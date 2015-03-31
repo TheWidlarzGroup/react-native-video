@@ -23,7 +23,6 @@
   [_player setContentURL:videoURL];
   [_player setControlStyle:MPMovieControlStyleNone];
   [_player setScalingMode:MPMovieScalingModeNone];
-  [_player setRepeatMode:MPMovieRepeatModeOne];
   [_player prepareToPlay];
   [_player play];
 }
@@ -31,6 +30,15 @@
 - (void)setResizeMode:(NSInteger)mode
 {
   [_player setScalingMode:mode];
+}
+
+- (void)setRepeat:(BOOL)repeat
+{
+  if (repeat) {
+    [_player setRepeatMode:MPMovieRepeatModeOne];
+  } else {
+    [_player setRepeatMode:MPMovieRepeatModeNone];
+  }
 }
 
 - (NSArray *)reactSubviews

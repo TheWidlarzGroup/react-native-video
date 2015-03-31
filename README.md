@@ -26,7 +26,7 @@ A <Video> component for react-native, as seen in
 ```javascript
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project
-<Video source={"background"} style={styles.backgroundVideo} />
+<Video source={"background"} style={styles.backgroundVideo} repeat={true} />
 
 // Later on in your styles..
 var styles = Stylesheet.create({
@@ -47,5 +47,6 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 
 - [ ] Support `require('video!...')`
 - [ ] Support other extensions than mp4?
-- [ ] Add prop to set repeat (none or forever)
-- [ ] Add support for other props (not sure which yet)
+- [x] Add prop to set repeat (none or forever)
+- [ ] Add support [for other props](https://developer.apple.com/library/prerelease/ios/documentation/MediaPlayer/Reference/MPMoviePlayerController_Class/index.html)
+- [ ] Tests..

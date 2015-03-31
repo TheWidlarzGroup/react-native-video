@@ -15,6 +15,7 @@ var Video = React.createClass({
   propTypes: {
     source: PropTypes.string,
     style: StyleSheetPropType(VideoStylePropTypes),
+    repeat: PropTypes.bool,
   },
 
   mixins: [NativeMethodsMixin],
@@ -49,7 +50,7 @@ var Video = React.createClass({
 });
 
 var RCTVideo = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactIOSViewAttributes.UIView, {src: true, resizeMode: true}),
+  validAttributes: merge(ReactIOSViewAttributes.UIView, {src: true, resizeMode: true, repeat: true}),
   uiViewClassName: 'RCTVideo',
 });
 
