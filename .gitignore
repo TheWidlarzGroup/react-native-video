@@ -1,0 +1,3 @@
+node_modules/**/*
+RCTVideo.xcodeproj/xcuserdata/**/*
+RCTVideo.xcodeproj/project.xcworkspace/**/*
