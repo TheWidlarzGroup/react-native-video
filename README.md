@@ -42,3 +42,10 @@ var styles = Stylesheet.create({
 ```
 
 Example code [here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js).
+
+## TODOS
+
+- [ ] Support `require('video!...')`
+- [ ] Support other extensions than mp4?
+- [ ] Add prop to set repeat (none or forever)
+- [ ] Add support for other props (not sure which yet)
