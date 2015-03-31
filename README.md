@@ -38,5 +38,6 @@ var styles = Stylesheet.create({
     right: 0,
   },
 });
+```
 
-In action [here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js).
+Example code [here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js).
