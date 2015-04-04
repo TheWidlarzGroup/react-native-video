@@ -7,6 +7,10 @@
   "dependencies": {
     "react-native": "^0.3.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:brentvatne/react-native-video.git"
+  },
   "devDependencies": {
     "jest-cli": "0.2.1"
   }
