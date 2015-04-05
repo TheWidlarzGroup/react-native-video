@@ -1,18 +1,17 @@
 #import "RCTVideo.h"
 #import "RCTLog.h"
-
-@import MediaPlayer;
+#import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideo
 {
-  MPMoviePlayerController *_player;
+    AVPlayer *_player;
+    AVPlayerLayer *_playerLayer;
 }
 
 - (id)init
 {
   if ((self = [super init])) {
-    _player = [[MPMoviePlayerController alloc] init];
-    [self addSubview: _player.view];
+
   }
   return self;
 }
@@ -20,31 +19,47 @@
 - (void)setSrc:(NSString *)source
 {
   NSURL *videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
-  [_player setContentURL:videoURL];
-  [_player setControlStyle:MPMovieControlStyleNone];
-  [_player setScalingMode:MPMovieScalingModeNone];
-  [_player prepareToPlay];
+  _player = [AVPlayer playerWithURL:videoURL];
+  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+  _playerLayer.frame = self.bounds;
+  _playerLayer.needsDisplayOnBoundsChange = YES;
+  [self.layer addSublayer:_playerLayer];
+  self.layer.needsDisplayOnBoundsChange = YES;
   [_player play];
 }
 
-- (void)setResizeMode:(NSInteger)mode
+- (void)setResizeMode:(NSString*)mode
 {
-  [_player setScalingMode:mode];
+  _playerLayer.videoGravity = mode;
+}
+
+
+- (void)playerItemDidReachEnd:(NSNotification *)notification {
+  AVPlayerItem *item = [notification object];
+  [item seekToTime:kCMTimeZero];
+  [_player play];
+}
+
+
+- (void)setRepeatEnabled {
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(playerItemDidReachEnd:)
+                                               name:AVPlayerItemDidPlayToEndTimeNotification
+                                             object:[_player currentItem]];
+}
+
+- (void) setRepeatDisabled {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)setRepeat:(BOOL)repeat
 {
   if (repeat) {
-    [_player setRepeatMode:MPMovieRepeatModeOne];
+    [self setRepeatEnabled];
   } else {
-    [_player setRepeatMode:MPMovieRepeatModeNone];
+    [self setRepeatDisabled];
   }
-}
-
-- (NSArray *)reactSubviews
-{
-  NSArray *subviews = @[_player.view];
-  return subviews;
 }
 
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
@@ -62,7 +77,12 @@
 - (void)layoutSubviews
 {
   [super layoutSubviews];
-  _player.view.frame = self.bounds;
+  _playerLayer.frame = self.bounds;
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

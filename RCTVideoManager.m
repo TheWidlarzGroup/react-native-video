@@ -1,7 +1,7 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
 #import "RCTBridge.h"
-@import MediaPlayer;
+#import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideoManager
 
@@ -13,15 +13,15 @@
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSString);
-RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSInteger);
+RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
 
 - (NSDictionary *)constantsToExport
 {
-  return @{@"ScaleNone": @(MPMovieScalingModeNone),
-           @"ScaleToFill": @(MPMovieScalingModeFill),
-           @"ScaleAspectFit": @(MPMovieScalingModeAspectFit),
-           @"ScaleAspectFill": @(MPMovieScalingModeAspectFill)};
+  return @{@"ScaleNone": AVLayerVideoGravityResizeAspect,
+           @"ScaleToFill": AVLayerVideoGravityResize,
+           @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
+           @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill};
 }
 
 @end
