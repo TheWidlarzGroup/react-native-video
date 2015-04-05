@@ -25,7 +25,8 @@ A <Video> component for react-native, as seen in
 
 ```javascript
 // Within your render function, assuming you have a file called
-// "background.mp4" in your project
+// "background.mp4" in your project. You can include multiple videos
+// on a single screen if you like.
 <Video source={"background"} style={styles.backgroundVideo} repeat={true} />
 
 // Later on in your styles..
@@ -48,5 +49,5 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Support `require('video!...')`
 - [ ] Support other extensions than mp4?
 - [x] Add prop to set repeat (none or forever)
-- [ ] Add support [for other props](https://developer.apple.com/library/prerelease/ios/documentation/MediaPlayer/Reference/MPMoviePlayerController_Class/index.html)
-- [ ] Tests..
+- [x] Switch to AVPlayer
+- [ ] Add support [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
