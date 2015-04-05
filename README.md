@@ -7,7 +7,7 @@ A <Video> component for react-native, as seen in
 
 1. Run `npm install react-native-video --save`
 2. Open your project in XCode, right click on `Libraries` and click `Add
-   Files to "Your Project Name" [(Screenshot)](http://url.brentvatne.ca/g9Wp).
+   Files to "Your Project Name"` [(Screenshot)](http://url.brentvatne.ca/g9Wp).
 3. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
    [(Screenshot)](http://url.brentvatne.ca/g9Wp).
 4. Click on `RCTVideo.xcodeproj` in `Libraries` and go the `Build
