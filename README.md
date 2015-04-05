@@ -57,5 +57,6 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Add some way to get back the `currentTime` value
 - [ ] Add some way to get back the `totalTime` value
 - [ ] Add some way to interface with `seekToTime`
+- [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Any other [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
