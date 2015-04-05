@@ -50,4 +50,5 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Support other extensions than mp4?
 - [x] Add prop to set repeat (none or forever)
 - [x] Switch to AVPlayer
+- [ ] Switch resizeMode to prop instead of style
 - [ ] Add support [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
