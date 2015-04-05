@@ -48,7 +48,14 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 
 - [ ] Support `require('video!...')`
 - [ ] Support other extensions than mp4?
-- [x] Add prop to set repeat (none or forever)
-- [x] Switch to AVPlayer
-- [ ] Switch resizeMode to prop instead of style
-- [ ] Add support [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
+- [x] Switch to AVPlayer (0.1.6)
+- [x] Switch resizeMode to prop instead of style (0.1.7)
+- [x] Add `pause` prop (0.1.7)
+- [ ] Add `playbackRate` prop
+- [ ] Add `volume` prop
+- [ ] Add `muted` prop
+- [ ] Add some way to get back the `currentTime` value
+- [ ] Add some way to get back the `totalTime` value
+- [ ] Add some way to interface with `seekToTime`
+- [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
+- [ ] Any other [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
