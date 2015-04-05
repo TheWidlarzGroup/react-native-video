@@ -15,7 +15,9 @@ var Video = React.createClass({
   propTypes: {
     source: PropTypes.string,
     style: StyleSheetPropType(VideoStylePropTypes),
+    resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
+    pause: PropTypes.bool,
   },
 
   mixins: [NativeMethodsMixin],
@@ -30,18 +32,19 @@ var Video = React.createClass({
     var source = this.props.source;
 
     var resizeMode;
-    var contentModes = NativeModules.VideoManager;
-    if (style.resizeMode === VideoResizeMode.stretch) {
-      resizeMode = contentModes.ScaleToFill;
-    } else if (style.resizeMode === VideoResizeMode.contain) {
-      resizeMode = contentModes.ScaleAspectFit;
+    if (this.props.resizeMode === VideoResizeMode.stretch) {
+      resizeMode = NativeModules.VideoManager.ScaleToFill;
+    } else if (this.props.resizeMode === VideoResizeMode.contain) {
+      resizeMode = NativeModules.VideoManager.ScaleAspectFit;
+    } else if (this.props.resizeMode == VideoResizeMode.cover) {
+      resizeMode = NativeModules.VideoManager.ScaleAspectFill;
     } else {
-      resizeMode = contentModes.ScaleAspectFill;
+      resizeMode = NativeModules.VideoManager.ScaleNone;
     }
 
     var nativeProps = merge(this.props, {
       style,
-      resizeMode,
+      resizeMode: resizeMode,
       src: source,
     });
 
@@ -50,7 +53,8 @@ var Video = React.createClass({
 });
 
 var RCTVideo = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactIOSViewAttributes.UIView, {src: true, resizeMode: true, repeat: true}),
+  validAttributes: merge(ReactIOSViewAttributes.UIView,
+                         {src: true, resizeMode: true, repeat: true, pause: true}),
   uiViewClassName: 'RCTVideo',
 });
 

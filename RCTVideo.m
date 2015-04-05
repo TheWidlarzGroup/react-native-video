@@ -34,6 +34,15 @@
   _playerLayer.videoGravity = mode;
 }
 
+- (void)setPause:(BOOL)wantsToPause
+{
+  if (wantsToPause) {
+    [_player pause];
+  } else {
+    [_player play];
+  }
+}
+
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
   AVPlayerItem *item = [notification object];

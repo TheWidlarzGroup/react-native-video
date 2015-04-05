@@ -15,6 +15,7 @@
 RCT_EXPORT_VIEW_PROPERTY(src, NSString);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(pause, BOOL);
 
 - (NSDictionary *)constantsToExport
 {

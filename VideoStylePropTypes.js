@@ -6,7 +6,6 @@ var ReactPropTypes = require('ReactPropTypes');
 
 var VideoStylePropTypes = {
   ...LayoutPropTypes,
-  resizeMode: ReactPropTypes.oneOf(Object.keys(VideoResizeMode)),
 };
 
 module.exports = VideoStylePropTypes;
