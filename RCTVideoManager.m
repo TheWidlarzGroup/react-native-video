@@ -12,13 +12,16 @@
   return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
-/* onLoadStart, onLoad, and onError to stay consistent with Image */
+/* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 
 - (NSDictionary *)customDirectEventTypes
 {
   return @{
     @"videoLoaded": @{
       @"registrationName": @"onLoad"
+    },
+    @"videoProgress": @{
+      @"registrationName": @"onProgress"
     },
   };
 }

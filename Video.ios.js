@@ -19,6 +19,7 @@ var Video = React.createClass({
     repeat: PropTypes.bool,
     pause: PropTypes.bool,
     onLoad: PropTypes.func,
+    onProgress: PropTypes.func,
   },
 
   mixins: [NativeMethodsMixin],
@@ -30,6 +31,10 @@ var Video = React.createClass({
 
   _onLoad(event) {
     this.props.onLoad && this.props.onLoad(event.nativeEvent);
+  },
+
+  _onProgress(event) {
+    this.props.onProgress && this.props.onProgress(event.nativeEvent);
   },
 
   render() {
@@ -52,6 +57,7 @@ var Video = React.createClass({
       resizeMode: resizeMode,
       src: source,
       onLoad: this._onLoad,
+      onProgress: this._onProgress,
     });
 
     return <RCTVideo {... nativeProps} />

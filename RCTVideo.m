@@ -10,15 +10,45 @@
     AVPlayer *_player;
     AVPlayerLayer *_playerLayer;
     NSURL *_videoURL;
+
+    /* Required to publish events */
     RCTEventDispatcher *_eventDispatcher;
+
+    /* For sending videoProgress events */
+    id _progressUpdateTimer;
+    int _progressUpdateInterval;
+    NSDate *_prevProgressUpdateTime;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
+
+    /* Initialize videoProgress status publisher */
+    _progressUpdateInterval = 1;
+    _prevProgressUpdateTime = nil;
+    _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
+    [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
   }
   return self;
+}
+
+- (void)sendProgressUpdate
+{
+   AVPlayerItem *video = [_player currentItem];
+   if (video == nil) {
+     return;
+   }
+
+  if (_prevProgressUpdateTime == nil ||
+     ((int) [[NSDate date] timeIntervalSinceDate: _prevProgressUpdateTime]) >= _progressUpdateInterval) {
+    [_eventDispatcher sendInputEventWithName:@"videoProgress" body:@{
+      @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
+      @"target": self.reactTag
+    }];
+    _prevProgressUpdateTime = [NSDate date];
+  }
 }
 
 - (void)setSrc:(NSString *)source
@@ -110,6 +140,7 @@
 
 - (void)dealloc
 {
+  [_progressUpdateTimer invalidate];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
