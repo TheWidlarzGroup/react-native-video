@@ -1,32 +1,51 @@
 #import "RCTVideo.h"
 #import "RCTLog.h"
+#import "RCTBridgeModule.h"
+#import "RCTEventDispatcher.h"
+#import "UIView+React.h"
 #import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideo
 {
     AVPlayer *_player;
     AVPlayerLayer *_playerLayer;
+    NSURL *_videoURL;
+    RCTEventDispatcher *_eventDispatcher;
 }
 
-- (id)init
+- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
 {
   if ((self = [super init])) {
-
+    _eventDispatcher = eventDispatcher;
   }
   return self;
 }
 
 - (void)setSrc:(NSString *)source
 {
-  NSURL *videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
-  _player = [AVPlayer playerWithURL:videoURL];
+  _videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
+  _player = [AVPlayer playerWithURL:_videoURL];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
   _playerLayer.frame = self.bounds;
   _playerLayer.needsDisplayOnBoundsChange = YES;
+
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
-  [_player play];
+
+  AVPlayerItem *video = [_player currentItem];
+
+  [_eventDispatcher sendInputEventWithName:@"videoLoaded" body:@{
+    @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(video.asset.duration)],
+    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
+    @"canPlayReverse": [NSNumber numberWithBool:video.canPlayReverse],
+    @"canPlayFastForward": [NSNumber numberWithBool:video.canPlayFastForward],
+    @"canPlaySlowForward": [NSNumber numberWithBool:video.canPlaySlowForward],
+    @"canPlaySlowReverse": [NSNumber numberWithBool:video.canPlaySlowReverse],
+    @"canStepBackward": [NSNumber numberWithBool:video.canStepBackward],
+    @"canStepForward": [NSNumber numberWithBool:video.canStepForward],
+    @"target": self.reactTag
+  }];
 }
 
 - (void)setResizeMode:(NSString*)mode
@@ -36,11 +55,11 @@
 
 - (void)setPause:(BOOL)wantsToPause
 {
-  if (wantsToPause) {
-    [_player pause];
-  } else {
-    [_player play];
-  }
+    if (wantsToPause) {
+        [_player pause];
+    } else {
+        [_player play];
+    }
 }
 
 

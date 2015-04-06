@@ -1,4 +1,4 @@
-var React = require('React');
+var React = require('react-native');
 var NativeModules = require('NativeModules');
 var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
 var StyleSheet = require('StyleSheet');
@@ -18,6 +18,7 @@ var Video = React.createClass({
     resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
     pause: PropTypes.bool,
+    onLoad: PropTypes.func,
   },
 
   mixins: [NativeMethodsMixin],
@@ -27,7 +28,11 @@ var Video = React.createClass({
     validAttributes: ReactIOSViewAttributes.UIView
   },
 
-  render: function() {
+  _onLoad(event) {
+    this.props.onLoad && this.props.onLoad(event.nativeEvent);
+  },
+
+  render() {
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
 
@@ -46,6 +51,7 @@ var Video = React.createClass({
       style,
       resizeMode: resizeMode,
       src: source,
+      onLoad: this._onLoad,
     });
 
     return <RCTVideo {... nativeProps} />
@@ -54,7 +60,7 @@ var Video = React.createClass({
 
 var RCTVideo = createReactIOSNativeComponentClass({
   validAttributes: merge(ReactIOSViewAttributes.UIView,
-                         {src: true, resizeMode: true, repeat: true, pause: true}),
+    {src: true, resizeMode: true, repeat: true, pause: true}),
   uiViewClassName: 'RCTVideo',
 });
 

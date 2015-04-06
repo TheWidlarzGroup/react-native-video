@@ -9,7 +9,18 @@
 
 - (UIView *)view
 {
-  return [[RCTVideo alloc] init];
+  return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+}
+
+/* onLoadStart, onLoad, and onError to stay consistent with Image */
+
+- (NSDictionary *)customDirectEventTypes
+{
+  return @{
+    @"videoLoaded": @{
+      @"registrationName": @"onLoad"
+    },
+  };
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSString);
