@@ -55,7 +55,7 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Add `volume` prop
 - [ ] Add `muted` prop
 - [ ] Add some way to get back the `currentTime` value
-- [ ] Add some way to get back the `totalTime` value
+- [x] Add some way to get back the `duration` value
 - [ ] Add some way to interface with `seekToTime`
 - [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
