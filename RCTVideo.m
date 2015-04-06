@@ -26,7 +26,7 @@
     _eventDispatcher = eventDispatcher;
 
     /* Initialize videoProgress status publisher */
-    _progressUpdateInterval = 1;
+    _progressUpdateInterval = 250;
     _prevProgressUpdateTime = nil;
     _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
     [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
@@ -41,8 +41,8 @@
      return;
    }
 
-  if (_prevProgressUpdateTime == nil ||
-     ((int) [[NSDate date] timeIntervalSinceDate: _prevProgressUpdateTime]) >= _progressUpdateInterval) {
+    if (_prevProgressUpdateTime == nil ||
+       (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:@"videoProgress" body:@{
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
