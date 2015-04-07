@@ -53,7 +53,13 @@
 
 - (void)setSrc:(NSString *)source
 {
-  _videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
+  BOOL isHttpPrefix = [source hasPrefix:@"http://"];
+  if (isHttpPrefix) {
+    _videoURL = [NSURL URLWithString:source];
+  }
+  else {
+    _videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
+  }
   _player = [AVPlayer playerWithURL:_videoURL];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
