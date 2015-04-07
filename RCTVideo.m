@@ -7,17 +7,17 @@
 
 @implementation RCTVideo
 {
-    AVPlayer *_player;
-    AVPlayerLayer *_playerLayer;
-    NSURL *_videoURL;
+  AVPlayer *_player;
+  AVPlayerLayer *_playerLayer;
+  NSURL *_videoURL;
 
-    /* Required to publish events */
-    RCTEventDispatcher *_eventDispatcher;
+  /* Required to publish events */
+  RCTEventDispatcher *_eventDispatcher;
 
-    /* For sending videoProgress events */
-    id _progressUpdateTimer;
-    int _progressUpdateInterval;
-    NSDate *_prevProgressUpdateTime;
+  /* For sending videoProgress events */
+  id _progressUpdateTimer;
+  int _progressUpdateInterval;
+  NSDate *_prevProgressUpdateTime;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
