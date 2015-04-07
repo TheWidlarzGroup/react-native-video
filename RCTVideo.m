@@ -76,6 +76,8 @@
     @"canStepForward": [NSNumber numberWithBool:video.canStepForward],
     @"target": self.reactTag
   }];
+
+  [_player play];
 }
 
 - (void)setResizeMode:(NSString*)mode
@@ -85,11 +87,11 @@
 
 - (void)setPause:(BOOL)wantsToPause
 {
-    if (wantsToPause) {
-        [_player pause];
-    } else {
-        [_player play];
-    }
+  if (wantsToPause) {
+    [_player pause];
+  } else {
+    [_player play];
+  }
 }
 
 
