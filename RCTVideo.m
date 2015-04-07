@@ -140,9 +140,14 @@
   _playerLayer.frame = self.bounds;
 }
 
-- (void)dealloc
+- (void)removeFromSuperview
 {
+  [_player pause];
   [_progressUpdateTimer invalidate];
+  [_playerLayer removeFromSuperlayer];
+  _player = nil;
+  _prevProgressUpdateTime = nil;
+  _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
