@@ -51,10 +51,10 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
   playing videos from phone's camera
 - [x] Switch to AVPlayer (0.1.6)
 - [x] Switch resizeMode to prop instead of style (0.1.7)
-- [x] Add `pause` prop (0.1.7)
-- [ ] Add `playbackRate` prop
-- [ ] Add `volume` prop
-- [ ] Add `muted` prop
+- [x] Add `paused` prop (0.1.7)
+- [x] Add `rate` prop
+- [x] Add `volume` prop
+- [x] Add `muted` prop
 - [x] Add some way to get back the `currentTime` value (0.1.9 - `onProgress` prop)
 - [x] Add some way to get back the `duration` value (0.1.8 - `onLoad` prop)
 - [ ] Add some way to interface with `seekToTime`

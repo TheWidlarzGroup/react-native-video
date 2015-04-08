@@ -18,6 +18,11 @@
   id _progressUpdateTimer;
   int _progressUpdateInterval;
   NSDate *_prevProgressUpdateTime;
+
+  /* Keep track of any modifiers, need to be applied after each play */
+  float _volume;
+  float _rate;
+  BOOL _muted;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -84,6 +89,9 @@
   }];
 
   [_player play];
+
+  /* rate and volume must be set after play is called */
+  [self applyModifiers];
 }
 
 - (void)setResizeMode:(NSString*)mode
@@ -91,20 +99,52 @@
   _playerLayer.videoGravity = mode;
 }
 
-- (void)setPause:(BOOL)wantsToPause
+- (void)setPaused:(BOOL)paused
 {
-  if (wantsToPause) {
+  if (paused) {
     [_player pause];
   } else {
     [_player play];
   }
 }
 
+- (void)setRate:(float)rate
+{
+  _rate = rate;
+  [self applyModifiers];
+}
+
+- (void)setMuted:(BOOL)muted
+{
+  _muted = muted;
+  [self applyModifiers];
+}
+
+- (void)setVolume:(float)volume {
+  _volume = volume;
+  [self applyModifiers];
+}
+
+- (void)applyModifiers
+{
+  /* volume must be set to 0 if muted is YES, or the video seems to
+   * freeze */
+  if (_muted) {
+    [_player setVolume:0];
+    [_player setMuted:YES];
+  } else {
+    [_player setVolume:_volume];
+    [_player setMuted:NO];
+  }
+
+  [_player setRate:_rate];
+}
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
   AVPlayerItem *item = [notification object];
   [item seekToTime:kCMTimeZero];
   [_player play];
+  [self applyModifiers];
 }
 
 

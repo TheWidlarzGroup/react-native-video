@@ -17,7 +17,10 @@ var Video = React.createClass({
     style: StyleSheetPropType(VideoStylePropTypes),
     resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
-    pause: PropTypes.bool,
+    paused: PropTypes.bool,
+    muted: PropTypes.bool,
+    volume: PropTypes.number,
+    rate: PropTypes.number,
     onLoad: PropTypes.func,
     onProgress: PropTypes.func,
   },
@@ -66,7 +69,8 @@ var Video = React.createClass({
 
 var RCTVideo = createReactIOSNativeComponentClass({
   validAttributes: merge(ReactIOSViewAttributes.UIView,
-    {src: true, resizeMode: true, repeat: true, pause: true}),
+    {src: true, resizeMode: true, repeat: true, paused: true, muted: true,
+     volume: true, rate: true}),
   uiViewClassName: 'RCTVideo',
 });
 
