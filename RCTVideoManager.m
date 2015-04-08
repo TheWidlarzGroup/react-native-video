@@ -17,16 +17,22 @@
 - (NSDictionary *)customDirectEventTypes
 {
   return @{
-    @"videoLoaded": @{
+    RNVideoLoadingEvent: @{
+      @"registrationName": @"onLoadStart"
+    },
+    RNVideoLoadedEvent: @{
       @"registrationName": @"onLoad"
     },
-    @"videoProgress": @{
+    RNVideoLoadingErrorEvent: @{
+      @"registrationName": @"onError"
+    },
+    RNVideoProgressEvent: @{
       @"registrationName": @"onProgress"
     },
   };
 }
 
-RCT_EXPORT_VIEW_PROPERTY(src, NSString);
+RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);

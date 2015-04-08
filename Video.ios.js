@@ -10,18 +10,21 @@ var VideoStylePropTypes = require('./VideoStylePropTypes');
 var NativeMethodsMixin = require('NativeMethodsMixin');
 var flattenStyle = require('flattenStyle');
 var merge = require('merge');
+var deepDiffer = require('deepDiffer');
 
 var Video = React.createClass({
   propTypes: {
-    source: PropTypes.string,
     style: StyleSheetPropType(VideoStylePropTypes),
+    source: PropTypes.object,
     resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
     paused: PropTypes.bool,
     muted: PropTypes.bool,
     volume: PropTypes.number,
     rate: PropTypes.number,
+    onLoadStart: PropTypes.func,
     onLoad: PropTypes.func,
+    onError: PropTypes.func,
     onProgress: PropTypes.func,
   },
 
@@ -32,8 +35,16 @@ var Video = React.createClass({
     validAttributes: ReactIOSViewAttributes.UIView
   },
 
+  _onLoadStart(event) {
+    this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
+  },
+
   _onLoad(event) {
     this.props.onLoad && this.props.onLoad(event.nativeEvent);
+  },
+
+  _onError(event) {
+    this.props.onError && this.props.onError(event.nativeEvent);
   },
 
   _onProgress(event) {
@@ -43,6 +54,7 @@ var Video = React.createClass({
   render() {
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
+    var isNetwork = !!(source.uri && source.uri.match(/^https?:/));
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
@@ -58,9 +70,14 @@ var Video = React.createClass({
     var nativeProps = merge(this.props, {
       style,
       resizeMode: resizeMode,
-      src: source,
+      src: {
+        uri: source.uri,
+        isNetwork,
+        type: source.type || 'mp4'
+      },
       onLoad: this._onLoad,
       onProgress: this._onProgress,
+
     });
 
     return <RCTVideo {... nativeProps} />
@@ -69,7 +86,7 @@ var Video = React.createClass({
 
 var RCTVideo = createReactIOSNativeComponentClass({
   validAttributes: merge(ReactIOSViewAttributes.UIView,
-    {src: true, resizeMode: true, repeat: true, paused: true, muted: true,
+    {src: {diff: deepDiffer}, resizeMode: true, repeat: true, paused: true, muted: true,
      volume: true, rate: true}),
   uiViewClassName: 'RCTVideo',
 });
