@@ -29,6 +29,9 @@
     RNVideoEventProgress: @{
       @"registrationName": @"onProgress"
     },
+    RNVideoEventSeek: @{
+      @"registrationName": @"onSeek"
+    }
   };
 }
 
@@ -39,6 +42,7 @@ RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
+RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
 
 - (NSDictionary *)constantsToExport
 {

@@ -21,6 +21,7 @@ var Video = React.createClass({
     resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
     paused: PropTypes.bool,
+    seek: PropTypes.number,
     muted: PropTypes.bool,
     volume: PropTypes.number,
     rate: PropTypes.number,
@@ -53,6 +54,10 @@ var Video = React.createClass({
     this.props.onProgress && this.props.onProgress(event.nativeEvent);
   },
 
+  _onSeek(event) {
+    this.props.onSeek && this.props.onSeek(event.nativeEvent);
+  },
+
   render() {
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
@@ -71,6 +76,10 @@ var Video = React.createClass({
     }
 
     var nativeProps = merge(this.props, {
+      seek: {
+        time: this.props.seek,
+        force: this.props.forceSeek
+      },
       style,
       resizeMode: resizeMode,
       src: {
@@ -81,7 +90,6 @@ var Video = React.createClass({
       },
       onLoad: this._onLoad,
       onProgress: this._onProgress,
-
     });
 
     return <RCTVideo {... nativeProps} />
@@ -91,7 +99,7 @@ var Video = React.createClass({
 var RCTVideo = createReactIOSNativeComponentClass({
   validAttributes: merge(ReactIOSViewAttributes.UIView,
     {src: {diff: deepDiffer}, resizeMode: true, repeat: true,
-     paused: true, muted: true, volume: true, rate: true}),
+     seek: {diff: () => true}, paused: true, muted: true, volume: true, rate: true}),
   uiViewClassName: 'RCTVideo',
 });
 
