@@ -52,18 +52,9 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 
 ## TODOS
 
-- [ ] Support `require('video!...')`
-- [ ] Support other extensions than `mp4` - `mov` would be useful for
-  playing videos from phone's camera
-- [x] Switch to AVPlayer (0.1.6)
-- [x] Switch resizeMode to prop instead of style (0.1.7)
-- [x] Add `paused` prop (0.1.7)
-- [x] Add `rate` prop
-- [x] Add `volume` prop
-- [x] Add `muted` prop
-- [x] Add some way to get back the `currentTime` value (0.1.9 - `onProgress` prop)
-- [x] Add some way to get back the `duration` value (0.1.8 - `onLoad` prop)
+- [ ] Support more file types (currently only `mp4` locally and web)
 - [ ] Add some way to interface with `seekToTime`
 - [ ] Add support for captions
+- [ ] Support `require('video!...')`
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
-- [ ] Any other [for other AVPlayer props](https://developer.apple.com/library/prerelease/ios/documentation/AVFoundation/Reference/AVPlayer_Class/index.html)
+- [ ] Add `onComplete` callback for when it finishes playing
