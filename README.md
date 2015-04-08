@@ -27,13 +27,13 @@ A <Video> component for react-native, as seen in
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
-<Video source="background"      // Can be a URL or a local file.
-       rate={1.0}               // 0 is paused, 1 is normal.
-       volume={1.0}             // 0 is muted, 1 is normal.
-       muted={false}            // Mutes the audio entirely.
-       paused={false}           // Pauses playback entirely.
-       resizeMode="cover"       // Fill the whole screen at aspect ratio.
-       repeat={true}            // Repeat forever.
+<Video source={{uri: "background"}} // Can be a URL or a local file.
+       rate={1.0}                   // 0 is paused, 1 is normal.
+       volume={1.0}                 // 0 is muted, 1 is normal.
+       muted={false}                // Mutes the audio entirely.
+       paused={false}               // Pauses playback entirely.
+       resizeMode="cover"           // Fill the whole screen at aspect ratio.
+       repeat={true}                // Repeat forever.
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
@@ -52,7 +52,6 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 
 ## TODOS
 
-- [ ] Support more file types (currently only `mp4` locally and web)
 - [ ] Add some way to interface with `seekToTime`
 - [ ] Add support for captions
 - [ ] Support `require('video!...')`
