@@ -5,10 +5,10 @@
 #import "UIView+React.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const RNVideoLoadedEvent = @"videoLoaded";
-NSString *const RNVideoLoadingEvent = @"videoLoading";
-NSString *const RNVideoProgressEvent = @"videoProgress";
-NSString *const RNVideoLoadingErrorEvent = @"videoLoadError";
+NSString *const RNVideoEventLoaded = @"videoLoaded";
+NSString *const RNVideoEventLoading = @"videoLoading";
+NSString *const RNVideoEventProgress = @"videoProgress";
+NSString *const RNVideoEventLoadingError = @"videoLoadError";
 
 static NSString *const statusKeyPath = @"status";
 
@@ -54,7 +54,7 @@ static NSString *const statusKeyPath = @"status";
 
   if (_prevProgressUpdateTime == nil ||
      (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:RNVideoProgressEvent body:@{
+    [_eventDispatcher sendInputEventWithName:RNVideoEventProgress body:@{
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
     }];
@@ -88,7 +88,7 @@ static NSString *const statusKeyPath = @"status";
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
 
-  [_eventDispatcher sendInputEventWithName:RNVideoLoadingEvent body:@{
+  [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
     @"src": @{
       @"uri":uri,
       @"type": type,
@@ -101,7 +101,7 @@ static NSString *const statusKeyPath = @"status";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
   if (object == _playerItem) {
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
-      [_eventDispatcher sendInputEventWithName:RNVideoLoadedEvent body:@{
+      [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
         @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.duration)],
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
         @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],

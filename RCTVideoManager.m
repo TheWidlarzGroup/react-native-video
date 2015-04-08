@@ -17,16 +17,16 @@
 - (NSDictionary *)customDirectEventTypes
 {
   return @{
-    RNVideoLoadingEvent: @{
+    RNVideoEventLoading: @{
       @"registrationName": @"onLoadStart"
     },
-    RNVideoLoadedEvent: @{
+    RNVideoEventLoaded: @{
       @"registrationName": @"onLoad"
     },
-    RNVideoLoadingErrorEvent: @{
+    RNVideoEventLoadingError: @{
       @"registrationName": @"onError"
     },
-    RNVideoProgressEvent: @{
+    RNVideoEventProgress: @{
       @"registrationName": @"onProgress"
     },
   };
