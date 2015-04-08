@@ -21,7 +21,7 @@ var VideoPlayer = React.createClass({
       rate: 1,
       volume: 1,
       muted: false,
-      resizeMode: 'contain', // cover, stretch
+      resizeMode: 'contain',
       duration: 0.0,
       currentTime: 0.0,
     }

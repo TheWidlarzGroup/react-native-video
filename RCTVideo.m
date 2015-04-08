@@ -1,3 +1,4 @@
+#import "RCTConvert.h"
 #import "RCTVideo.h"
 #import "RCTLog.h"
 #import "RCTBridgeModule.h"
