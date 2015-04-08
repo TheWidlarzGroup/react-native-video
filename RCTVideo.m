@@ -36,15 +36,11 @@ static NSString *const statusKeyPath = @"status";
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-
-    /* Initialize videoProgress status publisher */
-    _progressUpdateInterval = 250;
-    _prevProgressUpdateTime = nil;
-    _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
-    [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
   }
   return self;
 }
+
+#pragma mark - Progress
 
 - (void)sendProgressUpdate {
    AVPlayerItem *video = [_player currentItem];
@@ -58,21 +54,49 @@ static NSString *const statusKeyPath = @"status";
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
     }];
+    
     _prevProgressUpdateTime = [NSDate date];
   }
 }
 
-- (void)setSrc:(NSDictionary *)source {
+- (void)stopProgressTimer {
+  [_progressUpdateTimer invalidate];
+}
+
+- (void)startProgressTimer {
+  /* Initialize videoProgress status publisher */
+  _progressUpdateInterval = 250;
+  _prevProgressUpdateTime = nil;
+  
+  [self stopProgressTimer];
+  
+  _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
+  [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+}
+
+#pragma mark - Player and source
+
+- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source {
   bool isNetwork = [source objectForKey:@"isNetwork"];
+  bool isAsset = [source objectForKey:@"isAsset"];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
 
-  _videoURL = isNetwork ?
+  NSURL *url = isNetwork || isAsset ?
     [NSURL URLWithString:uri] :
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
+  if (isAsset) {
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    return [AVPlayerItem playerItemWithAsset:asset];
+  }
+
+  return [AVPlayerItem playerItemWithURL:url];
+}
+
+- (void)setSrc:(NSDictionary *)source {
   [_playerItem removeObserver:self forKeyPath:statusKeyPath];
-  _playerItem = [AVPlayerItem playerItemWithURL:_videoURL];
+  _playerItem = [self playerItemForSource:source];
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
 
   [_player pause];
@@ -88,11 +112,11 @@ static NSString *const statusKeyPath = @"status";
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
 
-  [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
+  [_eventDispatcher sendInputEventWithName:RNVideoEventLoading body:@{
     @"src": @{
-      @"uri":uri,
-      @"type": type,
-      @"isNetwork":[NSNumber numberWithBool:isNetwork]
+      @"uri": [source objectForKey:@"uri"],
+      @"type": [source objectForKey:@"type"],
+      @"isNetwork":[NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]
     },
     @"target": self.reactTag
   }];
@@ -113,10 +137,11 @@ static NSString *const statusKeyPath = @"status";
         @"target": self.reactTag
       }];
 
+      [self startProgressTimer];
       [_player play];
       [self applyModifiers];
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
-      [_eventDispatcher sendInputEventWithName:RNVideoLoadingErrorEvent body:@{
+      [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
         @"error": @{
           @"code": [NSNumber numberWithInt:_playerItem.error.code],
           @"domain": _playerItem.error.domain
@@ -129,6 +154,14 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
+- (void)playerItemDidReachEnd:(NSNotification *)notification {
+  AVPlayerItem *item = [notification object];
+  [item seekToTime:kCMTimeZero];
+  [_player play];
+}
+
+#pragma mark - additional prop setters
+
 - (void)setResizeMode:(NSString*)mode {
   _playerLayer.videoGravity = mode;
 }
@@ -136,9 +169,12 @@ static NSString *const statusKeyPath = @"status";
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
+    [self stopProgressTimer];
     [_player pause];
   } else {
+    [self startProgressTimer];
     [_player play];
+
   }
 }
 
@@ -200,6 +236,8 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
+#pragma mark - react and view related
+
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex {
   RCTLogError(@"video cannot have any subviews");
   return;
@@ -214,6 +252,8 @@ static NSString *const statusKeyPath = @"status";
   [super layoutSubviews];
   _playerLayer.frame = self.bounds;
 }
+
+#pragma mark - lifecycle
 
 - (void)removeFromSuperview
 {
