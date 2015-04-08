@@ -14,6 +14,8 @@ var deepDiffer = require('deepDiffer');
 
 var Video = React.createClass({
   propTypes: {
+    // should probably be a shape
+    source: PropTypes.object,
     style: StyleSheetPropType(VideoStylePropTypes),
     source: PropTypes.object,
     resizeMode: PropTypes.string,
@@ -55,13 +57,14 @@ var Video = React.createClass({
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
     var isNetwork = !!(source.uri && source.uri.match(/^https?:/));
+    var isAsset = !!(source.uri && source.uri.match(/^assets-library:/));
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
       resizeMode = NativeModules.VideoManager.ScaleToFill;
     } else if (this.props.resizeMode === VideoResizeMode.contain) {
       resizeMode = NativeModules.VideoManager.ScaleAspectFit;
-    } else if (this.props.resizeMode == VideoResizeMode.cover) {
+    } else if (this.props.resizeMode === VideoResizeMode.cover) {
       resizeMode = NativeModules.VideoManager.ScaleAspectFill;
     } else {
       resizeMode = NativeModules.VideoManager.ScaleNone;
@@ -73,6 +76,7 @@ var Video = React.createClass({
       src: {
         uri: source.uri,
         isNetwork,
+        isAsset,
         type: source.type || 'mp4'
       },
       onLoad: this._onLoad,
