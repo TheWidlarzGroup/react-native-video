@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9B1B824B-5918-47F5-B27A-FA559B781ACC</string>
+	<key>IDESourceControlProjectName</key>
+	<string>VideoPlayer</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>D05F265D0E65FFE673B2E9F5A4680A7F46E27F31</key>
+		<string>github.com:johanneslumpe/react-native-video.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Examples/VideoPlayer/VideoPlayer.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>D05F265D0E65FFE673B2E9F5A4680A7F46E27F31</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:johanneslumpe/react-native-video.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>D05F265D0E65FFE673B2E9F5A4680A7F46E27F31</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>D05F265D0E65FFE673B2E9F5A4680A7F46E27F31</string>
+			<key>IDESourceControlWCCName</key>
+			<string>react-native-video</string>
+		</dict>
+	</array>
+</dict>
+</plist>

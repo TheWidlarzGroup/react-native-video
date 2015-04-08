@@ -1,3 +1,4 @@
+#import "RCTConvert.h"
 #import "RCTVideo.h"
 #import "RCTLog.h"
 #import "RCTBridgeModule.h"
@@ -5,9 +6,17 @@
 #import "UIView+React.h"
 #import <AVFoundation/AVFoundation.h>
 
+NSString *const RNVideoEventLoaded = @"videoLoaded";
+NSString *const RNVideoEventLoading = @"videoLoading";
+NSString *const RNVideoEventProgress = @"videoProgress";
+NSString *const RNVideoEventLoadingError = @"videoLoadError";
+
+static NSString *const statusKeyPath = @"status";
+
 @implementation RCTVideo
 {
   AVPlayer *_player;
+  AVPlayerItem *_playerItem;
   AVPlayerLayer *_playerLayer;
   NSURL *_videoURL;
 
@@ -25,48 +34,61 @@
   BOOL _muted;
 }
 
-- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
-{
+- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-
-    /* Initialize videoProgress status publisher */
-    _progressUpdateInterval = 250;
-    _prevProgressUpdateTime = nil;
-    _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
-    [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    _rate = 1.0;
+    _volume = 1.0;
   }
   return self;
 }
 
-- (void)sendProgressUpdate
-{
+#pragma mark - Progress
+
+- (void)sendProgressUpdate {
    AVPlayerItem *video = [_player currentItem];
-   if (video == nil) {
+   if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
    }
 
-    if (_prevProgressUpdateTime == nil ||
-       (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:@"videoProgress" body:@{
+  if (_prevProgressUpdateTime == nil ||
+     (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
+    [_eventDispatcher sendInputEventWithName:RNVideoEventProgress body:@{
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
     }];
+
     _prevProgressUpdateTime = [NSDate date];
   }
 }
 
-- (void)setSrc:(NSString *)source
-{
-  BOOL isHttpPrefix = [source hasPrefix:@"http://"];
-  if (isHttpPrefix) {
-    _videoURL = [NSURL URLWithString:source];
-  }
-  else {
-    _videoURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:source ofType:@"mp4"]];
-  }
-  _player = [AVPlayer playerWithURL:_videoURL];
+- (void)stopProgressTimer {
+  [_progressUpdateTimer invalidate];
+}
+
+- (void)startProgressTimer {
+  _progressUpdateInterval = 250;
+  _prevProgressUpdateTime = nil;
+
+  [self stopProgressTimer];
+
+  _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
+  [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+}
+
+#pragma mark - Player and source
+
+- (void)setSrc:(NSDictionary *)source {
+  [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+  _playerItem = [self playerItemForSource:source];
+  [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+
+  [_player pause];
+  [_playerLayer removeFromSuperlayer];
+
+  _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
   _playerLayer.frame = self.bounds;
   _playerLayer.needsDisplayOnBoundsChange = YES;
@@ -74,37 +96,88 @@
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
 
-  AVPlayerItem *video = [_player currentItem];
-
-  [_eventDispatcher sendInputEventWithName:@"videoLoaded" body:@{
-    @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(video.asset.duration)],
-    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
-    @"canPlayReverse": [NSNumber numberWithBool:video.canPlayReverse],
-    @"canPlayFastForward": [NSNumber numberWithBool:video.canPlayFastForward],
-    @"canPlaySlowForward": [NSNumber numberWithBool:video.canPlaySlowForward],
-    @"canPlaySlowReverse": [NSNumber numberWithBool:video.canPlaySlowReverse],
-    @"canStepBackward": [NSNumber numberWithBool:video.canStepBackward],
-    @"canStepForward": [NSNumber numberWithBool:video.canStepForward],
+  [_eventDispatcher sendInputEventWithName:RNVideoEventLoading body:@{
+    @"src": @{
+      @"uri": [source objectForKey:@"uri"],
+      @"type": [source objectForKey:@"type"],
+      @"isNetwork":[NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]
+    },
     @"target": self.reactTag
   }];
-
-  [_player play];
-
-  /* rate and volume must be set after play is called */
-  [self applyModifiers];
 }
 
-- (void)setResizeMode:(NSString*)mode
-{
+- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source {
+  bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
+  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  NSString *uri = [source objectForKey:@"uri"];
+  NSString *type = [source objectForKey:@"type"];
+
+  NSURL *url = (isNetwork || isAsset) ?
+    [NSURL URLWithString:uri] :
+    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+
+  if (isAsset) {
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    return [AVPlayerItem playerItemWithAsset:asset];
+  }
+
+  return [AVPlayerItem playerItemWithURL:url];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+  if (object == _playerItem) {
+    if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
+      [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
+        @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.duration)],
+        @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
+        @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
+        @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
+        @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
+        @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
+        @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
+        @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
+        @"target": self.reactTag
+      }];
+
+      [self startProgressTimer];
+      [_player play];
+      [self applyModifiers];
+    } else if(_playerItem.status == AVPlayerItemStatusFailed) {
+      [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
+        @"error": @{
+          @"code": [NSNumber numberWithInt:_playerItem.error.code],
+          @"domain": _playerItem.error.domain
+        },
+        @"target": self.reactTag
+      }];
+    }
+  } else {
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  }
+}
+
+- (void)playerItemDidReachEnd:(NSNotification *)notification {
+    AVPlayerItem *item = [notification object];
+    [item seekToTime:kCMTimeZero];
+    [_player play];
+    [self applyModifiers];
+}
+
+#pragma mark - Prop setters
+
+- (void)setResizeMode:(NSString*)mode {
   _playerLayer.videoGravity = mode;
 }
 
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
+    [self stopProgressTimer];
     [_player pause];
   } else {
+    [self startProgressTimer];
     [_player play];
+
   }
 }
 
@@ -127,8 +200,7 @@
 
 - (void)applyModifiers
 {
-  /* volume must be set to 0 if muted is YES, or the video seems to
-   * freeze */
+  /* volume must be set to 0 if muted is YES, or the video freezes playback */
   if (_muted) {
     [_player setVolume:0];
     [_player setMuted:YES];
@@ -139,14 +211,6 @@
 
   [_player setRate:_rate];
 }
-
-- (void)playerItemDidReachEnd:(NSNotification *)notification {
-  AVPlayerItem *item = [notification object];
-  [item seekToTime:kCMTimeZero];
-  [_player play];
-  [self applyModifiers];
-}
-
 
 - (void)setRepeatEnabled {
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -159,8 +223,7 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)setRepeat:(BOOL)repeat
-{
+- (void)setRepeat:(BOOL)repeat {
   if (repeat) {
     [self setRepeatEnabled];
   } else {
@@ -168,23 +231,24 @@
   }
 }
 
-- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
-{
+#pragma mark - React View Management
+
+- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex {
   RCTLogError(@"video cannot have any subviews");
   return;
 }
 
-- (void)removeReactSubview:(UIView *)subview
-{
+- (void)removeReactSubview:(UIView *)subview {
   RCTLogError(@"video cannot have any subviews");
   return;
 }
 
-- (void)layoutSubviews
-{
+- (void)layoutSubviews {
   [super layoutSubviews];
   _playerLayer.frame = self.bounds;
 }
+
+#pragma mark - Lifecycle
 
 - (void)removeFromSuperview
 {
@@ -194,6 +258,7 @@
   _player = nil;
   _prevProgressUpdateTime = nil;
   _eventDispatcher = nil;
+  [_playerItem removeObserver:self forKeyPath:statusKeyPath];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
