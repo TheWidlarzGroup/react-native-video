@@ -27,8 +27,14 @@ A <Video> component for react-native, as seen in
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
-<Video source={"background"} style={styles.backgroundVideo}
-       resizeMode="cover" repeat={true} />
+<Video source={"background"}    // Can be a URL or a local file
+       rate={1.0}               // 0 is paused, 1 is normal.
+       volume={1}               // 0 is muted, 1 is normal.
+       muted={false}            // Mutes the audio entirely.
+       paused={false}           // Pauses playback entirely.
+       resizeMode="cover"       // Fill the whole screen at aspect ratio
+       repeat={true}            // Repeat forever
+       style={styles.backgroundVideo} />
 
 // Later on in your styles..
 var styles = Stylesheet.create({
