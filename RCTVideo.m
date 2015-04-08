@@ -36,6 +36,8 @@ static NSString *const statusKeyPath = @"status";
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
+    _rate = 1.0;
+    _volume = 1.0;
   }
   return self;
 }
@@ -54,7 +56,7 @@ static NSString *const statusKeyPath = @"status";
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
     }];
-    
+
     _prevProgressUpdateTime = [NSDate date];
   }
 }
@@ -64,35 +66,16 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)startProgressTimer {
-  /* Initialize videoProgress status publisher */
   _progressUpdateInterval = 250;
   _prevProgressUpdateTime = nil;
-  
+
   [self stopProgressTimer];
-  
+
   _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
   [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 #pragma mark - Player and source
-
-- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source {
-  bool isNetwork = [source objectForKey:@"isNetwork"];
-  bool isAsset = [source objectForKey:@"isAsset"];
-  NSString *uri = [source objectForKey:@"uri"];
-  NSString *type = [source objectForKey:@"type"];
-
-  NSURL *url = isNetwork || isAsset ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
-
-  if (isAsset) {
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    return [AVPlayerItem playerItemWithAsset:asset];
-  }
-
-  return [AVPlayerItem playerItemWithURL:url];
-}
 
 - (void)setSrc:(NSDictionary *)source {
   [_playerItem removeObserver:self forKeyPath:statusKeyPath];
@@ -120,6 +103,24 @@ static NSString *const statusKeyPath = @"status";
     },
     @"target": self.reactTag
   }];
+}
+
+- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source {
+  bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
+  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  NSString *uri = [source objectForKey:@"uri"];
+  NSString *type = [source objectForKey:@"type"];
+
+  NSURL *url = (isNetwork || isAsset) ?
+    [NSURL URLWithString:uri] :
+    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+
+  if (isAsset) {
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    return [AVPlayerItem playerItemWithAsset:asset];
+  }
+
+  return [AVPlayerItem playerItemWithURL:url];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -155,12 +156,13 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
-  AVPlayerItem *item = [notification object];
-  [item seekToTime:kCMTimeZero];
-  [_player play];
+    AVPlayerItem *item = [notification object];
+    [item seekToTime:kCMTimeZero];
+    [_player play];
+    [self applyModifiers];
 }
 
-#pragma mark - additional prop setters
+#pragma mark - Prop setters
 
 - (void)setResizeMode:(NSString*)mode {
   _playerLayer.videoGravity = mode;
@@ -197,8 +199,7 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)applyModifiers
 {
-  /* volume must be set to 0 if muted is YES, or the video seems to
-   * freeze */
+  /* volume must be set to 0 if muted is YES, or the video freezes playback */
   if (_muted) {
     [_player setVolume:0];
     [_player setMuted:YES];
@@ -208,13 +209,6 @@ static NSString *const statusKeyPath = @"status";
   }
 
   [_player setRate:_rate];
-}
-
-- (void)playerItemDidReachEnd:(NSNotification *)notification {
-  AVPlayerItem *item = [notification object];
-  [item seekToTime:kCMTimeZero];
-  [_player play];
-  [self applyModifiers];
 }
 
 - (void)setRepeatEnabled {
@@ -236,7 +230,7 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
-#pragma mark - react and view related
+#pragma mark - React View Management
 
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex {
   RCTLogError(@"video cannot have any subviews");
@@ -253,7 +247,7 @@ static NSString *const statusKeyPath = @"status";
   _playerLayer.frame = self.bounds;
 }
 
-#pragma mark - lifecycle
+#pragma mark - Lifecycle
 
 - (void)removeFromSuperview
 {
