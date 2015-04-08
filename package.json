@@ -5,7 +5,7 @@
   "main": "Video.ios.js",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "dependencies": {
-    "react-native": "^0.3.1"
+    "react-native": "^0.3.5"
   },
   "repository": {
     "type": "git",
