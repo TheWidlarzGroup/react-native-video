@@ -189,19 +189,8 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
-- (void)setSeek:(NSDictionary*)seek {
-  NSNumber *seekValue = [seek objectForKey:@"time"];
-  if (!seekValue) {
-    return;
-  }
-  
+- (void)setSeek:(float)seekTime {
   int timeScale = 10000;
-  float seekTime = [RCTConvert float:seekValue];
-  bool force = [RCTConvert BOOL:[seek objectForKey:@"force"]];
-
-  if (seekTime == _lastSeekTime && !force) {
-    return;
-  }
 
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
@@ -211,14 +200,13 @@ static NSString *const statusKeyPath = @"status";
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
-    
+
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance];
       _pendingSeek = false;
-      _lastSeekTime = seekTime;
       [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-        @"seekTime": seekValue,
+        @"seekTime": [NSNumber numberWithFloat:seekTime],
         @"target": self.reactTag
       }];
     }
