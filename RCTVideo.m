@@ -136,6 +136,7 @@ static NSString *const statusKeyPath = @"status";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
   if (object == _playerItem) {
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
+      // NSLog(@"duration: %f",CMTimeGetSeconds(_playerItem.asset.duration));
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
         @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.duration)],
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
@@ -202,13 +203,15 @@ static NSString *const statusKeyPath = @"status";
     CMTime tolerance = CMTimeMake(1000, timeScale);
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
-      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance];
-      _pendingSeek = false;
-      [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
-        @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-        @"seekTime": [NSNumber numberWithFloat:seekTime],
-        @"target": self.reactTag
+      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+        [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
+          @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+          @"seekTime": [NSNumber numberWithFloat:seekTime],
+          @"target": self.reactTag
+        }];
       }];
+      
+      _pendingSeek = false;
     }
 
   } else {
