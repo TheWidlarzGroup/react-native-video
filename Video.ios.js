@@ -58,7 +58,7 @@ var Video = React.createClass({
   },
 
   seek(time) {
-    this.refs.video.setNativeProps({seek: parseFloat(time)});
+    this.setNativeProps({seek: parseFloat(time)});
   },
 
   render() {
@@ -91,7 +91,7 @@ var Video = React.createClass({
       onProgress: this._onProgress,
     });
 
-    return <RCTVideo ref="video" {... nativeProps} />
+    return <RCTVideo {... nativeProps} />;
   },
 });
 
