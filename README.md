@@ -57,3 +57,4 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Support `require('video!...')`
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Add `onComplete` callback for when it finishes playing
+- [ ] Callback to get buffering progress for remote videos
