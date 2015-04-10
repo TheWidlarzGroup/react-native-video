@@ -287,15 +287,19 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - Lifecycle
 
-- (void)removeFromSuperview
-{
-  [_player pause];
+- (void)removeFromSuperview {
   [_progressUpdateTimer invalidate];
-  [_playerLayer removeFromSuperlayer];
-  _player = nil;
   _prevProgressUpdateTime = nil;
-  _eventDispatcher = nil;
+
+  [_player pause];
+  _player = nil;
+
+  [_playerLayer removeFromSuperlayer];
+  _playerLayer = nil;
+
   [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+
+  _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
