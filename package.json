@@ -7,6 +7,12 @@
   "dependencies": {
     "react-native": "^0.3.10"
   },
+  "contributors": [
+    {
+      "name": "Johannes Lumpe",
+      "email": "johannes@lum.pe"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:brentvatne/react-native-video.git"
