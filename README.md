@@ -34,7 +34,9 @@ A <Video> component for react-native, as seen in
        paused={false}               // Pauses playback entirely.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        repeat={true}                // Repeat forever.
-       onEnd={this._onEnd}          // handle end of playback
+       onLoad={this.setDuration}    // Callback when video loads
+       onProgress={this.setTime}    // Callback every ~250ms with currentTime
+       onEnd={this.onEnd}           // Callback when playback finishes
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
@@ -57,5 +59,4 @@ Example code [here](https://github.com/brentvatne/react-native-login/blob/master
 - [ ] Add support for captions
 - [ ] Support `require('video!...')`
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
-- [x] Add `onComplete` callback for when it finishes playing
 - [ ] Callback to get buffering progress for remote videos
