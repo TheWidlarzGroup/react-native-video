@@ -34,6 +34,7 @@ A <Video> component for react-native, as seen in
        paused={false}               // Pauses playback entirely.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        repeat={true}                // Repeat forever.
+       onEnd={this._onEnd}          // handle end of playback
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
