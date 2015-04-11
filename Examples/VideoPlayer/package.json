@@ -7,6 +7,6 @@
   },
   "dependencies": {
     "react-native": "0.3.10",
-    "react-native-video": "^0.2.6"
+    "react-native-video": "^0.2.7"
   }
 }
