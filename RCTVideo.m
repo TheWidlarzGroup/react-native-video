@@ -10,6 +10,7 @@ NSString *const RNVideoEventLoading = @"videoLoading";
 NSString *const RNVideoEventProgress = @"videoProgress";
 NSString *const RNVideoEventSeek = @"videoSeek";
 NSString *const RNVideoEventLoadingError = @"videoLoadError";
+NSString *const RNVideoEventEnd = @"videoEnd";
 
 static NSString *const statusKeyPath = @"status";
 
@@ -84,6 +85,12 @@ static NSString *const statusKeyPath = @"status";
   [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
+- (void)notifyEnd: (NSNotification *)notification {
+    [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
+        @"target": self.reactTag
+    }];
+}
+
 #pragma mark - Player and source
 
 - (void)setSrc:(NSDictionary *)source {
@@ -149,6 +156,7 @@ static NSString *const statusKeyPath = @"status";
       }];
 
       [self startProgressTimer];
+      [self attachListeners];
       [_player play];
       [self applyModifiers];
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
@@ -163,6 +171,16 @@ static NSString *const statusKeyPath = @"status";
   } else {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
+}
+
+- (void)attachListeners {
+
+    // listen for end of file
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(notifyEnd:)
+        name:AVPlayerItemDidPlayToEndTimeNotification
+        object:[_player currentItem]];
+
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
