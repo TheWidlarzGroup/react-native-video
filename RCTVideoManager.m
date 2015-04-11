@@ -31,6 +31,9 @@ RCT_EXPORT_MODULE();
     RNVideoEventProgress: @{
       @"registrationName": @"onProgress"
     },
+    RNVideoEventEnd: @{
+      @"registrationName": @"onEnd"
+    },
   };
 }
 
