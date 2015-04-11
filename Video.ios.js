@@ -28,6 +28,7 @@ var Video = React.createClass({
     onLoad: PropTypes.func,
     onError: PropTypes.func,
     onProgress: PropTypes.func,
+    onEnd: PropTypes.func,
   },
 
   mixins: [NativeMethodsMixin],
@@ -61,6 +62,10 @@ var Video = React.createClass({
     this.setNativeProps({seek: parseFloat(time)});
   },
 
+  _onEnd(event) {
+    this.props.onEnd && this.props.onEnd(event.nativeEvent);
+  },
+
   render() {
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
@@ -89,6 +94,7 @@ var Video = React.createClass({
       },
       onLoad: this._onLoad,
       onProgress: this._onProgress,
+      onEnd: this._onEnd,
     });
 
     return <RCTVideo {... nativeProps} />;
