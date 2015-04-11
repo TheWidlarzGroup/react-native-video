@@ -33,6 +33,9 @@ RCT_EXPORT_MODULE();
     },
     RNVideoEventSeek: @{
       @"registrationName": @"onSeek"
+    },
+    RNVideoEventEnd: @{
+      @"registrationName": @"onEnd"
     }
   };
 }
