@@ -51,7 +51,12 @@ var styles = Stylesheet.create({
 });
 ```
 
-Example code [here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js).
+Example code
+[here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js),
+or try out the example
+[VideoPlayer](https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer)
+app - clone this repo, cd into it, `npm install` open the project in
+XCode and build.
 
 ## TODOS
 
