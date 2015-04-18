@@ -49,6 +49,7 @@ static NSString *const statusKeyPath = @"status";
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
   }
+
   return self;
 }
 
@@ -174,7 +175,6 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)attachListeners {
-
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(notifyEnd:)
