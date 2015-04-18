@@ -40,6 +40,7 @@ static NSString *const statusKeyPath = @"status";
     _rate = 1.0;
     _volume = 1.0;
   }
+
   return self;
 }
 
@@ -164,7 +165,6 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)attachListeners {
-
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(notifyEnd:)
