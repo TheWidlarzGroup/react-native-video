@@ -13,14 +13,7 @@ A <Video> component for react-native, as seen in
 rather than the one pictured in screenshot).
 3. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
    [(Screenshot)](http://url.brentvatne.ca/g9Wp).
-4. Click on `RCTVideo.xcodeproj` in `Libraries` and go the `Build
-   Phases` tab. Double click the text to the right of `Header Search
-   Paths` and verify that it has `$(SRCROOT)../react-native/React` - if it
-   isn't, then add it. This is so XCode is able to find the headers that
-   the `RCTVideo` source files are referring to by pointing to the
-   header files installed within the `react-native` `node_modules`
-   directory. [(Screenshot)](http://url.brentvatne.ca/7wE0).
-5. Whenever you want to use it within React code now you can: `var Video =
+4. Whenever you want to use it within React code now you can: `var Video =
    require('react-native-video');`
 
 
