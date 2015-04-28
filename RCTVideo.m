@@ -145,7 +145,7 @@ static NSString *const statusKeyPath = @"status";
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
       // NSLog(@"duration: %f",CMTimeGetSeconds(_playerItem.asset.duration));
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
-        @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.duration)],
+        @"duration": [NSNumber numberWithFloat:(CMTimeGetSeconds(_playerItem.duration) || 0.0)],
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
         @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
         @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
