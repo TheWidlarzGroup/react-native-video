@@ -1,11 +1,11 @@
 'use strict';
 
 var VideoResizeMode = require('./VideoResizeMode');
-var LayoutPropTypes = require('LayoutPropTypes');
+var ViewStylePropTypes = require('ViewStylePropTypes');
 var ReactPropTypes = require('ReactPropTypes');
 
 var VideoStylePropTypes = {
-  ...LayoutPropTypes,
+  ...ViewStylePropTypes,
 };
 
 module.exports = VideoStylePropTypes;
