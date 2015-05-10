@@ -32,6 +32,7 @@ static NSString *const statusKeyPath = @"status";
   float _volume;
   float _rate;
   BOOL _muted;
+  BOOL _paused;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -148,7 +149,6 @@ static NSString *const statusKeyPath = @"status";
 
       [self startProgressTimer];
       [self attachListeners];
-      [_player play];
       [self applyModifiers];
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
@@ -176,7 +176,6 @@ static NSString *const statusKeyPath = @"status";
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
-    [_player play];
     [self applyModifiers];
 }
 
@@ -194,8 +193,9 @@ static NSString *const statusKeyPath = @"status";
   } else {
     [self startProgressTimer];
     [_player play];
-
   }
+
+  _paused = paused;
 }
 
 - (void)setRate:(float)rate
@@ -227,6 +227,7 @@ static NSString *const statusKeyPath = @"status";
   }
 
   [_player setRate:_rate];
+  [self setPaused:_paused];
 }
 
 - (void)setRepeatEnabled {

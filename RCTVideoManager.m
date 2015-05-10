@@ -47,10 +47,12 @@ RCT_EXPORT_VIEW_PROPERTY(rate, float);
 
 - (NSDictionary *)constantsToExport
 {
-  return @{@"ScaleNone": AVLayerVideoGravityResizeAspect,
-           @"ScaleToFill": AVLayerVideoGravityResize,
-           @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
-           @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill};
+  return @{
+    @"ScaleNone": AVLayerVideoGravityResizeAspect,
+    @"ScaleToFill": AVLayerVideoGravityResize,
+    @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
+    @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
+  };
 }
 
 @end
