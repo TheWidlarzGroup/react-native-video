@@ -144,9 +144,14 @@ static NSString *const statusKeyPath = @"status";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
   if (object == _playerItem) {
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
-      // NSLog(@"duration: %f",CMTimeGetSeconds(_playerItem.asset.duration));
+      float duration = CMTimeGetSeconds(_playerItem.asset.duration);
+
+      if (isnan(duration)) {
+        duration = 0.0;
+      }
+
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
-        @"duration": [NSNumber numberWithFloat:(CMTimeGetSeconds(_playerItem.duration) || 0.0)],
+        @"duration": [NSNumber numberWithFloat:duration],
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
         @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
         @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
