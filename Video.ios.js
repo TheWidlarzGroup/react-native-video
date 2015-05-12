@@ -14,7 +14,6 @@ var deepDiffer = require('deepDiffer');
 
 var Video = React.createClass({
   propTypes: {
-    source: PropTypes.object,
     style: StyleSheetPropType(VideoStylePropTypes),
     source: PropTypes.object,
     resizeMode: PropTypes.string,
