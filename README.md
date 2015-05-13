@@ -13,11 +13,12 @@ A <Video> component for react-native, as seen in
 rather than the one pictured in screenshot).
 3. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
    [(Screenshot)](http://url.brentvatne.ca/g9Wp).
-4. Whenever you want to use it within React code now you can: `var Video =
+4. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
+5. Whenever you want to use it within React code now you can: `var Video =
    require('react-native-video');`
 
 
-## Example
+## Usage
 
 ```javascript
 // Within your render function, assuming you have a file called
@@ -47,12 +48,21 @@ var styles = Stylesheet.create({
 });
 ```
 
-Example code
-[here](https://github.com/brentvatne/react-native-login/blob/master/index.ios.js),
-or try out the example
-[VideoPlayer](https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer)
-app - clone this repo, cd into it, `npm install` open the project in
-XCode and build.
+## Examples
+
+- See an [Example integration][1] in `react-native-login`.
+- Try the included [VideoPlayer example][2] yourself:
+
+   ```sh
+   git clone git@github.com:brentvatne/react-native-video.git
+   cd react-native-video/Examples/VideoPlayer
+   npm install
+   open VideoPlayer.xcodeproj
+
+   ```
+
+   Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
+
 
 ## TODOS
 
@@ -62,3 +72,6 @@ XCode and build.
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://www.w3schools.com/tags/ref_av_dom.asp)
+
+[1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
+[2]: https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer
