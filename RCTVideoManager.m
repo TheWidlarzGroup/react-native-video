@@ -34,6 +34,9 @@ RCT_EXPORT_MODULE();
     RNVideoEventSeek: @{
       @"registrationName": @"onSeek"
     },
+    RNVideoEventUpdateTime: @{
+      @"registrationName": @"onUpdateTime"
+    },
     RNVideoEventEnd: @{
       @"registrationName": @"onEnd"
     }

@@ -6,6 +6,7 @@ extern NSString *const RNVideoEventProgress;
 extern NSString *const RNVideoEventSeek;
 extern NSString *const RNVideoEventLoadingError;
 extern NSString *const RNVideoEventEnd;
+extern NSString *const RNVideoEventUpdateTime;
 
 @class RCTEventDispatcher;
 
