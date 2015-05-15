@@ -1,6 +1,6 @@
 {
   "name": "react-native-video",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "A <Video /> element for react-native",
   "main": "Video.ios.js",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
@@ -30,6 +30,6 @@
     "jest-cli": "0.2.1"
   },
   "peerDependencies": {
-    "react-native": "^0.4.0"
+    "react-native": "^0.4.3"
   }
 }

@@ -1,8 +1,8 @@
 var React = require('react-native');
 var NativeModules = require('NativeModules');
-var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
+var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 var StyleSheet = require('StyleSheet');
-var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentClass');
+var createReactIOSNativeComponentClass = require('createReactNativeComponentClass');
 var PropTypes = require('ReactPropTypes');
 var StyleSheetPropType = require('StyleSheetPropType');
 var VideoResizeMode = require('./VideoResizeMode');
@@ -33,7 +33,7 @@ var Video = React.createClass({
 
   viewConfig: {
     uiViewClassName: 'UIView',
-    validAttributes: ReactIOSViewAttributes.UIView
+    validAttributes: ReactNativeViewAttributes.UIView
   },
 
   _onLoadStart(event) {
@@ -100,7 +100,7 @@ var Video = React.createClass({
 });
 
 var RCTVideo = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactIOSViewAttributes.UIView,
+  validAttributes: merge(ReactNativeViewAttributes.UIView,
     {src: {diff: deepDiffer}, resizeMode: true, repeat: true,
      seek: true, paused: true, muted: true, volume: true, rate: true}),
   uiViewClassName: 'RCTVideo',
