@@ -274,9 +274,9 @@ static NSString *const statusKeyPath = @"status";
     [_player setVolume:_volume];
     [_player setMuted:NO];
   }
-
-  [_player setRate:_rate];
   [self setPaused:_paused];
+  
+  [_player setRate:_rate];
 }
 
 - (void)setRepeatEnabled {
