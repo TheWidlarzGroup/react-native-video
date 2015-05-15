@@ -28,11 +28,15 @@ var VideoPlayer = React.createClass({
     }
   },
 
+  componentWillMount() {
+    this.playing = true;
+  },
+
   onLoad(data) {
     this.setState({duration: data.duration});
   },
 
-  onProgress(data) {
+  onUpdateTime(data) {
     this.setState({currentTime: data.currentTime});
   },
 
@@ -48,7 +52,10 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.rate == rate);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
+      <TouchableOpacity onPress={() => {
+          this.setState({rate});
+          this.refs.video.setPlaybackRate(rate)
+      }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {rate}x
         </Text>
@@ -60,7 +67,7 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.resizeMode == resizeMode);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
+      <TouchableOpacity onPress={() => { this.setState({resizeMode}) }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {resizeMode}
         </Text>
@@ -72,7 +79,10 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.volume == volume);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
+      <TouchableOpacity onPress={() => {
+          this.refs.video.setVolume(volume);
+          this.setState({volume})
+        }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {volume * 100}%
         </Text>
@@ -86,18 +96,27 @@ var VideoPlayer = React.createClass({
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <Video source={{uri: "broadchurch"}}
-                 style={styles.video}
-                 rate={this.state.rate}
-                 paused={this.state.paused}
-                 volume={this.state.volume}
-                 muted={this.state.muted}
-                 resizeMode={this.state.resizeMode}
-                 onLoad={this.onLoad}
-                 onProgress={this.onProgress}
-                 onEnd={() => { AlertIOS.alert('Done!') }}
-                 repeat={true} />
+        <TouchableOpacity onPress={() => {
+            var video = this.refs.video;
+            if (this.playing) {
+              video.pause()
+            } else {
+              video.play();
+            }
+
+            this.playing = !this.playing;
+          }}>
+          <View style={styles.video}>
+            <Video source={{uri: "broadchurch"}}
+                   ref="video"
+                   style={styles.video}
+                   autoplay={true}
+                   resizeMode={this.state.resizeMode}
+                   onLoad={this.onLoad}
+                   onUpdateTime={this.onUpdateTime}
+                   onEnd={() => { AlertIOS.alert('Done!') }}
+                   />
+          </View>
         </TouchableOpacity>
 
         <View style={styles.controls}>
