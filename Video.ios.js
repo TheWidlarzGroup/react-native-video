@@ -140,6 +140,7 @@ var RCTVideo = createReactNativeComponentClass({
     {
       src: {diff: deepDiffer},
       resizeMode: true,
+      autoplay: true
       /*repeat: true,
       seek: true,
       paused: true,
