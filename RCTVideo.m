@@ -39,6 +39,8 @@ static NSString *const statusKeyPath = @"status";
   float _rate;
   BOOL _muted;
   BOOL _paused;
+
+  BOOL _repeat;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -89,9 +91,12 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)notifyEnd: (NSNotification *)notification {
-    [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
-        @"target": self.reactTag
-    }];
+  [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
+    @"target": self.reactTag
+  }];
+  if (!_repeat) {
+    [self stopTimeUpdateTimer];
+  }
 }
 
 #pragma mark - Player and source
@@ -286,6 +291,7 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)setRepeat:(BOOL)repeat {
+  _repeat = repeat;
   if (repeat) {
     [self setRepeatEnabled];
   } else {
