@@ -41,6 +41,7 @@ static NSString *const statusKeyPath = @"status";
   BOOL _paused;
 
   BOOL _repeat;
+  BOOL _autoplay;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -167,10 +168,13 @@ static NSString *const statusKeyPath = @"status";
         @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
         @"target": self.reactTag
       }];
-
-      [self startTimeUpdateTimer];
-      [self attachListeners];
-      [self applyModifiers];
+      
+      if(_autoplay) {
+        [self startTimeUpdateTimer];
+        [self attachListeners];
+        [self applyModifiers];
+      }
+      
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
         @"error": @{
@@ -214,8 +218,10 @@ static NSString *const statusKeyPath = @"status";
     [self startTimeUpdateTimer];
     [_player play];
   }
+}
 
-  _paused = paused;
+- (void)setAutoplay:(BOOL)autoplay {
+  _autoplay = autoplay;
 }
 
 - (void)setSeek:(float)seekTime {
@@ -274,8 +280,7 @@ static NSString *const statusKeyPath = @"status";
     [_player setVolume:_volume];
     [_player setMuted:NO];
   }
-  [self setPaused:_paused];
-  
+ 
   [_player setRate:_rate];
 }
 
