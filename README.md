@@ -75,3 +75,7 @@ var styles = Stylesheet.create({
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
 [2]: https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer
+
+---
+
+**MIT Licensed**
