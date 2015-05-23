@@ -9,6 +9,7 @@ NSString *const RNVideoEventLoaded = @"videoLoaded";
 NSString *const RNVideoEventLoading = @"videoLoading";
 NSString *const RNVideoEventProgress = @"videoProgress";
 NSString *const RNVideoEventSeek = @"videoSeek";
+NSString *const RNVideoEventUpdateTime = @"videoUpdateTime";
 NSString *const RNVideoEventLoadingError = @"videoLoadError";
 NSString *const RNVideoEventEnd = @"videoEnd";
 
@@ -29,15 +30,18 @@ static NSString *const statusKeyPath = @"status";
   float _lastSeekTime;
 
   /* For sending videoProgress events */
-  id _progressUpdateTimer;
-  int _progressUpdateInterval;
-  NSDate *_prevProgressUpdateTime;
+  id _timeUpdateTimer;
+  int _timeUpdateInterval;
+  NSDate *_prevTimeUpdateTime;
 
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
   float _rate;
   BOOL _muted;
   BOOL _paused;
+
+  BOOL _repeat;
+  BOOL _autoplay;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -56,41 +60,44 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - Progress
 
-- (void)sendProgressUpdate {
+- (void)sendTimeUpdate {
    AVPlayerItem *video = [_player currentItem];
    if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
    }
 
-  if (_prevProgressUpdateTime == nil ||
-     (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:RNVideoEventProgress body:@{
+  if (_prevTimeUpdateTime == nil ||
+     (([_prevTimeUpdateTime timeIntervalSinceNow] * -1000.0) >= _timeUpdateInterval)) {
+    [_eventDispatcher sendInputEventWithName:RNVideoEventUpdateTime body:@{
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
       @"target": self.reactTag
     }];
 
-    _prevProgressUpdateTime = [NSDate date];
+    _prevTimeUpdateTime = [NSDate date];
   }
 }
 
-- (void)stopProgressTimer {
-  [_progressUpdateTimer invalidate];
+- (void)stopTimeUpdateTimer {
+  [_timeUpdateTimer invalidate];
 }
 
-- (void)startProgressTimer {
-  _progressUpdateInterval = 250;
-  _prevProgressUpdateTime = nil;
+- (void)startTimeUpdateTimer {
+  _timeUpdateInterval = 250;
+  _prevTimeUpdateTime = nil;
 
-  [self stopProgressTimer];
+  [self stopTimeUpdateTimer];
 
-  _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
-  [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+  _timeUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendTimeUpdate)];
+  [_timeUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 - (void)notifyEnd: (NSNotification *)notification {
-    [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
-        @"target": self.reactTag
-    }];
+  [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
+    @"target": self.reactTag
+  }];
+  if (!_repeat) {
+    [self stopTimeUpdateTimer];
+  }
 }
 
 #pragma mark - Player and source
@@ -161,10 +168,13 @@ static NSString *const statusKeyPath = @"status";
         @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
         @"target": self.reactTag
       }];
-
-      [self startProgressTimer];
-      [self attachListeners];
-      [self applyModifiers];
+      
+      if(_autoplay) {
+        [self startTimeUpdateTimer];
+        [self attachListeners];
+        [self applyModifiers];
+      }
+      
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
         @"error": @{
@@ -202,14 +212,16 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)setPaused:(BOOL)paused {
   if (paused) {
-    [self stopProgressTimer];
+    [self stopTimeUpdateTimer];
     [_player pause];
   } else {
-    [self startProgressTimer];
+    [self startTimeUpdateTimer];
     [_player play];
   }
+}
 
-  _paused = paused;
+- (void)setAutoplay:(BOOL)autoplay {
+  _autoplay = autoplay;
 }
 
 - (void)setSeek:(float)seekTime {
@@ -232,7 +244,7 @@ static NSString *const statusKeyPath = @"status";
           @"target": self.reactTag
         }];
       }];
-      
+
       _pendingSeek = false;
     }
 
@@ -268,9 +280,8 @@ static NSString *const statusKeyPath = @"status";
     [_player setVolume:_volume];
     [_player setMuted:NO];
   }
-
+ 
   [_player setRate:_rate];
-  [self setPaused:_paused];
 }
 
 - (void)setRepeatEnabled {
@@ -285,6 +296,7 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)setRepeat:(BOOL)repeat {
+  _repeat = repeat;
   if (repeat) {
     [self setRepeatEnabled];
   } else {
@@ -312,8 +324,8 @@ static NSString *const statusKeyPath = @"status";
 #pragma mark - Lifecycle
 
 - (void)removeFromSuperview {
-  [_progressUpdateTimer invalidate];
-  _prevProgressUpdateTime = nil;
+  [_timeUpdateTimer invalidate];
+  _prevTimeUpdateTime = nil;
 
   [_player pause];
   _player = nil;

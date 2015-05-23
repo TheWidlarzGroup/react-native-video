@@ -1,8 +1,7 @@
 var React = require('react-native');
+var { requireNativeComponent, } = React;
 var NativeModules = require('NativeModules');
-var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 var StyleSheet = require('StyleSheet');
-var createReactIOSNativeComponentClass = require('createReactNativeComponentClass');
 var PropTypes = require('ReactPropTypes');
 var StyleSheetPropType = require('StyleSheetPropType');
 var VideoResizeMode = require('./VideoResizeMode');
@@ -16,16 +15,14 @@ var Video = React.createClass({
   propTypes: {
     style: StyleSheetPropType(VideoStylePropTypes),
     source: PropTypes.object,
-    resizeMode: PropTypes.string,
-    repeat: PropTypes.bool,
-    paused: PropTypes.bool,
-    muted: PropTypes.bool,
-    volume: PropTypes.number,
-    rate: PropTypes.number,
+    videoResizeMode: PropTypes.string,
+    autoplay: PropTypes.bool,
     onLoadStart: PropTypes.func,
+    onProgress: PropTypes.func,
     onLoad: PropTypes.func,
     onError: PropTypes.func,
-    onProgress: PropTypes.func,
+    onSeek: PropTypes.func,
+    onUpdateTime: PropTypes.func,
     onEnd: PropTypes.func,
   },
 
@@ -40,6 +37,10 @@ var Video = React.createClass({
     this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
   },
 
+  _onProgress(event) {
+    this.props.onProgress && this.props.onProgress(event.nativeEvent);
+  },
+
   _onLoad(event) {
     this.props.onLoad && this.props.onLoad(event.nativeEvent);
   },
@@ -48,20 +49,49 @@ var Video = React.createClass({
     this.props.onError && this.props.onError(event.nativeEvent);
   },
 
-  _onProgress(event) {
-    this.props.onProgress && this.props.onProgress(event.nativeEvent);
-  },
-
   _onSeek(event) {
     this.props.onSeek && this.props.onSeek(event.nativeEvent);
   },
+
+  _onUpdateTime(event) {
+    this.props.onUpdateTime && this.props.onUpdateTime(event.nativeEvent);
+  },
+
+  _onEnd(event) {
+    // TODO rename this to `onEnded` ?!
+    this.props.onEnd && this.props.onEnd(event.nativeEvent);
+  },
+
+  /* public api */
 
   seek(time) {
     this.setNativeProps({seek: parseFloat(time)});
   },
 
-  _onEnd(event) {
-    this.props.onEnd && this.props.onEnd(event.nativeEvent);
+  play() {
+    // TODO: should this start the video from the beginning if it is being
+    // called while the video is running?
+    this.setNativeProps({paused: false});
+  },
+
+  pause() {
+    this.setNativeProps({paused: true});
+  },
+
+  setPlaybackRate(rate) {
+    this.setNativeProps({rate: parseFloat(rate)});
+  },
+
+  setVolume(volume) {
+    this.setNativeProps({volume: parseFloat(volume)});
+  },
+
+  setMuted(muted) {
+    this.setNativeProps({muted});
+  },
+
+  setRepeat(repeat) {
+    this.setNativeProps({repeat});
   },
 
   render() {
@@ -90,8 +120,12 @@ var Video = React.createClass({
         isAsset,
         type: source.type || 'mp4'
       },
-      onLoad: this._onLoad,
+      onLoadStart: this._onLoadStart,
       onProgress: this._onProgress,
+      onLoad: this._onLoad,
+      onError: this._onError,
+      onSeek: this._onSeek,
+      onUpdateTime: this._onUpdateTime,
       onEnd: this._onEnd,
     });
 
@@ -99,12 +133,7 @@ var Video = React.createClass({
   },
 });
 
-var RCTVideo = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactNativeViewAttributes.UIView,
-    {src: {diff: deepDiffer}, resizeMode: true, repeat: true,
-     seek: true, paused: true, muted: true, volume: true, rate: true}),
-  uiViewClassName: 'RCTVideo',
-});
+var RCTVideo = requireNativeComponent('RCTVideo', Video);
 
 var styles = StyleSheet.create({
   base: {

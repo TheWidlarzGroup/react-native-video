@@ -34,6 +34,9 @@ RCT_EXPORT_MODULE();
     RNVideoEventSeek: @{
       @"registrationName": @"onSeek"
     },
+    RNVideoEventUpdateTime: @{
+      @"registrationName": @"onUpdateTime"
+    },
     RNVideoEventEnd: @{
       @"registrationName": @"onEnd"
     }
@@ -45,9 +48,11 @@ RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(autoplay, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, float);
+
 
 - (NSDictionary *)constantsToExport
 {
