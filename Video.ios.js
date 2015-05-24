@@ -1,8 +1,8 @@
 var React = require('react-native');
 var NativeModules = require('NativeModules');
-var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
+var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 var StyleSheet = require('StyleSheet');
-var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentClass');
+var createReactIOSNativeComponentClass = require('createReactNativeComponentClass');
 var PropTypes = require('ReactPropTypes');
 var StyleSheetPropType = require('StyleSheetPropType');
 var VideoResizeMode = require('./VideoResizeMode');
@@ -14,8 +14,6 @@ var deepDiffer = require('deepDiffer');
 
 var Video = React.createClass({
   propTypes: {
-    // should probably be a shape
-    source: PropTypes.object,
     style: StyleSheetPropType(VideoStylePropTypes),
     source: PropTypes.object,
     resizeMode: PropTypes.string,
@@ -35,7 +33,7 @@ var Video = React.createClass({
 
   viewConfig: {
     uiViewClassName: 'UIView',
-    validAttributes: ReactIOSViewAttributes.UIView
+    validAttributes: ReactNativeViewAttributes.UIView
   },
 
   _onLoadStart(event) {
@@ -52,6 +50,14 @@ var Video = React.createClass({
 
   _onProgress(event) {
     this.props.onProgress && this.props.onProgress(event.nativeEvent);
+  },
+
+  _onSeek(event) {
+    this.props.onSeek && this.props.onSeek(event.nativeEvent);
+  },
+
+  seek(time) {
+    this.setNativeProps({seek: parseFloat(time)});
   },
 
   _onEnd(event) {
@@ -87,17 +93,16 @@ var Video = React.createClass({
       onLoad: this._onLoad,
       onProgress: this._onProgress,
       onEnd: this._onEnd,
-
     });
 
-    return <RCTVideo {... nativeProps} />
+    return <RCTVideo {... nativeProps} />;
   },
 });
 
 var RCTVideo = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactIOSViewAttributes.UIView,
+  validAttributes: merge(ReactNativeViewAttributes.UIView,
     {src: {diff: deepDiffer}, resizeMode: true, repeat: true,
-     paused: true, muted: true, volume: true, rate: true}),
+     seek: true, paused: true, muted: true, volume: true, rate: true}),
   uiViewClassName: 'RCTVideo',
 });
 

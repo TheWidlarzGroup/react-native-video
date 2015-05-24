@@ -8,6 +8,7 @@
 NSString *const RNVideoEventLoaded = @"videoLoaded";
 NSString *const RNVideoEventLoading = @"videoLoading";
 NSString *const RNVideoEventProgress = @"videoProgress";
+NSString *const RNVideoEventSeek = @"videoSeek";
 NSString *const RNVideoEventLoadingError = @"videoLoadError";
 NSString *const RNVideoEventEnd = @"videoEnd";
 
@@ -23,6 +24,10 @@ static NSString *const statusKeyPath = @"status";
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
 
+  bool _pendingSeek;
+  float _pendingSeekTime;
+  float _lastSeekTime;
+
   /* For sending videoProgress events */
   id _progressUpdateTimer;
   int _progressUpdateInterval;
@@ -32,6 +37,7 @@ static NSString *const statusKeyPath = @"status";
   float _volume;
   float _rate;
   BOOL _muted;
+  BOOL _paused;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -39,6 +45,10 @@ static NSString *const statusKeyPath = @"status";
     _eventDispatcher = eventDispatcher;
     _rate = 1.0;
     _volume = 1.0;
+
+    _pendingSeek = false;
+    _pendingSeekTime = 0.0f;
+    _lastSeekTime = 0.0f;
   }
 
   return self;
@@ -134,8 +144,14 @@ static NSString *const statusKeyPath = @"status";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
   if (object == _playerItem) {
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
+      float duration = CMTimeGetSeconds(_playerItem.asset.duration);
+
+      if (isnan(duration)) {
+        duration = 0.0;
+      }
+
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
-        @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.duration)],
+        @"duration": [NSNumber numberWithFloat:duration],
         @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
         @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
         @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
@@ -148,7 +164,6 @@ static NSString *const statusKeyPath = @"status";
 
       [self startProgressTimer];
       [self attachListeners];
-      [_player play];
       [self applyModifiers];
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
@@ -176,7 +191,6 @@ static NSString *const statusKeyPath = @"status";
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
-    [_player play];
     [self applyModifiers];
 }
 
@@ -186,26 +200,56 @@ static NSString *const statusKeyPath = @"status";
   _playerLayer.videoGravity = mode;
 }
 
-- (void)setPaused:(BOOL)paused
-{
+- (void)setPaused:(BOOL)paused {
   if (paused) {
     [self stopProgressTimer];
     [_player pause];
   } else {
     [self startProgressTimer];
     [_player play];
+  }
 
+  _paused = paused;
+}
+
+- (void)setSeek:(float)seekTime {
+  int timeScale = 10000;
+
+  AVPlayerItem *item = _player.currentItem;
+  if (item && item.status == AVPlayerItemStatusReadyToPlay) {
+    // TODO check loadedTimeRanges
+
+    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+    CMTime current = item.currentTime;
+    // TODO figure out a good tolerance level
+    CMTime tolerance = CMTimeMake(1000, timeScale);
+
+    if (CMTimeCompare(current, cmSeekTime) != 0) {
+      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+        [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
+          @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+          @"seekTime": [NSNumber numberWithFloat:seekTime],
+          @"target": self.reactTag
+        }];
+      }];
+      
+      _pendingSeek = false;
+    }
+
+  } else {
+    // TODO see if this makes sense and if so,
+    // actually implement it
+    _pendingSeek = true;
+    _pendingSeekTime = seekTime;
   }
 }
 
-- (void)setRate:(float)rate
-{
+- (void)setRate:(float)rate {
   _rate = rate;
   [self applyModifiers];
 }
 
-- (void)setMuted:(BOOL)muted
-{
+- (void)setMuted:(BOOL)muted {
   _muted = muted;
   [self applyModifiers];
 }
@@ -215,8 +259,7 @@ static NSString *const statusKeyPath = @"status";
   [self applyModifiers];
 }
 
-- (void)applyModifiers
-{
+- (void)applyModifiers {
   /* volume must be set to 0 if muted is YES, or the video freezes playback */
   if (_muted) {
     [_player setVolume:0];
@@ -227,6 +270,7 @@ static NSString *const statusKeyPath = @"status";
   }
 
   [_player setRate:_rate];
+  [self setPaused:_paused];
 }
 
 - (void)setRepeatEnabled {

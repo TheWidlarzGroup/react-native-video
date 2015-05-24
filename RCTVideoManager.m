@@ -31,9 +31,12 @@ RCT_EXPORT_MODULE();
     RNVideoEventProgress: @{
       @"registrationName": @"onProgress"
     },
+    RNVideoEventSeek: @{
+      @"registrationName": @"onSeek"
+    },
     RNVideoEventEnd: @{
       @"registrationName": @"onEnd"
-    },
+    }
   };
 }
 
@@ -44,13 +47,16 @@ RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
+RCT_EXPORT_VIEW_PROPERTY(seek, float);
 
 - (NSDictionary *)constantsToExport
 {
-  return @{@"ScaleNone": AVLayerVideoGravityResizeAspect,
-           @"ScaleToFill": AVLayerVideoGravityResize,
-           @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
-           @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill};
+  return @{
+    @"ScaleNone": AVLayerVideoGravityResizeAspect,
+    @"ScaleToFill": AVLayerVideoGravityResize,
+    @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
+    @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
+  };
 }
 
 @end
