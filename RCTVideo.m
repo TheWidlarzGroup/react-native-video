@@ -18,6 +18,7 @@ static NSString *const statusKeyPath = @"status";
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
+  BOOL _playerItemObserverSet;
   AVPlayerLayer *_playerLayer;
   NSURL *_videoURL;
 
@@ -87,18 +88,36 @@ static NSString *const statusKeyPath = @"status";
   [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
-- (void)notifyEnd: (NSNotification *)notification {
+- (void)notifyEnd:(NSNotification *)notification
+{
     [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
         @"target": self.reactTag
     }];
 }
 
+- (void)addPlayerItemObserver
+{
+  [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  _playerItemObserverSet = YES;
+}
+
+/* Fixes https://github.com/brentvatne/react-native-video/issues/43
+ * Crashes caused when trying to remove the observer when there is no
+ * observer set */
+- (void)removePlayerItemObserver
+{
+  if (_playerItemObserverSet) {
+    [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+    _playerItemObserverSet = NO;
+  }
+}
+
 #pragma mark - Player and source
 
 - (void)setSrc:(NSDictionary *)source {
-  [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+  [self removePlayerItemObserver];
   _playerItem = [self playerItemForSource:source];
-  [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  [self addPlayerItemObserver];
 
   [_player pause];
   [_playerLayer removeFromSuperlayer];
@@ -321,7 +340,7 @@ static NSString *const statusKeyPath = @"status";
   [_playerLayer removeFromSuperlayer];
   _playerLayer = nil;
 
-  [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+  [self removePlayerItemObserver];
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
