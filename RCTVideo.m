@@ -41,7 +41,8 @@ static NSString *const statusKeyPath = @"status";
   BOOL _paused;
 }
 
-- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
+- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
+{
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
     _rate = 1.0;
@@ -57,7 +58,8 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - Progress
 
-- (void)sendProgressUpdate {
+- (void)sendProgressUpdate
+{
    AVPlayerItem *video = [_player currentItem];
    if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
@@ -74,11 +76,13 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
-- (void)stopProgressTimer {
+- (void)stopProgressTimer
+{
   [_progressUpdateTimer invalidate];
 }
 
-- (void)startProgressTimer {
+- (void)startProgressTimer
+{
   _progressUpdateInterval = 250;
   _prevProgressUpdateTime = nil;
 
@@ -114,7 +118,8 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - Player and source
 
-- (void)setSrc:(NSDictionary *)source {
+- (void)setSrc:(NSDictionary *)source
+{
   [self removePlayerItemObserver];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObserver];
@@ -142,7 +147,8 @@ static NSString *const statusKeyPath = @"status";
   }];
 }
 
-- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source {
+- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source
+{
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
@@ -160,7 +166,8 @@ static NSString *const statusKeyPath = @"status";
   return [AVPlayerItem playerItemWithURL:url];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
   if (object == _playerItem) {
     if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
       float duration = CMTimeGetSeconds(_playerItem.asset.duration);
@@ -198,7 +205,8 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
-- (void)attachListeners {
+- (void)attachListeners
+{
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(notifyEnd:)
@@ -207,7 +215,8 @@ static NSString *const statusKeyPath = @"status";
 
 }
 
-- (void)playerItemDidReachEnd:(NSNotification *)notification {
+- (void)playerItemDidReachEnd:(NSNotification *)notification
+{
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
@@ -215,11 +224,13 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - Prop setters
 
-- (void)setResizeMode:(NSString*)mode {
+- (void)setResizeMode:(NSString*)mode
+{
   _playerLayer.videoGravity = mode;
 }
 
-- (void)setPaused:(BOOL)paused {
+- (void)setPaused:(BOOL)paused
+{
   if (paused) {
     [self stopProgressTimer];
     [_player pause];
@@ -231,7 +242,8 @@ static NSString *const statusKeyPath = @"status";
   _paused = paused;
 }
 
-- (void)setSeek:(float)seekTime {
+- (void)setSeek:(float)seekTime
+{
   int timeScale = 10000;
 
   AVPlayerItem *item = _player.currentItem;
@@ -251,7 +263,7 @@ static NSString *const statusKeyPath = @"status";
           @"target": self.reactTag
         }];
       }];
-      
+
       _pendingSeek = false;
     }
 
@@ -263,22 +275,26 @@ static NSString *const statusKeyPath = @"status";
   }
 }
 
-- (void)setRate:(float)rate {
+- (void)setRate:(float)rate
+{
   _rate = rate;
   [self applyModifiers];
 }
 
-- (void)setMuted:(BOOL)muted {
+- (void)setMuted:(BOOL)muted
+{
   _muted = muted;
   [self applyModifiers];
 }
 
-- (void)setVolume:(float)volume {
+- (void)setVolume:(float)volume
+{
   _volume = volume;
   [self applyModifiers];
 }
 
-- (void)applyModifiers {
+- (void)applyModifiers
+{
   /* volume must be set to 0 if muted is YES, or the video freezes playback */
   if (_muted) {
     [_player setVolume:0];
@@ -292,14 +308,16 @@ static NSString *const statusKeyPath = @"status";
   [self setPaused:_paused];
 }
 
-- (void)setRepeatEnabled {
+- (void)setRepeatEnabled
+{
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(playerItemDidReachEnd:)
                                                name:AVPlayerItemDidPlayToEndTimeNotification
                                              object:[_player currentItem]];
 }
 
-- (void) setRepeatDisabled {
+- (void)setRepeatDisabled
+{
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -313,24 +331,28 @@ static NSString *const statusKeyPath = @"status";
 
 #pragma mark - React View Management
 
-- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex {
+- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
+{
   RCTLogError(@"video cannot have any subviews");
   return;
 }
 
-- (void)removeReactSubview:(UIView *)subview {
+- (void)removeReactSubview:(UIView *)subview
+{
   RCTLogError(@"video cannot have any subviews");
   return;
 }
 
-- (void)layoutSubviews {
+- (void)layoutSubviews
+{
   [super layoutSubviews];
   _playerLayer.frame = self.bounds;
 }
 
 #pragma mark - Lifecycle
 
-- (void)removeFromSuperview {
+- (void)removeFromSuperview
+{
   [_progressUpdateTimer invalidate];
   _prevProgressUpdateTime = nil;
 
