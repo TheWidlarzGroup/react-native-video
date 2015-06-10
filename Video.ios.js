@@ -69,6 +69,7 @@ var Video = React.createClass({
     var source = this.props.source;
     var isNetwork = !!(source.uri && source.uri.match(/^https?:/));
     var isAsset = !!(source.uri && source.uri.match(/^assets-library:/));
+    var isStatic = source.isStatic || false;
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
@@ -88,6 +89,7 @@ var Video = React.createClass({
         uri: source.uri,
         isNetwork,
         isAsset,
+        isStatic,
         type: source.type || 'mp4'
       },
       onLoad: this._onLoad,

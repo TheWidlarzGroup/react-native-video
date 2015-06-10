@@ -151,10 +151,11 @@ static NSString *const statusKeyPath = @"status";
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  bool isStatic = [RCTConvert BOOL:[source objectForKey:@"isStatic"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
 
-  NSURL *url = (isNetwork || isAsset) ?
+  NSURL *url = (isNetwork || isAsset || isStatic) ?
     [NSURL URLWithString:uri] :
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
