@@ -23,7 +23,7 @@ Requires react-native >= 0.4.4
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
-<Video source={{uri: "background"}} // Can be a URL or a local file.
+<Video source={{uri: "background"}} // Can be a URL or a local file, specify isStatic:true for a local file outside of the main bundle directory
        rate={1.0}                   // 0 is paused, 1 is normal.
        volume={1.0}                 // 0 is muted, 1 is normal.
        muted={false}                // Mutes the audio entirely.
