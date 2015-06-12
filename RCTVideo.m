@@ -80,7 +80,7 @@ static NSString *const statusKeyPath = @"status";
 /*!
  * Calculates and returns the playable duration of the current player item using its loaded time ranges.
  *
- * \returns The playable duration of the current player item.
+ * \returns The playable duration of the current player item in seconds.
  */
 - (NSNumber *)calculatePlayableDuration {
   AVPlayerItem *video = _player.currentItem;
