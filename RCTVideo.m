@@ -69,11 +69,33 @@ static NSString *const statusKeyPath = @"status";
      (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:RNVideoEventProgress body:@{
       @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
+      @"playableDuration": [self calculatePlayableDuration],
       @"target": self.reactTag
     }];
 
     _prevProgressUpdateTime = [NSDate date];
   }
+}
+
+/*!
+ * Calculates and returns the playable duration of the current player item using its loaded time ranges.
+ *
+ * \returns The playable duration of the current player item in seconds.
+ */
+- (NSNumber *)calculatePlayableDuration {
+  AVPlayerItem *video = _player.currentItem;
+  if (video.status == AVPlayerItemStatusReadyToPlay) {
+    __block CMTimeRange effectiveTimeRange;
+    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+      CMTimeRange timeRange = [obj CMTimeRangeValue];
+      if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
+        effectiveTimeRange = timeRange;
+        *stop = YES;
+      }
+    }];
+    return [NSNumber numberWithFloat:CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))];
+  }
+  return [NSNumber numberWithFloat:CMTimeGetSeconds(kCMTimeInvalid)];
 }
 
 - (void)stopProgressTimer
