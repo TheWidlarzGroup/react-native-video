@@ -67,8 +67,12 @@ var Video = React.createClass({
   render() {
     var style = flattenStyle([styles.base, this.props.style]);
     var source = this.props.source;
-    var isNetwork = !!(source.uri && source.uri.match(/^https?:/));
-    var isAsset = !!(source.uri && source.uri.match(/^assets-library:/));
+    var uri = source.uri;
+    if (uri && uri.match(/^\//)) {
+      uri = 'file://' + uri;
+    }
+    var isNetwork = !!(uri && uri.match(/^https?:/));
+    var isAsset = !!(uri && uri.match(/^(assets-library|file):/));
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
@@ -85,7 +89,7 @@ var Video = React.createClass({
       style,
       resizeMode: resizeMode,
       src: {
-        uri: source.uri,
+        uri: uri,
         isNetwork,
         isAsset,
         type: source.type || 'mp4'

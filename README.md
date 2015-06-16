@@ -3,6 +3,8 @@
 A <Video> component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login).
 
+Requires react-native >= 0.4.4
+
 ### Add it to your project
 
 1. Run `npm install react-native-video --save`
