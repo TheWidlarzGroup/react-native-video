@@ -39,6 +39,8 @@ static NSString *const statusKeyPath = @"status";
   float _rate;
   BOOL _muted;
   BOOL _paused;
+  BOOL _repeat;
+  NSString * _resizeMode;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -47,6 +49,8 @@ static NSString *const statusKeyPath = @"status";
     _eventDispatcher = eventDispatcher;
     _rate = 1.0;
     _volume = 1.0;
+
+     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
 
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
@@ -133,6 +137,8 @@ static NSString *const statusKeyPath = @"status";
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
   _playerLayer.frame = self.bounds;
   _playerLayer.needsDisplayOnBoundsChange = YES;
+
+  [self applyModifiers];
 
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
@@ -226,6 +232,7 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)setResizeMode:(NSString*)mode
 {
+  _resizeMode = mode;
   _playerLayer.videoGravity = mode;
 }
 
@@ -305,6 +312,9 @@ static NSString *const statusKeyPath = @"status";
   }
 
   [_player setRate:_rate];
+
+  [self setResizeMode:_resizeMode];
+  [self setRepeat:_repeat];
   [self setPaused:_paused];
 }
 
@@ -322,6 +332,8 @@ static NSString *const statusKeyPath = @"status";
 }
 
 - (void)setRepeat:(BOOL)repeat {
+  _repeat = repeat;
+
   if (repeat) {
     [self setRepeatEnabled];
   } else {
