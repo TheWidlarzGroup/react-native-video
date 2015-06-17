@@ -47,11 +47,10 @@ static NSString *const statusKeyPath = @"status";
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
+
     _rate = 1.0;
     _volume = 1.0;
-
-     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
-
+    _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
