@@ -96,9 +96,12 @@ static NSString *const statusKeyPath = @"status";
         *stop = YES;
       }
     }];
-    return [NSNumber numberWithFloat:CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))];
+    Float64 playableDuration = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange));
+    if (playableDuration > 0) {
+      return [NSNumber numberWithFloat:playableDuration];
+    }
   }
-  return [NSNumber numberWithFloat:CMTimeGetSeconds(kCMTimeInvalid)];
+  return [NSNumber numberWithInteger:0];
 }
 
 - (void)stopProgressTimer
