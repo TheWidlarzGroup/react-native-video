@@ -54,9 +54,35 @@ static NSString *const statusKeyPath = @"status";
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(applicationWillResignActive:)
+                                          name:UIApplicationWillResignActiveNotification
+                                          object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(applicationWillEnterForeground:)
+                                          name:UIApplicationWillEnterForegroundNotification
+                                          object:nil];
   }
 
   return self;
+}
+
+#pragma mark - App lifecycle handlers
+
+- (void)applicationWillResignActive:(NSNotification *)notification
+{
+  if (!_paused) {
+    [self stopProgressTimer];
+    [_player pause];
+  }
+}
+
+- (void)applicationWillEnterForeground:(NSNotification *)notification
+{
+  [self startProgressTimer];
+  [self applyModifiers];
 }
 
 #pragma mark - Progress
