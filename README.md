@@ -1,7 +1,7 @@
 ## react-native-video
 
 A <Video> component for react-native, as seen in
-[react-native-login](https://github.com/brentvatne/react-native-login).
+[react-native-login](https://github.com/brentvatne/react-native-login)!
 
 Requires react-native >= 0.4.4
 
