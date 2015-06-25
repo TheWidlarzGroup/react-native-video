@@ -237,12 +237,13 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)attachListeners
 {
-    // listen for end of file
-    [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(notifyEnd:)
-        name:AVPlayerItemDidPlayToEndTimeNotification
-        object:[_player currentItem]];
-
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // listen for end of file
+        [[NSNotificationCenter defaultCenter] addObserver:self
+            selector:@selector(notifyEnd:)
+            name:AVPlayerItemDidPlayToEndTimeNotification
+            object:[_player currentItem]];
+    });
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
