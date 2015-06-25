@@ -120,13 +120,6 @@ static NSString *const statusKeyPath = @"status";
   [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
-- (void)notifyEnd:(NSNotification *)notification
-{
-    [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
-        @"target": self.reactTag
-    }];
-}
-
 - (void)addPlayerItemObserver
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
@@ -240,17 +233,22 @@ static NSString *const statusKeyPath = @"status";
   dispatch_async(dispatch_get_main_queue(), ^{
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(notifyEnd:)
+                                             selector:@selector(playerItemDidEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification
                                                object:[_player currentItem]];
   });
 }
 
-- (void)playerItemDidReachEnd:(NSNotification *)notification
+- (void)playerItemDidEnd:(NSNotification *)notification
 {
-  AVPlayerItem *item = [notification object];
-  [item seekToTime:kCMTimeZero];
-  [self applyModifiers];
+  [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
+    @"target": self.reactTag
+  }];
+  if (_repeat) {
+    AVPlayerItem *item = [notification object];
+    [item seekToTime:kCMTimeZero];
+    [self applyModifiers];
+  }
 }
 
 #pragma mark - Prop setters
@@ -343,31 +341,8 @@ static NSString *const statusKeyPath = @"status";
   [self setPaused:_paused];
 }
 
-- (void)setRepeatEnabled
-{
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerItemDidReachEnd:)
-                                                 name:AVPlayerItemDidPlayToEndTimeNotification
-                                               object:[_player currentItem]];
-  });
-}
-
-- (void)setRepeatDisabled
-{
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-  });
-}
-
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
-
-  if (repeat) {
-    [self setRepeatEnabled];
-  } else {
-    [self setRepeatDisabled];
-  }
 }
 
 #pragma mark - React View Management
