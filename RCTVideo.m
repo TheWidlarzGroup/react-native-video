@@ -345,15 +345,19 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)setRepeatEnabled
 {
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerItemDidReachEnd:)
-                                               name:AVPlayerItemDidPlayToEndTimeNotification
-                                             object:[_player currentItem]];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(playerItemDidReachEnd:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:[_player currentItem]];
+  });
 }
 
 - (void)setRepeatDisabled
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+  });
 }
 
 - (void)setRepeat:(BOOL)repeat {
