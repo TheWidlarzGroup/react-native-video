@@ -237,20 +237,20 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)attachListeners
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // listen for end of file
-        [[NSNotificationCenter defaultCenter] addObserver:self
-            selector:@selector(notifyEnd:)
-            name:AVPlayerItemDidPlayToEndTimeNotification
-            object:[_player currentItem]];
-    });
+  dispatch_async(dispatch_get_main_queue(), ^{
+    // listen for end of file
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(notifyEnd:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:[_player currentItem]];
+  });
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
-    AVPlayerItem *item = [notification object];
-    [item seekToTime:kCMTimeZero];
-    [self applyModifiers];
+  AVPlayerItem *item = [notification object];
+  [item seekToTime:kCMTimeZero];
+  [self applyModifiers];
 }
 
 #pragma mark - Prop setters
