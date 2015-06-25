@@ -120,13 +120,6 @@ static NSString *const statusKeyPath = @"status";
   [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
-- (void)notifyEnd:(NSNotification *)notification
-{
-    [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
-        @"target": self.reactTag
-    }];
-}
-
 - (void)addPlayerItemObserver
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
@@ -237,19 +230,25 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)attachListeners
 {
+  dispatch_async(dispatch_get_main_queue(), ^{
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(notifyEnd:)
-        name:AVPlayerItemDidPlayToEndTimeNotification
-        object:[_player currentItem]];
-
+                                             selector:@selector(playerItemDidEnd:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:[_player currentItem]];
+  });
 }
 
-- (void)playerItemDidReachEnd:(NSNotification *)notification
+- (void)playerItemDidEnd:(NSNotification *)notification
 {
+  [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
+    @"target": self.reactTag
+  }];
+  if (_repeat) {
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
+  }
 }
 
 #pragma mark - Prop setters
@@ -342,27 +341,8 @@ static NSString *const statusKeyPath = @"status";
   [self setPaused:_paused];
 }
 
-- (void)setRepeatEnabled
-{
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerItemDidReachEnd:)
-                                               name:AVPlayerItemDidPlayToEndTimeNotification
-                                             object:[_player currentItem]];
-}
-
-- (void)setRepeatDisabled
-{
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
-
-  if (repeat) {
-    [self setRepeatEnabled];
-  } else {
-    [self setRepeatDisabled];
-  }
 }
 
 #pragma mark - React View Management
