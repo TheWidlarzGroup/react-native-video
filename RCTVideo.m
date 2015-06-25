@@ -325,7 +325,6 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)applyModifiers
 {
-  /* volume must be set to 0 if muted is YES, or the video freezes playback */
   if (_muted) {
     [_player setVolume:0];
     [_player setMuted:YES];
@@ -334,11 +333,10 @@ static NSString *const statusKeyPath = @"status";
     [_player setMuted:NO];
   }
 
-  [_player setRate:_rate];
-
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
+  [_player setRate:_rate];
 }
 
 - (void)setRepeat:(BOOL)repeat {
@@ -382,6 +380,8 @@ static NSString *const statusKeyPath = @"status";
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+  [super removeFromSuperview];
 }
 
 @end
