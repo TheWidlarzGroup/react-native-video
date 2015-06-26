@@ -30,9 +30,11 @@ Requires react-native >= 0.4.4
        paused={false}               // Pauses playback entirely.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        repeat={true}                // Repeat forever.
+       onLoadStart={this.loadStart} // Callback when video starts to load
        onLoad={this.setDuration}    // Callback when video loads
        onProgress={this.setTime}    // Callback every ~250ms with currentTime
        onEnd={this.onEnd}           // Callback when playback finishes
+       onError={this.videoError}    // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
@@ -46,6 +48,11 @@ var styles = Stylesheet.create({
   },
 });
 ```
+## Static Methods
+
+`seek(seconds)`
+
+Seeks the video to the specified time (in seconds). Access using a ref to the component
 
 ## Examples
 
