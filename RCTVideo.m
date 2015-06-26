@@ -264,13 +264,13 @@ static NSString *const statusKeyPath = @"status";
   dispatch_async(dispatch_get_main_queue(), ^{
     // listen for end of file
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerItemDidEnd:)
+                                             selector:@selector(playerItemDidReachEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification
                                                object:[_player currentItem]];
   });
 }
 
-- (void)playerItemDidEnd:(NSNotification *)notification
+- (void)playerItemDidReachEnd:(NSNotification *)notification
 {
   [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{
     @"target": self.reactTag
