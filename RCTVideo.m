@@ -294,10 +294,14 @@ static NSString *const statusKeyPath = @"status";
 {
   if (paused) {
     [self stopProgressTimer];
-    [_player pause];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player pause];
+    });
   } else {
     [self startProgressTimer];
-    [_player play];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player play];
+    });
   }
 
   _paused = paused;
