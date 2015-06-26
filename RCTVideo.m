@@ -69,6 +69,11 @@ static NSString *const statusKeyPath = @"status";
   return self;
 }
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - App lifecycle handlers
 
 - (void)applicationWillResignActive:(NSNotification *)notification
