@@ -375,7 +375,9 @@ static NSString *const statusKeyPath = @"status";
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  [_player setRate:_rate];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [_player setRate:_rate];
+  });
 }
 
 - (void)setRepeat:(BOOL)repeat {
