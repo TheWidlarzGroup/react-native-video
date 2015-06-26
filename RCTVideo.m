@@ -321,13 +321,15 @@ static NSString *const statusKeyPath = @"status";
     CMTime tolerance = CMTimeMake(1000, timeScale);
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
-      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
-          @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-          @"seekTime": [NSNumber numberWithFloat:seekTime],
-          @"target": self.reactTag
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+          [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
+            @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+            @"seekTime": [NSNumber numberWithFloat:seekTime],
+            @"target": self.reactTag
+          }];
         }];
-      }];
+      });
 
       _pendingSeek = false;
     }
