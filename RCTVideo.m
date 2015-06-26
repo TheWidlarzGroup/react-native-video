@@ -287,7 +287,9 @@ static NSString *const statusKeyPath = @"status";
 - (void)setResizeMode:(NSString*)mode
 {
   _resizeMode = mode;
-  _playerLayer.videoGravity = mode;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    _playerLayer.videoGravity = mode;
+  });
 }
 
 - (void)setPaused:(BOOL)paused
