@@ -1,7 +1,9 @@
 ## react-native-video
 
 A <Video> component for react-native, as seen in
-[react-native-login](https://github.com/brentvatne/react-native-login).
+[react-native-login](https://github.com/brentvatne/react-native-login)!
+
+Requires react-native >= 0.4.4
 
 ### Add it to your project
 
@@ -9,7 +11,7 @@ A <Video> component for react-native, as seen in
 2. Open your project in XCode, right click on `Libraries` and click `Add Files to "Your Project Name"`
    * ![Screenshot](http://url.brentvatne.ca/jQp8.png) ![Screenshot](http://url.brentvatne.ca/1gqUD.png) (use the RCTVideo project rather than the one pictured in screenshot).
 3. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
-   [(Screenshot)](http://url.brentvatne.ca/g9Wp).
+   ![(Screenshot)](http://url.brentvatne.ca/g9Wp.png).
 4. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
 5. Whenever you want to use it within React code now you can: `var Video =
    require('react-native-video');`
@@ -28,9 +30,11 @@ A <Video> component for react-native, as seen in
        paused={false}               // Pauses playback entirely.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        repeat={true}                // Repeat forever.
+       onLoadStart={this.loadStart} // Callback when video starts to load
        onLoad={this.setDuration}    // Callback when video loads
        onProgress={this.setTime}    // Callback every ~250ms with currentTime
        onEnd={this.onEnd}           // Callback when playback finishes
+       onError={this.videoError}    // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
@@ -44,6 +48,11 @@ var styles = Stylesheet.create({
   },
 });
 ```
+## Static Methods
+
+`seek(seconds)`
+
+Seeks the video to the specified time (in seconds). Access using a ref to the component
 
 ## Examples
 
