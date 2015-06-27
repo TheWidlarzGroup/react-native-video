@@ -248,7 +248,7 @@ static NSString *const statusKeyPath = @"status";
     } else if(_playerItem.status == AVPlayerItemStatusFailed) {
       [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
         @"error": @{
-          @"code": [NSNumber numberWithInt: (int)_playerItem.error.code],
+          @"code": [NSNumber numberWithInteger: _playerItem.error.code],
           @"domain": _playerItem.error.domain
         },
         @"target": self.reactTag
