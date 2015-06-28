@@ -2,4 +2,6 @@ node_modules/**/*
 RCTVideo.xcodeproj/xcuserdata/**/*
 RCTVideo.xcodeproj/project.xcworkspace/**/*
 Examples/VideoPlayer/node_modules/**/*
+Examples/VideoPlayer/VideoPlayer.xcodeproj/project.xcworkspace/**/*
+Examples/VideoPlayer/VideoPlayer.xcodeproj/xcuserdata/**/*
 npm-debug.log
