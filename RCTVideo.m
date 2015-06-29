@@ -365,11 +365,15 @@ static NSString *const statusKeyPath = @"status";
 - (void)applyModifiers
 {
   if (_muted) {
-    [_player setVolume:0];
-    [_player setMuted:YES];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player setVolume:0];
+      [_player setMuted:YES];
+    });
   } else {
-    [_player setVolume:_volume];
-    [_player setMuted:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player setVolume:_volume];
+      [_player setMuted:NO];
+    });
   }
 
   [self setResizeMode:_resizeMode];
