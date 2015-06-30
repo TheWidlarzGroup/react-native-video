@@ -1,13 +1,11 @@
 var React = require('react-native');
 var {
   requireNativeComponent,
-
-  ReactNativeViewAttributes,
   NativeModules,
   StyleSheet,
   PropTypes,
 
-  // Once these are exposed, use them instead.
+  // Once these are exposed, use them
   // ReactNativeViewAttributes,
   // StyleSheetPropType,
   // NativeMethodsMixin,
