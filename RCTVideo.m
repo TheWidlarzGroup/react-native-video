@@ -297,12 +297,12 @@ static NSString *const statusKeyPath = @"status";
   if (paused) {
     [self stopProgressTimer];
     dispatch_async(dispatch_get_main_queue(), ^{
-      [_player pause];
+      [_player setRate:0.0];
     });
   } else {
     [self startProgressTimer];
     dispatch_async(dispatch_get_main_queue(), ^{
-      [_player play];
+      [_player setRate:_rate];
     });
   }
 
@@ -379,9 +379,6 @@ static NSString *const statusKeyPath = @"status";
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [_player setRate:_rate];
-  });
 }
 
 - (void)setRepeat:(BOOL)repeat {
