@@ -405,7 +405,10 @@ static NSString *const statusKeyPath = @"status";
 - (void)layoutSubviews
 {
   [super layoutSubviews];
+  [CATransaction begin];
+  [CATransaction setAnimationDuration:0];
   _playerLayer.frame = self.bounds;
+  [CATransaction commit];
 }
 
 #pragma mark - Lifecycle
