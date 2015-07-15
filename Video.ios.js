@@ -99,9 +99,9 @@ var Video = React.createClass({
         isAsset,
         type: source.type || 'mp4'
       },
-      onLoad: this._onLoad,
-      onProgress: this._onProgress,
-      onEnd: this._onEnd,
+      onVideoLoad: this._onLoad,
+      onVideoProgress: this._onProgress,
+      onVideoEnd: this._onEnd,
     });
 
     return <RCTVideo {... nativeProps} />;

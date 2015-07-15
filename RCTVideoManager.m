@@ -20,22 +20,22 @@ RCT_EXPORT_MODULE();
 {
   return @{
     RNVideoEventLoading: @{
-      @"registrationName": @"onLoadStart"
+      @"registrationName": @"onVideoLoadStart"
     },
     RNVideoEventLoaded: @{
-      @"registrationName": @"onLoad"
+      @"registrationName": @"onVideoLoad"
     },
     RNVideoEventLoadingError: @{
-      @"registrationName": @"onError"
+      @"registrationName": @"onVideoError"
     },
     RNVideoEventProgress: @{
-      @"registrationName": @"onProgress"
+      @"registrationName": @"onVideoProgress"
     },
     RNVideoEventSeek: @{
-      @"registrationName": @"onSeek"
+      @"registrationName": @"onVideoSeek"
     },
     RNVideoEventEnd: @{
-      @"registrationName": @"onEnd"
+      @"registrationName": @"onVideoEnd"
     }
   };
 }
