@@ -261,13 +261,11 @@ static NSString *const statusKeyPath = @"status";
 
 - (void)attachListeners
 {
-  dispatch_async(dispatch_get_main_queue(), ^{
-    // listen for end of file
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerItemDidReachEnd:)
-                                                 name:AVPlayerItemDidPlayToEndTimeNotification
-                                               object:[_player currentItem]];
-  });
+  // listen for end of file
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(playerItemDidReachEnd:)
+                                               name:AVPlayerItemDidPlayToEndTimeNotification
+                                             object:[_player currentItem]];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
@@ -287,23 +285,17 @@ static NSString *const statusKeyPath = @"status";
 - (void)setResizeMode:(NSString*)mode
 {
   _resizeMode = mode;
-  dispatch_async(dispatch_get_main_queue(), ^{
-    _playerLayer.videoGravity = mode;
-  });
+  _playerLayer.videoGravity = mode;
 }
 
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
     [self stopProgressTimer];
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [_player pause];
-    });
+    [_player pause];
   } else {
     [self startProgressTimer];
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [_player play];
-    });
+    [_player play];
   }
 
   _paused = paused;
@@ -323,15 +315,13 @@ static NSString *const statusKeyPath = @"status";
     CMTime tolerance = CMTimeMake(1000, timeScale);
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-          [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
-            @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-            @"seekTime": [NSNumber numberWithFloat:seekTime],
-            @"target": self.reactTag
-          }];
+      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+        [_eventDispatcher sendInputEventWithName:RNVideoEventSeek body:@{
+          @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+          @"seekTime": [NSNumber numberWithFloat:seekTime],
+          @"target": self.reactTag
         }];
-      });
+      }];
 
       _pendingSeek = false;
     }
@@ -365,23 +355,17 @@ static NSString *const statusKeyPath = @"status";
 - (void)applyModifiers
 {
   if (_muted) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [_player setVolume:0];
-      [_player setMuted:YES];
-    });
+    [_player setVolume:0];
+    [_player setMuted:YES];
   } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [_player setVolume:_volume];
-      [_player setMuted:NO];
-    });
+    [_player setVolume:_volume];
+    [_player setMuted:NO];
   }
 
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [_player setRate:_rate];
-  });
+  [_player setRate:_rate];
 }
 
 - (void)setRepeat:(BOOL)repeat {
