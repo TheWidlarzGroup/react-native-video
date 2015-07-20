@@ -80,7 +80,7 @@ static NSString *const statusKeyPath = @"status";
 {
   if (!_paused) {
     [self stopProgressTimer];
-    [_player pause];
+    [_player setRate:0.0];
   }
 }
 
@@ -292,10 +292,10 @@ static NSString *const statusKeyPath = @"status";
 {
   if (paused) {
     [self stopProgressTimer];
-    [_player pause];
+    [_player setRate:0.0];
   } else {
     [self startProgressTimer];
-    [_player play];
+    [_player setRate:_rate];
   }
 
   _paused = paused;
@@ -365,7 +365,6 @@ static NSString *const statusKeyPath = @"status";
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  [_player setRate:_rate];
 }
 
 - (void)setRepeat:(BOOL)repeat {
