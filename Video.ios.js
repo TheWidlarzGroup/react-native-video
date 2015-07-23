@@ -1,16 +1,30 @@
 var React = require('react-native');
-var { requireNativeComponent, } = React;
+var {
+  requireNativeComponent,
+  NativeModules,
+  StyleSheet,
+  PropTypes,
+
+  // Once these are exposed, use them
+  // ReactNativeViewAttributes,
+  // StyleSheetPropType,
+  // NativeMethodsMixin,
+  // flattenStyle,
+  // merge,
+  // deepDiffer,
+} = React;
+
+// These are not yet exposed by the react-native package, so we must continue
+// requiring them this way, which will cause warnings.
 var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
-var NativeModules = require('NativeModules');
-var StyleSheet = require('StyleSheet');
-var PropTypes = require('ReactPropTypes');
 var StyleSheetPropType = require('StyleSheetPropType');
-var VideoResizeMode = require('./VideoResizeMode');
-var VideoStylePropTypes = require('./VideoStylePropTypes');
 var NativeMethodsMixin = require('NativeMethodsMixin');
 var flattenStyle = require('flattenStyle');
 var merge = require('merge');
 var deepDiffer = require('deepDiffer');
+
+var VideoResizeMode = require('./VideoResizeMode');
+var VideoStylePropTypes = require('./VideoStylePropTypes');
 
 var Video = React.createClass({
   propTypes: {
