@@ -1,10 +1,8 @@
 'use strict';
 
-var warning = require('warning');
-
 var Video = {
   test: function() {
-    warning("Not yet implemented for Android.");
+    console.warn("Not yet implemented for Android.");
   }
 };
 

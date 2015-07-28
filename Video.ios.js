@@ -1,16 +1,10 @@
 var React = require('react-native');
-var { requireNativeComponent, } = React;
-var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
-var NativeModules = require('NativeModules');
-var StyleSheet = require('StyleSheet');
-var PropTypes = require('ReactPropTypes');
-var StyleSheetPropType = require('StyleSheetPropType');
+var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = React;
+
 var VideoResizeMode = require('./VideoResizeMode');
-var VideoStylePropTypes = require('./VideoStylePropTypes');
-var NativeMethodsMixin = require('NativeMethodsMixin');
-var flattenStyle = require('flattenStyle');
 var merge = require('merge');
-var deepDiffer = require('deepDiffer');
+
+var VIDEO_REF = 'video';
 
 var Video = React.createClass({
   propTypes: {
@@ -19,7 +13,6 @@ var Video = React.createClass({
     seek: PropTypes.number,
 
     /* Wrapper component */
-    style: StyleSheetPropType(VideoStylePropTypes),
     source: PropTypes.object,
     resizeMode: PropTypes.string,
     repeat: PropTypes.bool,
@@ -34,11 +27,8 @@ var Video = React.createClass({
     onEnd: PropTypes.func,
   },
 
-  mixins: [NativeMethodsMixin],
-
-  viewConfig: {
-    uiViewClassName: 'UIView',
-    validAttributes: ReactNativeViewAttributes.UIView
+  setNativeProps(props) {
+    this.refs[VIDEO_REF].setNativeProps(props);
   },
 
   _onLoadStart(event) {
@@ -70,7 +60,7 @@ var Video = React.createClass({
   },
 
   render() {
-    var style = flattenStyle([styles.base, this.props.style]);
+    var style = [styles.base, this.props.style];
     var source = this.props.source;
     var uri = source.uri;
     if (uri && uri.match(/^\//)) {
@@ -104,7 +94,7 @@ var Video = React.createClass({
       onVideoEnd: this._onEnd,
     });
 
-    return <RCTVideo {... nativeProps} />;
+    return <RCTVideo ref={VIDEO_REF} {... nativeProps} />;
   },
 });
 
