@@ -80,7 +80,7 @@ var Video = React.createClass({
       resizeMode = NativeModules.VideoManager.ScaleNone;
     }
 
-    var nativeProps = merge(this.props, {
+    var nativeProps = merge({},this.props, {
       style,
       resizeMode: resizeMode,
       src: {
