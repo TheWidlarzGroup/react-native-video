@@ -5,13 +5,6 @@
 #import "UIView+React.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const RNVideoEventLoaded = @"videoLoaded";
-NSString *const RNVideoEventLoading = @"videoLoading";
-NSString *const RNVideoEventProgress = @"videoProgress";
-NSString *const RNVideoEventSeek = @"videoSeek";
-NSString *const RNVideoEventLoadingError = @"videoLoadError";
-NSString *const RNVideoEventEnd = @"videoEnd";
-
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 
