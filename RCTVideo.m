@@ -5,13 +5,6 @@
 #import "UIView+React.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const RNVideoEventLoaded = @"videoLoaded";
-NSString *const RNVideoEventLoading = @"videoLoading";
-NSString *const RNVideoEventProgress = @"videoProgress";
-NSString *const RNVideoEventSeek = @"videoSeek";
-NSString *const RNVideoEventLoadingError = @"videoLoadError";
-NSString *const RNVideoEventEnd = @"videoEnd";
-
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 
@@ -101,7 +94,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   }
 
   if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:RNVideoEventProgress
+    [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                         body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
                                                @"playableDuration": [self calculatePlayableDuration],
                                                @"target": self.reactTag}];
@@ -192,7 +185,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
 
-  [_eventDispatcher sendInputEventWithName:RNVideoEventLoading
+  [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
                                       body:@{@"src": @{
                                                  @"uri": [source objectForKey:@"uri"],
                                                  @"type": [source objectForKey:@"type"],
@@ -232,7 +225,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
           duration = 0.0;
         }
 
-        [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded
+        [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
                                             body:@{@"duration": [NSNumber numberWithFloat:duration],
                                                    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
                                                    @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
@@ -247,7 +240,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
         [self attachListeners];
         [self applyModifiers];
       } else if(_playerItem.status == AVPlayerItemStatusFailed) {
-        [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError
+        [_eventDispatcher sendInputEventWithName:@"onVideoError"
                                             body:@{@"error": @{
                                                        @"code": [NSNumber numberWithInteger: _playerItem.error.code],
                                                        @"domain": _playerItem.error.domain},
@@ -275,7 +268,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
-  [_eventDispatcher sendInputEventWithName:RNVideoEventEnd body:@{@"target": self.reactTag}];
+  [_eventDispatcher sendInputEventWithName:@"onVideoEnd" body:@{@"target": self.reactTag}];
 
   if (_repeat) {
     AVPlayerItem *item = [notification object];
@@ -320,7 +313,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        [_eventDispatcher sendInputEventWithName:RNVideoEventSeek
+        [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
                                             body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                                    @"seekTime": [NSNumber numberWithFloat:seekTime],
                                                    @"target": self.reactTag}];
