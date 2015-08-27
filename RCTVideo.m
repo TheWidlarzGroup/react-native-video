@@ -3,7 +3,8 @@
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
-#import <AVFoundation/AVFoundation.h>
+@import AVFoundation;
+@import AVKit;
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -13,7 +14,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
   BOOL _playerItemObserversSet;
-  AVPlayerLayer *_playerLayer;
+  UIView *_playerView;
+  AVPlayerViewController *_controller;
   NSURL *_videoURL;
 
   /* Required to publish events */
@@ -34,6 +36,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _showControls;
   NSString * _resizeMode;
 }
 
@@ -44,10 +47,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     _rate = 1.0;
     _volume = 1.0;
-    _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
+    _resizeMode = AVLayerVideoGravityResizeAspect;
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+    _showControls = YES;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -171,18 +175,20 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self addPlayerItemObservers];
 
   [_player pause];
-  [_playerLayer removeFromSuperlayer];
+  [_playerView removeFromSuperview];
 
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
-  _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
-  _playerLayer.frame = self.bounds;
-  _playerLayer.needsDisplayOnBoundsChange = YES;
+  _controller = [[AVPlayerViewController alloc] init];
+  _controller.player = _player;
 
   [self applyModifiers];
 
-  [self.layer addSublayer:_playerLayer];
+  _playerView = _controller.view;
+  _playerView.frame = self.bounds;
+
+  [self addSubview:_playerView];
   self.layer.needsDisplayOnBoundsChange = YES;
 
   [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
@@ -201,8 +207,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSString *type = [source objectForKey:@"type"];
 
   NSURL *url = (isNetwork || isAsset) ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  [NSURL URLWithString:uri] :
+  [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
   if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
@@ -282,7 +288,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)setResizeMode:(NSString*)mode
 {
   _resizeMode = mode;
-  _playerLayer.videoGravity = mode;
+  _controller.videoGravity = _resizeMode;
 }
 
 - (void)setPaused:(BOOL)paused
@@ -359,11 +365,17 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
+  [self setShowControls:_showControls];
   [self setPaused:_paused];
 }
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
+}
+
+- (void)setShowControls:(BOOL)showControls {
+  _showControls = showControls;
+  _controller.showsPlaybackControls = _showControls;
 }
 
 #pragma mark - React View Management
@@ -385,7 +397,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [super layoutSubviews];
   [CATransaction begin];
   [CATransaction setAnimationDuration:0];
-  _playerLayer.frame = self.bounds;
+  _playerView.frame = self.bounds;
   [CATransaction commit];
 }
 
@@ -399,8 +411,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [_player pause];
   _player = nil;
 
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
+  [_playerView removeFromSuperview];
+  _playerView = nil;
 
   [self removePlayerItemObservers];
 

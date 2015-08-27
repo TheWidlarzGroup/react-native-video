@@ -15,6 +15,7 @@ var Video = React.createClass({
     /* Wrapper component */
     source: PropTypes.object,
     resizeMode: PropTypes.string,
+    showControls: PropTypes.bool,
     repeat: PropTypes.bool,
     paused: PropTypes.bool,
     muted: PropTypes.bool,
