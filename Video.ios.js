@@ -2,7 +2,7 @@ var React = require('react-native');
 var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = React;
 
 var VideoResizeMode = require('./VideoResizeMode');
-var merge = require('merge');
+var { extend } = require('lodash');
 
 var VIDEO_REF = 'video';
 
@@ -80,7 +80,7 @@ var Video = React.createClass({
       resizeMode = NativeModules.VideoManager.ScaleNone;
     }
 
-    var nativeProps = merge({},this.props, {
+    var nativeProps = extend({}, this.props, {
       style,
       resizeMode: resizeMode,
       src: {
