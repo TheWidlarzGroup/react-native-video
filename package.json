@@ -31,6 +31,6 @@
   },
   "dependencies": {
     "keymirror": "^0.1.1",
-    "merge": "^1.2.0"
+    "lodash": "^3.10.1"
   }
 }
