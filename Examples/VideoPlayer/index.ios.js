@@ -14,7 +14,9 @@ var {
   AlertIOS,
 } = React;
 
-var Video = require('react-native-video');
+var Video = require('NativeModules').Video;
+var VideoView = require('react-native-video').Video;
+var LVideoPlayer = require('react-native-video').VideoPlayer;
 
 var VideoPlayer = React.createClass({
   getInitialState() {
@@ -36,6 +38,20 @@ var VideoPlayer = React.createClass({
     this.setState({currentTime: data.currentTime});
   },
 
+  componentWillMount: function () {
+    console.log('LVideoPlayer:' + JSON.stringify(LVideoPlayer));
+    var vp = new LVideoPlayer();
+    vp.onLoad(this.onLoad);
+    vp.onProgress(this.onProgress);
+    this.setState({ avPlayer:vp });
+    vp.setSource({ uri:"broadchurch" });
+  },
+
+  componentWillUnmount: function () {
+    console.log('componentWillUnmount!!!');
+    this.state.avPlayer.removePlayer();
+  },
+
   getCurrentTimePercentage() {
     if (this.state.currentTime > 0) {
       return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
@@ -48,7 +64,7 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.rate == rate);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
+      <TouchableOpacity onPress={() => { this.setState({rate: rate}); this.state.avPlayer.setRate(rate); }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {rate}x
         </Text>
@@ -72,7 +88,7 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.volume == volume);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
+      <TouchableOpacity onPress={() => { this.setState({volume: volume}); this.state.avPlayer.setVolume(volume); }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {volume * 100}%
         </Text>
@@ -87,17 +103,7 @@ var VideoPlayer = React.createClass({
     return (
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <Video source={{uri: "broadchurch"}}
-                 style={styles.fullScreen}
-                 rate={this.state.rate}
-                 paused={this.state.paused}
-                 volume={this.state.volume}
-                 muted={this.state.muted}
-                 resizeMode={this.state.resizeMode}
-                 onLoad={this.onLoad}
-                 onProgress={this.onProgress}
-                 onEnd={() => { AlertIOS.alert('Done!') }}
-                 repeat={true} />
+          <VideoView resizeMode={this.state.resizeMode} player={this.state.avPlayer} style={{flex:1}} />
         </TouchableOpacity>
 
         <View style={styles.controls}>

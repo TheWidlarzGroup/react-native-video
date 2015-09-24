@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		46543D6B1BB2AEAA00C3716B /* RCTVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */; };
+		46543D6E1BB2AF5A00C3716B /* RCTVideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */; };
 		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
 /* End PBXBuildFile section */
@@ -25,6 +27,10 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		46543D691BB2AEAA00C3716B /* RCTVideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoView.h; sourceTree = "<group>"; };
+		46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoView.m; sourceTree = "<group>"; };
+		46543D6C1BB2AF5A00C3716B /* RCTVideoViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoViewManager.h; sourceTree = "<group>"; };
+		46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoViewManager.m; sourceTree = "<group>"; };
 		BBD49E391AC8DEF000610F8E /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
 		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
 		BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoManager.h; sourceTree = "<group>"; };
@@ -53,6 +59,10 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				46543D691BB2AEAA00C3716B /* RCTVideoView.h */,
+				46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */,
+				46543D6C1BB2AF5A00C3716B /* RCTVideoViewManager.h */,
+				46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */,
 				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
 				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
 				BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */,
@@ -119,6 +129,8 @@
 			files = (
 				BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */,
 				BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */,
+				46543D6E1BB2AF5A00C3716B /* RCTVideoViewManager.m in Sources */,
+				46543D6B1BB2AEAA00C3716B /* RCTVideoView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2,8 +2,12 @@
   "name": "react-native-video",
   "version": "0.6.1",
   "description": "A <Video /> element for react-native",
-  "main": "Video.ios.js",
-  "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
+  "main": "VideoView.ios.js",
+  "author": {
+    "name": "Brent Vatne",
+    "email": "brentvatne@gmail.com",
+    "url": "https://github.com/brentvatne"
+  },
   "files": [
     "RCTVideo.xcodeproj",
     "RCTVideo.h",
@@ -13,6 +17,7 @@
     "README.md",
     "Video.android.js",
     "Video.ios.js",
+    "VideoView.ios.js",
     "VideoResizeMode.js",
     "VideoStylePropTypes.js"
   ],
@@ -24,7 +29,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:brentvatne/react-native-video.git"
+    "url": "git+ssh://git@github.com/brentvatne/react-native-video.git"
   },
   "devDependencies": {
     "jest-cli": "0.2.1"
@@ -32,5 +37,40 @@
   "dependencies": {
     "keymirror": "^0.1.1",
     "lodash": "^3.10.1"
-  }
+  },
+  "gitHead": "dc6de4364272ad0b3a0ac9ed56a912e02fe2985d",
+  "bugs": {
+    "url": "https://github.com/brentvatne/react-native-video/issues"
+  },
+  "homepage": "https://github.com/brentvatne/react-native-video#readme",
+  "_id": "react-native-video@0.6.1",
+  "scripts": {},
+  "_shasum": "5637e6bccde849597d3079db9947af142dfada36",
+  "_from": "react-native-video@>=0.6.0 <0.7.0",
+  "_npmVersion": "2.10.1",
+  "_nodeVersion": "2.3.4",
+  "_npmUser": {
+    "name": "brentvatne",
+    "email": "brentvatne@gmail.com"
+  },
+  "dist": {
+    "shasum": "5637e6bccde849597d3079db9947af142dfada36",
+    "tarball": "http://registry.npmjs.org/react-native-video/-/react-native-video-0.6.1.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "brentvatne",
+      "email": "brentvatne@gmail.com"
+    },
+    {
+      "name": "johanneslumpe",
+      "email": "johannes@johanneslumpe.de"
+    },
+    {
+      "name": "isair",
+      "email": "baris.sncn@gmail.com"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/react-native-video/-/react-native-video-0.6.1.tgz"
 }

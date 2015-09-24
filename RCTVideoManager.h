@@ -1,5 +1,8 @@
-#import "RCTViewManager.h"
+#import "RCTBridgeModule.h"
+#import "RCTVideo.h"
 
-@interface RCTVideoManager : RCTViewManager
+@interface RCTVideoManager : NSObject <RCTBridgeModule>
+
++(RCTVideo*)getPlayer:(NSString*)playerUuid;
 
 @end
