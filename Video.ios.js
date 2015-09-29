@@ -30,40 +30,36 @@ class VideoPlayer extends EventEmitter {
     this.uuid = guid();
     var self = this;
     NativeVideo.createVideoPlayer(this.uuid);
-    DeviceEventEmitter.addListener('onVideoLoadStart', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('loadStart', body);
+    DeviceEventEmitter.addListener('onVideoLoadStart', (body) => {
+      if (body.target === this.uuid) {
+        this.emit('loadStart', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoLoad', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('load', body);
+    DeviceEventEmitter.addListener('onVideoLoad', (body) => {
+      if (body.target === this.uuid) {
+        this.emit('load', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoError', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('error', body);
+    DeviceEventEmitter.addListener('onVideoError', (body) => {
+      if (body.target === this.uuid) {
+        this.emit('error', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoProgress', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('progress', body);
+    DeviceEventEmitter.addListener('onVideoProgress', (body) => {
+      if (body.target === this.uuid) {
+        this._currentTime = body.currentTime;
+        this.emit('progress', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoSeek', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('seek', body);
+    DeviceEventEmitter.addListener('onVideoSeek', (body) => {
+      if (body.target === this.uuid) {
+        this._currentTime = body.currentTime;
+        this.emit('seek', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoEnd', function(body) {
-      if (body.target === self.uuid) {
-        delete body.target;
-        self.emit('end', body);
+    DeviceEventEmitter.addListener('onVideoEnd', (body) => {
+      if (body.target === this.uuid) {
+        this.emit('end', body);
       }
     });
     this.rate = 1;
@@ -121,15 +117,15 @@ class VideoPlayer extends EventEmitter {
   get rate() {
     return this._rate;
   }
-  set seek(seek) {
+  set currentTime(seek) {
     NativeVideo.setSeek(this.uuid, seek, function(err) {});
-    this._seek = seek;
   }
-  get seek() {
-    return this._seek;
+  get currentTime() {
+    return this._currentTime;
   }
-  removePlayer() {
+  release() {
     NativeVideo.removePlayer(this.uuid, function(err) {});
+    // TODO remove all listener from DeviceEventEmitter/AppEventEmitter
   }
 }
 
