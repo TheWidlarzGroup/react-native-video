@@ -30,34 +30,34 @@ class VideoPlayer extends EventEmitter {
     this.uuid = guid();
     var self = this;
     NativeVideo.createVideoPlayer(this.uuid);
-    DeviceEventEmitter.addListener('onVideoLoadStart', (body) => {
+    this._loadStartListener = DeviceEventEmitter.addListener('onVideoLoadStart', (body) => {
       if (body.target === this.uuid) {
         this.emit('loadStart', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoLoad', (body) => {
+    this._loadListener = DeviceEventEmitter.addListener('onVideoLoad', (body) => {
       if (body.target === this.uuid) {
         this.emit('load', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoError', (body) => {
+    this._errorListener = DeviceEventEmitter.addListener('onVideoError', (body) => {
       if (body.target === this.uuid) {
         this.emit('error', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoProgress', (body) => {
+    this._progressListener = DeviceEventEmitter.addListener('onVideoProgress', (body) => {
       if (body.target === this.uuid) {
         this._currentTime = body.currentTime;
         this.emit('progress', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoSeek', (body) => {
+    this._seekListener = DeviceEventEmitter.addListener('onVideoSeek', (body) => {
       if (body.target === this.uuid) {
         this._currentTime = body.currentTime;
         this.emit('seek', body);
       }
     });
-    DeviceEventEmitter.addListener('onVideoEnd', (body) => {
+    this._endListener = DeviceEventEmitter.addListener('onVideoEnd', (body) => {
       if (body.target === this.uuid) {
         this.emit('end', body);
       }
@@ -125,7 +125,12 @@ class VideoPlayer extends EventEmitter {
   }
   release() {
     NativeVideo.removePlayer(this.uuid, function(err) {});
-    // TODO remove all listener from DeviceEventEmitter/AppEventEmitter
+    this._loadStartListener.remove();
+    this._loadListener.remove();
+    this._errorListener.remove();
+    this._progressListener.remove();
+    this._seekListener.remove();
+    this._endListener.remove();
   }
 }
 
