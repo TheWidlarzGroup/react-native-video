@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "keymirror": "^0.1.1",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "eventemitter3": "^1.1.1"
   },
   "gitHead": "dc6de4364272ad0b3a0ac9ed56a912e02fe2985d",
   "bugs": {

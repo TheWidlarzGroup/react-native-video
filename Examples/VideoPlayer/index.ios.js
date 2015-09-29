@@ -41,10 +41,10 @@ var VideoPlayer = React.createClass({
   componentWillMount: function () {
     console.log('LVideoPlayer:' + JSON.stringify(LVideoPlayer));
     var vp = new LVideoPlayer();
-    vp.onLoad(this.onLoad);
-    vp.onProgress(this.onProgress);
+    vp.on('load', this.onLoad);
+    vp.on('progress', this.onProgress);
     this.setState({ avPlayer:vp });
-    vp.setSource({ uri:"broadchurch" });
+    vp.source = { uri:"broadchurch" };
   },
 
   componentWillUnmount: function () {
@@ -64,7 +64,7 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.rate == rate);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({rate: rate}); this.state.avPlayer.setRate(rate); }}>
+      <TouchableOpacity onPress={() => { this.setState({rate: rate}); this.state.avPlayer.rate = rate; }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {rate}x
         </Text>
@@ -88,7 +88,7 @@ var VideoPlayer = React.createClass({
     var isSelected = (this.state.volume == volume);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({volume: volume}); this.state.avPlayer.setVolume(volume); }}>
+      <TouchableOpacity onPress={() => { this.setState({volume: volume}); this.state.avPlayer.volume = volume; }}>
         <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {volume * 100}%
         </Text>
