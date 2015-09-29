@@ -2,12 +2,12 @@ var React = require('react-native');
 var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = React;
 
 var VideoResizeMode = require('./VideoResizeMode');
-var VideoPlayer = require('./Video.ios')
+var AVVideoPlayer = require('./Video.ios')
 var { extend } = require('lodash');
 
 var VIDEO_REF = 'video';
 
-var Video = React.createClass({
+var AVVideoPlayerLayer = React.createClass({
   propTypes: {
     /* Wrapper component */
     resizeMode: PropTypes.string,
@@ -42,7 +42,7 @@ var Video = React.createClass({
   },
 });
 
-var RCTVideoView = requireNativeComponent('RCTVideoView', Video);
+var RCTVideoView = requireNativeComponent('RCTVideoView', AVVideoPlayerLayer);
 
 var styles = StyleSheet.create({
   base: {
@@ -50,4 +50,4 @@ var styles = StyleSheet.create({
   },
 });
 
-module.exports = { Video, VideoPlayer };
+module.exports = { AVVideoPlayer, AVVideoPlayerLayer };

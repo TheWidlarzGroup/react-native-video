@@ -14,9 +14,7 @@ var {
   AlertIOS,
 } = React;
 
-var Video = require('NativeModules').Video;
-var VideoView = require('react-native-video').Video;
-var LVideoPlayer = require('react-native-video').VideoPlayer;
+var { AVVideoPlayer, AVVideoPlayerLayer } = require('react-native-video');
 
 var VideoPlayer = React.createClass({
   getInitialState() {
@@ -39,8 +37,8 @@ var VideoPlayer = React.createClass({
   },
 
   componentWillMount: function () {
-    console.log('LVideoPlayer:' + JSON.stringify(LVideoPlayer));
-    var vp = new LVideoPlayer();
+    console.log('VideoPlayer:' + JSON.stringify(AVVideoPlayer));
+    var vp = new AVVideoPlayer();
     vp.on('load', this.onLoad);
     vp.on('progress', this.onProgress);
     this.setState({ avPlayer:vp });
@@ -103,7 +101,7 @@ var VideoPlayer = React.createClass({
     return (
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <VideoView resizeMode={this.state.resizeMode} player={this.state.avPlayer} style={{flex:1}} />
+          <AVVideoPlayerLayer resizeMode={this.state.resizeMode} player={this.state.avPlayer} style={{flex:1}} />
         </TouchableOpacity>
 
         <View style={styles.controls}>
