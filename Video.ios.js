@@ -81,9 +81,7 @@ class VideoPlayer extends EventEmitter {
       isAsset,
       type: source.type || 'mp4'
     };
-    NativeVideo.setSource(this.uuid, src, function(err) {
-      console.log("err:" + err);
-    });
+    NativeVideo.setSource(this.uuid, src, function(err) {});
     this._source = source;
   }
   get source() {
