@@ -35,7 +35,6 @@
     [CATransaction setAnimationDuration:0];
     _playerLayer.frame = self.bounds;
     [CATransaction commit];
-    [super setBackgroundColor:[UIColor redColor]];
 }
 
 -(void)setBackgroundColor:(UIColor *)backgroundColor
@@ -64,7 +63,7 @@
     _playerLayer.frame = self.bounds;
     _playerLayer.needsDisplayOnBoundsChange = YES;
     player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    _playerLayer.backgroundColor = [[UIColor greenColor] CGColor];
+    _playerLayer.videoGravity = _resizeMode;
     self.layer.needsDisplayOnBoundsChange = YES;
 }
 
