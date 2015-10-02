@@ -3,7 +3,7 @@
 
 @class RCTEventDispatcher;
 
-@interface RCTVideo : NSObject
+@interface RCTAVPlayer : NSObject
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 

@@ -1,3 +1,10 @@
+/**
+ *
+ * @providesModule AVPlayer
+ *
+*/
+
+
 'use strict';
 
 var Video = {

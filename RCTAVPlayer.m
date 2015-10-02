@@ -1,5 +1,5 @@
 #import "RCTConvert.h"
-#import "RCTVideo.h"
+#import "RCTAVPlayer.h"
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
@@ -7,7 +7,7 @@
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 
-@implementation RCTVideo
+@implementation RCTAVPlayer
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;

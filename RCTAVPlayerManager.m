@@ -1,14 +1,15 @@
-#import "RCTVideoManager.h"
-#import "RCTVideo.h"
+#import "RCTAVPlayerManager.h"
+#import "RCTAVPlayer.h"
 #import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
 #import <AVFoundation/AVFoundation.h>
 
-@implementation RCTVideoManager
+@implementation RCTAVPlayerManager
+
+
+RCT_EXPORT_MODULE(AVPlayer);
 
 @synthesize bridge;
-
-RCT_EXPORT_MODULE(RCTVideo);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 
@@ -35,7 +36,7 @@ RCT_EXPORT_METHOD(createVideoPlayer:(NSString*)uuid)
 {
     if (_players == nil)
         _players = [NSMutableDictionary dictionary];
-    RCTVideo* player = [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+    RCTAVPlayer* player = [[RCTAVPlayer alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
     player.uuid = uuid;
     [_players setObject:player forKey:player.uuid];
 }
@@ -47,7 +48,7 @@ RCT_EXPORT_METHOD(setSource:(NSString*)playerUuid withSource:(NSDictionary*)sour
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setSrc:source];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -59,7 +60,7 @@ RCT_EXPORT_METHOD(setRepeat:(NSString*)playerUuid withRepeat:(BOOL)repeat withCa
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setRepeat:repeat];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -72,7 +73,7 @@ RCT_EXPORT_METHOD(setMuted:(NSString*)playerUuid withMuted:(BOOL)muted withCallb
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setMuted:muted];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -84,7 +85,7 @@ RCT_EXPORT_METHOD(setVolume:(NSString*)playerUuid withVolume:(float)volume withC
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setVolume:volume];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -97,7 +98,7 @@ RCT_EXPORT_METHOD(setRate:(NSString*)playerUuid withRate:(float)rate withCallbac
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setRate:rate];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -110,7 +111,7 @@ RCT_EXPORT_METHOD(setSeek:(NSString*)playerUuid withSeek:(float)seek withCallbac
         callback(@[@"ERROR: Player with uuid not found!"]);
         return;
     }
-    RCTVideo* player = _players[playerUuid];
+    RCTAVPlayer* player = _players[playerUuid];
     [player setSeek:seek];
     callback(@[[NSNull null], player.uuid]);
 }
@@ -126,7 +127,7 @@ RCT_EXPORT_METHOD(removePlayer:(NSString*)playerUuid withCallback:(RCTResponseSe
     callback(@[[NSNull null], playerUuid]);
 }
 
-+(RCTVideo*)getPlayer:(NSString *)playerUuid
++(RCTAVPlayer*)getPlayer:(NSString *)playerUuid
 {
     if (_players == nil || !_players[playerUuid])
     {

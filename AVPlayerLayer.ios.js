@@ -1,13 +1,20 @@
-var React = require('react-native');
-var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = React;
+/**
+ *
+ * @providesModule AVPlayerLayer
+ *
+*/
 
-var VideoResizeMode = require('./VideoResizeMode');
-var AVVideoPlayer = require('./Video.ios')
+'use strict';
+
+var React = require('react-native');
+var { StyleSheet, requireNativeComponent, PropTypes, NativeModules } = React;
+
+var VideoResizeMode = require('./AVPlayerLayerResizeMode');
 var { extend } = require('lodash');
 
 var VIDEO_REF = 'video';
 
-var AVVideoPlayerLayer = React.createClass({
+var AVPlayerLayer = React.createClass({
   propTypes: {
     /* Wrapper component */
     resizeMode: PropTypes.string,
@@ -23,13 +30,13 @@ var AVVideoPlayerLayer = React.createClass({
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
-      resizeMode = NativeModules.VideoViewManager.ScaleToFill;
+      resizeMode = NativeModules.AVPlayerLayerManager.ScaleToFill;
     } else if (this.props.resizeMode === VideoResizeMode.contain) {
-      resizeMode = NativeModules.VideoViewManager.ScaleAspectFit;
+      resizeMode = NativeModules.AVPlayerLayerManager.ScaleAspectFit;
     } else if (this.props.resizeMode === VideoResizeMode.cover) {
-      resizeMode = NativeModules.VideoViewManager.ScaleAspectFill;
+      resizeMode = NativeModules.AVPlayerLayerManager.ScaleAspectFill;
     } else {
-      resizeMode = NativeModules.VideoViewManager.ScaleNone;
+      resizeMode = NativeModules.AVPlayerLayerManager.ScaleNone;
     }
     var playerUuid = this.props.player.uuid;
     var nativeProps = extend({}, this.props, {
@@ -42,7 +49,7 @@ var AVVideoPlayerLayer = React.createClass({
   },
 });
 
-var RCTVideoView = requireNativeComponent('RCTVideoView', AVVideoPlayerLayer);
+var RCTVideoView = requireNativeComponent('RCTAVPlayerLayer', AVPlayerLayer);
 
 var styles = StyleSheet.create({
   base: {
@@ -50,4 +57,4 @@ var styles = StyleSheet.create({
   },
 });
 
-module.exports = { AVVideoPlayer, AVVideoPlayerLayer };
+module.exports = AVPlayerLayer;

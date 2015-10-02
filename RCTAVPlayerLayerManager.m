@@ -1,9 +1,9 @@
-#import "RCTVideoViewManager.h"
-#import "RCTVideoView.h"
+#import "RCTAVPlayerLayerManager.h"
+#import "RCTAVPlayerLayer.h"
 #import "RCTBridge.h"
 #import <AVFoundation/AVFoundation.h>
 
-@implementation RCTVideoViewManager
+@implementation RCTAVPlayerLayerManager
 
 RCT_EXPORT_MODULE();
 
@@ -11,7 +11,7 @@ RCT_EXPORT_MODULE();
 
 - (UIView *)view
 {
-    return [[RCTVideoView alloc] init];
+    return [[RCTAVPlayerLayer alloc] init];
 }
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */

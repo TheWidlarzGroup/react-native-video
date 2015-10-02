@@ -1,17 +1,9 @@
-//
-//  RCTVideoView.m
-//  
-//
-//  Created by Tibor Hencz on 23/09/15.
-//
-//
-
-#import "RCTVideoView.h"
-#import "RCTVideo.h"
-#import "RCTVideoManager.h"
+#import "RCTAVPlayerLayer.h"
+#import "RCTAVPlayer.h"
+#import "RCTAVPlayerManager.h"
 #import <AVFoundation/AVFoundation.h>
 
-@implementation RCTVideoView
+@implementation RCTAVPlayerLayer
 {
     NSString* _resizeMode;
     AVPlayerLayer* _playerLayer;
@@ -69,7 +61,7 @@
 
 -(void)setPlayerUuid:(NSString*)playerUuid
 {
-    RCTVideo* player = [RCTVideoManager getPlayer:playerUuid];
+    RCTAVPlayer* player = [RCTAVPlayerManager getPlayer:playerUuid];
     AVPlayer* avPlayer = [player getAVPlayer];
     [self setPlayer:avPlayer];
 }

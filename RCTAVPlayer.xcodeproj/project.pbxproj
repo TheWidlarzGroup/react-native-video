@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		46543D6B1BB2AEAA00C3716B /* RCTVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */; };
-		46543D6E1BB2AF5A00C3716B /* RCTVideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */; };
-		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
-		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
+		46543D6B1BB2AEAA00C3716B /* RCTAVPlayerLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6A1BB2AEAA00C3716B /* RCTAVPlayerLayer.m */; };
+		46543D6E1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46543D6D1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.m */; };
+		BBD49E3F1AC8DEF000610F8E /* RCTAVPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTAVPlayer.m */; };
+		BBD49E401AC8DEF000610F8E /* RCTAVPlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTAVPlayerManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,15 +26,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		46543D691BB2AEAA00C3716B /* RCTVideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoView.h; sourceTree = "<group>"; };
-		46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoView.m; sourceTree = "<group>"; };
-		46543D6C1BB2AF5A00C3716B /* RCTVideoViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoViewManager.h; sourceTree = "<group>"; };
-		46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoViewManager.m; sourceTree = "<group>"; };
-		BBD49E391AC8DEF000610F8E /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
-		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
-		BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoManager.h; sourceTree = "<group>"; };
-		BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoManager.m; sourceTree = "<group>"; };
+		134814201AA4EA6300B7C361 /* libRCTAVPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTAVPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		46543D691BB2AEAA00C3716B /* RCTAVPlayerLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTAVPlayerLayer.h; sourceTree = "<group>"; };
+		46543D6A1BB2AEAA00C3716B /* RCTAVPlayerLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTAVPlayerLayer.m; sourceTree = "<group>"; };
+		46543D6C1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTAVPlayerLayerManager.h; sourceTree = "<group>"; };
+		46543D6D1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTAVPlayerLayerManager.m; sourceTree = "<group>"; };
+		BBD49E391AC8DEF000610F8E /* RCTAVPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTAVPlayer.h; sourceTree = "<group>"; };
+		BBD49E3A1AC8DEF000610F8E /* RCTAVPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTAVPlayer.m; sourceTree = "<group>"; };
+		BBD49E3B1AC8DEF000610F8E /* RCTAVPlayerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTAVPlayerManager.h; sourceTree = "<group>"; };
+		BBD49E3C1AC8DEF000610F8E /* RCTAVPlayerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTAVPlayerManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,7 +51,7 @@
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libRCTVideo.a */,
+				134814201AA4EA6300B7C361 /* libRCTAVPlayer.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -59,14 +59,14 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				46543D691BB2AEAA00C3716B /* RCTVideoView.h */,
-				46543D6A1BB2AEAA00C3716B /* RCTVideoView.m */,
-				46543D6C1BB2AF5A00C3716B /* RCTVideoViewManager.h */,
-				46543D6D1BB2AF5A00C3716B /* RCTVideoViewManager.m */,
-				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
-				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
-				BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */,
-				BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */,
+				46543D691BB2AEAA00C3716B /* RCTAVPlayerLayer.h */,
+				46543D6A1BB2AEAA00C3716B /* RCTAVPlayerLayer.m */,
+				46543D6C1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.h */,
+				46543D6D1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.m */,
+				BBD49E391AC8DEF000610F8E /* RCTAVPlayer.h */,
+				BBD49E3A1AC8DEF000610F8E /* RCTAVPlayer.m */,
+				BBD49E3B1AC8DEF000610F8E /* RCTAVPlayerManager.h */,
+				BBD49E3C1AC8DEF000610F8E /* RCTAVPlayerManager.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,9 +74,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* RCTVideo */ = {
+		58B511DA1A9E6C8500147676 /* RCTAVPlayer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTVideo" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTAVPlayer" */;
 			buildPhases = (
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -86,9 +86,9 @@
 			);
 			dependencies = (
 			);
-			name = RCTVideo;
+			name = RCTAVPlayer;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libRCTVideo.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libRCTAVPlayer.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTVideo" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTAVPlayer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -117,7 +117,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* RCTVideo */,
+				58B511DA1A9E6C8500147676 /* RCTAVPlayer */,
 			);
 		};
 /* End PBXProject section */
@@ -127,10 +127,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */,
-				BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */,
-				46543D6E1BB2AF5A00C3716B /* RCTVideoViewManager.m in Sources */,
-				46543D6B1BB2AEAA00C3716B /* RCTVideoView.m in Sources */,
+				BBD49E3F1AC8DEF000610F8E /* RCTAVPlayer.m in Sources */,
+				BBD49E401AC8DEF000610F8E /* RCTAVPlayerManager.m in Sources */,
+				46543D6E1BB2AF5A00C3716B /* RCTAVPlayerLayerManager.m in Sources */,
+				46543D6B1BB2AEAA00C3716B /* RCTAVPlayerLayer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,7 +223,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RCTVideo;
+				PRODUCT_NAME = RCTAVPlayer;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -240,7 +240,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RCTVideo;
+				PRODUCT_NAME = RCTAVPlayer;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -248,7 +248,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTVideo" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTAVPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -257,7 +257,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTVideo" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTAVPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,

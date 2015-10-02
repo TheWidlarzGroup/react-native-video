@@ -1,17 +1,19 @@
 /**
  *
- * @providesModule VideoPlayer
+ * @providesModule AVPlayer
  *
 */
 
 'use strict';
 
-var NativeVideo = require('NativeModules').Video;
+console.log(Object.keys(require('NativeModules')));
+
+var NativeVideo = require('NativeModules').AVPlayer;
 var React = require('react-native');
 var EventEmitter = require('eventemitter3');
 var {
   DeviceEventEmitter
- } = React;
+} = React;
 
 function guid() {
   function s4() {
@@ -23,7 +25,7 @@ function guid() {
     s4() + '-' + s4() + s4() + s4();
 }
 
-class VideoPlayer extends EventEmitter {
+class AVPlayer extends EventEmitter {
 
   constructor() {
     super();
@@ -132,4 +134,4 @@ class VideoPlayer extends EventEmitter {
   }
 }
 
-module.exports = VideoPlayer;
+module.exports = AVPlayer;
