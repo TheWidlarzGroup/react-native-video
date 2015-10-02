@@ -6,8 +6,6 @@
 
 'use strict';
 
-console.log(Object.keys(require('NativeModules')));
-
 var NativeVideo = require('NativeModules').AVPlayer;
 var React = require('react-native');
 var EventEmitter = require('eventemitter3');
