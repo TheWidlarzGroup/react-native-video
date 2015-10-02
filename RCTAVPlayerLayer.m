@@ -49,14 +49,17 @@
 
 -(void)setPlayer:(AVPlayer*)player
 {
-    [_playerLayer removeFromSuperlayer];
-    _playerLayer = (AVPlayerLayer*)self.layer;
-    [_playerLayer setPlayer:player];
-    _playerLayer.frame = self.bounds;
-    _playerLayer.needsDisplayOnBoundsChange = YES;
-    player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    _playerLayer.videoGravity = _resizeMode;
-    self.layer.needsDisplayOnBoundsChange = YES;
+    if (player != nil) {
+        //[_playerLayer removeFromSuperlayer];
+        _playerLayer = (AVPlayerLayer*)self.layer;
+        [_playerLayer setPlayer:player];
+        _playerLayer.frame = self.bounds;
+        _playerLayer.needsDisplayOnBoundsChange = YES;
+        _playerLayer.videoGravity = _resizeMode;
+        self.layer.needsDisplayOnBoundsChange = YES;
+    } else {
+        [_playerLayer setPlayer:nil];
+    }
 }
 
 -(void)setPlayerUuid:(NSString*)playerUuid

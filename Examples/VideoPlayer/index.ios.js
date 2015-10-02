@@ -25,6 +25,7 @@ var VideoPlayer = React.createClass({
       resizeMode: 'contain',
       duration: 0.0,
       currentTime: 0.0,
+      layer: 1
     }
   },
 
@@ -45,7 +46,6 @@ var VideoPlayer = React.createClass({
   },
 
   componentWillUnmount: function () {
-    console.log('componentWillUnmount!!!');
     this.state.avPlayer.removePlayer();
   },
 
@@ -93,15 +93,24 @@ var VideoPlayer = React.createClass({
     )
   },
 
+  _useLayer(id) {
+    this.setState({layer: id});
+  },
+
   render() {
     var flexCompleted = this.getCurrentTimePercentage() * 100;
     var flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <AVPlayerLayer resizeMode={this.state.resizeMode} player={this.state.avPlayer} style={{flex:1}} />
-        </TouchableOpacity>
+        <View style={styles.fullScreen}>
+          <TouchableOpacity style={styles.layer} onPress={this._useLayer.bind(null, this.state.layer === 1 ? 2 : 1)}>
+            <AVPlayerLayer ref="layer1" resizeMode={this.state.resizeMode} player={this.state.avPlayer} style={{flex:1}} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.layer} onPress={this._useLayer.bind(null, 2)}>
+            <AVPlayerLayer ref="layer2" resizeMode={this.state.resizeMode} player={this.state.layer === 2 && this.state.avPlayer} style={{flex:1}} />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.controls}>
           <View style={styles.generalControls}>
@@ -151,6 +160,11 @@ var styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
+    right: 0,
+  },
+  layer: {
+    flex: 1,
+    left: 0,
     right: 0,
   },
   controls: {

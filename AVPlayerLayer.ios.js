@@ -38,7 +38,8 @@ var AVPlayerLayer = React.createClass({
     } else {
       resizeMode = NativeModules.AVPlayerLayerManager.ScaleNone;
     }
-    var playerUuid = this.props.player.uuid;
+    var player = this.props.player;
+    var playerUuid = player ? player.uuid : '';
     var nativeProps = extend({}, this.props, {
       style,
       resizeMode: resizeMode,

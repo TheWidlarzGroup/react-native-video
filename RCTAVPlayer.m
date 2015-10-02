@@ -278,6 +278,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSeek:(float)seekTime
 {
+    
+
   int timeScale = 10000;
 
   AVPlayerItem *item = _player.currentItem;
