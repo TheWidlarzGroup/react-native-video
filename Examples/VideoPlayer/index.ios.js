@@ -86,9 +86,9 @@ var VideoPlayer = React.createClass({
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => {this.setState({paused: !this.state.paused})}}>
+        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video source={{uri: "broadchurch"}}
-                 style={styles.video}
+                 style={styles.fullScreen}
                  rate={this.state.rate}
                  paused={this.state.paused}
                  volume={this.state.volume}
@@ -143,7 +143,7 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'black',
   },
-  video: {
+  fullScreen: {
     position: 'absolute',
     top: 0,
     left: 0,
