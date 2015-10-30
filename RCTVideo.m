@@ -34,6 +34,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _playInBackground;
   NSString * _resizeMode;
 }
 
@@ -48,6 +49,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+    _playInBackground = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -72,7 +74,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-  if (!_paused) {
+  if (!_paused && !_playInBackground) {
     [self stopProgressTimer];
     [_player setRate:0.0];
   }
@@ -283,6 +285,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   _resizeMode = mode;
   _playerLayer.videoGravity = mode;
+}
+
+- (void)setPlayInBackground:(BOOL)playInBackground
+{
+    _playInBackground = playInBackground;
 }
 
 - (void)setPaused:(BOOL)paused

@@ -20,6 +20,7 @@ var Video = React.createClass({
     muted: PropTypes.bool,
     volume: PropTypes.number,
     rate: PropTypes.number,
+    playInBackground: PropTypes.bool,
     onLoadStart: PropTypes.func,
     onLoad: PropTypes.func,
     onError: PropTypes.func,
