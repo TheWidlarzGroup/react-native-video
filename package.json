@@ -2,7 +2,7 @@
   "name": "react-native-video",
   "version": "0.6.1",
   "description": "A <Video /> element for react-native",
-  "main": "Video.ios.js",
+  "main": "Video.js",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "files": [
     "RCTVideo.xcodeproj",
@@ -11,8 +11,7 @@
     "RCTVideoManager.h",
     "RCTVideoManager.m",
     "README.md",
-    "Video.android.js",
-    "Video.ios.js",
+    "Video.js",
     "VideoResizeMode.js",
     "VideoStylePropTypes.js"
   ],
@@ -20,6 +19,10 @@
     {
       "name": "Johannes Lumpe",
       "email": "johannes@lum.pe"
+    },
+    {
+      "name": "Baris Sencan",
+      "email": "baris.sncn@gmail.com"
     }
   ],
   "repository": {
@@ -31,6 +34,5 @@
   },
   "dependencies": {
     "keymirror": "^0.1.1",
-    "lodash": "^3.10.1"
   }
 }
