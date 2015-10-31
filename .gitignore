@@ -6,3 +6,5 @@ Examples/VideoPlayer/VideoPlayer.xcodeproj/project.xcworkspace/**/*
 Examples/VideoPlayer/VideoPlayer.xcodeproj/xcuserdata/**/*
 npm-debug.log
 .DS_Store
+build/
+*.iml
