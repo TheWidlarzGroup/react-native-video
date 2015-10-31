@@ -31,10 +31,6 @@ class Video extends Component {
     this._onEnd = this._onEnd.bind(this);
   }
 
-  seek(time) {
-    this.setState({ seekTime: time });
-  }
-
   render() {
     const { seekTime } = this.state;
     const {
@@ -80,6 +76,10 @@ class Video extends Component {
     });
 
     return <RCTVideo ref={ref} {...nativeProps} />;
+  }
+
+  seek(time) {
+    this.setState({ seekTime: time });
   }
 
   _onLoadStart(event) {
