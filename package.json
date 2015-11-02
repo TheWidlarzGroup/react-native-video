@@ -6,6 +6,7 @@
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "files": [
     "android/build.gradle",
+    "android/RCTVideo.iml",
     "android/src/main/AndroidManifest.xml",
     "android/src/main/res/values/styles.xml",
     "android/src/main/java/com/brentvatne/react/ReactVideoPackage.js",

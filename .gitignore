@@ -7,4 +7,3 @@ Examples/VideoPlayer/VideoPlayer.xcodeproj/xcuserdata/**/*
 npm-debug.log
 .DS_Store
 build/
-*.iml
