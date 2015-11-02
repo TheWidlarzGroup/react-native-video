@@ -5,6 +5,11 @@
   "main": "Video.js",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "files": [
+    "android/build.gradle",
+    "android/src/main/AndroidManifest.xml",
+    "android/src/main/res/values/styles.xml",
+    "android/src/main/java/com/brentvatne/react/ReactVideoPackage.js",
+    "android/src/main/java/com/brentvatne/react/ReactVideoViewManager.java",
     "RCTVideo.xcodeproj",
     "RCTVideo.h",
     "RCTVideo.m",
