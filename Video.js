@@ -4,7 +4,6 @@ const {
   StyleSheet,
   requireNativeComponent,
   PropTypes,
-  NativeModules,
 } = React;
 
 const VideoResizeMode = require('./VideoResizeMode');
@@ -50,16 +49,16 @@ class Video extends Component {
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
-      nativeResizeMode = NativeModules.VideoManager.ScaleToFill;
+      nativeResizeMode = RCTVideo.ScaleToFill;
     } else if (resizeMode === VideoResizeMode.contain) {
-      nativeResizeMode = NativeModules.VideoManager.ScaleAspectFit;
+      nativeResizeMode = RCTVideo.ScaleAspectFit;
     } else if (resizeMode === VideoResizeMode.cover) {
-      nativeResizeMode = NativeModules.VideoManager.ScaleAspectFill;
+      nativeResizeMode = RCTVideo.ScaleAspectFill;
     } else {
-      nativeResizeMode = NativeModules.VideoManager.ScaleNone;
+      nativeResizeMode = RCTVideo.ScaleNone;
     }
 
-    let nativeProps = Object.assign({}, this.props);
+    const nativeProps = Object.assign({}, this.props);
     Object.assign(nativeProps, {
       style: [styles.base, style],
       resizeMode: nativeResizeMode,
@@ -67,7 +66,7 @@ class Video extends Component {
         uri: uri,
         isNetwork,
         isAsset,
-        type: source.type || 'mp4'
+        type: source.type || 'mp4',
       },
       seek: seekTime,
       onVideoLoad: this._onLoad,
@@ -135,7 +134,7 @@ Video.propTypes = {
   rotation: React.PropTypes.number,
 };
 
-var RCTVideo = requireNativeComponent('RCTVideo', Video, {
+const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
