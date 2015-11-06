@@ -4,6 +4,7 @@ const {
   StyleSheet,
   requireNativeComponent,
   PropTypes,
+  NativeModules,
 } = React;
 
 const VideoResizeMode = require('./VideoResizeMode');
@@ -49,13 +50,13 @@ class Video extends Component {
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
-      nativeResizeMode = RCTVideo.ScaleToFill;
+      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleToFill;
     } else if (resizeMode === VideoResizeMode.contain) {
-      nativeResizeMode = RCTVideo.ScaleAspectFit;
+      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFit;
     } else if (resizeMode === VideoResizeMode.cover) {
-      nativeResizeMode = RCTVideo.ScaleAspectFill;
+      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFill;
     } else {
-      nativeResizeMode = RCTVideo.ScaleNone;
+      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleNone;
     }
 
     const nativeProps = Object.assign({}, this.props);
