@@ -2,22 +2,23 @@ package com.brentvatne.react;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.view.Gravity;
-import android.widget.FrameLayout;
-import android.support.annotation.Nullable;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static junit.framework.Assert.assertTrue;
 
-public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
+public class ReactVideoViewManager extends SimpleViewManager<ScalableVideoView> {
 
     public static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
@@ -41,23 +42,18 @@ public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
     }
 
     @Override
-    protected FrameLayout createViewInstance(ThemedReactContext themedReactContext) {
-        final FrameLayout container = new FrameLayout(themedReactContext);
-        final ScalableVideoView videoView = new ScalableVideoView(themedReactContext);
+    protected ScalableVideoView createViewInstance(ThemedReactContext themedReactContext) {
+        return new ScalableVideoView(themedReactContext);
+    }
 
-        final FrameLayout.LayoutParams videoLayout = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        );
-        videoLayout.gravity = Gravity.CENTER;
-        videoView.setLayoutParams(videoLayout);
-
-        container.setLayoutParams(new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-        ));
-        container.addView(videoView);
-        return container;
+    @Override
+    @Nullable
+    public Map getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.builder()
+                .put("onVideoLoadStart", MapBuilder.of("registrationName", "onVideoLoadStart"))
+                .put("onVideoLoad", MapBuilder.of("registrationName", "onVideoLoad"))
+                .put("onVideoEnd", MapBuilder.of("registrationName", "onVideoEnd"))
+                .build();
     }
 
     @Override
@@ -72,11 +68,13 @@ public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
     }
 
     @ReactProp(name = PROP_SRC)
-    public void setSrc(final FrameLayout container, @Nullable ReadableMap src) {
-        final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
+    public void setSrc(final ScalableVideoView videoView, @Nullable ReadableMap src) {
+        final ThemedReactContext themedReactContext = (ThemedReactContext) videoView.getContext();
+        final RCTEventEmitter eventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
 
         try {
             final String uriString = src.getString("uri");
+            final String type = src.getString("type");
             final boolean isNetwork = src.getBoolean("isNetwork");
 
             if (mPrepared) {
@@ -91,46 +89,72 @@ public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
                 videoView.setRawData(context.getResources().getIdentifier(uriString, "raw", context.getPackageName()));
             }
 
+            WritableMap writableSrc = Arguments.createMap();
+            writableSrc.putString("uri", uriString);
+            writableSrc.putString("type", type);
+            writableSrc.putBoolean("isNetwork", isNetwork);
+            WritableMap event = Arguments.createMap();
+            event.putMap("src", writableSrc);
+            eventEmitter.receiveEvent(videoView.getId(), "onVideoLoadStart", event);
+
             videoView.prepare(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mPrepared = true;
-                    applyModifiers(container);
+
+                    mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                        @Override
+                        public boolean onError(MediaPlayer mp, int what, int extra) {
+                            // TODO: onVideoError
+                            return false;
+                        }
+                    });
+
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            eventEmitter.receiveEvent(videoView.getId(), "onVideoEnd", null);
+                        }
+                    });
+
+                    WritableMap event = Arguments.createMap();
+                    event.putDouble("duration", (double) mp.getDuration() / (double) 1000);
+                    event.putDouble("currentTime", (double) mp.getCurrentPosition() / (double) 1000);
+                    // TODO: Add canX properties.
+                    eventEmitter.receiveEvent(videoView.getId(), "onVideoLoad", event);
+
+                    applyModifiers(videoView);
                 }
             });
         } catch (Exception e) {
-            assertTrue("failed to set video source", false);
+            // TODO: onVideoError
         }
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
-    public void setResizeMode(final FrameLayout container, final int resizeModeOrdinal) {
+    public void setResizeMode(final ScalableVideoView videoView, final int resizeModeOrdinal) {
         mResizeMode = ScalableType.values()[resizeModeOrdinal];
 
         if (mPrepared) {
-            final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
             videoView.setScalableType(mResizeMode);
             videoView.invalidate();
         }
     }
 
     @ReactProp(name = PROP_REPEAT)
-    public void setRepeat(final FrameLayout container, final boolean repeat) {
+    public void setRepeat(final ScalableVideoView videoView, final boolean repeat) {
         mRepeat = repeat;
 
         if (mPrepared) {
-            final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
             videoView.setLooping(mRepeat);
         }
     }
 
     @ReactProp(name = PROP_PAUSED)
-    public void setPaused(final FrameLayout container, final boolean paused) {
+    public void setPaused(final ScalableVideoView videoView, final boolean paused) {
         mPaused = paused;
 
         if (mPrepared) {
-            final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
-            videoView.requestFocus();
             if (!mPaused) {
                 videoView.start();
             } else {
@@ -140,12 +164,10 @@ public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
     }
 
     @ReactProp(name = PROP_MUTED)
-    public void setMuted(final FrameLayout container, final boolean muted) {
+    public void setMuted(final ScalableVideoView videoView, final boolean muted) {
         mMuted = muted;
 
         if (mPrepared) {
-            final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
-
             if (mMuted) {
                 videoView.setVolume(0, 0);
             } else {
@@ -155,19 +177,18 @@ public class ReactVideoViewManager extends SimpleViewManager<FrameLayout> {
     }
 
     @ReactProp(name = PROP_VOLUME)
-    public void setVolume(final FrameLayout container, final float volume) {
+    public void setVolume(final ScalableVideoView videoView, final float volume) {
         mVolume = volume;
 
         if (mPrepared) {
-            final ScalableVideoView videoView = (ScalableVideoView) container.getChildAt(0);
             videoView.setVolume(mVolume, mVolume);
         }
     }
 
-    private void applyModifiers(final FrameLayout container) {
-        setResizeMode(container, mResizeMode.ordinal());
-        setRepeat(container, mRepeat);
-        setPaused(container, mPaused);
-        setMuted(container, mMuted);
+    private void applyModifiers(final ScalableVideoView videoView) {
+        setResizeMode(videoView, mResizeMode.ordinal());
+        setRepeat(videoView, mRepeat);
+        setPaused(videoView, mPaused);
+        setMuted(videoView, mMuted);
     }
 }
