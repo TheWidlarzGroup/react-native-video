@@ -35,8 +35,11 @@ class Video extends Component {
     this._root.setNativeProps(nativeProps);
   }
 
+  seek(time) {
+    this.setNativeProps({ seek: parseFloat(time) });
+  }
+
   render() {
-    const { seekTime } = this.state;
     const {
       style,
       source,
@@ -73,9 +76,11 @@ class Video extends Component {
         isAsset,
         type: source.type || 'mp4',
       },
-      seek: seekTime,
+      onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
+      onVideoError: this._onError,
       onVideoProgress: this._onProgress,
+      onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
     });
 
@@ -84,10 +89,6 @@ class Video extends Component {
         ref={ component => this._root = component }
         {...nativeProps} />
     );
-  }
-
-  seek(time) {
-    this.setState({ seekTime: time });
   }
 
   _onLoadStart(event) {
@@ -133,6 +134,7 @@ Video.propTypes = {
   onLoad: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
+  onSeek: PropTypes.func,
   onEnd: PropTypes.func,
 
   /* Required by react-native */
