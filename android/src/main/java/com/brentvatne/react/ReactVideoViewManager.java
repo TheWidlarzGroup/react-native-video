@@ -1,7 +1,7 @@
 package com.brentvatne.react;
 
 import android.content.Context;
-import android.media.MediaPlayer;
+import com.brentvatne.react.ReactVideoView.Events;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
@@ -29,11 +29,6 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_MUTED = "muted";
     public static final String PROP_VOLUME = "volume";
 
-    public static final String EVENT_LOAD_START = "onVideoLoadStart";
-    public static final String EVENT_LOAD = "onVideoLoad";
-    public static final String EVENT_PROGRESS = "onVideoProgress";
-    public static final String EVENT_END = "onVideoEnd";
-
     @Override
     public String getName() {
         return REACT_CLASS;
@@ -47,12 +42,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.builder()
-                .put(EVENT_LOAD_START, MapBuilder.of("registrationName", EVENT_LOAD_START))
-                .put(EVENT_LOAD, MapBuilder.of("registrationName", EVENT_LOAD))
-                .put(EVENT_PROGRESS, MapBuilder.of("registrationName", EVENT_PROGRESS))
-                .put(EVENT_END, MapBuilder.of("registrationName", EVENT_END))
-                .build();
+        MapBuilder.Builder builder = MapBuilder.builder();
+        for (Events event : Events.values()) {
+            builder.put(event.toString(), MapBuilder.of("registrationName", event.toString()));
+        }
+        return builder.build();
     }
 
     @Override
@@ -91,39 +85,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
             writableSrc.putBoolean(PROP_SRC_IS_NETWORK, isNetwork);
             WritableMap event = Arguments.createMap();
             event.putMap(PROP_SRC, writableSrc);
-            eventEmitter.receiveEvent(videoView.getId(), EVENT_LOAD_START, event);
+            eventEmitter.receiveEvent(videoView.getId(), Events.EVENT_LOAD_START.toString(), event);
 
-            videoView.prepare(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(final MediaPlayer mp) {
-                    mp.setScreenOnWhilePlaying(true);
-
-                    mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                        @Override
-                        public boolean onError(MediaPlayer mp, int what, int extra) {
-                            // TODO: onVideoError
-                            return false;
-                        }
-                    });
-
-                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            eventEmitter.receiveEvent(videoView.getId(), EVENT_END, null);
-                        }
-                    });
-
-                    WritableMap event = Arguments.createMap();
-                    event.putDouble("duration", (double) mp.getDuration() / (double) 1000);
-                    event.putDouble("currentTime", (double) mp.getCurrentPosition() / (double) 1000);
-                    // TODO: Add canX properties.
-                    eventEmitter.receiveEvent(videoView.getId(), EVENT_LOAD, event);
-
-                    videoView.applyModifiers();
-                }
-            });
+            videoView.prepare();
         } catch (Exception e) {
-            // TODO: onVideoError
+            e.printStackTrace();
         }
     }
 
