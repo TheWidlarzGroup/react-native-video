@@ -35,6 +35,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _paused;
   BOOL _repeat;
   NSString * _resizeMode;
+
+  BOOL _stopped;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -166,6 +168,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSrc:(NSDictionary *)source
 {
+  if (!source[@"uri"]) {
+    return;
+  }
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
@@ -393,21 +398,27 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)removeFromSuperview
 {
-  [_progressUpdateTimer invalidate];
-  _prevProgressUpdateTime = nil;
-
-  [_player pause];
-  _player = nil;
-
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
-
-  [self removePlayerItemObservers];
-
-  _eventDispatcher = nil;
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-
+  [self stop];
   [super removeFromSuperview];
+}
+
+- (void)stop {
+  if (!_stopped) {
+    _stopped = YES;
+    [_progressUpdateTimer invalidate];
+    _prevProgressUpdateTime = nil;
+
+    [_player pause];
+    _player = nil;
+
+    [_playerLayer removeFromSuperlayer];
+    _playerLayer = nil;
+
+    [self removePlayerItemObservers];
+
+    _eventDispatcher = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+  }
 }
 
 @end

@@ -27,6 +27,11 @@ var Video = React.createClass({
     onEnd: PropTypes.func,
   },
 
+  componentWillUnmount() {
+    var nodeHandle = React.findNodeHandle(this.refs[VIDEO_REF]);
+    NativeModules.VideoManager.attemptStop(nodeHandle, () => {});
+  },
+
   setNativeProps(props) {
     this.refs[VIDEO_REF].setNativeProps(props);
   },

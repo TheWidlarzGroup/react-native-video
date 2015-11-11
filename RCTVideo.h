@@ -5,5 +5,6 @@
 @interface RCTVideo : UIView
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
+- (void)stop;
 
 @end
