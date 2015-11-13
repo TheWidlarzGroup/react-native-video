@@ -88,12 +88,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
     }
 
-    public void reset() {
-        mMediaPlayer.reset();
-    }
-
     public void setSrc(final String uriString, final boolean isNetwork) throws IOException {
-        reset();
+        mMediaPlayer.reset();
 
         if (isNetwork) {
             setDataSource(uriString);
@@ -105,7 +101,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             ));
         }
 
-        prepare(this);
+        prepareAsync(this);
     }
 
     public void setResizeModeModifier(final ScalableType resizeMode) {
