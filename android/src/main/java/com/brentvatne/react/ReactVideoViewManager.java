@@ -91,22 +91,22 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         videoView.setResizeModeModifier(ScalableType.values()[Integer.parseInt(resizeModeOrdinalString)]);
     }
 
-    @ReactProp(name = PROP_REPEAT)
+    @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactVideoView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
     }
 
-    @ReactProp(name = PROP_PAUSED)
+    @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactVideoView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
     }
 
-    @ReactProp(name = PROP_MUTED)
+    @ReactProp(name = PROP_MUTED, defaultBoolean = false)
     public void setMuted(final ReactVideoView videoView, final boolean muted) {
         videoView.setMutedModifier(muted);
     }
 
-    @ReactProp(name = PROP_VOLUME)
+    @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactVideoView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
     }
