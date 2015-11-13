@@ -9,6 +9,8 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
+import java.io.IOException;
+
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnCompletionListener {
 
@@ -82,11 +84,28 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             mMediaPlayer.setOnVideoSizeChangedListener(this);
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
         }
     }
 
     public void reset() {
         mMediaPlayer.reset();
+    }
+
+    public void setSrc(final String uriString, final boolean isNetwork) throws IOException {
+        reset();
+
+        if (isNetwork) {
+            setDataSource(uriString);
+        } else {
+            setRawData(mThemedReactContext.getResources().getIdentifier(
+                    uriString,
+                    "raw",
+                    mThemedReactContext.getPackageName()
+            ));
+        }
+
+        prepare(this);
     }
 
     public void setResizeModeModifier(final ScalableType resizeMode) {

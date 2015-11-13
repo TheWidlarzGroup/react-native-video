@@ -1,6 +1,5 @@
 package com.brentvatne.react;
 
-import android.content.Context;
 import com.brentvatne.react.ReactVideoView.Events;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
@@ -70,15 +69,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
             final String type = src.getString(PROP_SRC_TYPE);
             final boolean isNetwork = src.getBoolean(PROP_SRC_IS_NETWORK);
 
-            videoView.reset();
-
-            if (isNetwork) {
-                videoView.setDataSource(uriString);
-            } else {
-                Context context = videoView.getContext();
-                videoView.setRawData(context.getResources().getIdentifier(uriString, "raw", context.getPackageName()));
-            }
-
+            // TODO: Carry this inside videoView.setSrc
             WritableMap writableSrc = Arguments.createMap();
             writableSrc.putString(PROP_SRC_URI, uriString);
             writableSrc.putString(PROP_SRC_TYPE, type);
@@ -87,8 +78,10 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
             event.putMap(PROP_SRC, writableSrc);
             eventEmitter.receiveEvent(videoView.getId(), Events.EVENT_LOAD_START.toString(), event);
 
-            videoView.prepare();
+            videoView.setSrc(uriString, isNetwork);
         } catch (Exception e) {
+            // TODO: Send onError
+            // TODO: Carry inside videoView.setSrc
             e.printStackTrace();
         }
     }
