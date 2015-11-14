@@ -2,6 +2,7 @@ package com.brentvatne.react;
 
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.util.Log;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -54,7 +55,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mRepeat = false;
     private boolean mPaused = false;
     private boolean mMuted = false;
-    private float mVolume = 1;
+    private float mVolume = 1.0f;
+    private float mRate = 1.0f;
 
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private int mVideoDuration = 0;
@@ -73,16 +75,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             public void run() {
 
                 if (mMediaPlayerValid) {
-                    try {
-                        WritableMap event = Arguments.createMap();
-                        // TODO: Other event properties.
-                        event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
-                        event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
-                        event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration/ 1000.0);
-                        mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
-                    } catch (Exception e) {
-                        // Do nothing.
-                    }
+                    WritableMap event = Arguments.createMap();
+                    // TODO: Other event properties.
+                    event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
+                    event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
+                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); // TODO
+                    mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
                 }
                 mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
             }
@@ -179,11 +177,21 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setMutedModifier(mMuted);
     }
 
+    public void setRateModifier(final float rate) {
+        mRate = rate;
+
+        if (mMediaPlayerValid) {
+            // TODO: Implement this.
+            Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android");
+        }
+    }
+
     public void applyModifiers() {
         setResizeModeModifier(mResizeMode);
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
+//        setRateModifier(mRate);
     }
 
     @Override
@@ -213,12 +221,15 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void seekTo(int msec) {
-        WritableMap event = Arguments.createMap();
-        event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
-        event.putDouble(EVENT_PROP_SEEK_TIME, msec / 1000.0);
-        mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
 
-        super.seekTo(msec);
+        if (mMediaPlayerValid) {
+            WritableMap event = Arguments.createMap();
+            event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
+            event.putDouble(EVENT_PROP_SEEK_TIME, msec / 1000.0);
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
+
+            super.seekTo(msec);
+        }
     }
 
     @Override
@@ -236,7 +247,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        
+
         try {
             setSrc(mUriString, mIsNetwork);
         } catch (Exception e) {

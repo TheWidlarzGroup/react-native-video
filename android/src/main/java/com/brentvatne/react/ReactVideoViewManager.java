@@ -27,6 +27,8 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_PAUSED = "paused";
     public static final String PROP_MUTED = "muted";
     public static final String PROP_VOLUME = "volume";
+    public static final String PROP_SEEK = "seek";
+    public static final String PROP_RATE = "rate";
 
     @Override
     public String getName() {
@@ -109,5 +111,15 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactVideoView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
+    }
+
+    @ReactProp(name = PROP_SEEK)
+    public void setSeek(final ReactVideoView videoView, final float seek) {
+        videoView.seekTo(Math.round(seek * 1000.0f));
+    }
+
+    @ReactProp(name = PROP_RATE)
+    public void setRate(final ReactVideoView videoView, final float rate) {
+        videoView.setRateModifier(rate);
     }
 }
