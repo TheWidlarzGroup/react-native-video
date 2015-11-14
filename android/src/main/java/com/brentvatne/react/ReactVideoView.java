@@ -34,17 +34,30 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
     }
 
+    public static final String EVENT_PROP_DURATION = "duration";
+    public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
+    public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
+    public static final String EVENT_PROP_SEEK_TIME = "seekTime";
+    public static final String EVENT_PROP_ERROR = "error";
+    public static final String EVENT_PROP_WHAT = "what";
+    public static final String EVENT_PROP_EXTRA = "extra";
+
     private ThemedReactContext mThemedReactContext;
     private RCTEventEmitter mEventEmitter;
 
     private Handler mProgressUpdateHandler = new Handler();
     private Runnable mProgressUpdateRunnable = null;
 
+    private String mUriString = null;
+    private boolean mIsNetwork = false;
     private ScalableType mResizeMode = ScalableType.LEFT_TOP;
     private boolean mRepeat = false;
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1;
+
+    private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
+    private int mVideoDuration = 0;
 
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
@@ -55,21 +68,21 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         initializeMediaPlayerIfNeeded();
         setSurfaceTextureListener(this);
 
-        final MediaPlayer mediaPlayer = mMediaPlayer;
-
         mProgressUpdateRunnable = new Runnable() {
             @Override
             public void run() {
 
-                try {
-                    WritableMap event = Arguments.createMap();
-                    // TODO: Other event properties.
-                    event.putDouble("currentTime", (double) mediaPlayer.getCurrentPosition() / (double) 1000);
-                    event.putDouble("duration", (double) mediaPlayer.getDuration() / (double) 1000);
-                    event.putDouble("playableDuration", (double) mediaPlayer.getDuration() / (double) 1000);
-                    mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
-                } catch (Exception e) {
-                    // Do nothing.
+                if (mMediaPlayerValid) {
+                    try {
+                        WritableMap event = Arguments.createMap();
+                        // TODO: Other event properties.
+                        event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
+                        event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
+                        event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration/ 1000.0);
+                        mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
+                    } catch (Exception e) {
+                        // Do nothing.
+                    }
                 }
                 mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
             }
@@ -79,6 +92,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     private void initializeMediaPlayerIfNeeded() {
         if (mMediaPlayer == null) {
+            mMediaPlayerValid = false;
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.setOnVideoSizeChangedListener(this);
@@ -89,6 +103,13 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     public void setSrc(final String uriString, final boolean isNetwork) throws IOException {
+        mUriString = uriString;
+        mIsNetwork = isNetwork;
+
+        mMediaPlayerValid = false;
+        mVideoDuration = 0;
+
+        initializeMediaPlayerIfNeeded();
         mMediaPlayer.reset();
 
         if (isNetwork) {
@@ -106,37 +127,45 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setResizeModeModifier(final ScalableType resizeMode) {
         mResizeMode = resizeMode;
-        initializeMediaPlayerIfNeeded();
-        setScalableType(resizeMode);
-        invalidate();
+
+        if (mMediaPlayerValid) {
+            setScalableType(resizeMode);
+            invalidate();
+        }
     }
 
     public void setRepeatModifier(final boolean repeat) {
         mRepeat = repeat;
-        initializeMediaPlayerIfNeeded();
-        setLooping(repeat);
+
+        if (mMediaPlayerValid) {
+            setLooping(repeat);
+        }
     }
 
     public void setPausedModifier(final boolean paused) {
         mPaused = paused;
 
-        try {
-            initializeMediaPlayerIfNeeded();
+        if (!mMediaPlayerValid) {
+            return;
+        }
 
-            if (!mPaused) {
-                start();
-            } else {
+        if (mPaused) {
+            if (mMediaPlayer.isPlaying()) {
                 pause();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            if (!mMediaPlayer.isPlaying()) {
+                start();
+            }
         }
     }
 
     public void setMutedModifier(final boolean muted) {
         mMuted = muted;
 
-        initializeMediaPlayerIfNeeded();
+        if (!mMediaPlayerValid) {
+            return;
+        }
 
         if (mMuted) {
             setVolume(0, 0);
@@ -147,7 +176,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setVolumeModifier(final float volume) {
         mVolume = volume;
-        initializeMediaPlayerIfNeeded();
         setMutedModifier(mMuted);
     }
 
@@ -155,14 +183,17 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setResizeModeModifier(mResizeMode);
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
-        setVolumeModifier(mVolume);
+        setMutedModifier(mMuted);
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        mMediaPlayerValid = true;
+        mVideoDuration = mp.getDuration();
+
         WritableMap event = Arguments.createMap();
-        event.putDouble("duration", (double) mp.getDuration() / (double) 1000);
-        event.putDouble("currentTime", (double) mp.getCurrentPosition() / (double) 1000);
+        event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
+        event.putDouble(EVENT_PROP_CURRENT_TIME, mp.getCurrentPosition() / 1000.0);
         // TODO: Add canX properties.
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
@@ -172,10 +203,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         WritableMap error = Arguments.createMap();
-        error.putInt("what", what);
-        error.putInt("extra", extra);
+        error.putInt(EVENT_PROP_WHAT, what);
+        error.putInt(EVENT_PROP_EXTRA, extra);
         WritableMap event = Arguments.createMap();
-        event.putMap("error", error);
+        event.putMap(EVENT_PROP_ERROR, error);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_ERROR.toString(), event);
         return true;
     }
@@ -183,8 +214,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     public void seekTo(int msec) {
         WritableMap event = Arguments.createMap();
-        event.putDouble("currentTime", (double) getCurrentPosition() / (double) 1000);
-        event.putDouble("seekTime", (double) msec / (double) 1000);
+        event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
+        event.putDouble(EVENT_PROP_SEEK_TIME, msec / 1000.0);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
 
         super.seekTo(msec);
@@ -192,6 +223,24 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        mMediaPlayerValid = false;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mMediaPlayerValid = false;
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        
+        try {
+            setSrc(mUriString, mIsNetwork);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
