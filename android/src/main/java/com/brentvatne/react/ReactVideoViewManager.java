@@ -63,29 +63,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
 
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactVideoView videoView, @Nullable ReadableMap src) {
-        final ThemedReactContext themedReactContext = (ThemedReactContext) videoView.getContext();
-        final RCTEventEmitter eventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
-
-        try {
-            final String uriString = src.getString(PROP_SRC_URI);
-            final String type = src.getString(PROP_SRC_TYPE);
-            final boolean isNetwork = src.getBoolean(PROP_SRC_IS_NETWORK);
-
-            // TODO: Carry this inside videoView.setSrc
-            WritableMap writableSrc = Arguments.createMap();
-            writableSrc.putString(PROP_SRC_URI, uriString);
-            writableSrc.putString(PROP_SRC_TYPE, type);
-            writableSrc.putBoolean(PROP_SRC_IS_NETWORK, isNetwork);
-            WritableMap event = Arguments.createMap();
-            event.putMap(PROP_SRC, writableSrc);
-            eventEmitter.receiveEvent(videoView.getId(), Events.EVENT_LOAD_START.toString(), event);
-
-            videoView.setSrc(uriString, isNetwork);
-        } catch (Exception e) {
-            // TODO: Send onError
-            // TODO: Carry inside videoView.setSrc
-            e.printStackTrace();
-        }
+        videoView.setSrc(
+                src.getString(PROP_SRC_URI),
+                src.getString(PROP_SRC_TYPE),
+                src.getBoolean(PROP_SRC_IS_NETWORK)
+        );
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
