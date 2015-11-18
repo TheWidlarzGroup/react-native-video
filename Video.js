@@ -5,6 +5,7 @@ const {
   requireNativeComponent,
   PropTypes,
   NativeModules,
+  View,
 } = React;
 
 const VideoResizeMode = require('./VideoResizeMode');
@@ -19,9 +20,6 @@ class Video extends Component {
 
   constructor(props, context) {
     super(props, context);
-
-    this.state = { seekTime: 0 };
-
     this.seek = this.seek.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
@@ -37,6 +35,30 @@ class Video extends Component {
 
   seek(time) {
     this.setNativeProps({ seek: parseFloat(time) });
+  }
+
+  _onLoadStart(event) {
+    this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
+  }
+
+  _onLoad(event) {
+    this.props.onLoad && this.props.onLoad(event.nativeEvent);
+  }
+
+  _onError(event) {
+    this.props.onError && this.props.onError(event.nativeEvent);
+  }
+
+  _onProgress(event) {
+    this.props.onProgress && this.props.onProgress(event.nativeEvent);
+  }
+
+  _onSeek(event) {
+    this.props.onSeek && this.props.onSeek(event.nativeEvent);
+  }
+
+  _onEnd(event) {
+    this.props.onEnd && this.props.onEnd(event.nativeEvent);
   }
 
   render() {
@@ -90,30 +112,6 @@ class Video extends Component {
         {...nativeProps} />
     );
   }
-
-  _onLoadStart(event) {
-    this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
-  }
-
-  _onLoad(event) {
-    this.props.onLoad && this.props.onLoad(event.nativeEvent);
-  }
-
-  _onError(event) {
-    this.props.onError && this.props.onError(event.nativeEvent);
-  }
-
-  _onProgress(event) {
-    this.props.onProgress && this.props.onProgress(event.nativeEvent);
-  }
-
-  _onSeek(event) {
-    this.props.onSeek && this.props.onSeek(event.nativeEvent);
-  }
-
-  _onEnd(event) {
-    this.props.onEnd && this.props.onEnd(event.nativeEvent);
-  }
 }
 
 Video.propTypes = {
@@ -122,6 +120,7 @@ Video.propTypes = {
   seek: PropTypes.number,
 
   /* Wrapper component */
+  style: View.propTypes.style,
   ref: PropTypes.string,
   source: PropTypes.object,
   resizeMode: PropTypes.string,
