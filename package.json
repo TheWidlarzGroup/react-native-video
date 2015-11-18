@@ -11,6 +11,7 @@
     "android/src/main/res/values/styles.xml",
     "android/src/main/java/com/brentvatne/react/ReactVideoPackage.java",
     "android/src/main/java/com/brentvatne/react/ReactVideoViewManager.java",
+    "android/src/main/java/com/brentvatne/react/ReactVideoView.java",
     "RCTVideo.xcodeproj",
     "RCTVideo.h",
     "RCTVideo.m",
