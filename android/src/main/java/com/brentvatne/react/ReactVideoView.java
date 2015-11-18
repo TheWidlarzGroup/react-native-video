@@ -10,10 +10,8 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
-import java.io.IOException;
-
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
-        .OnErrorListener, MediaPlayer.OnCompletionListener {
+        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener {
 
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
@@ -35,10 +33,18 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
     }
 
+    public static final String EVENT_PROP_FAST_FORWARD = "canPlayFastForward";
+    public static final String EVENT_PROP_SLOW_FORWARD = "canPlaySlowForward";
+    public static final String EVENT_PROP_SLOW_REVERSE = "canPlaySlowReverse";
+    public static final String EVENT_PROP_REVERSE = "canPlayReverse";
+    public static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
+    public static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
+
     public static final String EVENT_PROP_DURATION = "duration";
     public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
+
     public static final String EVENT_PROP_ERROR = "error";
     public static final String EVENT_PROP_WHAT = "what";
     public static final String EVENT_PROP_EXTRA = "extra";
@@ -61,6 +67,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private int mVideoDuration = 0;
+    private int mVideoBufferedDuration = 0;
 
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
@@ -77,10 +84,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                 if (mMediaPlayerValid) {
                     WritableMap event = Arguments.createMap();
-                    // TODO: Other event properties.
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
-                    event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
-                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); // TODO
+                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
                 }
                 mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
@@ -97,6 +102,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             mMediaPlayer.setOnVideoSizeChangedListener(this);
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnBufferingUpdateListener(this);
             mMediaPlayer.setOnCompletionListener(this);
         }
     }
@@ -108,6 +114,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         mMediaPlayerValid = false;
         mVideoDuration = 0;
+        mVideoBufferedDuration = 0;
 
         initializeMediaPlayerIfNeeded();
         mMediaPlayer.reset();
@@ -217,7 +224,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
         event.putDouble(EVENT_PROP_CURRENT_TIME, mp.getCurrentPosition() / 1000.0);
-        // TODO: Add canX properties.
+        // TODO: Actually check if you can.
+        event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
+        event.putBoolean(EVENT_PROP_SLOW_FORWARD, true);
+        event.putBoolean(EVENT_PROP_SLOW_REVERSE, true);
+        event.putBoolean(EVENT_PROP_REVERSE, true);
+        event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
+        event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
+        event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         applyModifiers();
@@ -232,6 +246,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         event.putMap(EVENT_PROP_ERROR, error);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_ERROR.toString(), event);
         return true;
+    }
+
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
 
     @Override
