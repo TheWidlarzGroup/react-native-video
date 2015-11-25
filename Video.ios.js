@@ -92,6 +92,8 @@ var Video = React.createClass({
       onVideoLoad: this._onLoad,
       onVideoProgress: this._onProgress,
       onVideoEnd: this._onEnd,
+      onVideoLoadStart: this._onLoadStart,
+      onVideoError: this._onError,      
     });
 
     return <RCTVideo ref={VIDEO_REF} {... nativeProps} />;
