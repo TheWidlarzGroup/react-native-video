@@ -37,11 +37,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSString * _resizeMode;
 
   BOOL _stopped;
+  BOOL _timerInvalidated;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
 {
-  if ((self = [super init])) {
+  if ((self = [super initWithFrame:CGRectZero])) {
     _eventDispatcher = eventDispatcher;
 
     _rate = 1.0;
@@ -50,6 +51,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+    _timerInvalidated = NO;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -131,7 +133,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)stopProgressTimer
 {
-  [_progressUpdateTimer invalidate];
+  if (!_timerInvalidated) {
+    [_progressUpdateTimer invalidate];
+    _timerInvalidated = YES;
+  }
 }
 
 - (void)startProgressTimer
@@ -405,7 +410,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)stop {
   if (!_stopped) {
     _stopped = YES;
-    [_progressUpdateTimer invalidate];
+    [self stopProgressTimer];
     _prevProgressUpdateTime = nil;
 
     [_player pause];
