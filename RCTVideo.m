@@ -15,6 +15,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _playerItemObserversSet;
   AVPlayerLayer *_playerLayer;
   NSURL *_videoURL;
+  BOOL _videoEnded;
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -89,7 +90,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)sendProgressUpdate
 {
   AVPlayerItem *video = [_player currentItem];
-  if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
+  if (video == nil || _videoEnded || video.status != AVPlayerItemStatusReadyToPlay) {
     return;
   }
 
@@ -274,6 +275,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+  _videoEnded = YES;
   NSNumber *duration = [NSNumber numberWithFloat:[self getDuration:[_player currentItem]]];
   [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                       body:@{@"currentTime": duration,
@@ -324,7 +326,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       return;
     }
 
+    // Prevent 'onVideoProgress' events while seeking.
+    _videoEnded = YES;
+
     [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+
+      // The 'seekTime' is always less than the video duration.
+      _videoEnded = NO;
+
       [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
                                           body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                                  @"seekTime": [NSNumber numberWithFloat:seekTime],
