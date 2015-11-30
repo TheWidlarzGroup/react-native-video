@@ -22,6 +22,9 @@ RCT_EXPORT_MODULE();
     @"onVideoLoadStart",
     @"onVideoLoad",
     @"onVideoError",
+    @"onVideoBuffer",
+    @"onVideoBufferEmpty",
+    @"onVideoBufferReady",
     @"onVideoProgress",
     @"onVideoSeek",
     @"onVideoEnd"

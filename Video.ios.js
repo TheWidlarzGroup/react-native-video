@@ -23,6 +23,9 @@ var Video = React.createClass({
     onLoadStart: PropTypes.func,
     onLoad: PropTypes.func,
     onError: PropTypes.func,
+    onBuffer: PropTypes.func,
+    onBufferEmpty: PropTypes.func,
+    onBufferReady: PropTypes.func,
     onProgress: PropTypes.func,
     onEnd: PropTypes.func,
   },
@@ -41,6 +44,18 @@ var Video = React.createClass({
 
   _onError(event) {
     this.props.onError && this.props.onError(event.nativeEvent);
+  },
+
+  _onBuffer(event) {
+    this.props.onBuffer && this.props.onBuffer(event.nativeEvent);
+  },
+
+  _onBufferEmpty(event) {
+    this.props.onBufferEmpty && this.props.onBufferEmpty(event.nativeEvent);
+  },
+
+  _onBufferReady(event) {
+    this.props.onBufferReady && this.props.onBufferReady(event.nativeEvent);
   },
 
   _onProgress(event) {
@@ -91,6 +106,9 @@ var Video = React.createClass({
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
+      onVideoBuffer: this._onBuffer,
+      onVideoBufferEmpty: this._onBufferEmpty,
+      onVideoBufferReady: this._onBufferReady,
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,

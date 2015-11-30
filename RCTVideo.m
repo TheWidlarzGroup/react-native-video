@@ -6,6 +6,8 @@
 #import <AVFoundation/AVFoundation.h>
 
 static NSString *const statusKeyPath = @"status";
+static NSString *const loadedTimeRangesKeyPath = @"loadedTimeRanges";
+static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 
 @implementation RCTVideo
@@ -19,6 +21,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
+
+  BOOL _isBufferEmpty;
+  NSArray *_loadedTimeRanges;
 
   bool _pendingSeek;
   float _pendingSeekTime;
@@ -46,6 +51,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _rate = 1.0;
     _volume = 1.0;
     _resizeMode = AVLayerVideoGravityResizeAspectFill;
+    _isBufferEmpty = YES;
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
@@ -137,6 +143,41 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   return [NSNumber numberWithInteger:0];
 }
 
+- (NSArray *)getLoadedTimeRanges
+{
+  AVPlayerItem *video = _player.currentItem;
+  NSMutableArray *ranges = [NSMutableArray new];
+  [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    CMTimeRange range = [obj CMTimeRangeValue];
+    [ranges addObject:@{
+      @"start": [NSNumber numberWithFloat:CMTimeGetSeconds(range.start)],
+      @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(range.duration)]
+    }];
+  }];
+  return [ranges copy];
+}
+
+- (BOOL)isTimeBuffered:(CMTime)time
+{
+  // Nothing is buffered yet.
+  if (_isBufferEmpty) {
+    return NO;
+  }
+
+  __block BOOL isBuffered = NO;
+
+  AVPlayerItem *video = [_player currentItem];
+  [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    CMTimeRange range = [obj CMTimeRangeValue];
+    if (CMTimeRangeContainsTime(range, time)) {
+      isBuffered = YES;
+      *stop = YES;
+    }
+  }];
+
+  return isBuffered;
+}
+
 - (void)stopProgressTimer
 {
   [_progressUpdateTimer invalidate];
@@ -156,6 +197,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:loadedTimeRangesKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
   _playerItemObserversSet = YES;
 }
@@ -167,6 +210,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+    [_playerItem removeObserver:self forKeyPath:loadedTimeRangesKeyPath];
+    [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     _playerItemObserversSet = NO;
   }
@@ -253,10 +298,44 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                        @"domain": _playerItem.error.domain},
                                                    @"target": self.reactTag}];
       }
+
+    } else if ([keyPath isEqualToString:loadedTimeRangesKeyPath]) {
+
+      // Prevent 'onVideoBuffer' events while seeking or finished.
+      if (_pendingSeek || _videoEnded) {
+        return;
+      }
+
+      // Prevent duplicate 'onVideoBuffer' events.
+      NSArray *loadedTimeRanges = [self getLoadedTimeRanges];
+      if (_loadedTimeRanges && [_loadedTimeRanges isEqualToArray:loadedTimeRanges]) {
+        return;
+      }
+
+      _loadedTimeRanges = loadedTimeRanges;
+      [_eventDispatcher sendInputEventWithName:@"onVideoBuffer"
+                                          body:@{@"ranges": _loadedTimeRanges,
+                                                 @"target": self.reactTag}];
+
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
-      // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if (_playerItem.playbackLikelyToKeepUp) {
+
+      // Prevent duplicate 'onVideoBufferReady' events.
+      BOOL isBufferReady = _playerItem.playbackLikelyToKeepUp;
+      if (_isBufferEmpty && isBufferReady) {
+        _isBufferEmpty = NO;
+        [_eventDispatcher sendInputEventWithName:@"onVideoBufferReady"
+                                            body:@{@"target": self.reactTag}];
         [self setPaused:_paused];
+      }
+
+    } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
+
+      // Prevent duplicate 'onVideoBufferEmpty' events.
+      BOOL isBufferEmpty = _playerItem.playbackBufferEmpty;
+      if (!_isBufferEmpty && isBufferEmpty) {
+        _isBufferEmpty = YES;
+        [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
+                                            body:@{@"target": self.reactTag}];
       }
     }
   } else {
@@ -317,7 +396,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
-    // TODO check loadedTimeRanges
 
     float maxSeekTime = [self getDuration:item] - 0.1;
     if (seekTime >= maxSeekTime) {
@@ -329,6 +407,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     if (CMTimeCompare(item.currentTime, cmSeekTime) == 0) {
       return;
+    }
+
+    // Seeking to an unbuffered time should dispatch an 'onVideoBufferEmpty' event.
+    if (!_isBufferEmpty && ![self isTimeBuffered:cmSeekTime]) {
+      _isBufferEmpty = YES;
+      [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
+                                          body:@{@"target": self.reactTag}];
     }
 
     // Prevent 'onVideoProgress' events while seeking.
