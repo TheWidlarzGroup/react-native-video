@@ -274,6 +274,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+  NSNumber *duration = [NSNumber numberWithFloat:[self getDuration:[_player currentItem]]];
+  [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                      body:@{@"currentTime": duration,
+                                             @"playableDuration": duration,
+                                             @"target": self.reactTag}];
   [_eventDispatcher sendInputEventWithName:@"onVideoEnd" body:@{@"target": self.reactTag}];
 
   if (_repeat) {
