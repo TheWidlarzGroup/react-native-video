@@ -317,21 +317,19 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
 
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
-    CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
-
-    if (CMTimeCompare(current, cmSeekTime) != 0) {
-      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
-                                            body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                                                   @"seekTime": [NSNumber numberWithFloat:seekTime],
-                                                   @"target": self.reactTag}];
-      }];
-
+    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+    if (CMTimeCompare(item.currentTime, cmSeekTime) == 0) {
+      return;
     }
 
+    [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+      [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
+                                          body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                                                 @"seekTime": [NSNumber numberWithFloat:seekTime],
+                                                 @"target": self.reactTag}];
+    }];
   } else {
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
