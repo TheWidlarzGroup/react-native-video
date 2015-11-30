@@ -103,7 +103,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                         body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
-                                               @"playableDuration": [self calculatePlayableDuration],
                                                @"target": self.reactTag}];
     _prevProgressUpdateTime = [NSDate date];
   }
@@ -116,31 +115,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     duration = 0.0;
   }
   return duration;
-}
-
-/*!
- * Calculates and returns the playable duration of the current player item using its loaded time ranges.
- *
- * \returns The playable duration of the current player item in seconds.
- */
-- (NSNumber *)calculatePlayableDuration
-{
-  AVPlayerItem *video = _player.currentItem;
-  if (video.status == AVPlayerItemStatusReadyToPlay) {
-    __block CMTimeRange effectiveTimeRange;
-    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-      CMTimeRange timeRange = [obj CMTimeRangeValue];
-      if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
-        effectiveTimeRange = timeRange;
-        *stop = YES;
-      }
-    }];
-    Float64 playableDuration = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange));
-    if (playableDuration > 0) {
-      return [NSNumber numberWithFloat:playableDuration];
-    }
-  }
-  return [NSNumber numberWithInteger:0];
 }
 
 - (NSArray *)getLoadedTimeRanges
@@ -355,10 +329,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
   _videoEnded = YES;
-  NSNumber *duration = [NSNumber numberWithFloat:[self getDuration:[_player currentItem]]];
+  NSNumber *currentTime = [NSNumber numberWithFloat:[self getDuration:[_player currentItem]]];
   [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                      body:@{@"currentTime": duration,
-                                             @"playableDuration": duration,
+                                      body:@{@"currentTime": currentTime,
                                              @"target": self.reactTag}];
   [_eventDispatcher sendInputEventWithName:@"onVideoEnd" body:@{@"target": self.reactTag}];
 
@@ -426,7 +399,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
       [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
                                           body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                                                 @"seekTime": [NSNumber numberWithFloat:seekTime],
                                                  @"target": self.reactTag}];
     }];
   } else {
