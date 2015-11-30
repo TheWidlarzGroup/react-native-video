@@ -245,8 +245,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (object == _playerItem) {
 
+    // Handle player item status change.
     if ([keyPath isEqualToString:statusKeyPath]) {
-      // Handle player item status change.
+
       if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
                                             body:@{@"duration": [NSNumber numberWithFloat:[self getDuration:_playerItem]],
@@ -258,14 +259,17 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"target": self.reactTag}];
+
         if (_pendingSeek) {
           _pendingSeek = false;
           [self setSeek:_pendingSeekTime];
         }
+
         [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
-      } else if(_playerItem.status == AVPlayerItemStatusFailed) {
+
+      } else if (_playerItem.status == AVPlayerItemStatusFailed) {
         [_eventDispatcher sendInputEventWithName:@"onVideoError"
                                             body:@{@"error": @{
                                                        @"code": [NSNumber numberWithInteger: _playerItem.error.code],
