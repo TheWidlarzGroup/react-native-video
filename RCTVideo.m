@@ -402,6 +402,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
 
+    // The user called 'setSeek:' again.
+    if (!finished) {
+      return;
+    }
+
     // The 'seekTime' is always less than the video duration.
     _videoEnded = NO;
 
