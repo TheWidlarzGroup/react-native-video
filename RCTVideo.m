@@ -319,6 +319,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
 
+    float maxSeekTime = [self getDuration:item] - 0.1;
+    if (seekTime >= maxSeekTime) {
+      seekTime = maxSeekTime;
+    }
+
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
