@@ -369,46 +369,46 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSeek:(float)seekTime
 {
-  int timeScale = 10000;
-
   AVPlayerItem *item = _player.currentItem;
-  if (item && item.status == AVPlayerItemStatusReadyToPlay) {
-
-    float maxSeekTime = [self getDuration:item] - 0.1;
-    if (seekTime >= maxSeekTime) {
-      seekTime = maxSeekTime;
-    }
-
-    // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
-    if (CMTimeCompare(item.currentTime, cmSeekTime) == 0) {
-      return;
-    }
-
-    // Seeking to an unbuffered time should dispatch an 'onVideoBufferEmpty' event.
-    if (!_isBufferEmpty && ![self isTimeBuffered:cmSeekTime]) {
-      _isBufferEmpty = YES;
-      [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
-                                          body:@{@"target": self.reactTag}];
-    }
-
-    // Prevent 'onVideoProgress' events while seeking.
-    _videoEnded = YES;
-
-    [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-
-      // The 'seekTime' is always less than the video duration.
-      _videoEnded = NO;
-
-      [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
-                                          body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                                                 @"target": self.reactTag}];
-    }];
-  } else {
+  if (!item || item.status != AVPlayerItemStatusReadyToPlay) {
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
+    return;
   }
+
+  // If 'seekTime' is >= the video duration, nothing is rendered.
+  float maxSeekTime = [self getDuration:item] - 0.1;
+  if (seekTime >= maxSeekTime) {
+    seekTime = maxSeekTime;
+  }
+
+  int timeScale = 10000;
+  // TODO figure out a good tolerance level
+  CMTime tolerance = CMTimeMake(1000, timeScale);
+  CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+  if (CMTimeCompare(item.currentTime, cmSeekTime) == 0) {
+    return;
+  }
+
+  // Seeking to an unbuffered time should dispatch an 'onVideoBufferEmpty' event.
+  if (!_isBufferEmpty && ![self isTimeBuffered:cmSeekTime]) {
+    _isBufferEmpty = YES;
+    [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
+                                        body:@{@"target": self.reactTag}];
+  }
+
+  // Prevent 'onVideoProgress' events while seeking.
+  _videoEnded = YES;
+
+  [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+
+    // The 'seekTime' is always less than the video duration.
+    _videoEnded = NO;
+
+    [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
+                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                                               @"target": self.reactTag}];
+  }];
 }
 
 - (void)setRate:(float)rate
