@@ -102,6 +102,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   }
 }
 
+- (float)getDuration:(AVPlayerItem *)video
+{
+  float duration = CMTimeGetSeconds(video.asset.duration);
+  if (isnan(duration)) {
+    duration = 0.0;
+  }
+  return duration;
+}
+
 /*!
  * Calculates and returns the playable duration of the current player item using its loaded time ranges.
  *
@@ -219,14 +228,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
       if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
-        float duration = CMTimeGetSeconds(_playerItem.asset.duration);
-
-        if (isnan(duration)) {
-          duration = 0.0;
-        }
-
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
-                                            body:@{@"duration": [NSNumber numberWithFloat:duration],
+                                            body:@{@"duration": [NSNumber numberWithFloat:[self getDuration:_playerItem]],
                                                    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
                                                    @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
                                                    @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
