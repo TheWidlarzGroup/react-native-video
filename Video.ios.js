@@ -27,6 +27,7 @@ var Video = React.createClass({
     onBufferEmpty: PropTypes.func,
     onBufferReady: PropTypes.func,
     onProgress: PropTypes.func,
+    onSeek: PropTypes.func,
     onEnd: PropTypes.func,
   },
 
