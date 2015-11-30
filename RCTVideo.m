@@ -238,7 +238,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"target": self.reactTag}];
-
+        if (_pendingSeek) {
+          _pendingSeek = false;
+          [self setSeek:_pendingSeekTime];
+        }
         [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
@@ -322,11 +325,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"target": self.reactTag}];
       }];
 
-      _pendingSeek = false;
     }
 
   } else {
-    // TODO: See if this makes sense and if so, actually implement it
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
   }
