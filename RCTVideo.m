@@ -209,10 +209,23 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  bool *isLocalFile = [RCTConvert BOOL:[source objectForKey:@"isLocalFile"]];
 
-  NSURL *url = (isNetwork || isAsset) ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  NSURL *url = [NSURL alloc];
+
+  if (isLocalFile) {
+    url = [[NSBundle mainBundle] URLForResource:uri withExtension:@"mov"];
+  } else {
+    if (isNetwork || isAsset) {
+      url = [NSURL URLWithString:uri];
+    } else {
+      url = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+    }
+  }
+
+//  NSURL *url = (isNetwork || isAsset) ?
+//    [NSURL URLWithString:uri] :
+//    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
   if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
