@@ -1,6 +1,8 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
 #import "RCTBridge.h"
+#import "RCTUIManager.h"
+#import "RCTSparseArray.h"
 #import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideoManager
@@ -30,7 +32,7 @@ RCT_EXPORT_MODULE();
 
 - (dispatch_queue_t)methodQueue
 {
-    return dispatch_get_main_queue();
+  return dispatch_get_main_queue();
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
@@ -41,6 +43,15 @@ RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, float);
+
+RCT_EXPORT_METHOD(attemptStop:(nonnull NSNumber *)reactTag callback:(RCTResponseSenderBlock)callback) {
+  RCTVideo *videoView = (RCTVideo *)[self.bridge.uiManager viewForReactTag:reactTag];
+  if (!videoView) {
+    callback(@[[NSNull null], @(NO)]);
+  }
+  [videoView stop];
+  callback(@[[NSNull null], @(YES)]);
+}
 
 - (NSDictionary *)constantsToExport
 {

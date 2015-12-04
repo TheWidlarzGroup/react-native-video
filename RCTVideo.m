@@ -35,11 +35,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _paused;
   BOOL _repeat;
   NSString * _resizeMode;
+
+  BOOL _stopped;
+  BOOL _timerInvalidated;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
 {
-  if ((self = [super init])) {
+  if ((self = [super initWithFrame:CGRectZero])) {
     _eventDispatcher = eventDispatcher;
 
     _rate = 1.0;
@@ -48,6 +51,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+    _timerInvalidated = NO;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -129,7 +133,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)stopProgressTimer
 {
-  [_progressUpdateTimer invalidate];
+  if (!_timerInvalidated) {
+    [_progressUpdateTimer invalidate];
+    _timerInvalidated = YES;
+  }
 }
 
 - (void)startProgressTimer
@@ -166,6 +173,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSrc:(NSDictionary *)source
 {
+  if (!source[@"uri"]) {
+    return;
+  }
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
@@ -199,10 +209,23 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  bool *isLocalFile = [RCTConvert BOOL:[source objectForKey:@"isLocalFile"]];
 
-  NSURL *url = (isNetwork || isAsset) ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  NSURL *url = [NSURL alloc];
+
+  if (isLocalFile) {
+    url = [[NSBundle mainBundle] URLForResource:uri withExtension:@"mov"];
+  } else {
+    if (isNetwork || isAsset) {
+      url = [NSURL URLWithString:uri];
+    } else {
+      url = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+    }
+  }
+
+//  NSURL *url = (isNetwork || isAsset) ?
+//    [NSURL URLWithString:uri] :
+//    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
   if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
@@ -393,21 +416,27 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)removeFromSuperview
 {
-  [_progressUpdateTimer invalidate];
-  _prevProgressUpdateTime = nil;
-
-  [_player pause];
-  _player = nil;
-
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
-
-  [self removePlayerItemObservers];
-
-  _eventDispatcher = nil;
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-
+  [self stop];
   [super removeFromSuperview];
+}
+
+- (void)stop {
+  if (!_stopped) {
+    _stopped = YES;
+    [self stopProgressTimer];
+    _prevProgressUpdateTime = nil;
+
+    [_player pause];
+    _player = nil;
+
+    [_playerLayer removeFromSuperlayer];
+    _playerLayer = nil;
+
+    [self removePlayerItemObservers];
+
+    _eventDispatcher = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+  }
 }
 
 @end

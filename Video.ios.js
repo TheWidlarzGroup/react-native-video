@@ -25,6 +25,12 @@ var Video = React.createClass({
     onError: PropTypes.func,
     onProgress: PropTypes.func,
     onEnd: PropTypes.func,
+    isLocalFile: PropTypes.bool,
+  },
+
+  componentWillUnmount() {
+    var nodeHandle = React.findNodeHandle(this.refs[VIDEO_REF]);
+    NativeModules.VideoManager.attemptStop(nodeHandle, () => {});
   },
 
   setNativeProps(props) {
@@ -87,6 +93,7 @@ var Video = React.createClass({
         uri: uri,
         isNetwork,
         isAsset,
+        isLocalFile: this.props.isLocalFile || false,
         type: source.type || 'mp4'
       },
       onVideoLoad: this._onLoad,
