@@ -120,8 +120,6 @@ Video.propTypes = {
   seek: PropTypes.number,
 
   /* Wrapper component */
-  style: View.propTypes.style,
-  ref: PropTypes.string,
   source: PropTypes.object,
   resizeMode: PropTypes.string,
   repeat: PropTypes.bool,
@@ -142,6 +140,7 @@ Video.propTypes = {
   translateX: React.PropTypes.number,
   translateY: React.PropTypes.number,
   rotation: React.PropTypes.number,
+  ...View.propTypes,
 };
 
 const RCTVideo = requireNativeComponent('RCTVideo', Video, {
