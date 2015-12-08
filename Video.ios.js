@@ -31,6 +31,14 @@ var Video = React.createClass({
     onEnd: PropTypes.func,
   },
 
+  seek(time) {
+    this.setNativeProps({seek: parseFloat(time)});
+  },
+
+  setSource(source) {
+    this.setNativeProps({src: this._createSrc(source)});
+  },
+
   setNativeProps(props) {
     this.refs[VIDEO_REF].setNativeProps(props);
   },
@@ -67,23 +75,25 @@ var Video = React.createClass({
     this.props.onSeek && this.props.onSeek(event.nativeEvent);
   },
 
-  seek(time) {
-    this.setNativeProps({seek: parseFloat(time)});
-  },
-
   _onEnd(event) {
     this.props.onEnd && this.props.onEnd(event.nativeEvent);
   },
 
-  render() {
-    var style = [styles.base, this.props.style];
-    var source = this.props.source;
+  _createSrc(source) {
     var uri = source.uri;
     if (uri && uri.match(/^\//)) {
       uri = 'file://' + uri;
     }
-    var isNetwork = !!(uri && uri.match(/^https?:/));
-    var isAsset = !!(uri && uri.match(/^(assets-library|file):/));
+    return {
+      uri: uri,
+      isNetwork: !!(uri && uri.match(/^https?:/)),
+      isAsset: !!(uri && uri.match(/^(assets-library|file):/)),
+      type: source.type || 'mp4'
+    };
+  },
+
+  render() {
+    var style = [styles.base, this.props.style];
 
     var resizeMode;
     if (this.props.resizeMode === VideoResizeMode.stretch) {
@@ -99,12 +109,7 @@ var Video = React.createClass({
     var nativeProps = extend({}, this.props, {
       style,
       resizeMode: resizeMode,
-      src: {
-        uri: uri,
-        isNetwork,
-        isAsset,
-        type: source.type || 'mp4'
-      },
+      src: this._createSrc(this.props.source),
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
       onVideoBuffer: this._onBuffer,
