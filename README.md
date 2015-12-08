@@ -7,15 +7,47 @@ Requires react-native >= 0.4.4
 
 ### Add it to your project
 
-1. Run `npm install react-native-video --save`
-2. Open your project in XCode, right click on `Libraries` and click `Add Files to "Your Project Name"`
+Run `npm install react-native-video --save`
+
+#### iOS
+
+1. Open your project in XCode, right click on `Libraries` and click `Add Files to "Your Project Name"`
    * ![Screenshot](http://url.brentvatne.ca/jQp8.png) ![Screenshot](http://url.brentvatne.ca/1gqUD.png) (use the RCTVideo project rather than the one pictured in screenshot).
-3. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
+2. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
    ![(Screenshot)](http://url.brentvatne.ca/g9Wp.png).
-4. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
-5. Whenever you want to use it within React code now you can: `var Video =
+3. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
+4. Whenever you want to use it within React code now you can: `var Video =
    require('react-native-video');`
 
+#### Android
+
+Make the following additions to the given files.
+
+**android/settings.gradle**
+```
+include ':RCTVideo', ':app'
+project(':RCTVideo').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+```
+
+**android/app/build.gradle**
+```
+dependencies {
+   ...
+   compile project(':RCTVideo')
+}
+```
+
+**MainActivity.java**
+
+On top, where imports are:
+```java
+import com.brentvatne.react.ReactVideoPackage;
+```
+
+Under `.addPackage(new MainReactPackage())`:
+```java
+.addPackage(new ReactVideoPackage())
+```
 
 ## Usage
 
@@ -48,6 +80,7 @@ var styles = Stylesheet.create({
   },
 });
 ```
+
 ## Static Methods
 
 `seek(seconds)`
