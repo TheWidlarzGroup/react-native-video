@@ -301,6 +301,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       BOOL isBufferReady = _playerItem.playbackLikelyToKeepUp;
       if (_isBufferEmpty && isBufferReady) {
         _isBufferEmpty = NO;
+        _loadedTimeRanges = [self getLoadedTimeRanges];
+        [_eventDispatcher sendInputEventWithName:@"onVideoBuffer"
+                                            body:@{@"ranges": _loadedTimeRanges,
+                                                   @"target": self.reactTag}];
         [_eventDispatcher sendInputEventWithName:@"onVideoBufferReady"
                                             body:@{@"target": self.reactTag}];
         [self setPaused:_paused];
@@ -312,6 +316,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       BOOL isBufferEmpty = _playerItem.playbackBufferEmpty;
       if (!_isBufferEmpty && isBufferEmpty) {
         _isBufferEmpty = YES;
+        _loadedTimeRanges = nil;
         [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
                                             body:@{@"target": self.reactTag}];
       }
