@@ -102,10 +102,19 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
+                                        body:@{@"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:video]],
                                                @"target": self.reactTag}];
     _prevProgressUpdateTime = [NSDate date];
   }
+}
+
+- (float)getCurrentTime:(AVPlayerItem *)video
+{
+  float currentTime = CMTimeGetSeconds(video.currentTime);
+  if (isnan(currentTime)) {
+    currentTime = 0.0;
+  }
+  return currentTime;
 }
 
 - (float)getDuration:(AVPlayerItem *)video
@@ -251,7 +260,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
                                             body:@{@"duration": [NSNumber numberWithFloat:[self getDuration:_playerItem]],
-                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
+                                                   @"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:_playerItem]],
                                                    @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
                                                    @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
                                                    @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
@@ -416,7 +425,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _videoEnded = NO;
 
     [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
-                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                                        body:@{@"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:item]],
                                                @"target": self.reactTag}];
   }];
 }
