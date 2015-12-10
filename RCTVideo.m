@@ -6,6 +6,8 @@
 #import <AVFoundation/AVFoundation.h>
 
 static NSString *const statusKeyPath = @"status";
+static NSString *const loadedTimeRangesKeyPath = @"loadedTimeRanges";
+static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 
 @implementation RCTVideo
@@ -15,9 +17,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _playerItemObserversSet;
   AVPlayerLayer *_playerLayer;
   NSURL *_videoURL;
+  BOOL _videoEnded;
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
+
+  BOOL _isBufferEmpty;
+  NSArray *_loadedTimeRanges;
 
   bool _pendingSeek;
   float _pendingSeekTime;
@@ -44,7 +50,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     _rate = 1.0;
     _volume = 1.0;
-    _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
+    _resizeMode = AVLayerVideoGravityResizeAspectFill;
+    _isBufferEmpty = YES;
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
@@ -89,42 +96,69 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)sendProgressUpdate
 {
   AVPlayerItem *video = [_player currentItem];
-  if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
+  if (video == nil || _videoEnded || video.status != AVPlayerItemStatusReadyToPlay) {
     return;
   }
 
   if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
-                                               @"playableDuration": [self calculatePlayableDuration],
+                                        body:@{@"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:video]],
                                                @"target": self.reactTag}];
     _prevProgressUpdateTime = [NSDate date];
   }
 }
 
-/*!
- * Calculates and returns the playable duration of the current player item using its loaded time ranges.
- *
- * \returns The playable duration of the current player item in seconds.
- */
-- (NSNumber *)calculatePlayableDuration
+- (float)getCurrentTime:(AVPlayerItem *)video
+{
+  float currentTime = CMTimeGetSeconds(video.currentTime);
+  if (isnan(currentTime)) {
+    currentTime = 0.0;
+  }
+  return currentTime;
+}
+
+- (float)getDuration:(AVPlayerItem *)video
+{
+  float duration = CMTimeGetSeconds(video.asset.duration);
+  if (isnan(duration)) {
+    duration = 0.0;
+  }
+  return duration;
+}
+
+- (NSArray *)getLoadedTimeRanges
 {
   AVPlayerItem *video = _player.currentItem;
-  if (video.status == AVPlayerItemStatusReadyToPlay) {
-    __block CMTimeRange effectiveTimeRange;
-    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-      CMTimeRange timeRange = [obj CMTimeRangeValue];
-      if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
-        effectiveTimeRange = timeRange;
-        *stop = YES;
-      }
+  NSMutableArray *ranges = [NSMutableArray new];
+  [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    CMTimeRange range = [obj CMTimeRangeValue];
+    [ranges addObject:@{
+      @"start": [NSNumber numberWithFloat:CMTimeGetSeconds(range.start)],
+      @"duration": [NSNumber numberWithFloat:CMTimeGetSeconds(range.duration)]
     }];
-    Float64 playableDuration = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange));
-    if (playableDuration > 0) {
-      return [NSNumber numberWithFloat:playableDuration];
-    }
+  }];
+  return [ranges copy];
+}
+
+- (BOOL)isTimeBuffered:(CMTime)time
+{
+  // Nothing is buffered yet.
+  if (_isBufferEmpty) {
+    return NO;
   }
-  return [NSNumber numberWithInteger:0];
+
+  __block BOOL isBuffered = NO;
+
+  AVPlayerItem *video = [_player currentItem];
+  [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    CMTimeRange range = [obj CMTimeRangeValue];
+    if (CMTimeRangeContainsTime(range, time)) {
+      isBuffered = YES;
+      *stop = YES;
+    }
+  }];
+
+  return isBuffered;
 }
 
 - (void)stopProgressTimer
@@ -146,6 +180,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:loadedTimeRangesKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
   _playerItemObserversSet = YES;
 }
@@ -157,6 +193,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+    [_playerItem removeObserver:self forKeyPath:loadedTimeRangesKeyPath];
+    [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     _playerItemObserversSet = NO;
   }
@@ -216,18 +254,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (object == _playerItem) {
 
+    // Handle player item status change.
     if ([keyPath isEqualToString:statusKeyPath]) {
-      // Handle player item status change.
+
       if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
-        float duration = CMTimeGetSeconds(_playerItem.asset.duration);
-
-        if (isnan(duration)) {
-          duration = 0.0;
-        }
-
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
-                                            body:@{@"duration": [NSNumber numberWithFloat:duration],
-                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
+                                            body:@{@"duration": [NSNumber numberWithFloat:[self getDuration:_playerItem]],
+                                                   @"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:_playerItem]],
                                                    @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
                                                    @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
                                                    @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
@@ -236,20 +269,65 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"target": self.reactTag}];
 
+        if (_pendingSeek) {
+          _pendingSeek = false;
+          [self setSeek:_pendingSeekTime];
+        }
+
         [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
-      } else if(_playerItem.status == AVPlayerItemStatusFailed) {
+
+      } else if (_playerItem.status == AVPlayerItemStatusFailed) {
         [_eventDispatcher sendInputEventWithName:@"onVideoError"
                                             body:@{@"error": @{
                                                        @"code": [NSNumber numberWithInteger: _playerItem.error.code],
                                                        @"domain": _playerItem.error.domain},
                                                    @"target": self.reactTag}];
       }
+
+    } else if ([keyPath isEqualToString:loadedTimeRangesKeyPath]) {
+
+      // Prevent 'onVideoBuffer' events while seeking or finished.
+      if (_pendingSeek || _videoEnded) {
+        return;
+      }
+
+      // Prevent duplicate 'onVideoBuffer' events.
+      NSArray *loadedTimeRanges = [self getLoadedTimeRanges];
+      if (_loadedTimeRanges && [_loadedTimeRanges isEqualToArray:loadedTimeRanges]) {
+        return;
+      }
+
+      _loadedTimeRanges = loadedTimeRanges;
+      [_eventDispatcher sendInputEventWithName:@"onVideoBuffer"
+                                          body:@{@"ranges": _loadedTimeRanges,
+                                                 @"target": self.reactTag}];
+
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
-      // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if (_playerItem.playbackLikelyToKeepUp) {
+
+      // Prevent duplicate 'onVideoBufferReady' events.
+      BOOL isBufferReady = _playerItem.playbackLikelyToKeepUp;
+      if (_isBufferEmpty && isBufferReady) {
+        _isBufferEmpty = NO;
+        _loadedTimeRanges = [self getLoadedTimeRanges];
+        [_eventDispatcher sendInputEventWithName:@"onVideoBuffer"
+                                            body:@{@"ranges": _loadedTimeRanges,
+                                                   @"target": self.reactTag}];
+        [_eventDispatcher sendInputEventWithName:@"onVideoBufferReady"
+                                            body:@{@"target": self.reactTag}];
         [self setPaused:_paused];
+      }
+
+    } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
+
+      // Prevent duplicate 'onVideoBufferEmpty' events.
+      BOOL isBufferEmpty = _playerItem.playbackBufferEmpty;
+      if (!_isBufferEmpty && isBufferEmpty) {
+        _isBufferEmpty = YES;
+        _loadedTimeRanges = nil;
+        [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
+                                            body:@{@"target": self.reactTag}];
       }
     }
   } else {
@@ -268,6 +346,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+  _videoEnded = YES;
+  NSNumber *currentTime = [NSNumber numberWithFloat:[self getDuration:[_player currentItem]]];
+  [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                      body:@{@"currentTime": currentTime,
+                                             @"target": self.reactTag}];
   [_eventDispatcher sendInputEventWithName:@"onVideoEnd" body:@{@"target": self.reactTag}];
 
   if (_repeat) {
@@ -295,38 +378,72 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_player setRate:_rate];
   }
 
+  if (_paused == paused) {
+    return;
+  }
   _paused = paused;
+
+  AVPlayerItem *video = [_player currentItem];
+  NSNumber *currentTime = [NSNumber numberWithFloat:[self getCurrentTime:video]];
+
+  if (paused) {
+    [_eventDispatcher sendInputEventWithName:@"onVideoPause"
+                                        body:@{@"currentTime": currentTime,
+                                               @"target": self.reactTag}];
+  } else {
+    [_eventDispatcher sendInputEventWithName:@"onVideoPlay"
+                                        body:@{@"currentTime": currentTime,
+                                               @"target": self.reactTag}];
+  }
 }
 
 - (void)setSeek:(float)seekTime
 {
-  int timeScale = 10000;
-
   AVPlayerItem *item = _player.currentItem;
-  if (item && item.status == AVPlayerItemStatusReadyToPlay) {
-    // TODO check loadedTimeRanges
-
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
-    CMTime current = item.currentTime;
-    // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
-
-    if (CMTimeCompare(current, cmSeekTime) != 0) {
-      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
-                                            body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                                                   @"seekTime": [NSNumber numberWithFloat:seekTime],
-                                                   @"target": self.reactTag}];
-      }];
-
-      _pendingSeek = false;
-    }
-
-  } else {
-    // TODO: See if this makes sense and if so, actually implement it
+  if (!item || item.status != AVPlayerItemStatusReadyToPlay) {
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
+    return;
   }
+
+  // If 'seekTime' is >= the video duration, nothing is rendered.
+  float maxSeekTime = [self getDuration:item] - 0.1;
+  if (seekTime >= maxSeekTime) {
+    seekTime = maxSeekTime;
+  }
+
+  int timeScale = 10000;
+  // TODO figure out a good tolerance level
+  CMTime tolerance = CMTimeMake(1000, timeScale);
+  CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+  if (CMTimeCompare(item.currentTime, cmSeekTime) == 0) {
+    return;
+  }
+
+  // Seeking to an unbuffered time should dispatch an 'onVideoBufferEmpty' event.
+  if (!_isBufferEmpty && ![self isTimeBuffered:cmSeekTime]) {
+    _isBufferEmpty = YES;
+    [_eventDispatcher sendInputEventWithName:@"onVideoBufferEmpty"
+                                        body:@{@"target": self.reactTag}];
+  }
+
+  // Prevent 'onVideoProgress' events while seeking.
+  _videoEnded = YES;
+
+  [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+
+    // The user called 'setSeek:' again.
+    if (!finished) {
+      return;
+    }
+
+    // The 'seekTime' is always less than the video duration.
+    _videoEnded = NO;
+
+    [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
+                                        body:@{@"currentTime": [NSNumber numberWithFloat:[self getCurrentTime:item]],
+                                               @"target": self.reactTag}];
+  }];
 }
 
 - (void)setRate:(float)rate
