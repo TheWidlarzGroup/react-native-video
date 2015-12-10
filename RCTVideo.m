@@ -378,7 +378,23 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_player setRate:_rate];
   }
 
+  if (_paused == paused) {
+    return;
+  }
   _paused = paused;
+
+  AVPlayerItem *video = [_player currentItem];
+  NSNumber *currentTime = [NSNumber numberWithFloat:[self getCurrentTime:video]];
+
+  if (paused) {
+    [_eventDispatcher sendInputEventWithName:@"onVideoPause"
+                                        body:@{@"currentTime": currentTime,
+                                               @"target": self.reactTag}];
+  } else {
+    [_eventDispatcher sendInputEventWithName:@"onVideoPlay"
+                                        body:@{@"currentTime": currentTime,
+                                               @"target": self.reactTag}];
+  }
 }
 
 - (void)setSeek:(float)seekTime
