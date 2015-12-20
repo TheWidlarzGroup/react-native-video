@@ -7,6 +7,6 @@
   },
   "dependencies": {
     "react-native": "^0.16.0",
-    "react-native-video": "brentvatne/react-native-video#feature/android-support"
+    "react-native-video": "^0.6.1"
   }
 }
