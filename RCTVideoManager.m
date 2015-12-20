@@ -16,28 +16,21 @@ RCT_EXPORT_MODULE();
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 
-- (NSDictionary *)customDirectEventTypes
+- (NSArray *)customDirectEventTypes
 {
-  return @{
-    RNVideoEventLoading: @{
-      @"registrationName": @"onLoadStart"
-    },
-    RNVideoEventLoaded: @{
-      @"registrationName": @"onLoad"
-    },
-    RNVideoEventLoadingError: @{
-      @"registrationName": @"onError"
-    },
-    RNVideoEventProgress: @{
-      @"registrationName": @"onProgress"
-    },
-    RNVideoEventSeek: @{
-      @"registrationName": @"onSeek"
-    },
-    RNVideoEventEnd: @{
-      @"registrationName": @"onEnd"
-    }
-  };
+  return @[
+    @"onVideoLoadStart",
+    @"onVideoLoad",
+    @"onVideoError",
+    @"onVideoProgress",
+    @"onVideoSeek",
+    @"onVideoEnd"
+  ];
+}
+
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
