@@ -101,7 +101,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
    if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
-        [_eventDispatcher sendInputEventWithName:RNVideoEventProgress
+        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                             body:@{
                                                      @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
                                                      @"playableDuration": [self calculatePlayableDuration],
@@ -150,7 +150,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   return [NSNumber numberWithInteger:0];
 }
 
-- (void)addPlayerItemObserver
+- (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
@@ -229,7 +229,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if (object == _playerItem) {
+   if (object == _playerItem) {
 
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
@@ -251,7 +251,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"target": self.reactTag}];
 
-        [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
       } else if(_playerItem.status == AVPlayerItemStatusFailed) {
@@ -266,29 +265,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       if (_playerItem.playbackLikelyToKeepUp) {
         [self setPaused:_paused];
       }
-
-      [_eventDispatcher sendInputEventWithName:RNVideoEventLoaded body:@{
-        @"duration": [NSNumber numberWithFloat:duration],
-        @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
-        @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
-        @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
-        @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
-        @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
-        @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
-        @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
-        @"target": self.reactTag
-      }];
-
-      [self attachListeners];
-      [self applyModifiers];
-    } else if(_playerItem.status == AVPlayerItemStatusFailed) {
-      [_eventDispatcher sendInputEventWithName:RNVideoEventLoadingError body:@{
-        @"error": @{
-          @"code": [NSNumber numberWithInteger: _playerItem.error.code],
-          @"domain": _playerItem.error.domain
-        },
-        @"target": self.reactTag
-      }];
     }
   } else {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
