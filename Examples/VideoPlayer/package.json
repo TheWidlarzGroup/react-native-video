@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node_modules/react-native/packager/packager.sh"
   },
+  "scripts": { 
+    "postinstall" : "cp ../../*.js ./node_modules/react-native-video"
+  },
   "dependencies": {
     "react-native": "^0.16.0",
     "react-native-video": "brentvatne/react-native-video"
