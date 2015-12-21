@@ -24,9 +24,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   float _lastSeekTime;
 
   /* For sending videoProgress events */
-  id _progressUpdateTimer;
-  int _progressUpdateInterval;
-  NSDate *_prevProgressUpdateTime;
+  Float64 _progressUpdateInterval;
+  id _timeObserver;
 
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
@@ -48,6 +47,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
+    _progressUpdateInterval = 250;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -73,14 +73,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
   if (!_paused) {
-    [self stopProgressTimer];
+    [_player pause];
     [_player setRate:0.0];
   }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
-  [self startProgressTimer];
   [self applyModifiers];
 }
 
@@ -88,18 +87,42 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)sendProgressUpdate
 {
-  AVPlayerItem *video = [_player currentItem];
-  if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
-    return;
-  }
+   AVPlayerItem *video = [_player currentItem];
+   if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
+     return;
+   }
+    
+   CMTime playerDuration = [self playerItemDuration];
+   if (CMTIME_IS_INVALID(playerDuration)) {
+      return;
+   }
 
-  if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
-                                               @"playableDuration": [self calculatePlayableDuration],
-                                               @"target": self.reactTag}];
-    _prevProgressUpdateTime = [NSDate date];
-  }
+   CMTime currentTime = _player.currentTime;
+   const Float64 duration = CMTimeGetSeconds(playerDuration);
+   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+   if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
+        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                            body:@{
+                                                     @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                                                     @"playableDuration": [self calculatePlayableDuration],
+                                                     @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                                                     @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                                                     @"target": self.reactTag
+                                                 }];
+   }
+}
+
+/*!
+ *  Get the duration for a AVPlayerItem.
+ */
+
+- (CMTime)playerItemDuration
+{
+    AVPlayerItem *playerItem = [_player currentItem];
+    if (playerItem.status == AVPlayerItemStatusReadyToPlay) {
+        return([playerItem duration]);
+    }
+    return(kCMTimeInvalid);
 }
 
 /*!
@@ -127,22 +150,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   return [NSNumber numberWithInteger:0];
 }
 
-- (void)stopProgressTimer
-{
-  [_progressUpdateTimer invalidate];
-}
-
-- (void)startProgressTimer
-{
-  _progressUpdateInterval = 250;
-  _prevProgressUpdateTime = nil;
-
-  [self stopProgressTimer];
-
-  _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
-  [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-}
-
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
@@ -166,6 +173,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSrc:(NSDictionary *)source
 {
+  [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
@@ -184,7 +192,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [self.layer addSublayer:_playerLayer];
   self.layer.needsDisplayOnBoundsChange = YES;
-
+    
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  __weak RCTVideo *weakSelf = self;
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                        queue:NULL
+                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                   ];
   [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
                                       body:@{@"src": @{
                                                  @"uri": [source objectForKey:@"uri"],
@@ -214,7 +229,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if (object == _playerItem) {
+   if (object == _playerItem) {
 
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
@@ -236,7 +251,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"target": self.reactTag}];
 
-        [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
       } else if(_playerItem.status == AVPlayerItemStatusFailed) {
@@ -288,11 +302,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
-    [self stopProgressTimer];
-    [_player setRate:0.0];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player pause];
+      [_player setRate:0.0];
+    });
   } else {
-    [self startProgressTimer];
-    [_player setRate:_rate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_player play];
+      [_player setRate:_rate];
+    });
   }
 
   _paused = paused;
@@ -391,10 +409,19 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 #pragma mark - Lifecycle
 
+/* Cancels the previously registered time observer. */
+-(void)removePlayerTimeObserver
+{
+    if (_timeObserver)
+    {
+        [_player removeTimeObserver:_timeObserver];
+        _timeObserver = nil;
+    }
+}
+
 - (void)removeFromSuperview
 {
-  [_progressUpdateTimer invalidate];
-  _prevProgressUpdateTime = nil;
+  [self removePlayerTimeObserver];
 
   [_player pause];
   _player = nil;
