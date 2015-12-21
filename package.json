@@ -19,8 +19,7 @@
     "RCTVideoManager.m",
     "README.md",
     "Video.js",
-    "VideoResizeMode.js",
-    "VideoStylePropTypes.js"
+    "VideoResizeMode.js"
   ],
   "contributors": [
     {
