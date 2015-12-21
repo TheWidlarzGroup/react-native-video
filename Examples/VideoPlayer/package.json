@@ -5,8 +5,11 @@
   "scripts": {
     "start": "node_modules/react-native/packager/packager.sh"
   },
+  "scripts": { 
+    "postinstall" : "cp ../../*.js ../../*.m ../../*.h ../../README.md ../../package.json ./node_modules/react-native-video && cp ../../RCTVideo.xcodeproj/project.pbxproj ./node_modules/react-native-video/RCTVideo.xcodeproj/project.pbxproj"
+  },
   "dependencies": {
     "react-native": "^0.16.0",
-    "react-native-video": "brentvatne/react-native-video#feature/android-support"
+    "react-native-video": "brentvatne/react-native-video"
   }
 }
