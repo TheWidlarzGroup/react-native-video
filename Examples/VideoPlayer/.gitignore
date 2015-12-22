@@ -1,1 +1,3 @@
 node_modules/**/*
+VideoPlayer.xcodeproj/project.xcworkspace/**/*
+VideoPlayer.xcodeproj/xcuserdata/**/*

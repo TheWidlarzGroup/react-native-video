@@ -127,13 +127,15 @@ Video.propTypes = {
   muted: PropTypes.bool,
   volume: PropTypes.number,
   rate: PropTypes.number,
+  controls: PropTypes.bool,
+  currentTime: PropTypes.number,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
   onEnd: PropTypes.func,
-
+  
   /* Required by react-native */
   scaleX: React.PropTypes.number,
   scaleY: React.PropTypes.number,
@@ -146,7 +148,7 @@ Video.propTypes = {
 const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
-    seek: true,
+    seek: true
   },
 });
 
