@@ -10,6 +10,9 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener {
 
@@ -123,11 +126,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             if (isNetwork) {
                 setDataSource(uriString);
             } else {
-                setRawData(mThemedReactContext.getResources().getIdentifier(
-                        uriString,
-                        "raw",
-                        mThemedReactContext.getPackageName()
-                ));
+                FileInputStream video = new FileInputStream(uriString);
+                setDataSource(video.getFD());
             }
         } catch (Exception e) {
             e.printStackTrace();
