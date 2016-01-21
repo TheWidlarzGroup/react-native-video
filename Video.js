@@ -97,6 +97,8 @@ class Video extends Component {
         isNetwork,
         isAsset,
         type: source.type || 'mp4',
+        mainVer: source.mainVer || 0,
+        patchVer: source.patchVer || 0,
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,

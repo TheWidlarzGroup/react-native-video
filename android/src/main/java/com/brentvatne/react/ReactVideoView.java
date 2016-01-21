@@ -1,5 +1,6 @@
 package com.brentvatne.react;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
@@ -9,6 +10,11 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
+
+import com.android.vending.expansion.zipfile.APKExpansionSupport;
+import com.android.vending.expansion.zipfile.ZipResourceFile;
+
+import java.io.IOException;
 
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener {
@@ -65,6 +71,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mVolume = 1.0f;
     private float mRate = 1.0f;
 
+    private int mMainVer = 0;
+    private int mPatchVer = 0;
+
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private int mVideoDuration = 0;
     private int mVideoBufferedDuration = 0;
@@ -108,9 +117,15 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     public void setSrc(final String uriString, final String type, final boolean isNetwork) {
+        setSrc(uriString,type,isNetwork,0,0);
+    }
+
+    public void setSrc(final String uriString, final String type, final boolean isNetwork, final int expansionMainVersion, final int expansionPatchVersion) {
         mSrcUriString = uriString;
         mSrcType = type;
         mSrcIsNetwork = isNetwork;
+        mMainVer = expansionMainVersion;
+        mPatchVer = expansionPatchVersion;
 
         mMediaPlayerValid = false;
         mVideoDuration = 0;
@@ -123,11 +138,28 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             if (isNetwork) {
                 setDataSource(uriString);
             } else {
-                setRawData(mThemedReactContext.getResources().getIdentifier(
-                        uriString,
-                        "raw",
-                        mThemedReactContext.getPackageName()
-                ));
+                ZipResourceFile expansionFile= null;
+                AssetFileDescriptor fd= null;
+                if(mMainVer>0) {
+                    try {
+                        expansionFile = APKExpansionSupport.getAPKExpansionZipFile(mThemedReactContext, mMainVer, mPatchVer);
+                        fd = expansionFile.getAssetFileDescriptor(uriString.replace(".mp4","") + ".mp4");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(fd==null) {
+                    setRawData(mThemedReactContext.getResources().getIdentifier(
+                            uriString,
+                            "raw",
+                            mThemedReactContext.getPackageName()
+                    ));
+                }
+                else {
+                    setDataSource(fd.getFileDescriptor(), fd.getStartOffset(),fd.getLength());
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -138,6 +170,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         src.putString(ReactVideoViewManager.PROP_SRC_URI, uriString);
         src.putString(ReactVideoViewManager.PROP_SRC_TYPE, type);
         src.putBoolean(ReactVideoViewManager.PROP_SRC_IS_NETWORK, isNetwork);
+        if(mMainVer>0) {
+            src.putInt(ReactVideoViewManager.PROP_SRC_MAINVER, mMainVer);
+            if(mPatchVer>0) {
+                src.putInt(ReactVideoViewManager.PROP_SRC_PATCHVER, mPatchVer);
+            }
+        }
         WritableMap event = Arguments.createMap();
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
@@ -281,6 +319,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        setSrc(mSrcUriString, mSrcType, mSrcIsNetwork);
+        if(mMainVer>0) {
+            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork,mMainVer,mPatchVer);
+        }
+        else {
+            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork);
+        }
     }
 }
