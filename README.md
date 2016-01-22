@@ -81,6 +81,37 @@ var styles = Stylesheet.create({
 });
 ```
 
+## Android Expansion File Usage
+
+```javascript
+// Within your render function, assuming you have a file called
+// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
+       rate={1.0}                   // 0 is paused, 1 is normal.
+       volume={1.0}                 // 0 is muted, 1 is normal.
+       muted={false}                // Mutes the audio entirely.
+       paused={false}               // Pauses playback entirely.
+       resizeMode="cover"           // Fill the whole screen at aspect ratio.
+       repeat={true}                // Repeat forever.
+       onLoadStart={this.loadStart} // Callback when video starts to load
+       onLoad={this.setDuration}    // Callback when video loads
+       onProgress={this.setTime}    // Callback every ~250ms with currentTime
+       onEnd={this.onEnd}           // Callback when playback finishes
+       onError={this.videoError}    // Callback when video cannot be loaded
+       style={styles.backgroundVideo} />
+
+// Later on in your styles..
+var styles = Stylesheet.create({
+  backgroundVideo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+});
+```
+
 ## Static Methods
 
 `seek(seconds)`
