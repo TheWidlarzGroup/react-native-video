@@ -23,6 +23,8 @@ Run `npm install react-native-video --save`
 
 Make the following additions to the given files.
 
+**see below for expansion file usage**
+
 **android/settings.gradle**
 ```
 include ':RCTVideo', ':app'
