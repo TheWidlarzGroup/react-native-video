@@ -10,6 +10,9 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener {
 
@@ -120,19 +123,22 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mMediaPlayer.reset();
 
         try {
-            if (isNetwork) {
-                setDataSource(uriString);
-            } else {
-                setRawData(mThemedReactContext.getResources().getIdentifier(
-                        uriString,
-                        "raw",
-                        mThemedReactContext.getPackageName()
-                ));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+          if (isNetwork) {
+              setDataSource(uriString);
+          } else {
+              String fileUrl;
+              if(uriString.startsWith("file://")){
+                  fileUrl = uriString.substring(7);
+              }else {
+                  fileUrl = uriString;
+              }
+              FileInputStream video = new FileInputStream(fileUrl);
+              setDataSource(video.getFD());
+          }
+      } catch (Exception e) {
+          e.printStackTrace();
+          return;
+      }
 
         WritableMap src = Arguments.createMap();
         src.putString(ReactVideoViewManager.PROP_SRC_URI, uriString);
