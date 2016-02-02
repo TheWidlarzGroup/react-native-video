@@ -16,6 +16,6 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:0.13.+'
+    compile 'com.facebook.react:react-native:0.19.+'
     compile 'com.yqritc:android-scalablevideoview:1.0.1'
 }
