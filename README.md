@@ -89,7 +89,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 ## Examples
 
-- See an [Example integration][1] in `react-native-login`.
+- See an [Example integration][1] in `react-native-login`*.
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
@@ -101,6 +101,15 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
    ```
 
    Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
+
+*The example from `react-native-login` does not seem to work in some cases. Try replacing 
+```
+var Video = require('react-native-video');  
+```
+by
+```
+import Video from 'react-native-video';
+```
 
 
 ## TODOS
