@@ -84,13 +84,21 @@ export default class Video extends Component {
       resizeMode,
     } = this.props;
 
-    let uri = source.uri;
-    if (uri && uri.match(/^\//)) {
-      uri = `file://${uri}`;
-    }
+    sources = (source.constructor === Object ? [source] : source).map(function(src) {
+      let uri = src.uri;
+      if (uri && uri.match(/^\//)) {
+        uri = `file://${uri}`;
+      }
+      let isNetwork = !!(uri && uri.match(/^https?:/));
+      let isAsset = !!(uri && uri.match(/^(assets-library|file):/));
+      return {
+        uri,
+        isNetwork,
+        isAsset,
+        type: src.type || 'mp4'
+      };
+    });
 
-    const isNetwork = !!(uri && uri.match(/^https?:/));
-    const isAsset = !!(uri && uri.match(/^(assets-library|file):/));
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
@@ -107,12 +115,7 @@ export default class Video extends Component {
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
-      src: {
-        uri,
-        isNetwork,
-        isAsset,
-        type: source.type || 'mp4',
-      },
+      src: sources,
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
@@ -132,11 +135,11 @@ export default class Video extends Component {
 
 Video.propTypes = {
   /* Native only */
-  src: PropTypes.object,
+  src: PropTypes.array,
   seek: PropTypes.number,
 
   /* Wrapper component */
-  source: PropTypes.object,
+  // source: object or array
   resizeMode: PropTypes.string,
   repeat: PropTypes.bool,
   paused: PropTypes.bool,
