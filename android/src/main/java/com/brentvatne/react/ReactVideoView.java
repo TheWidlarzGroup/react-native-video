@@ -64,6 +64,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
     private boolean mSrcIsNetwork = false;
+    private boolean mSrcIsAsset = false;
     private ScalableType mResizeMode = ScalableType.LEFT_TOP;
     private boolean mRepeat = false;
     private boolean mPaused = false;
@@ -116,16 +117,18 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
     }
 
-    public void setSrc(final String uriString, final String type, final boolean isNetwork) {
-        setSrc(uriString,type,isNetwork,0,0);
+    public void setSrc(final String uriString, final String type, final boolean isNetwork, final boolean isAsset) {
+        setSrc(uriString,type,isNetwork,isAsset,0,0);
     }
 
-    public void setSrc(final String uriString, final String type, final boolean isNetwork, final int expansionMainVersion, final int expansionPatchVersion) {
+    public void setSrc(final String uriString, final String type, final boolean isNetwork, final boolean isAsset, final int expansionMainVersion, final int expansionPatchVersion) {
         mSrcUriString = uriString;
         mSrcType = type;
         mSrcIsNetwork = isNetwork;
+        mSrcIsAsset = isAsset;
         mMainVer = expansionMainVersion;
         mPatchVer = expansionPatchVersion;
+
 
         mMediaPlayerValid = false;
         mVideoDuration = 0;
@@ -135,7 +138,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mMediaPlayer.reset();
 
         try {
-            if (isNetwork) {
+            if (isNetwork || isAsset) {
                 setDataSource(uriString);
             } else {
                 ZipResourceFile expansionFile= null;
@@ -319,11 +322,13 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
         if(mMainVer>0) {
-            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork,mMainVer,mPatchVer);
+            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork,mSrcIsAsset,mMainVer,mPatchVer);
         }
         else {
-            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork);
+            setSrc(mSrcUriString, mSrcType, mSrcIsNetwork,mSrcIsAsset);
         }
+
     }
 }
