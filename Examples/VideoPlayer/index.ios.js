@@ -1,39 +1,42 @@
 'use strict';
 
-var React = require('react-native');
-var {
+import React, {
+  AlertIOS,
   AppRegistry,
+  Component,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  AlertIOS,
-} = React;
+  View,
+} from 'react-native';
 
-var Video = require('react-native-video');
+import Video from 'react-native-video';
 
-var VideoPlayer = React.createClass({
-  getInitialState() {
-    return {
-      rate: 1,
-      volume: 1,
-      muted: false,
-      resizeMode: 'contain',
-      duration: 0.0,
-      currentTime: 0.0,
-      controls: false,
-      paused: true,
-      skin: 'custom'
-    }
-  },
-
+class VideoPlayer extends Component {
+  constructor(props) {
+    super(props);
+    this.onLoad = this.onLoad.bind(this);
+    this.onProgress = this.onProgress.bind(this);
+  }
+  state = {
+    rate: 1,
+    volume: 1,
+    muted: false,
+    resizeMode: 'contain',
+    duration: 0.0,
+    currentTime: 0.0,
+    controls: false,
+    paused: true,
+    skin: 'custom'
+  };
+  
   onLoad(data) {
     this.setState({duration: data.duration});
-  },
+  }
 
   onProgress(data) {
     this.setState({currentTime: data.currentTime});
-  },
+  }
 
   getCurrentTimePercentage() {
     if (this.state.currentTime > 0) {
@@ -41,11 +44,11 @@ var VideoPlayer = React.createClass({
     } else {
       return 0;
     }
-  },
+  }
 
   renderSkinControl(skin) {
-    var isSelected = this.state.skin == skin;
-    var selectControls = skin == 'native' || skin == 'embed';
+    const isSelected = this.state.skin == skin;
+    const selectControls = skin == 'native' || skin == 'embed';
     return (
       <TouchableOpacity onPress={() => { this.setState({
           controls: selectControls,
@@ -56,10 +59,10 @@ var VideoPlayer = React.createClass({
         </Text>
       </TouchableOpacity>
     );
-  },
+  }
 
   renderRateControl(rate) {
-    var isSelected = (this.state.rate == rate);
+    const isSelected = (this.state.rate == rate);
 
     return (
       <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
@@ -68,10 +71,10 @@ var VideoPlayer = React.createClass({
         </Text>
       </TouchableOpacity>
     )
-  },
+  }
 
   renderResizeModeControl(resizeMode) {
-    var isSelected = (this.state.resizeMode == resizeMode);
+    const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
       <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
@@ -80,10 +83,10 @@ var VideoPlayer = React.createClass({
         </Text>
       </TouchableOpacity>
     )
-  },
+  }
 
   renderVolumeControl(volume) {
-    var isSelected = (this.state.volume == volume);
+    const isSelected = (this.state.volume == volume);
 
     return (
       <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
@@ -92,11 +95,11 @@ var VideoPlayer = React.createClass({
         </Text>
       </TouchableOpacity>
     )
-  },
+  }
 
   renderCustomSkin() {
-    var flexCompleted = this.getCurrentTimePercentage() * 100;
-    var flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
+    const flexCompleted = this.getCurrentTimePercentage() * 100;
+    const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
 
     return (
       <View style={styles.container}>
@@ -151,10 +154,10 @@ var VideoPlayer = React.createClass({
         </View>
       </View>
     );
-  },
+  }
 
   renderNativeSkin() {
-    var videoStyle = this.state.skin == 'embed' ? styles.nativeVideoControls : styles.fullScreen;
+    const videoStyle = this.state.skin == 'embed' ? styles.nativeVideoControls : styles.fullScreen;
     return (
       <View style={styles.container}>
         <View style={styles.fullScreen}>
@@ -202,16 +205,14 @@ var VideoPlayer = React.createClass({
 
       </View>
     );
-  },
-  
+  }
+
   render() {
     return this.state.controls ? this.renderNativeSkin() : this.renderCustomSkin();
   }
-  
-});
+}
 
-
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
