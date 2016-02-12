@@ -230,7 +230,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self prepareAssetsForSources:source];
   _playerItem = [self playerItemForAssets:_clipAssets];
 
-  if ([source count] > 0) {
+  if ([_clipAssets count] > 0) {
     [self startBufferingClips];
   }
 
@@ -291,8 +291,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     currentOffset = CMTimeAdd(currentOffset, asset.duration);
 
-    [assets addObject:asset];
-    [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
+    NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+    NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+
+    if ([videoTracks count] > 0 && [audioTracks count] > 0) {
+      [assets addObject:asset];
+      [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
+    } else {
+      NSLog(@"RCTVideo: WARNING - missing audio or video track for asset %@ (uri: %@), skipping...", asset, uri);
+    }
   }
   _clipAssets = assets;
   _clipEndOffsets = offsets;
@@ -310,18 +317,28 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     CMTimeRange editRange = CMTimeRangeMake(CMTimeMake(0, 600), asset.duration);
     NSError *editError;
 
-    AVAssetTrack *videoTrack = [[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
-    AVAssetTrack *audioTrack = [[asset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
+    NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+    NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
 
-    [compVideoTrack insertTimeRange:editRange
-                            ofTrack:videoTrack
-                             atTime:timeOffset
-                              error:&editError];
-    [compAudioTrack insertTimeRange:editRange
-                            ofTrack:audioTrack
-                             atTime:timeOffset
-                              error:&editError];
-    timeOffset = CMTimeAdd(timeOffset, asset.duration);
+    if ([videoTracks count] > 0) {
+    AVAssetTrack *videoTrack = [videoTracks objectAtIndex:0];
+      [compVideoTrack insertTimeRange:editRange
+                              ofTrack:videoTrack
+                               atTime:timeOffset
+                                error:&editError];
+    }
+
+    if ([audioTracks count] > 0) {
+      AVAssetTrack *audioTrack = [audioTracks objectAtIndex:0];
+      [compAudioTrack insertTimeRange:editRange
+                              ofTrack:audioTrack
+                               atTime:timeOffset
+                                error:&editError];
+    }
+
+    if ([videoTracks count] > 0 && [audioTracks count] > 0) {
+      timeOffset = CMTimeAdd(timeOffset, asset.duration);
+    }
   }
   AVPlayerItem* playerItem = [AVPlayerItem playerItemWithAsset:composition];
   return playerItem;
