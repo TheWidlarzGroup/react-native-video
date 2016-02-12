@@ -84,6 +84,10 @@ export default class Video extends Component {
       resizeMode,
     } = this.props;
 
+    if (source.constructor !== Object && source.constructor !== Array) {
+      throw "react-native-video: Invalid type for props.source, expected Object or Array, got: " + source.constructor;
+    }
+
     sources = (source.constructor === Object ? [source] : source).map(function(src) {
       let uri = src.uri;
       if (uri && uri.match(/^\//)) {
@@ -97,8 +101,7 @@ export default class Video extends Component {
         isAsset,
         type: src.type || 'mp4'
       };
-    });
-
+    }).filter((src) => src.uri);
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
