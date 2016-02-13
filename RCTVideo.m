@@ -153,25 +153,58 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
    }
-    
+
    CMTime playerDuration = [self playerItemDuration :_player];
    if (CMTIME_IS_INVALID(playerDuration)) {
       return;
    }
 
+   int newPlayingClipIndex = [self playingClipIndex];
+   if (_playingClipIndex < newPlayingClipIndex) {
+     [_eventDispatcher sendInputEventWithName:@"onVideoClipEnd"
+                                      body:@{
+                                               @"newClipIndex": [NSNumber numberWithInt:newPlayingClipIndex],
+                                               @"target": self.reactTag
+                                           }];
+   }
+   _playingClipIndex = newPlayingClipIndex;
+
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
-   if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                            body:@{
-                                                     @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                                                @"playableDuration": [self calculatePlayableDuration],
-                                                     @"atValue": [NSNumber numberWithLongLong:currentTime.value],
-                                                     @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                                                     @"target": self.reactTag
-                                                 }];
+   if(currentTimeSecs >= 0 && currentTimeSecs <= duration) {
+      [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                          body:@{
+                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                                              @"playableDuration": [self calculatePlayableDuration],
+                                                   @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                                                   @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                                                   @"target": self.reactTag
+                                               }];
    }
+}
+
+/*!
+ * Calculates and returns the index of the clip being played by _player.
+ *
+ * \returns The index of the clip currently being played.
+ */
+- (int)playingClipIndex
+{
+  AVPlayerItem *video = _player.currentItem;
+  if (video.status == AVPlayerItemStatusReadyToPlay) {
+    float playerTimeSeconds = CMTimeGetSeconds([_player currentTime]);
+    __block NSUInteger playingClipIndex = 0;
+
+    [_clipEndOffsets enumerateObjectsUsingBlock:^(id offset, NSUInteger idx, BOOL *stop) {
+      if (playerTimeSeconds < [offset floatValue]) {
+        playingClipIndex = idx;
+        *stop = YES;
+      }
+    }];
+    return playingClipIndex;
+  }
+  return 0;
 }
 
 /*!
@@ -229,8 +262,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [self prepareAssetsForSources:source];
   _playerItem = [self playerItemForAssets:_clipAssets];
+  _playingClipIndex = 0;
 
-  if ([_clipAssets count] > 0) {
+  if ([source count] > 0) {
     [self startBufferingClips];
   }
 
@@ -294,11 +328,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
     NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
 
-    if ([videoTracks count] > 0 && [audioTracks count] > 0) {
+    if ([videoTracks count] > 0 || [audioTracks count] > 0) {
       [assets addObject:asset];
       [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
     } else {
-      NSLog(@"RCTVideo: WARNING - missing audio or video track for asset %@ (uri: %@), skipping...", asset, uri);
+      NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
     }
   }
   _clipAssets = assets;
@@ -336,7 +370,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                 error:&editError];
     }
 
-    if ([videoTracks count] > 0 && [audioTracks count] > 0) {
+    if ([videoTracks count] > 0 || [audioTracks count] > 0) {
       timeOffset = CMTimeAdd(timeOffset, asset.duration);
     }
   }
@@ -467,15 +501,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   bool bufferingComplete = 0.95 * (bufferingItemDuration - playableDurationForBufferingItem) < 0.2;
 
   float playerTimeSeconds = CMTimeGetSeconds([_player currentTime]);
-  __block NSUInteger playingClipIndex = 0;
-
-  // find the index of _player's currently playing clip
-  [_clipEndOffsets enumerateObjectsUsingBlock:^(id offset, NSUInteger idx, BOOL *stop) {
-    if (playerTimeSeconds < [offset floatValue]) {
-      playingClipIndex = idx;
-      *stop = YES;
-    }
-  }];
 
   NSUInteger currentlyBufferingIndex = [(bufferingPlayer == _bufferingPlayerA ? _currentlyBufferingIndexA : _currentlyBufferingIndexB) intValue];
 
@@ -617,6 +642,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
   }
+}
+
+- (void)setSeekClipIndex:(int)clipIndex
+{
+  float position = clipIndex == 0 ? 0.0 : [[_clipEndOffsets objectAtIndex:(clipIndex - 1)] floatValue];
+  [self setSeek: position];
 }
 
 - (void)setRate:(float)rate

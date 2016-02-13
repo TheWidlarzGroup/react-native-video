@@ -24,6 +24,8 @@ RCT_EXPORT_MODULE();
     @"onVideoError",
     @"onVideoProgress",
     @"onVideoSeek",
+    @"onVideoSeekToClip",
+    @"onVideoClipEnd",
     @"onVideoEnd"
   ];
 }
@@ -42,6 +44,7 @@ RCT_EXPORT_VIEW_PROPERTY(controls, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, float);
+RCT_EXPORT_VIEW_PROPERTY(seekClipIndex, int);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 
 - (NSDictionary *)constantsToExport

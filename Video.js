@@ -27,6 +27,8 @@ export default class Video extends Component {
     this._onError = this._onError.bind(this);
     this._onProgress = this._onProgress.bind(this);
     this._onSeek = this._onSeek.bind(this);
+    this._onSeekToClip = this._onSeekToClip.bind(this);
+    this._onClipEnd = this._onClipEnd.bind(this);
     this._onEnd = this._onEnd.bind(this);
   }
 
@@ -36,6 +38,10 @@ export default class Video extends Component {
 
   seek(time) {
     this.setNativeProps({ seek: time });
+  }
+
+  seekToClip(index) {
+    this.setNativeProps({ seekClipIndex: index });
   }
 
   _assignRoot(component) {
@@ -69,6 +75,18 @@ export default class Video extends Component {
   _onSeek(event) {
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
+    }
+  }
+
+  _onSeekToClip(event) {
+    if (this.props.onSeekToClip) {
+      this.props.onSeekToClip(event.nativeEvent);
+    }
+  }
+
+  _onClipEnd(event) {
+    if (this.props.onClipEnd) {
+      this.props.onClipEnd(event.nativeEvent);
     }
   }
 
@@ -124,6 +142,8 @@ export default class Video extends Component {
       onVideoError: this._onError,
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
+      onVideoSeekToClip: this._onSeekToClip,
+      onVideoClipEnd: this._onClipEnd,
       onVideoEnd: this._onEnd,
     });
 
@@ -140,6 +160,7 @@ Video.propTypes = {
   /* Native only */
   src: PropTypes.array,
   seek: PropTypes.number,
+  seekClipIndex: PropTypes.number,
 
   /* Wrapper component */
   // source: object or array
@@ -156,6 +177,8 @@ Video.propTypes = {
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
+  onSeekToClip: PropTypes.func,
+  onClipEnd: PropTypes.func,
   onEnd: PropTypes.func,
 
   /* Required by react-native */
@@ -171,5 +194,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
+    seekToClip: true
   },
 });
