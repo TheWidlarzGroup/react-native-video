@@ -21,6 +21,7 @@ export default class Video extends Component {
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
+    this.seekToClip = this.seekToClip.bind(this);
     this._assignRoot = this._assignRoot.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);

@@ -219,7 +219,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     __block CMTimeRange effectiveTimeRange;
     [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
       CMTimeRange timeRange = [obj CMTimeRangeValue];
-      /* NSLog(@"loadedTimeRanges for main item: idx %i, seconds %f", idx, CMTimeGetSeconds(CMTimeRangeGetEnd(timeRange))); */
       if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
         effectiveTimeRange = timeRange;
         *stop = YES;
@@ -264,7 +263,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   _playerItem = [self playerItemForAssets:_clipAssets];
   _playingClipIndex = 0;
 
-  if ([source count] > 0) {
+  if ([_clipAssets count] > 0) {
     [self startBufferingClips];
   }
 
@@ -279,22 +278,22 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
+  if ([_clipAssets count] > 0) {
+    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+    __weak RCTVideo *weakSelf = self;
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                          queue:NULL
+                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                     ];
 
-  _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                        target:weakSelf
-                                                      selector:@selector(updateBufferingProgress)
-                                                      userInfo:nil
-                                                       repeats:true];
+    _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                          target:weakSelf
+                                                        selector:@selector(updateBufferingProgress)
+                                                        userInfo:nil
+                                                         repeats:true];
 
-  // Note: Currently doesn't handle heterogeneous clips.
-  if ([source count] > 0) {
+    // Note: Currently doesn't handle heterogeneous clips.
     NSDictionary *firstSource = source[0];
     [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
                                         body:@{@"src": @{
