@@ -18,6 +18,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   AVPlayerLayer *_playerLayer;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+  dispatch_queue_t _queue;
 
   /* To buffer multiple videos (AVMutableComposition doesn't do this properly).
    * See the comments below the Buffering pragma mark for more details. */
@@ -260,50 +261,54 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   [self removeBufferingObserver];
+   _queue = dispatch_queue_create(nil, nil);
 
-  [self prepareAssetsForSources:source];
-  _playerItem = [self playerItemForAssets:_clipAssets];
-  _playingClipIndex = 0;
+  // This heavy lifting is done asynchronously to avoid burdening the UI thread.
+  dispatch_async(_queue, ^{
+    [self prepareAssetsForSources:source];
+    _playerItem = [self playerItemForAssets:_clipAssets];
+    _playingClipIndex = 0;
 
-  if ([_clipAssets count] > 0) {
-    [self startBufferingClips];
-  }
+    if ([_clipAssets count] > 0) {
+      [self startBufferingClips];
+    }
 
-  [self addPlayerItemObservers];
+    [self addPlayerItemObservers];
 
-  [_player pause];
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
-  [_playerViewController.view removeFromSuperview];
-  _playerViewController = nil;
+    [_player pause];
+    [_playerLayer removeFromSuperlayer];
+    _playerLayer = nil;
+    [_playerViewController.view removeFromSuperview];
+    _playerViewController = nil;
 
-  _player = [AVPlayer playerWithPlayerItem:_playerItem];
-  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    _player = [AVPlayer playerWithPlayerItem:_playerItem];
+    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
-  if ([_clipAssets count] > 0) {
-    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-    __weak RCTVideo *weakSelf = self;
-    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                          queue:NULL
-                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                     ];
+    if ([_clipAssets count] > 0) {
+      // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+      const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+      __weak RCTVideo *weakSelf = self;
+      _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                            queue:NULL
+                                                       usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                       ];
 
-    _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                          target:weakSelf
-                                                        selector:@selector(updateBufferingProgress)
-                                                        userInfo:nil
-                                                         repeats:true];
+      _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                            target:weakSelf
+                                                          selector:@selector(updateBufferingProgress)
+                                                          userInfo:nil
+                                                           repeats:true];
 
-    // Note: Currently doesn't handle heterogeneous clips.
-    NSDictionary *firstSource = source[0];
-    [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                        body:@{@"src": @{
-                                                   @"uri": [firstSource objectForKey:@"uri"],
-                                                   @"type": [firstSource objectForKey:@"type"],
-                                                   @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
-                                               @"target": self.reactTag}];
-  }
+      // Note: Currently doesn't handle heterogeneous clips.
+      NSDictionary *firstSource = source[0];
+      [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
+                                          body:@{@"src": @{
+                                                     @"uri": [firstSource objectForKey:@"uri"],
+                                                     @"type": [firstSource objectForKey:@"type"],
+                                                     @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
+                                                 @"target": self.reactTag}];
+    }
+  });
 }
 
 - (void)prepareAssetsForSources:(NSArray *)sources
@@ -822,6 +827,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   [self removeBufferingObserver];
+  _queue = nil;
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
