@@ -10,11 +10,28 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 @implementation RCTVideo
 {
   AVPlayer *_player;
+  int _playingClipIndex;
+  NSMutableArray *_clipAssets;
+  NSMutableArray *_clipEndOffsets;
   AVPlayerItem *_playerItem;
   BOOL _playerItemObserversSet;
   AVPlayerLayer *_playerLayer;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+  dispatch_queue_t _queue;
+
+  /* To buffer multiple videos (AVMutableComposition doesn't do this properly).
+   * See the comments below the Buffering pragma mark for more details. */
+  NSTimer *_bufferingObserver;
+  AVPlayer *_bufferingPlayerA;
+  AVPlayer *_bufferingPlayerB;
+  AVPlayer *_mainBufferingPlayer;
+  AVPlayerItem *_bufferingPlayerItemA;
+  AVPlayerItem *_bufferingPlayerItemB;
+  NSNumber *_currentlyBufferingIndexA;
+  NSNumber *_currentlyBufferingIndexB;
+  NSNumber *_nextIndexToBuffer;
+  NSMutableArray *_bufferedClipIndexes;
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -77,9 +94,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
  **  Get the duration for a AVPlayerItem.
  ** ------------------------------------------------------- */
 
-- (CMTime)playerItemDuration
+- (CMTime)playerItemDuration:(AVPlayer *)player
 {
-    AVPlayerItem *playerItem = [_player currentItem];
+    AVPlayerItem *playerItem = [player currentItem];
     if (playerItem.status == AVPlayerItemStatusReadyToPlay)
     {
         return([playerItem duration]);
@@ -97,6 +114,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
         [_player removeTimeObserver:_timeObserver];
         _timeObserver = nil;
     }
+}
+
+/* Cancels the previously registered buffering progress observer */
+-(void)removeBufferingObserver
+{
+  if (_bufferingObserver) {
+    [_bufferingObserver invalidate];
+    _bufferingObserver = nil;
+  }
 }
 
 #pragma mark - Progress
@@ -129,25 +155,58 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
    }
-    
-   CMTime playerDuration = [self playerItemDuration];
+
+   CMTime playerDuration = [self playerItemDuration :_player];
    if (CMTIME_IS_INVALID(playerDuration)) {
       return;
    }
 
+   int newPlayingClipIndex = [self playingClipIndex];
+   if (_playingClipIndex < newPlayingClipIndex) {
+     [_eventDispatcher sendInputEventWithName:@"onVideoClipEnd"
+                                      body:@{
+                                               @"newClipIndex": [NSNumber numberWithInt:newPlayingClipIndex],
+                                               @"target": self.reactTag
+                                           }];
+   }
+   _playingClipIndex = newPlayingClipIndex;
+
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
-   if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                            body:@{
-                                                     @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                                                     @"playableDuration": [self calculatePlayableDuration],
-                                                     @"atValue": [NSNumber numberWithLongLong:currentTime.value],
-                                                     @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                                                     @"target": self.reactTag
-                                                 }];
+   if(currentTimeSecs >= 0 && currentTimeSecs <= duration) {
+      [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                          body:@{
+                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                                              @"playableDuration": [self calculatePlayableDuration],
+                                                   @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                                                   @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                                                   @"target": self.reactTag
+                                               }];
    }
+}
+
+/*!
+ * Calculates and returns the index of the clip being played by _player.
+ *
+ * \returns The index of the clip currently being played.
+ */
+- (int)playingClipIndex
+{
+  AVPlayerItem *video = _player.currentItem;
+  if (video.status == AVPlayerItemStatusReadyToPlay) {
+    float playerTimeSeconds = CMTimeGetSeconds([_player currentTime]);
+    __block NSUInteger playingClipIndex = 0;
+
+    [_clipEndOffsets enumerateObjectsUsingBlock:^(id offset, NSUInteger idx, BOOL *stop) {
+      if (playerTimeSeconds < [offset floatValue]) {
+        playingClipIndex = idx;
+        *stop = YES;
+      }
+    }];
+    return playingClipIndex;
+  }
+  return 0;
 }
 
 /*!
@@ -162,6 +221,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     __block CMTimeRange effectiveTimeRange;
     [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
       CMTimeRange timeRange = [obj CMTimeRangeValue];
+      /* NSLog(@"loadedTimeRanges for main item: idx %i, seconds %f", idx, CMTimeGetSeconds(CMTimeRangeGetEnd(timeRange))); */
       if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
         effectiveTimeRange = timeRange;
         *stop = YES;
@@ -196,64 +256,144 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 #pragma mark - Player and source
 
-- (void)setSrc:(NSDictionary *)source
+- (void)setSrc:(NSArray *)source
 {
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  _playerItem = [self playerItemForSource:source];
-  [self addPlayerItemObservers];
+  [self removeBufferingObserver];
+   _queue = dispatch_queue_create(nil, nil);
 
-  [_player pause];
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
-  [_playerViewController.view removeFromSuperview];
-  _playerViewController = nil;
+  // This heavy lifting is done asynchronously to avoid burdening the UI thread.
+  dispatch_async(_queue, ^{
+    [self prepareAssetsForSources:source];
+    _playerItem = [self playerItemForAssets:_clipAssets];
+    _playingClipIndex = 0;
 
-  _player = [AVPlayer playerWithPlayerItem:_playerItem];
-  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    if ([_clipAssets count] > 0) {
+      [self startBufferingClips];
+    }
 
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
-  [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                      body:@{@"src": @{
-                                                 @"uri": [source objectForKey:@"uri"],
-                                                 @"type": [source objectForKey:@"type"],
-                                                 @"isNetwork":[NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                                             @"target": self.reactTag}];
+    [self addPlayerItemObservers];
+
+    [_player pause];
+    [_playerLayer removeFromSuperlayer];
+    _playerLayer = nil;
+    [_playerViewController.view removeFromSuperview];
+    _playerViewController = nil;
+
+    _player = [AVPlayer playerWithPlayerItem:_playerItem];
+    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+
+    if ([_clipAssets count] > 0) {
+      // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+      const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+      __weak RCTVideo *weakSelf = self;
+      _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                            queue:NULL
+                                                       usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                       ];
+
+      _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                            target:weakSelf
+                                                          selector:@selector(updateBufferingProgress)
+                                                          userInfo:nil
+                                                           repeats:true];
+
+      // Note: Currently doesn't handle heterogeneous clips.
+      NSDictionary *firstSource = source[0];
+      [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
+                                          body:@{@"src": @{
+                                                     @"uri": [firstSource objectForKey:@"uri"],
+                                                     @"type": [firstSource objectForKey:@"type"],
+                                                     @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
+                                                 @"target": self.reactTag}];
+    }
+  });
 }
 
-- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source
+- (void)prepareAssetsForSources:(NSArray *)sources
 {
-  bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
-  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
-  NSString *uri = [source objectForKey:@"uri"];
-  NSString *type = [source objectForKey:@"type"];
+  NSMutableArray *assets = [[NSMutableArray alloc] init];
+  NSMutableArray *offsets = [[NSMutableArray alloc] init];
+  _bufferedClipIndexes = [[NSMutableArray alloc] init];
+  CMTime currentOffset = kCMTimeZero;
+  for (NSDictionary* source in sources) {
+    [_bufferedClipIndexes addObject:[NSNumber numberWithInt:0]];
+    bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
+    bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+    NSString *uri = [source objectForKey:@"uri"];
+    NSString *type = [source objectForKey:@"type"];
 
-  NSURL *url = (isNetwork || isAsset) ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+    NSURL *url = (isNetwork || isAsset) ?
+      [NSURL URLWithString:uri] :
+      [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
-  if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    return [AVPlayerItem playerItemWithAsset:asset];
-  }
+    currentOffset = CMTimeAdd(currentOffset, asset.duration);
 
-  return [AVPlayerItem playerItemWithURL:url];
+    NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+    NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+
+    if ([videoTracks count] > 0 || [audioTracks count] > 0) {
+      [assets addObject:asset];
+      [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
+    } else {
+      NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
+    }
+  }
+  _clipAssets = assets;
+  _clipEndOffsets = offsets;
+}
+
+- (AVPlayerItem*)playerItemForAssets:(NSMutableArray *)assets
+{
+  AVMutableComposition* composition = [AVMutableComposition composition];
+  AVMutableCompositionTrack *compVideoTrack = [composition addMutableTrackWithMediaType:AVMediaTypeVideo
+                                                                   preferredTrackID:kCMPersistentTrackID_Invalid];
+  AVMutableCompositionTrack *compAudioTrack = [composition addMutableTrackWithMediaType:AVMediaTypeAudio
+                                                                   preferredTrackID:kCMPersistentTrackID_Invalid];
+  CMTime timeOffset = kCMTimeZero;
+  for (AVAsset* asset in assets) {
+    CMTimeRange editRange = CMTimeRangeMake(CMTimeMake(0, 600), asset.duration);
+    NSError *editError;
+
+    NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+    NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+
+    if ([videoTracks count] > 0) {
+    AVAssetTrack *videoTrack = [videoTracks objectAtIndex:0];
+      [compVideoTrack insertTimeRange:editRange
+                              ofTrack:videoTrack
+                               atTime:timeOffset
+                                error:&editError];
+    }
+
+    if ([audioTracks count] > 0) {
+      AVAssetTrack *audioTrack = [audioTracks objectAtIndex:0];
+      [compAudioTrack insertTimeRange:editRange
+                              ofTrack:audioTrack
+                               atTime:timeOffset
+                                error:&editError];
+    }
+
+    if ([videoTracks count] > 0 || [audioTracks count] > 0) {
+      timeOffset = CMTimeAdd(timeOffset, asset.duration);
+    }
+  }
+  AVPlayerItem* playerItem = [AVPlayerItem playerItemWithAsset:composition];
+  return playerItem;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-   if (object == _playerItem) {
+  if (object == _playerItem) {
+
+    AVPlayerItem *item = object;
 
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
-      if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
-        float duration = CMTimeGetSeconds(_playerItem.asset.duration);
+      if (item.status == AVPlayerItemStatusReadyToPlay) {
+        float duration = CMTimeGetSeconds(item.asset.duration);
 
         if (isnan(duration)) {
           duration = 0.0;
@@ -261,27 +401,27 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
                                             body:@{@"duration": [NSNumber numberWithFloat:duration],
-                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
-                                                   @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
-                                                   @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
-                                                   @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
-                                                   @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
-                                                   @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
-                                                   @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
+                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                                                   @"canPlayReverse": [NSNumber numberWithBool:item.canPlayReverse],
+                                                   @"canPlayFastForward": [NSNumber numberWithBool:item.canPlayFastForward],
+                                                   @"canPlaySlowForward": [NSNumber numberWithBool:item.canPlaySlowForward],
+                                                   @"canPlaySlowReverse": [NSNumber numberWithBool:item.canPlaySlowReverse],
+                                                   @"canStepBackward": [NSNumber numberWithBool:item.canStepBackward],
+                                                   @"canStepForward": [NSNumber numberWithBool:item.canStepForward],
                                                    @"target": self.reactTag}];
 
         [self attachListeners];
         [self applyModifiers];
-      } else if(_playerItem.status == AVPlayerItemStatusFailed) {
+      } else if(item.status == AVPlayerItemStatusFailed) {
         [_eventDispatcher sendInputEventWithName:@"onVideoError"
                                             body:@{@"error": @{
-                                                       @"code": [NSNumber numberWithInteger: _playerItem.error.code],
-                                                       @"domain": _playerItem.error.domain},
+                                                       @"code": [NSNumber numberWithInteger: item.error.code],
+                                                       @"domain": item.error.domain},
                                                    @"target": self.reactTag}];
       }
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
       // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if (_playerItem.playbackLikelyToKeepUp) {
+      if (item.playbackLikelyToKeepUp) {
         [self setPaused:_paused];
       }
     }
@@ -310,6 +450,154 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   }
 }
 
+#pragma mark - Buffering
+
+/* AVMutableComposition has several desirable properties for multiple-video playback:
+ * It allows continuous scrubbing between clips, presenting the composite video's
+ * duration as the sum of the component clips' duration.
+ * 
+ * However, when this code was written (Feb '16), an AVPlayer loaded with an AVPlayerItem
+ * whose asset was a AVMutableComposition buffered the video assets very slowly, and its
+ * buffering progress was not correctly reflected in loadedTimeRanges or
+ * playbackLikelyToKeepUp (the former was set to the full duration from the start, and
+ * the latter was always true, despite very choppy playback during buffering).
+ * 
+ * To address this, two (or one, for clip lists of length <= 2) additional AVPlayers
+ * are maintained. They buffer the assets much faster and more reliably than the _player,
+ * since it's loaded with an AVMutableComposition.
+ *
+ * The logic below and associated bookkeeping variables track the buffering progress for
+ * the buffering players via loadedTimeRanges, proceeding to load the lowest-indexed
+ * clip that's not yet been buffered, stopping playback when it reaches a clip that's
+ * currently being buffered.
+ *
+ * To begin with, only one player is buffering. When 88% of the first clip has been buffered,
+ * the second buffering player starts working on the second clip, with the two players
+ * "leapfrogging" until all clips have been buffered. This avoids slowing down the buffering
+ * of any single clip by too much, while also aiming for smooth playback between clips.
+ * */
+
+- (void)startBufferingClips
+{
+  _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[0] 
+                               automaticallyLoadedAssetKeys:@[@"tracks"]];
+  _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
+  _mainBufferingPlayer = _bufferingPlayerA;
+  _currentlyBufferingIndexA = [NSNumber numberWithInt:0];
+  if ([_clipAssets count] > 1) {
+    _nextIndexToBuffer = [NSNumber numberWithInt:1];
+    _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
+  }
+}
+
+- (void)updateBufferingProgress
+{
+  [self updateBufferingProgressForPlayer :_mainBufferingPlayer];
+}
+
+- (void)updateBufferingProgressForPlayer:(AVPlayer*)bufferingPlayer
+{
+  Float64 playableDurationForMainBufferingItem = [self bufferedDurationForItem :bufferingPlayer];
+  Float64 bufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :bufferingPlayer]);
+  // This margin is to cover the case where the audio channel has a slightly
+  // shorter duration than the video channel.
+  bool bufferingComplete = 0.95 * (bufferingItemDuration - playableDurationForMainBufferingItem) < 0.2;
+
+  // Now compute the same for the alt buffering player
+  AVPlayer* altBufferingPlayer;
+  int currentlyBufferingIndexAlt;
+  if (bufferingPlayer == _bufferingPlayerA) {
+    altBufferingPlayer = _bufferingPlayerB;
+    currentlyBufferingIndexAlt = [_currentlyBufferingIndexB intValue];
+  } else {
+    altBufferingPlayer = _bufferingPlayerA;
+    currentlyBufferingIndexAlt = [_currentlyBufferingIndexA intValue];
+  }
+  Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
+  Float64 altBufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :altBufferingPlayer]);
+
+  bool altBufferingComplete = (0.95 * (altBufferingItemDuration - playableDurationForAltBufferingItem) < 0.2);
+
+  bool startBufferingNextClip = (0.88 * bufferingItemDuration - playableDurationForMainBufferingItem) < 0.0;
+  float playerTimeSeconds = CMTimeGetSeconds([_player currentTime]);
+
+  NSUInteger currentlyBufferingIndex = [(bufferingPlayer == _bufferingPlayerA ? _currentlyBufferingIndexA : _currentlyBufferingIndexB) intValue];
+
+  const int MAX_IDX = 99999;
+  __block int firstUnbufferedIdx = MAX_IDX;
+  NSNumber *zero = [NSNumber numberWithInt:0];
+  [_bufferedClipIndexes enumerateObjectsUsingBlock:^(id buffered, NSUInteger idx, BOOL *stop) {
+    if ([buffered isEqualToNumber:zero]) {
+      firstUnbufferedIdx = idx;
+      *stop = YES;
+    }
+  }];
+
+  if (firstUnbufferedIdx < MAX_IDX) {
+    Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
+    float bufferedOffset = firstUnbufferedIdx == 0 ? 0.0 : [_clipEndOffsets[firstUnbufferedIdx] floatValue];
+    float totalBufferedSeconds = bufferedOffset + playableDurationForAltBufferingItem;
+
+    /* NSLog(@"bufferedOffset %f # buffered for lowest %f", bufferedOffset, playableDurationForAltBufferingItem); */
+
+    if (totalBufferedSeconds < playerTimeSeconds + 4.0) {
+      [self setPaused :true];
+    } else {
+      [self setPaused :false];
+    }
+  }
+
+  if (bufferingComplete) {
+    [_bufferedClipIndexes replaceObjectAtIndex:currentlyBufferingIndex withObject:@(YES)];
+  }
+
+  if (altBufferingComplete && currentlyBufferingIndexAlt < [_clipAssets count]) {
+    [_bufferedClipIndexes replaceObjectAtIndex:currentlyBufferingIndexAlt withObject:@(YES)];
+  }
+
+  if (startBufferingNextClip && [_nextIndexToBuffer intValue] < [_clipAssets count]) {
+    if (bufferingPlayer == _bufferingPlayerA) {
+      _currentlyBufferingIndexB = [_nextIndexToBuffer copy];
+      _bufferingPlayerItemB = [AVPlayerItem playerItemWithAsset:_clipAssets[[_nextIndexToBuffer intValue]]
+                                  automaticallyLoadedAssetKeys:@[@"tracks"]];
+      
+      _bufferingPlayerB = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemB];
+      _mainBufferingPlayer = _bufferingPlayerB;
+    } else {
+      _currentlyBufferingIndexA = [_nextIndexToBuffer copy];
+      _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[[_nextIndexToBuffer intValue]]
+                                  automaticallyLoadedAssetKeys:@[@"tracks"]];
+      
+      _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
+      _mainBufferingPlayer = _bufferingPlayerA;
+    }
+    _nextIndexToBuffer = [NSNumber numberWithInt:([_nextIndexToBuffer intValue] + 1)];
+  }
+}
+
+- (Float64)bufferedDurationForItem:(AVPlayer*)bufferingPlayer
+{
+  AVPlayerItem *video = bufferingPlayer.currentItem;
+  if (video.status == AVPlayerItemStatusReadyToPlay) {
+    __block Float64 longestPlayableRangeSeconds;
+    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+      CMTimeRange timeRange = [obj CMTimeRangeValue];
+      Float64 seconds = CMTimeGetSeconds(CMTimeRangeGetEnd(timeRange));
+      if (seconds && seconds > 0.1) {
+        if (!longestPlayableRangeSeconds) {
+          longestPlayableRangeSeconds = seconds;
+        } else if (seconds > longestPlayableRangeSeconds) {
+          longestPlayableRangeSeconds = seconds;
+        }
+      }
+    }];
+    if (longestPlayableRangeSeconds && longestPlayableRangeSeconds > 0) {
+      return longestPlayableRangeSeconds;
+    }
+  }
+  return 0.0;
+}
+
 #pragma mark - Prop setters
 
 - (void)setResizeMode:(NSString*)mode
@@ -334,7 +622,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_player play];
     [_player setRate:_rate];
   }
-  
   _paused = paused;
 }
 
@@ -377,6 +664,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
   }
+}
+
+- (void)setSeekClipIndex:(int)clipIndex
+{
+  float position = clipIndex == 0 ? 0.0 : [[_clipEndOffsets objectAtIndex:(clipIndex - 1)] floatValue];
+  [self setSeek: position];
 }
 
 - (void)setRate:(float)rate
@@ -522,6 +815,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   [_player pause];
   _player = nil;
+  _bufferingPlayerA = nil;
+  _bufferingPlayerB = nil;
 
   [_playerLayer removeFromSuperlayer];
   _playerLayer = nil;
@@ -531,6 +826,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
+  [self removeBufferingObserver];
+  _queue = nil;
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];

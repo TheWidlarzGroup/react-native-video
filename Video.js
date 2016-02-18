@@ -21,12 +21,15 @@ export default class Video extends Component {
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
+    this.seekToClip = this.seekToClip.bind(this);
     this._assignRoot = this._assignRoot.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
     this._onError = this._onError.bind(this);
     this._onProgress = this._onProgress.bind(this);
     this._onSeek = this._onSeek.bind(this);
+    this._onSeekToClip = this._onSeekToClip.bind(this);
+    this._onClipEnd = this._onClipEnd.bind(this);
     this._onEnd = this._onEnd.bind(this);
   }
 
@@ -36,6 +39,10 @@ export default class Video extends Component {
 
   seek(time) {
     this.setNativeProps({ seek: time });
+  }
+
+  seekToClip(index) {
+    this.setNativeProps({ seekClipIndex: index });
   }
 
   _assignRoot(component) {
@@ -72,6 +79,18 @@ export default class Video extends Component {
     }
   }
 
+  _onSeekToClip(event) {
+    if (this.props.onSeekToClip) {
+      this.props.onSeekToClip(event.nativeEvent);
+    }
+  }
+
+  _onClipEnd(event) {
+    if (this.props.onClipEnd) {
+      this.props.onClipEnd(event.nativeEvent);
+    }
+  }
+
   _onEnd(event) {
     if (this.props.onEnd) {
       this.props.onEnd(event.nativeEvent);
@@ -84,13 +103,24 @@ export default class Video extends Component {
       resizeMode,
     } = this.props;
 
-    let uri = source.uri;
-    if (uri && uri.match(/^\//)) {
-      uri = `file://${uri}`;
+    if (source.constructor !== Object && source.constructor !== Array) {
+      throw "react-native-video: Invalid type for props.source, expected Object or Array, got: " + source.constructor;
     }
 
-    const isNetwork = !!(uri && uri.match(/^https?:/));
-    const isAsset = !!(uri && uri.match(/^(assets-library|file):/));
+    sources = (source.constructor === Object ? [source] : source).map(function(src) {
+      let uri = src.uri;
+      if (uri && uri.match(/^\//)) {
+        uri = `file://${uri}`;
+      }
+      let isNetwork = !!(uri && uri.match(/^https?:/));
+      let isAsset = !!(uri && uri.match(/^(assets-library|file):/));
+      return {
+        uri,
+        isNetwork,
+        isAsset,
+        type: src.type || 'mp4'
+      };
+    }).filter((src) => src.uri);
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
@@ -107,17 +137,14 @@ export default class Video extends Component {
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
-      src: {
-        uri,
-        isNetwork,
-        isAsset,
-        type: source.type || 'mp4',
-      },
+      src: sources,
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
+      onVideoSeekToClip: this._onSeekToClip,
+      onVideoClipEnd: this._onClipEnd,
       onVideoEnd: this._onEnd,
     });
 
@@ -132,11 +159,12 @@ export default class Video extends Component {
 
 Video.propTypes = {
   /* Native only */
-  src: PropTypes.object,
+  src: PropTypes.array,
   seek: PropTypes.number,
+  seekClipIndex: PropTypes.number,
 
   /* Wrapper component */
-  source: PropTypes.object,
+  // source: object or array
   resizeMode: PropTypes.string,
   repeat: PropTypes.bool,
   paused: PropTypes.bool,
@@ -150,6 +178,8 @@ Video.propTypes = {
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
+  onSeekToClip: PropTypes.func,
+  onClipEnd: PropTypes.func,
   onEnd: PropTypes.func,
 
   /* Required by react-native */
@@ -165,5 +195,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
+    seekToClip: true
   },
 });
