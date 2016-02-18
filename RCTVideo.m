@@ -24,6 +24,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSTimer *_bufferingObserver;
   AVPlayer *_bufferingPlayerA;
   AVPlayer *_bufferingPlayerB;
+  AVPlayer *_mainBufferingPlayer;
   AVPlayerItem *_bufferingPlayerItemA;
   AVPlayerItem *_bufferingPlayerItemB;
   NSNumber *_currentlyBufferingIndexA;
@@ -219,6 +220,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     __block CMTimeRange effectiveTimeRange;
     [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
       CMTimeRange timeRange = [obj CMTimeRangeValue];
+      /* NSLog(@"loadedTimeRanges for main item: idx %i, seconds %f", idx, CMTimeGetSeconds(CMTimeRangeGetEnd(timeRange))); */
       if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
         effectiveTimeRange = timeRange;
         *stop = YES;
@@ -463,6 +465,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
  * the buffering players via loadedTimeRanges, proceeding to load the lowest-indexed
  * clip that's not yet been buffered, stopping playback when it reaches a clip that's
  * currently being buffered.
+ *
+ * To begin with, only one player is buffering. When 88% of the first clip has been buffered,
+ * the second buffering player starts working on the second clip, with the two players
+ * "leapfrogging" until all clips have been buffered. This avoids slowing down the buffering
+ * of any single clip by too much, while also aiming for smooth playback between clips.
  * */
 
 - (void)startBufferingClips
@@ -470,35 +477,43 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[0] 
                                automaticallyLoadedAssetKeys:@[@"tracks"]];
   _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
+  _mainBufferingPlayer = _bufferingPlayerA;
   _currentlyBufferingIndexA = [NSNumber numberWithInt:0];
   if ([_clipAssets count] > 1) {
-    _bufferingPlayerItemB = [AVPlayerItem playerItemWithAsset:_clipAssets[1] 
-                                 automaticallyLoadedAssetKeys:@[@"tracks"]];
-    _bufferingPlayerB = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemB];
-    _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
-    _nextIndexToBuffer = [NSNumber numberWithInt:2];
-  } else {
     _nextIndexToBuffer = [NSNumber numberWithInt:1];
+    _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
   }
 }
 
 - (void)updateBufferingProgress
 {
-  [self updateBufferingProgressForPlayer :_bufferingPlayerA];
-  if ([_clipAssets count] > 2) {
-    [self updateBufferingProgressForPlayer :_bufferingPlayerB];
-  }
+  [self updateBufferingProgressForPlayer :_mainBufferingPlayer];
 }
 
 - (void)updateBufferingProgressForPlayer:(AVPlayer*)bufferingPlayer
 {
-  Float64 playableDurationForBufferingItem = [self bufferedDurationForItem :bufferingPlayer];
+  Float64 playableDurationForMainBufferingItem = [self bufferedDurationForItem :bufferingPlayer];
   Float64 bufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :bufferingPlayer]);
-
   // This margin is to cover the case where the audio channel has a slightly
   // shorter duration than the video channel.
-  bool bufferingComplete = 0.95 * (bufferingItemDuration - playableDurationForBufferingItem) < 0.2;
+  bool bufferingComplete = 0.95 * (bufferingItemDuration - playableDurationForMainBufferingItem) < 0.2;
 
+  // Now compute the same for the alt buffering player
+  AVPlayer* altBufferingPlayer;
+  int currentlyBufferingIndexAlt;
+  if (bufferingPlayer == _bufferingPlayerA) {
+    altBufferingPlayer = _bufferingPlayerB;
+    currentlyBufferingIndexAlt = [_currentlyBufferingIndexB intValue];
+  } else {
+    altBufferingPlayer = _bufferingPlayerA;
+    currentlyBufferingIndexAlt = [_currentlyBufferingIndexA intValue];
+  }
+  Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
+  Float64 altBufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :altBufferingPlayer]);
+
+  bool altBufferingComplete = (0.95 * (altBufferingItemDuration - playableDurationForAltBufferingItem) < 0.2);
+
+  bool startBufferingNextClip = (0.88 * bufferingItemDuration - playableDurationForMainBufferingItem) < 0.0;
   float playerTimeSeconds = CMTimeGetSeconds([_player currentTime]);
 
   NSUInteger currentlyBufferingIndex = [(bufferingPlayer == _bufferingPlayerA ? _currentlyBufferingIndexA : _currentlyBufferingIndexB) intValue];
@@ -513,16 +528,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     }
   }];
 
-  float margin;
-  if (firstUnbufferedIdx == MAX_IDX) {
-    // All clips have been buffered
-    [self setPaused :false];
-    margin = 1000.0;
-  } else {
+  if (firstUnbufferedIdx < MAX_IDX) {
+    Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
     float bufferedOffset = firstUnbufferedIdx == 0 ? 0.0 : [_clipEndOffsets[firstUnbufferedIdx] floatValue];
-    float totalBufferedSeconds = bufferedOffset + playableDurationForBufferingItem;
+    float totalBufferedSeconds = bufferedOffset + playableDurationForAltBufferingItem;
 
-    margin = totalBufferedSeconds - playerTimeSeconds - 4.0;
+    /* NSLog(@"bufferedOffset %f # buffered for lowest %f", bufferedOffset, playableDurationForAltBufferingItem); */
+
     if (totalBufferedSeconds < playerTimeSeconds + 4.0) {
       [self setPaused :true];
     } else {
@@ -534,19 +546,25 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_bufferedClipIndexes replaceObjectAtIndex:currentlyBufferingIndex withObject:@(YES)];
   }
 
-  if (bufferingComplete && [_nextIndexToBuffer intValue] < [_clipAssets count]) {
+  if (altBufferingComplete && currentlyBufferingIndexAlt < [_clipAssets count]) {
+    [_bufferedClipIndexes replaceObjectAtIndex:currentlyBufferingIndexAlt withObject:@(YES)];
+  }
+
+  if (startBufferingNextClip && [_nextIndexToBuffer intValue] < [_clipAssets count]) {
     if (bufferingPlayer == _bufferingPlayerA) {
-      _currentlyBufferingIndexA = [_nextIndexToBuffer copy];
-      _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[[_currentlyBufferingIndexA intValue]]
-                                  automaticallyLoadedAssetKeys:@[@"tracks"]];
-      
-      _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
-    } else {
       _currentlyBufferingIndexB = [_nextIndexToBuffer copy];
-      _bufferingPlayerItemB = [AVPlayerItem playerItemWithAsset:_clipAssets[[_currentlyBufferingIndexB intValue]]
+      _bufferingPlayerItemB = [AVPlayerItem playerItemWithAsset:_clipAssets[[_nextIndexToBuffer intValue]]
                                   automaticallyLoadedAssetKeys:@[@"tracks"]];
       
       _bufferingPlayerB = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemB];
+      _mainBufferingPlayer = _bufferingPlayerB;
+    } else {
+      _currentlyBufferingIndexA = [_nextIndexToBuffer copy];
+      _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[[_nextIndexToBuffer intValue]]
+                                  automaticallyLoadedAssetKeys:@[@"tracks"]];
+      
+      _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
+      _mainBufferingPlayer = _bufferingPlayerA;
     }
     _nextIndexToBuffer = [NSNumber numberWithInt:([_nextIndexToBuffer intValue] + 1)];
   }
