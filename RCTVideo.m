@@ -6,12 +6,14 @@
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
+static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 @implementation RCTVideo
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
   BOOL _playerItemObserversSet;
+  BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
@@ -50,6 +52,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _lastSeekTime = 0.0f;
     _progressUpdateInterval = 250;
     _controls = NO;
+    _playerBufferEmpty = YES;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -178,6 +181,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
   _playerItemObserversSet = YES;
 }
@@ -189,6 +193,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+    [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     _playerItemObserversSet = NO;
   }
@@ -279,11 +284,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                        @"domain": _playerItem.error.domain},
                                                    @"target": self.reactTag}];
       }
+    } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
+      _playerBufferEmpty = YES;
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
       // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if (_playerItem.playbackLikelyToKeepUp) {
+      if ((!_controls || _playerBufferEmpty) && _playerItem.playbackLikelyToKeepUp) {
         [self setPaused:_paused];
       }
+      _playerBufferEmpty = NO;
     }
   } else {
       [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
