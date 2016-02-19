@@ -168,7 +168,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    if (_playingClipIndex < newPlayingClipIndex) {
      [_eventDispatcher sendInputEventWithName:@"onVideoClipEnd"
                                       body:@{
-                                               @"newClipIndex": [NSNumber numberWithInt:newPlayingClipIndex],
+                                               @"playingClipIndex": [NSNumber numberWithInt:newPlayingClipIndex],
                                                @"target": self.reactTag
                                            }];
    }
@@ -181,9 +181,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                           body:@{
                                                    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                                              @"playableDuration": [self calculatePlayableDuration],
+                                                   @"playableDuration": [self calculatePlayableDuration],
                                                    @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                                                    @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                                                   @"playingClipIndex": [NSNumber numberWithInt:_playingClipIndex],
                                                    @"target": self.reactTag
                                                }];
    }
@@ -664,9 +665,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+        _playingClipIndex = [self playingClipIndex];
         [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
                                             body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                                    @"seekTime": [NSNumber numberWithFloat:seekTime],
+                                                   @"playingClipIndex": [NSNumber numberWithInt:_playingClipIndex],
                                                    @"target": self.reactTag}];
       }];
 
