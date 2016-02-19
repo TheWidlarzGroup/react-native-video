@@ -46,6 +46,7 @@ RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, float);
 RCT_EXPORT_VIEW_PROPERTY(seekClipIndex, int);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
+RCT_EXPORT_VIEW_PROPERTY(buffering, BOOL);
 
 - (NSDictionary *)constantsToExport
 {

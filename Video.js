@@ -101,6 +101,7 @@ export default class Video extends Component {
     const {
       source,
       resizeMode,
+      buffering
     } = this.props;
 
     if (source.constructor !== Object && source.constructor !== Array) {
@@ -138,6 +139,7 @@ export default class Video extends Component {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
       src: sources,
+      buffering: buffering === false ? false : true,
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
@@ -173,6 +175,7 @@ Video.propTypes = {
   rate: PropTypes.number,
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
+  buffering: PropTypes.bool,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onError: PropTypes.func,
@@ -195,6 +198,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
-    seekToClip: true
+    buffering: true
   },
 });

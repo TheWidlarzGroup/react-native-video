@@ -22,7 +22,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   /* To buffer multiple videos (AVMutableComposition doesn't do this properly).
    * See the comments below the Buffering pragma mark for more details. */
-  NSTimer *_bufferingObserver;
+  BOOL _bufferingStarted;
+  NSTimer *_bufferingTimer;
   AVPlayer *_bufferingPlayerA;
   AVPlayer *_bufferingPlayerB;
   AVPlayer *_mainBufferingPlayer;
@@ -51,6 +52,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _shouldBuffer;
   NSString * _resizeMode;
 }
 
@@ -61,6 +63,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     _rate = 1.0;
     _volume = 1.0;
+    _bufferingStarted = NO;
     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
@@ -117,11 +120,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 }
 
 /* Cancels the previously registered buffering progress observer */
--(void)removeBufferingObserver
+-(void)removebufferingTimer
 {
-  if (_bufferingObserver) {
-    [_bufferingObserver invalidate];
-    _bufferingObserver = nil;
+  if (_bufferingTimer) {
+    [_bufferingTimer invalidate];
+    _bufferingTimer = nil;
   }
 }
 
@@ -221,7 +224,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     __block CMTimeRange effectiveTimeRange;
     [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
       CMTimeRange timeRange = [obj CMTimeRangeValue];
-      /* NSLog(@"loadedTimeRanges for main item: idx %i, seconds %f", idx, CMTimeGetSeconds(CMTimeRangeGetEnd(timeRange))); */
       if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
         effectiveTimeRange = timeRange;
         *stop = YES;
@@ -260,8 +262,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  [self removeBufferingObserver];
+  [self removebufferingTimer];
    _queue = dispatch_queue_create(nil, nil);
+
+  __weak RCTVideo *weakSelf = self;
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+
 
   // This heavy lifting is done asynchronously to avoid burdening the UI thread.
   dispatch_async(_queue, ^{
@@ -286,18 +292,20 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     if ([_clipAssets count] > 0) {
       // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-      const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-      __weak RCTVideo *weakSelf = self;
       _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
                                                             queue:NULL
                                                        usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
                        ];
 
-      _bufferingObserver = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                            target:weakSelf
-                                                          selector:@selector(updateBufferingProgress)
-                                                          userInfo:nil
-                                                           repeats:true];
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                              target:weakSelf
+                                                            selector:@selector(updateBufferingProgress)
+                                                            userInfo:nil
+                                                             repeats:true];
+        [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
+      });
 
       // Note: Currently doesn't handle heterogeneous clips.
       NSDictionary *firstSource = source[0];
@@ -479,20 +487,28 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)startBufferingClips
 {
-  _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[0] 
-                               automaticallyLoadedAssetKeys:@[@"tracks"]];
-  _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
-  _mainBufferingPlayer = _bufferingPlayerA;
-  _currentlyBufferingIndexA = [NSNumber numberWithInt:0];
-  if ([_clipAssets count] > 1) {
-    _nextIndexToBuffer = [NSNumber numberWithInt:1];
-    _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
+  if (_bufferingStarted == NO && _shouldBuffer == YES) {
+    _bufferingStarted = YES;
+    _bufferingPlayerItemA = [AVPlayerItem playerItemWithAsset:_clipAssets[0] 
+                                 automaticallyLoadedAssetKeys:@[@"tracks"]];
+    _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
+    _mainBufferingPlayer = _bufferingPlayerA;
+    _currentlyBufferingIndexA = [NSNumber numberWithInt:0];
+    if ([_clipAssets count] > 1) {
+      _nextIndexToBuffer = [NSNumber numberWithInt:1];
+      _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
+    }
   }
 }
 
 - (void)updateBufferingProgress
 {
-  [self updateBufferingProgressForPlayer :_mainBufferingPlayer];
+  if (_shouldBuffer == YES) {
+    if (_bufferingStarted == NO) {
+      [self startBufferingClips];
+    }
+    [self updateBufferingProgressForPlayer :_mainBufferingPlayer];
+  }
 }
 
 - (void)updateBufferingProgressForPlayer:(AVPlayer*)bufferingPlayer
@@ -537,8 +553,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
     float bufferedOffset = firstUnbufferedIdx == 0 ? 0.0 : [_clipEndOffsets[firstUnbufferedIdx] floatValue];
     float totalBufferedSeconds = bufferedOffset + playableDurationForAltBufferingItem;
-
-    /* NSLog(@"bufferedOffset %f # buffered for lowest %f", bufferedOffset, playableDurationForAltBufferingItem); */
 
     if (totalBufferedSeconds < playerTimeSeconds + 4.0) {
       [self setPaused :true];
@@ -690,6 +704,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self applyModifiers];
 }
 
+- (void)setBuffering:(BOOL)shouldBuffer
+{
+  _shouldBuffer = (shouldBuffer || NO);
+}
+
 - (void)applyModifiers
 {
   if (_muted) {
@@ -704,6 +723,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self setRepeat:_repeat];
   [self setPaused:_paused];
   [self setControls:_controls];
+  [self setBuffering:_shouldBuffer];
 }
 
 - (void)setRepeat:(BOOL)repeat {
@@ -826,7 +846,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  [self removeBufferingObserver];
+  [self removebufferingTimer];
   _queue = nil;
 
   _eventDispatcher = nil;
