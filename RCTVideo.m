@@ -33,6 +33,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSNumber *_currentlyBufferingIndexB;
   NSNumber *_nextIndexToBuffer;
   NSMutableArray *_bufferedClipIndexes;
+  BOOL _pausedForBuffering;
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -70,6 +71,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _lastSeekTime = 0.0f;
     _progressUpdateInterval = 250;
     _controls = NO;
+    _pausedForBuffering = NO;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -557,8 +559,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     if (totalBufferedSeconds < playerTimeSeconds + 4.0) {
       [self setPaused :true];
+      _pausedForBuffering = YES;
     } else {
-      [self setPaused :false];
+      if (_pausedForBuffering == YES) {
+        [self setPaused :false];
+      }
     }
   }
 
@@ -637,6 +642,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_player play];
     [_player setRate:_rate];
   }
+  _pausedForBuffering = NO;
   _paused = paused;
 }
 
