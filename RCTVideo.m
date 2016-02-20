@@ -20,6 +20,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSURL *_videoURL;
   dispatch_queue_t _queue;
 
+
+  /* This is used to prevent the async initialization of the player from proceeding
+   * when removeFromSuperview has already been called. Under certain circumstances,
+   * this caused audio playback to continue in the background after the view was
+   * unmounted. */
+  BOOL _removed;
+
   /* To buffer multiple videos (AVMutableComposition doesn't do this properly).
    * See the comments below the Buffering pragma mark for more details. */
   BOOL _bufferingStarted;
@@ -72,6 +79,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _progressUpdateInterval = 250;
     _controls = NO;
     _pausedForBuffering = NO;
+    _removed = NO;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -295,29 +303,36 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     if ([_clipAssets count] > 0) {
       // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-      _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                            queue:NULL
-                                                       usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                       ];
+      if (_removed == YES) {
+        /* In case the view was removed while this async block was setting things up,
+         * we trigger the lifecycle cleanup logic, e.g. to prevent the player from
+         * playing on in the background afer the view is unmounted.  */
+        [self removeFromSuperview];
+      } else {
+        _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                              queue:NULL
+                                                         usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                         ];
 
 
-      dispatch_async(dispatch_get_main_queue(), ^{
-        _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                              target:weakSelf
-                                                            selector:@selector(updateBufferingProgress)
-                                                            userInfo:nil
-                                                             repeats:true];
-        [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
-      });
+        dispatch_async(dispatch_get_main_queue(), ^{
+          _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                                target:weakSelf
+                                                              selector:@selector(updateBufferingProgress)
+                                                              userInfo:nil
+                                                               repeats:true];
+          [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
+        });
 
-      // Note: Currently doesn't handle heterogeneous clips.
-      NSDictionary *firstSource = source[0];
-      [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                          body:@{@"src": @{
-                                                     @"uri": [firstSource objectForKey:@"uri"],
-                                                     @"type": [firstSource objectForKey:@"type"],
-                                                     @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
-                                                 @"target": self.reactTag}];
+        // Note: Currently doesn't handle heterogeneous clips.
+        NSDictionary *firstSource = source[0];
+        [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
+                                            body:@{@"src": @{
+                                                       @"uri": [firstSource objectForKey:@"uri"],
+                                                       @"type": [firstSource objectForKey:@"type"],
+                                                       @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
+                                                   @"target": self.reactTag}];
+      }
     }
   });
 }
@@ -715,7 +730,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setBuffering:(BOOL)shouldBuffer
 {
-  _shouldBuffer = (shouldBuffer || NO);
+  _shouldBuffer = (shouldBuffer || NO);
 }
 
 - (void)applyModifiers
@@ -860,6 +875,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  _removed = YES;
 
   [super removeFromSuperview];
 }
