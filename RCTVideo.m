@@ -20,7 +20,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSURL *_videoURL;
   dispatch_queue_t _queue;
 
-
   /* This is used to prevent the async initialization of the player from proceeding
    * when removeFromSuperview has already been called. Under certain circumstances,
    * this caused audio playback to continue in the background after the view was
@@ -533,9 +532,22 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   Float64 playableDurationForMainBufferingItem = [self bufferedDurationForItem :bufferingPlayer];
   Float64 bufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :bufferingPlayer]);
+  bool singleClip = !_currentlyBufferingIndexB;
   // This margin is to cover the case where the audio channel has a slightly
   // shorter duration than the video channel.
   bool bufferingComplete = 0.95 * (bufferingItemDuration - playableDurationForMainBufferingItem) < 0.2;
+
+  if (singleClip) {
+    if (playableDurationForMainBufferingItem < bufferingItemDuration) {
+      [self setPaused :true];
+      _pausedForBuffering = YES;
+    } else {
+      if (_pausedForBuffering == YES) {
+        [self setPaused :false];
+      }
+    }
+    return;
+  }
 
   // Now compute the same for the alt buffering player
   AVPlayer* altBufferingPlayer;
@@ -548,6 +560,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     currentlyBufferingIndexAlt = [_currentlyBufferingIndexA intValue];
   }
   Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
+
   Float64 altBufferingItemDuration = CMTimeGetSeconds([self playerItemDuration :altBufferingPlayer]);
 
   bool altBufferingComplete = (0.95 * (altBufferingItemDuration - playableDurationForAltBufferingItem) < 0.2);
@@ -568,11 +581,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   }];
 
   if (firstUnbufferedIdx < MAX_IDX) {
-    Float64 playableDurationForAltBufferingItem = [self bufferedDurationForItem :altBufferingPlayer];
     float bufferedOffset = firstUnbufferedIdx == 0 ? 0.0 : [_clipEndOffsets[firstUnbufferedIdx] floatValue];
     float totalBufferedSeconds = bufferedOffset + playableDurationForAltBufferingItem;
 
-    if (totalBufferedSeconds < playerTimeSeconds + 4.0) {
+    if (totalBufferedSeconds < playerTimeSeconds) {
       [self setPaused :true];
       _pausedForBuffering = YES;
     } else {
