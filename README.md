@@ -70,7 +70,7 @@ Under `.addPackage(new MainReactPackage())`:
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
-var styles = Stylesheet.create({
+var styles = StyleSheet.create({
   backgroundVideo: {
     position: 'absolute',
     top: 0,
