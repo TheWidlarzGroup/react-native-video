@@ -17,7 +17,7 @@ Run `npm install react-native-video --save`
    ![(Screenshot)](http://url.brentvatne.ca/g9Wp.png).
 3. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
 4. Whenever you want to use it within React code now you can: `var Video =
-   require('react-native-video');`
+   require('react-native-video').default;`
 
 #### Android
 
