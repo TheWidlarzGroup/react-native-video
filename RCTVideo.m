@@ -20,6 +20,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSURL *_videoURL;
   dispatch_queue_t _queue;
 
+
   /* This is used to prevent the async initialization of the player from proceeding
    * when removeFromSuperview has already been called. Under certain circumstances,
    * this caused audio playback to continue in the background after the view was
@@ -418,14 +419,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
       if (item.status == AVPlayerItemStatusReadyToPlay) {
-        float duration = CMTimeGetSeconds(item.asset.duration);
-
-        if (isnan(duration)) {
-          duration = 0.0;
-        }
-
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
-                                            body:@{@"duration": [NSNumber numberWithFloat:duration],
+                                            body:@{@"duration": [self totalDuration],
+                                                   @"clipDurations": [self clipDurations],
                                                    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                                    @"canPlayReverse": [NSNumber numberWithBool:item.canPlayReverse],
                                                    @"canPlayFastForward": [NSNumber numberWithBool:item.canPlayFastForward],
@@ -451,7 +447,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       }
     }
   } else {
-      [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+      @try {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+      } @catch (NSException *exception) {
+        NSLog(@"react-native-video caught exception: %@", exception);
+      }
   }
 }
 
@@ -462,6 +462,24 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                            selector:@selector(playerItemDidReachEnd:)
                                                name:AVPlayerItemDidPlayToEndTimeNotification
                                              object:[_player currentItem]];
+}
+
+- (NSNumber*)totalDuration
+{
+  float duration = 0.0;
+  for (AVAsset *asset in _clipAssets) {
+    duration += CMTimeGetSeconds(asset.duration);
+  }
+  return [NSNumber numberWithFloat:duration];
+}
+
+- (NSMutableArray*)clipDurations
+{
+  NSMutableArray* durations = [[NSMutableArray alloc] init];
+  for (AVAsset *asset in _clipAssets) {
+    [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(asset.duration)]];
+  }
+  return [NSArray arrayWithArray:durations];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
