@@ -13,6 +13,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   int _playingClipIndex;
   NSMutableArray *_clipAssets;
   NSMutableArray *_clipEndOffsets;
+  NSMutableArray *_clipDurations;
   AVPlayerItem *_playerItem;
   BOOL _playerItemObserversSet;
   AVPlayerLayer *_playerLayer;
@@ -190,7 +191,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    if(currentTimeSecs >= 0 && currentTimeSecs <= duration) {
       [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                           body:@{
-                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                                                   @"currentTime": [NSNumber numberWithFloat:currentTimeSecs],
+                                                   @"currentTimeWithinPlayingClip": [self currentTimeWithinPlayingClip:currentTimeSecs],
                                                    @"playableDuration": [self calculatePlayableDuration],
                                                    @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                                                    @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
@@ -198,6 +200,18 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"target": self.reactTag
                                                }];
    }
+}
+
+- (NSNumber*)currentTimeWithinPlayingClip:(float)currentTime
+{
+  float time;
+  int playingClipIndex = [self playingClipIndex];
+  if (playingClipIndex > 0) {
+    time = currentTime - [_clipEndOffsets[playingClipIndex - 1] floatValue];
+  } else {
+    time = currentTime;
+  }
+  return [NSNumber numberWithFloat:time];
 }
 
 /*!
@@ -341,6 +355,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   NSMutableArray *assets = [[NSMutableArray alloc] init];
   NSMutableArray *offsets = [[NSMutableArray alloc] init];
+  NSMutableArray *durations = [[NSMutableArray alloc] init];
   _bufferedClipIndexes = [[NSMutableArray alloc] init];
   CMTime currentOffset = kCMTimeZero;
   for (NSDictionary* source in sources) {
@@ -363,12 +378,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     if ([videoTracks count] > 0 || [audioTracks count] > 0) {
       [assets addObject:asset];
       [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
+      [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(asset.duration)]];
     } else {
       NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
     }
   }
   _clipAssets = assets;
   _clipEndOffsets = offsets;
+  _clipDurations = durations;
 }
 
 - (AVPlayerItem*)playerItemForAssets:(NSMutableArray *)assets
@@ -421,7 +438,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       if (item.status == AVPlayerItemStatusReadyToPlay) {
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
                                             body:@{@"duration": [self totalDuration],
-                                                   @"clipDurations": [self clipDurations],
+                                                   @"clipDurations": [NSArray arrayWithArray:_clipDurations],
                                                    @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                                    @"canPlayReverse": [NSNumber numberWithBool:item.canPlayReverse],
                                                    @"canPlayFastForward": [NSNumber numberWithBool:item.canPlayFastForward],
@@ -466,20 +483,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (NSNumber*)totalDuration
 {
-  float duration = 0.0;
-  for (AVAsset *asset in _clipAssets) {
-    duration += CMTimeGetSeconds(asset.duration);
+  float total = 0.0;
+  for (NSNumber *duration in _clipDurations) {
+    total += [duration floatValue];
   }
-  return [NSNumber numberWithFloat:duration];
-}
-
-- (NSMutableArray*)clipDurations
-{
-  NSMutableArray* durations = [[NSMutableArray alloc] init];
-  for (AVAsset *asset in _clipAssets) {
-    [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(asset.duration)]];
-  }
-  return [NSArray arrayWithArray:durations];
+  return [NSNumber numberWithFloat:total];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
