@@ -742,9 +742,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   }
 }
 
-- (void)setSeekClipIndex:(int)clipIndex
+- (void)setSeekClip:(NSDictionary*)seekParams
 {
-  float position = clipIndex == 0 ? 0.0 : [[_clipEndOffsets objectAtIndex:(clipIndex - 1)] floatValue];
+  int clipIndex = [[seekParams objectForKey:@"index"] intValue];
+  float time = ([[seekParams objectForKey:@"time"] floatValue] || 0.0);
+  float position = clipIndex == 0 ? time : ([[_clipEndOffsets objectAtIndex:(clipIndex - 1)] floatValue] + time);
   [self setSeek: position];
 }
 

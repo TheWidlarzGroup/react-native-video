@@ -41,8 +41,9 @@ export default class Video extends Component {
     this.setNativeProps({ seek: time });
   }
 
-  seekToClip(index) {
-    this.setNativeProps({ seekClipIndex: index });
+  // time is optional
+  seekToClip(index, time) {
+    this.setNativeProps({ seekClip: { index, time } });
   }
 
   _assignRoot(component) {
@@ -163,7 +164,7 @@ Video.propTypes = {
   /* Native only */
   src: PropTypes.array,
   seek: PropTypes.number,
-  seekClipIndex: PropTypes.number,
+  seekClip: PropTypes.object,
 
   /* Wrapper component */
   // source: object or array
