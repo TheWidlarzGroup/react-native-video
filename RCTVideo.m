@@ -288,67 +288,67 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   [self removebufferingTimer];
-   _queue = dispatch_queue_create(nil, nil);
 
   __weak RCTVideo *weakSelf = self;
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
 
+  if (!_queue) {
+     _queue = dispatch_queue_create(nil, nil);
+    // This heavy lifting is done asynchronously to avoid burdening the UI thread.
+    dispatch_async(_queue, ^{
+      [self prepareAssetsForSources:source];
+      _playerItem = [self playerItemForAssets:_clipAssets];
+      _playingClipIndex = 0;
 
-  // This heavy lifting is done asynchronously to avoid burdening the UI thread.
-  dispatch_async(_queue, ^{
-    [self prepareAssetsForSources:source];
-    _playerItem = [self playerItemForAssets:_clipAssets];
-    _playingClipIndex = 0;
-
-    if ([_clipAssets count] > 0) {
-      [self startBufferingClips];
-    }
-
-    [self addPlayerItemObservers];
-
-    [_player pause];
-    [_playerLayer removeFromSuperlayer];
-    _playerLayer = nil;
-    [_playerViewController.view removeFromSuperview];
-    _playerViewController = nil;
-
-    _player = [AVPlayer playerWithPlayerItem:_playerItem];
-    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-
-    if ([_clipAssets count] > 0) {
-      // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-      if (_removed == YES) {
-        /* In case the view was removed while this async block was setting things up,
-         * we trigger the lifecycle cleanup logic, e.g. to prevent the player from
-         * playing on in the background afer the view is unmounted.  */
-        [self removeFromSuperview];
-      } else {
-        _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                              queue:NULL
-                                                         usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                         ];
-
-
-        dispatch_async(dispatch_get_main_queue(), ^{
-          _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                                target:weakSelf
-                                                              selector:@selector(updateBufferingProgress)
-                                                              userInfo:nil
-                                                               repeats:true];
-          [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
-        });
-
-        // Note: Currently doesn't handle heterogeneous clips.
-        NSDictionary *firstSource = source[0];
-        [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                            body:@{@"src": @{
-                                                       @"uri": [firstSource objectForKey:@"uri"],
-                                                       @"type": [firstSource objectForKey:@"type"],
-                                                       @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
-                                                   @"target": self.reactTag}];
+      if ([_clipAssets count] > 0) {
+        [self startBufferingClips];
       }
-    }
-  });
+
+      [_player pause];
+      [_playerLayer removeFromSuperlayer];
+      _playerLayer = nil;
+      [_playerViewController.view removeFromSuperview];
+      _playerViewController = nil;
+
+      _player = [AVPlayer playerWithPlayerItem:_playerItem];
+      _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+
+      if ([_clipAssets count] > 0) {
+        // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+        [self addPlayerItemObservers];
+        if (_removed == YES) {
+          /* In case the view was removed while this async block was setting things up,
+           * we trigger the lifecycle cleanup logic, e.g. to prevent the player from
+           * playing on in the background afer the view is unmounted.  */
+          [self removeFromSuperview];
+        } else {
+          _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                                queue:NULL
+                                                           usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                           ];
+
+
+          dispatch_async(dispatch_get_main_queue(), ^{
+            _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                                  target:weakSelf
+                                                                selector:@selector(updateBufferingProgress)
+                                                                userInfo:nil
+                                                                 repeats:true];
+            [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
+          });
+
+          // Note: Currently doesn't handle heterogeneous clips.
+          NSDictionary *firstSource = source[0];
+          [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
+                                              body:@{@"src": @{
+                                                         @"uri": [firstSource objectForKey:@"uri"],
+                                                         @"type": [firstSource objectForKey:@"type"],
+                                                         @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
+                                                     @"target": self.reactTag}];
+        }
+      }
+    });
+  }
 }
 
 - (void)prepareAssetsForSources:(NSArray *)sources
@@ -464,11 +464,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       }
     }
   } else {
-      @try {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-      } @catch (NSException *exception) {
-        NSLog(@"react-native-video caught exception: %@", exception);
-      }
+    @try {
+      [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    } @catch (NSException *exception) {
+      NSLog(@"react-native-video caught exception: %@", exception);
+    }
   }
 }
 
@@ -911,6 +911,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   [self removebufferingTimer];
+  _playerItem = nil;
   _queue = nil;
 
   _eventDispatcher = nil;
