@@ -192,7 +192,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                           body:@{
                                                    @"currentTime": [NSNumber numberWithFloat:currentTimeSecs],
-                                                   @"currentTimeWithinPlayingClip": [self currentTimeWithinPlayingClip:currentTimeSecs],
+                                                   @"playingClipCurrentTime": [self playingClipCurrentTime:currentTimeSecs],
                                                    @"playableDuration": [self calculatePlayableDuration],
                                                    @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                                                    @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
@@ -202,7 +202,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
    }
 }
 
-- (NSNumber*)currentTimeWithinPlayingClip:(float)currentTime
+- (NSNumber*)playingClipCurrentTime:(float)currentTime
 {
   float time;
   int playingClipIndex = [self playingClipIndex];
