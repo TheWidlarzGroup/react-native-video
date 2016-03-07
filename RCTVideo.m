@@ -369,16 +369,19 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       [NSURL URLWithString:uri] :
       [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    currentOffset = CMTimeAdd(currentOffset, asset.duration);
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetPreferPreciseDurationAndTimingKey:@YES}];
 
     NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
     NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+    AVAssetTrack *firstVideoTrack = videoTracks[0];
+
+    CMTime dur = firstVideoTrack.timeRange.duration;
+    currentOffset = CMTimeAdd(currentOffset, dur);
 
     if ([videoTracks count] > 0 || [audioTracks count] > 0) {
       [assets addObject:asset];
       [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
-      [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(asset.duration)]];
+      [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
     } else {
       NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
     }
@@ -397,11 +400,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                                    preferredTrackID:kCMPersistentTrackID_Invalid];
   CMTime timeOffset = kCMTimeZero;
   for (AVAsset* asset in assets) {
-    CMTimeRange editRange = CMTimeRangeMake(CMTimeMake(0, 600), asset.duration);
     NSError *editError;
 
     NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
     NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+    AVAssetTrack *firstVideoTrack = videoTracks[0];
+
+    CMTime dur = firstVideoTrack.timeRange.duration;
+
+    CMTimeRange editRange = CMTimeRangeMake(CMTimeMake(0, 600), dur);
 
     if ([videoTracks count] > 0) {
     AVAssetTrack *videoTrack = [videoTracks objectAtIndex:0];
@@ -420,7 +427,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     }
 
     if ([videoTracks count] > 0 || [audioTracks count] > 0) {
-      timeOffset = CMTimeAdd(timeOffset, asset.duration);
+      timeOffset = CMTimeAdd(timeOffset, dur);
     }
   }
   AVPlayerItem* playerItem = [AVPlayerItem playerItemWithAsset:composition];
