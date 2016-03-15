@@ -373,12 +373,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
     NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
-    AVAssetTrack *firstVideoTrack = videoTracks[0];
-
-    CMTime dur = firstVideoTrack.timeRange.duration;
-    currentOffset = CMTimeAdd(currentOffset, dur);
 
     if ([videoTracks count] > 0 || [audioTracks count] > 0) {
+      AVAssetTrack *firstVideoTrack = videoTracks[0];
+
+      CMTime dur = firstVideoTrack.timeRange.duration;
+      currentOffset = CMTimeAdd(currentOffset, dur);
       [assets addObject:asset];
       [offsets addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
       [durations addObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
