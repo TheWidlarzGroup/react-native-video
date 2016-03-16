@@ -20,6 +20,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
   dispatch_queue_t _queue;
+  NSArray *_pendingSource;
+  BOOL _preparationInProgress;
 
 
   /* This is used to prevent the async initialization of the player from proceeding
@@ -72,6 +74,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
     _rate = 1.0;
     _volume = 1.0;
+    _preparationInProgress = NO;
     _bufferingStarted = NO;
     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
     _pendingSeek = false;
@@ -136,6 +139,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   if (_bufferingTimer) {
     [_bufferingTimer invalidate];
     _bufferingTimer = nil;
+    _bufferingStarted = NO;
   }
 }
 
@@ -285,70 +289,87 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSrc:(NSArray *)source
 {
+  if (!_queue) {
+    _queue = dispatch_queue_create(nil, nil);
+  }
+
+  if (_preparationInProgress) {
+    _pendingSource = source;
+  } else {
+    dispatch_async(_queue, ^{
+      // This heavy lifting is done asynchronously to avoid burdening the UI thread.
+      [self preparePlayer:source];
+      if (_pendingSource) {
+        NSArray *ps = _pendingSource;
+        _pendingSource = nil;
+        [self preparePlayer:ps];
+      }
+    });
+  }
+}
+
+- (void)preparePlayer:(NSArray *)source
+{
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   [self removebufferingTimer];
 
+  _preparationInProgress = YES;
   __weak RCTVideo *weakSelf = self;
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
 
-  if (!_queue) {
-     _queue = dispatch_queue_create(nil, nil);
-    // This heavy lifting is done asynchronously to avoid burdening the UI thread.
-    dispatch_async(_queue, ^{
-      [self prepareAssetsForSources:source];
-      _playerItem = [self playerItemForAssets:_clipAssets];
-      _playingClipIndex = 0;
+  [self prepareAssetsForSources:source];
+  _playerItem = [self playerItemForAssets:_clipAssets];
+  _playingClipIndex = 0;
 
-      if ([_clipAssets count] > 0) {
-        [self startBufferingClips];
-      }
-
-      [_player pause];
-      [_playerLayer removeFromSuperlayer];
-      _playerLayer = nil;
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
-
-      _player = [AVPlayer playerWithPlayerItem:_playerItem];
-      _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-
-      if ([_clipAssets count] > 0) {
-        // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-        [self addPlayerItemObservers];
-        if (_removed == YES) {
-          /* In case the view was removed while this async block was setting things up,
-           * we trigger the lifecycle cleanup logic, e.g. to prevent the player from
-           * playing on in the background afer the view is unmounted.  */
-          [self removeFromSuperview];
-        } else {
-          _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                                queue:NULL
-                                                           usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                           ];
-
-
-          dispatch_async(dispatch_get_main_queue(), ^{
-            _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
-                                                                  target:weakSelf
-                                                                selector:@selector(updateBufferingProgress)
-                                                                userInfo:nil
-                                                                 repeats:true];
-            [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
-          });
-
-          // Note: Currently doesn't handle heterogeneous clips.
-          NSDictionary *firstSource = source[0];
-          [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                              body:@{@"src": @{
-                                                         @"uri": [firstSource objectForKey:@"uri"],
-                                                         @"type": [firstSource objectForKey:@"type"],
-                                                         @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
-                                                     @"target": self.reactTag}];
-        }
-      }
-    });
+  if ([_clipAssets count] > 0) {
+    [self startBufferingClips];
   }
+
+  [_player pause];
+  [_playerLayer removeFromSuperlayer];
+  _playerLayer = nil;
+  [_playerViewController.view removeFromSuperview];
+  _playerViewController = nil;
+
+  _player = [AVPlayer playerWithPlayerItem:_playerItem];
+  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+
+  if ([_clipAssets count] > 0) {
+    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+    [self addPlayerItemObservers];
+    if (_removed == YES) {
+      /* In case the view was removed while this async block was setting things up,
+       * we trigger the lifecycle cleanup logic, e.g. to prevent the player from
+       * playing on in the background afer the view is unmounted.  */
+      [self removeFromSuperview];
+    } else {
+      _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                            queue:NULL
+                                                       usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                       ];
+
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        _bufferingTimer = [NSTimer scheduledTimerWithTimeInterval:(_progressUpdateInterval / 1000)
+                                                              target:weakSelf
+                                                            selector:@selector(updateBufferingProgress)
+                                                            userInfo:nil
+                                                             repeats:true];
+        [[NSRunLoop currentRunLoop] addTimer:_bufferingTimer forMode:UITrackingRunLoopMode];
+      });
+
+      // Note: Currently doesn't handle heterogeneous clips.
+      NSDictionary *firstSource = source[0];
+      [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
+                                          body:@{@"src": @{
+                                                     @"uri": [firstSource objectForKey:@"uri"],
+                                                     @"type": [firstSource objectForKey:@"type"],
+                                                     @"isNetwork":[NSNumber numberWithBool:(bool)[firstSource objectForKey:@"isNetwork"]]},
+                                                 @"target": self.reactTag}];
+    }
+  }
+  _preparationInProgress = NO;
 }
 
 - (void)prepareAssetsForSources:(NSArray *)sources
@@ -356,9 +377,24 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   NSMutableArray *assets = [[NSMutableArray alloc] init];
   NSMutableArray *offsets = [[NSMutableArray alloc] init];
   NSMutableArray *durations = [[NSMutableArray alloc] init];
-  _bufferedClipIndexes = [[NSMutableArray alloc] init];
-  CMTime currentOffset = kCMTimeZero;
-  for (NSDictionary* source in sources) {
+
+  NSMutableArray *sourcesToPrepare;
+  CMTime currentOffset;
+
+  if (_clipAssets) {
+    // Then we only prepare assets for clips just appended
+    sourcesToPrepare = [[NSMutableArray alloc] init];
+    for (int i = [_clipAssets count]; i < [sources count]; i++) {
+      [sourcesToPrepare addObject:[sources objectAtIndex:i]];
+    }
+    currentOffset = CMTimeMakeWithSeconds([[_clipEndOffsets lastObject] floatValue], 9000);
+  } else {
+    sourcesToPrepare = [NSMutableArray arrayWithArray:sources];
+    _bufferedClipIndexes = [[NSMutableArray alloc] init];
+    currentOffset = kCMTimeZero;
+  }
+
+  for (NSDictionary* source in sourcesToPrepare) {
     [_bufferedClipIndexes addObject:[NSNumber numberWithInt:0]];
     bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
     bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
@@ -386,9 +422,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
     }
   }
-  _clipAssets = assets;
-  _clipEndOffsets = offsets;
-  _clipDurations = durations;
+  if (_clipAssets) {
+    [_clipAssets     addObjectsFromArray:assets];
+    [_clipEndOffsets addObjectsFromArray:offsets];
+    [_clipDurations  addObjectsFromArray:durations];
+  } else {
+    _clipAssets     = assets;
+    _clipEndOffsets = offsets;
+    _clipDurations  = durations;
+  }
 }
 
 - (AVPlayerItem*)playerItemForAssets:(NSMutableArray *)assets
@@ -468,6 +510,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
       // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
       if (item.playbackLikelyToKeepUp) {
         [self setPaused:_paused];
+        _pausedForBuffering = _paused;
       }
     }
   } else {
@@ -544,10 +587,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _bufferingPlayerA = [AVPlayer playerWithPlayerItem:_bufferingPlayerItemA];
     _mainBufferingPlayer = _bufferingPlayerA;
     _currentlyBufferingIndexA = [NSNumber numberWithInt:0];
-    if ([_clipAssets count] > 1) {
-      _nextIndexToBuffer = [NSNumber numberWithInt:1];
-      _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
-    }
+  }
+
+  // For the case when setSrc was initially called with one clip, and then again
+  // with more than one clip.
+  if ([_clipAssets count] > 1 &&
+      (_bufferingStarted == NO || (_bufferingStarted == YES && !_bufferingPlayerB))) {
+    _nextIndexToBuffer = [NSNumber numberWithInt:1];
+    _currentlyBufferingIndexB = [NSNumber numberWithInt:1];
   }
 }
 
@@ -577,6 +624,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     } else {
       if (_pausedForBuffering == YES) {
         [self setPaused :false];
+        _pausedForBuffering = NO;
       }
     }
     return;
@@ -623,7 +671,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     } else {
       if (_pausedForBuffering == YES) {
         [self setPaused :false];
+        _pausedForBuffering = NO;
       }
+    }
+  } else {
+    if (_pausedForBuffering == YES) {
+      [self setPaused :false];
+      _pausedForBuffering = NO;
     }
   }
 
@@ -702,7 +756,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     [_player play];
     [_player setRate:_rate];
   }
-  _pausedForBuffering = NO;
   _paused = paused;
 }
 
