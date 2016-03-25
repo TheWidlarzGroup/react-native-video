@@ -19,7 +19,8 @@
     "RCTVideoManager.m",
     "README.md",
     "Video.js",
-    "VideoResizeMode.js"
+    "VideoResizeMode.js",
+    "react-native-video.podspec"
   ],
   "contributors": [
     {
