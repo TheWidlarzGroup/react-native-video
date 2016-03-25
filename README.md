@@ -3,7 +3,7 @@
 A <Video> component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.4.4
+Requires react-native >= 0.19.0
 
 ### Add it to your project
 
@@ -17,7 +17,7 @@ Run `npm install react-native-video --save`
    ![(Screenshot)](http://url.brentvatne.ca/g9Wp.png).
 3. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
 4. Whenever you want to use it within React code now you can: `var Video =
-   require('react-native-video').default;`
+   require('react-native-video').default;` or just `import Video from 'react-native-video'`.
 
 #### Android
 
@@ -89,7 +89,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 ## Examples
 
-- See an [Example integration][1] in `react-native-login`*.
+- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
@@ -102,21 +102,9 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
    Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
 
-*The example from `react-native-login` does not seem to work in some cases. Try replacing 
-```
-var Video = require('react-native-video');  
-```
-by
-```
-import Video from 'react-native-video';
-```
-
-
 ## TODOS
 
-- [ ] Add some way to interface with `seekToTime`
 - [ ] Add support for captions
-- [ ] Support `require('video!...')`
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://www.w3schools.com/tags/ref_av_dom.asp)
