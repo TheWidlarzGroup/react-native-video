@@ -18,6 +18,8 @@
     "RCTVideoManager.h",
     "RCTVideoManager.m",
     "README.md",
+    "UIView+FindUIViewController.h",
+    "UIView+FindUIViewController.m",
     "Video.js",
     "VideoResizeMode.js",
     "react-native-video.podspec"
