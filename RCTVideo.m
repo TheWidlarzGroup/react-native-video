@@ -458,18 +458,21 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
         if( viewController )
         {
             _presentingViewController = viewController;
+            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillPresent" body:@{@"target": self.reactTag}];
             [viewController presentViewController:_playerViewController animated:true completion:^{
                 _playerViewController.showsPlaybackControls = YES;
                 _fullScreenPlayerPresented = fullscreen;
+                [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidPresent" body:@{@"target": self.reactTag}];
             }];
-            
         }
     }
     else
     {
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
         [_presentingViewController dismissViewControllerAnimated:true completion:^{
             _fullScreenPlayerPresented = fullscreen;
             _presentingViewController = nil;
+            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
         }];
     }
 }

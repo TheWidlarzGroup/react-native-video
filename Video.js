@@ -29,6 +29,10 @@ export default class Video extends Component {
     this._onProgress = this._onProgress.bind(this);
     this._onSeek = this._onSeek.bind(this);
     this._onEnd = this._onEnd.bind(this);
+    this._onFullscreenPlayerWillPresent = this._onFullscreenPlayerWillPresent.bind(this);
+    this._onFullscreenPlayerDidPresent = this._onFullscreenPlayerDidPresent.bind(this);
+    this._onFullscreenPlayerWillDismiss = this._onFullscreenPlayerWillDismiss.bind(this);
+    this._onFullscreenPlayerDidDismiss = this._onFullscreenPlayerDidDismiss.bind(this);
   }
 
   setNativeProps(nativeProps) {
@@ -83,6 +87,30 @@ export default class Video extends Component {
     }
   }
 
+  _onFullscreenPlayerWillPresent(event) {
+    if (this.props.onFullscreenPlayerWillPresent) {
+      this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerDidPresent(event) {
+    if (this.props.onFullscreenPlayerWillPresent) {
+      this.props.onFullscreenPlayerDidPresent(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerWillDismiss(event) {
+    if (this.props.onFullscreenPlayerWillPresent) {
+      this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerDidDismiss(event) {
+    if (this.props.onFullscreenPlayerDidDismiss) {
+      this.props.onFullscreenPlayerDidDismiss(event.nativeEvent);
+    }
+  }
+
   render() {
     const {
       source,
@@ -124,6 +152,10 @@ export default class Video extends Component {
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
+      onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
+      onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
+      onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
+      onVideoFullscreenPlayerDidDismiss: this._onFullscreenPlayerDidDismiss,
     });
 
     return (
@@ -157,6 +189,10 @@ Video.propTypes = {
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
   onEnd: PropTypes.func,
+  onFullscreenPlayerWillPresent: PropTypes.func,
+  onFullscreenPlayerDidPresent: PropTypes.func,
+  onFullscreenPlayerWillDismiss: PropTypes.func,
+  onFullscreenPlayerDidDismiss: PropTypes.func,
 
   /* Required by react-native */
   scaleX: React.PropTypes.number,
