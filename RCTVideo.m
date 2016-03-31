@@ -37,6 +37,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   BOOL _paused;
   BOOL _repeat;
   NSString * _resizeMode;
+  BOOL _fullScreenPlayerPresented;
+  UIViewController * _presentingViewController;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -424,6 +426,54 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
 }
+
+- (BOOL)getFullscreen
+{
+    return _fullScreenPlayerPresented;
+}
+
+- (void)setFullscreen:(BOOL)fullscreen
+{
+    if( fullscreen )
+    {
+        // Ensure player view controller is not null
+        if( !_playerViewController )
+        {
+            [self usePlayerViewController];
+        }
+        // Set presentation style to fullscreen
+        [_playerViewController setModalPresentationStyle:UIModalPresentationOverFullScreen];
+        
+        // Find the nearest view controller
+        UIViewController *viewController = [self firstAvailableUIViewController];
+        if( !viewController )
+        {
+            UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+            viewController = keyWindow.rootViewController;
+            if( viewController.childViewControllers.count > 0 )
+            {
+                viewController = viewController.childViewControllers.lastObject;
+            }
+        }
+        if( viewController )
+        {
+            _presentingViewController = viewController;
+            [viewController presentViewController:_playerViewController animated:true completion:^{
+                _playerViewController.showsPlaybackControls = YES;
+                _fullScreenPlayerPresented = fullscreen;
+            }];
+            
+        }
+    }
+    else
+    {
+        [_presentingViewController dismissViewControllerAnimated:true completion:^{
+            _fullScreenPlayerPresented = fullscreen;
+            _presentingViewController = nil;
+        }];
+    }
+}
+
 
 - (void)usePlayerViewController
 {
