@@ -71,7 +71,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 }
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
-    AVPlayerViewController* playerLayer= [[AVPlayerViewController alloc] init];
+    RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
+    playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = _player;
     playerLayer.view.frame = self.bounds;
@@ -472,6 +473,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
         [_presentingViewController dismissViewControllerAnimated:true completion:^{
             _fullScreenPlayerPresented = fullscreen;
             _presentingViewController = nil;
+            [self setControls:_controls];
             [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
         }];
     }
