@@ -1,6 +1,7 @@
 #import "RCTView.h"
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
+#import "UIView+FindUIViewController.h"
 
 @class RCTEventDispatcher;
 
