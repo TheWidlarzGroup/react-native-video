@@ -21,6 +21,7 @@ export default class Video extends Component {
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
+    this.goFullscreen = this.goFullscreen.bind(this);
     this._assignRoot = this._assignRoot.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
@@ -36,6 +37,10 @@ export default class Video extends Component {
 
   seek(time) {
     this.setNativeProps({ seek: time });
+  }
+
+  goFullscreen() {
+    this.setNativeProps({ fullscreen: true });
   }
 
   _assignRoot(component) {
@@ -134,6 +139,7 @@ Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.number,
+  fullscreen: PropTypes.bool,
 
   /* Wrapper component */
   source: PropTypes.object,
