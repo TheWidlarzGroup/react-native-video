@@ -11,5 +11,5 @@
 #import "RCTVideoPlayerViewControllerDelegate.h"
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
-@property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate *> rctDelegate;
+@property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
 @end
