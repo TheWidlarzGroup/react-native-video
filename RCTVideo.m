@@ -469,16 +469,12 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
     }
     else
     {
-        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
+        [self videoPlayerViewControllerWillDismiss:_playerViewController];
         [_presentingViewController dismissViewControllerAnimated:true completion:^{
-            _fullScreenPlayerPresented = fullscreen;
-            _presentingViewController = nil;
-            [self setControls:_controls];
-            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
+            [self videoPlayerViewControllerDidDismiss:_playerViewController];
         }];
     }
 }
-
 
 - (void)usePlayerViewController
 {
@@ -519,6 +515,27 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             _playerViewController = nil;
             [self usePlayerLayer];
         }
+    }
+}
+
+#pragma mark - RCTVideoPlayerViewControllerDelegate
+
+- (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullScreenPlayerPresented)
+    {
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
+    }
+}
+
+- (void)videoPlayerViewControllerDidDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullScreenPlayerPresented)
+    {
+        _fullScreenPlayerPresented = false;
+        _presentingViewController = nil;
+        [self setControls:_controls];
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
     }
 }
 
