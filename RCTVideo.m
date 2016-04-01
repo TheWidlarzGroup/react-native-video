@@ -37,7 +37,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   BOOL _paused;
   BOOL _repeat;
   NSString * _resizeMode;
-  BOOL _fullScreenPlayerPresented;
+  BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
 }
 
@@ -431,7 +431,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (BOOL)getFullscreen
 {
-    return _fullScreenPlayerPresented;
+    return _fullscreenPlayerPresented;
 }
 
 - (void)setFullscreen:(BOOL)fullscreen
@@ -463,7 +463,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillPresent" body:@{@"target": self.reactTag}];
             [viewController presentViewController:_playerViewController animated:true completion:^{
                 _playerViewController.showsPlaybackControls = YES;
-                _fullScreenPlayerPresented = fullscreen;
+                _fullscreenPlayerPresented = fullscreen;
                 [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidPresent" body:@{@"target": self.reactTag}];
             }];
         }
@@ -523,7 +523,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
 {
-    if (_playerViewController == playerViewController && _fullScreenPlayerPresented)
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
     {
         [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
     }
@@ -531,9 +531,9 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (void)videoPlayerViewControllerDidDismiss:(AVPlayerViewController *)playerViewController
 {
-    if (_playerViewController == playerViewController && _fullScreenPlayerPresented)
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
     {
-        _fullScreenPlayerPresented = false;
+        _fullscreenPlayerPresented = false;
         _presentingViewController = nil;
         [self applyModifiers];
         [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
