@@ -8,7 +8,8 @@
 
 #import <AVKit/AVKit.h>
 #import "RCTVideo.h"
+#import "RCTVideoPlayerViewControllerDelegate.h"
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
-@property (nonatomic, weak) id<RCTVideo> rctVideoView;
+@property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate *> rctDelegate;
 @end

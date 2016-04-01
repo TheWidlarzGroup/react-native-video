@@ -14,9 +14,15 @@
 
 @implementation RCTVideoPlayerViewController
 
-- (IBAction)close:(id)sender
+- (void)viewDidDisappear:(BOOL)animated
 {
-    [self.rctVideoView setFullscreen:false];
+    [super viewDidDisappear:animated];
+    [_rctDelegate videoPlayerViewControllerDidDismiss:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [_rctDelegate videoPlayerViewControllerWillDismiss:self];
+    [super viewWillDisappear:animated];
 }
 
 @end
