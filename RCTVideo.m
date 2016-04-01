@@ -436,7 +436,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (void)setFullscreen:(BOOL)fullscreen
 {
-    if( fullscreen )
+    if( fullscreen && !_fullscreenPlayerPresented )
     {
         // Ensure player view controller is not null
         if( !_playerViewController )
@@ -468,7 +468,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             }];
         }
     }
-    else
+    else if ( !fullscreen && _fullscreenPlayerPresented )
     {
         [self videoPlayerViewControllerWillDismiss:_playerViewController];
         [_presentingViewController dismissViewControllerAnimated:true completion:^{
