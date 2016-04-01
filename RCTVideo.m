@@ -443,7 +443,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             [self usePlayerViewController];
         }
         // Set presentation style to fullscreen
-        [_playerViewController setModalPresentationStyle:UIModalPresentationOverFullScreen];
+        [_playerViewController setModalPresentationStyle:UIModalPresentationFullScreen];
         
         // Find the nearest view controller
         UIViewController *viewController = [self firstAvailableUIViewController];
