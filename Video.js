@@ -21,7 +21,8 @@ export default class Video extends Component {
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
-    this.goFullscreen = this.goFullscreen.bind(this);
+    this.presentFullscreenPlayer = this.presentFullscreenPlayer.bind(this);
+    this.dismissFullscreenPlayer = this.dismissFullscreenPlayer.bind(this);
     this._assignRoot = this._assignRoot.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
@@ -43,8 +44,12 @@ export default class Video extends Component {
     this.setNativeProps({ seek: time });
   }
 
-  goFullscreen() {
+  presentFullscreenPlayer() {
     this.setNativeProps({ fullscreen: true });
+  }
+
+  dismissFullscreenPlayer() {
+    this.setNativeProps({ fullscreen: false });
   }
 
   _assignRoot(component) {
@@ -207,5 +212,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
+    fullscreen: true,
   },
 });
