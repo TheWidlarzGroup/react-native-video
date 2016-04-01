@@ -534,7 +534,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
     {
         _fullScreenPlayerPresented = false;
         _presentingViewController = nil;
-        [self setControls:_controls];
+        [self applyModifiers];
         [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
     }
 }
