@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/brentvatne/react-native-video"
 
   s.license      = "MIT"
-  s.platform     = :ios, "8.0"
+  s.platform     = :ios, "7.0"
 
   s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
 
