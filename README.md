@@ -21,7 +21,9 @@ Run `npm install react-native-video --save`
 
 #### Android
 
-Make the following additions to the given files.
+First, copy your video file to android/app/src/main/res/raw/
+
+Then make the following additions to the given files.
 
 **android/settings.gradle**
 ```
