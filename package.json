@@ -3,6 +3,7 @@
   "version": "0.7.1",
   "description": "A <Video /> element for react-native",
   "main": "Video.js",
+  "license": "MIT",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "files": [
     "android/build.gradle",
