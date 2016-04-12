@@ -37,6 +37,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   BOOL _paused;
   BOOL _repeat;
   NSString * _resizeMode;
+  BOOL _fullscreenPlayerPresented;
+  UIViewController * _presentingViewController;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -69,7 +71,9 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 }
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
-    AVPlayerViewController* playerLayer= [[AVPlayerViewController alloc] init];
+    RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
+    playerLayer.showsPlaybackControls = NO;
+    playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = _player;
     playerLayer.view.frame = self.bounds;
@@ -436,6 +440,54 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   _repeat = repeat;
 }
 
+- (BOOL)getFullscreen
+{
+    return _fullscreenPlayerPresented;
+}
+
+- (void)setFullscreen:(BOOL)fullscreen
+{
+    if( fullscreen && !_fullscreenPlayerPresented )
+    {
+        // Ensure player view controller is not null
+        if( !_playerViewController )
+        {
+            [self usePlayerViewController];
+        }
+        // Set presentation style to fullscreen
+        [_playerViewController setModalPresentationStyle:UIModalPresentationFullScreen];
+        
+        // Find the nearest view controller
+        UIViewController *viewController = [self firstAvailableUIViewController];
+        if( !viewController )
+        {
+            UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+            viewController = keyWindow.rootViewController;
+            if( viewController.childViewControllers.count > 0 )
+            {
+                viewController = viewController.childViewControllers.lastObject;
+            }
+        }
+        if( viewController )
+        {
+            _presentingViewController = viewController;
+            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillPresent" body:@{@"target": self.reactTag}];
+            [viewController presentViewController:_playerViewController animated:true completion:^{
+                _playerViewController.showsPlaybackControls = YES;
+                _fullscreenPlayerPresented = fullscreen;
+                [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidPresent" body:@{@"target": self.reactTag}];
+            }];
+        }
+    }
+    else if ( !fullscreen && _fullscreenPlayerPresented )
+    {
+        [self videoPlayerViewControllerWillDismiss:_playerViewController];
+        [_presentingViewController dismissViewControllerAnimated:true completion:^{
+            [self videoPlayerViewControllerDidDismiss:_playerViewController];
+        }];
+    }
+}
+
 - (void)usePlayerViewController
 {
     if( _player )
@@ -475,6 +527,27 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             _playerViewController = nil;
             [self usePlayerLayer];
         }
+    }
+}
+
+#pragma mark - RCTVideoPlayerViewControllerDelegate
+
+- (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
+    {
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
+    }
+}
+
+- (void)videoPlayerViewControllerDidDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
+    {
+        _fullscreenPlayerPresented = false;
+        _presentingViewController = nil;
+        [self applyModifiers];
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
     }
 }
 
