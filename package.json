@@ -1,8 +1,9 @@
 {
   "name": "react-native-video",
-  "version": "0.6.1",
+  "version": "0.8.0-beta",
   "description": "A <Video /> element for react-native",
   "main": "Video.js",
+  "license": "MIT",
   "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
   "files": [
     "android/build.gradle",
@@ -18,9 +19,14 @@
     "RCTVideoManager.h",
     "RCTVideoManager.m",
     "README.md",
+    "UIView+FindUIViewController.h",
+    "UIView+FindUIViewController.m",
+    "RCTVideoPlayerViewController.h",
+    "RCTVideoPlayerViewController.m",
+    "RCTVideoPlayerViewControllerDelegate.h",
     "Video.js",
     "VideoResizeMode.js",
-    "VideoStylePropTypes.js"
+    "react-native-video.podspec"
   ],
   "contributors": [
     {
@@ -37,9 +43,16 @@
     "url": "git@github.com:brentvatne/react-native-video.git"
   },
   "devDependencies": {
-    "jest-cli": "0.2.1"
+    "jest-cli": "0.2.1",
+    "eslint": "1.10.3",
+    "babel-eslint": "5.0.0-beta8",
+    "eslint-plugin-react": "3.16.1",
+    "eslint-config-airbnb": "4.0.0"
   },
   "dependencies": {
-    "keymirror": "^0.1.1"
+    "keymirror": "0.1.1"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/eslint *.js"
   }
 }

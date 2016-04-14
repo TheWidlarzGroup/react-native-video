@@ -1,4 +1,6 @@
-const React = require('react-native');
+import React from 'react-native';
+import VideoResizeMode from './VideoResizeMode.js';
+
 const {
   Component,
   StyleSheet,
@@ -8,25 +10,30 @@ const {
   View,
 } = React;
 
-const VideoResizeMode = require('./VideoResizeMode');
-
 const styles = StyleSheet.create({
   base: {
     overflow: 'hidden',
   },
 });
 
-class Video extends Component {
+export default class Video extends Component {
 
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
+    this.presentFullscreenPlayer = this.presentFullscreenPlayer.bind(this);
+    this.dismissFullscreenPlayer = this.dismissFullscreenPlayer.bind(this);
+    this._assignRoot = this._assignRoot.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
     this._onError = this._onError.bind(this);
     this._onProgress = this._onProgress.bind(this);
     this._onSeek = this._onSeek.bind(this);
     this._onEnd = this._onEnd.bind(this);
+    this._onFullscreenPlayerWillPresent = this._onFullscreenPlayerWillPresent.bind(this);
+    this._onFullscreenPlayerDidPresent = this._onFullscreenPlayerDidPresent.bind(this);
+    this._onFullscreenPlayerWillDismiss = this._onFullscreenPlayerWillDismiss.bind(this);
+    this._onFullscreenPlayerDidDismiss = this._onFullscreenPlayerDidDismiss.bind(this);
   }
 
   setNativeProps(nativeProps) {
@@ -34,48 +41,94 @@ class Video extends Component {
   }
 
   seek(time) {
-    this.setNativeProps({ seek: parseFloat(time) });
+    this.setNativeProps({ seek: time });
+  }
+
+  presentFullscreenPlayer() {
+    this.setNativeProps({ fullscreen: true });
+  }
+
+  dismissFullscreenPlayer() {
+    this.setNativeProps({ fullscreen: false });
+  }
+
+  _assignRoot(component) {
+    this._root = component;
   }
 
   _onLoadStart(event) {
-    this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
+    if (this.props.onLoadStart) {
+      this.props.onLoadStart(event.nativeEvent);
+    }
   }
 
   _onLoad(event) {
-    this.props.onLoad && this.props.onLoad(event.nativeEvent);
+    if (this.props.onLoad) {
+      this.props.onLoad(event.nativeEvent);
+    }
   }
 
   _onError(event) {
-    this.props.onError && this.props.onError(event.nativeEvent);
+    if (this.props.onError) {
+      this.props.onError(event.nativeEvent);
+    }
   }
 
   _onProgress(event) {
-    this.props.onProgress && this.props.onProgress(event.nativeEvent);
+    if (this.props.onProgress) {
+      this.props.onProgress(event.nativeEvent);
+    }
   }
 
   _onSeek(event) {
-    this.props.onSeek && this.props.onSeek(event.nativeEvent);
+    if (this.props.onSeek) {
+      this.props.onSeek(event.nativeEvent);
+    }
   }
 
   _onEnd(event) {
-    this.props.onEnd && this.props.onEnd(event.nativeEvent);
+    if (this.props.onEnd) {
+      this.props.onEnd(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerWillPresent(event) {
+    if (this.props.onFullscreenPlayerWillPresent) {
+      this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerDidPresent(event) {
+    if (this.props.onFullscreenPlayerDidPresent) {
+      this.props.onFullscreenPlayerDidPresent(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerWillDismiss(event) {
+    if (this.props.onFullscreenPlayerWillDismiss) {
+      this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
+    }
+  }
+
+  _onFullscreenPlayerDidDismiss(event) {
+    if (this.props.onFullscreenPlayerDidDismiss) {
+      this.props.onFullscreenPlayerDidDismiss(event.nativeEvent);
+    }
   }
 
   render() {
     const {
-      style,
       source,
-      ref,
       resizeMode,
     } = this.props;
 
     let uri = source.uri;
     if (uri && uri.match(/^\//)) {
-      uri = 'file://' + uri;
+      uri = `file://${uri}`;
     }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
-    const isAsset = !!(uri && uri.match(/^(assets-library|file):/));
+    const isAsset = !!(uri && uri.match(/^(assets-library|file|content):/));
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
@@ -90,10 +143,10 @@ class Video extends Component {
 
     const nativeProps = Object.assign({}, this.props);
     Object.assign(nativeProps, {
-      style: [styles.base, style],
+      style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
       src: {
-        uri: uri,
+        uri,
         isNetwork,
         isAsset,
         type: source.type || 'mp4',
@@ -104,12 +157,17 @@ class Video extends Component {
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
+      onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
+      onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
+      onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
+      onVideoFullscreenPlayerDidDismiss: this._onFullscreenPlayerDidDismiss,
     });
 
     return (
       <RCTVideo
-        ref={ component => this._root = component }
-        {...nativeProps} />
+        ref={this._assignRoot}
+        {...nativeProps}
+      />
     );
   }
 }
@@ -118,6 +176,7 @@ Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.number,
+  fullscreen: PropTypes.bool,
 
   /* Wrapper component */
   source: PropTypes.object,
@@ -128,12 +187,18 @@ Video.propTypes = {
   volume: PropTypes.number,
   rate: PropTypes.number,
   playInBackground: PropTypes.bool,
+  controls: PropTypes.bool,
+  currentTime: PropTypes.number,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
   onEnd: PropTypes.func,
+  onFullscreenPlayerWillPresent: PropTypes.func,
+  onFullscreenPlayerDidPresent: PropTypes.func,
+  onFullscreenPlayerWillDismiss: PropTypes.func,
+  onFullscreenPlayerDidDismiss: PropTypes.func,
 
   /* Required by react-native */
   scaleX: React.PropTypes.number,
@@ -148,7 +213,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
+    fullscreen: true,
   },
 });
-
-module.exports = Video;

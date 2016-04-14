@@ -3,7 +3,7 @@
 A <Video> component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.4.4
+Requires react-native >= 0.19.0
 
 ### Add it to your project
 
@@ -11,17 +11,12 @@ Run `npm install react-native-video --save`
 
 #### iOS
 
-1. Open your project in XCode, right click on `Libraries` and click `Add Files to "Your Project Name"`
-   * ![Screenshot](http://url.brentvatne.ca/jQp8.png) ![Screenshot](http://url.brentvatne.ca/1gqUD.png) (use the RCTVideo project rather than the one pictured in screenshot).
-2. Add `libRTCVideo.a` to `Build Phases -> Link Binary With Libraries`
-   ![(Screenshot)](http://url.brentvatne.ca/g9Wp.png).
-3. Add `.mp4` video file to project and to `Build Phases -> Copy Bundle Resources`
-4. Whenever you want to use it within React code now you can: `var Video =
-   require('react-native-video');`
+Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`
 
 #### Android
 
-Make the following additions to the given files.
+First, copy your video file to `android/app/src/main/res/raw/`, then
+make the following additions to the given files:
 
 **android/settings.gradle**
 ```
@@ -70,7 +65,7 @@ Under `.addPackage(new MainReactPackage())`:
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
-var styles = Stylesheet.create({
+var styles = StyleSheet.create({
   backgroundVideo: {
     position: 'absolute',
     top: 0,
@@ -89,7 +84,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 ## Examples
 
-- See an [Example integration][1] in `react-native-login`.
+- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
@@ -102,12 +97,9 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
    Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
 
-
 ## TODOS
 
-- [ ] Add some way to interface with `seekToTime`
 - [ ] Add support for captions
-- [ ] Support `require('video!...')`
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://www.w3schools.com/tags/ref_av_dom.asp)

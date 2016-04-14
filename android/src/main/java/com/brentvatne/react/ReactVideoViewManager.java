@@ -5,7 +5,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.ReactProp;
+import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
@@ -22,6 +22,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_SRC_URI = "uri";
     public static final String PROP_SRC_TYPE = "type";
     public static final String PROP_SRC_IS_NETWORK = "isNetwork";
+    public static final String PROP_SRC_IS_ASSET = "isAsset";
     public static final String PROP_RESIZE_MODE = "resizeMode";
     public static final String PROP_REPEAT = "repeat";
     public static final String PROP_PAUSED = "paused";
@@ -66,7 +67,8 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         videoView.setSrc(
                 src.getString(PROP_SRC_URI),
                 src.getString(PROP_SRC_TYPE),
-                src.getBoolean(PROP_SRC_IS_NETWORK)
+                src.getBoolean(PROP_SRC_IS_NETWORK),
+                src.getBoolean(PROP_SRC_IS_ASSET)
         );
     }
 

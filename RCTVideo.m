@@ -3,17 +3,19 @@
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
-#import <AVFoundation/AVFoundation.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
+static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 @implementation RCTVideo
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
   BOOL _playerItemObserversSet;
+  BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
+  AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
 
   /* Required to publish events */
@@ -24,9 +26,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   float _lastSeekTime;
 
   /* For sending videoProgress events */
-  id _progressUpdateTimer;
-  int _progressUpdateInterval;
-  NSDate *_prevProgressUpdateTime;
+  Float64 _progressUpdateInterval;
+  BOOL _controls;
+  id _timeObserver;
 
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
@@ -36,6 +38,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   BOOL _repeat;
   BOOL _playInBackground;
   NSString * _resizeMode;
+  BOOL _fullscreenPlayerPresented;
+  UIViewController * _presentingViewController;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -49,7 +53,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
-    _playInBackground = false;
+    _progressUpdateInterval = 250;
+    _controls = NO;
+    _playerBufferEmpty = YES;
+	_playInBackground = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -65,6 +72,44 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   return self;
 }
 
+- (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
+    RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
+    playerLayer.showsPlaybackControls = NO;
+    playerLayer.rctDelegate = self;
+    playerLayer.view.frame = self.bounds;
+    playerLayer.player = _player;
+    playerLayer.view.frame = self.bounds;
+    return playerLayer;
+}
+
+/* ---------------------------------------------------------
+ **  Get the duration for a AVPlayerItem.
+ ** ------------------------------------------------------- */
+
+- (CMTime)playerItemDuration
+{
+    AVPlayerItem *playerItem = [_player currentItem];
+    if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+    {
+        return([playerItem duration]);
+    }
+    
+    return(kCMTimeInvalid);
+}
+
+
+/* Cancels the previously registered time observer. */
+-(void)removePlayerTimeObserver
+{
+    if (_timeObserver)
+    {
+        [_player removeTimeObserver:_timeObserver];
+        _timeObserver = nil;
+    }
+}
+
+#pragma mark - Progress
+
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -74,15 +119,14 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-  if (!_paused && !_playInBackground) {
-    [self stopProgressTimer];
+   if (!_paused && !_playInBackground) {
+    [_player pause];
     [_player setRate:0.0];
   }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
-  [self startProgressTimer];
   [self applyModifiers];
 }
 
@@ -90,18 +134,29 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)sendProgressUpdate
 {
-  AVPlayerItem *video = [_player currentItem];
-  if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
-    return;
-  }
+   AVPlayerItem *video = [_player currentItem];
+   if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
+     return;
+   }
+    
+   CMTime playerDuration = [self playerItemDuration];
+   if (CMTIME_IS_INVALID(playerDuration)) {
+      return;
+   }
 
-  if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
-    [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                        body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
-                                               @"playableDuration": [self calculatePlayableDuration],
-                                               @"target": self.reactTag}];
-    _prevProgressUpdateTime = [NSDate date];
-  }
+   CMTime currentTime = _player.currentTime;
+   const Float64 duration = CMTimeGetSeconds(playerDuration);
+   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+   if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
+        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
+                                            body:@{
+                                                     @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                                                     @"playableDuration": [self calculatePlayableDuration],
+                                                     @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                                                     @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                                                     @"target": self.reactTag
+                                                 }];
+   }
 }
 
 /*!
@@ -129,25 +184,10 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   return [NSNumber numberWithInteger:0];
 }
 
-- (void)stopProgressTimer
-{
-  [_progressUpdateTimer invalidate];
-}
-
-- (void)startProgressTimer
-{
-  _progressUpdateInterval = 250;
-  _prevProgressUpdateTime = nil;
-
-  [self stopProgressTimer];
-
-  _progressUpdateTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(sendProgressUpdate)];
-  [_progressUpdateTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-}
-
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
   _playerItemObserversSet = YES;
 }
@@ -159,6 +199,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
+    [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     _playerItemObserversSet = NO;
   }
@@ -168,25 +209,27 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setSrc:(NSDictionary *)source
 {
+  [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
 
   [_player pause];
   [_playerLayer removeFromSuperlayer];
+  _playerLayer = nil;
+  [_playerViewController.view removeFromSuperview];
+  _playerViewController = nil;
 
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
-  _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
-  _playerLayer.frame = self.bounds;
-  _playerLayer.needsDisplayOnBoundsChange = YES;
-
-  [self applyModifiers];
-
-  [self.layer addSublayer:_playerLayer];
-  self.layer.needsDisplayOnBoundsChange = YES;
-
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  __weak RCTVideo *weakSelf = self;
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                        queue:NULL
+                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                   ];
   [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
                                       body:@{@"src": @{
                                                  @"uri": [source objectForKey:@"uri"],
@@ -216,7 +259,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if (object == _playerItem) {
+   if (object == _playerItem) {
 
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
@@ -225,6 +268,13 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
         if (isnan(duration)) {
           duration = 0.0;
+        }
+          
+        NSObject *width = @"undefined";
+        NSObject *height = @"undefined";
+        if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
+          width = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.width];
+          height = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.height];
         }
 
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
@@ -236,9 +286,12 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                    @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
                                                    @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
+                                                   @"naturalSize": @{
+                                                        @"width": width,
+                                                        @"height": height
+                                                        },
                                                    @"target": self.reactTag}];
 
-        [self startProgressTimer];
         [self attachListeners];
         [self applyModifiers];
       } else if(_playerItem.status == AVPlayerItemStatusFailed) {
@@ -248,14 +301,17 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                                                        @"domain": _playerItem.error.domain},
                                                    @"target": self.reactTag}];
       }
+    } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
+      _playerBufferEmpty = YES;
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
       // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if (_playerItem.playbackLikelyToKeepUp) {
+      if ((!_controls || _playerBufferEmpty) && _playerItem.playbackLikelyToKeepUp) {
         [self setPaused:_paused];
       }
+      _playerBufferEmpty = NO;
     }
   } else {
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+      [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
 
@@ -283,8 +339,15 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)setResizeMode:(NSString*)mode
 {
+  if( _controls )
+  {
+    _playerViewController.videoGravity = mode;
+  }
+  else
+  {
+    _playerLayer.videoGravity = mode;
+  }
   _resizeMode = mode;
-  _playerLayer.videoGravity = mode;
 }
 
 - (void)setPlayInBackground:(BOOL)playInBackground
@@ -295,14 +358,24 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
-    [self stopProgressTimer];
+    [_player pause];
     [_player setRate:0.0];
   } else {
-    [self startProgressTimer];
+    [_player play];
     [_player setRate:_rate];
   }
-
+  
   _paused = paused;
+}
+
+- (float)getCurrentTime
+{
+  return _playerItem != NULL ? CMTimeGetSeconds(_playerItem.currentTime) : 0;
+}
+
+- (void)setCurrentTime:(float)currentTime
+{
+  [self setSeek: currentTime];
 }
 
 - (void)setSeek:(float)seekTime
@@ -317,7 +390,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
-
+    
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
         [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
@@ -367,48 +440,195 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
+  [self setControls:_controls];
 }
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
 }
 
+- (BOOL)getFullscreen
+{
+    return _fullscreenPlayerPresented;
+}
+
+- (void)setFullscreen:(BOOL)fullscreen
+{
+    if( fullscreen && !_fullscreenPlayerPresented )
+    {
+        // Ensure player view controller is not null
+        if( !_playerViewController )
+        {
+            [self usePlayerViewController];
+        }
+        // Set presentation style to fullscreen
+        [_playerViewController setModalPresentationStyle:UIModalPresentationFullScreen];
+        
+        // Find the nearest view controller
+        UIViewController *viewController = [self firstAvailableUIViewController];
+        if( !viewController )
+        {
+            UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+            viewController = keyWindow.rootViewController;
+            if( viewController.childViewControllers.count > 0 )
+            {
+                viewController = viewController.childViewControllers.lastObject;
+            }
+        }
+        if( viewController )
+        {
+            _presentingViewController = viewController;
+            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillPresent" body:@{@"target": self.reactTag}];
+            [viewController presentViewController:_playerViewController animated:true completion:^{
+                _playerViewController.showsPlaybackControls = YES;
+                _fullscreenPlayerPresented = fullscreen;
+                [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidPresent" body:@{@"target": self.reactTag}];
+            }];
+        }
+    }
+    else if ( !fullscreen && _fullscreenPlayerPresented )
+    {
+        [self videoPlayerViewControllerWillDismiss:_playerViewController];
+        [_presentingViewController dismissViewControllerAnimated:true completion:^{
+            [self videoPlayerViewControllerDidDismiss:_playerViewController];
+        }];
+    }
+}
+
+- (void)usePlayerViewController
+{
+    if( _player )
+    {
+        _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+        [self addSubview:_playerViewController.view];
+    }
+}
+
+- (void)usePlayerLayer
+{
+    if( _player )
+    {
+      _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+      _playerLayer.frame = self.bounds;
+      _playerLayer.needsDisplayOnBoundsChange = YES;
+    
+      [self.layer addSublayer:_playerLayer];
+      self.layer.needsDisplayOnBoundsChange = YES;
+    }
+}
+
+- (void)setControls:(BOOL)controls
+{
+    if( _controls != controls || (!_playerLayer && !_playerViewController) )
+    {
+        _controls = controls;
+        if( _controls )
+        {
+            [_playerLayer removeFromSuperlayer];
+            _playerLayer = nil;
+            [self usePlayerViewController];
+        }
+        else
+        {
+            [_playerViewController.view removeFromSuperview];
+            _playerViewController = nil;
+            [self usePlayerLayer];
+        }
+    }
+}
+
+#pragma mark - RCTVideoPlayerViewControllerDelegate
+
+- (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
+    {
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
+    }
+}
+
+- (void)videoPlayerViewControllerDidDismiss:(AVPlayerViewController *)playerViewController
+{
+    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
+    {
+        _fullscreenPlayerPresented = false;
+        _presentingViewController = nil;
+        [self applyModifiers];
+        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
+    }
+}
+
 #pragma mark - React View Management
 
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
 {
-  RCTLogError(@"video cannot have any subviews");
+  // We are early in the game and somebody wants to set a subview.
+  // That can only be in the context of playerViewController.
+  if( !_controls && !_playerLayer && !_playerViewController )
+  {
+    [self setControls:true];
+  }
+  
+  if( _controls )
+  {
+     view.frame = self.bounds;
+     [_playerViewController.contentOverlayView insertSubview:view atIndex:atIndex];
+  }
+  else
+  {
+     RCTLogError(@"video cannot have any subviews");
+  }
   return;
 }
 
 - (void)removeReactSubview:(UIView *)subview
 {
-  RCTLogError(@"video cannot have any subviews");
+  if( _controls )
+  {
+      [subview removeFromSuperview];
+  }
+  else
+  {
+    RCTLogError(@"video cannot have any subviews");
+  }
   return;
 }
 
 - (void)layoutSubviews
 {
   [super layoutSubviews];
-  [CATransaction begin];
-  [CATransaction setAnimationDuration:0];
-  _playerLayer.frame = self.bounds;
-  [CATransaction commit];
+  if( _controls )
+  {
+    _playerViewController.view.frame = self.bounds;
+  
+    // also adjust all subviews of contentOverlayView
+    for (UIView* subview in _playerViewController.contentOverlayView.subviews) {
+      subview.frame = self.bounds;
+    }
+  }
+  else
+  {
+      [CATransaction begin];
+      [CATransaction setAnimationDuration:0];
+      _playerLayer.frame = self.bounds;
+      [CATransaction commit];
+  }
 }
 
 #pragma mark - Lifecycle
 
 - (void)removeFromSuperview
 {
-  [_progressUpdateTimer invalidate];
-  _prevProgressUpdateTime = nil;
-
   [_player pause];
   _player = nil;
 
   [_playerLayer removeFromSuperlayer];
   _playerLayer = nil;
+  
+  [_playerViewController.view removeFromSuperview];
+  _playerViewController = nil;
 
+  [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
 
   _eventDispatcher = nil;

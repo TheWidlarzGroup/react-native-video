@@ -1,12 +1,13 @@
 {
   "name": "VideoPlayer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node_modules/react-native/packager/packager.sh"
   },
   "dependencies": {
-    "react-native": "^0.16.0",
-    "react-native-video": "brentvatne/react-native-video#feature/android-support"
+    "react": "^0.14.8",
+    "react-native": "0.23.0",
+    "react-native-video": "../../"
   }
 }
