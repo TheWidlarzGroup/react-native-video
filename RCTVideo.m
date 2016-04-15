@@ -318,7 +318,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   __weak RCTVideo *weakSelf = self;
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
   
-  [self prepareAssetsForSources:source];
+  if (!_clipAssets || [_clipAssets count] < [source count]) {
+    [self prepareAssetsForSources:source];
+  }
   _playerItem = [self playerItemForAssets:_clipAssets];
   _playingClipIndex = 0;
   
@@ -375,9 +377,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)prepareAssetsForSources:(NSArray *)sources
 {
   int prepCount;
-  NSMutableArray *assets    = [[NSMutableArray alloc] init];
-  NSMutableArray *offsets   = [[NSMutableArray alloc] init];
-  NSMutableArray *durations = [[NSMutableArray alloc] init];
+  int clipIndex;
   
   NSMutableArray *sourcesToPrepare;
   __block CMTime currentOffset;
@@ -385,25 +385,29 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   if (_clipAssets) {
     // Then we only prepare assets for clips just appended
     sourcesToPrepare = [[NSMutableArray alloc] init];
-    prepCount = [sources count];
-    for (int i = [_clipAssets count]; i < prepCount; i++) {
+    prepCount = [sources count] - [_clipAssets count];
+    for (int i = [_clipAssets count]; i < [sources count]; i++) {
       [sourcesToPrepare addObject:[sources objectAtIndex:i]];
     }
     currentOffset = CMTimeMakeWithSeconds([[_clipEndOffsets lastObject] floatValue], 9000);
+    clipIndex = [_clipAssets count];
   } else {
     sourcesToPrepare = [NSMutableArray arrayWithArray:sources];
+    _clipAssets     = [[NSMutableArray alloc] init];
+    _clipEndOffsets = [[NSMutableArray alloc] init];
+    _clipDurations  = [[NSMutableArray alloc] init];
     prepCount = [sourcesToPrepare count];
     _bufferedClipIndexes = [[NSMutableArray alloc] init];
     currentOffset = kCMTimeZero;
+    clipIndex = 0;
   }
   for (int i = 0; i < prepCount; i++) {
-    [assets addObject:kCFNull];
-    [offsets addObject:kCFNull];
-    [durations addObject:kCFNull];
+    [_clipAssets     addObject:kCFNull];
+    [_clipEndOffsets addObject:kCFNull];
+    [_clipDurations  addObject:kCFNull];
   }
   
   // We initialise the assets concurrently to avoid blocking while metadata is loaded
-  int clipIndex = 0;
   dispatch_group_t assetGroup = dispatch_group_create();
   for (NSDictionary* source in sourcesToPrepare) {
     [_bufferedClipIndexes addObject:[NSNumber numberWithInt:0]];
@@ -428,9 +432,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                              
                              CMTime dur = firstVideoTrack.timeRange.duration;
                              currentOffset = CMTimeAdd(currentOffset, dur);
-                             [assets replaceObjectAtIndex:clipIndex withObject:asset];
-                             [offsets replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
-                             [durations replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
+                             [_clipAssets replaceObjectAtIndex:clipIndex withObject:asset];
+                             [_clipEndOffsets replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
+                             [_clipDurations replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
                            } else {
                              NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
                            }
@@ -440,15 +444,6 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     clipIndex++;
   }
   dispatch_group_wait(assetGroup, DISPATCH_TIME_FOREVER);
-  if (_clipAssets) {
-    [_clipAssets     addObjectsFromArray:assets];
-    [_clipEndOffsets addObjectsFromArray:offsets];
-    [_clipDurations  addObjectsFromArray:durations];
-  } else {
-    _clipAssets     = assets;
-    _clipEndOffsets = offsets;
-    _clipDurations  = durations;
-  }
 }
 
 - (AVPlayerItem*)playerItemForAssets:(NSMutableArray *)assets
