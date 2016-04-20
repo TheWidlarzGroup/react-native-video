@@ -427,7 +427,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                            NSArray *videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
                            NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
                            
-                           if ([videoTracks count] > 0 || [audioTracks count] > 0) {
+                           if ([videoTracks count] > 0) {
                              AVAssetTrack *firstVideoTrack = videoTracks[0];
                              
                              CMTime dur = firstVideoTrack.timeRange.duration;
@@ -443,7 +443,19 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     
     clipIndex++;
   }
+
   dispatch_group_wait(assetGroup, DISPATCH_TIME_FOREVER);
+
+  // Clips without video tracks will have resulted in a nil entry in
+  // _clipAssets / _clipEndOffsets / _clipDurations, so before we finish
+  // we'll remove those entries.
+  for (int i = 0; i < [_clipAssets count]; i++) {
+    if ([_clipAssets objectAtIndex:i] == kCFNull) {
+       [_clipAssets     removeObjectAtIndex:i];
+       [_clipEndOffsets removeObjectAtIndex:i];
+       [_clipDurations  removeObjectAtIndex:i];
+    }
+  }
 }
 
 - (AVPlayerItem*)playerItemForAssets:(NSMutableArray *)assets
