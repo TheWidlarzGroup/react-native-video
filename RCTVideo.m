@@ -377,10 +377,11 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 - (void)prepareAssetsForSources:(NSArray *)sources
 {
   int prepCount;
-  int clipIndex;
+  int nextClipIndex;
+  int firstClipIndexToPrepare;
   
   NSMutableArray *sourcesToPrepare;
-  __block CMTime currentOffset;
+  float currentOffset;
   
   if (_clipAssets) {
     // Then we only prepare assets for clips just appended
@@ -389,8 +390,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     for (int i = [_clipAssets count]; i < [sources count]; i++) {
       [sourcesToPrepare addObject:[sources objectAtIndex:i]];
     }
-    currentOffset = CMTimeMakeWithSeconds([[_clipEndOffsets lastObject] floatValue], 9000);
-    clipIndex = [_clipAssets count];
+    currentOffset = [[_clipEndOffsets lastObject] floatValue];
+    nextClipIndex = [_clipAssets count];
+    firstClipIndexToPrepare = [_clipAssets count];
   } else {
     sourcesToPrepare = [NSMutableArray arrayWithArray:sources];
     _clipAssets     = [[NSMutableArray alloc] init];
@@ -398,8 +400,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
     _clipDurations  = [[NSMutableArray alloc] init];
     prepCount = [sourcesToPrepare count];
     _bufferedClipIndexes = [[NSMutableArray alloc] init];
-    currentOffset = kCMTimeZero;
-    clipIndex = 0;
+    currentOffset = 0.0;
+    nextClipIndex = 0;
+    firstClipIndexToPrepare = 0;
   }
   for (int i = 0; i < prepCount; i++) {
     [_clipAssets     addObject:kCFNull];
@@ -431,20 +434,27 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
                              AVAssetTrack *firstVideoTrack = videoTracks[0];
                              
                              CMTime dur = firstVideoTrack.timeRange.duration;
-                             currentOffset = CMTimeAdd(currentOffset, dur);
-                             [_clipAssets replaceObjectAtIndex:clipIndex withObject:asset];
-                             [_clipEndOffsets replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(currentOffset)]];
-                             [_clipDurations replaceObjectAtIndex:clipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
+                             [_clipAssets replaceObjectAtIndex:nextClipIndex withObject:asset];
+                             [_clipDurations replaceObjectAtIndex:nextClipIndex withObject:[NSNumber numberWithFloat:CMTimeGetSeconds(dur)]];
                            } else {
                              NSLog(@"RCTVideo: WARNING - no audio or video tracks for asset %@ (uri: %@), skipping...", asset, uri);
                            }
                            dispatch_group_leave(assetGroup);
                          }];
     
-    clipIndex++;
+    nextClipIndex++;
   }
 
   dispatch_group_wait(assetGroup, DISPATCH_TIME_FOREVER);
+
+  // Fill in any new values in _clipEndOffsets
+  for (int i = firstClipIndexToPrepare; i < [_clipAssets count]; i++) {
+    float duration = [[_clipDurations objectAtIndex:i] floatValue];
+    if (duration) {
+      currentOffset += duration;
+      [_clipEndOffsets replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:currentOffset]];
+    }
+  }
 
   // Clips without video tracks will have resulted in a nil entry in
   // _clipAssets / _clipEndOffsets / _clipDurations, so before we finish
@@ -462,6 +472,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   AVMutableComposition* composition = [AVMutableComposition composition];
   AVMutableCompositionTrack *compVideoTrack = [composition addMutableTrackWithMediaType:AVMediaTypeVideo
+             
                                                                        preferredTrackID:kCMPersistentTrackID_Invalid];
   AVMutableCompositionTrack *compAudioTrack = [composition addMutableTrackWithMediaType:AVMediaTypeAudio
                                                                        preferredTrackID:kCMPersistentTrackID_Invalid];
@@ -831,8 +842,17 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   int clipIndex = [[seekParams objectForKey:@"index"] intValue];
   float time = ([[seekParams objectForKey:@"time"] floatValue] || 0.0);
-  float position = clipIndex == 0 ? time : ([[_clipEndOffsets objectAtIndex:(clipIndex - 1)] floatValue] + time);
-  [self setSeek: position];
+  float position;
+  if (clipIndex == 0) {
+    [self setSeek: time];
+  } else {
+    NSNumber *offset = [_clipEndOffsets objectAtIndex:(clipIndex - 1)];
+    if (offset != kCFNull) {
+      [self setSeek: ([offset floatValue] + time)];
+    }
+    // if offset is nil, the clips' metadata hasn't been loaded, so we do nothing.
+  }
+  
 }
 
 - (void)setRate:(float)rate
