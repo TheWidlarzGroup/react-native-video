@@ -328,6 +328,7 @@ static NSString *const playbackRate = @"rate";
               [_eventDispatcher sendInputEventWithName:@"onPlaybackResume"
                                                   body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                                          @"target": self.reactTag}];
+              _playbackStalled = NO;
           }
       }
   } else {
