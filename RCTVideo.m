@@ -7,6 +7,7 @@
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
+static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 
 @implementation RCTVideo
 {
@@ -213,8 +214,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   [self addPlayerItemObservers];
 
   [_player pause];
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
+  [self removePlayerLayer];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
@@ -504,6 +504,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
       _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
       _playerLayer.frame = self.bounds;
       _playerLayer.needsDisplayOnBoundsChange = YES;
+        
+      [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     
       [self.layer addSublayer:_playerLayer];
       self.layer.needsDisplayOnBoundsChange = YES;
@@ -517,8 +519,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
         _controls = controls;
         if( _controls )
         {
-            [_playerLayer removeFromSuperlayer];
-            _playerLayer = nil;
+            [self removePlayerLayer];
             [self usePlayerViewController];
         }
         else
@@ -528,6 +529,13 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
             [self usePlayerLayer];
         }
     }
+}
+
+- (void)removePlayerLayer
+{
+    [_playerLayer removeFromSuperlayer];
+    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    _playerLayer = nil;
 }
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
@@ -615,8 +623,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   [_player pause];
   _player = nil;
 
-  [_playerLayer removeFromSuperlayer];
-  _playerLayer = nil;
+  [self removePlayerLayer];
   
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
