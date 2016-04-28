@@ -119,7 +119,10 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-   if (!_paused && !_playInBackground) {
+  if (_playInBackground) {
+    // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+    [_playerLayer setPlayer:nil];
+  } else if (!_paused) {
     [_player pause];
     [_player setRate:0.0];
   }
@@ -128,6 +131,9 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
   [self applyModifiers];
+  if (_playInBackground) {
+    [_playerLayer setPlayer:_player];
+  }
 }
 
 #pragma mark - Progress
