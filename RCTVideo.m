@@ -317,6 +317,12 @@ static NSString *const playbackRate = @"rate";
                                               body:@{@"target": self.reactTag}];
         }
     }
+  } else if (object == _player) {
+      if([keyPath isEqualToString:playbackRate] && [change objectForKey:NSKeyValueChangeNewKey]) {
+          [_eventDispatcher sendInputEventWithName:@"onPlaybackRateChange"
+                                              body:@{@"playbackRate": _player.rate,
+                                                     @"target": self.reactTag}];
+      }
   } else {
       [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
