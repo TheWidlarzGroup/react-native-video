@@ -8,6 +8,7 @@ static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
+static NSString *const playbackRate = @"rate";
 
 @implementation RCTVideo
 {
@@ -220,6 +221,7 @@ static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
 
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
   // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
@@ -628,6 +630,7 @@ static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 - (void)removeFromSuperview
 {
   [_player pause];
+  [_player removeObserver:self forKeyPath:playbackRate];
   _player = nil;
 
   [self removePlayerLayer];
