@@ -308,6 +308,13 @@ static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
       }
       _playerBufferEmpty = NO;
     }
+   } else if (object == _playerLayer) {
+      if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
+        if([change objectForKey:NSKeyValueChangeNewKey]) {
+          [_eventDispatcher sendInputEventWithName:@"onReadyForDisplay"
+                                              body:@{@"target": self.reactTag}];
+        }
+    }
   } else {
       [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
