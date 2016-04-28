@@ -320,7 +320,7 @@ static NSString *const playbackRate = @"rate";
         }
     }
   } else if (object == _player) {
-      if([keyPath isEqualToString:playbackRate] && [change objectForKey:NSKeyValueChangeNewKey]) {
+      if([keyPath isEqualToString:playbackRate]) {
           [_eventDispatcher sendInputEventWithName:@"onPlaybackRateChange"
                                               body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                                      @"target": self.reactTag}];
