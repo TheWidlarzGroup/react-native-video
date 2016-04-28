@@ -449,9 +449,9 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
   // Fill in any new values in _clipEndOffsets
   for (int i = firstClipIndexToPrepare; i < [_clipAssets count]; i++) {
-    float duration = [[_clipDurations objectAtIndex:i] floatValue];
-    if (duration) {
-      currentOffset += duration;
+    NSNumber *duration = [_clipDurations objectAtIndex:i];
+    if (duration != kCFNull) {
+      currentOffset += [duration floatValue];
       [_clipEndOffsets replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:currentOffset]];
     }
   }
