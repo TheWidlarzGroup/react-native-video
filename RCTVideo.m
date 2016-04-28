@@ -322,11 +322,11 @@ static NSString *const playbackRate = @"rate";
   } else if (object == _player) {
       if([keyPath isEqualToString:playbackRate] && [change objectForKey:NSKeyValueChangeNewKey]) {
           [_eventDispatcher sendInputEventWithName:@"onPlaybackRateChange"
-                                              body:@{@"playbackRate": _player.rate,
+                                              body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                                      @"target": self.reactTag}];
           if(_playbackStalled && _player.rate > 0) {
               [_eventDispatcher sendInputEventWithName:@"onPlaybackResume"
-                                                  body:@{@"playbackRate": _player.rate,
+                                                  body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                                          @"target": self.reactTag}];
           }
       }
