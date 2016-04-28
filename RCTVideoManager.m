@@ -30,6 +30,8 @@ RCT_EXPORT_MODULE();
     @"onVideoFullscreenPlayerWillDismiss",
     @"onVideoFullscreenPlayerDidDismiss",
     @"onReadyForDisplay",
+    @"onPlaybackStalled",
+    @"onPlaybackResume",
     @"onPlaybackRateChange"
   ];
 }

@@ -38,6 +38,7 @@ static NSString *const playbackRate = @"rate";
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _playbackStalled;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
@@ -48,6 +49,7 @@ static NSString *const playbackRate = @"rate";
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
 
+    _playbackStalled = NO;
     _rate = 1.0;
     _volume = 1.0;
     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
@@ -322,6 +324,11 @@ static NSString *const playbackRate = @"rate";
           [_eventDispatcher sendInputEventWithName:@"onPlaybackRateChange"
                                               body:@{@"playbackRate": _player.rate,
                                                      @"target": self.reactTag}];
+          if(_playbackStalled && _player.rate > 0) {
+              [_eventDispatcher sendInputEventWithName:@"onPlaybackResume"
+                                                  body:@{@"playbackRate": _player.rate,
+                                                         @"target": self.reactTag}];
+          }
       }
   } else {
       [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -335,6 +342,16 @@ static NSString *const playbackRate = @"rate";
                                            selector:@selector(playerItemDidReachEnd:)
                                                name:AVPlayerItemDidPlayToEndTimeNotification
                                              object:[_player currentItem]];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(playbackStalled:)
+                                               name:AVPlayerItemPlaybackStalledNotification
+                                             object:nil];
+}
+
+- (void)playbackStalled:(NSNotification *)notification
+{
+  [_eventDispatcher sendInputEventWithName:@"onPlaybackStalled" body:@{@"target": self.reactTag}];
+  _playbackStalled = YES;
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
