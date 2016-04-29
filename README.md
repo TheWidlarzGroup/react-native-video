@@ -13,6 +13,20 @@ Run `npm install react-native-video --save`
 
 Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`
 
+If you would like to allow other apps to play music over your video component, add:
+
+**AppDelegate.m**
+```
+#import <AVFoundation/AVFoundation.h>  // import
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ...
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
+  ...
+}
+```
+
 #### Android
 
 First, copy your video file to `android/app/src/main/res/raw/`, then
