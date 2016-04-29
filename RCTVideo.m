@@ -37,6 +37,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
   BOOL _paused;
   BOOL _repeat;
   BOOL _playInBackground;
+  BOOL _playWhenInactive;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
@@ -57,6 +58,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
     _controls = NO;
     _playerBufferEmpty = YES;
 	_playInBackground = false;
+    _playWhenInactive = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -124,10 +126,10 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-  if (!_paused && !_playInBackground) {
-    [_player pause];
-    [_player setRate:0.0];
-  }
+  if (_playInBackground || _playWhenInactive || _paused) return;
+
+  [_player pause];
+  [_player setRate:0.0];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
@@ -369,6 +371,11 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 - (void)setPlayInBackground:(BOOL)playInBackground
 {
     _playInBackground = playInBackground;
+}
+
+- (void)setPlayWhenInactive:(BOOL)playWhenInactive
+{
+    _playWhenInactive = playWhenInactive;
 }
 
 - (void)setPaused:(BOOL)paused
