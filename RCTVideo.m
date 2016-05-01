@@ -270,9 +270,21 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
           
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
+        NSString *orientation = @"undefined";
+
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
-          width = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.width];
-          height = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.height];
+          AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+          width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
+          height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
+          CGAffineTransform preferredTransform = [videoTrack preferredTransform];
+
+          if ((videoTrack.naturalSize.width == preferredTransform.tx
+            && videoTrack.naturalSize.height == preferredTransform.ty)
+            || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
+          {
+            orientation = @"landscape";
+          } else
+            orientation = @"portrait";
         }
 
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
@@ -286,7 +298,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"naturalSize": @{
                                                         @"width": width,
-                                                        @"height": height
+                                                        @"height": height,
+                                                        @"orientation": orientation
                                                         },
                                                    @"target": self.reactTag}];
 
