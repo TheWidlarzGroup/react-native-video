@@ -270,9 +270,19 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
           
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
+        NSString *orientation = @"undefined";
+        AVAssetTrack *vT = nil;
+
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
-          width = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.width];
-          height = [NSNumber numberWithFloat:[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo][0].naturalSize.height];
+          vT = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+          width = [NSNumber numberWithFloat:vT.naturalSize.width];
+          height = [NSNumber numberWithFloat:vT.naturalSize.height];
+          CGAffineTransform txf = [vT preferredTransform];
+
+          if ((vT.naturalSize.width == txf.tx && vT.naturalSize.height == txf.ty) | (txf.tx == 0 && txf.ty == 0))
+            orientation = @"landscape";
+          else
+            orientation = @"portrait";
         }
 
         [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
@@ -286,7 +296,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
                                                    @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                                                    @"naturalSize": @{
                                                         @"width": width,
-                                                        @"height": height
+                                                        @"height": height,
+                                                        @"orientation": orientation
                                                         },
                                                    @"target": self.reactTag}];
 
