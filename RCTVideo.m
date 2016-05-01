@@ -271,17 +271,19 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
         NSString *orientation = @"undefined";
-        AVAssetTrack *vT = nil;
 
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
-          vT = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
-          width = [NSNumber numberWithFloat:vT.naturalSize.width];
-          height = [NSNumber numberWithFloat:vT.naturalSize.height];
-          CGAffineTransform txf = [vT preferredTransform];
+          AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+          width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
+          height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
+          CGAffineTransform preferredTransform = [videoTrack preferredTransform];
 
-          if ((vT.naturalSize.width == txf.tx && vT.naturalSize.height == txf.ty) | (txf.tx == 0 && txf.ty == 0))
+          if ((videoTrack.naturalSize.width == preferredTransform.tx
+            && videoTrack.naturalSize.height == preferredTransform.ty)
+            || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
+          {
             orientation = @"landscape";
-          else
+          } else
             orientation = @"portrait";
         }
 
