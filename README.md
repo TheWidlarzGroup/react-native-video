@@ -29,20 +29,21 @@ If you would like to allow other apps to play music over your video component, a
 
 #### Android
 
-First, copy your video file to `android/app/src/main/res/raw/`, then
-make the following additions to the given files:
+Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`
+
+Or if you have trouble using [rnpm](https://github.com/rnpm/rnpm), make the following additions to the given files manually:
 
 **android/settings.gradle**
 ```
-include ':RCTVideo', ':app'
-project(':RCTVideo').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
 **android/app/build.gradle**
 ```
 dependencies {
    ...
-   compile project(':RCTVideo')
+   compile project(':react-native-video')
 }
 ```
 

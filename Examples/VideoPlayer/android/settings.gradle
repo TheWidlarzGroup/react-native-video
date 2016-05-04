@@ -3,5 +3,3 @@ rootProject.name = 'VideoPlayer'
 include ':app'
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
-include ':RCTVideo', ':app'
-project(':RCTVideo').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
