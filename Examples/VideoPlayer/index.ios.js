@@ -1,9 +1,11 @@
 'use strict';
-
 import React, {
+  Component
+} from 'react';
+
+import {
   AlertIOS,
   AppRegistry,
-  Component,
   StyleSheet,
   Text,
   TouchableOpacity,
