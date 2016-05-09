@@ -38,6 +38,10 @@ export default class Video extends Component {
     this._onFullscreenPlayerDidPresent = this._onFullscreenPlayerDidPresent.bind(this);
     this._onFullscreenPlayerWillDismiss = this._onFullscreenPlayerWillDismiss.bind(this);
     this._onFullscreenPlayerDidDismiss = this._onFullscreenPlayerDidDismiss.bind(this);
+    this._onReadyForDisplay = this._onReadyForDisplay.bind(this);
+    this._onPlaybackStalled = this._onPlaybackStalled.bind(this);
+    this._onPlaybackResume = this._onPlaybackResume.bind(this);
+    this._onPlaybackRateChange = this._onPlaybackRateChange.bind(this);
   }
 
   setNativeProps(nativeProps) {
@@ -120,6 +124,30 @@ export default class Video extends Component {
     }
   }
 
+  _onReadyForDisplay(event) {
+    if (this.props.onReadyForDisplay) {
+      this.props.onReadyForDisplay(event.nativeEvent);
+    }
+  }
+
+  _onPlaybackStalled(event) {
+    if (this.props.onPlaybackStalled) {
+      this.props.onPlaybackStalled(event.nativeEvent);
+    }
+  }
+
+  _onPlaybackResume(event) {
+    if (this.props.onPlaybackResume) {
+      this.props.onPlaybackResume(event.nativeEvent);
+    }
+  }
+
+  _onPlaybackRateChange(event) {
+    if (this.props.onPlaybackRateChange) {
+      this.props.onPlaybackRateChange(event.nativeEvent);
+    }
+  }
+
   render() {
     const {
       source,
@@ -165,6 +193,10 @@ export default class Video extends Component {
       onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
       onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
       onVideoFullscreenPlayerDidDismiss: this._onFullscreenPlayerDidDismiss,
+      onReadyForDisplay: this._onReadyForDisplay,
+      onPlaybackStalled: this._onPlaybackStalled,
+      onPlaybackResume: this._onPlaybackResume,
+      onPlaybackRateChange: this._onPlaybackRateChange,
     });
 
     return (
@@ -202,6 +234,10 @@ Video.propTypes = {
   onFullscreenPlayerDidPresent: PropTypes.func,
   onFullscreenPlayerWillDismiss: PropTypes.func,
   onFullscreenPlayerDidDismiss: PropTypes.func,
+  onReadyForDisplay: PropTypes.func,
+  onPlaybackStalled: PropTypes.func,
+  onPlaybackResume: PropTypes.func,
+  onPlaybackRateChange: PropTypes.func,
 
   /* Required by react-native */
   scaleX: React.PropTypes.number,
