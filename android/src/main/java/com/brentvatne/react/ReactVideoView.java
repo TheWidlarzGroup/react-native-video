@@ -3,6 +3,10 @@ package com.brentvatne.react;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
+import android.net.Uri;
+import android.webkit.CookieManager;
+import java.util.Map;
+import java.util.HashMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -122,7 +126,24 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mMediaPlayer.reset();
 
         try {
-            if (isNetwork || isAsset) {
+            if (isNetwork) {
+                // Use the shared CookieManager to access the cookies
+                // set by WebViews inside the same app
+                CookieManager cookieManager = CookieManager.getInstance();
+
+                Uri parsedUrl = Uri.parse(uriString);
+                Uri.Builder builtUrl = parsedUrl.buildUpon();
+
+                String cookie = cookieManager.getCookie(builtUrl.build().toString());
+
+                Map<String, String> headers = new HashMap<String, String>();
+
+                if (cookie != null) {
+                    headers.put("Cookie", cookie);
+                }
+
+                setDataSource(mThemedReactContext, parsedUrl, headers);
+            } else if (isAsset) {
                 setDataSource(uriString);
             } else {
                 setRawData(mThemedReactContext.getResources().getIdentifier(
