@@ -675,8 +675,10 @@ static NSString *const playbackRate = @"rate";
 - (void)removeFromSuperview
 {
   [_player pause];
+  if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate];
     _playbackRateObserverRegistered = NO;
+  }
   _player = nil;
 
   [self removePlayerLayer];
