@@ -227,7 +227,7 @@ static NSString *const playbackRate = @"rate";
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     
   if (_playbackRateObserverRegistered) {
-    [_player removeObserver:self forKeyPath:playbackRate];
+    [_player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
   }
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
@@ -676,7 +676,7 @@ static NSString *const playbackRate = @"rate";
 {
   [_player pause];
   if (_playbackRateObserverRegistered) {
-    [_player removeObserver:self forKeyPath:playbackRate];
+    [_player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
   }
   _player = nil;
