@@ -1,6 +1,6 @@
 ## react-native-video
 
-A <Video> component for react-native, as seen in
+A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
 Requires react-native >= 0.19.0
@@ -12,6 +12,20 @@ Run `npm install react-native-video --save`
 #### iOS
 
 Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`
+
+If you would like to allow other apps to play music over your video component, add:
+
+**AppDelegate.m**
+```
+#import <AVFoundation/AVFoundation.h>  // import
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ...
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
+  ...
+}
+```
 
 #### Android
 
