@@ -223,13 +223,14 @@ static NSString *const playbackRate = @"rate";
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
-  _player = [AVPlayer playerWithPlayerItem:_playerItem];
-  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
   }
+
+  _player = [AVPlayer playerWithPlayerItem:_playerItem];
+  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
   _playbackRateObserverRegistered = YES;
 
