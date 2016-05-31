@@ -48,6 +48,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
+    
+    public static final String EVENT_PROP_ORIGINAL_MEDIA_WIDTH = "originalWidth";
+    public static final String EVENT_PROP_ORIGINAL_MEDIA_HEIGHT = "originalHeight";
 
     public static final String EVENT_PROP_ERROR = "error";
     public static final String EVENT_PROP_WHAT = "what";
@@ -252,6 +255,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
         event.putDouble(EVENT_PROP_CURRENT_TIME, mp.getCurrentPosition() / 1000.0);
+        event.putInt(EVENT_PROP_ORIGINAL_MEDIA_WIDTH, mp.getVideoWidth());
+        event.putInt(EVENT_PROP_ORIGINAL_MEDIA_HEIGHT, mp.getVideoHeight());
         // TODO: Actually check if you can.
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
         event.putBoolean(EVENT_PROP_SLOW_FORWARD, true);
