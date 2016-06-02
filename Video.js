@@ -160,7 +160,7 @@ export default class Video extends Component {
     }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
-    const isAsset = !!(uri && uri.match(/^(assets-library|file|content):/));
+    const isAsset = !!(uri && uri.match(/^(assets-library|file|content|asset):/));
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
