@@ -63,7 +63,7 @@ static NSString *const playbackRate = @"rate";
     _progressUpdateInterval = 250;
     _controls = NO;
     _playerBufferEmpty = YES;
-	_playInBackground = false;
+    _playInBackground = false;
     _playWhenInactive = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -140,10 +140,10 @@ static NSString *const playbackRate = @"rate";
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
-    if (_playInBackground) {
-        // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
-        [_playerLayer setPlayer:nil];
-    }
+  if (_playInBackground) {
+    // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+    [_playerLayer setPlayer:nil];
+  }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
