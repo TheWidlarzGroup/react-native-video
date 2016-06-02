@@ -425,12 +425,12 @@ static NSString *const playbackRate = @"rate";
 
 - (void)setPlayInBackground:(BOOL)playInBackground
 {
-    _playInBackground = playInBackground;
+  _playInBackground = playInBackground;
 }
 
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
 {
-    _playWhenInactive = playWhenInactive;
+  _playWhenInactive = playWhenInactive;
 }
 
 - (void)setPaused:(BOOL)paused
