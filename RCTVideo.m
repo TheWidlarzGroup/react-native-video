@@ -22,6 +22,7 @@ static NSString *const playbackRate = @"rate";
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
+  BOOL _playbackRateObserverRegistered;
 
   bool _pendingSeek;
   float _pendingSeekTime;
@@ -51,6 +52,7 @@ static NSString *const playbackRate = @"rate";
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
 
+    _playbackRateObserverRegistered = NO;
     _playbackStalled = NO;
     _rate = 1.0;
     _volume = 1.0;
@@ -241,9 +243,16 @@ static NSString *const playbackRate = @"rate";
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
+  if (_playbackRateObserverRegistered) {
+    [_player removeObserver:self forKeyPath:playbackRate context:nil];
+    _playbackRateObserverRegistered = NO;
+  }
+
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+  _playbackRateObserverRegistered = YES;
 
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
   // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
@@ -697,7 +706,10 @@ static NSString *const playbackRate = @"rate";
 - (void)removeFromSuperview
 {
   [_player pause];
-  [_player removeObserver:self forKeyPath:playbackRate];
+  if (_playbackRateObserverRegistered) {
+    [_player removeObserver:self forKeyPath:playbackRate context:nil];
+    _playbackRateObserverRegistered = NO;
+  }
   _player = nil;
 
   [self removePlayerLayer];
