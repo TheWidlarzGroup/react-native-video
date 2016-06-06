@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 16
@@ -16,6 +16,7 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:0.19.+'
+    compile 'com.facebook.react:react-native:0.23.+'
+    compile 'com.devbrackets.android:exomedia:3.0.0-preview3'
     compile 'com.yqritc:android-scalablevideoview:1.0.1'
 }
