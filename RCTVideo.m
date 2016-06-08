@@ -40,6 +40,8 @@ static NSString *const playbackRate = @"rate";
   BOOL _paused;
   BOOL _repeat;
   BOOL _playbackStalled;
+  BOOL _playInBackground;
+  BOOL _playWhenInactive;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
@@ -61,10 +63,17 @@ static NSString *const playbackRate = @"rate";
     _progressUpdateInterval = 250;
     _controls = NO;
     _playerBufferEmpty = YES;
+    _playInBackground = false;
+    _playWhenInactive = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
                                                  name:UIApplicationWillResignActiveNotification
+                                               object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidEnterBackground:)
+                                                 name:UIApplicationDidEnterBackgroundNotification
                                                object:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -123,15 +132,26 @@ static NSString *const playbackRate = @"rate";
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
-  if (!_paused) {
-    [_player pause];
-    [_player setRate:0.0];
+  if (_playInBackground || _playWhenInactive || _paused) return;
+
+  [_player pause];
+  [_player setRate:0.0];
+}
+
+- (void)applicationDidEnterBackground:(NSNotification *)notification
+{
+  if (_playInBackground) {
+    // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+    [_playerLayer setPlayer:nil];
   }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
   [self applyModifiers];
+  if (_playInBackground) {
+    [_playerLayer setPlayer:_player];
+  }
 }
 
 #pragma mark - Progress
@@ -401,6 +421,16 @@ static NSString *const playbackRate = @"rate";
     _playerLayer.videoGravity = mode;
   }
   _resizeMode = mode;
+}
+
+- (void)setPlayInBackground:(BOOL)playInBackground
+{
+  _playInBackground = playInBackground;
+}
+
+- (void)setPlayWhenInactive:(BOOL)playWhenInactive
+{
+  _playWhenInactive = playWhenInactive;
 }
 
 - (void)setPaused:(BOOL)paused

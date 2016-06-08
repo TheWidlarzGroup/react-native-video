@@ -9,13 +9,14 @@ import java.util.Map;
 import java.util.HashMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
-        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener {
+        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, LifecycleEventListener {
 
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
@@ -73,6 +74,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mMuted = false;
     private float mVolume = 1.0f;
     private float mRate = 1.0f;
+    private boolean mPlayInBackground = false;
 
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private int mVideoDuration = 0;
@@ -83,6 +85,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         mThemedReactContext = themedReactContext;
         mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
+        themedReactContext.addLifecycleEventListener(this);
 
         initializeMediaPlayerIfNeeded();
         setSurfaceTextureListener(this);
@@ -248,6 +251,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 //        setRateModifier(mRate);
     }
 
+    public void setPlayInBackground(final boolean playInBackground) {
+        mPlayInBackground = playInBackground;
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         mMediaPlayerValid = true;
@@ -323,5 +330,20 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset);
+    }
+
+    @Override
+    public void onHostPause() {
+        if (mMediaPlayer != null && !mPlayInBackground) {
+            mMediaPlayer.pause();
+        }
+    }
+
+    @Override 
+    public void onHostResume() {
+    }
+
+    @Override
+    public void onHostDestroy() {
     }
 }

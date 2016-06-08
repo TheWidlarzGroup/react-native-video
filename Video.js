@@ -222,6 +222,8 @@ Video.propTypes = {
   muted: PropTypes.bool,
   volume: PropTypes.number,
   rate: PropTypes.number,
+  playInBackground: PropTypes.bool,
+  playWhenInactive: PropTypes.bool,
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
   onLoadStart: PropTypes.func,
