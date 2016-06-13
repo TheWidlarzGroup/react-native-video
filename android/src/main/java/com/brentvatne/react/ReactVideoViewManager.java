@@ -1,15 +1,12 @@
 package com.brentvatne.react;
 
-import com.brentvatne.react.ReactVideoView.Events;
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.yqritc.scalablevideoview.ScalableType;
+
+import com.devbrackets.android.exomedia.core.video.scale.ScaleType;
+import com.facebook.react.uimanager.annotations.ReactProp;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -46,7 +43,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
         MapBuilder.Builder builder = MapBuilder.builder();
-        for (Events event : Events.values()) {
+        for (ReactVideoView.Events event : ReactVideoView.Events.values()) {
             builder.put(event.toString(), MapBuilder.of("registrationName", event.toString()));
         }
         return builder.build();
@@ -56,10 +53,10 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @Nullable
     public Map getExportedViewConstants() {
         return MapBuilder.of(
-                "ScaleNone", Integer.toString(ScalableType.LEFT_TOP.ordinal()),
-                "ScaleToFill", Integer.toString(ScalableType.FIT_XY.ordinal()),
-                "ScaleAspectFit", Integer.toString(ScalableType.FIT_CENTER.ordinal()),
-                "ScaleAspectFill", Integer.toString(ScalableType.CENTER_CROP.ordinal())
+                "ScaleNone", Integer.toString(ScaleType.NONE.ordinal()),
+                "ScaleToFill", Integer.toString(ScaleType.FIT_CENTER.ordinal()),
+                "ScaleAspectFit", Integer.toString(ScaleType.FIT_CENTER.ordinal()),
+                "ScaleAspectFill", Integer.toString(ScaleType.CENTER_CROP.ordinal())
         );
     }
 
@@ -75,7 +72,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
 
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactVideoView videoView, final String resizeModeOrdinalString) {
-        videoView.setResizeModeModifier(ScalableType.values()[Integer.parseInt(resizeModeOrdinalString)]);
+        videoView.setResizeModeModifier(ScaleType.values()[Integer.parseInt(resizeModeOrdinalString)]);
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
