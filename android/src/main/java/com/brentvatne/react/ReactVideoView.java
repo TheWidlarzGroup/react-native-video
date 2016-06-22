@@ -336,13 +336,16 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onHostPause() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
+        if (mMediaPlayer != null && !mPaused) {
             mMediaPlayer.pause();
         }
     }
 
     @Override 
     public void onHostResume() {
+        if (mMediaPlayer != null && !mPaused) {
+            mMediaPlayer.start();
+        }
     }
 
     @Override
