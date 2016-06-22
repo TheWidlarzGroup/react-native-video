@@ -22,131 +22,109 @@ const styles = StyleSheet.create({
 
 export default class Video extends Component {
 
-  constructor(props, context) {
-    super(props, context);
-    this.seek = this.seek.bind(this);
-    this.presentFullscreenPlayer = this.presentFullscreenPlayer.bind(this);
-    this.dismissFullscreenPlayer = this.dismissFullscreenPlayer.bind(this);
-    this._assignRoot = this._assignRoot.bind(this);
-    this._onLoadStart = this._onLoadStart.bind(this);
-    this._onLoad = this._onLoad.bind(this);
-    this._onError = this._onError.bind(this);
-    this._onProgress = this._onProgress.bind(this);
-    this._onSeek = this._onSeek.bind(this);
-    this._onEnd = this._onEnd.bind(this);
-    this._onFullscreenPlayerWillPresent = this._onFullscreenPlayerWillPresent.bind(this);
-    this._onFullscreenPlayerDidPresent = this._onFullscreenPlayerDidPresent.bind(this);
-    this._onFullscreenPlayerWillDismiss = this._onFullscreenPlayerWillDismiss.bind(this);
-    this._onFullscreenPlayerDidDismiss = this._onFullscreenPlayerDidDismiss.bind(this);
-    this._onReadyForDisplay = this._onReadyForDisplay.bind(this);
-    this._onPlaybackStalled = this._onPlaybackStalled.bind(this);
-    this._onPlaybackResume = this._onPlaybackResume.bind(this);
-    this._onPlaybackRateChange = this._onPlaybackRateChange.bind(this);
-  }
-
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
 
-  seek(time) {
+  seek = (time) => {
     this.setNativeProps({ seek: time });
-  }
+  };
 
-  presentFullscreenPlayer() {
+  presentFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: true });
-  }
+  };
 
-  dismissFullscreenPlayer() {
+  dismissFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: false });
-  }
+  };
 
-  _assignRoot(component) {
+  _assignRoot = (component) => {
     this._root = component;
-  }
+  };
 
-  _onLoadStart(event) {
+  _onLoadStart = (event) => {
     if (this.props.onLoadStart) {
       this.props.onLoadStart(event.nativeEvent);
     }
-  }
+  };
 
-  _onLoad(event) {
+  _onLoad = (event) => {
     if (this.props.onLoad) {
       this.props.onLoad(event.nativeEvent);
     }
-  }
+  };
 
-  _onError(event) {
+  _onError = (event) => {
     if (this.props.onError) {
       this.props.onError(event.nativeEvent);
     }
-  }
+  };
 
-  _onProgress(event) {
+  _onProgress = (event) => {
     if (this.props.onProgress) {
       this.props.onProgress(event.nativeEvent);
     }
-  }
+  };
 
-  _onSeek(event) {
+  _onSeek = (event) => {
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
     }
-  }
+  };
 
-  _onEnd(event) {
+  _onEnd = (event) => {
     if (this.props.onEnd) {
       this.props.onEnd(event.nativeEvent);
     }
-  }
+  };
 
-  _onFullscreenPlayerWillPresent(event) {
+  _onFullscreenPlayerWillPresent = (event) => {
     if (this.props.onFullscreenPlayerWillPresent) {
       this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
     }
-  }
+  };
 
-  _onFullscreenPlayerDidPresent(event) {
+  _onFullscreenPlayerDidPresent = (event) => {
     if (this.props.onFullscreenPlayerDidPresent) {
       this.props.onFullscreenPlayerDidPresent(event.nativeEvent);
     }
-  }
+  };
 
-  _onFullscreenPlayerWillDismiss(event) {
+  _onFullscreenPlayerWillDismiss = (event) => {
     if (this.props.onFullscreenPlayerWillDismiss) {
       this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
     }
-  }
+  };
 
-  _onFullscreenPlayerDidDismiss(event) {
+  _onFullscreenPlayerDidDismiss = (event) => {
     if (this.props.onFullscreenPlayerDidDismiss) {
       this.props.onFullscreenPlayerDidDismiss(event.nativeEvent);
     }
-  }
+  };
 
-  _onReadyForDisplay(event) {
+  _onReadyForDisplay = (event) => {
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }
-  }
+  };
 
-  _onPlaybackStalled(event) {
+  _onPlaybackStalled = (event) => {
     if (this.props.onPlaybackStalled) {
       this.props.onPlaybackStalled(event.nativeEvent);
     }
-  }
+  };
 
-  _onPlaybackResume(event) {
+  _onPlaybackResume = (event) => {
     if (this.props.onPlaybackResume) {
       this.props.onPlaybackResume(event.nativeEvent);
     }
-  }
+  };
 
-  _onPlaybackRateChange(event) {
+  _onPlaybackRateChange = (event) => {
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
-  }
+  };
 
   render() {
     const {
