@@ -180,6 +180,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         if (!mMediaPlayerValid) {
             prepareAsync(this);
         }
+    }
 
     public void setResizeModeModifier(final ScalableType resizeMode) {
         mResizeMode = resizeMode;
