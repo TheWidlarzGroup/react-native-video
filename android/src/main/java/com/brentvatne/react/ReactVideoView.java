@@ -177,8 +177,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
         
-        if (!mMediaPlayerValid) {
-            prepareAsync(this);
+        try {
+	    prepare(this);
+        } catch (IOException e) {
+	    e.printStackTrace();
         }
     }
 
