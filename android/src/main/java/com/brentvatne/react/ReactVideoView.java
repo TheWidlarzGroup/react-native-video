@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.webkit.CookieManager;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.IOException;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.LifecycleEventListener;
