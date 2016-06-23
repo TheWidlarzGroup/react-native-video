@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.webkit.CookieManager;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.IOException;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -176,8 +177,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         WritableMap event = Arguments.createMap();
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
-
-        prepareAsync(this);
+        
+        try {
+	    prepare(this);
+        } catch (IOException e) {
+	    e.printStackTrace();
+        }
     }
 
     public void setResizeModeModifier(final ScalableType resizeMode) {
@@ -191,10 +196,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setRepeatModifier(final boolean repeat) {
         mRepeat = repeat;
-
-        if (mMediaPlayerValid) {
-            setLooping(repeat);
-        }
     }
 
     public void setPausedModifier(final boolean paused) {
@@ -316,8 +317,13 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mMediaPlayerValid = false;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
+        
+        if (mRepeat) {
+            mp.start();
+        } else {
+            mMediaPlayerValid = false;
+        }
     }
 
     @Override
@@ -334,13 +340,16 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onHostPause() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
+        if (mMediaPlayer != null && !mPaused) {
             mMediaPlayer.pause();
         }
     }
 
     @Override 
     public void onHostResume() {
+        if (mMediaPlayer != null && !mPaused) {
+            mMediaPlayer.start();
+        }
     }
 
     @Override
