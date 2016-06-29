@@ -16,7 +16,7 @@ import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
-        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, LifecycleEventListener {
+        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener,  MediaPlayer.OnInfoListener, LifecycleEventListener  {
 
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
@@ -24,7 +24,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         EVENT_ERROR("onVideoError"),
         EVENT_PROGRESS("onVideoProgress"),
         EVENT_SEEK("onVideoSeek"),
-        EVENT_END("onVideoEnd");
+        EVENT_END("onVideoEnd"),
+        EVENT_STALLED("onPlaybackStalled"),
+        EVENT_RESUME("onPlaybackResume"),
+        EVENT_READY_FOR_DISPLAY("onReadyForDisplay");
 
         private final String mName;
 
@@ -79,6 +82,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private int mVideoDuration = 0;
     private int mVideoBufferedDuration = 0;
+    private boolean isStalled = false;
 
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
@@ -116,6 +120,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnBufferingUpdateListener(this);
             mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnInfoListener(this);
+
         }
     }
 
@@ -294,6 +300,26 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         event.putMap(EVENT_PROP_ERROR, error);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_ERROR.toString(), event);
         return true;
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        switch (what) {
+            case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                mEventEmitter.receiveEvent(getId(), Events.EVENT_STALLED.toString(), Arguments.createMap());
+                isStalled = true;
+                break;
+            case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                mEventEmitter.receiveEvent(getId(), Events.EVENT_RESUME.toString(), Arguments.createMap());
+                isStalled = false;
+                break;
+            case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
+                mEventEmitter.receiveEvent(getId(), Events.EVENT_READY_FOR_DISPLAY.toString(), Arguments.createMap());
+                break;
+
+            default:
+        }
+        return false;
     }
 
     @Override
