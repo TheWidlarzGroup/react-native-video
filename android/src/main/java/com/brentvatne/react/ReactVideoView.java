@@ -4,8 +4,10 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.webkit.CookieManager;
 
+import android.widget.MediaController;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.WritableMap;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
-        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener {
+        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
 
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
@@ -68,6 +70,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     private Handler mProgressUpdateHandler = new Handler();
     private Runnable mProgressUpdateRunnable = null;
+    private Handler videoControlHandler = new Handler();
+    private MediaController mediaController;
+
 
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
@@ -85,6 +90,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private int mVideoDuration = 0;
     private int mVideoBufferedDuration = 0;
     private boolean isCompleted = false;
+    private boolean mUseNativeControls = false;
 
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
@@ -112,6 +118,16 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mProgressUpdateHandler.post(mProgressUpdateRunnable);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mUseNativeControls) {
+            initializeMediaControllerIfNeeded();
+            mediaController.show();
+        }
+
+        return super.onTouchEvent(event);
+    }
+
     private void initializeMediaPlayerIfNeeded() {
         if (mMediaPlayer == null) {
             mMediaPlayerValid = false;
@@ -123,7 +139,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             mMediaPlayer.setOnBufferingUpdateListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.setOnInfoListener(this);
+        }
+    }
 
+    private void initializeMediaControllerIfNeeded() {
+        if (mediaController == null) {
+            mediaController = new MediaController(this.getContext());
         }
     }
 
@@ -267,6 +288,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mPlayInBackground = playInBackground;
     }
 
+    public void setControls(boolean controls) {
+        this.mUseNativeControls = controls;
+    }
+
+
     @Override
     public void onPrepared(MediaPlayer mp) {
 
@@ -296,6 +322,20 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         applyModifiers();
+
+        if (mUseNativeControls) {
+            initializeMediaControllerIfNeeded();
+            mediaController.setMediaPlayer(this);
+            mediaController.setAnchorView(this);
+
+            videoControlHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mediaController.setEnabled(true);
+                    mediaController.show();
+                }
+            });
+        }
     }
 
     @Override
@@ -347,6 +387,31 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 isCompleted = false;
             }
         }
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
     }
 
     @Override
