@@ -204,6 +204,7 @@ Video.propTypes = {
   playWhenInactive: PropTypes.bool,
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
+  progressUpdateInterval: PropTypes.number,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onError: PropTypes.func,
