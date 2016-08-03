@@ -54,6 +54,7 @@ RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, float);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 
 - (NSDictionary *)constantsToExport
 {
