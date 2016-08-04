@@ -106,7 +106,7 @@ static NSString *const playbackRate = @"rate";
     {
         return([playerItem duration]);
     }
-    
+
     return(kCMTimeInvalid);
 }
 
@@ -126,6 +126,8 @@ static NSString *const playbackRate = @"rate";
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [self removePlayerItemObservers];
+  [_player removeObserver:self forKeyPath:playbackRate context:nil];
 }
 
 #pragma mark - App lifecycle handlers
@@ -162,7 +164,7 @@ static NSString *const playbackRate = @"rate";
    if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
      return;
    }
-    
+
    CMTime playerDuration = [self playerItemDuration];
    if (CMTIME_IS_INVALID(playerDuration)) {
       return;
@@ -250,7 +252,7 @@ static NSString *const playbackRate = @"rate";
 
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-  
+
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
   _playbackRateObserverRegistered = YES;
 
@@ -300,7 +302,7 @@ static NSString *const playbackRate = @"rate";
         if (isnan(duration)) {
           duration = 0.0;
         }
-          
+
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
         NSString *orientation = @"undefined";
@@ -442,7 +444,7 @@ static NSString *const playbackRate = @"rate";
     [_player play];
     [_player setRate:_rate];
   }
-  
+
   _paused = paused;
 }
 
@@ -468,7 +470,7 @@ static NSString *const playbackRate = @"rate";
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
-    
+
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
         [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
@@ -541,7 +543,7 @@ static NSString *const playbackRate = @"rate";
         }
         // Set presentation style to fullscreen
         [_playerViewController setModalPresentationStyle:UIModalPresentationFullScreen];
-        
+
         // Find the nearest view controller
         UIViewController *viewController = [self firstAvailableUIViewController];
         if( !viewController )
@@ -589,9 +591,9 @@ static NSString *const playbackRate = @"rate";
       _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
       _playerLayer.frame = self.bounds;
       _playerLayer.needsDisplayOnBoundsChange = YES;
-        
+
       [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
-    
+
       [self.layer addSublayer:_playerLayer];
       self.layer.needsDisplayOnBoundsChange = YES;
     }
@@ -654,7 +656,7 @@ static NSString *const playbackRate = @"rate";
   {
     [self setControls:true];
   }
-  
+
   if( _controls )
   {
      view.frame = self.bounds;
@@ -686,7 +688,7 @@ static NSString *const playbackRate = @"rate";
   if( _controls )
   {
     _playerViewController.view.frame = self.bounds;
-  
+
     // also adjust all subviews of contentOverlayView
     for (UIView* subview in _playerViewController.contentOverlayView.subviews) {
       subview.frame = self.bounds;
@@ -713,7 +715,7 @@ static NSString *const playbackRate = @"rate";
   _player = nil;
 
   [self removePlayerLayer];
-  
+
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
