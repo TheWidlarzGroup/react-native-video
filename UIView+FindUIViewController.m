@@ -1,10 +1,3 @@
-//
-//  UIView+FindUIViewController.m
-//  RCTVideo
-//
-//  Created by Stanisław Chmiela on 31.03.2016.
-//  Copyright © 2016 Facebook. All rights reserved.
-//
 //  Source: http://stackoverflow.com/a/3732812/1123156
 
 #import "UIView+FindUIViewController.h"
