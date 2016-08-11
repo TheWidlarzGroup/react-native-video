@@ -59,6 +59,23 @@ Under `.addPackage(new MainReactPackage())`:
 .addPackage(new ReactVideoPackage())
 ```
 
+
+### Note:In react-native >= 0.29.0 you have to edit MainApplication.java
+
+**MainApplication.java** (react-native >= 0.29.0)
+
+On top, where imports are:
+```java
+import com.brentvatne.react.ReactVideoPackage;
+```
+
+Under `.addPackage(new MainReactPackage())`:
+```java
+.addPackage(new ReactVideoPackage())
+```
+
+
+
 ## Usage
 
 ```javascript
