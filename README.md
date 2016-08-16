@@ -129,8 +129,6 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 />
 ```
 
-**Tip**: When loading files locally on iOS it's necessary to add static video file to the _Copy Bundle Resources_ section of _Build Phases_ for your project's build target in Xcode.
-
 ### Play in background on iOS
 
 To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details.
