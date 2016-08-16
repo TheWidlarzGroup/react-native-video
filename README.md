@@ -163,7 +163,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 - [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [ ] Callback to get buffering progress for remote videos
-- [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video#attr-poster)
+- [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
 [2]: https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer
