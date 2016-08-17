@@ -118,7 +118,9 @@ var styles = StyleSheet.create({
 
 ### Load files with the RN Asset System
 
-The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading local static resources using a `require` statement. As of version `react-native-video@0.9.0`, it's also be used to load video files in the same manner, e.g.
+The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allowed loading image resources shared across iOS and Android. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of `0.32` iOS should also be supported.
+
+With As of version `react-native-video@0.9.0`, it's also be used to load video files in the same manner, e.g.
 
 ```
 <Video
