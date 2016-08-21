@@ -124,7 +124,7 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 <Video
   repeat
   resizeMode='cover'
-  source={require('../assets/video/turntable-loop-1920x500-h264-512kbps-h264.mp4')}
+  source={require('../assets/video/turntable.mp4')}
   style={styles.backgroundVideo}
 />
 ```
