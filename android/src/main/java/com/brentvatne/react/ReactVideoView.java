@@ -85,6 +85,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private int mVideoDuration = 0;
     private int mVideoBufferedDuration = 0;
     private boolean isCompleted = false;
+    private boolean isBuffering = false;
+    private boolean lifecyclePaused = false;
 
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
@@ -100,7 +102,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             @Override
             public void run() {
 
-                if (mMediaPlayerValid && !isCompleted) {
+                if (mMediaPlayerValid && !isCompleted && (!mPaused || isBuffering)) {
+
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
@@ -263,7 +266,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     public void setPlayInBackground(final boolean playInBackground) {
-
         mPlayInBackground = playInBackground;
     }
 
@@ -331,6 +333,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
+        if (percent == 100) {
+            isBuffering = false;
+        } else if (!isBuffering) {
+            isBuffering = true;
+        }
     }
 
     @Override
@@ -358,14 +365,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     protected void onDetachedFromWindow() {
-
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
     }
 
     @Override
     protected void onAttachedToWindow() {
-
         super.onAttachedToWindow();
         setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset);
     }
@@ -374,12 +379,19 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void onHostPause() {
 
         if (mMediaPlayer != null && !mPlayInBackground) {
-            mMediaPlayer.pause();
+            pause();
+            lifecyclePaused = true;
+            mPaused = true;
         }
     }
 
     @Override
     public void onHostResume() {
+        if (lifecyclePaused && mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+            start();
+            lifecyclePaused = false;
+            mPaused = false;
+        }
     }
 
     @Override
