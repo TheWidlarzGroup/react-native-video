@@ -88,8 +88,8 @@ class VideoPlayer extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <Video source={{uri: "broadchurch"}}
+        <View style={styles.fullScreen}>
+          <Video source={{uri: "asset:///broadchurch.mp4"}}
                  style={styles.fullScreen}
                  rate={this.state.rate}
                  paused={this.state.paused}
@@ -100,7 +100,10 @@ class VideoPlayer extends Component {
                  onProgress={this.onProgress}
                  onEnd={() => { console.log('Done!') }}
                  repeat={true} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.touchOverlay}
+            onPress={() => { this.setState({paused: !this.state.paused}) }} />
+        </View>
 
         <View style={styles.controls}>
           <View style={styles.generalControls}>
@@ -151,6 +154,9 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
+  },
+  touchOverlay: {
+    flex: 1,
   },
   controls: {
     backgroundColor: "transparent",
