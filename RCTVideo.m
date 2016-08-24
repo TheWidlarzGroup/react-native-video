@@ -580,6 +580,9 @@ static NSString *const playbackRate = @"rate";
     if( _player )
     {
         _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+        // to prevent video from being animated when resizeMode is 'cover'
+        // resize mode must be set before subview is added
+        [self setResizeMode:_resizeMode];
         [self addSubview:_playerViewController.view];
     }
 }
@@ -592,6 +595,9 @@ static NSString *const playbackRate = @"rate";
       _playerLayer.frame = self.bounds;
       _playerLayer.needsDisplayOnBoundsChange = YES;
 
+      // to prevent video from being animated when resizeMode is 'cover'
+      // resize mode must be set before layer is added
+      [self setResizeMode:_resizeMode];
       [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
 
       [self.layer addSublayer:_playerLayer];
