@@ -110,6 +110,17 @@ static NSString *const playbackRate = @"rate";
     return(kCMTimeInvalid);
 }
 
+- (CMTimeRange)playerItemSeekableTimeRange
+{
+    AVPlayerItem *playerItem = [_player currentItem];
+    if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+    {
+        return [playerItem seekableTimeRanges].firstObject.CMTimeRangeValue;
+    }
+    
+    return (kCMTimeRangeZero);
+}
+
 
 /* Cancels the previously registered time observer. */
 -(void)removePlayerTimeObserver
@@ -173,14 +184,15 @@ static NSString *const playbackRate = @"rate";
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
-   if( currentTimeSecs >= 0 && currentTimeSecs <= duration) {
+   if( currentTimeSecs >= 0) {
         [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                             body:@{
                                                      @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
                                                      @"playableDuration": [self calculatePlayableDuration],
                                                      @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                                                      @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                                                     @"target": self.reactTag
+                                                     @"target": self.reactTag,
+                                                     @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
                                                  }];
    }
 }
