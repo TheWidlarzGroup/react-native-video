@@ -40,6 +40,12 @@ class VideoPlayer extends Component {
     this.setState({currentTime: data.currentTime});
   }
 
+  getFrames = () => {
+    this.refs.videoView.getFrames(function(err, frames) {
+        console.log(frames)
+    });
+  }
+
   getCurrentTimePercentage() {
     if (this.state.currentTime > 0) {
       return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
@@ -107,6 +113,7 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
+            ref="videoView"
             source={{uri: "broadchurch"}}
             style={styles.fullScreen}
             rate={this.state.rate}
@@ -146,6 +153,13 @@ class VideoPlayer extends Component {
               {this.renderResizeModeControl('cover')}
               {this.renderResizeModeControl('contain')}
               {this.renderResizeModeControl('stretch')}
+            </View>
+            <View>
+                <TouchableOpacity onPress={this.getFrames}>
+                    <Text style={[styles.controlOption, {fontWeight: "bold" }]}>
+                        get frames
+                    </Text>
+                </TouchableOpacity>
             </View>
           </View>
 
@@ -282,6 +296,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   controlOption: {
+    alignSelf: 'center',
+    fontSize: 11,
+    color: "white",
+    paddingLeft: 2,
+    paddingRight: 2,
+    lineHeight: 12,
+  },
+  screenshot: {
     alignSelf: 'center',
     fontSize: 11,
     color: "white",

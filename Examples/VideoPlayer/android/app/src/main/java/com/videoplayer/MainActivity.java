@@ -1,7 +1,6 @@
 package com.videoplayer;
 
 import com.facebook.react.ReactActivity;
-import com.brentvatne.react.ReactVideoPackage;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 
@@ -28,14 +27,14 @@ public class MainActivity extends ReactActivity {
         return BuildConfig.DEBUG;
     }
 
-   /**
-   * A list of packages used by the app. If the app uses additional views
-   * or modules besides the default ones, add more packages here.
-   */
+    /**
+     * A list of packages used by the app. If the app uses additional views
+     * or modules besides the default ones, add more packages here.
+     */
     @Override
     protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(
-        new MainReactPackage(),
-        new ReactVideoPackage());
+        return Arrays.<ReactPackage>asList(
+            new MainReactPackage()
+        );
     }
 }

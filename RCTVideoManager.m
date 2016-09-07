@@ -3,7 +3,9 @@
 #import "RCTBridge.h"
 #import <AVFoundation/AVFoundation.h>
 
-@implementation RCTVideoManager
+@implementation RCTVideoManager {
+    RCTVideo* _player;
+}
 
 RCT_EXPORT_MODULE();
 
@@ -11,29 +13,31 @@ RCT_EXPORT_MODULE();
 
 - (UIView *)view
 {
-  return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+    
+    _player = [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+    return _player;
 }
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 
 - (NSArray *)customDirectEventTypes
 {
-  return @[
-    @"onVideoLoadStart",
-    @"onVideoLoad",
-    @"onVideoError",
-    @"onVideoProgress",
-    @"onVideoSeek",
-    @"onVideoEnd",
-    @"onVideoFullscreenPlayerWillPresent",
-    @"onVideoFullscreenPlayerDidPresent",
-    @"onVideoFullscreenPlayerWillDismiss",
-    @"onVideoFullscreenPlayerDidDismiss",
-    @"onReadyForDisplay",
-    @"onPlaybackStalled",
-    @"onPlaybackResume",
-    @"onPlaybackRateChange"
-  ];
+    return @[
+             @"onVideoLoadStart",
+             @"onVideoLoad",
+             @"onVideoError",
+             @"onVideoProgress",
+             @"onVideoSeek",
+             @"onVideoEnd",
+             @"onVideoFullscreenPlayerWillPresent",
+             @"onVideoFullscreenPlayerDidPresent",
+             @"onVideoFullscreenPlayerWillDismiss",
+             @"onVideoFullscreenPlayerDidDismiss",
+             @"onReadyForDisplay",
+             @"onPlaybackStalled",
+             @"onPlaybackResume",
+             @"onPlaybackRateChange"
+             ];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -55,14 +59,28 @@ RCT_EXPORT_VIEW_PROPERTY(seek, float);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 
+RCT_EXPORT_METHOD(getFrames:(RCTResponseSenderBlock)callback) {
+    
+    [_player getFrames: ^(int percent, NSArray *result, NSError *error) {
+        if(percent == 100) {
+            
+            NSLog(@"%@", result);
+            callback(@[[NSNull null], result]);
+            
+        }
+    }];
+    
+    
+}
+
 - (NSDictionary *)constantsToExport
 {
-  return @{
-    @"ScaleNone": AVLayerVideoGravityResizeAspect,
-    @"ScaleToFill": AVLayerVideoGravityResize,
-    @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
-    @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
-  };
+    return @{
+             @"ScaleNone": AVLayerVideoGravityResizeAspect,
+             @"ScaleToFill": AVLayerVideoGravityResize,
+             @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
+             @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
+             };
 }
 
 @end
