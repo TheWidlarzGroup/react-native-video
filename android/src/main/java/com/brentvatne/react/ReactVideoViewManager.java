@@ -44,6 +44,12 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     }
 
     @Override
+    public void onDropViewInstance(ReactVideoView view) {
+        super.onDropViewInstance(view);
+        view.cleanupMediaPlayerResources();
+    }
+
+    @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
         MapBuilder.Builder builder = MapBuilder.builder();
