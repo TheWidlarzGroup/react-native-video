@@ -362,10 +362,6 @@ static NSString *const playbackRate = @"rate";
     } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
       _playerBufferEmpty = YES;
     } else if ([keyPath isEqualToString:playbackLikelyToKeepUpKeyPath]) {
-      // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-      if ((!_controls || _playerBufferEmpty) && _playerItem.playbackLikelyToKeepUp) {
-        [self setPaused:_paused];
-      }
       _playerBufferEmpty = NO;
     }
    } else if (object == _playerLayer) {
