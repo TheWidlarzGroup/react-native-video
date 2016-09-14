@@ -34,8 +34,6 @@ Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-vid
 
 Or if you have trouble using [rnpm](https://github.com/rnpm/rnpm), make the following additions to the given files manually:
 
-**see below for expansion file usage**
-
 **android/settings.gradle**
 
 ```
@@ -166,7 +164,6 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 ### Play in background on iOS
 
 To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
-
 
 ## Static Methods
 
