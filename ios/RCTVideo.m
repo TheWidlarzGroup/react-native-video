@@ -636,6 +636,11 @@ static NSString *const playbackRate = @"rate";
     }
 }
 
+- (void)setProgressUpdateInterval:(float)progressUpdateInterval
+{
+  _progressUpdateInterval = progressUpdateInterval;
+}
+
 - (void)removePlayerLayer
 {
     [_playerLayer removeFromSuperlayer];
