@@ -196,7 +196,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
-[2]: https://github.com/brentvatne/react-native-video/tree/master/Examples/VideoPlayer
+[2]: https://github.com/react-native-community/react-native-video/tree/master/example
 [3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
 
 ---
