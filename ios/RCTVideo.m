@@ -294,7 +294,12 @@ static NSString *const playbackRate = @"rate";
     [NSURL URLWithString:uri] :
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
-  if (isAsset) {
+  if (isNetwork) {
+    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    return [AVPlayerItem playerItemWithAsset:asset];
+  }
+  else if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     return [AVPlayerItem playerItemWithAsset:asset];
   }
