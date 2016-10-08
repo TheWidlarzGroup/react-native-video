@@ -150,6 +150,7 @@ using System.Collections.Generic;
        onProgress={this.setTime}      // Callback every ~250ms with currentTime
        onEnd={this.onEnd}             // Callback when playback finishes
        onError={this.videoError}      // Callback when video cannot be loaded
+       onBuffer={this.onBuffer} // Callback when remote video is buffering
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
@@ -250,7 +251,7 @@ Toggles a fullscreen player. Access using a ref to the component.
 
 - [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
-- [ ] Callback to get buffering progress for remote videos
+- [x] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
