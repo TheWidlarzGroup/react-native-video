@@ -90,6 +90,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mVolume = 1.0f;
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
+    private boolean mActiveStatePauseStatus = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -504,14 +505,26 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onHostPause() {
-
         if (mMediaPlayer != null && !mPlayInBackground) {
-            mMediaPlayer.pause();
+            mActiveStatePauseStatus = mPaused;
+
+            // Pause the video in background
+            setPausedModifier(true);
         }
     }
 
     @Override
     public void onHostResume() {
+        if (mMediaPlayer != null && !mPlayInBackground) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    // Restore original state
+                    setPausedModifier(mActiveStatePauseStatus);
+                }
+            });
+
+        }
     }
 
     @Override
