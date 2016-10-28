@@ -115,16 +115,18 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             @Override
             public void run() {
 
-                if (mMediaPlayerValid && !isCompleted) {
+                if (mMediaPlayerValid && !isCompleted &&!mPaused) {
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
+
+                    // Check for update after an interval
+                    // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
                 }
-                mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
             }
         };
-        mProgressUpdateHandler.post(mProgressUpdateRunnable);
     }
 
     @Override
@@ -298,6 +300,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         } else {
             if (!mMediaPlayer.isPlaying()) {
                 start();
+
+                // Also Start the Progress Update Handler
+                mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
     }
