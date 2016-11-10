@@ -315,7 +315,7 @@ namespace ReactNativeVideo
 
         private static async void RunOnDispatcher(DispatchedHandler action)
         {
-            await CoreApplication.GetCurrentView().Dispatcher.RunAsync(CoreDispatcherPriority.Normal, action).AsTask().ConfigureAwait(false);
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, action).AsTask().ConfigureAwait(false);
         }
 
         class ReactVideoEvent : Event
