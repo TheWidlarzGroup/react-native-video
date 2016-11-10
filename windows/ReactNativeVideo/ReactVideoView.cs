@@ -17,9 +17,6 @@ namespace ReactNativeVideo
 
         private readonly DispatcherTimer _timer;
 
-        private bool _isSourceSet;
-
-        private string _uri;
         private bool _isLoopingEnabled;
         private bool _isPaused;
         private bool _isMuted;
@@ -39,9 +36,22 @@ namespace ReactNativeVideo
         {
             set
             {
-                _uri = value;
-                base.Source = MediaSource.CreateFromUri(new Uri(_uri));
-                _isSourceSet = true;
+                var uri = value;
+
+                base.Source = MediaSource.CreateFromUri(new Uri(uri));
+
+                this.GetReactContext()
+                    .GetNativeModule<UIManagerModule>()
+                    .EventDispatcher
+                    .DispatchEvent(
+                        new ReactVideoEvent(
+                            ReactVideoEventType.LoadStart.GetEventName(),
+                            this.GetTag(),
+                            new JObject
+                            {
+                                { "src", uri }
+                            }));
+
                 ApplyModifiers();
                 SubscribeEvents();
             }
@@ -52,9 +62,10 @@ namespace ReactNativeVideo
             set
             {
                 _isLoopingEnabled = value;
-                if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
-                    MediaPlayer.IsLoopingEnabled = _isLoopingEnabled;
+                    mediaPlayer.IsLoopingEnabled = _isLoopingEnabled;
                 }
             }
         }
@@ -64,9 +75,10 @@ namespace ReactNativeVideo
             set
             {
                 _isMuted = value;
-                if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
-                    MediaPlayer.IsMuted = _isMuted;
+                    mediaPlayer.IsMuted = _isMuted;
                 }
             }
         }
@@ -76,15 +88,16 @@ namespace ReactNativeVideo
             set
             {
                 _isPaused = value;
-                if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
                     if (_isPaused)
                     {
-                        MediaPlayer.Pause();
+                        mediaPlayer.Pause();
                     }
                     else
                     {
-                        MediaPlayer.Play();
+                        mediaPlayer.Play();
                     }
                 }
             }
@@ -95,9 +108,10 @@ namespace ReactNativeVideo
             set
             {
                 _isUserControlEnabled = value;
-               if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
-                    MediaPlayer.SystemMediaTransportControls.IsEnabled = _isUserControlEnabled;
+                    mediaPlayer.SystemMediaTransportControls.IsEnabled = _isUserControlEnabled;
                 }
             }
         }
@@ -107,9 +121,10 @@ namespace ReactNativeVideo
             set
             {
                 _volume = value;
-                if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
-                    MediaPlayer.Volume = _volume;
+                    mediaPlayer.Volume = _volume;
                 }
             }
         }
@@ -119,9 +134,10 @@ namespace ReactNativeVideo
             set
             {
                 _rate = value;
-                if (_isSourceSet)
+                var mediaPlayer = MediaPlayer;
+                if (mediaPlayer != null)
                 {
-                    MediaPlayer.PlaybackSession.PlaybackRate = _rate;
+                    mediaPlayer.PlaybackSession.PlaybackRate = _rate;
                 }
             }
         }
@@ -136,23 +152,24 @@ namespace ReactNativeVideo
 
         public void Seek(double seek)
         {
-            if (_isSourceSet)
+            var mediaPlayer = MediaPlayer;
+            if (mediaPlayer != null)
             {
-                MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seek);
+                mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seek);
             }
         }
 
         public void Dispose()
         {
-            if (_isSourceSet)
+            var mediaPlayer = MediaPlayer;
+            if (mediaPlayer != null)
             {
                 _timer.Tick -= OnTick;
-                MediaPlayer.SourceChanged -= OnSourceChanged;
-                MediaPlayer.MediaOpened -= OnMediaOpened;
-                MediaPlayer.MediaFailed -= OnMediaFailed;
-                MediaPlayer.MediaEnded -= OnMediaEnded;
-                MediaPlayer.PlaybackSession.BufferingStarted -= OnBufferingStarted;
-                MediaPlayer.PlaybackSession.BufferingEnded -= OnBufferingEnded;
+                mediaPlayer.MediaOpened -= OnMediaOpened;
+                mediaPlayer.MediaFailed -= OnMediaFailed;
+                mediaPlayer.MediaEnded -= OnMediaEnded;
+                mediaPlayer.PlaybackSession.BufferingStarted -= OnBufferingStarted;
+                mediaPlayer.PlaybackSession.BufferingEnded -= OnBufferingEnded;
                 MediaPlayer.PlaybackSession.SeekCompleted -= OnSeekCompleted;
             }
 
@@ -172,55 +189,41 @@ namespace ReactNativeVideo
         private void SubscribeEvents()
         {
             _timer.Tick += OnTick;
-            MediaPlayer.SourceChanged += OnSourceChanged;
-            MediaPlayer.MediaOpened += OnMediaOpened;
-            MediaPlayer.MediaFailed += OnMediaFailed;
-            MediaPlayer.MediaEnded += OnMediaEnded;
-            MediaPlayer.PlaybackSession.BufferingStarted += OnBufferingStarted;
-            MediaPlayer.PlaybackSession.BufferingEnded += OnBufferingEnded;
-            MediaPlayer.PlaybackSession.SeekCompleted += OnSeekCompleted;
+            var mediaPlayer = MediaPlayer;
+            mediaPlayer.MediaOpened += OnMediaOpened;
+            mediaPlayer.MediaFailed += OnMediaFailed;
+            mediaPlayer.MediaEnded += OnMediaEnded;
+            mediaPlayer.PlaybackSession.BufferingStarted += OnBufferingStarted;
+            mediaPlayer.PlaybackSession.BufferingEnded += OnBufferingEnded;
+            mediaPlayer.PlaybackSession.SeekCompleted += OnSeekCompleted;
         }
 
         private void OnTick(object sender, object e)
         {
-            if (_isSourceSet && !_isCompleted && !_isPaused)
+            var mediaPlayer = MediaPlayer;
+            if (mediaPlayer != null && !_isCompleted && !_isPaused)
             {
                 this.GetReactContext()
                     .GetNativeModule<UIManagerModule>()
                     .EventDispatcher
                     .DispatchEvent(
                         new ReactVideoEvent(
-                            ReactVideoEventType.Progress.GetEventName(), 
+                            ReactVideoEventType.Progress.GetEventName(),
                             this.GetTag(),
                             new JObject
                             {
-                                { "currentTime",  MediaPlayer.PlaybackSession.Position.TotalSeconds },
+                                { "currentTime",  mediaPlayer.PlaybackSession.Position.TotalSeconds },
                                 { "playableDuration", 0.0 /* TODO */ }
                             }));
             }
-        }
-
-        private void OnSourceChanged(MediaPlayer sender, object args)
-        {
-            this.GetReactContext()
-                .GetNativeModule<UIManagerModule>()
-                .EventDispatcher
-                .DispatchEvent(
-                    new ReactVideoEvent(
-                        ReactVideoEventType.LoadStart.GetEventName(),
-                        this.GetTag(),
-                        new JObject
-                        {
-                            { "src", this._uri }
-                        }));
         }
 
         private void OnMediaOpened(MediaPlayer sender, object args)
         {
             RunOnDispatcher(delegate
             {
-                var width = MediaPlayer.PlaybackSession.NaturalVideoWidth;
-                var height = MediaPlayer.PlaybackSession.NaturalVideoHeight;
+                var width = sender.PlaybackSession.NaturalVideoWidth;
+                var height = sender.PlaybackSession.NaturalVideoHeight;
                 var orientation = (width > height) ? "landscape" : "portrait";
                 var size = new JObject
                 {
@@ -229,18 +232,25 @@ namespace ReactNativeVideo
                     { "orientation", orientation }
                 };
 
-                this.GetReactContext().GetNativeModule<UIManagerModule>().EventDispatcher.DispatchEvent(new ReactVideoView.ReactVideoEvent(ReactVideoEventType.Load.GetEventName(), this.GetTag(), new JObject
-                {
-                    { "duration", MediaPlayer.PlaybackSession.NaturalDuration.TotalSeconds },
-                    { "currentTime",  MediaPlayer.PlaybackSession.Position.TotalSeconds },
-                    { "naturalSize", size },
-                    { "canPlayFastForward", false },
-                    { "canPlaySlowForward", false },
-                    { "canPlaySlow", false },
-                    { "canPlayReverse", false },
-                    { "canStepBackward", false },
-                    { "canStepForward", false }
-                }));
+                this.GetReactContext()
+                    .GetNativeModule<UIManagerModule>()
+                    .EventDispatcher
+                    .DispatchEvent(
+                        new ReactVideoEvent(
+                            ReactVideoEventType.Load.GetEventName(),
+                            this.GetTag(),
+                            new JObject
+                            {
+                                { "duration", sender.PlaybackSession.NaturalDuration.TotalSeconds },
+                                { "currentTime",  sender.PlaybackSession.Position.TotalSeconds },
+                                { "naturalSize", size },
+                                { "canPlayFastForward", false },
+                                { "canPlaySlowForward", false },
+                                { "canPlaySlow", false },
+                                { "canPlayReverse", false },
+                                { "canStepBackward", false },
+                                { "canStepForward", false }
+                            }));
             });
         }
 
@@ -258,7 +268,7 @@ namespace ReactNativeVideo
                 .DispatchEvent(
                     new ReactVideoEvent(
                         ReactVideoEventType.Error.GetEventName(),
-                        this.GetTag(), 
+                        this.GetTag(),
                         new JObject
                         {
                             { "error", errorData }
@@ -273,7 +283,7 @@ namespace ReactNativeVideo
                 .EventDispatcher
                 .DispatchEvent(
                     new ReactVideoEvent(
-                        ReactVideoEventType.End.GetEventName(), 
+                        ReactVideoEventType.End.GetEventName(),
                         this.GetTag(),
                         null));
         }
@@ -308,7 +318,7 @@ namespace ReactNativeVideo
                 .GetNativeModule<UIManagerModule>()
                 .EventDispatcher.DispatchEvent(
                     new ReactVideoEvent(
-                        ReactVideoEventType.Seek.GetEventName(), 
+                        ReactVideoEventType.Seek.GetEventName(),
                         this.GetTag(),
                         new JObject()));
         }
@@ -323,7 +333,7 @@ namespace ReactNativeVideo
             private readonly string _eventName;
             private readonly JObject _eventData;
 
-            public ReactVideoEvent(string eventName, int viewTag, JObject eventData) 
+            public ReactVideoEvent(string eventName, int viewTag, JObject eventData)
                 : base(viewTag, TimeSpan.FromTicks(Environment.TickCount))
             {
                 _eventName = eventName;
