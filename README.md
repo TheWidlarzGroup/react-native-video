@@ -94,21 +94,10 @@ Add the `ReactNativeVideo` project to your solution.
 
 **windows/myapp/myapp.csproj**
 
-Add a reference to `ReactNativeVideo` to your main application project.
-
-Using Visual Studio 2015:
+Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
 1. Right-click main application project > Add > Reference...
 2. Check `ReactNativeVideo` from Solution Projects.
-
-Manually from `windows/myapp/myapp.csproj`, add:
-
-```xml
-    <ProjectReference Include="..\..\node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj">
-      <Project>{e8f5f57f-757e-4237-ad23-f7a8755427cd}</Project>
-      <Name>ReactNativeVideo</Name>
-    </ProjectReference>
-```
 
 **MainPage.cs**
 
