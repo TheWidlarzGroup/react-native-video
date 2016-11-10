@@ -11,7 +11,7 @@ Run `npm i -S react-native-video`
 
 #### iOS
 
-Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`.
+Run `react-native link` to link the react-native-video library.
 
 If you would like to allow other apps to play music over your video component, add:
 
@@ -30,9 +30,9 @@ If you would like to allow other apps to play music over your video component, a
 
 #### Android
 
-Install [rnpm](https://github.com/rnpm/rnpm) and run `rnpm link react-native-video`
+Run `react-native link` to link the react-native-video library.
 
-Or if you have trouble using [rnpm](https://github.com/rnpm/rnpm), make the following additions to the given files manually:
+Or if you have trouble, make the following additions to the given files manually:
 
 **android/settings.gradle**
 
