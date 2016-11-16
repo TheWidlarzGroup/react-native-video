@@ -14,28 +14,6 @@ RCT_EXPORT_MODULE();
   return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
-/* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
-
-- (NSArray *)customDirectEventTypes
-{
-  return @[
-    @"onVideoLoadStart",
-    @"onVideoLoad",
-    @"onVideoError",
-    @"onVideoProgress",
-    @"onVideoSeek",
-    @"onVideoEnd",
-    @"onVideoFullscreenPlayerWillPresent",
-    @"onVideoFullscreenPlayerDidPresent",
-    @"onVideoFullscreenPlayerWillDismiss",
-    @"onVideoFullscreenPlayerDidDismiss",
-    @"onReadyForDisplay",
-    @"onPlaybackStalled",
-    @"onPlaybackResume",
-    @"onPlaybackRateChange"
-  ];
-}
-
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
@@ -55,6 +33,21 @@ RCT_EXPORT_VIEW_PROPERTY(seek, float);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
+/* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
+RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillPresent, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidPresent, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillDismiss, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidDismiss, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 
 - (NSDictionary *)constantsToExport
 {
