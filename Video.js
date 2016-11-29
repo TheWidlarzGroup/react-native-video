@@ -68,7 +68,9 @@ export default class Video extends Component {
   };
 
   _onSeek = (event) => {
-    this.setState({showPoster: false});
+    if (this.state.showPoster) {
+      this.setState({showPoster: false});
+    }
 
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
