@@ -42,6 +42,7 @@ static NSString *const playbackRate = @"rate";
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
+  BOOL _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
@@ -65,6 +66,7 @@ static NSString *const playbackRate = @"rate";
     _playerBufferEmpty = YES;
     _playInBackground = false;
     _playWhenInactive = false;
+    _ignoreSilentSwitch = false;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -117,7 +119,7 @@ static NSString *const playbackRate = @"rate";
     {
         return [playerItem seekableTimeRanges].firstObject.CMTimeRangeValue;
     }
-    
+
     return (kCMTimeRangeZero);
 }
 
@@ -452,6 +454,12 @@ static NSString *const playbackRate = @"rate";
   _playWhenInactive = playWhenInactive;
 }
 
+- (void)setIgnoreSilentSwitch:(BOOL)ignoreSilentSwitch
+{
+  _ignoreSilentSwitch = ignoreSilentSwitch;
+  [self applyModifiers];
+}
+
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
@@ -532,6 +540,12 @@ static NSString *const playbackRate = @"rate";
   } else {
     [_player setVolume:_volume];
     [_player setMuted:NO];
+  }
+
+  if(_ignoreSilentSwitch) {
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+  } else {
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
   }
 
   [self setResizeMode:_resizeMode];
