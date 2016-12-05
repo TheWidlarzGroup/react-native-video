@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from 'react';
-import {StyleSheet, requireNativeComponent, NativeModules, View} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, Image} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import VideoResizeMode from './VideoResizeMode.js';
 
@@ -10,6 +10,14 @@ const styles = StyleSheet.create({
 });
 
 export default class Video extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showPoster: true,
+    };
+  }
 
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
@@ -50,12 +58,20 @@ export default class Video extends Component {
   };
 
   _onProgress = (event) => {
+    if (this.state.showPoster) {
+      this.setState({showPoster: false});
+    }
+
     if (this.props.onProgress) {
       this.props.onProgress(event.nativeEvent);
     }
   };
 
   _onSeek = (event) => {
+    if (this.state.showPoster) {
+      this.setState({showPoster: false});
+    }
+
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
     }
@@ -166,6 +182,30 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
     });
 
+    if (this.props.poster && this.state.showPoster) {
+      const posterStyle = {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        resizeMode: 'contain',
+      };
+
+      return (
+        <View style={nativeProps.style}>
+          <RCTVideo
+            ref={this._assignRoot}
+            {...nativeProps}
+          />
+          <Image
+            style={posterStyle}
+            source={{uri: this.props.poster}}
+          />
+        </View>
+      );
+    }
+
     return (
       <RCTVideo
         ref={this._assignRoot}
@@ -190,6 +230,7 @@ Video.propTypes = {
     PropTypes.number
   ]),
   resizeMode: PropTypes.string,
+  poster: PropTypes.string,
   repeat: PropTypes.bool,
   paused: PropTypes.bool,
   muted: PropTypes.bool,
