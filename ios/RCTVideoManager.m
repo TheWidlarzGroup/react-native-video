@@ -16,7 +16,7 @@ RCT_EXPORT_MODULE();
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 
-- (NSArray *)customDirectEventTypes
+- (NSArray *)customBubblingEventTypes
 {
   return @[
     @"onVideoLoadStart",
