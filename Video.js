@@ -58,10 +58,6 @@ export default class Video extends Component {
   };
 
   _onProgress = (event) => {
-    if (this.state.showPoster) {
-      this.setState({showPoster: false});
-    }
-
     if (this.props.onProgress) {
       this.props.onProgress(event.nativeEvent);
     }
@@ -126,6 +122,10 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
+    if (this.state.showPoster && (event.nativeEvent.playbackRate === 1)) {
+      this.setState({showPoster: false});
+    }
+
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
