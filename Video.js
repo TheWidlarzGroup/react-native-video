@@ -122,7 +122,7 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && (event.nativeEvent.playbackRate === 1)) {
+    if (this.state.showPoster && (event.nativeEvent.playbackRate !== 0)) {
       this.setState({showPoster: false});
     }
 
