@@ -185,15 +185,14 @@ static NSString *const playbackRate = @"rate";
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
    if( currentTimeSecs >= 0) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
-                                            body:@{
-                                                     @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                                                     @"playableDuration": [self calculatePlayableDuration],
-                                                     @"atValue": [NSNumber numberWithLongLong:currentTime.value],
-                                                     @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                                                     @"target": self.reactTag,
-                                                     @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
-                                                 }];
+      self.onVideoProgress(@{
+                             @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                             @"playableDuration": [self calculatePlayableDuration],
+                             @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                             @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                             @"target": self.reactTag,
+                             @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
+                            });
    }
 }
 
@@ -275,12 +274,16 @@ static NSString *const playbackRate = @"rate";
                                                         queue:NULL
                                                    usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
                    ];
-  [_eventDispatcher sendInputEventWithName:@"onVideoLoadStart"
-                                      body:@{@"src": @{
-                                                 @"uri": [source objectForKey:@"uri"],
-                                                 @"type": [source objectForKey:@"type"],
-                                                 @"isNetwork":[NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                                             @"target": self.reactTag}];
+
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    //Perform on next run loop, otherwise onVideoLoadStart is nil
+    self.onVideoLoadStart(@{@"src": @{
+                                @"uri": [source objectForKey:@"uri"],
+                                @"type": [source objectForKey:@"type"],
+                                @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                            @"target": self.reactTag
+                            });
+  });
 }
 
 - (AVPlayerItem*)playerItemForSource:(NSDictionary *)source
@@ -339,30 +342,27 @@ static NSString *const playbackRate = @"rate";
             orientation = @"portrait";
         }
 
-        [_eventDispatcher sendInputEventWithName:@"onVideoLoad"
-                                            body:@{@"duration": [NSNumber numberWithFloat:duration],
-                                                   @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
-                                                   @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
-                                                   @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
-                                                   @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
-                                                   @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
-                                                   @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
-                                                   @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
-                                                   @"naturalSize": @{
-                                                        @"width": width,
-                                                        @"height": height,
-                                                        @"orientation": orientation
-                                                        },
-                                                   @"target": self.reactTag}];
+        self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
+                           @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
+                           @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
+                           @"canPlayFastForward": [NSNumber numberWithBool:_playerItem.canPlayFastForward],
+                           @"canPlaySlowForward": [NSNumber numberWithBool:_playerItem.canPlaySlowForward],
+                           @"canPlaySlowReverse": [NSNumber numberWithBool:_playerItem.canPlaySlowReverse],
+                           @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
+                           @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
+                           @"naturalSize": @{
+                              @"width": width,
+                              @"height": height,
+                              @"orientation": orientation
+                           },
+                           @"target": self.reactTag});
 
         [self attachListeners];
         [self applyModifiers];
       } else if(_playerItem.status == AVPlayerItemStatusFailed) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoError"
-                                            body:@{@"error": @{
-                                                       @"code": [NSNumber numberWithInteger: _playerItem.error.code],
-                                                       @"domain": _playerItem.error.domain},
-                                                   @"target": self.reactTag}];
+        self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: _playerItem.error.code],
+                                        @"domain": _playerItem.error.domain},
+                                        @"target": self.reactTag});
       }
     } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
       _playerBufferEmpty = YES;
@@ -376,19 +376,16 @@ static NSString *const playbackRate = @"rate";
    } else if (object == _playerLayer) {
       if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
         if([change objectForKey:NSKeyValueChangeNewKey]) {
-          [_eventDispatcher sendInputEventWithName:@"onReadyForDisplay"
-                                              body:@{@"target": self.reactTag}];
+          self.onReadyForDisplay(@{@"target": self.reactTag});
         }
     }
   } else if (object == _player) {
       if([keyPath isEqualToString:playbackRate]) {
-          [_eventDispatcher sendInputEventWithName:@"onPlaybackRateChange"
-                                              body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
-                                                     @"target": self.reactTag}];
+          self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
+                                      @"target": self.reactTag});
           if(_playbackStalled && _player.rate > 0) {
-              [_eventDispatcher sendInputEventWithName:@"onPlaybackResume"
-                                                  body:@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
-                                                         @"target": self.reactTag}];
+              self.onPlaybackResume(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
+                                      @"target": self.reactTag});
               _playbackStalled = NO;
           }
       }
@@ -412,13 +409,13 @@ static NSString *const playbackRate = @"rate";
 
 - (void)playbackStalled:(NSNotification *)notification
 {
-  [_eventDispatcher sendInputEventWithName:@"onPlaybackStalled" body:@{@"target": self.reactTag}];
+  self.onPlaybackStalled(@{@"target": self.reactTag});
   _playbackStalled = YES;
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
-  [_eventDispatcher sendInputEventWithName:@"onVideoEnd" body:@{@"target": self.reactTag}];
+  self.onVideoEnd(@{@"target": self.reactTag});
 
   if (_repeat) {
     AVPlayerItem *item = [notification object];
@@ -490,10 +487,9 @@ static NSString *const playbackRate = @"rate";
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        [_eventDispatcher sendInputEventWithName:@"onVideoSeek"
-                                            body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                                                   @"seekTime": [NSNumber numberWithFloat:seekTime],
-                                                   @"target": self.reactTag}];
+        self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                           @"seekTime": [NSNumber numberWithFloat:seekTime],
+                           @"target": self.reactTag});
       }];
 
       _pendingSeek = false;
@@ -575,11 +571,11 @@ static NSString *const playbackRate = @"rate";
         if( viewController )
         {
             _presentingViewController = viewController;
-            [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillPresent" body:@{@"target": self.reactTag}];
+            self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
             [viewController presentViewController:_playerViewController animated:true completion:^{
                 _playerViewController.showsPlaybackControls = YES;
                 _fullscreenPlayerPresented = fullscreen;
-                [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidPresent" body:@{@"target": self.reactTag}];
+                self.onVideoFullscreenPlayerDidPresent(@{@"target": self.reactTag});
             }];
         }
     }
@@ -659,7 +655,7 @@ static NSString *const playbackRate = @"rate";
 {
     if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
     {
-        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerWillDismiss" body:@{@"target": self.reactTag}];
+        self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
     }
 }
 
@@ -670,7 +666,7 @@ static NSString *const playbackRate = @"rate";
         _fullscreenPlayerPresented = false;
         _presentingViewController = nil;
         [self applyModifiers];
-        [_eventDispatcher sendInputEventWithName:@"onVideoFullscreenPlayerDidDismiss" body:@{@"target": self.reactTag}];
+        self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
     }
 }
 

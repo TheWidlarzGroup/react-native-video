@@ -220,6 +220,16 @@ Video.propTypes = {
   src: PropTypes.object,
   seek: PropTypes.number,
   fullscreen: PropTypes.bool,
+  onVideoLoadStart: PropTypes.func,
+  onVideoLoad: PropTypes.func,
+  onVideoError: PropTypes.func,
+  onVideoProgress: PropTypes.func,
+  onVideoSeek: PropTypes.func,
+  onVideoEnd: PropTypes.func,
+  onVideoFullscreenPlayerWillPresent: PropTypes.func,
+  onVideoFullscreenPlayerDidPresent: PropTypes.func,
+  onVideoFullscreenPlayerWillDismiss: PropTypes.func,
+  onVideoFullscreenPlayerDidDismiss: PropTypes.func,
 
   /* Wrapper component */
   source: PropTypes.oneOfType([
