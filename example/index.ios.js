@@ -6,6 +6,7 @@ import React, {
 import {
   AlertIOS,
   AppRegistry,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -29,7 +30,8 @@ class VideoPlayer extends Component {
     currentTime: 0.0,
     controls: false,
     paused: true,
-    skin: 'custom'
+    skin: 'custom',
+    ignoreSilentSwitch: false
   };
 
   onLoad(data) {
@@ -99,6 +101,18 @@ class VideoPlayer extends Component {
     )
   }
 
+  renderIgnoreSilentSwitchControl() {
+    const isSelected = this.state.ignoreSilentSwitch;
+
+    return (
+      <TouchableOpacity onPress={() => { this.setState({ignoreSilentSwitch: !isSelected}) }}>
+        <Text style={[styles.controlOption, {fontWeight: !isSelected ? "bold" : "normal"}]}>
+          ambient
+        </Text>
+      </TouchableOpacity>
+    )
+  }
+
   renderCustomSkin() {
     const flexCompleted = this.getCurrentTimePercentage() * 100;
     const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
@@ -113,6 +127,7 @@ class VideoPlayer extends Component {
             paused={this.state.paused}
             volume={this.state.volume}
             muted={this.state.muted}
+            ignoreSilentSwitch={this.state.ignoreSilentSwitch}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
             onProgress={this.onProgress}
@@ -148,6 +163,14 @@ class VideoPlayer extends Component {
               {this.renderResizeModeControl('stretch')}
             </View>
           </View>
+          <View style={styles.generalControls}>
+            {
+              (Platform.OS === 'ios') ?
+                <View style={styles.ignoreSilentSwitchControl}>
+                  {this.renderIgnoreSilentSwitchControl()}
+                </View> : null
+            }
+          </View>
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
@@ -172,6 +195,7 @@ class VideoPlayer extends Component {
             paused={this.state.paused}
             volume={this.state.volume}
             muted={this.state.muted}
+            ignoreSilentSwitch={this.state.ignoreSilentSwitch}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
             onProgress={this.onProgress}
@@ -206,6 +230,14 @@ class VideoPlayer extends Component {
               {this.renderResizeModeControl('contain')}
               {this.renderResizeModeControl('stretch')}
             </View>
+          </View>
+          <View style={styles.generalControls}>
+            {
+              (Platform.OS === 'ios') ?
+                <View style={styles.ignoreSilentSwitchControl}>
+                  {this.renderIgnoreSilentSwitchControl()}
+                </View> : null
+            }
           </View>
         </View>
 
@@ -276,6 +308,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   resizeModeControl: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  ignoreSilentSwitchControl: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
