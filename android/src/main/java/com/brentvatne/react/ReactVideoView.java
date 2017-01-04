@@ -1,6 +1,7 @@
 package com.brentvatne.react;
 
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -19,6 +20,8 @@ import com.yqritc.scalablevideoview.ScalableVideoView;
 
 import com.android.vending.expansion.zipfile.APKExpansionSupport;
 import com.android.vending.expansion.zipfile.ZipResourceFile;
+import com.yqritc.scalablevideoview.ScaleManager;
+import com.yqritc.scalablevideoview.Size;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -138,6 +141,30 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
 
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (!changed || !mMediaPlayerValid) {
+            return;
+        }
+
+        int videoWidth = getVideoWidth();
+        int videoHeight = getVideoHeight();
+
+        if (videoWidth == 0 || videoHeight == 0) {
+            return;
+        }
+
+        Size viewSize = new Size(getWidth(), getHeight());
+        Size videoSize = new Size(videoWidth, videoHeight);
+        ScaleManager scaleManager = new ScaleManager(viewSize, videoSize);
+        Matrix matrix = scaleManager.getScaleMatrix(mScalableType);
+        if (matrix != null) {
+            setTransform(matrix);
+        }
     }
 
     private void initializeMediaPlayerIfNeeded() {
