@@ -248,55 +248,92 @@ static NSString *const playbackRate = @"rate";
 {
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  _playerItem = [self playerItemForSource:source];
-  [self addPlayerItemObservers];
-
-  [_player pause];
-  [self removePlayerLayer];
-  [_playerViewController.view removeFromSuperview];
-  _playerViewController = nil;
-
-  if (_playbackRateObserverRegistered) {
-    [_player removeObserver:self forKeyPath:playbackRate context:nil];
-    _playbackRateObserverRegistered = NO;
+  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  if(isAsset) {
+    NSURL *url = [RCTConvert NSURL:source[@"uri"]];
+    if([url.scheme caseInsensitiveCompare:@"photos"] == NSOrderedSame) {
+        return [self loadPhotosVideoPlayerItem:url andSource:source andCompleteBlock:^(AVPlayerItem * _Nullable playerItem) {
+            _playerItem = playerItem;
+            [self setupVideoPlayback:source];
+        }];
+    }
   }
+  _playerItem = [self playerItemForSource:source];
+  [self setupVideoPlayback:source];
+}
 
-  _player = [AVPlayer playerWithPlayerItem:_playerItem];
-  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+-(void) loadPhotosVideoPlayerItem:(NSURL *)localIdentifierUrl andSource:(NSDictionary *)source andCompleteBlock:(void(^)(AVPlayerItem * _Nullable playerItem))completeBlock  {
+    NSString *localIdentifier = [localIdentifierUrl.absoluteString substringFromIndex:@"photos://".length];
+    PHAsset *asset = [self getAssetFromOfLocalIdentifier:localIdentifier];
+    if(asset == nil) {
+        return [NSException raise:@"Invalid localIdentifier" format:@"Could not locate photos-asset with localIdentifier %@", localIdentifier];
 
-  [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-  _playbackRateObserverRegistered = YES;
+    }
+    PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
+    [videoRequestOptions setNetworkAccessAllowed:YES];
+    [[PHImageManager defaultManager] requestPlayerItemForVideo:asset options:videoRequestOptions resultHandler:^(AVPlayerItem * _Nullable playerItem, NSDictionary * _Nullable info) {
+        completeBlock(playerItem);
+    }];
+}
 
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
+-(PHAsset *) getAssetFromOfLocalIdentifier:(NSString *)localIdentifier {
+    PHFetchOptions *fetchOptions = [PHFetchOptions new];
+    fetchOptions.includeHiddenAssets = YES;
+    fetchOptions.includeAllBurstAssets = YES;
+    return [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:fetchOptions] firstObject];
+}
 
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    //Perform on next run loop, otherwise onVideoLoadStart is nil
-    self.onVideoLoadStart(@{@"src": @{
-                                @"uri": [source objectForKey:@"uri"],
-                                @"type": [source objectForKey:@"type"],
-                                @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                            @"target": self.reactTag
-                            });
-  });
+-(void) setupVideoPlayback:(NSDictionary *)source {
+    
+    [self addPlayerItemObservers];
+    [_player pause];
+    [self removePlayerLayer];
+    [_playerViewController.view removeFromSuperview];
+    _playerViewController = nil;
+    
+    if (_playbackRateObserverRegistered) {
+        [_player removeObserver:self forKeyPath:playbackRate context:nil];
+        _playbackRateObserverRegistered = NO;
+    }
+    
+    _player = [AVPlayer playerWithPlayerItem:_playerItem];
+    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    
+    [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+    _playbackRateObserverRegistered = YES;
+    
+    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+    __weak RCTVideo *weakSelf = self;
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                          queue:NULL
+                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                     ];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        //Perform on next run loop, otherwise onVideoLoadStart is nil
+        self.onVideoLoadStart(@{@"src": @{
+                                        @"uri": [source objectForKey:@"uri"],
+                                        @"type": [source objectForKey:@"type"],
+                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                @"target": self.reactTag
+                                });
+    });
+
 }
 
 - (AVPlayerItem*)playerItemForSource:(NSDictionary *)source
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
 
   NSURL *url = (isNetwork || isAsset) ?
     [NSURL URLWithString:uri] :
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
-
+  
   if (isNetwork) {
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];

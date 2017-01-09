@@ -6,7 +6,7 @@
 #import "RCTVideoPlayerViewControllerDelegate.h"
 
 @class RCTEventDispatcher;
-
+@import Photos;
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
