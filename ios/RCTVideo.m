@@ -246,20 +246,30 @@ static NSString *const playbackRate = @"rate";
 
 - (void)setSrc:(NSDictionary *)source
 {
-  [self removePlayerTimeObserver];
-  [self removePlayerItemObservers];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
-  if(isAsset) {
-    NSURL *url = [RCTConvert NSURL:source[@"uri"]];
-    if([url.scheme caseInsensitiveCompare:@"photos"] == NSOrderedSame) {
-        return [self loadPhotosVideoPlayerItem:url andSource:source andCompleteBlock:^(AVPlayerItem * _Nullable playerItem) {
-            _playerItem = playerItem;
-            [self setupVideoPlayback:source];
-        }];
-    }
+  self.loadedPhotosUri = [self startLoadingPhotosAsset:source];
+  if(!self.loadedPhotosUri) {
+    [self setupVideoPlayback:source andPlayerItem:[self playerItemForSource:source]];
   }
-  _playerItem = [self playerItemForSource:source];
-  [self setupVideoPlayback:source];
+
+}
+
+-(NSString *)startLoadingPhotosAsset:(NSDictionary *)source {
+    bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+    if(isAsset) {
+        NSURL *url = [RCTConvert NSURL:source[@"uri"]];
+        if([url.scheme caseInsensitiveCompare:@"photos"] == NSOrderedSame) {
+            NSString *loadedPhotosUriKey = [url absoluteString];
+            [self loadPhotosVideoPlayerItem:url andSource:source andCompleteBlock:^(AVPlayerItem * _Nullable playerItem) {
+                if(self.loadedPhotosUri != nil && [loadedPhotosUriKey isEqualToString:self.loadedPhotosUri]) {
+                    [self setupVideoPlayback:source andPlayerItem:playerItem];
+                }
+
+            }];
+            return loadedPhotosUriKey;
+        }
+    }
+    return nil;
 }
 
 -(void) loadPhotosVideoPlayerItem:(NSURL *)localIdentifierUrl andSource:(NSDictionary *)source andCompleteBlock:(void(^)(AVPlayerItem * _Nullable playerItem))completeBlock  {
@@ -283,8 +293,11 @@ static NSString *const playbackRate = @"rate";
     return [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:fetchOptions] firstObject];
 }
 
--(void) setupVideoPlayback:(NSDictionary *)source {
+-(void) setupVideoPlayback:(NSDictionary *)source andPlayerItem:(AVPlayerItem*)playerItem {
     
+    [self removePlayerTimeObserver];
+    [self removePlayerItemObservers];
+    _playerItem = playerItem;
     [self addPlayerItemObservers];
     [_player pause];
     [self removePlayerLayer];
@@ -418,8 +431,10 @@ static NSString *const playbackRate = @"rate";
     }
   } else if (object == _player) {
       if([keyPath isEqualToString:playbackRate]) {
-          self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
-                                      @"target": self.reactTag});
+          if(self.onPlaybackRateChange) {
+              self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
+                                          @"target": self.reactTag});
+          }
           if(_playbackStalled && _player.rate > 0) {
               self.onPlaybackResume(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                       @"target": self.reactTag});
