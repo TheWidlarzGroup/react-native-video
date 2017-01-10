@@ -279,11 +279,47 @@ static NSString *const playbackRate = @"rate";
         return [NSException raise:@"Invalid localIdentifier" format:@"Could not locate photos-asset with localIdentifier %@", localIdentifier];
 
     }
-    PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
-    [videoRequestOptions setNetworkAccessAllowed:YES];
+    PHVideoRequestOptions *videoRequestOptions = [self getVideoRequestOptionsFromUrl:localIdentifierUrl];
     [[PHImageManager defaultManager] requestPlayerItemForVideo:asset options:videoRequestOptions resultHandler:^(AVPlayerItem * _Nullable playerItem, NSDictionary * _Nullable info) {
         completeBlock(playerItem);
     }];
+}
+
+-(PHVideoRequestOptions *)getVideoRequestOptionsFromUrl:(NSURL *)url {
+    PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
+    videoRequestOptions.networkAccessAllowed = YES;
+    
+    NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url
+                                                resolvingAgainstBaseURL:NO];
+    NSArray *queryItems = urlComponents.queryItems;
+    NSString *deliveryModeQuery = [self valueForKey:@"deliveryMode"
+                                     fromQueryItems:queryItems];
+    NSString *versionQuery = [self valueForKey:@"version"
+                                     fromQueryItems:queryItems];
+    
+    PHVideoRequestOptionsVersion version = PHVideoRequestOptionsVersionCurrent;
+    
+    if(versionQuery) {
+        if([versionQuery isEqualToString:@"original"]) {
+            version = PHVideoRequestOptionsVersionOriginal;
+        }
+    }
+    
+    PHVideoRequestOptionsDeliveryMode deliveryMode = PHVideoRequestOptionsDeliveryModeAutomatic;
+    if(deliveryModeQuery != nil) {
+        if([deliveryModeQuery isEqualToString:@"mediumQuality"]) {
+            deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
+        }
+        else if([deliveryModeQuery isEqualToString:@"highQuality"]) {
+            deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
+        }
+        else if([deliveryModeQuery isEqualToString:@"fast"]) {
+            deliveryMode = PHVideoRequestOptionsDeliveryModeFastFormat;
+        }
+    }
+    videoRequestOptions.deliveryMode = deliveryMode;
+    videoRequestOptions.version = version;
+    return videoRequestOptions;
 }
 
 -(PHAsset *) getAssetFromOfLocalIdentifier:(NSString *)localIdentifier {
@@ -291,6 +327,16 @@ static NSString *const playbackRate = @"rate";
     fetchOptions.includeHiddenAssets = YES;
     fetchOptions.includeAllBurstAssets = YES;
     return [[PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:fetchOptions] firstObject];
+}
+
+- (NSString *)valueForKey:(NSString *)key
+           fromQueryItems:(NSArray *)queryItems
+{
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", key];
+    NSURLQueryItem *queryItem = [[queryItems
+                                  filteredArrayUsingPredicate:predicate]
+                                 firstObject];
+    return queryItem.value;
 }
 
 -(void) setupVideoPlayback:(NSDictionary *)source andPlayerItem:(AVPlayerItem*)playerItem {

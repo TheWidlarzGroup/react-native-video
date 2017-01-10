@@ -13,7 +13,6 @@ export default class Video extends Component {
 
   constructor(props) {
     super(props);
-
     this.state = {
       showPoster: true,
     };
@@ -50,6 +49,12 @@ export default class Video extends Component {
       this.props.onLoad(event.nativeEvent);
     }
   };
+
+  _onLoadProgress = (event) => {
+    if (this.props.onLoadProgress) {
+      this.props.onLoadProgress(event.nativeEvent);
+    }
+  }
 
   _onError = (event) => {
     if (this.props.onError) {
@@ -166,6 +171,7 @@ export default class Video extends Component {
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
       },
+      onVideoLoadProgress : this._onLoadProgress,
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
@@ -253,6 +259,7 @@ Video.propTypes = {
   progressUpdateInterval: PropTypes.number,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
+  onLoadProgress : PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
