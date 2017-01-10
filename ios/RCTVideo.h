@@ -9,6 +9,7 @@
 @import Photos;
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
 
+@property (nonatomic, copy) RCTBubblingEventBlock onLoadProgress;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoError;
@@ -23,7 +24,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackStalled;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
-@property (nonatomic, strong) NSString *loadedPhotosUri;
+@property (nonatomic, strong) NSString *loadedPhotosLocalIdentifier;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
