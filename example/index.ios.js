@@ -114,7 +114,7 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
-            source={{uri: "broadchurch"}}
+            source={require('./broadchurch.mp4')}
             style={styles.fullScreen}
             rate={this.state.rate}
             paused={this.state.paused}
@@ -174,7 +174,7 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <View style={styles.fullScreen}>
           <Video
-            source={{uri: "broadchurch"}}
+            source={require('./broadchurch.mp4')}
             style={videoStyle}
             rate={this.state.rate}
             paused={this.state.paused}
