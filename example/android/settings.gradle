@@ -1,5 +1,12 @@
 rootProject.name = 'VideoPlayer'
 
-include ':app'
-include ':react-native-video'
+include ':app',
+        ':react-native-video',
+        ':react-native-video-exoplayer'
+
+// Quick Local Development
+//project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../android')
+//project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../android-exoplayer')
+
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')

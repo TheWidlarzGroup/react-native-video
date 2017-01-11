@@ -2,7 +2,20 @@
 ; We fork some components by platform
 .*/*[.]android.js
 
-; Ignore "BUCK" generated dirs
+# We fork some components by platform.
+.*/*[.]android.js
+
+# Ignore templates with `@flow` in header
+.*/local-cli/generator.*
+
+# Ignore malformed json
+.*/node_modules/y18n/test/.*\.json
+
+# Ignore the website subdir
+<PROJECT_ROOT>/website/.*
+
+# Ignore BUCK generated dirs
+
 <PROJECT_ROOT>/\.buckd/
 
 ; Ignore unexpected extra "@providesModule"
@@ -41,4 +54,5 @@ suppress_comment=\\(.\\|\n\\)*\\$FlowFixedInNextDeploy
 unsafe.enable_getters_and_setters=true
 
 [version]
+
 ^0.36.0
