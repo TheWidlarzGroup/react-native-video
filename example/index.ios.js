@@ -35,6 +35,7 @@ class VideoPlayer extends Component {
   };
 
   onLoad(data) {
+    console.log('On load fired!');
     this.setState({duration: data.duration});
   }
 
