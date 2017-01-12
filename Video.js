@@ -180,7 +180,7 @@ export default class Video extends Component {
         uri,
         isNetwork,
         isAsset,
-        type: source.type,
+        type: source.type || '',
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
       },
