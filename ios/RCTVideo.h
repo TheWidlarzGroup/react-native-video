@@ -1,4 +1,11 @@
+// import RCTConvert
+#if __has_include(<React/RCTView.h>)
 #import <React/RCTView.h>
+#elif __has_include("RCTView.h")
+#import "RCTView.h"
+#else
+#import "React/RCTView.h"   // Required when used as a Pod in a Swift project
+#endif
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
 #import "UIView+FindUIViewController.h"
