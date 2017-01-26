@@ -1,8 +1,36 @@
+// import RCTConvert
+#if __has_include(<React/RCTConvert.h>)
 #import <React/RCTConvert.h>
-#import "RCTVideo.h"
+#elif __has_include("RCTConvert.h")
+#import "RCTConvert.h"
+#else
+#import "React/RCTConvert.h"   // Required when used as a Pod in a Swift project
+#endif
+// import RCTBridgeModule
+#if __has_include(<React/RCTBridgeModule.h>)
 #import <React/RCTBridgeModule.h>
+#elif __has_include("RCTBridgeModule.h")
+#import "RCTBridgeModule.h"
+#else
+#import "React/RCTBridgeModule.h"   // Required when used as a Pod in a Swift project
+#endif
+// import RCTEventDispatcher
+#if __has_include(<React/RCTEventDispatcher.h>)
 #import <React/RCTEventDispatcher.h>
+#elif __has_include("RCTEventDispatcher.h")
+#import "RCTEventDispatcher.h"
+#else
+#import "React/RCTEventDispatcher.h"   // Required when used as a Pod in a Swift project
+#endif
+// import UIView+React
+#if __has_include(<React/UIView+React.h>)
 #import <React/UIView+React.h>
+#elif __has_include("UIView+React.h")
+#import "UIView+React.h"
+#else
+#import "React/UIView+React.h"   // Required when used as a Pod in a Swift project
+#endif
+#import "RCTVideo.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
