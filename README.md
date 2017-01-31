@@ -3,7 +3,7 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.19.0
+Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
 ### Add it to your project
 
