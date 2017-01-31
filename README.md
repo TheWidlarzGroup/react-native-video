@@ -236,10 +236,10 @@ Toggles a fullscreen player. Access using a ref to the component.
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
-   git clone git@github.com:brentvatne/react-native-video.git
-   cd react-native-video/Examples/VideoPlayer
+   git clone git@github.com:react-native-community/react-native-video.git
+   cd react-native-video/example
    npm install
-   open VideoPlayer.xcodeproj
+   open ios/VideoPlayer.xcodeproj
 
    ```
 
