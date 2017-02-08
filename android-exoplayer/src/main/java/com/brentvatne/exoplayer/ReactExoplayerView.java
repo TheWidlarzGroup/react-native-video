@@ -26,6 +26,8 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -49,11 +51,14 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 
 @SuppressLint("ViewConstructor")
+
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
         ExoPlayer.EventListener,
         BecomingNoisyListener,
-        AudioManager.OnAudioFocusChangeListener {
+        AudioManager.OnAudioFocusChangeListener,
+        MetadataRenderer.Output
+    {
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -192,6 +197,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, new DefaultLoadControl());
             player.addListener(this);
+            player.setMetadataOutput(this);
             exoPlayerView.setPlayer(player);
             if (isTimelineStatic) {
                 if (playerPosition == C.TIME_UNSET) {
@@ -247,6 +253,7 @@ class ReactExoplayerView extends FrameLayout implements
                 playerPosition = player.getCurrentPosition();
             }
             player.release();
+            player.setMetadataOutput(null);
             player = null;
             trackSelector = null;
         }
@@ -478,6 +485,11 @@ class ReactExoplayerView extends FrameLayout implements
             eventEmitter.error(errorString, e);
         }
         playerNeedsSource = true;
+    }
+
+    @Override
+    public void onMetadata(Metadata metadata) {
+        eventEmitter.timedMetadata(metadata);
     }
 
     // ReactExoplayerViewManager public api
