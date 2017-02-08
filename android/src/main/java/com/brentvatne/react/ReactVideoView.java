@@ -91,6 +91,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
@@ -127,7 +128,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                     // Check for update after an interval
                     // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
-                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, mProgressUpdateInterval);
                 }
             }
         };
@@ -362,6 +363,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setMutedModifier(mMuted);
     }
 
+    public void setProgressUpdateInterval(final float progressUpdateInterval) {
+        mProgressUpdateInterval = progressUpdateInterval;
+    }
+
     public void setRateModifier(final float rate) {
         mRate = rate;
 
@@ -376,6 +381,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
+        setProgressUpdateInterval(mProgressUpdateInterval);
 //        setRateModifier(mRate);
     }
 
