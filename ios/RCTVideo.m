@@ -325,16 +325,20 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([keyPath isEqualToString: timedMetadata])
     {
 
+        
         NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
         if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
             
             NSMutableArray *array = [NSMutableArray new];
             for (AVMetadataItem *item in items) {
                 
-                NSString *jsonString = item.value;
+                NSString *value = item.value;
+                NSString *identifier = item.identifier;
                 
-                if (![jsonString isEqual: [NSNull null]]) {
-                    [array addObject:jsonString];
+                if (![value isEqual: [NSNull null]]) {
+                    NSDictionary *dictionary = [[NSDictionary alloc] initWithObjects:@[value, identifier] forKeys:@[@"value", @"identifier"]];
+                    
+                    [array addObject:dictionary];
                 }
             }
             
