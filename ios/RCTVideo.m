@@ -326,6 +326,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     {
 
         self.onTimedMetadata(@{
+                               @"target": self.reactTag,
                                @"metadata": change
                                });
     }
