@@ -16,6 +16,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoProgress;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoSeek;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoEnd;
+@property (nonatomic, copy) RCTBubblingEventBlock onTimedMetadata;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillDismiss;
