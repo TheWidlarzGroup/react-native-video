@@ -26,6 +26,7 @@ import com.yqritc.scalablevideoview.Size;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Math;
 
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
@@ -127,8 +128,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
-                    // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
-                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, mProgressUpdateInterval);
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, Math.round(mProgressUpdateInterval));
                 }
             }
         };
