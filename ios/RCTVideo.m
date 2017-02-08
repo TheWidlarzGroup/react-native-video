@@ -325,10 +325,24 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([keyPath isEqualToString: timedMetadata])
     {
 
-        self.onTimedMetadata(@{
-                               @"target": self.reactTag,
-                               @"metadata": change
-                               });
+        NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
+        if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
+            
+            NSMutableArray *array = [NSMutableArray new];
+            for (AVMetadataItem *item in items) {
+                
+                NSString *jsonString = item.value;
+                
+                if (![jsonString isEqual: [NSNull null]]) {
+                    [array addObject:jsonString];
+                }
+            }
+            
+            self.onTimedMetadata(@{
+                                   @"target": self.reactTag,
+                                   @"metadata": array
+                                   });
+        }
     }
 
     if ([keyPath isEqualToString:statusKeyPath]) {
