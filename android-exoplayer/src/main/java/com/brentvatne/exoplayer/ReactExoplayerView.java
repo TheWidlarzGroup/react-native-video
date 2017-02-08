@@ -480,6 +480,11 @@ class ReactExoplayerView extends FrameLayout implements
         playerNeedsSource = true;
     }
 
+    @Override
+    public void onMetadata(List<Id3Frame> metadata) {
+        Log.d("onMetadata", "onMetadata");
+    }
+
     // ReactExoplayerViewManager public api
 
     public void setSrc(final Uri uri, final String extension) {
