@@ -325,9 +325,9 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([keyPath isEqualToString: timedMetadata])
     {
 
-        NSLog("received timedMetadata");
-        
-        //TODO: return the value read
+        self.onTimedMetadata(@{
+                               @"metadata": change
+                               });
     }
 
     if ([keyPath isEqualToString:statusKeyPath]) {
