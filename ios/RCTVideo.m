@@ -9,6 +9,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
+static NSString *const timedMetadata = @"timedMetadata";
 
 @implementation RCTVideo
 {
@@ -226,6 +227,7 @@ static NSString *const playbackRate = @"rate";
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
+  [_playerItem addObserver:self forKeyPath:timedMetadata options:NSKeyValueObservingOptionNew context:nil];
   _playerItemObserversSet = YES;
 }
 
@@ -238,6 +240,7 @@ static NSString *const playbackRate = @"rate";
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
+    [_playerItem removeObserver:self forKeyPath:timedMetadata];
     _playerItemObserversSet = NO;
   }
 }
@@ -317,6 +320,15 @@ static NSString *const playbackRate = @"rate";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
    if (object == _playerItem) {
+
+    // When timeMetadata is read the event onTimedMetadata is triggered
+    if ([keyPath isEqualToString: timedMetadata])
+    {
+
+        NSLog("received timedMetadata");
+        
+        //TODO: return the value read
+    }
 
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
