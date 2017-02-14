@@ -140,7 +140,7 @@ using System.Collections.Generic;
        volume={1.0}                            // 0 is muted, 1 is normal.
        muted={false}                           // Mutes the audio entirely.
        paused={false}                          // Pauses playback entirely.
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.
+       resizeMode="cover"                      // Fill the whole screen at aspect ratio.* 
        repeat={true}                           // Repeat forever.
        playInBackground={false}                // Audio continues to play when app entering background.
        playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
@@ -172,6 +172,7 @@ var styles = StyleSheet.create({
 });
 ```
 
+- * *For iOS you also need to specify muted for this to work*
 
 ## Android Expansion File Usage
 
