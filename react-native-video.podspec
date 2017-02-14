@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
 
-  s.source_files  = "*.{h,m}"
+  s.source_files  = "ios/*.{h,m}"
 
   s.dependency "React"
 end

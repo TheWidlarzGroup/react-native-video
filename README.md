@@ -3,7 +3,7 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.19.0
+Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
 ### Add it to your project
 
@@ -152,6 +152,7 @@ using System.Collections.Generic;
        onProgress={this.setTime}      // Callback every ~250ms with currentTime
        onEnd={this.onEnd}             // Callback when playback finishes
        onError={this.videoError}      // Callback when video cannot be loaded
+       onBuffer={this.onBuffer} // Callback when remote video is buffering
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
@@ -237,10 +238,10 @@ Toggles a fullscreen player. Access using a ref to the component.
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
-   git clone git@github.com:brentvatne/react-native-video.git
-   cd react-native-video/Examples/VideoPlayer
+   git clone git@github.com:react-native-community/react-native-video.git
+   cd react-native-video/example
    npm install
-   open VideoPlayer.xcodeproj
+   open ios/VideoPlayer.xcodeproj
 
    ```
 
@@ -252,7 +253,7 @@ Toggles a fullscreen player. Access using a ref to the component.
 
 - [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
-- [ ] Callback to get buffering progress for remote videos
+- [x] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35

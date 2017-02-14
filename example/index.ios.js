@@ -20,6 +20,7 @@ class VideoPlayer extends Component {
     super(props);
     this.onLoad = this.onLoad.bind(this);
     this.onProgress = this.onProgress.bind(this);
+    this.onBuffer = this.onBuffer.bind(this);
   }
   state = {
     rate: 1,
@@ -32,14 +33,20 @@ class VideoPlayer extends Component {
     paused: true,
     skin: 'custom',
     ignoreSilentSwitch: false
+    isBuffering: false,
   };
 
   onLoad(data) {
+    console.log('On load fired!');
     this.setState({duration: data.duration});
   }
 
   onProgress(data) {
     this.setState({currentTime: data.currentTime});
+  }
+
+  onBuffer({ isBuffering }: { isBuffering: boolean }) {
+    this.setState({ isBuffering });
   }
 
   getCurrentTimePercentage() {
@@ -121,7 +128,7 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
-            source={{uri: "broadchurch"}}
+            source={require('./broadchurch.mp4')}
             style={styles.fullScreen}
             rate={this.state.rate}
             paused={this.state.paused}
@@ -130,6 +137,7 @@ class VideoPlayer extends Component {
             ignoreSilentSwitch={this.state.ignoreSilentSwitch}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
+            onBuffer={this.onBuffer}
             onProgress={this.onProgress}
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
@@ -189,7 +197,7 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <View style={styles.fullScreen}>
           <Video
-            source={{uri: "broadchurch"}}
+            source={require('./broadchurch.mp4')}
             style={videoStyle}
             rate={this.state.rate}
             paused={this.state.paused}
@@ -198,6 +206,7 @@ class VideoPlayer extends Component {
             ignoreSilentSwitch={this.state.ignoreSilentSwitch}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
+            onBuffer={this.onBuffer}
             onProgress={this.onProgress}
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
