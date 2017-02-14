@@ -5,11 +5,18 @@ import android.view.View;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
+import com.google.android.exoplayer2.metadata.id3.Id3Frame;
+import com.google.android.exoplayer2.metadata.id3.TxxxFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
 
 class VideoEventEmitter {
 
@@ -32,6 +39,7 @@ class VideoEventEmitter {
     private static final String EVENT_READY = "onReadyForDisplay";
     private static final String EVENT_BUFFER = "onVideoBuffer";
     private static final String EVENT_IDLE = "onVideoIdle";
+    private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
 
@@ -47,6 +55,7 @@ class VideoEventEmitter {
             EVENT_READY,
             EVENT_BUFFER,
             EVENT_IDLE,
+            EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
     };
@@ -64,6 +73,7 @@ class VideoEventEmitter {
             EVENT_READY,
             EVENT_BUFFER,
             EVENT_IDLE,
+            EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
     })
@@ -91,6 +101,9 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
     private static final String EVENT_PROP_ERROR_EXCEPTION = "";
+
+    private static final String EVENT_PROP_TIMED_METADATA = "metadata";
+
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -166,6 +179,36 @@ class VideoEventEmitter {
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);
+    }
+
+    void timedMetadata(Metadata metadata) {
+        WritableArray metadataArray = Arguments.createArray();
+
+        for (int i = 0; i < metadata.length(); i++) {
+
+
+            Id3Frame frame = (Id3Frame) metadata.get(i);
+
+            String value = "";
+
+            if (frame instanceof TxxxFrame) {
+                TxxxFrame txxxFrame = (TxxxFrame) frame;
+                value = txxxFrame.value;
+            }
+
+            String identifier = frame.id;
+
+            WritableMap map = Arguments.createMap();
+            map.putString("identifier", identifier);
+            map.putString("value", value);
+
+            metadataArray.pushMap(map);
+
+        }
+
+        WritableMap event = Arguments.createMap();
+        event.putArray(EVENT_PROP_TIMED_METADATA, metadataArray);
+        receiveEvent(EVENT_TIMED_METADATA, event);
     }
 
     void audioFocusChanged(boolean hasFocus) {
