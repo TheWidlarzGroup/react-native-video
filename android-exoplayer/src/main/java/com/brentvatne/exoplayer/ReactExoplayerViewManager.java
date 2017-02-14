@@ -84,10 +84,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         } else {
             int identifier = context.getResources().getIdentifier(
+                uriString,
+                "drawable",
+                context.getPackageName()
+            );
+            if (identifier == 0) {
+                identifier = context.getResources().getIdentifier(
                     uriString,
                     "raw",
                     context.getPackageName()
-            );
+                );
+            }
             if (identifier > 0) {
                 Uri srcUri = RawResourceDataSource.buildRawResourceUri(identifier);
                 if (srcUri != null) {
