@@ -171,7 +171,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
-        startPlayback();
+        setPlayWhenReady(!isPaused);
     }
 
     @Override
