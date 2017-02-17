@@ -36,21 +36,21 @@ Or if you have trouble, make the following additions to the given files manually
 
 **android/settings.gradle**
 
-```
+```gradle
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
 **android/app/build.gradle**
 
-```
+```gradle
 dependencies {
    ...
    compile project(':react-native-video')
 }
 ```
 
-**MainActivity.java**
+**MainApplication.java**
 
 On top, where imports are:
 
@@ -58,26 +58,16 @@ On top, where imports are:
 import com.brentvatne.react.ReactVideoPackage;
 ```
 
-Under `.addPackage(new MainReactPackage())`:
+Add the `ReactVideoPackage` class to your list of exported packages.
 
 ```java
-.addPackage(new ReactVideoPackage())
-```
-
-### Note: In react-native >= 0.29.0 you have to edit `MainApplication.java`
-
-**MainApplication.java** (react-native >= 0.29.0)
-
-On top, where imports are:
-
-```java
-import com.brentvatne.react.ReactVideoPackage;
-```
-
-Under `.addPackage(new MainReactPackage())`:
-
-```java
-.addPackage(new ReactVideoPackage())
+@Override
+protected List<ReactPackage> getPackages() {
+    return Arrays.asList(
+            new MainReactPackage(),
+            new ReactVideoPackage()
+    );
+}
 ```
 
 #### Windows
@@ -140,7 +130,7 @@ using System.Collections.Generic;
        volume={1.0}                            // 0 is muted, 1 is normal.
        muted={false}                           // Mutes the audio entirely.
        paused={false}                          // Pauses playback entirely.
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.* 
+       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
        repeat={true}                           // Repeat forever.
        playInBackground={false}                // Audio continues to play when app entering background.
        playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
