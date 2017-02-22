@@ -9,14 +9,11 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
-import com.google.android.exoplayer2.metadata.id3.TxxxFrame;
+import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.Map;
 
 class VideoEventEmitter {
 
@@ -191,8 +188,8 @@ class VideoEventEmitter {
 
             String value = "";
 
-            if (frame instanceof TxxxFrame) {
-                TxxxFrame txxxFrame = (TxxxFrame) frame;
+            if (frame instanceof TextInformationFrame) {
+                TextInformationFrame txxxFrame = (TextInformationFrame) frame;
                 value = txxxFrame.value;
             }
 
