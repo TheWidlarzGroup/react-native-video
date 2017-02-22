@@ -97,7 +97,6 @@ public final class ExoPlayerView extends FrameLayout {
             this.player.setVideoListener(null);
             this.player.removeListener(componentListener);
             this.player.setVideoSurface(null);
-            this.player.setMetadataOutput(componentListener);
         }
         this.player = player;
         shutterView.setVisibility(VISIBLE);
