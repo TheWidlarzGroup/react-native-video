@@ -139,7 +139,7 @@ using System.Collections.Generic;
        rate={1.0}                              // 0 is paused, 1 is normal.
        volume={1.0}                            // 0 is muted, 1 is normal.
        muted={false}                           // Mutes the audio entirely.
-       paused={false}                          // Pauses playback entirely.
+       paused={true}                           // Pauses playback entirely.
        resizeMode="cover"                      // Fill the whole screen at aspect ratio.* 
        repeat={true}                           // Repeat forever.
        playInBackground={false}                // Audio continues to play when app entering background.
