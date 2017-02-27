@@ -297,7 +297,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         // not async to prevent random crashes on Android playback from local resource due to race conditions
         try {
-          prepare(this);
+          prepareAsync(this);
         } catch (Exception e) {
           e.printStackTrace();
         }
