@@ -80,7 +80,6 @@ class ReactExoplayerView extends FrameLayout implements
     private MappingTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
-    private boolean shouldRestorePosition;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -126,6 +125,8 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+
+        initializePlayer();
     }
 
 
@@ -150,12 +151,6 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        initializePlayer();
     }
 
     @Override
@@ -239,7 +234,6 @@ class ReactExoplayerView extends FrameLayout implements
     private void releasePlayer() {
         if (player != null) {
             isPaused = player.getPlayWhenReady();
-            shouldRestorePosition = false;
             updateResumePosition();
             player.release();
             player.setMetadataOutput(null);
