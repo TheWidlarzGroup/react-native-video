@@ -11,6 +11,7 @@
 		31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
 		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
+		FADF7A4B1E780375008C128A /* RCTVideoAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = FADF7A4A1E780375008C128A /* RCTVideoAudio.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +37,8 @@
 		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
 		BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoManager.h; sourceTree = "<group>"; };
 		BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoManager.m; sourceTree = "<group>"; };
+		FADF7A491E780375008C128A /* RCTVideoAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoAudio.h; sourceTree = "<group>"; };
+		FADF7A4A1E780375008C128A /* RCTVideoAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoAudio.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +63,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				FADF7A491E780375008C128A /* RCTVideoAudio.h */,
+				FADF7A4A1E780375008C128A /* RCTVideoAudio.m */,
 				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
 				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
 				31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */,
@@ -133,6 +138,7 @@
 				31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */,
 				BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */,
 				BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */,
+				FADF7A4B1E780375008C128A /* RCTVideoAudio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,8 +1,9 @@
 #import <React/RCTConvert.h>
-#import "RCTVideo.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
+#import "RCTVideo.h"
+#import "RCTVideoAudio.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -81,6 +82,8 @@ static NSString *const timedMetadata = @"timedMetadata";
                                              selector:@selector(applicationWillEnterForeground:)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
+      
+    [[RCTVideoAudio sharedInstance] addComponent];
   }
 
   return self;
@@ -808,6 +811,8 @@ static NSString *const timedMetadata = @"timedMetadata";
 
   _eventDispatcher = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+  [[RCTVideoAudio sharedInstance] removeComponent];
 
   [super removeFromSuperview];
 }
