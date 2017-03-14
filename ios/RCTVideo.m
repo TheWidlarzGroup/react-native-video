@@ -505,11 +505,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   if (paused) {
     [_player pause];
     [_player setRate:0.0];
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
-    [[AVAudioSession sharedInstance] setActive:NO error:nil];
   } else {
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-    [[AVAudioSession sharedInstance] setActive:YES error:nil];
     [_player play];
     [_player setRate:_rate];
   }
