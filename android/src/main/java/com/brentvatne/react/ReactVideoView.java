@@ -193,8 +193,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
         if ( mMediaPlayer != null ) {
             mMediaPlayerValid = false;
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
+            release();
         }
     }
 
