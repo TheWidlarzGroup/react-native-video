@@ -719,6 +719,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     {
         _fullscreenPlayerPresented = false;
         _presentingViewController = nil;
+        _playerViewController = nil;
         [self applyModifiers];
         if(self.onVideoFullscreenPlayerDidDismiss) {
             self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
