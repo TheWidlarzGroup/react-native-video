@@ -194,8 +194,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
         if ( mMediaPlayer != null ) {
             mMediaPlayerValid = false;
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
+            release();
         }
     }
 
@@ -296,9 +295,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
 
-        // not async to prevent random crashes on Android playback from local resource due to race conditions
         try {
-          prepare(this);
+          prepareAsync(this);
         } catch (Exception e) {
           e.printStackTrace();
         }
