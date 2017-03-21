@@ -520,18 +520,37 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final String extension) {
         if (uri != null) {
+            boolean isOriginalSourceNull = srcUri == null;
+            boolean isSourceEqual = uri.equals(srcUri);
+
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(getContext(), BANDWIDTH_METER);
+
+            if (!isOriginalSourceNull && !isSourceEqual) {
+                reloadSource();
+            }
         }
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
         if (uri != null) {
+            boolean isOriginalSourceNull = srcUri == null;
+            boolean isSourceEqual = uri.equals(srcUri);
+
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(getContext());
+
+            if (!isOriginalSourceNull && !isSourceEqual) {
+                reloadSource();
+            }
         }
+    }
+
+    private void reloadSource() {
+        playerNeedsSource = true;
+        initializePlayer();
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
