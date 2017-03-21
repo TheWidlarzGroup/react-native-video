@@ -94,6 +94,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
+    private boolean mActiveStatePauseStatusInitialized = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -324,6 +325,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setPausedModifier(final boolean paused) {
 
         mPaused = paused;
+
+        if ( !mActiveStatePauseStatusInitialized ) {
+            mActiveStatePauseStatus = mPaused;
+            mActiveStatePauseStatusInitialized = true;
+        }
 
         if (!mMediaPlayerValid) {
             return;
