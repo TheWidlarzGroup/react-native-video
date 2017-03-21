@@ -26,6 +26,7 @@ import com.yqritc.scalablevideoview.Size;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Math;
 
 @SuppressLint("ViewConstructor")
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
@@ -92,6 +93,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
@@ -128,8 +130,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
-                    // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
-                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, Math.round(mProgressUpdateInterval));
                 }
             }
         };
@@ -368,6 +369,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setMutedModifier(mMuted);
     }
 
+    public void setProgressUpdateInterval(final float progressUpdateInterval) {
+        mProgressUpdateInterval = progressUpdateInterval;
+    }
+
     public void setRateModifier(final float rate) {
         mRate = rate;
 
@@ -382,6 +387,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
+        setProgressUpdateInterval(mProgressUpdateInterval);
 //        setRateModifier(mRate);
     }
 
