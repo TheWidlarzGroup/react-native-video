@@ -126,7 +126,7 @@ using System.Collections.Generic;
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
 
-<Video source={{uri: "background"}}   // Can be a URL or a local file.
+<Video source={{uri: "background"}}   // Can be a URL or a local file. URL must be on a https scheme on iOS.
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
