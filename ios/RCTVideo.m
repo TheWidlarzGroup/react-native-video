@@ -42,7 +42,7 @@ static NSString *const playbackRate = @"rate";
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
-  BOOL _ignoreSilentSwitch;
+  NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
@@ -66,7 +66,7 @@ static NSString *const playbackRate = @"rate";
     _playerBufferEmpty = YES;
     _playInBackground = false;
     _playWhenInactive = false;
-    _ignoreSilentSwitch = false;
+    _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -347,7 +347,7 @@ static NSString *const playbackRate = @"rate";
           } else
             orientation = @"portrait";
         }
-          
+
       if(self.onVideoLoad) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
@@ -468,7 +468,7 @@ static NSString *const playbackRate = @"rate";
   _playWhenInactive = playWhenInactive;
 }
 
-- (void)setIgnoreSilentSwitch:(BOOL)ignoreSilentSwitch
+- (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
   _ignoreSilentSwitch = ignoreSilentSwitch;
   [self applyModifiers];
@@ -480,6 +480,11 @@ static NSString *const playbackRate = @"rate";
     [_player pause];
     [_player setRate:0.0];
   } else {
+    if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
+      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
+      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
+    }
     [_player play];
     [_player setRate:_rate];
   }
@@ -555,12 +560,6 @@ static NSString *const playbackRate = @"rate";
   } else {
     [_player setVolume:_volume];
     [_player setMuted:NO];
-  }
-
-  if(_ignoreSilentSwitch) {
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-  } else {
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
   }
 
   [self setResizeMode:_resizeMode];

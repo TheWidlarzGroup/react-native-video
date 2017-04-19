@@ -32,7 +32,7 @@ class VideoPlayer extends Component {
     controls: false,
     paused: true,
     skin: 'custom',
-    ignoreSilentSwitch: false
+    ignoreSilentSwitch: null,
     isBuffering: false,
   };
 
@@ -108,13 +108,13 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderIgnoreSilentSwitchControl() {
-    const isSelected = this.state.ignoreSilentSwitch;
+  renderIgnoreSilentSwitchControl(ignoreSilentSwitch) {
+    const isSelected = (this.state.ignoreSilentSwitch == ignoreSilentSwitch);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ignoreSilentSwitch: !isSelected}) }}>
-        <Text style={[styles.controlOption, {fontWeight: !isSelected ? "bold" : "normal"}]}>
-          ambient
+      <TouchableOpacity onPress={() => { this.setState({ignoreSilentSwitch: ignoreSilentSwitch}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+          {ignoreSilentSwitch}
         </Text>
       </TouchableOpacity>
     )
@@ -175,7 +175,8 @@ class VideoPlayer extends Component {
             {
               (Platform.OS === 'ios') ?
                 <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl()}
+                  {this.renderIgnoreSilentSwitchControl('ignore')}
+                  {this.renderIgnoreSilentSwitchControl('obey')}
                 </View> : null
             }
           </View>
@@ -244,7 +245,8 @@ class VideoPlayer extends Component {
             {
               (Platform.OS === 'ios') ?
                 <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl()}
+                  {this.renderIgnoreSilentSwitchControl('ignore')}
+                  {this.renderIgnoreSilentSwitchControl('obey')}
                 </View> : null
             }
           </View>

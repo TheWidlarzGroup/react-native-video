@@ -145,7 +145,7 @@ using System.Collections.Generic;
        repeat={true}                  // Repeat forever.
        playInBackground={false}       // Audio continues to play when app entering background.
        playWhenInactive={false}       // [iOS] Video continues to play when control or notification center are shown.
-       ignoreSilentSwitch={false}     // [iOS] When true, audio will still play with the iOS hard silent switch set to silent
+       ignoreSilentSwitch={"ignore"}     // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
        progressUpdateInterval={250.0} // [iOS] Interval to fire onProgress (default to ~250ms)
        onLoadStart={this.loadStart}   // Callback when video starts to load
        onLoad={this.setDuration}      // Callback when video loads
