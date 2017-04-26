@@ -404,9 +404,14 @@ class ReactExoplayerView extends FrameLayout implements
                 videoLoaded();
                 break;
             case ExoPlayer.STATE_ENDED:
-                text += "ended";
-                eventEmitter.end();
-                onStopPlayback();
+                if(repeat) {
+                    playerNeedsSource =  true;
+                    startPlayback();
+                } else {
+                    text += "ended";
+                    eventEmitter.end();
+                    onStopPlayback();
+                }
                 break;
             default:
                 text += "unknown";
