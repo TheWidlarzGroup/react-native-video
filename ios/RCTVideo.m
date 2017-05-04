@@ -636,6 +636,20 @@ static NSString *const timedMetadata = @"timedMetadata";
         }
         if( viewController )
         {
+          /*
+           *
+           * After entering full screen mode, the _playerLayer would be hide by
+           * _playerViewController, which means not visible to user,
+           * so we set the _playerLayer.player to nil,
+           * because we don't need keeping the _playerLayer rendering video data.
+           *
+           * Meanwhile, fix the bug that the _playerLayer's video would be stopped
+           * (while the audio keeps going on), after user dismiss the _playerViewController
+           *
+           */
+            [_playerLayer setPlayer: nil];
+            _playerViewController.player = _player;
+            
             _presentingViewController = viewController;
             if(self.onVideoFullscreenPlayerWillPresent) {
                 self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
@@ -723,6 +737,15 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
 {
+    /*
+     * User will leave full screen mode, 
+     * and _playerLayer need to resume the video rendering task
+     * so we switch the AVPlayer instance back to _playerLayer
+     *
+     */
+    [_playerLayer setPlayer: _player];
+    playerViewController.player = nil;
+    
     if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
     {
         self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
