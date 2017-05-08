@@ -93,6 +93,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean repeat;
     private boolean disableFocus;
     private float mProgressUpdateInterval = 250.0f;
+    private boolean playInBackground = false;
     // \ End props
 
     // React
@@ -171,11 +172,17 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
+        if (playInBackground) {
+            return;
+        }
         setPlayWhenReady(!isPaused);
     }
 
     @Override
     public void onHostPause() {
+        if (playInBackground) {
+            return;
+        }
         setPlayWhenReady(false);
     }
 
@@ -605,7 +612,7 @@ class ReactExoplayerView extends FrameLayout implements
 
 
     public void setPlayInBackground(boolean playInBackground) {
-        // TODO: implement
+        this.playInBackground = playInBackground;
     }
 
     public void setDisableFocus(boolean disableFocus) {
