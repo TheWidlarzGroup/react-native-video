@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "keymirror": "0.1.1",
-    "react-native-windows": "0.41.0-rc.0"
+    "react-native-windows": "https://github.com/TBouder/react-native-windows"
   },
   "scripts": {
     "test": "node_modules/.bin/eslint *.js"
