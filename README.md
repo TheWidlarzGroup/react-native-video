@@ -170,6 +170,8 @@ var styles = StyleSheet.create({
 
 - * *For iOS you also need to specify muted for this to work*
 
+To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
+
 ## Android Expansion File Usage
 
 ```javascript
