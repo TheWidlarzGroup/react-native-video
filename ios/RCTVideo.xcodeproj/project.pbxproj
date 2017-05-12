@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		274428A51EC53469006D3DD4 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
+		274428A61EC5346D006D3DD4 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
+		274428A71EC53470006D3DD4 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
+		274428A81EC53472006D3DD4 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
 		31CAFB211CADA8CD009BCF6F /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
 		31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
 		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
@@ -27,6 +31,9 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		2744289C1EC5345A006D3DD4 /* libRCTVideo-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRCTVideo-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2744289E1EC5345A006D3DD4 /* RCTVideo_tvOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTVideo_tvOS.h; sourceTree = "<group>"; };
+		2744289F1EC5345A006D3DD4 /* RCTVideo_tvOS.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTVideo_tvOS.m; sourceTree = "<group>"; };
 		31CAFB1F1CADA8CD009BCF6F /* UIView+FindUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+FindUIViewController.h"; sourceTree = "<group>"; };
 		31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+FindUIViewController.m"; sourceTree = "<group>"; };
 		31CAFB2D1CADC77F009BCF6F /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
@@ -57,6 +64,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2744289D1EC5345A006D3DD4 /* RCTVideo-tvOS */ = {
+			isa = PBXGroup;
+			children = (
+				2744289E1EC5345A006D3DD4 /* RCTVideo_tvOS.h */,
+				2744289F1EC5345A006D3DD4 /* RCTVideo_tvOS.m */,
+			);
+			path = "RCTVideo-tvOS";
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
@@ -69,13 +85,30 @@
 				BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */,
 				31CAFB1F1CADA8CD009BCF6F /* UIView+FindUIViewController.h */,
 				31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */,
+				2744289D1EC5345A006D3DD4 /* RCTVideo-tvOS */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				2744289C1EC5345A006D3DD4 /* libRCTVideo-tvOS.a */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2744289B1EC5345A006D3DD4 /* RCTVideo-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 274428A41EC5345A006D3DD4 /* Build configuration list for PBXNativeTarget "RCTVideo-tvOS" */;
+			buildPhases = (
+				274428981EC5345A006D3DD4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "RCTVideo-tvOS";
+			productName = "RCTVideo-tvOS";
+			productReference = 2744289C1EC5345A006D3DD4 /* libRCTVideo-tvOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		58B511DA1A9E6C8500147676 /* RCTVideo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTVideo" */;
@@ -102,6 +135,10 @@
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
+					2744289B1EC5345A006D3DD4 = {
+						CreatedOnToolsVersion = 8.3.2;
+						ProvisioningStyle = Automatic;
+					};
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
 					};
@@ -120,11 +157,23 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTVideo */,
+				2744289B1EC5345A006D3DD4 /* RCTVideo-tvOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		274428981EC5345A006D3DD4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				274428A81EC53472006D3DD4 /* UIView+FindUIViewController.m in Sources */,
+				274428A71EC53470006D3DD4 /* RCTVideoManager.m in Sources */,
+				274428A61EC5346D006D3DD4 /* RCTVideoPlayerViewController.m in Sources */,
+				274428A51EC53469006D3DD4 /* RCTVideo.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -139,6 +188,43 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		274428A21EC5345A006D3DD4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_NO_COMMON_BLOCKS = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TVOS_DEPLOYMENT_TARGET = 9.2;
+			};
+			name = Debug;
+		};
+		274428A31EC5345A006D3DD4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_NO_COMMON_BLOCKS = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TVOS_DEPLOYMENT_TARGET = 9.2;
+			};
+			name = Release;
+		};
 		58B511ED1A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -245,6 +331,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		274428A41EC5345A006D3DD4 /* Build configuration list for PBXNativeTarget "RCTVideo-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				274428A21EC5345A006D3DD4 /* Debug */,
+				274428A31EC5345A006D3DD4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTVideo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
