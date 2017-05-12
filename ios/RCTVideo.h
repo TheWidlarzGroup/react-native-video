@@ -1,4 +1,11 @@
+#if __has_include(<React/RCTView.h>)
 #import <React/RCTView.h>
+#elif __has_include("React/RCTView.h")
+#import "React/RCTView.h"
+#elif __has_include("RCTView.h")
+#import "RCTView.h"
+#endif
+
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
 #import "UIView+FindUIViewController.h"
@@ -16,7 +23,6 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoProgress;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoSeek;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoEnd;
-@property (nonatomic, copy) RCTBubblingEventBlock onTimedMetadata;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillDismiss;
