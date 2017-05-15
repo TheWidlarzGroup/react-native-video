@@ -627,7 +627,7 @@ static NSString *const timedMetadata = @"timedMetadata";
         UIViewController *viewController = [self firstAvailableUIViewController];
         if( !viewController )
         {
-            UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+            UIWindow *keyWindow = [RCTSharedApplication() keyWindow];
             viewController = keyWindow.rootViewController;
             if( viewController.childViewControllers.count > 0 )
             {
