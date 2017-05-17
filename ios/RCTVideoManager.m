@@ -1,6 +1,6 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 #import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideoManager

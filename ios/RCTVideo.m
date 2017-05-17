@@ -1,8 +1,8 @@
-#import "RCTConvert.h"
+#import <React/RCTConvert.h>
 #import "RCTVideo.h"
-#import "RCTBridgeModule.h"
-#import "RCTEventDispatcher.h"
-#import "UIView+React.h"
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventDispatcher.h>
+#import <React/UIView+React.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -117,7 +117,7 @@ static NSString *const playbackRate = @"rate";
     {
         return [playerItem seekableTimeRanges].firstObject.CMTimeRangeValue;
     }
-    
+
     return (kCMTimeRangeZero);
 }
 
