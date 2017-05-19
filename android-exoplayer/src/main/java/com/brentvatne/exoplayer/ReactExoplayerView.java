@@ -572,6 +572,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setRepeatModifier(boolean repeat) {
         this.repeat = repeat;
+        reloadSource();
     }
 
     public void setPausedModifier(boolean paused) {
