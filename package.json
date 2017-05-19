@@ -24,10 +24,13 @@
     "eslint": "1.10.3",
     "babel-eslint": "5.0.0-beta8",
     "eslint-plugin-react": "3.16.1",
-    "eslint-config-airbnb": "4.0.0"
+    "eslint-config-airbnb": "4.0.0",
+    "react-native-windows": "0.41.0-rc.0"
   },
   "dependencies": {
-    "keymirror": "0.1.1",
+    "keymirror": "0.1.1"
+  },
+  "optionalDependencies": {
     "react-native-windows": "0.41.0-rc.0"
   },
   "scripts": {
