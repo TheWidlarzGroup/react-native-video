@@ -141,6 +141,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self removePlayerItemObservers];
+  [self removePlayerLayer];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
 }
 
@@ -327,23 +328,23 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([keyPath isEqualToString: timedMetadata])
     {
 
-        
+
         NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
         if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
-            
+
             NSMutableArray *array = [NSMutableArray new];
             for (AVMetadataItem *item in items) {
-                
+
                 NSString *value = item.value;
                 NSString *identifier = item.identifier;
-                
+
                 if (![value isEqual: [NSNull null]]) {
                     NSDictionary *dictionary = [[NSDictionary alloc] initWithObjects:@[value, identifier] forKeys:@[@"value", @"identifier"]];
-                    
+
                     [array addObject:dictionary];
                 }
             }
-            
+
             self.onTimedMetadata(@{
                                    @"target": self.reactTag,
                                    @"metadata": array
