@@ -37,6 +37,22 @@ Run `react-native link` to link the react-native-video library.
 
 First select your project in Xcode.
 
+<img src="./docs/tvOS-step-1.jpg" width="40%">
+
+After that, select the tvOS target of your application and select « General » tab
+
+<img src="./docs/tvOS-step-2.jpg" width="40%">
+
+Scroll to « Linked Frameworks and Libraries » and tap on the + button
+
+<img src="./docs/tvOS-step-3.jpg" width="40%">
+
+Select RCTVideo-tvOS
+
+<img src="./docs/tvOS-step-4.jpg" width="40%">
+
+That’s all, you can use react-native-video for your tvOS application
+
 #### Android
 
 Run `react-native link` to link the react-native-video library.
