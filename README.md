@@ -29,6 +29,14 @@ If you would like to allow other apps to play music over your video component, a
 ```
 Note: you can also use the `ignoreSilentSwitch` prop, shown below.
 
+#### tvOS
+
+Run `react-native link` to link the react-native-video library.
+
+`react-native link` don’t works properly with the tvOS target so we need to add the library manually.
+
+First select your project in Xcode.
+
 #### Android
 
 Run `react-native link` to link the react-native-video library.
