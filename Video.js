@@ -162,6 +162,8 @@ export default class Video extends Component {
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
+    } else if (uri === '') {
+      return null;
     }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
