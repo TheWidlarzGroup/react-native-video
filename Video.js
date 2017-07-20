@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from 'react';
-import {StyleSheet, requireNativeComponent, NativeModules, View, Image} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, Image, ViewPropTypes} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import VideoResizeMode from './VideoResizeMode.js';
 
@@ -76,12 +76,6 @@ export default class Video extends Component {
   _onEnd = (event) => {
     if (this.props.onEnd) {
       this.props.onEnd(event.nativeEvent);
-    }
-  };
-
-  _onTimedMetadata = (event) => {
-    if (this.props.onTimedMetadata) {
-      this.props.onTimedMetadata(event.nativeEvent);
     }
   };
 
@@ -197,7 +191,6 @@ export default class Video extends Component {
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
       onVideoBuffer: this._onBuffer,
-      onTimedMetadata: this._onTimedMetadata,
       onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
       onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
       onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
@@ -255,7 +248,6 @@ Video.propTypes = {
   onVideoProgress: PropTypes.func,
   onVideoSeek: PropTypes.func,
   onVideoEnd: PropTypes.func,
-  onTimedMetadata: PropTypes.func,
   onVideoFullscreenPlayerWillPresent: PropTypes.func,
   onVideoFullscreenPlayerDidPresent: PropTypes.func,
   onVideoFullscreenPlayerWillDismiss: PropTypes.func,
@@ -278,7 +270,6 @@ Video.propTypes = {
   rate: PropTypes.number,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
-  ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
@@ -307,7 +298,7 @@ Video.propTypes = {
   translateX: PropTypes.number,
   translateY: PropTypes.number,
   rotation: PropTypes.number,
-  ...View.propTypes,
+  ...ViewPropTypes,
 };
 
 const RCTVideo = requireNativeComponent('RCTVideo', Video, {
