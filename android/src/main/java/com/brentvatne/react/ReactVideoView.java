@@ -83,6 +83,9 @@ public class ReactVideoView extends ScalableVideoView implements
     public static final String EVENT_PROP_HEIGHT = "height";
     public static final String EVENT_PROP_ORIENTATION = "orientation";
     public static final String EVENT_PROP_METADATA = "metadata";
+    public static final String EVENT_PROP_TARGET = "target";
+    public static final String EVENT_PROP_METADATA_IDENTIFIER = "identifier";
+    public static final String EVENT_PROP_METADATA_VALUE = "value";
 
     public static final String EVENT_PROP_ERROR = "error";
     public static final String EVENT_PROP_WHAT = "what";
@@ -557,15 +560,15 @@ public class ReactVideoView extends ScalableVideoView implements
             String rawMeta  = new String(data.getMetaData(), "UTF-8");
             WritableMap id3 = Arguments.createMap();
 
-            id3.putString("value", rawMeta.substring(rawMeta.lastIndexOf("\u0003") + 1));
-            id3.putString("identifier", "id3/TDEN");
+            id3.putString(EVENT_PROP_METADATA_VALUE, rawMeta.substring(rawMeta.lastIndexOf("\u0003") + 1));
+            id3.putString(EVENT_PROP_METADATA_IDENTIFIER, "id3/TDEN");
 
             WritableArray metadata = new WritableNativeArray();
 
             metadata.pushMap(id3);
 
             event.putArray(EVENT_PROP_METADATA, metadata);
-            event.putDouble("target", getId());
+            event.putDouble(EVENT_PROP_TARGET, getId());
         } catch(UnsupportedEncodingException e) {
             e.printStackTrace();
         }
