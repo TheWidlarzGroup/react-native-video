@@ -276,6 +276,7 @@ Video.propTypes = {
   muted: PropTypes.bool,
   volume: PropTypes.number,
   rate: PropTypes.number,
+  isLive: PropTypes.bool,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
