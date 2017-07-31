@@ -83,6 +83,12 @@ static NSString *const timedMetadata = @"timedMetadata";
                                              selector:@selector(applicationWillEnterForeground:)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
+
+      
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleAudioSessionInterruption:)
+                                                 name:AVAudioSessionInterruptionNotification 
+                                                 object: nil];                                        
   }
 
   return self;
@@ -169,6 +175,27 @@ static NSString *const timedMetadata = @"timedMetadata";
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
+}
+
+- (void) handleAudioSessionInterruption: (NSNotification *)notification
+{
+    
+    NSNumber *interruptionType = [[notification userInfo] objectForKey:AVAudioSessionInterruptionTypeKey];
+    NSNumber *interruptionOption = [[notification userInfo] objectForKey:AVAudioSessionInterruptionOptionKey];
+
+    switch (interruptionType.unsignedIntegerValue) {
+        case AVAudioSessionInterruptionTypeBegan:{
+            NSLog(@"%s", "AUDIO INTERRUPTION BEGAN");
+             //Handle interreption from here
+        } break;
+        case AVAudioSessionInterruptionTypeEnded:{
+            NSLog(@"%s", "AUDIO ENDED");
+            //Handle interreption from here
+        } break;
+        default:
+            break;
+    }
+    
 }
 
 #pragma mark - Progress
