@@ -3,6 +3,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
+#import <Photos/Photos.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -254,9 +255,6 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  _playerItem = [self playerItemForSource:source];
-  [self addPlayerItemObservers];
-
   [_player pause];
   [self removePlayerLayer];
   [_playerViewController.view removeFromSuperview];
@@ -266,6 +264,41 @@ static NSString *const timedMetadata = @"timedMetadata";
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
   }
+  [self loadVideoFromSource:source];
+}
+
+- (void)loadVideoFromSource:(NSDictionary *)source {
+  bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
+  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  NSString *uri = [source objectForKey:@"uri"];
+
+  if (isNetwork) {
+    NSURL *url = [NSURL URLWithString:uri];
+    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    [self initialiseVideo:[AVPlayerItem playerItemWithAsset:asset] source:source];
+  } else if (isAsset) {
+    if ([uri hasPrefix:@"assets-library://"]) {
+      NSURL *url = [NSURL URLWithString:uri];
+      AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+      [self initialiseVideo:[AVPlayerItem playerItemWithAsset:asset] source:source];
+    } else {
+      NSString *assetId = [uri substringFromIndex:@"ph://".length];
+      PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[assetId] options:nil] firstObject];
+      [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:nil resultHandler:^(AVAsset * _Nullable asset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+        [self initialiseVideo:[AVPlayerItem playerItemWithAsset:asset] source:source];
+      }];
+    }
+  } else {
+    NSString *type = [source objectForKey:@"type"];
+    NSURL *url = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+      [self initialiseVideo:[AVPlayerItem playerItemWithURL:url] source:source];
+  }
+}
+
+- (void)initialiseVideo:(AVPlayerItem*)video source:(NSDictionary *)source {
+  _playerItem = video;
+  [self addPlayerItemObservers];
 
   _player = [AVPlayer playerWithPlayerItem:_playerItem];
   _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
@@ -276,10 +309,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
   // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
   __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC) queue:NULL usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }];
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //Perform on next run loop, otherwise onVideoLoadStart is nil
@@ -291,33 +321,9 @@ static NSString *const timedMetadata = @"timedMetadata";
                                         @"type": type ? type : [NSNull null],
                                         @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
                                         @"target": self.reactTag
-                                        });
+                                      });
     }
   });
-}
-
-- (AVPlayerItem*)playerItemForSource:(NSDictionary *)source
-{
-  bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
-  bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
-  NSString *uri = [source objectForKey:@"uri"];
-  NSString *type = [source objectForKey:@"type"];
-
-  NSURL *url = (isNetwork || isAsset) ?
-    [NSURL URLWithString:uri] :
-    [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
-
-  if (isNetwork) {
-    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
-    return [AVPlayerItem playerItemWithAsset:asset];
-  }
-  else if (isAsset) {
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    return [AVPlayerItem playerItemWithAsset:asset];
-  }
-
-  return [AVPlayerItem playerItemWithURL:url];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
