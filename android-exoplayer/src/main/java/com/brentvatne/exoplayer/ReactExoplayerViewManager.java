@@ -87,7 +87,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                Log.d("ReactExoplayer", "setSrc: "+srcUri );
                 videoView.setSrc(srcUri, extension);
             }
         } else {

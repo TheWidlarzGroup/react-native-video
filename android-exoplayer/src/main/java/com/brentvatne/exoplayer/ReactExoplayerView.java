@@ -256,7 +256,6 @@ class ReactExoplayerView extends FrameLayout implements
                 return new DashMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory), mainHandler, null);
             case C.TYPE_HLS:
-                Log.d(TAG, "buildMediaSource: TYPE HLS");
                 return new HlsMediaSource(uri, mediaDataSourceFactory, mainHandler, null);
             case C.TYPE_OTHER:
                 return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
@@ -292,16 +291,13 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        Log.d(TAG, "setPlayWhenReady: " + playWhenReady);
         if (player == null) {
             return;
         }
-        Log.d(TAG, "setPlayWhenReady:=> " + playWhenReady);
 
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                Log.d(TAG, "setPlayWhenReady: true");
                 player.setPlayWhenReady(true);
             }
         } else {
@@ -579,10 +575,8 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(getContext(), BANDWIDTH_METER);
-            Log.d(TAG, "setSrc: " + uri +" : "+ extension);
 //            if (!isOriginalSourceNull && !isSourceEqual) {
             if (!isSourceEqual) {
-                Log.d(TAG, "setSrc: reloadSource");
                 reloadSource();
             }
         }
