@@ -8,9 +8,13 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,9 +24,11 @@ class VideoEventEmitter {
     private final RCTEventEmitter eventEmitter;
 
     private int viewId = View.NO_ID;
+    private ReactExoplayerView reactExoplayerView;
 
-    VideoEventEmitter(ReactContext reactContext) {
+    VideoEventEmitter(ReactContext reactContext,ReactExoplayerView reactExoplayerView) {
         this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        this.reactExoplayerView = reactExoplayerView;
     }
 
     private static final String EVENT_LOAD_START = "onVideoLoadStart";
@@ -87,6 +93,14 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
+    public static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
+    public static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
+    public static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+
+    public static final String EVENT_PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    public static final String EVENT_PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
+    public static final String EVENT_PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
+
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
@@ -138,13 +152,54 @@ class VideoEventEmitter {
         event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
 
+
+        WritableArray videoTracks = Arguments.createArray();
+        String[] trackNameArray= this.reactExoplayerView.getTrackNameArray(C.TRACK_TYPE_VIDEO);
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                videoTracks.pushString(trackName);
+            }
+
+        event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
+
+        WritableArray audioTracks = Arguments.createArray();
+        trackNameArray= this.reactExoplayerView.getTrackNameArray(C.TRACK_TYPE_AUDIO);
+
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                audioTracks.pushString(trackName);
+            }
+        event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
+
+        WritableArray textTracks = Arguments.createArray();
+        trackNameArray= this.reactExoplayerView.getTrackNameArray(C.TRACK_TYPE_TEXT);
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                textTracks.pushString(trackName);
+            }
+        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
+
+        event.putInt(EVENT_PROP_SELECTED_VIDEO_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_VIDEO));
+        event.putInt(EVENT_PROP_SELECTED_AUDIO_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_AUDIO));
+        event.putInt(EVENT_PROP_SELECTED_TEXT_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_TEXT));
+
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration) {
+
+
+    void progressChanged(double currentPosition, double duration,double bufferedDuration) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
-        event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
+        event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
+        event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 100D);
+
+        event.putInt(EVENT_PROP_SELECTED_VIDEO_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_VIDEO));
+        event.putInt(EVENT_PROP_SELECTED_AUDIO_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_AUDIO));
+        event.putInt(EVENT_PROP_SELECTED_TEXT_TRACK,this.reactExoplayerView.getSelectedTrack(C.TRACK_TYPE_TEXT));
         receiveEvent(EVENT_PROGRESS, event);
     }
 

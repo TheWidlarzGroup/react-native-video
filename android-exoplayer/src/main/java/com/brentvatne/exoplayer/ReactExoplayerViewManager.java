@@ -3,12 +3,14 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.Map;
@@ -32,6 +34,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
+
+    public static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    public static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
+    public static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
 
     @Override
     public String getName() {
@@ -81,6 +87,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
+                Log.d("ReactExoplayer", "setSrc: "+srcUri );
                 videoView.setSrc(srcUri, extension);
             }
         } else {
@@ -138,6 +145,24 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SEEK)
     public void setSeek(final ReactExoplayerView videoView, final float seek) {
         videoView.seekTo(Math.round(seek * 1000f));
+    }
+
+    @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
+    public void setSelectedVideoTrack(final ReactExoplayerView videoView, final float index) {
+//        if (index < videoView.getNumberTrack(DemoPlayer.TYPE_VIDEO))
+            videoView.setSelectedTrack(C.TRACK_TYPE_VIDEO,Math.round(index));
+    }
+
+    @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
+    public void setSelectedAudioTrack(final ReactExoplayerView videoView, final float index) {
+//        if (index < videoView.getNumberTrack(DemoPlayer.TYPE_AUDIO))
+            videoView.setSelectedTrack(C.TRACK_TYPE_AUDIO,Math.round(index));
+    }
+
+    @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
+    public void setSelectedTextTrack(final ReactExoplayerView videoView, final float index) {
+//        if (index < videoView.getNumberTrack(DemoPlayer.TYPE_TEXT))
+            videoView.setSelectedTrack(C.TRACK_TYPE_TEXT,Math.round(index));
     }
 
     @ReactProp(name = PROP_RATE)

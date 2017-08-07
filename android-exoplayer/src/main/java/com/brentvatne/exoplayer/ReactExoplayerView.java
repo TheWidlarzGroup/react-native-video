@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -22,6 +24,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -33,6 +36,7 @@ import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
@@ -41,6 +45,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -52,6 +57,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
+import java.util.Arrays;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -80,12 +86,19 @@ class ReactExoplayerView extends FrameLayout implements
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private MappingTrackSelector trackSelector;
+    TrackSelectionArray trackSelections;
     private boolean playerNeedsSource;
+    private TrackSelection.Factory videoTrackSelectionFactory;
+    private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
+
+    private MappingTrackSelector.SelectionOverride override;
+
+    private TrackGroupArray lastSeenTrackGroupArray;
 
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
-    private boolean isPaused = true;
+    private boolean isPaused = false;
     private boolean isBuffering;
     private float rate = 1f;
 
@@ -113,7 +126,7 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlayWhenReady()
                             ) {
                         long pos = player.getCurrentPosition();
-                        eventEmitter.progressChanged(pos, player.getBufferedPercentage());
+                        eventEmitter.progressChanged(pos, player.getDuration(),player.getBufferedPercentage()) ;
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -125,7 +138,7 @@ class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
         createViews();
-        this.eventEmitter = new VideoEventEmitter(context);
+        this.eventEmitter = new VideoEventEmitter(context,this);
         this.themedReactContext = context;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
@@ -202,15 +215,17 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            this.videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, new DefaultLoadControl());
+            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
             player.addListener(this);
             player.setMetadataOutput(this);
             exoPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
+
+            lastSeenTrackGroupArray = null;
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
             player.setPlaybackParameters(params);
@@ -241,6 +256,7 @@ class ReactExoplayerView extends FrameLayout implements
                 return new DashMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory), mainHandler, null);
             case C.TYPE_HLS:
+                Log.d(TAG, "buildMediaSource: TYPE HLS");
                 return new HlsMediaSource(uri, mediaDataSourceFactory, mainHandler, null);
             case C.TYPE_OTHER:
                 return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
@@ -276,13 +292,16 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
+        Log.d(TAG, "setPlayWhenReady: " + playWhenReady);
         if (player == null) {
             return;
         }
+        Log.d(TAG, "setPlayWhenReady:=> " + playWhenReady);
 
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
+                Log.d(TAG, "setPlayWhenReady: true");
                 player.setPlayWhenReady(true);
             }
         } else {
@@ -437,6 +456,7 @@ class ReactExoplayerView extends FrameLayout implements
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
+
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height);
         }
     }
@@ -471,7 +491,21 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-        // Do Nothing.
+        this.trackSelections = trackSelections;
+
+        if (trackGroups != lastSeenTrackGroupArray) {
+            MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+            if (mappedTrackInfo != null) {
+                if (mappedTrackInfo.getTrackTypeRendererSupport(C.TRACK_TYPE_VIDEO)
+                        == MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
+                }
+                if (mappedTrackInfo.getTrackTypeRendererSupport(C.TRACK_TYPE_AUDIO)
+                        == MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
+                }
+            }
+            lastSeenTrackGroupArray = trackGroups;
+        }
+
     }
 
     @Override
@@ -545,8 +579,10 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(getContext(), BANDWIDTH_METER);
-
-            if (!isOriginalSourceNull && !isSourceEqual) {
+            Log.d(TAG, "setSrc: " + uri +" : "+ extension);
+//            if (!isOriginalSourceNull && !isSourceEqual) {
+            if (!isSourceEqual) {
+                Log.d(TAG, "setSrc: reloadSource");
                 reloadSource();
             }
         }
@@ -574,6 +610,51 @@ class ReactExoplayerView extends FrameLayout implements
     private void reloadSource() {
         playerNeedsSource = true;
         initializePlayer();
+    }
+
+    public void setSelectedTrack(int trackType,int trackIndex){
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+
+        int trackGroupsIndex=0;
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length != 0) {
+                if (player.getRendererType(i) == trackType){
+                    trackGroupsIndex = i;
+                    break;
+
+                }
+            }
+        }
+
+        TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(trackGroupsIndex);
+
+        if (trackIndex > 0) {
+
+            int groupIndex = 0;
+
+//            boolean[] trackGroupsAdaptive = new boolean[trackGroups.length];
+//            for (int i = 0; i < trackGroups.length; i++) {
+//                trackGroupsAdaptive[i] = this.videoTrackSelectionFactory != null
+//                        && mappedTrackInfo.getAdaptiveSupport(trackGroupsIndex, i, false)
+//                        != RendererCapabilities.ADAPTIVE_NOT_SUPPORTED
+//                        && trackGroups.get(i).length > 1;
+//            }
+
+            override = new MappingTrackSelector.SelectionOverride(FIXED_FACTORY, groupIndex, trackIndex-1);
+
+            this.trackSelector.setSelectionOverride(trackGroupsIndex, trackGroups, override);
+        } else {
+            override = null;
+            this.trackSelector.clearSelectionOverrides(trackGroupsIndex);
+        }
+
+    }
+
+    private void setOverride(int group, int[] tracks) {
+        TrackSelection.Factory factory = tracks.length == 1 ? FIXED_FACTORY
+                :  this.videoTrackSelectionFactory;
+        override = new MappingTrackSelector.SelectionOverride(factory, group, tracks);
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
@@ -631,5 +712,66 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableFocus(boolean disableFocus) {
         this.disableFocus = disableFocus;
+    }
+
+    public int getSelectedTrack(final int trackType){
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+
+        int trackIndex=0;
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length != 0) {
+                if (player.getRendererType(i) == trackType){
+                    trackIndex = i;
+                    break;
+
+                }
+            }
+        }
+
+        int selectedIndexInTrackGroup =player.getCurrentTrackSelections().get(trackIndex).getSelectedIndexInTrackGroup();
+        // custom for auto mode
+        if (override!=null){
+            if (getTrackNameArray(trackType).length>1){
+                selectedIndexInTrackGroup = selectedIndexInTrackGroup + 1;
+            }else{
+                selectedIndexInTrackGroup = 0;
+            }
+
+        }else{
+            selectedIndexInTrackGroup = 0;
+        }
+
+
+        return selectedIndexInTrackGroup;
+    }
+
+    public String[] getTrackNameArray(final int trackType){
+
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+
+        int trackIndex=0;
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length != 0) {
+                if (player.getRendererType(i) == trackType){
+                    trackIndex = i;
+                    break;
+
+                }
+            }
+        }
+        TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(trackIndex);
+        String[] trackNameArray = null;
+        for (int groupIndex = 0; groupIndex < trackGroups.length; groupIndex++) {
+            TrackGroup group = trackGroups.get(groupIndex);
+            trackNameArray = new String[group.length];
+            for (int i = 0; i < group.length; i++) {
+                trackNameArray[i] = DemoUtil.buildTrackName(group.getFormat(i));
+            }
+        }
+
+
+        return trackNameArray;
     }
 }

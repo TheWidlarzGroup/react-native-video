@@ -49,7 +49,7 @@ public final class ExoPlayerView extends FrameLayout {
     public ExoPlayerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        boolean useTextureView = false;
+        boolean useTextureView = true;
 
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -99,7 +99,13 @@ public final class ExoPlayerView extends FrameLayout {
             this.player.setTextOutput(null);
             this.player.setVideoListener(null);
             this.player.removeListener(componentListener);
-            this.player.setVideoSurface(null);
+
+            if (surfaceView instanceof TextureView) {
+                this.player.clearVideoTextureView((TextureView) surfaceView);
+            } else if (surfaceView instanceof SurfaceView) {
+                this.player.clearVideoSurfaceView((SurfaceView) surfaceView);
+            }
+//            this.player.setVideoSurface(null);
             this.player.setMetadataOutput(componentListener);
         }
         this.player = player;
