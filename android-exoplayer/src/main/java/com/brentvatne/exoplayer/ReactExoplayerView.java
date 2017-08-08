@@ -24,6 +24,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
@@ -511,6 +512,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onPlayerError(ExoPlaybackException e) {
+        e.printStackTrace();
         String errorString = null;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
@@ -534,9 +536,9 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
-        if (errorString != null) {
+//        if (errorString != null) {
             eventEmitter.error(errorString, e);
-        }
+//        }
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
@@ -565,6 +567,10 @@ class ReactExoplayerView extends FrameLayout implements
         eventEmitter.timedMetadata(metadata);
     }
 
+    @Override
+    public void onRepeatModeChanged(@Player.RepeatMode int repeatMode) {
+
+    }
     // ReactExoplayerViewManager public api
 
     public void setSrc(final Uri uri, final String extension) {
@@ -722,6 +728,10 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+        if(player.getCurrentTrackSelections().get(trackIndex) == null){
+            return 0;
+        }
+
 
         int selectedIndexInTrackGroup =player.getCurrentTrackSelections().get(trackIndex).getSelectedIndexInTrackGroup();
         // custom for auto mode

@@ -11,10 +11,15 @@ android {
 }
 
 dependencies {
-    provided 'com.facebook.react:react-native:+'
-    compile 'com.google.android.exoplayer:exoplayer:r2.4.0'
-    compile('com.google.android.exoplayer:extension-okhttp:r2.4.0') {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
-    compile 'com.squareup.okhttp3:okhttp:3.4.2'
+    //provided 'com.facebook.react:react-native:+'
+    compile project(':ReactAndroid')
+
+    compile project(':exoplayer-library')
+    compile project(':exoplayer-extension-okhttp')
+
+//    compile 'com.google.android.exoplayer:exoplayer:r2.5.0'
+//    compile('com.google.android.exoplayer:extension-okhttp:r2.5.0') {
+//        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+//    }
+//    compile 'com.squareup.okhttp3:okhttp:3.4.2'
 }

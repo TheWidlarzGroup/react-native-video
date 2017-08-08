@@ -16,6 +16,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -236,6 +237,12 @@ public final class ExoPlayerView extends FrameLayout {
         public void onPlaybackParametersChanged(PlaybackParameters params) {
             // Do nothing
         }
+
+        @Override
+        public void onRepeatModeChanged(@Player.RepeatMode int repeatMode) {
+
+        }
+
 
         @Override
         public void onMetadata(Metadata metadata) {
