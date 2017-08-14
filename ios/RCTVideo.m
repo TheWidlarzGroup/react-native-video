@@ -208,21 +208,31 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (NSNumber *)calculatePlayableDuration
 {
   AVPlayerItem *video = _player.currentItem;
-  if (video.status == AVPlayerItemStatusReadyToPlay) {
-    __block CMTimeRange effectiveTimeRange;
-    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-      CMTimeRange timeRange = [obj CMTimeRangeValue];
-      if (CMTimeRangeContainsTime(timeRange, video.currentTime)) {
-        effectiveTimeRange = timeRange;
-        *stop = YES;
-      }
-    }];
-    Float64 playableDuration = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange));
+  __block CMTimeRange *effectiveTimeRange = [self getEffectiveTimeRange:video.currentTime];
+  if (effectiveTimeRange != NULL) {
+    Float64 playableDuration = CMTimeGetSeconds(CMTimeRangeGetEnd(*effectiveTimeRange));
     if (playableDuration > 0) {
       return [NSNumber numberWithFloat:playableDuration];
     }
   }
   return [NSNumber numberWithInteger:0];
+}
+
+
+- (CMTimeRange *)getEffectiveTimeRange:(CMTime)targetTime
+{
+  __block CMTimeRange *effectiveTimeRange = NULL;
+  AVPlayerItem *video = _player.currentItem;
+  if (video.status == AVPlayerItemStatusReadyToPlay) {
+    [video.loadedTimeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+      CMTimeRange timeRange = [obj CMTimeRangeValue];
+      if (CMTimeRangeContainsTime(timeRange, targetTime)) {
+        effectiveTimeRange = &timeRange;
+        *stop = YES;
+      }
+    }];
+  }
+  return effectiveTimeRange;
 }
 
 - (void)addPlayerItemObservers
@@ -540,21 +550,30 @@ static NSString *const timedMetadata = @"timedMetadata";
 
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
-    // TODO check loadedTimeRanges
-
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
     CMTime tolerance = CMTimeMake(1000, timeScale);
     BOOL wasPaused = _paused;
 
-    if (CMTimeCompare(current, cmSeekTime) != 0) {
+    CMTimeRange* timerange = [self getEffectiveTimeRange:cmSeekTime];
+    if (timerange == NULL) {
+      if(self.onVideoSeek) {
+        self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                           @"seekTime": [NSNumber numberWithFloat:seekTime],
+                           @"success": [NSNumber numberWithBool:FALSE],
+                           @"target": self.reactTag});
+      }
+      
+      _pendingSeek = false;
+    } else if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
         if (!wasPaused) [_player play];
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
+                               @"success": [NSNumber numberWithBool:finished],
                                @"target": self.reactTag});
         }
       }];
