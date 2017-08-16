@@ -1,15 +1,11 @@
 {
     "name": "react-native-video",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
     "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
     "contributors": [
-        {
-            "name": "Matthew Apperson",
-            "email": "me@mattapperson.com"
-        },
         {
             "name": "Johannes Lumpe",
             "email": "johannes@lum.pe"
@@ -32,7 +28,7 @@
     },
     "dependencies": {
         "keymirror": "0.1.1",
-        "react-native-windows": "0.41.0-rc.0"
+        "prop-types": "^15.5.10"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
