@@ -269,6 +269,10 @@ Video.propTypes = {
     // Opaque type returned by require('./video.mp4')
     PropTypes.number
   ]),
+
+  selectedVideoTrack:PropTypes.number,
+  selectedAudioTrack:PropTypes.number,
+  selectedTextTrack:PropTypes.number,
   resizeMode: PropTypes.string,
   poster: PropTypes.string,
   repeat: PropTypes.bool,
