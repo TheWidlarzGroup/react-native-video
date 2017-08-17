@@ -27,6 +27,10 @@ export default class Video extends Component {
     this.setNativeProps({ seek: time });
   };
 
+  selectVideoTrack = (index) => {
+    this.setNativeProps({ selectedVideoTrack: parseInt(index) });
+  }
+
   presentFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: true });
   };
