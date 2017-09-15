@@ -24,6 +24,9 @@ import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
 
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileDescriptor;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
@@ -245,7 +248,18 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     Uri parsedUrl = Uri.parse(uriString);
                     setDataSource(mThemedReactContext, parsedUrl);
                 } else {
-                    setDataSource(uriString);
+                    // Fixes permission problem playing videos on Android API 16 or less
+                    // See https://stackoverflow.com/a/16964824
+
+                    String s = uriString;
+                    if (s.startsWith("file://")) {
+                        s = s.substring(7);
+                    }
+                    s = URLDecoder.decode(s);
+
+                    FileInputStream fis = new FileInputStream(s);
+                    setDataSource(fis.getFD());
+                    fis.close();
                 }
             } else {
                 ZipResourceFile expansionFile= null;
