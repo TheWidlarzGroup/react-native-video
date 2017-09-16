@@ -32,7 +32,6 @@ import java.util.List;
 public final class ExoPlayerView extends FrameLayout {
 
     private final View surfaceView;
-    private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
@@ -64,10 +63,6 @@ public final class ExoPlayerView extends FrameLayout {
         layout = new AspectRatioFrameLayout(context);
         layout.setLayoutParams(aspectRatioParams);
 
-        shutterView = new View(getContext());
-        shutterView.setLayoutParams(params);
-        shutterView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black));
-
         subtitleLayout = new SubtitleView(context);
         subtitleLayout.setLayoutParams(params);
         subtitleLayout.setUserDefaultStyle();
@@ -78,8 +73,7 @@ public final class ExoPlayerView extends FrameLayout {
         surfaceView = view;
 
         layout.addView(surfaceView, 0, params);
-        layout.addView(shutterView, 1, params);
-        layout.addView(subtitleLayout, 2, params);
+        layout.addView(subtitleLayout, 1, params);
 
         addViewInLayout(layout, 0, aspectRatioParams);
     }
@@ -103,7 +97,7 @@ public final class ExoPlayerView extends FrameLayout {
             this.player.setMetadataOutput(componentListener);
         }
         this.player = player;
-        shutterView.setVisibility(VISIBLE);
+        surfaceView.setAlpha(0);
         if (player != null) {
             if (surfaceView instanceof TextureView) {
                 player.setVideoTextureView((TextureView) surfaceView);
@@ -162,8 +156,6 @@ public final class ExoPlayerView extends FrameLayout {
                 return;
             }
         }
-        // Video disabled so the shutter must be closed.
-        shutterView.setVisibility(VISIBLE);
     }
 
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,
@@ -191,7 +183,7 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onRenderedFirstFrame() {
-            shutterView.setVisibility(INVISIBLE);
+            surfaceView.setAlpha(1);
         }
 
         // ExoPlayer.EventListener implementation
