@@ -17,4 +17,18 @@
     [super viewWillDisappear:animated];
 }
 
+- (BOOL)shouldAutorotate
+{
+    return _autoRotate;
+}
+
+#if !TARGET_OS_TV
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return _fullScreenOrientation;
+}
+
+#endif
+
 @end

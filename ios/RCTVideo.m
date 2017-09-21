@@ -20,6 +20,8 @@ static NSString *const timedMetadata = @"timedMetadata";
   AVPlayerLayer *_playerLayer;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+  BOOL _autoRotate;
+  NSString * _fullScreenOrientation;
 
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -68,6 +70,8 @@ static NSString *const timedMetadata = @"timedMetadata";
     _playInBackground = false;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _autoRotate = YES;
+    _fullScreenOrientation = @"all";
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -597,6 +601,16 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self applyModifiers];
 }
 
+- (void)setAutoRotate:(BOOL)autoRotate
+{
+    _autoRotate = autoRotate;
+}
+
+- (void)setFullScreenOrientation:(NSString *)fullScreenOrientation
+{
+    _fullScreenOrientation = fullScreenOrientation;
+}
+
 - (void)applyModifiers
 {
   if (_muted) {
@@ -651,6 +665,10 @@ static NSString *const timedMetadata = @"timedMetadata";
             if(self.onVideoFullscreenPlayerWillPresent) {
                 self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
             }
+            ((RCTVideoPlayerViewController *) _playerViewController).autoRotate = _autoRotate;
+            #if !TARGET_OS_TV
+                ((RCTVideoPlayerViewController *) _playerViewController).fullScreenOrientation = [self getFullScreenOrientation];
+            #endif
             [viewController presentViewController:_playerViewController animated:true completion:^{
                 _playerViewController.showsPlaybackControls = YES;
                 _fullscreenPlayerPresented = fullscreen;
@@ -729,6 +747,39 @@ static NSString *const timedMetadata = @"timedMetadata";
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
     _playerLayer = nil;
 }
+
+#if !TARGET_OS_TV
+- (UIInterfaceOrientationMask)getFullScreenOrientation
+{
+    UIInterfaceOrientationMask orientation = UIInterfaceOrientationMaskAll;
+    if ([_fullScreenOrientation isEqualToString:@"portrait"])
+    {
+        orientation = UIInterfaceOrientationMaskPortrait;
+    }
+    else if ([_fullScreenOrientation isEqualToString:@"portraitUpsideDown"])
+    {
+        orientation = UIInterfaceOrientationMaskPortraitUpsideDown;
+    }
+    else if ([_fullScreenOrientation isEqualToString:@"landscape"])
+    {
+        orientation = UIInterfaceOrientationMaskLandscape;
+    }
+    else if ([_fullScreenOrientation isEqualToString:@"landscapeLeft"])
+    {
+        orientation = UIInterfaceOrientationMaskLandscapeLeft;
+    }
+    else if ([_fullScreenOrientation isEqualToString:@"landscapeRight"])
+    {
+        orientation = UIInterfaceOrientationMaskLandscapeRight;
+    }
+    else if ([_fullScreenOrientation isEqualToString:@"allButUpsideDown"])
+    {
+        orientation = UIInterfaceOrientationMaskAllButUpsideDown;
+    }
+
+    return orientation;
+}
+#endif
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
 

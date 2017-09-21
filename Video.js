@@ -271,6 +271,8 @@ Video.propTypes = {
     PropTypes.number
   ]),
   resizeMode: PropTypes.string,
+  fullScreenOrientation: PropTypes.string,
+  autoRotate: PropTypes.bool,
   poster: PropTypes.string,
   repeat: PropTypes.bool,
   paused: PropTypes.bool,
@@ -309,6 +311,16 @@ Video.propTypes = {
   translateY: PropTypes.number,
   rotation: PropTypes.number,
   ...View.propTypes,
+};
+
+Video.Constants = {
+  all: 'all',
+  allButUpsideDown: 'allButUpsideDown',
+  portrait: 'portrait',
+  portraitUpsideDown: 'portraitUpsideDown',
+  landscape: 'landscape',
+  landscapeLeft: 'landscapeLeft',
+  landscapeRight: 'landscapeRight'
 };
 
 const RCTVideo = requireNativeComponent('RCTVideo', Video, {
