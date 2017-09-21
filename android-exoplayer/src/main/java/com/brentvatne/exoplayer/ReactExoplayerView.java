@@ -491,6 +491,11 @@ class ReactExoplayerView extends FrameLayout implements
         Log.d(TAG, text);
     }
 
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
     private void startProgressHandler() {
         progressHandler.sendEmptyMessage(SHOW_PROGRESS);
     }
