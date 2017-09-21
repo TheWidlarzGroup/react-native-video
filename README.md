@@ -172,6 +172,8 @@ using System.Collections.Generic;
        onError={this.videoError}               // Callback when video cannot be loaded
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
+       autoRotate={false}                      // [iOS] Determines if FullScreenPlayer can be rotated (default true).
+       fullScreenOrientation={Video.Constants.landscape} // [iOS] Determines FullScreenPlayer's orientation.
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
