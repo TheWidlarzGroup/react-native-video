@@ -66,6 +66,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
+    public static final String EVENT_PROP_SEEK_SUCCESS = "success";
     public static final String EVENT_PROP_NATURALSIZE = "naturalSize";
     public static final String EVENT_PROP_WIDTH = "width";
     public static final String EVENT_PROP_HEIGHT = "height";
@@ -485,12 +486,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void seekTo(int msec) {
 
         if (mMediaPlayerValid) {
+            super.seekTo(msec);
+
             WritableMap event = Arguments.createMap();
             event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
             event.putDouble(EVENT_PROP_SEEK_TIME, msec / 1000.0);
+            event.putBoolean(EVENT_PROP_SEEK_SUCCESS, true);
             mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
 
-            super.seekTo(msec);
             if (isCompleted && mVideoDuration != 0 && msec < mVideoDuration) {
                 isCompleted = false;
             }
