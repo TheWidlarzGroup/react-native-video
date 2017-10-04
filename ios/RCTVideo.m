@@ -195,7 +195,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                              @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
                              @"target": self.reactTag,
-                             @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
+                             @"seekableDuration": [self calculateSeekableDuration],
                             });
    }
 }
@@ -223,6 +223,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     }
   }
   return [NSNumber numberWithInteger:0];
+}
+
+- (NSNumber *)calculateSeekableDuration
+{
+    CMTimeRange timeRange = [self playerItemSeekableTimeRange];
+    if (CMTIME_IS_NUMERIC(timeRange.duration))
+    {
+        return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.duration)];
+    }
+    return [NSNumber numberWithInteger:0];
 }
 
 - (void)addPlayerItemObservers
