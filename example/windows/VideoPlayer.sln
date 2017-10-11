@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoPlayer", "VideoPlayer\VideoPlayer.csproj", "{A027BE54-D118-49A4-8D84-0666A2A93E64}"
 EndProject
@@ -10,7 +10,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraBridge", "..\node_mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNativeVideo", "..\node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj", "{E8F5F57F-757E-4237-AD23-F7A8755427CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNativeWebViewBridge", "..\node_modules\react-native-windows\ReactWindows\ReactNativeWebViewBridge\ReactNativeWebViewBridge.csproj", "{7596216B-669C-41F8-86DA-F3637F6545C0}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\node_modules\react-native-windows\ReactWindows\ReactNative.Shared\ReactNative.Shared.projitems*{c7673ad5-e3aa-468c-a5fd-fa38154e205c}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
 		Debug|x64 = Debug|x64
@@ -134,8 +139,35 @@ Global
 		{E8F5F57F-757E-4237-AD23-F7A8755427CD}.ReleaseBundle|x64.Build.0 = Release|x64
 		{E8F5F57F-757E-4237-AD23-F7A8755427CD}.ReleaseBundle|x86.ActiveCfg = Release|x86
 		{E8F5F57F-757E-4237-AD23-F7A8755427CD}.ReleaseBundle|x86.Build.0 = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|ARM.Build.0 = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x64.ActiveCfg = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x64.Build.0 = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x86.ActiveCfg = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x86.Build.0 = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|ARM.ActiveCfg = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|ARM.Build.0 = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|x64.ActiveCfg = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|x64.Build.0 = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|x86.ActiveCfg = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.DebugBundle|x86.Build.0 = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|ARM.ActiveCfg = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|ARM.Build.0 = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x64.ActiveCfg = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x64.Build.0 = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x86.ActiveCfg = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x86.Build.0 = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|ARM.ActiveCfg = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|ARM.Build.0 = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|x64.ActiveCfg = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|x64.Build.0 = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|x86.ActiveCfg = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.ReleaseBundle|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {644EDA77-3E95-4475-87FD-B3E145B48036}
 	EndGlobalSection
 EndGlobal

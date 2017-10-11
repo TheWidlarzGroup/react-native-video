@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node_modules/react-native/packager/packager.sh"
+    "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
-    "react": "15.4.2",
-    "react-native": "^0.42.0",
+    "react": "^16.0.0-alpha.12",
+    "react-native": "^0.48.4",
     "react-native-video": "file:../",
-    "react-native-windows": "^0.40.0"
+    "react-native-windows": "^0.48.0-rc.9"
   },
   "devDependencies": {
-    "rnpm-plugin-windows": "~0.2.3"
+    "rnpm-plugin-windows": "~0.2.8"
   }
 }
