@@ -250,7 +250,11 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 `presentFullscreenPlayer()`
 
-Toggles a fullscreen player. Access using a ref to the component.
+Switches the player to fullscreen. Access using a ref to the component.
+
+`dismissFullscreenPlayer()`
+
+Switches the player from fullscreen back to normal. Access using a ref to the component.
 
 ## Examples
 
