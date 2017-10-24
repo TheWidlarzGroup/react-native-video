@@ -141,6 +141,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self removePlayerItemObservers];
+  [self removePlayerLayer];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
 }
 
@@ -194,7 +195,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                              @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
                              @"target": self.reactTag,
-                             @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
+                             @"seekableDuration": [self calculateSeekableDuration],
                             });
    }
 }
@@ -222,6 +223,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     }
   }
   return [NSNumber numberWithInteger:0];
+}
+
+- (NSNumber *)calculateSeekableDuration
+{
+    CMTimeRange timeRange = [self playerItemSeekableTimeRange];
+    if (CMTIME_IS_NUMERIC(timeRange.duration))
+    {
+        return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.duration)];
+    }
+    return [NSNumber numberWithInteger:0];
 }
 
 - (void)addPlayerItemObservers
@@ -327,23 +338,23 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([keyPath isEqualToString: timedMetadata])
     {
 
-        
+
         NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
         if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
-            
+
             NSMutableArray *array = [NSMutableArray new];
             for (AVMetadataItem *item in items) {
-                
+
                 NSString *value = item.value;
                 NSString *identifier = item.identifier;
-                
+
                 if (![value isEqual: [NSNull null]]) {
                     NSDictionary *dictionary = [[NSDictionary alloc] initWithObjects:@[value, identifier] forKeys:@[@"value", @"identifier"]];
-                    
+
                     [array addObject:dictionary];
                 }
             }
-            
+
             self.onTimedMetadata(@{
                                    @"target": self.reactTag,
                                    @"metadata": array
