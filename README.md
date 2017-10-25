@@ -269,6 +269,16 @@ Toggles a fullscreen player. Access using a ref to the component.
 
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
+## Use ExoPlayer on Android
+
+To use ExoPlayer instead of the default player, you have to change android to android-exoplayer in settings.gradle
+
+**android/settings.gradle**
+
+```gradle
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+```
+
 ## TODOS
 
 - [ ] Add support for captions
