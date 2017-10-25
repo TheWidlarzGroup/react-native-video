@@ -167,6 +167,9 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (playInBackground) {
+            return;
+        }
         stopPlayback();
     }
 
@@ -174,9 +177,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
-        if (playInBackground) {
-            return;
-        }
         setPlayWhenReady(!isPaused);
     }
 
