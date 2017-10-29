@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         minSdkVersion 16
@@ -12,9 +12,9 @@ android {
 
 dependencies {
     provided 'com.facebook.react:react-native:+'
-    compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
-    compile('com.google.android.exoplayer:extension-okhttp:r2.2.0') {
+    compile 'com.google.android.exoplayer:exoplayer:r2.5.4'
+    compile('com.google.android.exoplayer:extension-okhttp:r2.5.4') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    compile 'com.squareup.okhttp3:okhttp:3.4.2'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
 }
