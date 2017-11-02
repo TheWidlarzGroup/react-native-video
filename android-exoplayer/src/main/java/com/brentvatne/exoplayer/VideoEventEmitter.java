@@ -126,6 +126,7 @@ class VideoEventEmitter {
 
         // 0 = landscape left
         // 90 = portrait (Upside down)
+        // 180 = landscape right
         // 270 = portrait
 
         if (rotation == 0 || rotation == 180) {
