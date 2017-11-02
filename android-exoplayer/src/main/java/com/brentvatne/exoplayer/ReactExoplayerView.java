@@ -437,7 +437,7 @@ class ReactExoplayerView extends FrameLayout implements
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height);
+            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height, videoFormat.rotationDegrees);
         }
     }
 

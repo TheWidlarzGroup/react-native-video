@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import android.support.annotation.StringDef;
 import android.view.View;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -114,7 +115,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight) {
+    void load(double duration, double currentPosition, int videoWidth, int videoHeight, int rotation) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -122,11 +123,28 @@ class VideoEventEmitter {
         WritableMap naturalSize = Arguments.createMap();
         naturalSize.putInt(EVENT_PROP_WIDTH, videoWidth);
         naturalSize.putInt(EVENT_PROP_HEIGHT, videoHeight);
-        if (videoWidth > videoHeight) {
-            naturalSize.putString(EVENT_PROP_ORIENTATION, "landscape");
-        } else {
+
+        // 0 = landscape left
+        // 90 = portrait (Upside down)
+        // 270 = portrait
+
+        if (rotation == 0 || rotation == 180) {
+
+            // IOS always has rotation 0, so we do the old check
+            if (videoWidth > videoHeight) {
+                naturalSize.putString(EVENT_PROP_ORIENTATION, "landscape");
+            } else {
+                naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
+            }
+            
+        } else if (rotation == 90 || rotation == 270) {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
+
+            // Android videos always have a 16:9 ratio, for the right dimensions they need to be switched
+            naturalSize.putInt(EVENT_PROP_WIDTH, videoHeight);
+            naturalSize.putInt(EVENT_PROP_HEIGHT, videoWidth);
         }
+        
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
 
         // TODO: Actually check if you can.
