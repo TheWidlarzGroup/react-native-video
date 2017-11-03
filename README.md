@@ -195,7 +195,7 @@ var styles = StyleSheet.create({
 - * *For iOS you also need to specify muted for this to work*
 
 ## Android Expansion File Usage
-
+Only supports .mp4 files
 ```javascript
 // Within your render function, assuming you have a file called
 // "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
