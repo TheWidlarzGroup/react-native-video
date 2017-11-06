@@ -14,6 +14,8 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -41,6 +43,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -80,6 +83,8 @@ class ReactExoplayerView extends FrameLayout implements
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private MappingTrackSelector trackSelector;
+    private TrackSelection.Factory videoTrackSelectionFactory;
+    private TrackHelper trackHelper;
     private boolean playerNeedsSource;
 
     private int resumeWindow;
@@ -202,8 +207,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            trackHelper = new TrackHelper(trackSelector);
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, new DefaultLoadControl());
             player.addListener(this);
             player.setMetadataOutput(this);
@@ -437,7 +443,9 @@ class ReactExoplayerView extends FrameLayout implements
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height);
+            WritableArray tracks = trackHelper.parseTracks();
+
+            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height, tracks);
         }
     }
 
@@ -574,6 +582,17 @@ class ReactExoplayerView extends FrameLayout implements
     private void reloadSource() {
         playerNeedsSource = true;
         initializePlayer();
+    }
+
+    public void setTrackOverride(ReadableMap overrideOptions) {
+        int rendererIndex = overrideOptions.getInt("rendererIndex");
+        int groupIndex = overrideOptions.getInt("groupIndex");
+        int trackIndex = overrideOptions.getInt("trackIndex");
+
+        MappingTrackSelector.MappedTrackInfo trackInfo = trackSelector.getCurrentMappedTrackInfo();
+        TrackGroupArray trackGroups = trackInfo.getTrackGroups(rendererIndex);
+        MappingTrackSelector.SelectionOverride override = new MappingTrackSelector.SelectionOverride(videoTrackSelectionFactory, groupIndex, trackIndex);
+        trackSelector.setSelectionOverride(rendererIndex, trackGroups, override);
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {

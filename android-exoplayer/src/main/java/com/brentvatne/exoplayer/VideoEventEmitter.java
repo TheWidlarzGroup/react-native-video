@@ -105,6 +105,7 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
+    private static final String EVENT_PROP_TRACKS = "tracks";
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -114,7 +115,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight) {
+    void load(double duration, double currentPosition, int videoWidth, int videoHeight, WritableArray tracks) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -128,6 +129,7 @@ class VideoEventEmitter {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
+        event.putArray(EVENT_PROP_TRACKS, tracks);
 
         // TODO: Actually check if you can.
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);

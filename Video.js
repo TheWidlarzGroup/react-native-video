@@ -36,6 +36,10 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
+  overrideTrack = (overrideOptions) => {
+    this.setNativeProps({ trackOverride: overrideOptions });
+  };
+
   _assignRoot = (component) => {
     this._root = component;
   };
@@ -248,6 +252,7 @@ Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.number,
+  trackOverride: PropTypes.object,
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,
@@ -316,5 +321,6 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
     src: true,
     seek: true,
     fullscreen: true,
+    trackOverride: true,
   },
 });
