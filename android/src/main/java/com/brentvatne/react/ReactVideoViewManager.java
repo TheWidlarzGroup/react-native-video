@@ -35,7 +35,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_RATE = "rate";
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     public static final String PROP_CONTROLS = "controls";
-    private static final String PROP_TRACK_OVERRIDE = "trackOverride";
+    public static final String PROP_TRACK_OVERRIDE = "trackOverride";
 
     @Override
     public String getName() {
