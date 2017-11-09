@@ -374,7 +374,7 @@ static NSString *const timedMetadata = @"timedMetadata";
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
         NSString *orientation = @"undefined";
-
+		  
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
           AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
           width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
@@ -390,7 +390,7 @@ static NSString *const timedMetadata = @"timedMetadata";
             orientation = @"portrait";
         }
 
-      if(self.onVideoLoad) {
+      if (self.onVideoLoad) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
                              @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
@@ -404,7 +404,8 @@ static NSString *const timedMetadata = @"timedMetadata";
                                      @"height": height,
                                      @"orientation": orientation
                                      },
-                             @"target": self.reactTag});
+                             @"target": self.reactTag,
+							 @"tracks": [self parseTracks]});
       }
 
 
@@ -449,6 +450,29 @@ static NSString *const timedMetadata = @"timedMetadata";
   } else {
       [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
+}
+
+- (NSMutableArray*)parseTracks {
+	NSMutableArray *rendererArray = [NSMutableArray array];
+	for (AVMediaCharacteristic charecteristic in [_player.currentItem.asset availableMediaCharacteristicsWithMediaSelectionOptions]) {
+		NSMutableArray *trackGroups = [NSMutableArray array];
+		AVMediaSelectionGroup *group = [_player.currentItem.asset mediaSelectionGroupForMediaCharacteristic:charecteristic];
+		for (AVMediaSelectionOption *option in group.options) {
+			NSMutableDictionary *track = [NSMutableDictionary dictionary];
+			
+			if (option.commonMetadata.count > 0) {
+				[track setValue:[[option.commonMetadata objectAtIndex:0] value] forKey:@"id"];
+			} else {
+				[track setValue:option.displayName forKey:@"id"];
+			}
+			[track setValue:option.extendedLanguageTag forKey:@"language"];
+			[track setValue:option.mediaType forKey:@"sampleMimeType"];
+	
+			[trackGroups addObject:@[track]];
+		}
+		[rendererArray addObject:trackGroups];
+	}
+	return rendererArray;
 }
 
 - (void)attachListeners
@@ -577,6 +601,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     _pendingSeek = true;
     _pendingSeekTime = seekTime;
   }
+}
+
+- (void)setTrackOverride:(NSDictionary *)overrideOptions
+{
+	NSInteger rendererIndex = [[overrideOptions objectForKey:@"rendererIndex"] integerValue];
+	NSInteger groupIndex = [[overrideOptions objectForKey:@"groupIndex"] integerValue];
+	AVMediaCharacteristic charecteristic = [[_player.currentItem.asset availableMediaCharacteristicsWithMediaSelectionOptions] objectAtIndex:rendererIndex];
+	AVMediaSelectionGroup *mediaSelectionGroup = [_player.currentItem.asset mediaSelectionGroupForMediaCharacteristic:charecteristic];
+	AVMediaSelectionOption *option = [mediaSelectionGroup.options objectAtIndex:groupIndex];
+	[_player.currentItem selectMediaOption:option inMediaSelectionGroup:mediaSelectionGroup];
 }
 
 - (void)setRate:(float)rate
