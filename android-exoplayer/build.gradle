@@ -6,15 +6,15 @@ android {
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 25
     }
 }
 
 dependencies {
-    provided 'com.facebook.react:react-native:+'
-    compile 'com.google.android.exoplayer:exoplayer:r2.5.4'
-    compile('com.google.android.exoplayer:extension-okhttp:r2.5.4') {
+    compileOnly 'com.facebook.react:react-native:0.50.0'
+    implementation 'com.google.android.exoplayer:exoplayer:r2.5.4'
+    implementation('com.google.android.exoplayer:extension-okhttp:r2.5.4') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
 }
