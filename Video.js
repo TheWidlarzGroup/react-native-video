@@ -253,6 +253,7 @@ Video.propTypes = {
   src: PropTypes.object,
   seek: PropTypes.number,
   trackOverride: PropTypes.object,
+  useTextureView: PropTypes.bool,
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,

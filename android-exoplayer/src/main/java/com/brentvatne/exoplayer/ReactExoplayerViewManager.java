@@ -33,6 +33,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_TRACK_OVERRIDE = "trackOverride";
+    private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
 
     @Override
     public String getName() {
@@ -159,6 +160,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
    @ReactProp(name = PROP_TRACK_OVERRIDE)
     public void setTrackOverride(final ReactExoplayerView videoView, final ReadableMap options) {
         videoView.setTrackOverride(options);
+    }
+
+    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
+    public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
+        videoView.setUseTextureView(useTextureView);
     }
 
     private boolean startsWithValidScheme(String uriString) {

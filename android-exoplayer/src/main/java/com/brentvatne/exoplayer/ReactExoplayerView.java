@@ -595,6 +595,10 @@ class ReactExoplayerView extends FrameLayout implements
         trackSelector.setSelectionOverride(rendererIndex, trackGroups, override);
     }
 
+    public void setUseTextureView(boolean useTectureView) {
+        exoPlayerView.setUseTextureView(useTectureView);
+    }
+
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
         exoPlayerView.setResizeMode(resizeMode);
     }
