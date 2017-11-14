@@ -1,6 +1,9 @@
-'use strict';
+/**
+ * @flow
+ */
+
 import React, {
-  Component
+  Component,
 } from 'react';
 
 import {
