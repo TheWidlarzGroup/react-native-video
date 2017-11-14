@@ -8,6 +8,7 @@ Limited scope video component for Android and iOS:
 - Remote video and Local media sources are the priority
 - Expansion files not supported
 - Only ExoPlayer and native iOS player support
+- Only supports hls (and dash - Android Only)
 
 Requires react-native >= 0.50.0, no backward compatibility.
 
