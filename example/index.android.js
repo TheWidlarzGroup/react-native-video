@@ -1,3 +1,6 @@
+/**
+ * @flow
+ */
 
 import React, {
   Component
