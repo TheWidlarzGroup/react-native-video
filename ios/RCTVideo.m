@@ -196,7 +196,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                              @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
                              @"target": self.reactTag,
-                             @"seekableDuration": [NSNumber numberWithFloat:CMTimeGetSeconds([self playerItemSeekableTimeRange].duration)],
+                             @"seekableDuration": [self calculateSeekableDuration],
                             });
    }
 }
@@ -224,6 +224,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     }
   }
   return [NSNumber numberWithInteger:0];
+}
+
+- (NSNumber *)calculateSeekableDuration
+{
+    CMTimeRange timeRange = [self playerItemSeekableTimeRange];
+    if (CMTIME_IS_NUMERIC(timeRange.duration))
+    {
+        return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.duration)];
+    }
+    return [NSNumber numberWithInteger:0];
 }
 
 - (void)addPlayerItemObservers
@@ -538,7 +548,9 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime tolerance = CMTimeMake(1000, timeScale);
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
+      if (!_paused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
+        if (!_paused) [_player play];
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
@@ -723,6 +735,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     {
         _fullscreenPlayerPresented = false;
         _presentingViewController = nil;
+        _playerViewController = nil;
         [self applyModifiers];
         if(self.onVideoFullscreenPlayerDidDismiss) {
             self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
