@@ -252,6 +252,10 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 Toggles a fullscreen player. Access using a ref to the component.
 
+`overrideTrack({ rendererIndex: number,  groupIndex: number trackIndex: number })`
+
+Overrides currently playing track (video, audio, text, etc.)  
+
 ## Examples
 
 - See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
