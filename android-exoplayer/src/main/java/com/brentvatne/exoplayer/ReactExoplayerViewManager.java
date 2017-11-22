@@ -3,14 +3,17 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -32,6 +35,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
+    private static final String PROP_DRM_LICENSE_URL = "drmUrl";
+    private static final String PROP_DRM_LICENSE_HEADER = "drmHeader";
+    private static final String PROP_DRM_NAME = "drmName";
 
     @Override
     public String getName() {
@@ -69,6 +75,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
+        Log.d("SetSrc", "Set Source");
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
@@ -155,6 +162,34 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setDisableFocus(disableFocus);
     }
 
+    @ReactProp(name = PROP_DRM_LICENSE_URL)
+    public void setDrmUrl(final ReactExoplayerView videoView, @Nullable String licenseUrl){
+        Log.d("setDrmUrl", licenseUrl);
+        videoView.setDrmLicenseUrl(licenseUrl);
+    }
+
+    @ReactProp(name = PROP_DRM_LICENSE_HEADER)
+    public void setDrmHeader(final ReactExoplayerView videoView, @Nullable ReadableMap headers){
+        ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
+        ReadableMapKeySetIterator itr = headers.keySetIterator();
+        while (itr.hasNextKey()) {
+            String key = itr.nextKey();
+            drmKeyRequestPropertiesList.add(key);
+            drmKeyRequestPropertiesList.add(headers.getString(key));
+        }
+        videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
+    }
+
+    @ReactProp(name = PROP_DRM_NAME)
+    public void setDrmName(final ReactExoplayerView videoView, final String drmName){
+        try {
+            videoView.setDrmName(drmName);
+        }
+        catch (Exception ex){
+            Log.e("DRM Info", ex.toString());
+        }
+    }
+    
     private boolean startsWithValidScheme(String uriString) {
         return uriString.startsWith("http://")
                 || uriString.startsWith("https://")
