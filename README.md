@@ -27,6 +27,31 @@ If you would like to allow other apps to play music over your video component, a
   ...
 }
 ```
+Note: you can also use the `ignoreSilentSwitch` prop, shown below.
+
+#### tvOS
+
+Run `react-native link` to link the react-native-video library.
+
+`react-native link` don’t works properly with the tvOS target so we need to add the library manually.
+
+First select your project in Xcode.
+
+<img src="./docs/tvOS-step-1.jpg" width="40%">
+
+After that, select the tvOS target of your application and select « General » tab
+
+<img src="./docs/tvOS-step-2.jpg" width="40%">
+
+Scroll to « Linked Frameworks and Libraries » and tap on the + button
+
+<img src="./docs/tvOS-step-3.jpg" width="40%">
+
+Select RCTVideo-tvOS
+
+<img src="./docs/tvOS-step-4.jpg" width="40%">
+
+That’s all, you can use react-native-video for your tvOS application
 
 #### Android
 
@@ -36,21 +61,21 @@ Or if you have trouble, make the following additions to the given files manually
 
 **android/settings.gradle**
 
-```
+```gradle
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
 **android/app/build.gradle**
 
-```
+```gradle
 dependencies {
    ...
    compile project(':react-native-video')
 }
 ```
 
-**MainActivity.java**
+**MainApplication.java**
 
 On top, where imports are:
 
@@ -58,26 +83,16 @@ On top, where imports are:
 import com.brentvatne.react.ReactVideoPackage;
 ```
 
-Under `.addPackage(new MainReactPackage())`:
+Add the `ReactVideoPackage` class to your list of exported packages.
 
 ```java
-.addPackage(new ReactVideoPackage())
-```
-
-### Note: In react-native >= 0.29.0 you have to edit `MainApplication.java`
-
-**MainApplication.java** (react-native >= 0.29.0)
-
-On top, where imports are:
-
-```java
-import com.brentvatne.react.ReactVideoPackage;
-```
-
-Under `.addPackage(new MainReactPackage())`:
-
-```java
-.addPackage(new ReactVideoPackage())
+@Override
+protected List<ReactPackage> getPackages() {
+    return Arrays.asList(
+            new MainReactPackage(),
+            new ReactVideoPackage()
+    );
+}
 ```
 
 #### Windows
@@ -90,14 +105,18 @@ Add the `ReactNativeVideo` project to your solution.
 
 1. Open the solution in Visual Studio 2015
 2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
-3. Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
+3.
+  UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
+  WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
 
 **windows/myapp/myapp.csproj**
 
 Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
 1. Right-click main application project > Add > Reference...
-2. Check `ReactNativeVideo` from Solution Projects.
+2.
+  UWP: Check `ReactNativeVideo` from Solution Projects.
+  WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
 
 **MainPage.cs**
 
@@ -140,10 +159,11 @@ using System.Collections.Generic;
        volume={1.0}                            // 0 is muted, 1 is normal.
        muted={false}                           // Mutes the audio entirely.
        paused={false}                          // Pauses playback entirely.
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.* 
+       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
        repeat={true}                           // Repeat forever.
        playInBackground={false}                // Audio continues to play when app entering background.
        playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
+       ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
        progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
        onLoadStart={this.loadStart}            // Callback when video starts to load
        onLoad={this.setDuration}               // Callback when video loads

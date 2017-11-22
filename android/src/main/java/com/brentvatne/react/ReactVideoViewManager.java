@@ -30,6 +30,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_PAUSED = "paused";
     public static final String PROP_MUTED = "muted";
     public static final String PROP_VOLUME = "volume";
+    public static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     public static final String PROP_SEEK = "seek";
     public static final String PROP_RATE = "rate";
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
@@ -121,6 +122,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactVideoView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
+    }
+
+    @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)
+    public void setProgressUpdateInterval(final ReactVideoView videoView, final float progressUpdateInterval) {
+        videoView.setProgressUpdateInterval(progressUpdateInterval);
     }
 
     @ReactProp(name = PROP_SEEK)

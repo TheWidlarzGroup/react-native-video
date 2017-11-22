@@ -1,5 +1,6 @@
 package com.brentvatne.react;
 
+import android.annotation.SuppressLint;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
@@ -8,8 +9,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.webkit.CookieManager;
-
 import android.widget.MediaController;
+
+import com.android.vending.expansion.zipfile.APKExpansionSupport;
+import com.android.vending.expansion.zipfile.ZipResourceFile;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.WritableMap;
@@ -17,16 +20,15 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
-
-import com.android.vending.expansion.zipfile.APKExpansionSupport;
-import com.android.vending.expansion.zipfile.ZipResourceFile;
 import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Math;
 
+@SuppressLint("ViewConstructor")
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
         .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
 
@@ -91,9 +93,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
+    private boolean mActiveStatePauseStatusInitialized = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -126,8 +130,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
-                    // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
-                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, Math.round(mProgressUpdateInterval));
                 }
             }
         };
@@ -144,6 +147,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     @Override
+    @SuppressLint("DrawAllocation")
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
@@ -193,8 +197,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
         if ( mMediaPlayer != null ) {
             mMediaPlayerValid = false;
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
+            release();
         }
     }
 
@@ -236,7 +239,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     headers.put("Cookie", cookie);
                 }
 
-                setDataSource(mThemedReactContext, parsedUrl, headers);
+                setDataSource(uriString);
             } else if (isAsset) {
                 if (uriString.startsWith("content://")) {
                     Uri parsedUrl = Uri.parse(uriString);
@@ -295,7 +298,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
 
-        // not async to prevent random crashes on Android playback from local resource due to race conditions
         try {
           prepareAsync(this);
         } catch (Exception e) {
@@ -324,6 +326,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setPausedModifier(final boolean paused) {
 
         mPaused = paused;
+
+        if ( !mActiveStatePauseStatusInitialized ) {
+            mActiveStatePauseStatus = mPaused;
+            mActiveStatePauseStatusInitialized = true;
+        }
 
         if (!mMediaPlayerValid) {
             return;
@@ -362,6 +369,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setMutedModifier(mMuted);
     }
 
+    public void setProgressUpdateInterval(final float progressUpdateInterval) {
+        mProgressUpdateInterval = progressUpdateInterval;
+    }
+
     public void setRateModifier(final float rate) {
         mRate = rate;
 
@@ -376,6 +387,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
+        setProgressUpdateInterval(mProgressUpdateInterval);
 //        setRateModifier(mRate);
     }
 

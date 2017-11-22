@@ -33,7 +33,7 @@ https://github.com/google/ExoPlayer
     this.setState({ pause: true })
   }
 
-  onAudioFocusChanged(event: { hasAudioFocus: boolean }) {
+  onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
     if (!this.state.paused && !event.hasAudioFocus) {
       this.setState({ paused: true })
     }

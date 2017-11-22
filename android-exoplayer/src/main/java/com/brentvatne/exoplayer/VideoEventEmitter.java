@@ -9,14 +9,11 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
-import com.google.android.exoplayer2.metadata.id3.TxxxFrame;
+import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.Map;
 
 class VideoEventEmitter {
 
@@ -42,6 +39,7 @@ class VideoEventEmitter {
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
+    private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -58,6 +56,7 @@ class VideoEventEmitter {
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
+            EVENT_PLAYBACK_RATE_CHANGE,
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -76,6 +75,7 @@ class VideoEventEmitter {
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
+            EVENT_PLAYBACK_RATE_CHANGE,
     })
     @interface VideoEvents {
     }
@@ -97,6 +97,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ORIENTATION = "orientation";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
+    private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -181,6 +182,12 @@ class VideoEventEmitter {
         receiveEvent(EVENT_ERROR, event);
     }
 
+    void playbackRateChange(float rate) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
+        receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
+    }
+
     void timedMetadata(Metadata metadata) {
         WritableArray metadataArray = Arguments.createArray();
 
@@ -191,8 +198,8 @@ class VideoEventEmitter {
 
             String value = "";
 
-            if (frame instanceof TxxxFrame) {
-                TxxxFrame txxxFrame = (TxxxFrame) frame;
+            if (frame instanceof TextInformationFrame) {
+                TextInformationFrame txxxFrame = (TextInformationFrame) frame;
                 value = txxxFrame.value;
             }
 
