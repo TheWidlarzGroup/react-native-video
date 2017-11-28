@@ -281,6 +281,7 @@ Video.propTypes = {
   volume: PropTypes.number,
   rate: PropTypes.number,
   isLive: PropTypes.bool,
+  videoType: PropTypes.number,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
