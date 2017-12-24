@@ -334,7 +334,7 @@ namespace ReactNativeVideo
             private readonly JObject _eventData;
 
             public ReactVideoEvent(string eventName, int viewTag, JObject eventData)
-                : base(viewTag, TimeSpan.FromTicks(Environment.TickCount))
+                : base(viewTag)
             {
                 _eventName = eventName;
                 _eventData = eventData;
