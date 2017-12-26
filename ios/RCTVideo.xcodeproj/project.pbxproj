@@ -15,6 +15,8 @@
 		641E28501F0EECF100443AF6 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
 		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
+		FDAFB4461FEB6F8300C519F8 /* libSigmaDRM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FDAFB4451FEB6F8300C519F8 /* libSigmaDRM.a */; };
+		FDAFB4471FEB6F8300C519F8 /* libSigmaDRM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FDAFB4451FEB6F8300C519F8 /* libSigmaDRM.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +52,8 @@
 		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
 		BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoManager.h; sourceTree = "<group>"; };
 		BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoManager.m; sourceTree = "<group>"; };
+		FDAFB4431FEB6F8300C519F8 /* SigmaDRM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SigmaDRM.h; sourceTree = "<group>"; };
+		FDAFB4451FEB6F8300C519F8 /* libSigmaDRM.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libSigmaDRM.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDAFB4461FEB6F8300C519F8 /* libSigmaDRM.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDAFB4471FEB6F8300C519F8 /* libSigmaDRM.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +87,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				FDAFB4411FEB6F8300C519F8 /* DRM */,
 				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
 				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
 				31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */,
@@ -93,6 +100,31 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 				641E28441F0EEC8500443AF6 /* libRCTVideo.a */,
 			);
+			sourceTree = "<group>";
+		};
+		FDAFB4411FEB6F8300C519F8 /* DRM */ = {
+			isa = PBXGroup;
+			children = (
+				FDAFB4421FEB6F8300C519F8 /* include */,
+				FDAFB4441FEB6F8300C519F8 /* lib */,
+			);
+			path = DRM;
+			sourceTree = "<group>";
+		};
+		FDAFB4421FEB6F8300C519F8 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				FDAFB4431FEB6F8300C519F8 /* SigmaDRM.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		FDAFB4441FEB6F8300C519F8 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				FDAFB4451FEB6F8300C519F8 /* libSigmaDRM.a */,
+			);
+			path = lib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,7 +308,10 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DRM/lib",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTVideo;
 				SKIP_INSTALL = YES;
@@ -290,7 +325,10 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DRM/lib",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTVideo;
 				SKIP_INSTALL = YES;
@@ -307,6 +345,10 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_NO_COMMON_BLOCKS = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DRM/lib",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTVideo;
 				SDKROOT = appletvos;
@@ -326,6 +368,10 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DRM/lib",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTVideo;
 				SDKROOT = appletvos;
@@ -362,6 +408,7 @@
 				641E284B1F0EEC8500443AF6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
