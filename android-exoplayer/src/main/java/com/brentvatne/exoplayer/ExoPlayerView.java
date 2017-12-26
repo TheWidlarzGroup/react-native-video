@@ -219,8 +219,8 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
-            // Do nothing.
+        public void onPositionDiscontinuity(int reason) {
+
         }
 
         @Override
@@ -239,7 +239,17 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
+        public void onSeekProcessed() {
+
+        }
+
+        @Override
         public void onRepeatModeChanged(@Player.RepeatMode int repeatMode) {
+
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
 
         }
 
