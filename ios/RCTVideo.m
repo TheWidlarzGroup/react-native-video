@@ -15,6 +15,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
+  AVURLAsset *asset;
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
@@ -322,11 +323,12 @@ static NSString *const timedMetadata = @"timedMetadata";
 
   if (isNetwork) {
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
     return [AVPlayerItem playerItemWithAsset:asset];
   }
   else if (isAsset) {
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    asset = [AVURLAsset URLAssetWithURL:url options:nil];
     return [AVPlayerItem playerItemWithAsset:asset];
   }
 
@@ -486,6 +488,32 @@ static NSString *const timedMetadata = @"timedMetadata";
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
   }
+
+  if(self.onVideoSaved) {
+  AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:asset presetName:AVAssetExportPresetPassthrough];
+
+  NSString *filename = @"filename.mp4";
+
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *documentsDirectory = [paths lastObject];
+
+  NSString *outputPath = [documentsDirectory stringByAppendingPathComponent: filename];
+  NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
+
+  exporter.outputURL = outputURL;
+  exporter.outputFileType = AVFileTypeMPEG4;
+
+  [exporter exportAsynchronouslyWithCompletionHandler:^(void)
+    {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"Export Complete %d %@", exporter.status, exporter.error);
+        self.onVideoSaved(@{@"target": self.reactTag,
+                            @"outputPath": outputPath
+                            });
+      });
+    }];
+  }
+
 }
 
 #pragma mark - Prop setters

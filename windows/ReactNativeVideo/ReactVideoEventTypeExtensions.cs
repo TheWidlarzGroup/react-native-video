@@ -21,6 +21,8 @@ namespace ReactNativeVideo
                     return "onVideoSeek";
                 case ReactVideoEventType.End:
                     return "onVideoEnd";
+                case ReactVideoEventType.Saved:
+                    return "onVideoSaved";
                 case ReactVideoEventType.Stalled:
                     return "onPlaybackStalled";
                 case ReactVideoEventType.Resume:
