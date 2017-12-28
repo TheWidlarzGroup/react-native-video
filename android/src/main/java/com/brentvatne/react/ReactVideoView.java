@@ -44,6 +44,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         EVENT_PROGRESS("onVideoProgress"),
         EVENT_SEEK("onVideoSeek"),
         EVENT_END("onVideoEnd"),
+        EVENT_SAVED("onVideoSaved"),
         EVENT_STALLED("onPlaybackStalled"),
         EVENT_RESUME("onPlaybackResume"),
         EVENT_READY_FOR_DISPLAY("onReadyForDisplay");
