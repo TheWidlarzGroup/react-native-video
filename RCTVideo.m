@@ -1,5 +1,6 @@
 #import "RCTConvert.h"
 #import "RCTVideo.h"
+#import "SigmaDRM.h"
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
@@ -45,6 +46,7 @@ static NSString *const playbackRate = @"rate";
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
+  SigmaDRM *_sigmaDrm;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -279,7 +281,10 @@ static NSString *const playbackRate = @"rate";
   NSURL *url = (isNetwork || isAsset) ?
     [NSURL URLWithString:uri] :
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
-
+  if (isNetwork) {
+    self->_sigmaDrm = [[SigmaDRM alloc] initWithUrl:uri];
+    return [AVPlayerItem playerItemWithAsset:[_sigmaDrm assset]];
+  }
   if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     return [AVPlayerItem playerItemWithAsset:asset];
