@@ -49,7 +49,7 @@ public class DataSourceUtil {
     }
 
     public static DataSource.Factory getDefaultDataSourceFactory(Context context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        if (defaultDataSourceFactory == null || !requestHeaders.isEmpty()) {
+        if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
             defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
         }
         return defaultDataSourceFactory;
