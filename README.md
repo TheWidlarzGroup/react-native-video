@@ -5,9 +5,43 @@ A `<Video>` component for react-native, as seen in
 
 Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
-### Add it to your project
+### Instalation
 
 Run `npm i -S react-native-video`
+ 
+ - [**Add it to iOS**](https://github.com/react-native-community/react-native-video#ios)
+ - [**Add it to Windows**](https://github.com/react-native-community/react-native-video#windows)
+ - [**Add it to Android**](https://github.com/react-native-community/react-native-video#android)
+ 
+ ## Examples
+
+- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
+- Try the included [VideoPlayer example][2] yourself:
+
+   ```sh
+   git clone git@github.com:react-native-community/react-native-video.git
+   cd react-native-video/example
+   npm install
+   open ios/VideoPlayer.xcodeproj
+
+   ```
+
+   Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
+
+- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
+
+## TODOS
+
+- [ ] Add support for captions
+- [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
+- [x] Callback to get buffering progress for remote videos
+- [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
+
+[1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
+[2]: https://github.com/react-native-community/react-native-video/tree/master/example
+[3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
+
+---
 
 #### iOS
 
@@ -252,34 +286,6 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 Toggles a fullscreen player. Access using a ref to the component.
 
-## Examples
 
-- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
-- Try the included [VideoPlayer example][2] yourself:
-
-   ```sh
-   git clone git@github.com:react-native-community/react-native-video.git
-   cd react-native-video/example
-   npm install
-   open ios/VideoPlayer.xcodeproj
-
-   ```
-
-   Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
-
-- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
-
-## TODOS
-
-- [ ] Add support for captions
-- [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
-- [x] Callback to get buffering progress for remote videos
-- [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
-
-[1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
-[2]: https://github.com/react-native-community/react-native-video/tree/master/example
-[3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
-
----
 
 **MIT Licensed**
