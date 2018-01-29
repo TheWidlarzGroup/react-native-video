@@ -22,6 +22,9 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 
+# history
+.history
+
 # Android/IJ
 #
 *.iml
