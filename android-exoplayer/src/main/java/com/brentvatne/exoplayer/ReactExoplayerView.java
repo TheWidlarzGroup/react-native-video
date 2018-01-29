@@ -131,6 +131,7 @@ class ReactExoplayerView extends FrameLayout implements
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
 
+        initializePlayer();
     }
 
 
@@ -481,6 +482,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
+        Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -503,8 +505,12 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+          ex = e.getSourceException();
+          errorString = getResources().getString(R.string.unrecognized_media_format);
+        }
         if (errorString != null) {
-            eventEmitter.error(errorString, e);
+            eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
