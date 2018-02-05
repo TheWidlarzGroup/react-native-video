@@ -732,7 +732,10 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)removePlayerLayer
 {
     [_playerLayer removeFromSuperlayer];
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    @try{
+        [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    }@catch (NSException * e) {
+    }
     _playerLayer = nil;
 }
 
@@ -823,7 +826,10 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   [_player pause];
   if (_playbackRateObserverRegistered) {
-    [_player removeObserver:self forKeyPath:playbackRate context:nil];
+    @try{
+      [_player removeObserver:self forKeyPath:playbackRate context:nil];
+    }@catch (NSException * e) {
+    }
     _playbackRateObserverRegistered = NO;
   }
   _player = nil;
