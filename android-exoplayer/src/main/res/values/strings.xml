@@ -9,4 +9,6 @@
 
   <string name="error_instantiating_decoder">Unable to instantiate decoder <xliff:g id="decoder_name">%1$s</xliff:g></string>
 
+  <string name="unrecognized_media_format">Unrecognized media format</string>
+
 </resources>
