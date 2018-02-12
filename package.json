@@ -1,7 +1,7 @@
 {
-    "name": "react-native-video",
+    "name": "react-native-video-support-header",
     "version": "2.0.0",
-    "description": "A <Video /> element for react-native",
+    "description": "A <Video /> element for react-native, support header",
     "main": "Video.js",
     "license": "MIT",
     "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
@@ -13,6 +13,10 @@
         {
             "name": "Baris Sencan",
             "email": "baris.sncn@gmail.com"
+        },
+        {
+            "name": "Xuan Hung",
+            "email": "mr.hungdx@gmail.com"
         }
     ],
     "repository": {
