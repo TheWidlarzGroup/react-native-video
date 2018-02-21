@@ -485,8 +485,8 @@ static NSString *const timedMetadata = @"timedMetadata";
   }
 
   if (_repeat) {
-    AVPlayerItem *item = [notification object];
-    [item seekToTime:kCMTimeZero];
+    [self setSeek:0.0];
+    // Not sure this is needed:
     [self applyModifiers];
   }
 }
