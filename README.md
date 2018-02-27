@@ -151,7 +151,7 @@ using System.Collections.Generic;
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
 
-<Video source={{uri: "background"}}   // Can be a URL or a local file.
+<Video source={{uri: "background", type: "mp4"}}   // Can be a URL or a local file.
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
@@ -199,7 +199,7 @@ var styles = StyleSheet.create({
 ```javascript
 // Within your render function, assuming you have a file called
 // "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
-<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
+<Video source={{uri: "background", type: "mp4", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
        rate={1.0}                   // 0 is paused, 1 is normal.
        volume={1.0}                 // 0 is muted, 1 is normal.
        muted={false}                // Mutes the audio entirely.
