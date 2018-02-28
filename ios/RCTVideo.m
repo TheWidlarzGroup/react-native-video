@@ -94,7 +94,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     playerLayer.showsPlaybackControls = NO;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
-    playerLayer.player = _player;
+    playerLayer.player = player;
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
