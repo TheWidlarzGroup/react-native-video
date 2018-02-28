@@ -25,11 +25,11 @@
     "url": "git@github.com:brentvatne/react-native-video.git"
   },
   "devDependencies": {
-    "babel-eslint": "8.2.2",
-    "eslint": "4.18.1",
-    "eslint-config-airbnb": "16.1.0",
-    "eslint-plugin-react": "7.7.0",
-    "jest-cli": "22.4.2"
+    "babel-eslint": "^8.2.2",
+    "eslint": "^4.18.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-react": "^7.7.0",
+    "jest-cli": "^22.4.2"
   },
   "dependencies": {
     "keymirror": "0.1.1",
