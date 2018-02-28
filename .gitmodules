@@ -1,0 +1,3 @@
+[submodule "ios/Vendor/SPTPersistentCache"]
+	path = ios/Vendor/SPTPersistentCache
+	url = https://github.com/spotify/SPTPersistentCache.git
