@@ -1,4 +1,4 @@
-import { AppRegistry } from 'react-native';
-import App from './App';
+import { AppRegistry, Platform } from "react-native";
+import App from "./App";
 
-AppRegistry.registerComponent('VideoCaching', () => App);
+AppRegistry.registerComponent("VideoCaching", () => App);

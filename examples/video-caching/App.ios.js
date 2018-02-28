@@ -12,7 +12,7 @@ export default class App extends Component<Props> {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Caching is only supported in iOS!</Text>
+        <Text style={styles.welcome}>The implementation will follow!</Text>
       </View>
     );
   }
