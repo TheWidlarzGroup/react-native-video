@@ -247,6 +247,7 @@ export default class Video extends Component {
 Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
+  cache: PropTypes.bool,
   seek: PropTypes.number,
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
