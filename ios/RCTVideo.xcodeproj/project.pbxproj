@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		31CAFB211CADA8CD009BCF6F /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
 		31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
+		49E995722048B4CE00EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
+		49E995752048B4D900EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
 		641E284D1F0EECF100443AF6 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		641E284E1F0EECF100443AF6 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
 		641E284F1F0EECF100443AF6 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
@@ -16,6 +18,37 @@
 		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		49E9956B2048B4A500EA7890 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0510FF131BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCache;
+		};
+		49E9956D2048B4A500EA7890 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0510FF1E1BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCacheTests;
+		};
+		49E9956F2048B4C900EA7890 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCache;
+		};
+		49E995732048B4D300EA7890 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCache;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
@@ -45,6 +78,7 @@
 		31CAFB2D1CADC77F009BCF6F /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
 		31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
+		49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = Vendor/SPTPersistentCache/SPTPersistentCache.xcodeproj; sourceTree = SOURCE_ROOT; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBD49E391AC8DEF000610F8E /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
 		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
@@ -57,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49E995722048B4CE00EA7890 /* libSPTPersistentCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +99,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49E995752048B4D900EA7890 /* libSPTPersistentCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,9 +114,35 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		49E995652048B48A00EA7890 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */,
+			);
+			name = Vendor;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
+		49E995672048B4A500EA7890 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */,
+				49E9956E2048B4A500EA7890 /* SPTPersistentCacheTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		49E995712048B4CE00EA7890 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				49E995652048B48A00EA7890 /* Vendor */,
 				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
 				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
 				31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */,
@@ -92,6 +154,7 @@
 				31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				641E28441F0EEC8500443AF6 /* libRCTVideo.a */,
+				49E995712048B4CE00EA7890 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,6 +172,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				49E995702048B4C900EA7890 /* PBXTargetDependency */,
 			);
 			name = RCTVideo;
 			productName = RCTDataManager;
@@ -126,6 +190,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				49E995742048B4D300EA7890 /* PBXTargetDependency */,
 			);
 			name = "RCTVideo-tvOS";
 			productName = "RCTVideo-tvOS";
@@ -160,6 +225,12 @@
 			mainGroup = 58B511D21A9E6C8500147676;
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 49E995672048B4A500EA7890 /* Products */;
+					ProjectRef = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTVideo */,
@@ -167,6 +238,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSPTPersistentCache.a;
+			remoteRef = 49E9956B2048B4A500EA7890 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		49E9956E2048B4A500EA7890 /* SPTPersistentCacheTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = SPTPersistentCacheTests.xctest;
+			remoteRef = 49E9956D2048B4A500EA7890 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -192,6 +280,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		49E995702048B4C900EA7890 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SPTPersistentCache;
+			targetProxy = 49E9956F2048B4C900EA7890 /* PBXContainerItemProxy */;
+		};
+		49E995742048B4D300EA7890 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SPTPersistentCache;
+			targetProxy = 49E995732048B4D300EA7890 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		58B511ED1A9E6C8500147676 /* Debug */ = {
@@ -362,6 +463,7 @@
 				641E284B1F0EEC8500443AF6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
