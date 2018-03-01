@@ -11,6 +11,14 @@
 		31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
 		49E995722048B4CE00EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
 		49E995752048B4D900EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
+		49E995962048B7F100EA7890 /* DVAssetLoaderError.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */; };
+		49E995972048B7F100EA7890 /* DVAssetLoaderError.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */; };
+		49E995982048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */; };
+		49E995992048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */; };
+		49E9959A2048B7F100EA7890 /* DVURLAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995922048B7F100EA7890 /* DVURLAsset.m */; };
+		49E9959B2048B7F100EA7890 /* DVURLAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995922048B7F100EA7890 /* DVURLAsset.m */; };
+		49E9959C2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */; };
+		49E9959D2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */; };
 		641E284D1F0EECF100443AF6 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
 		641E284E1F0EECF100443AF6 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
 		641E284F1F0EECF100443AF6 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
@@ -79,6 +87,16 @@
 		31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
 		31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = Vendor/SPTPersistentCache/SPTPersistentCache.xcodeproj; sourceTree = SOURCE_ROOT; };
+		49E9958C2048B7F100EA7890 /* DVAssetLoaderDelegatesDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderDelegatesDelegate.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegatesDelegate.h; sourceTree = SOURCE_ROOT; };
+		49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderError.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderError.m; sourceTree = SOURCE_ROOT; };
+		49E9958E2048B7F100EA7890 /* DVAssetLoaderError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderError.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderError.h; sourceTree = SOURCE_ROOT; };
+		49E9958F2048B7F100EA7890 /* DVAssetLoaderHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderHelpers.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderHelpers.h; sourceTree = SOURCE_ROOT; };
+		49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderDelegate.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegate.m; sourceTree = SOURCE_ROOT; };
+		49E995912048B7F100EA7890 /* DVURLAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVURLAsset.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVURLAsset.h; sourceTree = SOURCE_ROOT; };
+		49E995922048B7F100EA7890 /* DVURLAsset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVURLAsset.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVURLAsset.m; sourceTree = SOURCE_ROOT; };
+		49E995932048B7F100EA7890 /* DVAssetLoaderDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderDelegate.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegate.h; sourceTree = SOURCE_ROOT; };
+		49E995942048B7F100EA7890 /* DVAssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoader.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoader.h; sourceTree = SOURCE_ROOT; };
+		49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderHelpers.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderHelpers.m; sourceTree = SOURCE_ROOT; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBD49E391AC8DEF000610F8E /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
 		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
@@ -117,6 +135,7 @@
 		49E995652048B48A00EA7890 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				49E9958B2048B7CA00EA7890 /* DVAssetLoaderDelegate */,
 				49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */,
 			);
 			name = Vendor;
@@ -137,6 +156,23 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		49E9958B2048B7CA00EA7890 /* DVAssetLoaderDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				49E995942048B7F100EA7890 /* DVAssetLoader.h */,
+				49E995932048B7F100EA7890 /* DVAssetLoaderDelegate.h */,
+				49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */,
+				49E9958C2048B7F100EA7890 /* DVAssetLoaderDelegatesDelegate.h */,
+				49E9958E2048B7F100EA7890 /* DVAssetLoaderError.h */,
+				49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */,
+				49E9958F2048B7F100EA7890 /* DVAssetLoaderHelpers.h */,
+				49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */,
+				49E995912048B7F100EA7890 /* DVURLAsset.h */,
+				49E995922048B7F100EA7890 /* DVURLAsset.m */,
+			);
+			name = DVAssetLoaderDelegate;
 			sourceTree = "<group>";
 		};
 		58B511D21A9E6C8500147676 = {
@@ -263,6 +299,10 @@
 			files = (
 				31CAFB211CADA8CD009BCF6F /* UIView+FindUIViewController.m in Sources */,
 				31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */,
+				49E995982048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */,
+				49E9959A2048B7F100EA7890 /* DVURLAsset.m in Sources */,
+				49E995962048B7F100EA7890 /* DVAssetLoaderError.m in Sources */,
+				49E9959C2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */,
 				BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */,
 				BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */,
 			);
@@ -274,6 +314,10 @@
 			files = (
 				641E284D1F0EECF100443AF6 /* RCTVideo.m in Sources */,
 				641E284E1F0EECF100443AF6 /* RCTVideoPlayerViewController.m in Sources */,
+				49E995992048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */,
+				49E9959B2048B7F100EA7890 /* DVURLAsset.m in Sources */,
+				49E995972048B7F100EA7890 /* DVAssetLoaderError.m in Sources */,
+				49E9959D2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */,
 				641E284F1F0EECF100443AF6 /* RCTVideoManager.m in Sources */,
 				641E28501F0EECF100443AF6 /* UIView+FindUIViewController.m in Sources */,
 			);
