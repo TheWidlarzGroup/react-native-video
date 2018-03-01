@@ -5,14 +5,30 @@
  */
 
 import React, { Component } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Dimensions } from "react-native";
+import Video from "react-native-video";
+
+const { height, width } = Dimensions.get("screen");
 
 type Props = {};
 export default class App extends Component<Props> {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>The implementation will follow!</Text>
+        <Video
+          cache={true}
+          source={{
+            uri:
+              "https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4"
+          }}
+          ref={player => {
+            this.player = player;
+          }}
+          onEnd={() => {
+            this.player.seek(0);
+          }}
+          style={{ flex: 1, height, width }}
+        />
       </View>
     );
   }

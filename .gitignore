@@ -35,6 +35,12 @@ local.properties
 node_modules/
 npm-debug.log
 
+# yarn
+yarn.lock
+
+# editor workspace settings
+.vscode
+
 # BUCK
 buck-out/
 \.buckd/

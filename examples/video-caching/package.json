@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "react": "16.2.0",
+    "react-native-video": "file:../../react-native-video-2.0.0.tgz",
     "react-native": "0.53.3"
   },
   "devDependencies": {
