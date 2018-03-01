@@ -4,10 +4,12 @@
 #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import "RCTVideoCache.h"
+#import "DVURLAsset.h"
 
 @class RCTEventDispatcher;
 
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;

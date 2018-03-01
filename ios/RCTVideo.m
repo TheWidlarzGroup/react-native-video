@@ -1,4 +1,5 @@
 #import <React/RCTConvert.h>
+#import "RCTVideoCache.h"
 #import "RCTVideo.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
@@ -47,6 +48,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
+  RCTVideoCache * _videoCache;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -68,6 +70,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _playInBackground = false;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _videoCache = [RCTVideoCache sharedInstance];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -268,7 +271,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setCache:(BOOL *)cache
 {
-  // @TODO: Implement
+  
 }
 
 - (void)setSrc:(NSDictionary *)source
@@ -336,10 +339,16 @@ static NSString *const timedMetadata = @"timedMetadata";
   [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   
   if (isNetwork) {
-    // @TODO: Check if item is cached an if so use the cached asset
-    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
-    handler([AVPlayerItem playerItemWithAsset:asset]);
+    [_videoCache getItemForUri:uri withCallback:^(AVAsset * _Nullable asset) {
+      if (asset) {
+        handler([AVPlayerItem playerItemWithAsset:asset]);
+        return;
+      }
+      NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+      DVURLAsset * dvAsset = [[DVURLAsset alloc] initWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies} networkTimeout: 10000];
+      dvAsset.loaderDelegate = self;
+      handler([AVPlayerItem playerItemWithAsset:dvAsset]);
+    }];
     return;
   }
   else if (isAsset) {
@@ -749,6 +758,18 @@ static NSString *const timedMetadata = @"timedMetadata";
   [_playerLayer removeFromSuperlayer];
   [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
   _playerLayer = nil;
+}
+
+#pragma mark - DVAssetLoaderDelegate
+
+- (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
+                  didLoadData:(NSData *)data
+                       forURL:(NSURL *)url {
+  NSLog(@"File size is : %.2f MB",(float)data.length/1024.0f/1024.0f);
+  [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
+    
+    NSLog(@"data stored succesfully 🎉");
+  }];
 }
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
