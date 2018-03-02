@@ -47,11 +47,11 @@
                                            withIntermediateDirectories:YES
                                                             attributes:nil
                                                                  error:&error];
+#ifdef DEBUG
   if (!success || error) {
-    NSLog(@"Error! %@", error);
-  } else {
-    NSLog(@"Success!");
+    NSLog(@"Error while! %@", error);
   }
+#endif
 }
 
 - (void)storeItem:(NSData *)data forUri:(NSString *)uri withCallback:(void(^)(BOOL))handler;
@@ -60,9 +60,11 @@
   [self saveDataToTemporaryStorage:data key:key];
   [self.videoCache storeData:data forKey:key locked:NO withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
     if (response.error) {
+#ifdef DEBUG
       NSLog(@"An error occured while saving the video into the cache: %@", [response.error localizedDescription]);
       handler(NO);
       return;
+#endif
     }
     handler(YES);
   } onQueue:dispatch_get_main_queue()];
@@ -74,10 +76,8 @@
   
   BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:temporaryFilePath];
   if (!fileExists) {
-    NSLog(@"Temporary file does not exist");
     return nil;
   }
-  NSLog(@"Temporary file does exist");
   NSURL * assetUrl = [[NSURL alloc] initFileURLWithPath:temporaryFilePath];
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:assetUrl options:nil];
   return asset;
@@ -85,31 +85,24 @@
 
 - (BOOL)saveDataToTemporaryStorage:(NSData *)data key:(NSString *)key {
   NSString * temporaryFilePath = [self.temporaryCachePath stringByAppendingPathComponent:key];
-  NSLog(@"Temporary path %@", temporaryFilePath);
   [data writeToFile:temporaryFilePath atomically:YES];
   return YES;
 }
 
 - (void)getItemForUri:(NSString *)uri withCallback:(void(^)(AVAsset * _Nullable)) handler {
   NSString * key = [[self generateHashForUrl:uri] stringByAppendingPathExtension: [uri pathExtension]];
-  
-  NSLog(@"LOADING FROM TEMPORARY STORAGE %@", key);
+
   AVURLAsset * temporaryAsset = [self getItemFromTemporaryStorage:key];
   if (temporaryAsset != nil) {
-    NSLog(@"FOUND IN TEMPORARY STORAGE");
     handler(temporaryAsset);
     return;
   }
-  NSLog(@"NOT FOUND IN TEMPORARY STORAGE");
-  NSLog(@"LOAD FROM PERSISTENT STORAGE");
   
   [self.videoCache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
     if (response.record == nil || response.record.data == nil) {
-      NSLog(@"NOT FOUND IN PERSISTENT STORAGE");
       handler(nil);
       return;
     }
-    NSLog(@"FOUND IN PERSISTENT -> SAVE TO TEMPORARY");
     [self saveDataToTemporaryStorage:response.record.data key:key];
     handler([self getItemFromTemporaryStorage:key]);
   } onQueue:dispatch_get_main_queue()];
@@ -130,4 +123,3 @@
 }
 
 @end
-

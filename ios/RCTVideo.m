@@ -765,10 +765,10 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
                   didLoadData:(NSData *)data
                        forURL:(NSURL *)url {
-  NSLog(@"File size is : %.2f MB",(float)data.length/1024.0f/1024.0f);
   [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
-    
+#ifdef DEBUG
     NSLog(@"data stored succesfully 🎉");
+#endif
   }];
 }
 
