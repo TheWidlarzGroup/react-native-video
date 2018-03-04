@@ -1,6 +1,0 @@
-[submodule "ios/Vendor/SPTPersistentCache"]
-	path = ios/Vendor/SPTPersistentCache
-	url = https://github.com/spotify/SPTPersistentCache.git
-[submodule "ios/Vendor/DVAssetLoaderDelegate"]
-	path = ios/Vendor/DVAssetLoaderDelegate
-	url = https://github.com/vdugnist/DVAssetLoaderDelegate.git
