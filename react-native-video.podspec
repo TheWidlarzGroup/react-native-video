@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
 
   s.license      = "MIT"
 
-  s.ios.deployment_target = "7.0"
+  s.ios.deployment_target = "8.0"
   s.tvos.deployment_target = "9.0"
 
   s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
@@ -20,4 +20,6 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/*.{h,m}"
 
   s.dependency "React"
+  s.dependency "SPTPersistentCache", "1.1.0"
+  s.dependency "DVAssetLoaderDelegate", "0.3.1"
 end
