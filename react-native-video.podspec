@@ -20,6 +20,7 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/*.{h,m}"
 
   s.dependency "React"
-  s.dependency "SPTPersistentCache"
-  s.dependency "DVAssetLoaderDelegate"
+  s.dependency "SPTPersistentCache", "1.1.0"
+  s.dependency "DVAssetLoaderDelegate", "0.3.1"
+
 end
