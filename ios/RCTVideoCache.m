@@ -63,9 +63,9 @@
     if (response.error) {
 #ifdef DEBUG
       NSLog(@"An error occured while saving the video into the cache: %@", [response.error localizedDescription]);
+#endif
       handler(NO);
       return;
-#endif
     }
     handler(YES);
   } onQueue:dispatch_get_main_queue()];
