@@ -32,6 +32,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
+    private static final String SUBTITLE = "subtitle";
 
     @Override
     public String getName() {
@@ -85,15 +86,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         } else {
             int identifier = context.getResources().getIdentifier(
-                uriString,
-                "drawable",
-                context.getPackageName()
+                    uriString,
+                    "drawable",
+                    context.getPackageName()
             );
             if (identifier == 0) {
                 identifier = context.getResources().getIdentifier(
-                    uriString,
-                    "raw",
-                    context.getPackageName()
+                        uriString,
+                        "raw",
+                        context.getPackageName()
                 );
             }
             if (identifier > 0) {
@@ -153,6 +154,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
     public void setDisableFocus(final ReactExoplayerView videoView, final boolean disableFocus) {
         videoView.setDisableFocus(disableFocus);
+    }
+
+    @ReactProp(name = SUBTITLE, defaultBoolean = false)
+    public void setSubtitle(final ReactExoplayerView videoView, final boolean subtitle) {
+        videoView.setSubtitle(subtitle);
     }
 
     private boolean startsWithValidScheme(String uriString) {

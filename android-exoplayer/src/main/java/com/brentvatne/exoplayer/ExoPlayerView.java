@@ -79,7 +79,7 @@ public final class ExoPlayerView extends FrameLayout {
 
         layout.addView(surfaceView, 0, params);
         layout.addView(shutterView, 1, params);
-        layout.addView(subtitleLayout, 2, params);
+//        layout.addView(subtitleLayout, 2, params);
 
         addViewInLayout(layout, 0, aspectRatioParams);
     }
@@ -128,6 +128,22 @@ public final class ExoPlayerView extends FrameLayout {
             post(measureAndLayout);
         }
 
+    }
+
+    /**
+     * Toggles subtitle on or off
+     *
+     * @param isSubtitleOn The boolean value for subtitle showing.
+     */
+    public void setSubtitle(boolean isSubtitleShowing) {
+        if (isSubtitleShowing) {
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            layout.addView(subtitleLayout, 2, params);
+        } else {
+            layout.removeView(subtitleLayout);
+        }
     }
 
     /**
