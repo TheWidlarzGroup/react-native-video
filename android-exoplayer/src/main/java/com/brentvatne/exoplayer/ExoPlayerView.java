@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 
 import java.util.List;
+import java.lang.Object;
 
 @TargetApi(16)
 public final class ExoPlayerView extends FrameLayout {
@@ -212,12 +213,12 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
             // Do nothing.
         }
 
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
+        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
             // Do nothing.
         }
 
@@ -234,6 +235,21 @@ public final class ExoPlayerView extends FrameLayout {
         @Override
         public void onMetadata(Metadata metadata) {
             Log.d("onMetadata", "onMetadata");
+        }
+
+        @Override
+        public void onSeekProcessed() {
+            // Do nothing.
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+            // Do nothing.
         }
     }
 
