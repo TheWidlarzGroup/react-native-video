@@ -4,6 +4,7 @@
 #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import "AudioTapProcessor.h"
 
 @class RCTEventDispatcher;
 

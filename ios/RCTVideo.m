@@ -34,6 +34,10 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _controls;
   id _timeObserver;
 
+  // for audio level metering
+  AudioTapProcessor *tapProcessor;
+  float currentAudioLevel;
+
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
   float _rate;
@@ -199,6 +203,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
                              @"target": self.reactTag,
                              @"seekableDuration": [self calculateSeekableDuration],
+                             @"currentAudioLevel": [NSNumber numberWithFloat:currentAudioLevel],
                             });
    }
 }
@@ -394,6 +399,13 @@ static NSString *const timedMetadata = @"timedMetadata";
             orientation = @"landscape";
           } else
             orientation = @"portrait";
+        }
+          
+        if ([_playerItem.asset tracksWithMediaType:AVMediaTypeAudio].count > 0 &&
+            !tapProcessor) {
+            tapProcessor = [[AudioTapProcessor alloc] initWithAVPlayerItem:_playerItem];
+            _playerItem.audioMix = tapProcessor.audioMix;
+            tapProcessor.delegate = self;
         }
 
       if(self.onVideoLoad) {
