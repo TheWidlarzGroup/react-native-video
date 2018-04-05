@@ -854,4 +854,9 @@ static NSString *const timedMetadata = @"timedMetadata";
   [super removeFromSuperview];
 }
 
+- (void)audioTabProcessor:(AudioTapProcessor *)audioTabProcessor hasNewLeftChannelValue:(float)leftChannelValue rightChannelValue:(float)rightChannelValue
+{
+  currentAudioLevel = (leftChannelValue + rightChannelValue) / 2;
+}
+
 @end
