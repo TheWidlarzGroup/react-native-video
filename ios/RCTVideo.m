@@ -46,6 +46,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
+  BOOL _allowsExternalPlayback;
   UIViewController * _presentingViewController;
 }
 
@@ -68,6 +69,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _playInBackground = false;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _allowsExternalPlayback = YES;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -538,6 +540,12 @@ static NSString *const timedMetadata = @"timedMetadata";
   }
 
   _paused = paused;
+}
+
+- (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
+{
+  _allowsExternalPlayback = allowsExternalPlayback;
+  [_player setAllowsExternalPlayback:allowsExternalPlayback];
 }
 
 - (float)getCurrentTime
