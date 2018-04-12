@@ -24,6 +24,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
   BOOL _playbackRateObserverRegistered;
+  BOOL _playerLayerObserverRegistered;
 
   bool _pendingSeek;
   float _pendingSeekTime;
@@ -33,6 +34,10 @@ static NSString *const timedMetadata = @"timedMetadata";
   Float64 _progressUpdateInterval;
   BOOL _controls;
   id _timeObserver;
+
+  // for audio level metering
+  AudioTapProcessor *tapProcessor;
+  float currentAudioLevel;
 
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
@@ -55,6 +60,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _eventDispatcher = eventDispatcher;
 
     _playbackRateObserverRegistered = NO;
+    _playerLayerObserverRegistered = NO;
     _playbackStalled = NO;
     _rate = 1.0;
     _volume = 1.0;
@@ -199,6 +205,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
                              @"target": self.reactTag,
                              @"seekableDuration": [self calculateSeekableDuration],
+                             @"currentAudioLevel": [NSNumber numberWithFloat:currentAudioLevel],
                             });
    }
 }
@@ -252,8 +259,9 @@ static NSString *const timedMetadata = @"timedMetadata";
  * observer set */
 - (void)removePlayerItemObservers
 {
-  if (_playerLayer) {
+  if (_playerLayer && _playerLayerObserverRegistered) {
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    _playerLayerObserverRegistered = NO;
   }
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
@@ -394,6 +402,13 @@ static NSString *const timedMetadata = @"timedMetadata";
             orientation = @"landscape";
           } else
             orientation = @"portrait";
+        }
+          
+        if ([_playerItem.asset tracksWithMediaType:AVMediaTypeAudio].count > 0 &&
+            !tapProcessor) {
+            tapProcessor = [[AudioTapProcessor alloc] initWithAVPlayerItem:_playerItem];
+            _playerItem.audioMix = tapProcessor.audioMix;
+            tapProcessor.delegate = self;
         }
 
       if(self.onVideoLoad) {
@@ -699,6 +714,7 @@ static NSString *const timedMetadata = @"timedMetadata";
       // resize mode must be set before layer is added
       [self setResizeMode:_resizeMode];
       [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
+      _playerLayerObserverRegistered = YES;
 
       [self.layer addSublayer:_playerLayer];
       self.layer.needsDisplayOnBoundsChange = YES;
@@ -732,7 +748,9 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)removePlayerLayer
 {
     [_playerLayer removeFromSuperlayer];
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    if (_playerLayerObserverRegistered) {
+      [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    }
     _playerLayer = nil;
 }
 
@@ -840,6 +858,11 @@ static NSString *const timedMetadata = @"timedMetadata";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [super removeFromSuperview];
+}
+
+- (void)audioTabProcessor:(AudioTapProcessor *)audioTabProcessor hasNewLeftChannelValue:(float)leftChannelValue rightChannelValue:(float)rightChannelValue
+{
+  currentAudioLevel = (leftChannelValue + rightChannelValue) / 2;
 }
 
 @end
