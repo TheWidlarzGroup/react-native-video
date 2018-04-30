@@ -568,8 +568,8 @@ static NSString *const timedMetadata = @"timedMetadata";
 
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
-    // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
+
+    CMTime tolerance = kCMTimeZero;
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
