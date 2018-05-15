@@ -247,6 +247,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 } else {
                     setDataSource(uriString);
                 }
+            } else if (uriString.startsWith("assets://")) {
+                setAssetData(uriString.substring("assets://".length()));
             } else {
                 ZipResourceFile expansionFile= null;
                 AssetFileDescriptor fd= null;
@@ -405,7 +407,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void onPrepared(MediaPlayer mp) {
 
         mMediaPlayerValid = true;
-        mVideoDuration = mp.getDuration();
+        mVideoBufferedDuration = mVideoDuration = mp.getDuration();
 
         WritableMap naturalSize = Arguments.createMap();
         naturalSize.putInt(EVENT_PROP_WIDTH, mp.getVideoWidth());
