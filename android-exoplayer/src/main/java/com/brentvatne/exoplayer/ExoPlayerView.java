@@ -206,13 +206,16 @@ public final class ExoPlayerView extends FrameLayout {
             // Do nothing.
         }
 
+        @Override public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
         @Override
         public void onPlayerError(ExoPlaybackException e) {
             // Do nothing.
         }
 
-        @Override
-        public void onPositionDiscontinuity() {
+        @Override public void onPositionDiscontinuity(int reason) {
             // Do nothing.
         }
 
@@ -221,8 +224,11 @@ public final class ExoPlayerView extends FrameLayout {
             // Do nothing.
         }
 
-        @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
+        @Override public void onSeekProcessed() {
+
+        }
+
+        @Override public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
             // Do nothing.
         }
 

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 ext {
-    exoPlayerVersion = 'r2.5.4'
+    exoPlayerVersion = '2.8.0'
 }
 
 android {

@@ -417,6 +417,10 @@ class ReactExoplayerView extends FrameLayout implements
         // Do nothing.
     }
 
+    @Override public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
     private void startProgressHandler() {
         progressHandler.sendEmptyMessage(SHOW_PROGRESS);
     }
@@ -445,7 +449,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity() {
+    public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -459,8 +463,11 @@ class ReactExoplayerView extends FrameLayout implements
         // Do nothing.
     }
 
-    @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
+    @Override public void onSeekProcessed() {
+
+    }
+
+    @Override public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
         // Do nothing.
     }
 
