@@ -175,7 +175,7 @@ using System.Collections.Generic;
        onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
        style={styles.backgroundVideo} />
 
-// Later to trigger fullscreen
+// Later to trigger fullscreen (currently only supported in iOS)
 this.player.presentFullscreenPlayer()
 
 // To set video position in seconds (seek)
@@ -254,7 +254,7 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 `presentFullscreenPlayer()`
 
-Toggles a fullscreen player. Access using a ref to the component.
+Toggles a fullscreen player (only supported in iOS). Access using a ref to the component.
 
 ## Examples
 
