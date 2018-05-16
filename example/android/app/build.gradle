@@ -83,8 +83,8 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.videoplayer"
@@ -127,7 +127,7 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:appcompat-v7:26.1.0"
+    implementation "com.android.support:appcompat-v7:27.1.1"
     implementation "com.facebook.react:react-native:$reactNativeVersion"  // From node_modules
     implementation project(':react-native-video')
 }
