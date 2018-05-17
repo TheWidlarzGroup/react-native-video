@@ -1,13 +1,20 @@
 ## react-native-video
 
-A `<Video>` component for react-native, as seen in
-[react-native-login](https://github.com/brentvatne/react-native-login)!
+A `<Video>` component for react-native, forked from https://github.com/react-native-community/react-native-video
 
-Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
+Limited scope video component for Android and iOS:
+- No DRM
+- Only iOS and Android
+- Remote video and Local media sources are the priority
+- Expansion files not supported
+- Only ExoPlayer and native iOS player support
+- Only supports hls (and dash - Android Only)
+
+Requires react-native >= 0.50.0, no backward compatibility.
 
 ### Add it to your project
 
-Run `npm i -S react-native-video`
+Run `yarn add react-native-video`
 
 #### iOS
 
@@ -63,7 +70,7 @@ Or if you have trouble, make the following additions to the given files manually
 
 ```gradle
 include ':react-native-video'
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
 ```
 
 **android/app/build.gradle**
@@ -75,7 +82,7 @@ dependencies {
 }
 ```
 
-**MainApplication.java**
+**MainApplication.java  (react-native >= 0.29.0)**
 
 On top, where imports are:
 
@@ -83,7 +90,7 @@ On top, where imports are:
 import com.brentvatne.react.ReactVideoPackage;
 ```
 
-Add the `ReactVideoPackage` class to your list of exported packages.
+Under `.addPackage(new MainReactPackage())`:
 
 ```java
 @Override
@@ -93,55 +100,6 @@ protected List<ReactPackage> getPackages() {
             new ReactVideoPackage()
     );
 }
-```
-
-#### Windows
-
-Make the following additions to the given files manually:
-
-**windows/myapp.sln**
-
-Add the `ReactNativeVideo` project to your solution.
-
-1. Open the solution in Visual Studio 2015
-2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
-3.
-  UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
-  WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
-
-**windows/myapp/myapp.csproj**
-
-Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
-
-1. Right-click main application project > Add > Reference...
-2.
-  UWP: Check `ReactNativeVideo` from Solution Projects.
-  WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
-
-**MainPage.cs**
-
-Add the `ReactVideoPackage` class to your list of exported packages.
-```cs
-using ReactNative;
-using ReactNative.Modules.Core;
-using ReactNative.Shell;
-using ReactNativeVideo; // <-- Add this
-using System.Collections.Generic;
-...
-
-        public override List<IReactPackage> Packages
-        {
-            get
-            {
-                return new List<IReactPackage>
-                {
-                    new MainReactPackage(),
-                    new ReactVideoPackage(), // <-- Add this
-                };
-            }
-        }
-
-...
 ```
 
 ## Usage
@@ -195,40 +153,6 @@ var styles = StyleSheet.create({
 
 - * *For iOS you also need to specify muted for this to work*
 
-To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
-
-## Android Expansion File Usage
-
-```javascript
-// Within your render function, assuming you have a file called
-// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
-<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
-       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
-       rate={1.0}                   // 0 is paused, 1 is normal.
-       volume={1.0}                 // 0 is muted, 1 is normal.
-       muted={false}                // Mutes the audio entirely.
-       paused={false}               // Pauses playback entirely.
-       resizeMode="cover"           // Fill the whole screen at aspect ratio.
-       repeat={true}                // Repeat forever.
-       onLoadStart={this.loadStart} // Callback when video starts to load
-       onLoad={this.setDuration}    // Callback when video loads
-       onProgress={this.setTime}    // Callback every ~250ms with currentTime
-       onEnd={this.onEnd}           // Callback when playback finishes
-       onError={this.videoError}    // Callback when video cannot be loaded
-       style={styles.backgroundVideo} />
-
-// Later on in your styles..
-var styles = Stylesheet.create({
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-});
-```
-
 ### Load files with the RN Asset System
 
 The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
@@ -258,20 +182,7 @@ Toggles a fullscreen player. Access using a ref to the component.
 
 ## Examples
 
-- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
-- Try the included [VideoPlayer example][2] yourself:
-
-   ```sh
-   git clone git@github.com:react-native-community/react-native-video.git
-   cd react-native-video/example
-   npm install
-   open ios/VideoPlayer.xcodeproj
-
-   ```
-
-   Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
-
-- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
+- DRIVETRIBE app
 
 ## TODOS
 

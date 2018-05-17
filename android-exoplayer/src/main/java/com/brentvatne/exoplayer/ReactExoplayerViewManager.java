@@ -68,7 +68,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_SRC)
-    public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
+    public void setSrc(final ReactExoplayerView videoView, ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
@@ -153,6 +153,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
     public void setDisableFocus(final ReactExoplayerView videoView, final boolean disableFocus) {
         videoView.setDisableFocus(disableFocus);
+    }
+
+    @Override
+    protected void onAfterUpdateTransaction(ReactExoplayerView view) {
+        super.onAfterUpdateTransaction(view);
+        // TODO: implement - init player at this point
     }
 
     private boolean startsWithValidScheme(String uriString) {

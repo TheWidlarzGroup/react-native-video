@@ -16,12 +16,12 @@ import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -37,8 +37,6 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
@@ -56,7 +54,7 @@ import java.lang.Math;
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
-        ExoPlayer.EventListener,
+        Player.EventListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataRenderer.Output {
@@ -87,7 +85,6 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean loadVideoStarted;
     private boolean isPaused = true;
     private boolean isBuffering;
-    private float rate = 1f;
 
     // Props from React
     private Uri srcUri;
@@ -103,13 +100,14 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
+    @SuppressLint("HandlerLeak")
     private final Handler progressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW_PROGRESS:
                     if (player != null
-                            && player.getPlaybackState() == ExoPlayer.STATE_READY
+                            && player.getPlaybackState() == Player.STATE_READY
                             && player.getPlayWhenReady()
                             ) {
                         long pos = player.getCurrentPosition();
@@ -201,12 +199,14 @@ class ReactExoplayerView extends FrameLayout implements
     // Internal methods
 
     private void initializePlayer() {
-        if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
-            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, new DefaultLoadControl());
+        boolean needNewPlayer = player == null;
+        if (needNewPlayer) {
+            TrackSelection.Factory adaptiveTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
+            DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(getContext());
+            player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
             player.addListener(this);
-            player.setMetadataOutput(this);
+            player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
@@ -234,9 +234,6 @@ class ReactExoplayerView extends FrameLayout implements
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         switch (type) {
-            case C.TYPE_SS:
-                return new SsMediaSource(uri, buildDataSourceFactory(false),
-                        new DefaultSsChunkSource.Factory(mediaDataSourceFactory), mainHandler, null);
             case C.TYPE_DASH:
                 return new DashMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory), mainHandler, null);
@@ -256,7 +253,7 @@ class ReactExoplayerView extends FrameLayout implements
             isPaused = player.getPlayWhenReady();
             updateResumePosition();
             player.release();
-            player.setMetadataOutput(null);
+            player.removeMetadataOutput(this);
             player = null;
             trackSelector = null;
         }
@@ -293,12 +290,12 @@ class ReactExoplayerView extends FrameLayout implements
     private void startPlayback() {
         if (player != null) {
             switch (player.getPlaybackState()) {
-                case ExoPlayer.STATE_IDLE:
-                case ExoPlayer.STATE_ENDED:
+                case Player.STATE_IDLE:
+                case Player.STATE_ENDED:
                     initializePlayer();
                     break;
-                case ExoPlayer.STATE_BUFFERING:
-                case ExoPlayer.STATE_READY:
+                case Player.STATE_BUFFERING:
+                case Player.STATE_READY:
                     if (!player.getPlayWhenReady()) {
                         setPlayWhenReady(true);
                     }
@@ -400,22 +397,22 @@ class ReactExoplayerView extends FrameLayout implements
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
         switch (playbackState) {
-            case ExoPlayer.STATE_IDLE:
+            case Player.STATE_IDLE:
                 text += "idle";
                 eventEmitter.idle();
                 break;
-            case ExoPlayer.STATE_BUFFERING:
+            case Player.STATE_BUFFERING:
                 text += "buffering";
                 onBuffering(true);
                 break;
-            case ExoPlayer.STATE_READY:
+            case Player.STATE_READY:
                 text += "ready";
                 eventEmitter.ready();
                 onBuffering(false);
                 startProgressHandler();
                 videoLoaded();
                 break;
-            case ExoPlayer.STATE_ENDED:
+            case Player.STATE_ENDED:
                 text += "ended";
                 eventEmitter.end();
                 onStopPlayback();
@@ -425,6 +422,15 @@ class ReactExoplayerView extends FrameLayout implements
                 break;
         }
         Log.d(TAG, text);
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+        // Do nothing.
+    }
+
+    @Override public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
     }
 
     private void startProgressHandler() {
@@ -455,7 +461,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity() {
+    public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -465,7 +471,15 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+        // Do nothing.
+    }
+
+    @Override public void onSeekProcessed() {
+
+    }
+
+    @Override public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
         // Do nothing.
     }
 
