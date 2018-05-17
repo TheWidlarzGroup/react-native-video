@@ -49,6 +49,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.lang.Math;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -90,6 +91,8 @@ class ReactExoplayerView extends FrameLayout implements
     private String extension;
     private boolean repeat;
     private boolean disableFocus;
+    private float mProgressUpdateInterval = 250.0f;
+    private boolean playInBackground = false;
     // \ End props
 
     // React
@@ -110,7 +113,7 @@ class ReactExoplayerView extends FrameLayout implements
                         long pos = player.getCurrentPosition();
                         eventEmitter.progressChanged(pos, player.getBufferedPercentage());
                         msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, 1000 - (pos % 1000));
+                        sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
                     break;
             }
@@ -169,11 +172,17 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
+        if (playInBackground) {
+            return;
+        }
         setPlayWhenReady(!isPaused);
     }
 
     @Override
     public void onHostPause() {
+        if (playInBackground) {
+            return;
+        }
         setPlayWhenReady(false);
     }
 
@@ -202,6 +211,9 @@ class ReactExoplayerView extends FrameLayout implements
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
+
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
         }
         if (playerNeedsSource && srcUri != null) {
             MediaSource mediaSource = buildMediaSource(srcUri, extension);
@@ -477,8 +489,14 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
+    public void onPlaybackParametersChanged(PlaybackParameters params) {
+        eventEmitter.playbackRateChange(params.speed);
+    }
+
+    @Override
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
+        Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -501,8 +519,12 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+            ex = e.getSourceException();
+            errorString = getResources().getString(R.string.unrecognized_media_format);
+        }
         if (errorString != null) {
-            eventEmitter.error(errorString, e);
+            eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
@@ -547,6 +569,10 @@ class ReactExoplayerView extends FrameLayout implements
                 reloadSource();
             }
         }
+    }
+
+    public void setProgressUpdateInterval(final float progressUpdateInterval) {
+        mProgressUpdateInterval = progressUpdateInterval;
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
@@ -608,14 +634,18 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setRateModifier(float rate) {
-        // TODO: waiting on ExoPlayer implementation
-        // https://github.com/google/ExoPlayer/issues/26
+    public void setRateModifier(float newRate) {
+      rate = newRate;
+
+      if (player != null) {
+          PlaybackParameters params = new PlaybackParameters(rate, 1f);
+          player.setPlaybackParameters(params);
+      }
     }
 
 
     public void setPlayInBackground(boolean playInBackground) {
-        // TODO: implement
+        this.playInBackground = playInBackground;
     }
 
     public void setDisableFocus(boolean disableFocus) {

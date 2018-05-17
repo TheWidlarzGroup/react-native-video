@@ -236,6 +236,14 @@ public final class ExoPlayerView extends FrameLayout {
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
             updateForCurrentTrackSelections();
         }
+        public void onPlaybackParametersChanged(PlaybackParameters params) {
+            // Do nothing
+        }
+
+        @Override
+        public void onMetadata(Metadata metadata) {
+            Log.d("onMetadata", "onMetadata");
+        }
     }
 
 }

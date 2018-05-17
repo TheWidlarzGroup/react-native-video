@@ -8,6 +8,6 @@
   "dependencies": {
     "react": "16.3.2",
     "react-native": "0.55.4",
-    "@drivetribe/react-native-video": "file:../"
+    "react-native-video": "file:../"
   }
 }
