@@ -177,6 +177,8 @@ using System.Collections.Generic;
 
 // Later to trigger fullscreen
 this.player.presentFullscreenPlayer()
+// Disable fullscreen
+this.player.dismissFullscreenPlayer()
 
 // To set video position in seconds (seek)
 this.player.seek(0)
@@ -217,6 +219,10 @@ To see full list of available props, you can check [the propTypes](https://githu
        onError={this.videoError}    // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
+// Later to enable fullscreen UI mode (ExoPlayer only). Combine with setting the style to be height & width from Dimensions.get('screen')
+this.player.presentFullscreenPlayer()
+// Disable fullscreen UI mode
+
 // Later on in your styles..
 var styles = Stylesheet.create({
   backgroundVideo: {
@@ -254,7 +260,11 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 `presentFullscreenPlayer()`
 
-Toggles a fullscreen player. Access using a ref to the component.
+Enable the fullscreen player. Access using a ref to the component.
+
+`dimissFullscreenPlayer()`
+
+Disable the fullscreen player. Access using a ref to the component.
 
 ## Examples
 

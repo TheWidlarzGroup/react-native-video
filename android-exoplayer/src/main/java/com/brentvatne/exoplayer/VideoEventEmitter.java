@@ -31,6 +31,11 @@ class VideoEventEmitter {
     private static final String EVENT_PROGRESS = "onVideoProgress";
     private static final String EVENT_SEEK = "onVideoSeek";
     private static final String EVENT_END = "onVideoEnd";
+    private static final String EVENT_FULLSCREEN_WILL_PRESENT = "onVideoFullscreenPlayerWillPresent";
+    private static final String EVENT_FULLSCREEN_DID_PRESENT = "onVideoFullscreenPlayerDidPresent";
+    private static final String EVENT_FULLSCREEN_WILL_DISMISS = "onVideoFullscreenPlayerWillDismiss";
+    private static final String EVENT_FULLSCREEN_DID_DISMISS = "onVideoFullscreenPlayerDidDismiss";
+
     private static final String EVENT_STALLED = "onPlaybackStalled";
     private static final String EVENT_RESUME = "onPlaybackResume";
     private static final String EVENT_READY = "onReadyForDisplay";
@@ -48,6 +53,10 @@ class VideoEventEmitter {
             EVENT_PROGRESS,
             EVENT_SEEK,
             EVENT_END,
+            EVENT_FULLSCREEN_WILL_PRESENT,
+            EVENT_FULLSCREEN_DID_PRESENT,
+            EVENT_FULLSCREEN_WILL_DISMISS,
+            EVENT_FULLSCREEN_DID_DISMISS,
             EVENT_STALLED,
             EVENT_RESUME,
             EVENT_READY,
@@ -67,6 +76,10 @@ class VideoEventEmitter {
             EVENT_PROGRESS,
             EVENT_SEEK,
             EVENT_END,
+            EVENT_FULLSCREEN_WILL_PRESENT,
+            EVENT_FULLSCREEN_DID_PRESENT,
+            EVENT_FULLSCREEN_WILL_DISMISS,
+            EVENT_FULLSCREEN_DID_DISMISS,
             EVENT_STALLED,
             EVENT_RESUME,
             EVENT_READY,
@@ -173,6 +186,22 @@ class VideoEventEmitter {
 
     void end() {
         receiveEvent(EVENT_END, null);
+    }
+
+    void fullscreenWillPresent() {
+        receiveEvent(EVENT_FULLSCREEN_WILL_PRESENT, null);
+    }
+
+    void fullscreenDidPresent() {
+        receiveEvent(EVENT_FULLSCREEN_DID_PRESENT, null);
+    }
+
+    void fullscreenWillDismiss() {
+        receiveEvent(EVENT_FULLSCREEN_WILL_DISMISS, null);
+    }
+
+    void fullscreenDidDismiss() {
+        receiveEvent(EVENT_FULLSCREEN_DID_DISMISS, null);
     }
 
     void error(String errorString, Exception exception) {
