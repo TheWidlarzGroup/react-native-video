@@ -222,6 +222,7 @@ To see full list of available props, you can check [the propTypes](https://githu
 // Later to enable fullscreen UI mode (ExoPlayer only). Combine with setting the style to be height & width from Dimensions.get('screen')
 this.player.presentFullscreenPlayer()
 // Disable fullscreen UI mode
+this.player.dismissFullscreenPlayer()
 
 // Later on in your styles..
 var styles = Stylesheet.create({
