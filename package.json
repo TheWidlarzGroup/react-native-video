@@ -32,8 +32,11 @@
     },
     "dependencies": {
         "keymirror": "0.1.1",
-        "prop-types": "^15.5.10"
     },
+    "peerDependencies": {
+        "react": "^15.0 || ^16.0",
+        "prop-types": "^15.0 || ^16.0"
+      },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
     }
