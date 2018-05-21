@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -96,6 +97,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mVolume = 1.0f;
     private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
+    private float mActiveRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
     private boolean mActiveStatePauseStatusInitialized = false;
@@ -345,6 +347,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         } else {
             if (!mMediaPlayer.isPlaying()) {
                 start();
+                // Setting the rate unpauses, so we have to wait for an unpause
+                if (mRate != mActiveRate) { 
+                    setRateModifier(mRate);
+                }
 
                 // Also Start the Progress Update Handler
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
@@ -379,8 +385,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mRate = rate;
 
         if (mMediaPlayerValid) {
-            // TODO: Implement this.
-            Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!mPaused) { // Applying the rate while paused will cause the video to start
+                    mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
+                    mActiveRate = rate;
+                }
+            } else {
+                Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android versions below 6.0");
+            }
         }
     }
 
@@ -390,7 +402,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
         setProgressUpdateInterval(mProgressUpdateInterval);
-//        setRateModifier(mRate);
+        setRateModifier(mRate);
     }
 
     public void setPlayInBackground(final boolean playInBackground) {
