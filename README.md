@@ -198,10 +198,14 @@ var styles = StyleSheet.create({
   },
 });
 ```
+To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
-- * *For iOS you also need to specify muted for this to work*
+- By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
 
-To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
+
+<img src="./docs/AppTransportSecuritySetting.png" width="50%">
+
+For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
 
 ## Android Expansion File Usage
 
