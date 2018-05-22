@@ -200,7 +200,7 @@ var styles = StyleSheet.create({
 ```
 
 -  For iOS you also need to specify muted for this to work
--  To load the HTTP source url on iOS you need to add/modify the App Transport Security Exception into the Info.plist
+- iOS 9+ requires all webservices and files loaded inside the app to use HTTPS. To use the non-secured (HTTP) webservices or files, you need to add/modify the App Transport Security Exception into the Info.plist
 
 <img src="./docs/AppTransportSecuritySetting.png" width="50%">
 
