@@ -48,7 +48,7 @@ namespace ReactNativeVideo
             set
             {
                 var uri = new Uri(value);
-                
+
                 _player.Open(uri);
 
                 this.GetReactContext()
@@ -144,6 +144,7 @@ namespace ReactNativeVideo
             if (_player != null)
             {
                 _player.Position = TimeSpan.FromSeconds(seek);
+                OnSeekCompleted(seek);
             }
         }
 
@@ -157,7 +158,6 @@ namespace ReactNativeVideo
                 _player.MediaEnded -= OnMediaEnded;
                 _player.BufferingStarted -= OnBufferingStarted;
                 _player.BufferingEnded -= OnBufferingEnded;
-                // _player.SeekCompleted -= OnSeekCompleted;
             }
 
             _timer.Stop();
@@ -180,7 +180,6 @@ namespace ReactNativeVideo
             _player.MediaEnded += OnMediaEnded;
             _player.BufferingStarted += OnBufferingStarted;
             _player.BufferingEnded += OnBufferingEnded;
-            //_player.SeekCompleted += OnSeekCompleted;
         }
 
         private void OnTick(object sender, object e)
@@ -306,15 +305,21 @@ namespace ReactNativeVideo
                         new JObject()));
         }
 
-        private void OnSeekCompleted(object sender, EventArgs args)
+        private void OnSeekCompleted(double seekTime)
         {
+            var data = new JObject
+            {
+                { "currentTime", _player.Position.TotalSeconds },
+                { "seekTime", seekTime }
+            };
+
             this.GetReactContext()
                 .GetNativeModule<UIManagerModule>()
                 .EventDispatcher.DispatchEvent(
                     new ReactVideoEvent(
                         ReactVideoEventType.Seek.GetEventName(),
                         this.GetTag(),
-                        new JObject()));
+                        data));
         }
 
         private static async void RunOnDispatcher(Action action)

@@ -24,6 +24,7 @@ namespace ReactNativeVideo
         private bool _isCompleted;
         private double _volume;
         private double _rate;
+        private double _seekTime = 0.0;
 
         public ReactVideoView()
         {
@@ -156,6 +157,7 @@ namespace ReactNativeVideo
             if (mediaPlayer != null)
             {
                 mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seek);
+                _seekTime = seek;
             }
         }
 
@@ -314,13 +316,23 @@ namespace ReactNativeVideo
 
         private void OnSeekCompleted(MediaPlaybackSession sender, object args)
         {
-            this.GetReactContext()
+            RunOnDispatcher(delegate
+            {
+                var data = new JObject
+                {
+                    { "currentTime", sender.Position.TotalSeconds },
+                    { "seekTime", _seekTime }
+                };
+                _seekTime = 0.0;
+
+                this.GetReactContext()
                 .GetNativeModule<UIManagerModule>()
                 .EventDispatcher.DispatchEvent(
                     new ReactVideoEvent(
                         ReactVideoEventType.Seek.GetEventName(),
                         this.GetTag(),
-                        new JObject()));
+                        data));
+            });
         }
 
         private static async void RunOnDispatcher(DispatchedHandler action)
