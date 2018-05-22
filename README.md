@@ -199,7 +199,9 @@ var styles = StyleSheet.create({
 });
 ```
 
-- * *For iOS you also need to specify muted for this to work*
+- * For iOS you also need to specify muted for this to work*
+- * To load the HTTP source url on iOS you need to add the exception into the Info.plist
+<img src="./docs/AppTransportSecuritySetting.png" width="50%">
 
 To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
