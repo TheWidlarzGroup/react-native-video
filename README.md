@@ -166,17 +166,23 @@ using System.Collections.Generic;
        playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
        ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
        progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
+       onBuffer={this.onBuffer}                // Callback when remote video is buffering
+       onEnd={this.onEnd}                      // Callback when playback finishes
+       onError={this.videoError}               // Callback when video cannot be loaded
+       onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
+       onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
+       onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
+       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDissmiss}  // Callback after fullscreen stopped
        onLoadStart={this.loadStart}            // Callback when video starts to load
        onLoad={this.setDuration}               // Callback when video loads
        onProgress={this.setTime}               // Callback every ~250ms with currentTime
-       onEnd={this.onEnd}                      // Callback when playback finishes
-       onError={this.videoError}               // Callback when video cannot be loaded
-       onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
 this.player.presentFullscreenPlayer()
+// Disable fullscreen
+this.player.dismissFullscreenPlayer()
 
 // To set video position in seconds (seek)
 this.player.seek(0)
@@ -192,10 +198,14 @@ var styles = StyleSheet.create({
   },
 });
 ```
+To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
-- * *For iOS you also need to specify muted for this to work*
+- By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
 
-To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
+
+<img src="./docs/AppTransportSecuritySetting.png" width="50%">
+
+For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
 
 ## Android Expansion File Usage
 
@@ -216,6 +226,11 @@ To see full list of available props, you can check [the propTypes](https://githu
        onEnd={this.onEnd}           // Callback when playback finishes
        onError={this.videoError}    // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
+
+// Later to enable fullscreen UI mode (ExoPlayer only). Combine with setting the style to be height & width from Dimensions.get('screen')
+this.player.presentFullscreenPlayer()
+// Disable fullscreen UI mode
+this.player.dismissFullscreenPlayer()
 
 // Later on in your styles..
 var styles = Stylesheet.create({
@@ -254,7 +269,11 @@ Seeks the video to the specified time (in seconds). Access using a ref to the co
 
 `presentFullscreenPlayer()`
 
-Toggles a fullscreen player. Access using a ref to the component.
+Enable the fullscreen player. Access using a ref to the component.
+
+`dimissFullscreenPlayer()`
+
+Disable the fullscreen player. Access using a ref to the component.
 
 ## Examples
 

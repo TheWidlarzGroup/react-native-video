@@ -33,6 +33,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String SUBTITLE = "subtitle";
+    private static final String PROP_FULLSCREEN = "fullscreen";
 
     @Override
     public String getName() {
@@ -159,6 +160,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = SUBTITLE, defaultBoolean = false)
     public void setSubtitle(final ReactExoplayerView videoView, final boolean subtitle) {
         videoView.setSubtitle(subtitle);
+    }
+
+    @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)
+    public void setFullscreen(final ReactExoplayerView videoView, final boolean fullscreen) {
+        videoView.setFullscreen(fullscreen);
     }
 
     private boolean startsWithValidScheme(String uriString) {
