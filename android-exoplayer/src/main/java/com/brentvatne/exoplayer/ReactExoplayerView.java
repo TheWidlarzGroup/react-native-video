@@ -610,6 +610,13 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRepeatModifier(boolean repeat) {
+        if (player != null) {
+            if (repeat) {
+                player.setRepeatMode(Player.REPEAT_MODE_ONE);
+            } else {
+                player.setRepeatMode(Player.REPEAT_MODE_OFF);
+            }
+        }
         this.repeat = repeat;
     }
 
