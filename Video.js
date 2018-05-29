@@ -217,6 +217,7 @@ export default class Video extends Component {
         top: 0,
         right: 0,
         bottom: 0,
+        resizeMode: this.props.posterResizeMode || 'contain'
       };
 
       return (
@@ -228,7 +229,6 @@ export default class Video extends Component {
           <Image
             style={posterStyle}
             source={{uri: this.props.poster}}
-            resizeMode={this.props.posterResizeMode}
           />
         </View>
       );
