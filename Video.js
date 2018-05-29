@@ -65,7 +65,7 @@ export default class Video extends Component {
   };
 
   _onSeek = (event) => {
-    if (this.state.showPoster) {
+    if (this.state.showPoster && !this.props.audioOnly) {
       this.setState({showPoster: false});
     }
 
@@ -129,7 +129,7 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && (event.nativeEvent.playbackRate !== 0)) {
+    if (this.state.showPoster && (event.nativeEvent.playbackRate !== 0) && (!this.props.audioOnly)) {
       this.setState({showPoster: false});
     }
 
