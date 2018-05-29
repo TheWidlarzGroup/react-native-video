@@ -182,6 +182,7 @@ using System.Collections.Generic;
 
 <Video source={{uri: "background"}}   // Can be a URL or a local file.
        poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
+       posterResizeMode="contain"              // Poster resize mode. One of contain (default), cover, stretch, center, repeat
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
