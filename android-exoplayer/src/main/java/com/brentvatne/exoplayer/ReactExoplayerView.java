@@ -55,6 +55,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
+import java.lang.Object;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -463,7 +464,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity() {
+    public void onPositionDiscontinuity(int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -473,7 +474,22 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onSeekProcessed() {
+        // Do nothing.
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
         // Do nothing.
     }
 
