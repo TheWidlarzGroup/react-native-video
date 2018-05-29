@@ -79,10 +79,20 @@ Or if you have trouble, make the following additions to the given files manually
 
 **android/settings.gradle**
 
+The newer ExoPlayer library will work for most people.
+
+```gradle
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+```
+
+If you need to use the old Android media player based player, use the following instead:
+
 ```gradle
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
+
 
 **android/app/build.gradle**
 
@@ -116,6 +126,7 @@ protected List<ReactPackage> getPackages() {
 
 <details>
   <summary>Windows</summary>
+
 Make the following additions to the given files manually:
 
 **windows/myapp.sln**
@@ -176,12 +187,12 @@ using System.Collections.Generic;
        }}                                      // Store reference
        rate={1.0}                              // 0 is paused, 1 is normal.
        volume={1.0}                            // 0 is muted, 1 is normal.
-       muted={false}                           // Mutes the audio entirely.
-       paused={false}                          // Pauses playback entirely.
+       muted={true|false}                      // Mutes the audio entirely. Default false
+       paused={true|false}                     // Pauses playback entirely. Default false
        resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
-       repeat={true}                           // Repeat forever.
-       playInBackground={false}                // Audio continues to play when app entering background.
-       playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
+       repeat={true|false}                     // Repeat forever. Default false
+       playInBackground={true|false}           // Audio continues to play when app entering background. Default false
+       playWhenInactive={true|false}           // [iOS] Video continues to play when control or notification center are shown. Default false
        ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
        progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
