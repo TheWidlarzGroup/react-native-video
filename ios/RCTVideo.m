@@ -576,7 +576,9 @@ static NSString *const timedMetadata = @"timedMetadata";
         if (!_timeObserver) {
           [self addPlayerTimeObserver];
         }
-        if (!wasPaused) [_player play];
+        if (!wasPaused) {
+            [self setPaused:false];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
