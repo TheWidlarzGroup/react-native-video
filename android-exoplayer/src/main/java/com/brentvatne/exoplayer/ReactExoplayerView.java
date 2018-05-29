@@ -100,6 +100,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String extension;
     private boolean repeat;
     private boolean disableFocus;
+    private boolean subtitle;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     // \ End props
@@ -616,6 +617,11 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setResizeMode(resizeMode);
     }
 
+    public void setSubtitle(boolean isSubtitleShowing) {
+        this.subtitle = isSubtitleShowing;
+        exoPlayerView.setSubtitle(isSubtitleShowing);
+    }
+
     public void setRepeatModifier(boolean repeat) {
         if (player != null) {
             if (repeat) {
@@ -659,12 +665,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
-      rate = newRate;
+        rate = newRate;
 
-      if (player != null) {
-          PlaybackParameters params = new PlaybackParameters(rate, 1f);
-          player.setPlaybackParameters(params);
-      }
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
+        }
     }
 
 
