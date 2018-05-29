@@ -124,15 +124,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     return (kCMTimeRangeZero);
 }
 
-- (void)addPlayerTimeObserver
+-(void)addPlayerTimeObserver
 {
-    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-    __weak RCTVideo *weakSelf = self;
-    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                          queue:NULL
-                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                     ];
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
+  // of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  __weak RCTVideo *weakSelf = self;
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                        queue:NULL
+                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                   ];
 }
 
 /* Cancels the previously registered time observer. */
@@ -738,6 +739,11 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval
 {
   _progressUpdateInterval = progressUpdateInterval;
+
+  if (_timeObserver) {
+    [self removePlayerTimeObserver];
+    [self addPlayerTimeObserver];
+  }
 }
 
 - (void)removePlayerLayer
