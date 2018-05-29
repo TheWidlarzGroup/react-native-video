@@ -93,7 +93,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     playerLayer.showsPlaybackControls = NO;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
-    playerLayer.player = _player;
+    playerLayer.player = player;
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
@@ -124,6 +124,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     return (kCMTimeRangeZero);
 }
 
+- (void)addPlayerTimeObserver
+{
+    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+    __weak RCTVideo *weakSelf = self;
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                          queue:NULL
+                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                     ];
+}
 
 /* Cancels the previously registered time observer. */
 -(void)removePlayerTimeObserver
@@ -188,6 +198,9 @@ static NSString *const timedMetadata = @"timedMetadata";
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
+
    if( currentTimeSecs >= 0 && self.onVideoProgress) {
       self.onVideoProgress(@{
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
@@ -249,6 +262,9 @@ static NSString *const timedMetadata = @"timedMetadata";
  * observer set */
 - (void)removePlayerItemObservers
 {
+  if (_playerLayer) {
+    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+  }
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
@@ -283,13 +299,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
   _playbackRateObserverRegistered = YES;
 
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
+  [self addPlayerTimeObserver];
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //Perform on next run loop, otherwise onVideoLoadStart is nil
@@ -487,6 +497,8 @@ static NSString *const timedMetadata = @"timedMetadata";
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
+  } else {
+    [self removePlayerTimeObserver];
   }
 }
 
@@ -566,7 +578,12 @@ static NSString *const timedMetadata = @"timedMetadata";
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        if (!wasPaused) [_player play];
+        if (!_timeObserver) {
+          [self addPlayerTimeObserver];
+        }
+        if (!wasPaused) {
+            [self setPaused:false];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
