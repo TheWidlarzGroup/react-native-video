@@ -5,12 +5,28 @@ A `<Video>` component for react-native, as seen in
 
 Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
-### Add it to your project
+## TOC
 
-Run `npm i -S react-native-video`
+* [Installation](#installation)
+* [Linking](#linking)
+* [Usage](#usage)
 
-#### iOS
+## Installation
 
+Using npm:
+
+```shell
+npm install --save react-native-video
+```
+
+or using yarn:
+
+```shell
+yarn add react-native-video
+```
+
+<details>
+  <summary>iOS</summary>
 Run `react-native link` to link the react-native-video library.
 
 If you would like to allow other apps to play music over your video component, add:
@@ -28,9 +44,10 @@ If you would like to allow other apps to play music over your video component, a
 }
 ```
 Note: you can also use the `ignoreSilentSwitch` prop, shown below.
+</details>
 
-#### tvOS
-
+<details>
+  <summary>tvOS</summary>
 Run `react-native link` to link the react-native-video library.
 
 `react-native link` don’t works properly with the tvOS target so we need to add the library manually.
@@ -50,11 +67,10 @@ Scroll to « Linked Frameworks and Libraries » and tap on the + button
 Select RCTVideo-tvOS
 
 <img src="./docs/tvOS-step-4.jpg" width="40%">
+</details>
 
-That’s all, you can use react-native-video for your tvOS application
-
-#### Android
-
+<details>
+  <summary>Android</summary>
 Run `react-native link` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
@@ -94,9 +110,10 @@ protected List<ReactPackage> getPackages() {
     );
 }
 ```
+</details>
 
-#### Windows
-
+<details>
+  <summary>Windows</summary>
 Make the following additions to the given files manually:
 
 **windows/myapp.sln**
@@ -105,18 +122,17 @@ Add the `ReactNativeVideo` project to your solution.
 
 1. Open the solution in Visual Studio 2015
 2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
-3.
-  UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
-  WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
+3a. UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
+3b. WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
 
 **windows/myapp/myapp.csproj**
 
 Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
 1. Right-click main application project > Add > Reference...
-2.
-  UWP: Check `ReactNativeVideo` from Solution Projects.
-  WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
+2a. UWP: Check `ReactNativeVideo` from Solution Projects.
+
+WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
 
 **MainPage.cs**
 
@@ -143,6 +159,7 @@ using System.Collections.Generic;
 
 ...
 ```
+</details>
 
 ## Usage
 
@@ -181,6 +198,7 @@ using System.Collections.Generic;
 
 // Later to trigger fullscreen
 this.player.presentFullscreenPlayer()
+
 // Disable fullscreen
 this.player.dismissFullscreenPlayer()
 
@@ -202,47 +220,16 @@ To see the full list of available props, you can check the [propTypes](https://g
 
 - By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
 
-
 <img src="./docs/AppTransportSecuritySetting.png" width="50%">
 
 For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
+</details>
 
-## Android Expansion File Usage
-
-```javascript
-// Within your render function, assuming you have a file called
-// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
-<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
-       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
-       rate={1.0}                   // 0 is paused, 1 is normal.
-       volume={1.0}                 // 0 is muted, 1 is normal.
-       muted={false}                // Mutes the audio entirely.
-       paused={false}               // Pauses playback entirely.
-       resizeMode="cover"           // Fill the whole screen at aspect ratio.
-       repeat={true}                // Repeat forever.
-       onLoadStart={this.loadStart} // Callback when video starts to load
-       onLoad={this.setDuration}    // Callback when video loads
-       onProgress={this.setTime}    // Callback every ~250ms with currentTime
-       onEnd={this.onEnd}           // Callback when playback finishes
-       onError={this.videoError}    // Callback when video cannot be loaded
-       style={styles.backgroundVideo} />
-
-// Later to enable fullscreen UI mode (ExoPlayer only). Combine with setting the style to be height & width from Dimensions.get('screen')
-this.player.presentFullscreenPlayer()
-// Disable fullscreen UI mode
-this.player.dismissFullscreenPlayer()
-
-// Later on in your styles..
-var styles = Stylesheet.create({
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-});
-```
+### Android Expansion File Usage
+Within your render function, assuming you have a file called
+"background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+`source={{uri: "background", mainVer: 1, patchVer: 0}}`
+This will look for an .mp4 file (background.mp4) in the given expansion version.
 
 ### Load files with the RN Asset System
 
@@ -260,20 +247,6 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 ### Play in background on iOS
 
 To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
-
-## Static Methods
-
-`seek(seconds)`
-
-Seeks the video to the specified time (in seconds). Access using a ref to the component
-
-`presentFullscreenPlayer()`
-
-Enable the fullscreen player. Access using a ref to the component.
-
-`dimissFullscreenPlayer()`
-
-Disable the fullscreen player. Access using a ref to the component.
 
 ## Examples
 
