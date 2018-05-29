@@ -8,7 +8,6 @@ Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a 
 ## TOC
 
 * [Installation](#installation)
-* [Linking](#linking)
 * [Usage](#usage)
 
 ## Installation
@@ -27,6 +26,7 @@ yarn add react-native-video
 
 <details>
   <summary>iOS</summary>
+
 Run `react-native link` to link the react-native-video library.
 
 If you would like to allow other apps to play music over your video component, add:
@@ -48,6 +48,7 @@ Note: you can also use the `ignoreSilentSwitch` prop, shown below.
 
 <details>
   <summary>tvOS</summary>
+  
 Run `react-native link` to link the react-native-video library.
 
 `react-native link` don’t works properly with the tvOS target so we need to add the library manually.
@@ -71,6 +72,7 @@ Select RCTVideo-tvOS
 
 <details>
   <summary>Android</summary>
+
 Run `react-native link` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
@@ -121,18 +123,17 @@ Make the following additions to the given files manually:
 Add the `ReactNativeVideo` project to your solution.
 
 1. Open the solution in Visual Studio 2015
-2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
-3a. UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
-3b. WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
+2. Right-click Solution icon in Solution Explorer > Add > Existing Project
+  * UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
+  * WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
 
 **windows/myapp/myapp.csproj**
 
 Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
 1. Right-click main application project > Add > Reference...
-2a. UWP: Check `ReactNativeVideo` from Solution Projects.
-
-WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
+  * UWP: Check `ReactNativeVideo` from Solution Projects.
+  * WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
 
 **MainPage.cs**
 
@@ -228,7 +229,11 @@ For more detailed info check this [article](https://cocoacasts.com/how-to-add-ap
 ### Android Expansion File Usage
 Within your render function, assuming you have a file called
 "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
-`source={{uri: "background", mainVer: 1, patchVer: 0}}`
+```
+<Video
+  source={{uri: "background", mainVer: 1, patchVer: 0}}
+/>
+```
 This will look for an .mp4 file (background.mp4) in the given expansion version.
 
 ### Load files with the RN Asset System
@@ -237,10 +242,7 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 
 ```
 <Video
-  repeat
-  resizeMode='cover'
   source={require('../assets/video/turntable.mp4')}
-  style={styles.backgroundVideo}
 />
 ```
 
