@@ -18,8 +18,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.TextRenderer;
@@ -27,6 +25,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 
 import java.util.List;
+import java.lang.Object;
 
 @TargetApi(16)
 public final class ExoPlayerView extends FrameLayout {
@@ -100,7 +99,6 @@ public final class ExoPlayerView extends FrameLayout {
             this.player.setVideoListener(null);
             this.player.removeListener(componentListener);
             this.player.setVideoSurface(null);
-            this.player.setMetadataOutput(componentListener);
         }
         this.player = player;
         shutterView.setVisibility(VISIBLE);
@@ -113,7 +111,6 @@ public final class ExoPlayerView extends FrameLayout {
             player.setVideoListener(componentListener);
             player.addListener(componentListener);
             player.setTextOutput(componentListener);
-            player.setMetadataOutput(componentListener);
         }
     }
 
@@ -167,7 +164,7 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,
-            TextRenderer.Output, ExoPlayer.EventListener, MetadataRenderer.Output {
+            TextRenderer.Output, ExoPlayer.EventListener {
 
         // TextRenderer.Output implementation
 
@@ -212,12 +209,12 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
             // Do nothing.
         }
 
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
+        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
             // Do nothing.
         }
 
@@ -232,8 +229,18 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onMetadata(Metadata metadata) {
-            Log.d("onMetadata", "onMetadata");
+        public void onSeekProcessed() {
+            // Do nothing.
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+            // Do nothing.
         }
     }
 

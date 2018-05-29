@@ -93,7 +93,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     playerLayer.showsPlaybackControls = NO;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
-    playerLayer.player = _player;
+    playerLayer.player = player;
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
@@ -127,7 +127,8 @@ static NSString *const timedMetadata = @"timedMetadata";
 -(void)addPlayerTimeObserver
 {
   const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
+  // of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
   __weak RCTVideo *weakSelf = self;
   _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
                                                         queue:NULL
@@ -198,6 +199,9 @@ static NSString *const timedMetadata = @"timedMetadata";
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
+
    if( currentTimeSecs >= 0 && self.onVideoProgress) {
       self.onVideoProgress(@{
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
@@ -259,6 +263,9 @@ static NSString *const timedMetadata = @"timedMetadata";
  * observer set */
 - (void)removePlayerItemObservers
 {
+  if (_playerLayer) {
+    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+  }
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
@@ -486,6 +493,8 @@ static NSString *const timedMetadata = @"timedMetadata";
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
+  } else {
+    [self removePlayerTimeObserver];
   }
 }
 
@@ -565,7 +574,12 @@ static NSString *const timedMetadata = @"timedMetadata";
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        if (!wasPaused) [_player play];
+        if (!_timeObserver) {
+          [self addPlayerTimeObserver];
+        }
+        if (!wasPaused) {
+            [self setPaused:false];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],

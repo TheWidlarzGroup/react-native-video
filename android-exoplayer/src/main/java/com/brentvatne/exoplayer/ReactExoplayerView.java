@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -8,6 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -22,6 +25,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -52,6 +56,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
+import java.lang.Object;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -85,6 +90,7 @@ class ReactExoplayerView extends FrameLayout implements
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
+    private boolean isFullscreen;
     private boolean isPaused = true;
     private boolean isBuffering;
     private float rate = 1f;
@@ -113,7 +119,8 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlayWhenReady()
                             ) {
                         long pos = player.getCurrentPosition();
-                        eventEmitter.progressChanged(pos, player.getBufferedPercentage());
+                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration();
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -330,6 +337,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void onStopPlayback() {
+        if (isFullscreen) {
+            setFullscreen(false);
+        }
         setKeepScreenOn(false);
         audioManager.abandonAudioFocus(this);
     }
@@ -455,17 +465,38 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity() {
+    public void onPositionDiscontinuity(int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
             // which they seeked.
             updateResumePosition();
         }
+        // When repeat is turned on, reaching the end of the video will not cause a state change
+        // so we need to explicitly detect it.
+        if (reason == ExoPlayer.DISCONTINUITY_REASON_PERIOD_TRANSITION
+                && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
+            eventEmitter.end();
+        }
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onSeekProcessed() {
+        // Do nothing.
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
         // Do nothing.
     }
 
@@ -482,6 +513,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
+        Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -504,8 +536,12 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+            ex = e.getSourceException();
+            errorString = getResources().getString(R.string.unrecognized_media_format);
+        }
         if (errorString != null) {
-            eventEmitter.error(errorString, e);
+            eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
@@ -581,6 +617,13 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRepeatModifier(boolean repeat) {
+        if (player != null) {
+            if (repeat) {
+                player.setRepeatMode(Player.REPEAT_MODE_ONE);
+            } else {
+                player.setRepeatMode(Player.REPEAT_MODE_OFF);
+            }
+        }
         this.repeat = repeat;
     }
 
@@ -631,5 +674,38 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableFocus(boolean disableFocus) {
         this.disableFocus = disableFocus;
+    }
+
+    public void setFullscreen(boolean fullscreen) {
+        if (fullscreen == isFullscreen) {
+            return; // Avoid generating events when nothing is changing
+        }
+        isFullscreen = fullscreen;
+
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) {
+            return;
+        }
+        Window window = activity.getWindow();
+        View decorView = window.getDecorView();
+        int uiOptions;
+        if (isFullscreen) {
+            if (Util.SDK_INT >= 19) { // 4.4+
+                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | SYSTEM_UI_FLAG_FULLSCREEN;
+            } else {
+                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | SYSTEM_UI_FLAG_FULLSCREEN;
+            }
+            eventEmitter.fullscreenWillPresent();
+            decorView.setSystemUiVisibility(uiOptions);
+            eventEmitter.fullscreenDidPresent();
+        } else {
+            uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+            eventEmitter.fullscreenWillDismiss();
+            decorView.setSystemUiVisibility(uiOptions);
+            eventEmitter.fullscreenDidDismiss();
+        }
     }
 }
