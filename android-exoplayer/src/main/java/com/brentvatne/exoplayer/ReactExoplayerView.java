@@ -471,6 +471,10 @@ class ReactExoplayerView extends FrameLayout implements
             // which they seeked.
             updateResumePosition();
         }
+        if (reason == ExoPlayer.DISCONTINUITY_REASON_PERIOD_TRANSITION
+                && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
+            eventEmitter.end();
+        }
     }
 
     @Override
