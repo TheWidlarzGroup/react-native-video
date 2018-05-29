@@ -79,10 +79,20 @@ Or if you have trouble, make the following additions to the given files manually
 
 **android/settings.gradle**
 
+The newer ExoPlayer library will work for most people.
+
+```gradle
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+```
+
+If you need to use the old Android media player based player, use the following instead:
+
 ```gradle
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
+
 
 **android/app/build.gradle**
 
@@ -116,6 +126,7 @@ protected List<ReactPackage> getPackages() {
 
 <details>
   <summary>Windows</summary>
+
 Make the following additions to the given files manually:
 
 **windows/myapp.sln**
