@@ -212,13 +212,13 @@ export default class Video extends Component {
     });
 
     if (this.props.poster && this.state.showPoster) {
-      const posterStyle = {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        resizeMode: this.props.posterResizeMode || 'contain'
+      let posterStyle = this.props.posterStyles ? this.props.posterStyles : {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          resizeMode: this.props.posterResizeMode || 'contain'
       };
 
       return (
@@ -273,6 +273,7 @@ Video.propTypes = {
   resizeMode: PropTypes.string,
   poster: PropTypes.string,
   posterResizeMode: Image.propTypes.resizeMode,
+  posterStyles: PropTypes.object,
   repeat: PropTypes.bool,
   paused: PropTypes.bool,
   muted: PropTypes.bool,
