@@ -243,7 +243,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     headers.put("Cookie", cookie);
                 }
 
-                setDataSource(uriString);
+                setDataSource(mThemedReactContext, parsedUrl, headers);
             } else if (isAsset) {
                 if (uriString.startsWith("content://")) {
                     Uri parsedUrl = Uri.parse(uriString);
