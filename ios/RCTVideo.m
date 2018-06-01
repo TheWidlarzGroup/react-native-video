@@ -554,13 +554,20 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setCurrentTime:(float)currentTime
 {
-  [self setSeek: currentTime];
+
+  [self setSeek:currentTime toleranceInMS:1000];
+
 }
 
-- (void)setSeek:(float)seekTime
+- (void)setCurrentTime:(float)currentTime toleranceInMS:(int)toleranceInMS
 {
-  int timeScale = 10000;
+  [self setSeek:currentTime toleranceInMS:toleranceInMS];
 
+}
+
+- (void)setSeek:(float)seekTime toleranceMS:(int)toleranceMS
+{
+  int timeScale = 1000;
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
@@ -568,11 +575,11 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
+    CMTime tolerance = CMTimeMake(toleranceMS, timeScale);
     BOOL wasPaused = _paused;
-
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
-      [_player seekToTime:cmSeekTime toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero completionHandler:^(BOOL finished) {
+      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
         if (!_timeObserver) {
           [self addPlayerTimeObserver];
         }
@@ -580,12 +587,11 @@ static NSString *const timedMetadata = @"timedMetadata";
           [self setPaused:false];
         }
         if(self.onVideoSeek) {
-            self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                               @"seekTime": [NSNumber numberWithFloat:seekTime],
-                               @"target": self.reactTag});
+          self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                             @"seekTime": [NSNumber numberWithFloat:seekTime],
+                             @"target": self.reactTag});
         }
       }];
-
       _pendingSeek = false;
     }
 
