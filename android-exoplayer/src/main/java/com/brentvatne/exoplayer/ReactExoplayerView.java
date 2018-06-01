@@ -504,10 +504,9 @@ class ReactExoplayerView extends FrameLayout implements
                             decoderInitializationException.decoderName);
                 }
             }
-        }
-        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
-          ex = e.getSourceException();
-          errorString = getResources().getString(R.string.unrecognized_media_format);
+        } else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+            ex = e.getSourceException();
+            errorString = getResources().getString(R.string.unrecognized_media_format);
         }
         if (errorString != null) {
             eventEmitter.error(errorString, ex);
