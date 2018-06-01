@@ -131,9 +131,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
+        this.themedReactContext = context;
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
-        this.themedReactContext = context;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -363,7 +363,7 @@ class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultDataSourceFactory(getContext(), useBandwidthMeter ? BANDWIDTH_METER : null);
+        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, useBandwidthMeter ? BANDWIDTH_METER : null);
     }
 
     // AudioManager.OnAudioFocusChangeListener implementation
@@ -535,8 +535,7 @@ class ReactExoplayerView extends FrameLayout implements
                             decoderInitializationException.decoderName);
                 }
             }
-        }
-        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+        } else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
             ex = e.getSourceException();
             errorString = getResources().getString(R.string.unrecognized_media_format);
         }
@@ -580,7 +579,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(getContext(), BANDWIDTH_METER);
+            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();
@@ -599,7 +598,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(getContext());
+            this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(this.themedReactContext);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();
