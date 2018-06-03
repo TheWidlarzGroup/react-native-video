@@ -640,11 +640,10 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
   _selectedTextTrack = selectedTextTrack;
   NSString *type = selectedTextTrack[@"type"];
-
   AVMediaSelectionGroup *group = [_player.currentItem.asset
                                   mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
-  
   AVMediaSelectionOption *option;
+
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
   } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
@@ -664,6 +663,8 @@ static NSString *const timedMetadata = @"timedMetadata";
         break;
       }
     }
+  //} else if ([type isEqualToString:@"default"]) {
+  //  option = group.defaultOption; */
   } else if ([type isEqualToString:@"index"]) {
     if ([selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
       int index = [selectedTextTrack[@"value"] intValue];
@@ -672,12 +673,11 @@ static NSString *const timedMetadata = @"timedMetadata";
       }
     }
   } else { // default. invalid type or "system"
-    // _player.appliesMediaSelectionCriteriaAutomatically = YES;
+    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
     return;
   }
   
   // If a match isn't found, option will be nil and text tracks will be disabled
-  // _player.appliesMediaSelectionCriteriaAutomatically = NO;
   [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
 }
 
