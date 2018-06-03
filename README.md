@@ -86,7 +86,7 @@ include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
 ```
 
-If you need to use the old Android media player based player, use the following instead:
+If you need to use the old Android MediaPlayer based player, use the following instead:
 
 ```gradle
 include ':react-native-video'
