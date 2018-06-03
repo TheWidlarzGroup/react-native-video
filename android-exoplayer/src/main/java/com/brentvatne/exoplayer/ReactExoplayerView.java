@@ -5,12 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -59,6 +61,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
 import java.lang.Object;
+import java.util.Locale;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -653,6 +656,9 @@ class ReactExoplayerView extends FrameLayout implements
         int trackIndex = C.INDEX_UNSET;
         if (TextUtils.isEmpty(type)) {
             // Do nothing
+        } else if (type.equals("disabled")) {
+            trackSelector.setSelectionOverride(index, groups, null);
+            return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
