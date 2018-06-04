@@ -104,6 +104,8 @@ class ReactExoplayerView extends FrameLayout implements
     private Uri srcUri;
     private String extension;
     private boolean repeat;
+    private String textTrackType;
+    private Dynamic textTrackValue;
     private boolean disableFocus;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
@@ -449,6 +451,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
+            setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -643,6 +646,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSelectedTextTrack(String type, Dynamic value) {
+        textTrackType = type;
+        textTrackValue = value;
+
         int index = getTextTrackRendererIndex();
         if (index == C.INDEX_UNSET) {
             return;
