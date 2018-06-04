@@ -1,6 +1,7 @@
 ## Changelog
 
 Upcoming release
+* Prevent multiple onEnd notifications on iOS (https://github.com/react-native-community/react-native-video/pull/832)
 * Fix doing a partial swipe on iOS causing a black screen (https://github.com/react-native-community/react-native-video/pull/1048)
 * Fix crash when switching to a new source on iOS (https://github.com/react-native-community/react-native-video/pull/974)
 * Add cookie support for ExoPlayer (https://github.com/react-native-community/react-native-video/pull/922)
