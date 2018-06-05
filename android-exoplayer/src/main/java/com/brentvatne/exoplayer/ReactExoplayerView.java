@@ -650,9 +650,9 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setChannel(String channel) {
+    public void setStereoPan(float stereoPan) {
         if (player != null) {
-            player.setChannel(channel);
+            player.setStereoPan(stereoPan);
         }
     }
 

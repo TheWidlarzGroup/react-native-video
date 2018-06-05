@@ -132,9 +132,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setVolumeModifier(volume);
     }
 
-    @ReactProp(name = PROP_CHANNEL)
-    public void setChannel(final ReactExoplayerView videoView, final String channel) {
-        videoView.setChannel(channel);
+    @ReactProp(name = PROP_STEREO_PAN)
+    public void setStereoPan(final ReactExoplayerView videoView, final float stereoPan) {
+        videoView.setStereoPan(stereoPan);
     }
 
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)

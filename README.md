@@ -188,7 +188,7 @@ using System.Collections.Generic;
        }}                                      // Store reference
        rate={1.0}                              // 0 is paused, 1 is normal.
        volume={1.0}                            // 0 is muted, 1 is normal.
-       channel="both"                          // [Android only] Target channel for audio panning: left, right or both (default).
+       stereoPan={0}                           // [Android only] The audio player’s stereo pan position. A value of –1.0 is full left, 0.0 is center, and 1.0 is full right. Default 0.0
        muted={true|false}                      // Mutes the audio entirely. Default false
        paused={true|false}                     // Pauses playback entirely. Default false
        resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
