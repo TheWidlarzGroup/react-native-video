@@ -27,6 +27,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
+    private static final String PROP_CHANNEL = "channel";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
@@ -129,6 +130,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactExoplayerView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
+    }
+
+    @ReactProp(name = PROP_CHANNEL)
+    public void setChannel(final ReactExoplayerView videoView, final String channel) {
+        videoView.setChannel(channel);
     }
 
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)

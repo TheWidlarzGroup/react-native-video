@@ -77,6 +77,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public static final String EVENT_PROP_WHAT = "what";
     public static final String EVENT_PROP_EXTRA = "extra";
 
+    public static final String CHANNEL_LEFT = "left";
+    public static final String CHANNEL_BOTH = "both";
+    public static final String CHANNEL_RIGHT = "right";
+
     private ThemedReactContext mThemedReactContext;
     private RCTEventEmitter mEventEmitter;
 
@@ -95,6 +99,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private String mChannel = CHANNEL_BOTH;
     private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private float mActiveRate = 1.0f;
@@ -368,6 +373,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         if (mMuted) {
             setVolume(0, 0);
+        } else if (CHANNEL_LEFT.equals(mChannel)){
+            setVolume(mVolume, 0);
+        } else if (CHANNEL_RIGHT.equals(mChannel)){
+            setVolume(0, mVolume);
         } else {
             setVolume(mVolume, mVolume);
         }
@@ -375,6 +384,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setVolumeModifier(final float volume) {
         mVolume = volume;
+        setMutedModifier(mMuted);
+    }
+
+    public void setChannel(final String channel) {
+        mChannel = channel;
         setMutedModifier(mMuted);
     }
 

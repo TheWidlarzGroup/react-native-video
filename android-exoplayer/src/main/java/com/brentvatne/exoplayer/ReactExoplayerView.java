@@ -650,6 +650,12 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setChannel(String channel) {
+        if (player != null) {
+            player.setChannel(channel);
+        }
+    }
+
     public void seekTo(long positionMs) {
         if (player != null) {
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
