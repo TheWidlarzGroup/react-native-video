@@ -27,7 +27,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
-    private static final String PROP_CHANNEL = "channel";
+    private static final String PROP_STEREO_PAN = "stereoPan";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
