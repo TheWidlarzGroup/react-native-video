@@ -230,6 +230,7 @@ var styles = StyleSheet.create({
 * [rate](#rate)
 * [repeat](#repeat)
 * [resizeMode](#resizemode)
+* [selectedTextTrack](#selectedtexttrack)
 * [volume](#volume)
 
 #### ignoreSilentSwitch
@@ -303,6 +304,38 @@ Determines how to resize the video when the frame doesn't match the raw video di
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### selectedTextTrack
+Configure which text track (caption or subtitle), if any, is shown.
+
+```
+selectedTextTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedTextTrack={{
+  type: "title",
+  value: "English Subtitles"
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Display captions only if the system preference for captions is enabled
+"disabled" | N/A | Don't display a text track
+"title" | string | Display the text track with the title specified as the Value, e.g. "French 1"
+"language" | string | Display the text track with the language specified as the Value, e.g. "fr"
+"index" | number | Display the text track with the index specified as the value, e.g. 0
+
+Both iOS & Android offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it.
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
+
+Platforms: Android ExoPlayer, iOS
 
 #### volume
 Adjust the volume.
