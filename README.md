@@ -229,7 +229,7 @@ var styles = StyleSheet.create({
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
-* [resizeMode](#resize-mode)
+* [resizeMode](#resizemode)
 * [selectedTextTrack](#selectedtexttrack)
 * [volume](#volume)
 
