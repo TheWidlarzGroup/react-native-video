@@ -237,66 +237,82 @@ Controls the iOS silent switch behavior
 * **"inherit" (default)** - Use the default AVPlayer behavior
 * **"ignore"** - Play audio even if the silent switch is set
 * **"obey"** - Don't play audio if the silent switch is set
-<br>Platforms: iOS
+
+Platforms: iOS
 
 #### muted
 Controls whether the audio is muted
 * **false (default)** - Don't mute audio
 * **true** - Mute audio
-<br>Platforms: all
+
+Platforms: all
 
 #### paused
 Controls whether the media is paused
 * **false (default)** - Pause the media
 * **true** - Don't pause the media
-<br>Platforms: all
+
+Platforms: all
 
 #### poster
 An image to display while the video is loading
 <br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
-<br>Platforms: all
+
+Platforms: all
 
 #### posterResizeMode
 Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
 * **"contain" (default)** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"center"** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
 * **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
 * **"none"** - Don't apply resize
+* **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
-<br>Platforms: all
+
+Platforms: all
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
-<br>Default: 250.0.
-<br>Platforms: all
+
+Default: 250.0.
+
+Platforms: all
 
 #### rate
 Speed at which the media should play. 
 * **0.0** - Pauses the video
 * **1.0** - Play at normal speed
 * **Other values** - Slow down or speed up playback
-<br>Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+Platforms: all
+
+Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
 
 #### repeat
 Determine whether to repeat the video when the end is reached
 * **false (default)** - Don't repeat the video
 * **true** - Repeat the video
 
+Platforms: all
+
 #### resizeMode
 Determines how to resize the video when the frame doesn't match the raw video dimensions.
-**center** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
-* **"contain"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
-* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
-* **"none"** - Don't apply resize
-* **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
+* **"none" (default)** - Don't apply resize
+* **"contain"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the video will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
-<br>Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
 
 #### volume
 Adjust the volume.
 * **1.0 (default)** - Play at full volume
 * **0.0** - Mute the audio
 * **Other values** - Reduce volume
-<br>Platforms: all
+
+Platforms: all
+
+### Additional props
 
 To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
