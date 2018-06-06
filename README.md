@@ -221,18 +221,18 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-* [ignoreSilentSwitch](#ignoreSilentSwitch)
+* [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
 * [poster](#poster)
-* [posterResizeMode](#posterResizeMode)
-* [progressUpdateInterval](#progressUpdateInterval)
+* [posterResizeMode](#poster-resize-mode)
+* [progressUpdateInterval](#progress-update-interval)
 * [rate](#rate)
 * [repeat](#repeat)
-* [resizeMode](#resizeMode)
+* [resizeMode](#resize-mode)
 * [volume](#volume)
 
-#### ignoreSilentSwitch 
+#### ignoreSilentSwitch
 Controls the iOS silent switch behavior
 * **"inherit" (default)** - Use the default AVPlayer behavior
 * **"ignore"** - Play audio even if the silent switch is set
