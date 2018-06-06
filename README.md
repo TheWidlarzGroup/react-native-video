@@ -184,13 +184,6 @@ using System.Collections.Generic;
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
-       rate={1.0}                              // 0 is paused, 1 is normal.
-       volume={1.0}                            // 0 is muted, 1 is normal.
-       stereoPan={0}                           // [Android only] The audio player’s stereo pan position. A value of –1.0 is full left, 0.0 is center, and 1.0 is full right. Default 0.0
-       muted={true|false}                      // Mutes the audio entirely. Default false
-       paused={true|false}                     // Pauses playback entirely. Default false
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
-       repeat={true|false}                     // Repeat forever. Default false
        playInBackground={true|false}           // Audio continues to play when app entering background. Default false
        playWhenInactive={true|false}           // [iOS] Video continues to play when control or notification center are shown. Default false
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
@@ -351,6 +344,14 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
+#### stereoPan
+The audio player’s stereo pan position.  Any value between –1.0 and 1.0 is accepted.
+* **-1.0** - Full left
+* **0.0 (default)** - Center
+* **1.0** - Full right
+
+Platforms: Android
 
 ### Additional props
 
