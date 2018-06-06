@@ -181,21 +181,11 @@ using System.Collections.Generic;
 // on a single screen if you like.
 
 <Video source={{uri: "background"}}   // Can be a URL or a local file.
-       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
-       posterResizeMode="contain"              // Poster resize mode. One of contain (default), cover, stretch, center, repeat
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
-       rate={1.0}                              // 0 is paused, 1 is normal.
-       volume={1.0}                            // 0 is muted, 1 is normal.
-       muted={true|false}                      // Mutes the audio entirely. Default false
-       paused={true|false}                     // Pauses playback entirely. Default false
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
-       repeat={true|false}                     // Repeat forever. Default false
        playInBackground={true|false}           // Audio continues to play when app entering background. Default false
        playWhenInactive={true|false}           // [iOS] Video continues to play when control or notification center are shown. Default false
-       ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
-       progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
@@ -229,6 +219,85 @@ var styles = StyleSheet.create({
   },
 });
 ```
+
+### Configurable props
+* [ignoreSilentSwitch](#ignoresilentswitch)
+* [muted](#muted)
+* [paused](#paused)
+* [poster](#poster)
+* [posterResizeMode](#posterresizemode)
+* [progressUpdateInterval](#progressupdateinterval)
+* [rate](#rate)
+* [repeat](#repeat)
+* [resizeMode](#resize-mode)
+* [volume](#volume)
+
+#### ignoreSilentSwitch
+Controls the iOS silent switch behavior
+* **"inherit" (default)** - Use the default AVPlayer behavior
+* **"ignore"** - Play audio even if the silent switch is set
+* **"obey"** - Don't play audio if the silent switch is set
+<br>Platforms: iOS
+
+#### muted
+Controls whether the audio is muted
+* **false (default)** - Don't mute audio
+* **true** - Mute audio
+<br>Platforms: all
+
+#### paused
+Controls whether the media is paused
+* **false (default)** - Pause the media
+* **true** - Don't pause the media
+<br>Platforms: all
+
+#### poster
+An image to display while the video is loading
+<br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
+<br>Platforms: all
+
+#### posterResizeMode
+Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
+* **"contain" (default)** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"none"** - Don't apply resize
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+<br>Platforms: all
+
+#### progressUpdateInterval
+Delay in milliseconds between onProgress events in milliseconds.
+<br>Default: 250.0.
+<br>Platforms: all
+
+#### rate
+Speed at which the media should play. 
+* **0.0** - Pauses the video
+* **1.0** - Play at normal speed
+* **Other values** - Slow down or speed up playback
+<br>Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+#### repeat
+Determine whether to repeat the video when the end is reached
+* **false (default)** - Don't repeat the video
+* **true** - Repeat the video
+
+#### resizeMode
+Determines how to resize the video when the frame doesn't match the raw video dimensions.
+**center** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
+* **"contain"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"none"** - Don't apply resize
+* **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+<br>Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### volume
+Adjust the volume.
+* **1.0 (default)** - Play at full volume
+* **0.0** - Mute the audio
+* **Other values** - Reduce volume
+<br>Platforms: all
+
 To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
 - By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
