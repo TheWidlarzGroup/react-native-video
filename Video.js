@@ -274,6 +274,7 @@ Video.propTypes = {
   poster: PropTypes.string,
   posterResizeMode: Image.propTypes.resizeMode,
   repeat: PropTypes.bool,
+  allowsExternalPlayback: PropTypes.bool,
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
