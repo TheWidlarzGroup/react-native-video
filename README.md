@@ -229,6 +229,88 @@ var styles = StyleSheet.create({
   },
 });
 ```
+
+### Props
+* [ignoreSilentSwitch](#ignoreSilentSwitch)
+* [muted](#muted)
+* [paused](#paused)
+* [progressUpdateInterval](#progressUpdateInterval)
+* [rate](#rate)
+* [resizeMode](#resizeMode)
+
+#### ignoreSilentSwitch
+Controls the iOS silent switch behavior
+* **"ignore"** - Play audio even if the silent switch is set
+* **"inherit"** - Use the default AVPlayer behavior
+* **"obey"** - Don't play audio if the silent switch is set
+
+Type | Default | Platforms
+--- | --- | ---
+string | "inherit" | iOS
+
+#### muted
+If true, mutes the audio
+
+Type | Default | Platforms
+--- | --- | ---
+boolean | false | all
+
+#### paused
+If true, pauses the media
+
+Type | Default | Platforms
+--- | --- | ---
+boolean | false | all
+
+#### progressUpdateInterval
+Delay between onProgress events in milliseconds
+
+Type | Default | Platforms
+--- | --- | ---
+number | 250.0 | all
+
+#### rate
+Speed at which the media should play. 
+* **0.0** - Pauses the video
+* **1.0** - Play at normal speed
+* **Other values** - Slow down or speed up playback
+
+Type | Default | Platforms
+--- | --- | ---
+number | 1.0 | all
+
+Note: On Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+#### resizeMode
+Determines how to resize the video when the frame doesn't match the raw video dimensions.
+* **"contain"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"none"** - Don't apply resize
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+
+Type | Default | Platforms
+--- | --- | ---
+string | "none" | Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### volume
+Adjust the volume.
+* **0.0** - Mute the audio
+* **Other values** - Reduce volume
+* **1.0** - Play at full volume
+
+
+
+Name | Type | Default | Platforms | Description
+--- | --- | --- | --- | ---
+ignoreSilentSwitch | string | "obey" | iOS | **"ignore"** Play audio even if the silent switch is set<br>**inherit** - Use the default behavior<br>**"obey"** - Don't play audio if the silent switch is set
+muted | boolean | false | all | When true, mutes the audio
+paused | boolean | false | all | When true, pauses the video
+progressUpdateInterval | number | 250.0 | all | Delay between onProgress events in milliseconds
+rate | number | 1.0 | all | normal rate to speed up or slow down playback<br>Note: For Android MediaPlayer, only works on Android 6.0+
+repeat | boolean | false | all | When true, once the end is reached the video will replay from the start
+resizeMode | string | "none" | AMP<br>Exo<br>iOS<br>UWP | **"contain"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).<br>**"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).<br>"none" Don't apply resize<br>**"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.<br>
+volume | number | 1.0 | all | 
+
 To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
 - By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
