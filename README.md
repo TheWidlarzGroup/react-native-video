@@ -323,13 +323,13 @@ selectedTextTrack={{
 }}
 ```
 
-Type | Description
---- | ---
-"system" | (default) Display captions only if the system preference for captions is enabled
-"disabled" | Don't display a text track
-"title" | Display the text track with the title specified as the Value, e.g. "French 1"
-"language" | Display the text track with the language specified as the Value, e.g. "fr"
-"index" | Display the text track with the index specified as the value, e.g. 0
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Display captions only if the system preference for captions is enabled
+"disabled" | N/A | Don't display a text track
+"title" | string | Display the text track with the title specified as the Value, e.g. "French 1"
+"language" | string | Display the text track with the language specified as the Value, e.g. "fr"
+"index" | number | Display the text track with the index specified as the value, e.g. 0
 
 Both iOS & Android offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it.
 
