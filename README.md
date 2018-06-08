@@ -231,6 +231,7 @@ var styles = StyleSheet.create({
 * [repeat](#repeat)
 * [resizeMode](#resizemode)
 * [selectedTextTrack](#selectedtexttrack)
+* [stereoPan](#stereopan)
 * [volume](#volume)
 
 #### ignoreSilentSwitch
@@ -337,6 +338,14 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: Android ExoPlayer, iOS
 
+#### stereoPan
+The audio player’s stereo pan position.  Any value between –1.0 and 1.0 is accepted.
+* **-1.0** - Full left
+* **0.0 (default)** - Center
+* **1.0** - Full right
+
+Platforms: Android MediaPlayer
+
 #### volume
 Adjust the volume.
 * **1.0 (default)** - Play at full volume
@@ -344,14 +353,6 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
-
-#### stereoPan
-The audio player’s stereo pan position.  Any value between –1.0 and 1.0 is accepted.
-* **-1.0** - Full left
-* **0.0 (default)** - Center
-* **1.0** - Full right
-
-Platforms: Android
 
 ### Additional props
 
