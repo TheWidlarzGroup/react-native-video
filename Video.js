@@ -275,6 +275,13 @@ Video.propTypes = {
   posterResizeMode: Image.propTypes.resizeMode,
   repeat: PropTypes.bool,
   allowsExternalPlayback: PropTypes.bool,
+  selectedTextTrack: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ])
+  }),
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,

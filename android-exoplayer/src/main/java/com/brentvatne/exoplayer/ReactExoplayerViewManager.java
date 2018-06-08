@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -24,6 +25,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
+    private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
+    private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
@@ -114,6 +118,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
+    }
+
+    @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
+    public void setSelectedTextTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedTextTrack) {
+        String typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
+                ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
+        Dynamic value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
+                ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
+        videoView.setSelectedTextTrack(typeString, value);
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)

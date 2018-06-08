@@ -41,6 +41,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _paused;
   BOOL _repeat;
   BOOL _allowsExternalPlayback;
+  NSDictionary * _selectedTextTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
@@ -637,6 +638,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     [_player setMuted:NO];
   }
 
+  [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
@@ -646,6 +648,50 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
+}
+
+- (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
+  _selectedTextTrack = selectedTextTrack;
+  NSString *type = selectedTextTrack[@"type"];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  AVMediaSelectionOption *option;
+
+  if ([type isEqualToString:@"disabled"]) {
+    // Do nothing. We want to ensure option is nil
+  } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
+    NSString *value = selectedTextTrack[@"value"];
+    for (int i = 0; i < group.options.count; ++i) {
+      AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+      NSString *optionValue;
+      if ([type isEqualToString:@"language"]) {
+        optionValue = [currentOption extendedLanguageTag];
+      } else {
+        optionValue = [[[currentOption commonMetadata]
+                        valueForKey:@"value"]
+                       objectAtIndex:0];
+      }
+      if ([value isEqualToString:optionValue]) {
+        option = currentOption;
+        break;
+      }
+    }
+  //} else if ([type isEqualToString:@"default"]) {
+  //  option = group.defaultOption; */
+  } else if ([type isEqualToString:@"index"]) {
+    if ([selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
+      int index = [selectedTextTrack[@"value"] intValue];
+      if (group.options.count > index) {
+        option = [group.options objectAtIndex:index];
+      }
+    }
+  } else { // default. invalid type or "system"
+    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+    return;
+  }
+  
+  // If a match isn't found, option will be nil and text tracks will be disabled
+  [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
 }
 
 - (BOOL)getFullscreen
