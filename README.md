@@ -232,6 +232,7 @@ var styles = StyleSheet.create({
 * [resizeMode](#resizemode)
 * [selectedTextTrack](#selectedtexttrack)
 * [stereoPan](#stereopan)
+* [useTextureView](#usetextureview)
 * [volume](#volume)
 
 #### ignoreSilentSwitch
@@ -345,6 +346,16 @@ Adjust the balance of the left and right audio channels.  Any value between –1
 * **1.0** - Full right
 
 Platforms: Android MediaPlayer
+
+#### useTextureView
+Output to a TextureView instead of the default SurfaceView. In general you will want to use SurfaceView because it provides better performance. However, SurfaceViews can't be animated, transformed or scaled. You also can't overlay multiple SurfaceViews.
+
+useTextureView can only be set at same time you're setting the source.
+
+* **false (default)** - Use a SurfaceView
+* **true** - Use a TextureView
+
+Platforms: Android ExoPlayer
 
 #### volume
 Adjust the volume.

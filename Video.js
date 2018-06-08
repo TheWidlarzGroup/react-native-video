@@ -293,6 +293,7 @@ Video.propTypes = {
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
   progressUpdateInterval: PropTypes.number,
+  useTextureView: PropTypes.bool,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,

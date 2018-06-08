@@ -5,14 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -61,7 +59,6 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
 import java.lang.Object;
-import java.util.Locale;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -109,6 +106,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean disableFocus;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
+    private boolean useTextureView = false;
     // \ End props
 
     // React
@@ -779,5 +777,9 @@ class ReactExoplayerView extends FrameLayout implements
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();
         }
+    }
+
+    public void setUseTextureView(boolean useTextureView) {
+        exoPlayerView.setUseTextureView(useTextureView);
     }
 }
