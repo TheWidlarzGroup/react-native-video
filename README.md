@@ -339,7 +339,7 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 Platforms: Android ExoPlayer, iOS
 
 #### stereoPan
-The audio player’s stereo pan position.  Any value between –1.0 and 1.0 is accepted.
+Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
 * **-1.0** - Full left
 * **0.0 (default)** - Center
 * **1.0** - Full right
