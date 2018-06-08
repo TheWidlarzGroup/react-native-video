@@ -348,7 +348,9 @@ Adjust the balance of the left and right audio channels.  Any value between –1
 Platforms: Android MediaPlayer
 
 #### useTextureView
-Output to a TextureView instead of the default SurfaceView. In general you will want to use SurfaceView because it provides better performance. However, SurfaceViews can't be animated, transformed or scaled. You also can't overlay multiple SurfaceViews.
+Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
+* It can't be animated, transformed or scaled
+* You can't overlay multiple SurfaceViews
 
 useTextureView can only be set at same time you're setting the source.
 
