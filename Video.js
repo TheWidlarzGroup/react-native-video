@@ -284,6 +284,7 @@ Video.propTypes = {
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
+  stereoPan: PropTypes.number,
   rate: PropTypes.number,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,

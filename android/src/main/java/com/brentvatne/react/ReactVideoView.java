@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
+import java.math.BigDecimal;
 
 @SuppressLint("ViewConstructor")
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
@@ -95,6 +96,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private float mStereoPan = 0.0f;
     private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private float mActiveRate = 1.0f;
@@ -359,6 +361,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         }
     }
 
+    // reduces the volume based on stereoPan
+    private float calulateRelativeVolume() {
+        float relativeVolume = (mVolume * (1 - Math.abs(mStereoPan)));
+        // only one decimal allowed
+        BigDecimal roundRelativeVolume = new BigDecimal(relativeVolume).setScale(1, BigDecimal.ROUND_HALF_UP);
+        return roundRelativeVolume.floatValue();
+    }
+
     public void setMutedModifier(final boolean muted) {
         mMuted = muted;
 
@@ -368,13 +378,25 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         if (mMuted) {
             setVolume(0, 0);
+        } else if (mStereoPan < 0) {
+            // louder on the left channel
+            setVolume(mVolume, calulateRelativeVolume());
+        } else if (mStereoPan > 0) {
+            // louder on the right channel
+            setVolume(calulateRelativeVolume(), mVolume);
         } else {
+            // same volume on both channels
             setVolume(mVolume, mVolume);
         }
     }
 
     public void setVolumeModifier(final float volume) {
         mVolume = volume;
+        setMutedModifier(mMuted);
+    }
+
+    public void setStereoPan(final float stereoPan) {
+        mStereoPan = stereoPan;
         setMutedModifier(mMuted);
     }
 

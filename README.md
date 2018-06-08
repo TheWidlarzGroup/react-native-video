@@ -231,6 +231,7 @@ var styles = StyleSheet.create({
 * [repeat](#repeat)
 * [resizeMode](#resizemode)
 * [selectedTextTrack](#selectedtexttrack)
+* [stereoPan](#stereopan)
 * [volume](#volume)
 
 #### ignoreSilentSwitch
@@ -336,6 +337,14 @@ Both iOS & Android offer Settings to enable Captions for hearing impaired people
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
 Platforms: Android ExoPlayer, iOS
+
+#### stereoPan
+Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
+* **-1.0** - Full left
+* **0.0 (default)** - Center
+* **1.0** - Full right
+
+Platforms: Android MediaPlayer
 
 #### volume
 Adjust the volume.
