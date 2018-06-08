@@ -1,6 +1,7 @@
 ## Changelog
 
 Upcoming release
+* Support changing the left/right balance on Android MediaPlayer (https://github.com/react-native-community/react-native-video/pull/1051)
 * Prevent multiple onEnd notifications on iOS (https://github.com/react-native-community/react-native-video/pull/832)
 * Fix doing a partial swipe on iOS causing a black screen (https://github.com/react-native-community/react-native-video/pull/1048)
 * Fix crash when switching to a new source on iOS (https://github.com/react-native-community/react-native-video/pull/974)
