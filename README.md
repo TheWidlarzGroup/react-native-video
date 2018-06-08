@@ -192,7 +192,7 @@ using System.Collections.Generic;
        onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
        onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
        onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
-       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDissmiss}  // Callback after fullscreen stopped
+       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        onLoadStart={this.loadStart}            // Callback when video starts to load
        onLoad={this.setDuration}               // Callback when video loads
        onProgress={this.setTime}               // Callback every ~250ms with currentTime
