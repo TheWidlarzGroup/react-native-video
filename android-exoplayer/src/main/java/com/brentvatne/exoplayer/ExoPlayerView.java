@@ -25,17 +25,20 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 
 import java.util.List;
-import java.lang.Object;
 
 @TargetApi(16)
 public final class ExoPlayerView extends FrameLayout {
 
-    private final View surfaceView;
+    private View surfaceView;
     private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
     private SimpleExoPlayer player;
+    private Context context;
+    private ViewGroup.LayoutParams layoutParams;
+
+    private boolean useTextureView = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -48,9 +51,9 @@ public final class ExoPlayerView extends FrameLayout {
     public ExoPlayerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        boolean useTextureView = false;
+        this.context = context;
 
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+        layoutParams = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -64,23 +67,43 @@ public final class ExoPlayerView extends FrameLayout {
         layout.setLayoutParams(aspectRatioParams);
 
         shutterView = new View(getContext());
-        shutterView.setLayoutParams(params);
+        shutterView.setLayoutParams(layoutParams);
         shutterView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black));
 
         subtitleLayout = new SubtitleView(context);
-        subtitleLayout.setLayoutParams(params);
+        subtitleLayout.setLayoutParams(layoutParams);
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
-        View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
-        view.setLayoutParams(params);
-        surfaceView = view;
+        updateSurfaceView();
 
-        layout.addView(surfaceView, 0, params);
-        layout.addView(shutterView, 1, params);
-        layout.addView(subtitleLayout, 2, params);
+        layout.addView(shutterView, 1, layoutParams);
+        layout.addView(subtitleLayout, 2, layoutParams);
 
         addViewInLayout(layout, 0, aspectRatioParams);
+    }
+
+    private void setVideoView() {
+        if (surfaceView instanceof TextureView) {
+            player.setVideoTextureView((TextureView) surfaceView);
+        } else if (surfaceView instanceof SurfaceView) {
+            player.setVideoSurfaceView((SurfaceView) surfaceView);
+        }
+    }
+
+    private void updateSurfaceView() {
+        View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
+        view.setLayoutParams(layoutParams);
+
+        surfaceView = view;
+        if (layout.getChildAt(0) != null) {
+            layout.removeViewAt(0);
+        }
+        layout.addView(surfaceView, 0, layoutParams);
+
+        if (this.player != null) {
+            setVideoView();
+        }
     }
 
     /**
@@ -103,11 +126,7 @@ public final class ExoPlayerView extends FrameLayout {
         this.player = player;
         shutterView.setVisibility(VISIBLE);
         if (player != null) {
-            if (surfaceView instanceof TextureView) {
-                player.setVideoTextureView((TextureView) surfaceView);
-            } else if (surfaceView instanceof SurfaceView) {
-                player.setVideoSurfaceView((SurfaceView) surfaceView);
-            }
+            setVideoView();
             player.setVideoListener(componentListener);
             player.addListener(componentListener);
             player.setTextOutput(componentListener);
@@ -135,6 +154,11 @@ public final class ExoPlayerView extends FrameLayout {
      */
     public View getVideoSurfaceView() {
         return surfaceView;
+    }
+
+    public void setUseTextureView(boolean useTextureView) {
+        this.useTextureView = useTextureView;
+        updateSurfaceView();
     }
 
     private final Runnable measureAndLayout = new Runnable() {
