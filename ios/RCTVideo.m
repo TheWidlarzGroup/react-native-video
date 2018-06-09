@@ -328,12 +328,14 @@ static NSString *const timedMetadata = @"timedMetadata";
     [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
 
   if (isNetwork) {
+    NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc]init];
     if ([headers count] > 0) {
-      AVURLAsset* asset = [AVURLAsset URLAssetWithURL:url options:@{@"AVURLAssetHTTPHeaderFieldsKey": headers}];
-      return [AVPlayerItem playerItemWithAsset:asset];
+      [assetOptions setObject:@headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"]
     }
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    [assetOptions setObject:@cookies forKey:@AVURLAssetHTTPCookiesKey]
+
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
     return [AVPlayerItem playerItemWithAsset:asset];
   }
   else if (isAsset) {
