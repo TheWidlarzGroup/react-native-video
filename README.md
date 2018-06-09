@@ -262,9 +262,11 @@ Determine whether the media should continue playing while the app is in the back
 * **false (default)** - Don't continue playing the media
 * **true** - Continue playing the media
 
-iOS support is currently broken until background service support is added [#797](https://github.com/react-native-community/react-native-video/issues/797)
+To use this feature on iOS, you must:
+*[Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3)
+*Set the ignoreSilentSwitch prop to "ignore"
 
-Platforms: Android ExoPlayer, Android MediaPlayer
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
 #### playWhenInactive
 Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
