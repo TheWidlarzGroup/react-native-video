@@ -263,8 +263,8 @@ Determine whether the media should continue playing while the app is in the back
 * **true** - Continue playing the media
 
 To use this feature on iOS, you must:
-*[Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3)
-*Set the ignoreSilentSwitch prop to "ignore"
+* [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3)
+* Set the ignoreSilentSwitch prop to "ignore"
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
