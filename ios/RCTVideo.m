@@ -40,6 +40,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  NSDictionary * _selectedTextTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
@@ -93,7 +94,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     playerLayer.showsPlaybackControls = NO;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
-    playerLayer.player = _player;
+    playerLayer.player = player;
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
@@ -124,6 +125,17 @@ static NSString *const timedMetadata = @"timedMetadata";
     return (kCMTimeRangeZero);
 }
 
+-(void)addPlayerTimeObserver
+{
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
+  // of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  __weak RCTVideo *weakSelf = self;
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                        queue:NULL
+                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                   ];
+}
 
 /* Cancels the previously registered time observer. */
 -(void)removePlayerTimeObserver
@@ -140,8 +152,8 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [self removePlayerItemObservers];
   [self removePlayerLayer];
+  [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
 }
 
@@ -252,9 +264,6 @@ static NSString *const timedMetadata = @"timedMetadata";
  * observer set */
 - (void)removePlayerItemObservers
 {
-  if (_playerLayer) {
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
-  }
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
@@ -268,13 +277,13 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setSrc:(NSDictionary *)source
 {
+  [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
 
   [_player pause];
-  [self removePlayerLayer];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
@@ -289,13 +298,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
   _playbackRateObserverRegistered = YES;
 
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
+  [self addPlayerTimeObserver];
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //Perform on next run loop, otherwise onVideoLoadStart is nil
@@ -460,10 +463,17 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)attachListeners
 {
   // listen for end of file
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemDidPlayToEndTimeNotification
+                                                object:[_player currentItem]];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(playerItemDidReachEnd:)
                                                name:AVPlayerItemDidPlayToEndTimeNotification
                                              object:[_player currentItem]];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemPlaybackStalledNotification
+                                                object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
@@ -488,6 +498,8 @@ static NSString *const timedMetadata = @"timedMetadata";
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
+  } else {
+    [self removePlayerTimeObserver];
   }
 }
 
@@ -567,7 +579,12 @@ static NSString *const timedMetadata = @"timedMetadata";
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        if (!wasPaused) [_player play];
+        if (!_timeObserver) {
+          [self addPlayerTimeObserver];
+        }
+        if (!wasPaused) {
+            [self setPaused:false];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
@@ -613,6 +630,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     [_player setMuted:NO];
   }
 
+  [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
@@ -621,6 +639,50 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
+}
+
+- (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
+  _selectedTextTrack = selectedTextTrack;
+  NSString *type = selectedTextTrack[@"type"];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  AVMediaSelectionOption *option;
+
+  if ([type isEqualToString:@"disabled"]) {
+    // Do nothing. We want to ensure option is nil
+  } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
+    NSString *value = selectedTextTrack[@"value"];
+    for (int i = 0; i < group.options.count; ++i) {
+      AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+      NSString *optionValue;
+      if ([type isEqualToString:@"language"]) {
+        optionValue = [currentOption extendedLanguageTag];
+      } else {
+        optionValue = [[[currentOption commonMetadata]
+                        valueForKey:@"value"]
+                       objectAtIndex:0];
+      }
+      if ([value isEqualToString:optionValue]) {
+        option = currentOption;
+        break;
+      }
+    }
+  //} else if ([type isEqualToString:@"default"]) {
+  //  option = group.defaultOption; */
+  } else if ([type isEqualToString:@"index"]) {
+    if ([selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
+      int index = [selectedTextTrack[@"value"] intValue];
+      if (group.options.count > index) {
+        option = [group.options objectAtIndex:index];
+      }
+    }
+  } else { // default. invalid type or "system"
+    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+    return;
+  }
+  
+  // If a match isn't found, option will be nil and text tracks will be disabled
+  [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
 }
 
 - (BOOL)getFullscreen
@@ -727,6 +789,11 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval
 {
   _progressUpdateInterval = progressUpdateInterval;
+
+  if (_timeObserver) {
+    [self removePlayerTimeObserver];
+    [self addPlayerTimeObserver];
+  }
 }
 
 - (void)removePlayerLayer

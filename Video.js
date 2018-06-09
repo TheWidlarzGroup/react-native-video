@@ -218,7 +218,7 @@ export default class Video extends Component {
         top: 0,
         right: 0,
         bottom: 0,
-        resizeMode: 'contain',
+        resizeMode: this.props.posterResizeMode || 'contain'
       };
 
       return (
@@ -272,10 +272,19 @@ Video.propTypes = {
   ]),
   resizeMode: PropTypes.string,
   poster: PropTypes.string,
+  posterResizeMode: Image.propTypes.resizeMode,
   repeat: PropTypes.bool,
+  selectedTextTrack: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ])
+  }),
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
+  stereoPan: PropTypes.number,
   rate: PropTypes.number,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
@@ -284,6 +293,7 @@ Video.propTypes = {
   controls: PropTypes.bool,
   currentTime: PropTypes.number,
   progressUpdateInterval: PropTypes.number,
+  useTextureView: PropTypes.bool,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,
