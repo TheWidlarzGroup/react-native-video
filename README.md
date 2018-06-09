@@ -184,8 +184,6 @@ using System.Collections.Generic;
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
-       playInBackground={true|false}           // Audio continues to play when app entering background. Default false
-       playWhenInactive={true|false}           // [iOS] Video continues to play when control or notification center are shown. Default false
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
@@ -224,6 +222,8 @@ var styles = StyleSheet.create({
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
+* [playInBackground](#playinbackground)
+* [playWhenInactive](#playwheninactive)
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
 * [progressUpdateInterval](#progressupdateinterval)
@@ -280,6 +280,22 @@ Delay in milliseconds between onProgress events in milliseconds.
 Default: 250.0.
 
 Platforms: all
+
+#### playInBackground
+Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+iOS support is currently broken until background service support is added [#797](https://github.com/react-native-community/react-native-video/issues/797)
+
+Platforms: Android ExoPlayer, Android MediaPlayer
+
+#### playWhenInactive
+Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+Platforms: iOS
 
 #### rate
 Speed at which the media should play. 
