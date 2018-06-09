@@ -12,9 +12,9 @@ android {
 
 dependencies {
     provided 'com.facebook.react:react-native:+'
-    compile 'com.google.android.exoplayer:exoplayer:r2.4.0'
-    compile('com.google.android.exoplayer:extension-okhttp:r2.4.0') {
+    compile 'com.google.android.exoplayer:exoplayer:2.7.3'
+    compile('com.google.android.exoplayer:extension-okhttp:2.7.3') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    compile 'com.squareup.okhttp3:okhttp:3.4.2'
+    compile 'com.squareup.okhttp3:okhttp:3.9.1'
 }

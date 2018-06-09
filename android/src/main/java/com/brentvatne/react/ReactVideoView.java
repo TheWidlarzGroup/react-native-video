@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
+import java.math.BigDecimal;
 
 @SuppressLint("ViewConstructor")
 public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
@@ -64,6 +66,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public static final String EVENT_PROP_DURATION = "duration";
     public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
+    public static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
     public static final String EVENT_PROP_NATURALSIZE = "naturalSize";
@@ -93,8 +96,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private boolean mPaused = false;
     private boolean mMuted = false;
     private float mVolume = 1.0f;
+    private float mStereoPan = 0.0f;
     private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
+    private float mActiveRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
     private boolean mActiveStatePauseStatusInitialized = false;
@@ -127,6 +132,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
+                    event.putDouble(EVENT_PROP_SEEKABLE_DURATION, mVideoDuration / 1000.0);
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
@@ -297,6 +303,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         WritableMap event = Arguments.createMap();
         event.putMap(ReactVideoViewManager.PROP_SRC, src);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
+        isCompleted = false;
 
         try {
           prepareAsync(this);
@@ -343,11 +350,23 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         } else {
             if (!mMediaPlayer.isPlaying()) {
                 start();
+                // Setting the rate unpauses, so we have to wait for an unpause
+                if (mRate != mActiveRate) { 
+                    setRateModifier(mRate);
+                }
 
                 // Also Start the Progress Update Handler
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
+    }
+
+    // reduces the volume based on stereoPan
+    private float calulateRelativeVolume() {
+        float relativeVolume = (mVolume * (1 - Math.abs(mStereoPan)));
+        // only one decimal allowed
+        BigDecimal roundRelativeVolume = new BigDecimal(relativeVolume).setScale(1, BigDecimal.ROUND_HALF_UP);
+        return roundRelativeVolume.floatValue();
     }
 
     public void setMutedModifier(final boolean muted) {
@@ -359,13 +378,25 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         if (mMuted) {
             setVolume(0, 0);
+        } else if (mStereoPan < 0) {
+            // louder on the left channel
+            setVolume(mVolume, calulateRelativeVolume());
+        } else if (mStereoPan > 0) {
+            // louder on the right channel
+            setVolume(calulateRelativeVolume(), mVolume);
         } else {
+            // same volume on both channels
             setVolume(mVolume, mVolume);
         }
     }
 
     public void setVolumeModifier(final float volume) {
         mVolume = volume;
+        setMutedModifier(mMuted);
+    }
+
+    public void setStereoPan(final float stereoPan) {
+        mStereoPan = stereoPan;
         setMutedModifier(mMuted);
     }
 
@@ -377,8 +408,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mRate = rate;
 
         if (mMediaPlayerValid) {
-            // TODO: Implement this.
-            Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!mPaused) { // Applying the rate while paused will cause the video to start
+                    mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
+                    mActiveRate = rate;
+                }
+            } else {
+                Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android versions below 6.0");
+            }
         }
     }
 
@@ -388,7 +425,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
         setProgressUpdateInterval(mProgressUpdateInterval);
-//        setRateModifier(mRate);
+        setRateModifier(mRate);
     }
 
     public void setPlayInBackground(final boolean playInBackground) {
