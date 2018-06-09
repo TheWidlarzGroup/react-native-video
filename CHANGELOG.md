@@ -1,6 +1,7 @@
 ## Changelog
 
 ### Next Version
+* Inherit Android buildtools and SDK version from the root project [#999](https://github.com/react-native-community/react-native-video/pull/999)
 * Fix bug that caused ExoPlayer to start paused if playInBackground was set [#833](https://github.com/react-native-community/react-native-video/pull/833)
 
 ### Version 2.2.0
