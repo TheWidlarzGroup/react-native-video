@@ -257,6 +257,22 @@ Controls whether the media is paused
 
 Platforms: all
 
+#### playInBackground
+Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+iOS support is currently broken until background service support is added [#797](https://github.com/react-native-community/react-native-video/issues/797)
+
+Platforms: Android ExoPlayer, Android MediaPlayer
+
+#### playWhenInactive
+Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+Platforms: iOS
+
 #### poster
 An image to display while the video is loading
 <br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
@@ -277,27 +293,11 @@ Platforms: all
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
 
-Default: 250.0.
+Default: 250.0
 
 Platforms: all
 
-#### playInBackground
-Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
-* **false (default)** - Don't continue playing the media
-* **true** - Continue playing the media
-
-iOS support is currently broken until background service support is added [#797](https://github.com/react-native-community/react-native-video/issues/797)
-
-Platforms: Android ExoPlayer, Android MediaPlayer
-
-#### playWhenInactive
-Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
-* **false (default)** - Don't continue playing the media
-* **true** - Continue playing the media
-
-Platforms: iOS
-
-#### rate
+### rate
 Speed at which the media should play. 
 * **0.0** - Pauses the video
 * **1.0** - Play at normal speed
