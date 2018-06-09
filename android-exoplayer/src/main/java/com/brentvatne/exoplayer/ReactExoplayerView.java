@@ -104,6 +104,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean disableFocus;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
+    private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
     // \ End props
 
@@ -366,7 +367,7 @@ class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultDataSourceFactory(getContext(), useBandwidthMeter ? BANDWIDTH_METER : null, requestHeaders);
+        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, useBandwidthMeter ? BANDWIDTH_METER : null, requestHeaders);
     }
 
     // AudioManager.OnAudioFocusChangeListener implementation
@@ -584,7 +585,7 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(getContext(), BANDWIDTH_METER, requestHeaders);
+            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, requestHeaders);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();

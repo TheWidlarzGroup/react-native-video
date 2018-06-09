@@ -1,10 +1,11 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
-import android.util.ArrayMap;
+import android.content.ContextWrapper;
 
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableNativeMap;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.modules.network.CookieJarContainer;
+import com.facebook.react.modules.network.ForwardingCookieHandler;
 import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -13,8 +14,9 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import okhttp3.Cookie;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
 import java.util.Map;
 
 public class DataSourceUtil {
@@ -48,7 +50,7 @@ public class DataSourceUtil {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
 
-    public static DataSource.Factory getDefaultDataSourceFactory(Context context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+    public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
             defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
         }
@@ -63,14 +65,18 @@ public class DataSourceUtil {
         return new RawResourceDataSourceFactory(context.getApplicationContext());
     }
 
-    private static DataSource.Factory buildDataSourceFactory(Context context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        Context appContext = context.getApplicationContext();
-        return new DefaultDataSourceFactory(appContext, bandwidthMeter,
-                buildHttpDataSourceFactory(appContext, bandwidthMeter, requestHeaders));
+    private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+        return new DefaultDataSourceFactory(context, bandwidthMeter,
+                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
     }
 
-    private static HttpDataSource.Factory buildHttpDataSourceFactory(Context context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        OkHttpDataSourceFactory okHttpDataSourceFactory = new OkHttpDataSourceFactory(OkHttpClientProvider.getOkHttpClient(), getUserAgent(context), bandwidthMeter);
+    private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+        OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
+        CookieJarContainer container = (CookieJarContainer) client.cookieJar();
+        ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
+        container.setCookieJar(new JavaNetCookieJar(handler));
+
+        OkHttpDataSourceFactory okHttpDataSourceFactory = new OkHttpDataSourceFactory(client, getUserAgent(context), bandwidthMeter);
 
         if (requestHeaders != null)
             okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders);
