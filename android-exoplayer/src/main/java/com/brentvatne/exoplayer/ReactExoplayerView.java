@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -46,6 +47,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -101,6 +103,8 @@ class ReactExoplayerView extends FrameLayout implements
     private Uri srcUri;
     private String extension;
     private boolean repeat;
+    private String textTrackType;
+    private Dynamic textTrackValue;
     private boolean disableFocus;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
@@ -135,9 +139,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
+        this.themedReactContext = context;
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
-        this.themedReactContext = context;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -448,6 +452,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
+            setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -570,6 +575,16 @@ class ReactExoplayerView extends FrameLayout implements
         return false;
     }
 
+    public int getTextTrackRendererIndex() {
+        int rendererCount = player.getRendererCount();
+        for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
+            if (player.getRendererType(rendererIndex) == C.TRACK_TYPE_TEXT) {
+                return rendererIndex;
+            }
+        }
+        return C.INDEX_UNSET;
+    }
+
     @Override
     public void onMetadata(Metadata metadata) {
         eventEmitter.timedMetadata(metadata);
@@ -585,7 +600,7 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, requestHeaders);
+            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();
@@ -604,7 +619,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(getContext());
+            this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(this.themedReactContext);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();
@@ -630,6 +645,60 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         this.repeat = repeat;
+    }
+
+    public void setSelectedTextTrack(String type, Dynamic value) {
+        textTrackType = type;
+        textTrackValue = value;
+
+        int index = getTextTrackRendererIndex();
+        if (index == C.INDEX_UNSET) {
+            return;
+        }
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        if (info == null) {
+            return;
+        }
+
+        TrackGroupArray groups = info.getTrackGroups(index);
+        int trackIndex = C.INDEX_UNSET;
+        if (TextUtils.isEmpty(type)) {
+            // Do nothing
+        } else if (type.equals("disabled")) {
+            trackSelector.setSelectionOverride(index, groups, null);
+            return;
+        } else if (type.equals("language")) {
+            for (int i = 0; i < groups.length; ++i) {
+                Format format = groups.get(i).getFormat(0);
+                if (format.language != null && format.language.equals(value.asString())) {
+                    trackIndex = i;
+                    break;
+                }
+            }
+        } else if (type.equals("title")) {
+            for (int i = 0; i < groups.length; ++i) {
+                Format format = groups.get(i).getFormat(0);
+                if (format.id != null && format.id.equals(value.asString())) {
+                    trackIndex = i;
+                    break;
+                }
+            }
+        } else if (type.equals("index")) {
+            trackIndex = value.asInt();
+        } else { // default. invalid type or "system"
+            trackSelector.clearSelectionOverrides(index);
+            return;
+        }
+
+        if (trackIndex == C.INDEX_UNSET) {
+            trackSelector.clearSelectionOverrides(trackIndex);
+            return;
+        }
+
+        MappingTrackSelector.SelectionOverride override
+                = new MappingTrackSelector.SelectionOverride(
+                        new FixedTrackSelection.Factory(), trackIndex, 0);
+        trackSelector.setSelectionOverride(index, groups, override);
     }
 
     public void setPausedModifier(boolean paused) {
@@ -712,5 +781,9 @@ class ReactExoplayerView extends FrameLayout implements
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();
         }
+    }
+
+    public void setUseTextureView(boolean useTextureView) {
+        exoPlayerView.setUseTextureView(useTextureView);
     }
 }

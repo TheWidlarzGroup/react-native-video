@@ -31,6 +31,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_PAUSED = "paused";
     public static final String PROP_MUTED = "muted";
     public static final String PROP_VOLUME = "volume";
+    public static final String PROP_STEREO_PAN = "stereoPan";
     public static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     public static final String PROP_SEEK = "seek";
     public static final String PROP_RATE = "rate";
@@ -125,6 +126,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactVideoView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
+    }
+
+    @ReactProp(name = PROP_STEREO_PAN)
+    public void setStereoPan(final ReactVideoView videoView, final float stereoPan) {
+        videoView.setStereoPan(stereoPan);
     }
 
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)

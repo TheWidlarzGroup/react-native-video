@@ -86,7 +86,7 @@ include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
 ```
 
-If you need to use the old Android media player based player, use the following instead:
+If you need to use the old Android MediaPlayer based player, use the following instead:
 
 ```gradle
 include ':react-native-video'
@@ -181,27 +181,16 @@ using System.Collections.Generic;
 // on a single screen if you like.
 
 <Video source={{uri: "background"}}   // Can be a URL or a local file.
-       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
-       rate={1.0}                              // 0 is paused, 1 is normal.
-       volume={1.0}                            // 0 is muted, 1 is normal.
-       muted={true|false}                      // Mutes the audio entirely. Default false
-       paused={true|false}                     // Pauses playback entirely. Default false
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
-       repeat={true|false}                     // Repeat forever. Default false
-       playInBackground={true|false}           // Audio continues to play when app entering background. Default false
-       playWhenInactive={true|false}           // [iOS] Video continues to play when control or notification center are shown. Default false
-       ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
-       progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
        onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
        onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
        onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
-       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDissmiss}  // Callback after fullscreen stopped
+       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        onLoadStart={this.loadStart}            // Callback when video starts to load
        onLoad={this.setDuration}               // Callback when video loads
        onProgress={this.setTime}               // Callback every ~250ms with currentTime
@@ -228,6 +217,176 @@ var styles = StyleSheet.create({
   },
 });
 ```
+
+### Configurable props
+* [ignoreSilentSwitch](#ignoresilentswitch)
+* [muted](#muted)
+* [paused](#paused)
+* [playInBackground](#playinbackground)
+* [playWhenInactive](#playwheninactive)
+* [poster](#poster)
+* [posterResizeMode](#posterresizemode)
+* [progressUpdateInterval](#progressupdateinterval)
+* [rate](#rate)
+* [repeat](#repeat)
+* [resizeMode](#resizemode)
+* [selectedTextTrack](#selectedtexttrack)
+* [stereoPan](#stereopan)
+* [useTextureView](#usetextureview)
+* [volume](#volume)
+
+#### ignoreSilentSwitch
+Controls the iOS silent switch behavior
+* **"inherit" (default)** - Use the default AVPlayer behavior
+* **"ignore"** - Play audio even if the silent switch is set
+* **"obey"** - Don't play audio if the silent switch is set
+
+Platforms: iOS
+
+#### muted
+Controls whether the audio is muted
+* **false (default)** - Don't mute audio
+* **true** - Mute audio
+
+Platforms: all
+
+#### paused
+Controls whether the media is paused
+* **false (default)** - Pause the media
+* **true** - Don't pause the media
+
+Platforms: all
+
+#### playInBackground
+Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+To use this feature on iOS, you must:
+* [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3) in your Xcode project
+* Set the ignoreSilentSwitch prop to "ignore"
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### playWhenInactive
+Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+Platforms: iOS
+
+#### poster
+An image to display while the video is loading
+<br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
+
+Platforms: all
+
+#### posterResizeMode
+Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
+* **"contain" (default)** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"center"** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
+* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"none"** - Don't apply resize
+* **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+
+Platforms: all
+
+#### progressUpdateInterval
+Delay in milliseconds between onProgress events in milliseconds.
+
+Default: 250.0
+
+Platforms: all
+
+### rate
+Speed at which the media should play. 
+* **0.0** - Pauses the video
+* **1.0** - Play at normal speed
+* **Other values** - Slow down or speed up playback
+
+Platforms: all
+
+Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+#### repeat
+Determine whether to repeat the video when the end is reached
+* **false (default)** - Don't repeat the video
+* **true** - Repeat the video
+
+Platforms: all
+
+#### resizeMode
+Determines how to resize the video when the frame doesn't match the raw video dimensions.
+* **"none" (default)** - Don't apply resize
+* **"contain"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the video will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### selectedTextTrack
+Configure which text track (caption or subtitle), if any, is shown.
+
+```
+selectedTextTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedTextTrack={{
+  type: "title",
+  value: "English Subtitles"
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Display captions only if the system preference for captions is enabled
+"disabled" | N/A | Don't display a text track
+"title" | string | Display the text track with the title specified as the Value, e.g. "French 1"
+"language" | string | Display the text track with the language specified as the Value, e.g. "fr"
+"index" | number | Display the text track with the index specified as the value, e.g. 0
+
+Both iOS & Android offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it.
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
+
+Platforms: Android ExoPlayer, iOS
+
+#### stereoPan
+Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
+* **-1.0** - Full left
+* **0.0 (default)** - Center
+* **1.0** - Full right
+
+Platforms: Android MediaPlayer
+
+#### useTextureView
+Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
+* It can't be animated, transformed or scaled
+* You can't overlay multiple SurfaceViews
+
+useTextureView can only be set at same time you're setting the source.
+
+* **false (default)** - Use a SurfaceView
+* **true** - Use a TextureView
+
+Platforms: Android ExoPlayer
+
+#### volume
+Adjust the volume.
+* **1.0 (default)** - Play at full volume
+* **0.0** - Mute the audio
+* **Other values** - Reduce volume
+
+Platforms: all
+
+### Additional props
+
 To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
 
 - By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:

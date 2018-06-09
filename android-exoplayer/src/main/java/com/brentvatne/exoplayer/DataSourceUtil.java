@@ -19,6 +19,7 @@ import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import java.util.Map;
 
+
 public class DataSourceUtil {
 
     private DataSourceUtil() {
@@ -32,14 +33,14 @@ public class DataSourceUtil {
         DataSourceUtil.userAgent = userAgent;
     }
 
-    public static String getUserAgent(Context context) {
+    public static String getUserAgent(ReactContext context) {
         if (userAgent == null) {
-            userAgent = Util.getUserAgent(context.getApplicationContext(), "ReactNativeVideo");
+            userAgent = Util.getUserAgent(context, "ReactNativeVideo");
         }
         return userAgent;
     }
 
-    public static DataSource.Factory getRawDataSourceFactory(Context context) {
+    public static DataSource.Factory getRawDataSourceFactory(ReactContext context) {
         if (rawDataSourceFactory == null) {
             rawDataSourceFactory = buildRawDataSourceFactory(context);
         }
@@ -49,6 +50,7 @@ public class DataSourceUtil {
     public static void setRawDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
+
 
     public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
@@ -61,7 +63,7 @@ public class DataSourceUtil {
         DataSourceUtil.defaultDataSourceFactory = factory;
     }
 
-    private static DataSource.Factory buildRawDataSourceFactory(Context context) {
+    private static DataSource.Factory buildRawDataSourceFactory(ReactContext context) {
         return new RawResourceDataSourceFactory(context.getApplicationContext());
     }
 
@@ -75,7 +77,6 @@ public class DataSourceUtil {
         CookieJarContainer container = (CookieJarContainer) client.cookieJar();
         ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
         container.setCookieJar(new JavaNetCookieJar(handler));
-
         OkHttpDataSourceFactory okHttpDataSourceFactory = new OkHttpDataSourceFactory(client, getUserAgent(context), bandwidthMeter);
 
         if (requestHeaders != null)
