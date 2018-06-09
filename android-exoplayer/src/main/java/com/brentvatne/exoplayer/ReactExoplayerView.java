@@ -93,6 +93,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long resumePosition;
     private boolean loadVideoStarted;
     private boolean isFullscreen;
+    private boolean isInBackground;
     private boolean isPaused = true;
     private boolean isBuffering;
     private float rate = 1f;
@@ -186,14 +187,15 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
-        if (playInBackground) {
-            return;
+        if (!playInBackground || !isInBackground) {
+            setPlayWhenReady(!isPaused);
         }
-        setPlayWhenReady(!isPaused);
+        isInBackground = false;
     }
 
     @Override
     public void onHostPause() {
+        isInBackground = true;
         if (playInBackground) {
             return;
         }
