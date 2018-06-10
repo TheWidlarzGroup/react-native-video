@@ -40,6 +40,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _allowsExternalPlayback;
   NSDictionary * _selectedTextTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
@@ -67,6 +68,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
+    _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
 
@@ -523,6 +525,12 @@ static NSString *const timedMetadata = @"timedMetadata";
   _playInBackground = playInBackground;
 }
 
+- (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
+{
+    _allowsExternalPlayback = allowsExternalPlayback;
+    _player.allowsExternalPlayback = _allowsExternalPlayback;
+}
+
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
 {
   _playWhenInactive = playWhenInactive;
@@ -635,6 +643,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self setRepeat:_repeat];
   [self setPaused:_paused];
   [self setControls:_controls];
+  [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
 
 - (void)setRepeat:(BOOL)repeat {

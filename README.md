@@ -219,6 +219,7 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
+* [allowsExternalPlayback](#allowsexternalplayback)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -234,6 +235,13 @@ var styles = StyleSheet.create({
 * [stereoPan](#stereopan)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+
+#### allowsExternalPlayback
+Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
+* **true (default)** - allow switching to external playback mode
+* **false** -  Don't allow switching to external playback mode
+
+Platforms: iOS
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
