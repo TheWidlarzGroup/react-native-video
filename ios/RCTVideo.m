@@ -68,7 +68,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
-      _allowsExternalPlayback = YES;
+    _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
 
