@@ -643,6 +643,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         this.repeat = repeat;
+        reloadSource();
     }
 
     public void setSelectedTextTrack(String type, Dynamic value) {
