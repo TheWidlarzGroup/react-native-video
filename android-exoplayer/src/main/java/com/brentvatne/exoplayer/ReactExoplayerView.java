@@ -36,7 +36,6 @@ import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
@@ -231,7 +230,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
         if (playerNeedsSource && srcUri != null) {
             MediaSource mediaSource = buildMediaSource(srcUri, extension);
-            mediaSource = repeat ? new LoopingMediaSource(mediaSource) : mediaSource;
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             if (haveResumePosition) {
                 player.seekTo(resumeWindow, resumePosition);
