@@ -37,6 +37,8 @@ import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MergingMediaSource;
+import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
@@ -51,6 +53,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
 import java.net.CookieHandler;
@@ -58,6 +61,8 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
 import java.lang.Object;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -229,7 +234,27 @@ class ReactExoplayerView extends FrameLayout implements
             player.setPlaybackParameters(params);
         }
         if (playerNeedsSource && srcUri != null) {
-            MediaSource mediaSource = buildMediaSource(srcUri, extension);
+            ArrayList<MediaSource> mediaSources = new ArrayList<>();
+            mediaSources.add(buildMediaSource(srcUri, extension)); // video source
+            MediaSource text0 = buildTextSource(
+                    "ES VTT",
+                    Uri.parse("https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_es.vtt"),
+                    "vtt",
+                    "es"
+            );
+            if (text0 != null) {
+                mediaSources.add(text0);
+            }
+            MediaSource mediaSource;
+            if (mediaSources.size() > 1) {
+                MediaSource[] textSourceArray = mediaSources.toArray(
+                        new MediaSource[mediaSources.size()]
+                );
+                mediaSource = new MergingMediaSource(textSourceArray);
+            } else {
+                mediaSource = mediaSources.get(0);
+            }
+
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             if (haveResumePosition) {
                 player.seekTo(resumeWindow, resumePosition);
@@ -261,6 +286,22 @@ class ReactExoplayerView extends FrameLayout implements
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
+    }
+
+    private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
+        String sampleType;
+        switch (mimeType) {
+            case "srt":
+                sampleType = MimeTypes.APPLICATION_SUBRIP;
+                break;
+            case "vtt":
+                sampleType = MimeTypes.TEXT_VTT;
+                break;
+            default:
+                return null;
+        }
+        Format textFormat = Format.createTextSampleFormat(title, sampleType, Format.NO_VALUE, language);
+        return new SingleSampleMediaSource(uri, mediaDataSourceFactory, textFormat, C.TIME_UNSET);
     }
 
     private void releasePlayer() {
