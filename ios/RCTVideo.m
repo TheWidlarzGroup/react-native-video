@@ -330,10 +330,10 @@ static NSString *const timedMetadata = @"timedMetadata";
   if (isNetwork) {
     NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc]init];
     if ([headers count] > 0) {
-      [assetOptions setObject:@headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"]
+      [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
     }
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    [assetOptions setObject:@cookies forKey:@AVURLAssetHTTPCookiesKey]
+    [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
 
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
     return [AVPlayerItem playerItemWithAsset:asset];
