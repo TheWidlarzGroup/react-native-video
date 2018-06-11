@@ -1,5 +1,5 @@
-#import "RCTVideo.h"
 #import <React/RCTConvert.h>
+#import "RCTVideo.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
@@ -575,7 +575,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, _pendingSeekTolerance);
+    CMTime tolerance = CMTimeMake(_pendingSeekTolerance, timeScale);
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
