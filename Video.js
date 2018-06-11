@@ -24,8 +24,11 @@ export default class Video extends Component {
     this._root.setNativeProps(nativeProps);
   }
 
-  seek = (time) => {
-    this.setNativeProps({ seek: time });
+  seek = (time, tolerance = 1000) => {
+    this.setNativeProps({
+       seek: time,
+       seekTolerance: tolerance
+    });
   };
 
   presentFullscreenPlayer = () => {
@@ -316,6 +319,7 @@ const RCTVideo = requireNativeComponent('RCTVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
-    fullscreen: true,
+    seekTolerance: true,
+    fullscreen: true
   },
 });

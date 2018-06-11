@@ -1,5 +1,5 @@
-#import <React/RCTConvert.h>
 #import "RCTVideo.h"
+#import <React/RCTConvert.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
@@ -28,6 +28,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   bool _pendingSeek;
   float _pendingSeekTime;
   float _lastSeekTime;
+  int _pendingSeekTolerance;
 
   /* For sending videoProgress events */
   Float64 _progressUpdateInterval;
@@ -68,7 +69,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _playInBackground = false;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
-
+    _pendingSeekTolerance = 0;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
                                                  name:UIApplicationWillResignActiveNotification
@@ -557,6 +558,12 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self setSeek: currentTime];
 }
 
+- (void)setSeekTolerance:(float)seekTime toleranceInMS:(int)toleranceInMS
+{
+  _pendingSeekTolerance = toleranceInMS;
+  [self setSeek:seekTime];
+}
+
 - (void)setSeek:(float)seekTime
 {
   int timeScale = 10000;
@@ -568,11 +575,12 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
+    CMTime tolerance = CMTimeMake(1000, _pendingSeekTolerance);
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
-      [_player seekToTime:cmSeekTime toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero completionHandler:^(BOOL finished) {
+      [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
         if (!_timeObserver) {
           [self addPlayerTimeObserver];
         }
