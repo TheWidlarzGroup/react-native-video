@@ -6,7 +6,7 @@
     "license": "MIT",
     "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
     "contributors": [
-         {
+        {
             "name": "Isaiah Grey",
             "email": "isaiahgrey@gmail.com"
         },
@@ -40,5 +40,10 @@
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
+    },
+    "rnpm": {
+        "android": {
+            "sourceDir": "./android-exoplayer"
+        }
     }
 }
