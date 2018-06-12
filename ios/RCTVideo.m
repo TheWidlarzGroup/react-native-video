@@ -415,6 +415,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                                      @"height": height,
                                      @"orientation": orientation
                                      },
+                             @"textTracks": [self getTextTrackInfo],
                              @"target": self.reactTag});
       }
 
@@ -692,6 +693,26 @@ static NSString *const timedMetadata = @"timedMetadata";
   
   // If a match isn't found, option will be nil and text tracks will be disabled
   [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
+}
+
+- (NSArray *)getTextTrackInfo
+{
+  NSMutableArray *textTracks = [[NSMutableArray alloc] init];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  for (int i = 0; i < group.options.count; ++i) {
+    AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+    NSString *title = [[[currentOption commonMetadata]
+                        valueForKey:@"value"]
+                       objectAtIndex:0];
+    NSDictionary *textTrack = @{
+                                @"index": [NSNumber numberWithInt:i],
+                                @"title": title,
+                                @"language": [currentOption extendedLanguageTag]
+                                };
+    [textTracks addObject:textTrack];
+  }
+  return textTracks;
 }
 
 - (BOOL)getFullscreen
