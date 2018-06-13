@@ -382,7 +382,7 @@ Load one or more "sidecar" text tracks. This takes an array of objects represent
 Property | Description
 --- | ---
 title | Descriptive name for the track
-language | 2 character [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
+language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
 type | Mime type of the track<br> * TextTrackType.SRT - .srt SubRip Subtitle<br> * TextTrackType.TTML - .ttml TTML<br> * TextTrackType.VTT - .vtt WebVTT
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
 
@@ -442,7 +442,7 @@ Property | Type | Description
 currentPosition | number | Time in seconds where the media will start
 duration | number | Length of the media in seconds
 naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
-textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - IOS 639-1 2 letter language code<br> * type - Mime type of track
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code<br> * type - Mime type of track
 
 Example:
 ```
