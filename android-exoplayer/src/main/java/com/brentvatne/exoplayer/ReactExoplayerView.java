@@ -307,18 +307,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
-        String sampleType;
-        switch (mimeType) {
-            case "srt":
-                sampleType = MimeTypes.APPLICATION_SUBRIP;
-                break;
-            case "vtt":
-                sampleType = MimeTypes.TEXT_VTT;
-                break;
-            default:
-                return null;
-        }
-        Format textFormat = Format.createTextSampleFormat(title, sampleType, Format.NO_VALUE, language);
+        Format textFormat = Format.createTextSampleFormat(title, mimeType, Format.NO_VALUE, language);
         return new SingleSampleMediaSource(uri, mediaDataSourceFactory, textFormat, C.TIME_UNSET);
     }
 
