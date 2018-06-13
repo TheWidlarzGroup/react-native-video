@@ -437,12 +437,12 @@ Callback function that is called when the media is loaded and ready to play.
 
 Payload:
 
-Property | Description
---- | ---
-currentPosition | Time in seconds where the media will start
-duration | Length of the media in seconds
-naturalSize | * width - Width in pixels that the video was encoding at<br> * height - Height in pixels that the video was encoding at<br> * orientation - "portrait" or "landscape"
-textTracks | An array with info about the text tracks<br> * index - Index number<br> * title - Description of the track<br> * language - IOS 639-1 2 letter language code<br> * type - Mime type of track
+Property | Type | Description
+--- | --- | ---
+currentPosition | number | Time in seconds where the media will start
+duration | number | Length of the media in seconds
+naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - IOS 639-1 2 letter language code<br> * type - Mime type of track
 
 Example:
 ```
