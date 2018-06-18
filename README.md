@@ -280,6 +280,12 @@ Toggles a fullscreen player. Access using a ref to the component.
 [2]: https://github.com/react-native-community/react-native-video/tree/master/example
 [3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
 
+## Contributing
+
+`git clone --recurse-submodules <repo>` this repo.
+
+In order to test this library with the examples you will have to run `npm pack`, then `cd` into the example you want to try out and run `npm install`.
+
 ---
 
 **MIT Licensed**
