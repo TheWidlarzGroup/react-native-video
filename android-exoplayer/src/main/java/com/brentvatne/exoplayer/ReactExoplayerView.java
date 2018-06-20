@@ -520,9 +520,9 @@ class ReactExoplayerView extends FrameLayout implements
              Format format = groups.get(i).getFormat(0);
              WritableMap textTrack = Arguments.createMap();
              textTrack.putInt("index", i);
-             textTrack.putString("title", format.id);
+             textTrack.putString("title", format.id != null ? format.id : "");
              textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language);
+             textTrack.putString("language", format.language != null ? format.language : "");
              textTracks.pushMap(textTrack);
         }
         return textTracks;

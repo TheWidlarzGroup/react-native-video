@@ -126,10 +126,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
     public void setSelectedTextTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedTextTrack) {
-        String typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
-                ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
-        Dynamic value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
-                ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedTextTrack != null) {
+            typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
+                    ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
+            value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
+                    ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
+        }
         videoView.setSelectedTextTrack(typeString, value);
     }
 
