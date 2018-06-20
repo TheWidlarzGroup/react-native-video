@@ -40,6 +40,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_DRM_URL = "drmUrl";
 
     @Override
     public String getName() {
@@ -187,6 +188,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_DRM_URL)
+    public void setDrmUrl(final ReactExoplayerView videoView, final String dmrUrl) {
+        videoView.setDrmUrl(dmrUrl);
     }
 
     private boolean startsWithValidScheme(String uriString) {
