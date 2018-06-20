@@ -129,7 +129,7 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && (event.nativeEvent.playbackRate !== 0) && (!this.props.audioOnly)) {
+    if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
       this.setState({showPoster: false});
     }
 
@@ -282,6 +282,7 @@ Video.propTypes = {
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
+  audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
   progressUpdateInterval: PropTypes.number,
   onLoadStart: PropTypes.func,
