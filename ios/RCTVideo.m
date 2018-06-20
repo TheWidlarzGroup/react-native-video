@@ -702,13 +702,16 @@ static NSString *const timedMetadata = @"timedMetadata";
                                   mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
   for (int i = 0; i < group.options.count; ++i) {
     AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-    NSString *title = [[[currentOption commonMetadata]
-                        valueForKey:@"value"]
-                       objectAtIndex:0];
+    NSString *title = @"";
+    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+    if (values.count > 0) {
+      title = [values objectAtIndex:0];
+    }
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
     NSDictionary *textTrack = @{
                                 @"index": [NSNumber numberWithInt:i],
                                 @"title": title,
-                                @"language": [currentOption extendedLanguageTag]
+                                @"language": language
                                 };
     [textTracks addObject:textTrack];
   }
