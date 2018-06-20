@@ -28,4 +28,9 @@ dependencies {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     compile 'com.squareup.okhttp3:okhttp:3.9.1'
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+    compile 'com.squareup.retrofit2:converter-jackson:2.4.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
 }

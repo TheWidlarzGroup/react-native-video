@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
 
+import com.brentvatne.exoplayer.dmr.DRMSessionManagerFactory;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -26,6 +27,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -34,6 +36,8 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -58,7 +62,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
 import java.net.CookieHandler;
@@ -67,6 +70,7 @@ import java.net.CookiePolicy;
 import java.lang.Math;
 import java.lang.Object;
 import java.util.ArrayList;
+import java.util.UUID;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -117,6 +121,9 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean useTextureView = false;
+
+    private String drmUrl = null;
+    private UUID drmUUID = C.WIDEVINE_UUID; // Currently only support WideVine
     // \ End props
 
     // React
@@ -227,7 +234,17 @@ class ReactExoplayerView extends FrameLayout implements
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, new DefaultLoadControl());
+            DrmSessionManager dmrSessionManager = null;
+            if(drmUrl != null) {
+                try {
+                    dmrSessionManager = DRMSessionManagerFactory.createSessionManager(drmUUID, drmUrl, mainHandler);
+                } catch (UnsupportedDrmException e) {
+                    Log.e("DMR Session", e.toString());
+                }
+            }
+            DefaultRenderersFactory rendererFactory = new DefaultRenderersFactory(getContext(),
+                    dmrSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+            player = ExoPlayerFactory.newSimpleInstance(rendererFactory, trackSelector);
             player.addListener(this);
             player.setMetadataOutput(this);
             exoPlayerView.setPlayer(player);
@@ -517,13 +534,13 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id);
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language);
-             textTracks.pushMap(textTrack);
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id);
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language);
+            textTracks.pushMap(textTrack);
         }
         return textTracks;
     }
@@ -612,8 +629,7 @@ class ReactExoplayerView extends FrameLayout implements
                             decoderInitializationException.decoderName);
                 }
             }
-        }
-        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+        } else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
             ex = e.getSourceException();
             errorString = getResources().getString(R.string.unrecognized_media_format);
         }
@@ -769,7 +785,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         MappingTrackSelector.SelectionOverride override
                 = new MappingTrackSelector.SelectionOverride(
-                        new FixedTrackSelection.Factory(), trackIndex, 0);
+                new FixedTrackSelection.Factory(), trackIndex, 0);
         trackSelector.setSelectionOverride(index, groups, override);
     }
 
@@ -805,12 +821,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
-      rate = newRate;
+        rate = newRate;
 
-      if (player != null) {
-          PlaybackParameters params = new PlaybackParameters(rate, 1f);
-          player.setPlaybackParameters(params);
-      }
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
+        }
     }
 
 
@@ -853,6 +869,12 @@ class ReactExoplayerView extends FrameLayout implements
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();
         }
+    }
+
+    public void setDrmUrl(String drmUrl) {
+        this.drmUrl = drmUrl;
+        this.player = null;
+        reloadSource();
     }
 
     public void setUseTextureView(boolean useTextureView) {
