@@ -109,6 +109,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_WIDTH = "width";
     private static final String EVENT_PROP_HEIGHT = "height";
     private static final String EVENT_PROP_ORIENTATION = "orientation";
+    private static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
@@ -128,7 +129,8 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight) {
+    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+              WritableArray textTracks) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -142,6 +144,8 @@ class VideoEventEmitter {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
+
+        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
 
         // TODO: Actually check if you can.
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);

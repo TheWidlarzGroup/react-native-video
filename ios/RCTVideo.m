@@ -18,6 +18,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
+  BOOL _playerLayerObserverSet;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
 
@@ -40,6 +41,8 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _allowsExternalPlayback;
+  NSDictionary * _selectedTextTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
@@ -66,6 +69,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
+    _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
 
@@ -124,15 +128,16 @@ static NSString *const timedMetadata = @"timedMetadata";
     return (kCMTimeRangeZero);
 }
 
-- (void)addPlayerTimeObserver
+-(void)addPlayerTimeObserver
 {
-    const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-    // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-    __weak RCTVideo *weakSelf = self;
-    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                          queue:NULL
-                                                     usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                     ];
+  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
+  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
+  // of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
+  __weak RCTVideo *weakSelf = self;
+  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
+                                                        queue:NULL
+                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                   ];
 }
 
 /* Cancels the previously registered time observer. */
@@ -150,8 +155,8 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [self removePlayerItemObservers];
   [self removePlayerLayer];
+  [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
 }
 
@@ -262,9 +267,6 @@ static NSString *const timedMetadata = @"timedMetadata";
  * observer set */
 - (void)removePlayerItemObservers
 {
-  if (_playerLayer) {
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
-  }
   if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
@@ -278,13 +280,13 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setSrc:(NSDictionary *)source
 {
+  [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
 
   [_player pause];
-  [self removePlayerLayer];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
 
@@ -414,6 +416,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                                      @"height": height,
                                      @"orientation": orientation
                                      },
+                             @"textTracks": [self getTextTrackInfo],
                              @"target": self.reactTag});
       }
 
@@ -464,10 +467,17 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)attachListeners
 {
   // listen for end of file
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemDidPlayToEndTimeNotification
+                                                object:[_player currentItem]];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(playerItemDidReachEnd:)
                                                name:AVPlayerItemDidPlayToEndTimeNotification
                                              object:[_player currentItem]];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemPlaybackStalledNotification
+                                                object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
@@ -515,6 +525,12 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setPlayInBackground:(BOOL)playInBackground
 {
   _playInBackground = playInBackground;
+}
+
+- (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
+{
+    _allowsExternalPlayback = allowsExternalPlayback;
+    _player.allowsExternalPlayback = _allowsExternalPlayback;
 }
 
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
@@ -624,14 +640,83 @@ static NSString *const timedMetadata = @"timedMetadata";
     [_player setMuted:NO];
   }
 
+  [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
   [self setControls:_controls];
+  [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
+}
+
+- (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
+  _selectedTextTrack = selectedTextTrack;
+  NSString *type = selectedTextTrack[@"type"];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  AVMediaSelectionOption *option;
+
+  if ([type isEqualToString:@"disabled"]) {
+    // Do nothing. We want to ensure option is nil
+  } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
+    NSString *value = selectedTextTrack[@"value"];
+    for (int i = 0; i < group.options.count; ++i) {
+      AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+      NSString *optionValue;
+      if ([type isEqualToString:@"language"]) {
+        optionValue = [currentOption extendedLanguageTag];
+      } else {
+        optionValue = [[[currentOption commonMetadata]
+                        valueForKey:@"value"]
+                       objectAtIndex:0];
+      }
+      if ([value isEqualToString:optionValue]) {
+        option = currentOption;
+        break;
+      }
+    }
+  //} else if ([type isEqualToString:@"default"]) {
+  //  option = group.defaultOption; */
+  } else if ([type isEqualToString:@"index"]) {
+    if ([selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
+      int index = [selectedTextTrack[@"value"] intValue];
+      if (group.options.count > index) {
+        option = [group.options objectAtIndex:index];
+      }
+    }
+  } else { // default. invalid type or "system"
+    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+    return;
+  }
+  
+  // If a match isn't found, option will be nil and text tracks will be disabled
+  [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
+}
+
+- (NSArray *)getTextTrackInfo
+{
+  NSMutableArray *textTracks = [[NSMutableArray alloc] init];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  for (int i = 0; i < group.options.count; ++i) {
+    AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+    NSString *title = @"";
+    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+    if (values.count > 0) {
+      title = [values objectAtIndex:0];
+    }
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+    NSDictionary *textTrack = @{
+                                @"index": [NSNumber numberWithInt:i],
+                                @"title": title,
+                                @"language": language
+                                };
+    [textTracks addObject:textTrack];
+  }
+  return textTracks;
 }
 
 - (BOOL)getFullscreen
@@ -710,6 +795,7 @@ static NSString *const timedMetadata = @"timedMetadata";
       // resize mode must be set before layer is added
       [self setResizeMode:_resizeMode];
       [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
+      _playerLayerObserverSet = YES;
 
       [self.layer addSublayer:_playerLayer];
       self.layer.needsDisplayOnBoundsChange = YES;
@@ -738,12 +824,20 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval
 {
   _progressUpdateInterval = progressUpdateInterval;
+
+  if (_timeObserver) {
+    [self removePlayerTimeObserver];
+    [self addPlayerTimeObserver];
+  }
 }
 
 - (void)removePlayerLayer
 {
     [_playerLayer removeFromSuperlayer];
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    if (_playerLayerObserverSet) {
+      [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+      _playerLayerObserverSet = NO;
+    }
     _playerLayer = nil;
 }
 
