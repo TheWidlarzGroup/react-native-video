@@ -569,21 +569,28 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setCurrentTime:(float)currentTime
 {
-  [self setSeek: currentTime];
+  NSDictionary *info = @{
+                         @"time": [NSNumber numberWithFloat:currentTime],
+                         @"tolerance": [NSNumber numberWithInt:100]
+                         };
+  [self setSeek:info];
 }
 
-- (void)setSeek:(float)seekTime
+- (void)setSeek:(NSDictionary *)info
 {
-  int timeScale = 10000;
+  NSNumber *seekTime = info[@"time"];
+  NSNumber *seekTolerance = info[@"tolerance"];
+
+  int timeScale = 1000;
 
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
 
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+    CMTime cmSeekTime = CMTimeMakeWithSeconds([seekTime floatValue], timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
+    CMTime tolerance = CMTimeMake([seekTolerance floatValue], timeScale);
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
@@ -593,11 +600,11 @@ static NSString *const timedMetadata = @"timedMetadata";
           [self addPlayerTimeObserver];
         }
         if (!wasPaused) {
-            [self setPaused:false];
+          [self setPaused:false];
         }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                               @"seekTime": [NSNumber numberWithFloat:seekTime],
+                               @"seekTime": seekTime,
                                @"target": self.reactTag});
         }
       }];
@@ -608,7 +615,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   } else {
     // TODO: See if this makes sense and if so, actually implement it
     _pendingSeek = true;
-    _pendingSeekTime = seekTime;
+    _pendingSeekTime = [seekTime floatValue];
   }
 }
 
