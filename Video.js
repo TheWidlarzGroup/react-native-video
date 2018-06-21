@@ -68,7 +68,7 @@ export default class Video extends Component {
   };
 
   _onSeek = (event) => {
-    if (this.state.showPoster) {
+    if (this.state.showPoster && !this.props.audioOnly) {
       this.setState({showPoster: false});
     }
 
@@ -132,7 +132,7 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && (event.nativeEvent.playbackRate !== 0)) {
+    if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
       this.setState({showPoster: false});
     }
 
@@ -307,6 +307,7 @@ Video.propTypes = {
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
+  audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,

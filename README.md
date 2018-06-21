@@ -218,6 +218,7 @@ var styles = StyleSheet.create({
 
 ### Configurable props
 * [allowsExternalPlayback](#allowsexternalplayback)
+* [audioOnly](#audioonly)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -245,6 +246,15 @@ Indicates whether the player allows switching to external playback mode such as 
 * **false** -  Don't allow switching to external playback mode
 
 Platforms: iOS
+
+#### audioOnly
+Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.
+* **false (default)** - Display the video as normal
+* **true** - Show the poster and play the audio
+
+For this to work, the poster prop must be set.
+
+Platforms: all
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
