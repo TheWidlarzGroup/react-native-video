@@ -29,6 +29,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   bool _pendingSeek;
   float _pendingSeekTime;
   float _lastSeekTime;
+  int _pendingSeekTolerance;
 
   /* For sending videoProgress events */
   Float64 _progressUpdateInterval;
@@ -72,7 +73,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
-
+    _pendingSeekTolerance = 0;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
                                                  name:UIApplicationWillResignActiveNotification
@@ -572,6 +573,12 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self setSeek: currentTime];
 }
 
+- (void)setSeekTolerance:(float)seekTime toleranceInMS:(int)toleranceInMS
+{
+  _pendingSeekTolerance = toleranceInMS;
+  [self setSeek:seekTime];
+}
+
 - (void)setSeek:(float)seekTime
 {
   int timeScale = 10000;
@@ -583,7 +590,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
+    CMTime tolerance = CMTimeMake(_pendingSeekTolerance, timeScale);
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
@@ -593,7 +600,7 @@ static NSString *const timedMetadata = @"timedMetadata";
           [self addPlayerTimeObserver];
         }
         if (!wasPaused) {
-            [self setPaused:false];
+          [self setPaused:false];
         }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
