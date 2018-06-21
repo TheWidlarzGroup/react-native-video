@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import VideoResizeMode from './VideoResizeMode.js';
@@ -27,8 +27,17 @@ export default class Video extends Component {
     this._root.setNativeProps(nativeProps);
   }
 
-  seek = (time) => {
-    this.setNativeProps({ seek: time });
+  seek = (time, tolerance = 100) => {
+    if (Platform.OS === 'ios') {
+      this.setNativeProps({
+        seek: {
+          time,
+          tolerance
+        }
+      });
+    } else {
+      this.setNativeProps({ seek: time });
+    }
   };
 
   presentFullscreenPlayer = () => {
@@ -250,7 +259,10 @@ export default class Video extends Component {
 Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
-  seek: PropTypes.number,
+  seek: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.object
+  ]),
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,
