@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -759,7 +760,14 @@ class ReactExoplayerView extends FrameLayout implements
             trackIndex = value.asInt();
         } else { // default. invalid type or "system"
             trackSelector.clearSelectionOverrides(index);
-            return;
+            trackSelector.setSelectionOverride(index, groups, null);
+
+            int sdk = android.os.Build.VERSION.SDK_INT;
+            if (sdk>18 && groups.length>0) {
+                CaptioningManager captioningManager = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+                if (captioningManager.isEnabled()) trackIndex=0;
+            } else return;
+
         }
 
         if (trackIndex == C.INDEX_UNSET) {

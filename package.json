@@ -1,49 +1,83 @@
 {
-    "name": "react-native-video",
-    "version": "2.2.0",
-    "description": "A <Video /> element for react-native",
-    "main": "Video.js",
-    "license": "MIT",
-    "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
-    "contributors": [
-        {
-            "name": "Isaiah Grey",
-            "email": "isaiahgrey@gmail.com"
-        },
-        {
-            "name": "Johannes Lumpe",
-            "email": "johannes@lum.pe"
-        },
-        {
-            "name": "Baris Sencan",
-            "email": "baris.sncn@gmail.com"
-        },
-        {
-            "name": "Hampton Maxwell",
-            "email": "me@hamptonmaxwell.com"
-        }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:brentvatne/react-native-video.git"
+  "_args": [
+    [
+      "git://github.com/nfb-onf/react-native-video.git",
+      "/Users/amishra/Development/react_films"
+    ]
+  ],
+  "_from": "git://github.com/nfb-onf/react-native-video.git",
+  "_id": "react-native-video@git://github.com/nfb-onf/react-native-video.git#8ce39e5b82108e6b9ea8549bd72ba58e95f04647",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/react-native-video",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "git://github.com/nfb-onf/react-native-video.git",
+    "rawSpec": "git://github.com/nfb-onf/react-native-video.git",
+    "saveSpec": "git://github.com/nfb-onf/react-native-video.git",
+    "fetchSpec": "git://github.com/nfb-onf/react-native-video.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git://github.com/nfb-onf/react-native-video.git#8ce39e5b82108e6b9ea8549bd72ba58e95f04647",
+  "_spec": "git://github.com/nfb-onf/react-native-video.git",
+  "_where": "/Users/amishra/Development/react_films",
+  "author": {
+    "name": "Brent Vatne",
+    "email": "brentvatne@gmail.com",
+    "url": "https://github.com/brentvatne"
+  },
+  "bugs": {
+    "url": "https://github.com/brentvatne/react-native-video/issues"
+  },
+  "contributors": [
+    {
+      "name": "Isaiah Grey",
+      "email": "isaiahgrey@gmail.com"
     },
-    "devDependencies": {
-        "jest-cli": "0.2.1",
-        "eslint": "1.10.3",
-        "babel-eslint": "5.0.0-beta8",
-        "eslint-plugin-react": "3.16.1",
-        "eslint-config-airbnb": "4.0.0"
+    {
+      "name": "Johannes Lumpe",
+      "email": "johannes@lum.pe"
     },
-    "dependencies": {
-        "keymirror": "0.1.1",
-        "prop-types": "^15.5.10"
+    {
+      "name": "Baris Sencan",
+      "email": "baris.sncn@gmail.com"
     },
-    "scripts": {
-        "test": "node_modules/.bin/eslint *.js"
-    },
-    "rnpm": {
-        "android": {
-            "sourceDir": "./android-exoplayer"
-        }
+    {
+      "name": "Hampton Maxwell",
+      "email": "me@hamptonmaxwell.com"
     }
+  ],
+  "dependencies": {
+    "keymirror": "0.1.1",
+    "prop-types": "^15.5.10"
+  },
+  "description": "A <Video /> element for react-native",
+  "devDependencies": {
+    "babel-eslint": "5.0.0-beta8",
+    "eslint": "1.10.3",
+    "eslint-config-airbnb": "4.0.0",
+    "eslint-plugin-react": "3.16.1",
+    "jest-cli": "0.2.1"
+  },
+  "homepage": "https://github.com/brentvatne/react-native-video#readme",
+  "license": "MIT",
+  "main": "Video.js",
+  "name": "react-native-video",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/brentvatne/react-native-video.git"
+  },
+  "rnpm": {
+    "android": {
+      "sourceDir": "./android-exoplayer"
+    }
+  },
+  "scripts": {
+    "test": "eslint *.js"
+  },
+  "version": "2.2.0"
 }
