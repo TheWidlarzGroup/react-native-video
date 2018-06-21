@@ -240,6 +240,11 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 
+### Methods
+* [seek](#seek)
+
+### Configurable props
+
 #### allowsExternalPlayback
 Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
 * **true (default)** - allow switching to external playback mode
@@ -501,6 +506,45 @@ Example:
 ```
 
 Platforms: all
+
+### Methods
+Methods operate on a ref to the Video element. You can create a ref using code like:
+```
+return (
+  <Video source={...}
+    ref => (this.player = ref) />
+);
+```
+
+#### seek()
+`seek(seconds)`
+
+Seek to the specified position represented by seconds. seconds is a float value.
+
+`seek()` can only be called after the `onLoad` event has fired.
+
+Example:
+```
+this.player.seek(200); // Seek to 3 minutes, 20 seconds
+```
+
+Platforms: all
+
+##### Exact seek
+
+By default iOS seeks within 100 milliseconds of the target position. If you need more accuracy, you can use the seek with tolerance method:
+
+`seek(seconds, tolerance)`
+
+tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
+
+Example:
+```
+this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
+```
+
+Platforms: iOS
+
 
 ### Additional props
 
