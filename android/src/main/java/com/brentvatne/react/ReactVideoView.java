@@ -590,10 +590,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     @Override
     public void onHostPause() {
         if (mMediaPlayer != null && !mPlayInBackground) {
-            mActiveStatePauseStatus = mPaused;
-
             // Pause the video in background
             setPausedModifier(true);
+            mActiveStatePauseStatus = mPaused;
         }
     }
 
