@@ -1,12 +1,20 @@
 apply plugin: 'com.android.library'
 
+def _ext = rootProject.ext
+
+def _reactNativeVersion = _ext.has('reactNative') ? _ext.reactNative : '+'
+def _compileSdkVersion = _ext.has('compileSdkVersion') ? _ext.compileSdkVersion : 27
+def _buildToolsVersion = _ext.has('buildToolsVersion') ? _ext.buildToolsVersion : '27.0.3'
+def _minSdkVersion = _ext.has('minSdkVersion') ? _ext.minSdkVersion : 16
+def _targetSdkVersion = _ext.has('targetSdkVersion') ? _ext.targetSdkVersion : 27
+
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion _buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 25
+        minSdkVersion _minSdkVersion
+        targetSdkVersion _targetSdkVersion
         versionCode 1
         versionName "1.0"
         ndk {
@@ -17,6 +25,6 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided 'com.facebook.react:react-native:+'
+    provided "com.facebook.react:react-native:${_reactNativeVersion}"
     compile 'com.yqritc:android-scalablevideoview:1.0.4'
 }
