@@ -102,7 +102,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean loadVideoStarted;
     private boolean isFullscreen;
     private boolean isInBackground;
-    private boolean isPaused = true;
+    private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
 
