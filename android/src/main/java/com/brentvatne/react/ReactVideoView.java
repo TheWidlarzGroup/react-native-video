@@ -410,8 +410,16 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         if (mMediaPlayerValid) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!mPaused) { // Applying the rate while paused will cause the video to start
-                    mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
-                    mActiveRate = rate;
+                    /* Per https://stackoverflow.com/questions/39442522/setplaybackparams-causes-illegalstateexception
+                     * Some devices throw an IllegalStateException if you set the rate without first calling reset()
+                     * TODO: Call reset() then reinitialize the player
+                     */
+                    try {
+                        mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
+                        mActiveRate = rate;
+                    } catch (Exception e) {
+                        Log.e(ReactVideoViewManager.REACT_CLASS, "Unable to set rate, unsupported on this device");
+                    }
                 }
             } else {
                 Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android versions below 6.0");
