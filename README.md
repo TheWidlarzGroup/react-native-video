@@ -609,15 +609,15 @@ To enable audio to play in background on iOS the audio session needs to be set t
 #### All platforms now auto-play
 Previously, on Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.
 
-#### All platforms now pause when returning from the background
-Previously, on Android MediaPlayer & Android ExoPlayer if the media was playing and you put the app in the background, it would pause. Then if you returned to the app, it would unpause and start playing again. On iOS, returning to the app keeps the media paused. This has been changed so that all platforms stay paused when returning to the app for consistency.
+#### All platforms now keep their paused state when returning from the background
+Previously, on Android MediaPlayer if you setup an AppState event when the app went into the background and set a paused prop so that when you returned to the app the video would be paused it would be ignored.
 
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
 #### Use Android SDK 27 by default
 Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
-You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app.
+You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
 
 ##### Using app build settings
 You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
@@ -643,7 +643,6 @@ allprojects {
 
 ## TODOS
 
-- [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [x] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
