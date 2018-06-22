@@ -607,10 +607,10 @@ To enable audio to play in background on iOS the audio session needs to be set t
 ### Version 3.0
 
 #### All platforms now auto-play
-Previously, on Android MediaPlayer & Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.
+Previously, on Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.
 
 #### All platforms now pause when returning from the background
-Previously, on Android MediaPlayer & Android ExoPlayer, if the media was playing and you put the app in the background, it would pause. Then if you returned to the app, it would unpause and start playing again. On iOS, returning to the app keeps the media paused. This has been changed so that all platforms stay paused when returning to the app for consistency.
+Previously, on Android MediaPlayer & Android ExoPlayer if the media was playing and you put the app in the background, it would pause. Then if you returned to the app, it would unpause and start playing again. On iOS, returning to the app keeps the media paused. This has been changed so that all platforms stay paused when returning to the app for consistency.
 
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
