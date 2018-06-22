@@ -101,8 +101,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mRate = 1.0f;
     private float mActiveRate = 1.0f;
     private boolean mPlayInBackground = false;
-    private boolean mActiveStatePauseStatus = false;
-    private boolean mActiveStatePauseStatusInitialized = false;
+    private boolean mBackgroundPaused = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -128,7 +127,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             @Override
             public void run() {
 
-                if (mMediaPlayerValid && !isCompleted &&!mPaused) {
+                if (mMediaPlayerValid && !isCompleted && !mPaused && !mBackgroundPaused) {
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
@@ -333,11 +332,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setPausedModifier(final boolean paused) {
 
         mPaused = paused;
-
-        if ( !mActiveStatePauseStatusInitialized ) {
-            mActiveStatePauseStatus = mPaused;
-            mActiveStatePauseStatusInitialized = true;
-        }
 
         if (!mMediaPlayerValid) {
             return;
@@ -597,25 +591,27 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onHostPause() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
-            mActiveStatePauseStatus = mPaused;
-
-            // Pause the video in background
-            setPausedModifier(true);
+        if (mMediaPlayerValid && !mPaused && !mPlayInBackground) {
+            /* Pause the video in background
+             * Don't update the paused prop, developers should be able to update it on background
+             *  so that when you return to the app the video is paused
+             */
+            mBackgroundPaused = true;
+            mMediaPlayer.pause();
         }
     }
 
     @Override
     public void onHostResume() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
+        mBackgroundPaused = false;
+        if (mMediaPlayerValid && !mPlayInBackground && !mPaused) {
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
                     // Restore original state
-                    setPausedModifier(mActiveStatePauseStatus);
+                    setPausedModifier(false);
                 }
             });
-
         }
     }
 
