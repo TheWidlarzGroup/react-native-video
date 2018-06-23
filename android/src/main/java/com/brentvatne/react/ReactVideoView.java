@@ -641,14 +641,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
      * @see 'Adapted from https://github.com/artemyarulin/react-native-eval/blob/master/android/src/main/java/com/evaluator/react/ConversionUtil.java'
      */
     public static Map<String, String> toStringMap(@Nullable ReadableMap readableMap) {
+        Map<String, String> result = new HashMap<>();
         if (readableMap == null)
-            return null;
+            return result;
 
         com.facebook.react.bridge.ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
-        if (!iterator.hasNextKey())
-            return null;
-
-        Map<String, String> result = new HashMap<>();
         while (iterator.hasNextKey()) {
             String key = iterator.nextKey();
             result.put(key, readableMap.getString(key));
