@@ -566,7 +566,7 @@ Within your render function, assuming you have a file called
 "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
 ```
 <Video
-  source={{uri: "background", mainVer: 1, patchVer: 0}}
+  source={{uri: "background", type: "mp4", mainVer: 1, patchVer: 0}}
 />
 ```
 This will look for an .mp4 file (background.mp4) in the given expansion version.
