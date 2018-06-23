@@ -12,4 +12,8 @@
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
 @property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
+@property (nonatomic, assign) BOOL autoRotate;
+#if !TARGET_OS_TV
+@property (nonatomic, assign) UIInterfaceOrientationMask fullScreenOrientation;
+#endif
 @end

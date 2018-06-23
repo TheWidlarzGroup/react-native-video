@@ -197,6 +197,8 @@ using System.Collections.Generic;
        onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        onProgress={this.setTime}               // Callback every ~250ms with currentTime
        onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
+       autoRotate={false}                      // [iOS] Determines if FullScreenPlayer can be rotated (default true).
+       fullScreenOrientation={Video.Constants.landscape} // [iOS] Determines FullScreenPlayer's orientation.
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
