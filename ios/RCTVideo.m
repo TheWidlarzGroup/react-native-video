@@ -639,6 +639,11 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)applyModifiers
 {
+  // Skip applying modifiers if the video is not ready to avoid freezing
+  if (_playerItem.status != AVPlayerItemStatusReadyToPlay) {
+    return;
+  }
+
   if (_muted) {
     [_player setVolume:0];
     [_player setMuted:YES];
