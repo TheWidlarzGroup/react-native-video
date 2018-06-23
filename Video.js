@@ -47,16 +47,6 @@ export default class Video extends Component {
     return strObj;
   }
 
-  stringsOnlyObject(obj) {
-    const strObj = {};
-
-    Object.keys(obj).forEach(x => {
-      strObj[x] = obj[x].toString();
-    });
-
-    return strObj;
-  }
-
   seek = (time) => {
     this.setNativeProps({ seek: time });
   };
