@@ -332,6 +332,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setPausedModifier(final boolean paused) {
 
         mPaused = paused;
+        mActiveStatePauseStatus = paused;
 
         if (!mMediaPlayerValid) {
             return;
