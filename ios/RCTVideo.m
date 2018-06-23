@@ -18,6 +18,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
+  BOOL _playerLayerObserverSet;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
 
@@ -40,6 +41,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
+  BOOL _allowsExternalPlayback;
   NSDictionary * _selectedTextTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
@@ -67,6 +69,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
+    _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
 
@@ -420,6 +423,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                                      @"height": height,
                                      @"orientation": orientation
                                      },
+                             @"textTracks": [self getTextTrackInfo],
                              @"target": self.reactTag});
       }
 
@@ -530,6 +534,12 @@ static NSString *const timedMetadata = @"timedMetadata";
   _playInBackground = playInBackground;
 }
 
+- (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
+{
+    _allowsExternalPlayback = allowsExternalPlayback;
+    _player.allowsExternalPlayback = _allowsExternalPlayback;
+}
+
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
 {
   _playWhenInactive = playWhenInactive;
@@ -566,21 +576,28 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setCurrentTime:(float)currentTime
 {
-  [self setSeek: currentTime];
+  NSDictionary *info = @{
+                         @"time": [NSNumber numberWithFloat:currentTime],
+                         @"tolerance": [NSNumber numberWithInt:100]
+                         };
+  [self setSeek:info];
 }
 
-- (void)setSeek:(float)seekTime
+- (void)setSeek:(NSDictionary *)info
 {
-  int timeScale = 10000;
+  NSNumber *seekTime = info[@"time"];
+  NSNumber *seekTolerance = info[@"tolerance"];
+
+  int timeScale = 1000;
 
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
 
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+    CMTime cmSeekTime = CMTimeMakeWithSeconds([seekTime floatValue], timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
+    CMTime tolerance = CMTimeMake([seekTolerance floatValue], timeScale);
     BOOL wasPaused = _paused;
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
@@ -590,11 +607,11 @@ static NSString *const timedMetadata = @"timedMetadata";
           [self addPlayerTimeObserver];
         }
         if (!wasPaused) {
-            [self setPaused:false];
+          [self setPaused:false];
         }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                               @"seekTime": [NSNumber numberWithFloat:seekTime],
+                               @"seekTime": seekTime,
                                @"target": self.reactTag});
         }
       }];
@@ -605,7 +622,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   } else {
     // TODO: See if this makes sense and if so, actually implement it
     _pendingSeek = true;
-    _pendingSeekTime = seekTime;
+    _pendingSeekTime = [seekTime floatValue];
   }
 }
 
@@ -642,6 +659,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self setRepeat:_repeat];
   [self setPaused:_paused];
   [self setControls:_controls];
+  [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
 
 - (void)setRepeat:(BOOL)repeat {
@@ -690,6 +708,29 @@ static NSString *const timedMetadata = @"timedMetadata";
   
   // If a match isn't found, option will be nil and text tracks will be disabled
   [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
+}
+
+- (NSArray *)getTextTrackInfo
+{
+  NSMutableArray *textTracks = [[NSMutableArray alloc] init];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+  for (int i = 0; i < group.options.count; ++i) {
+    AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+    NSString *title = @"";
+    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+    if (values.count > 0) {
+      title = [values objectAtIndex:0];
+    }
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+    NSDictionary *textTrack = @{
+                                @"index": [NSNumber numberWithInt:i],
+                                @"title": title,
+                                @"language": language
+                                };
+    [textTracks addObject:textTrack];
+  }
+  return textTracks;
 }
 
 - (BOOL)getFullscreen
@@ -768,6 +809,7 @@ static NSString *const timedMetadata = @"timedMetadata";
       // resize mode must be set before layer is added
       [self setResizeMode:_resizeMode];
       [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
+      _playerLayerObserverSet = YES;
 
       [self.layer addSublayer:_playerLayer];
       self.layer.needsDisplayOnBoundsChange = YES;
@@ -806,7 +848,10 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)removePlayerLayer
 {
     [_playerLayer removeFromSuperlayer];
-    [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    if (_playerLayerObserverSet) {
+      [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
+      _playerLayerObserverSet = NO;
+    }
     _playerLayer = nil;
 }
 

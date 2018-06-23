@@ -42,6 +42,5 @@ https://github.com/google/ExoPlayer
 
 ## Unimplemented props
 
-- `playInBackground={true}`
-- `rate={1.0}`
 - Expansion file - `source={{ mainVer: 1, patchVer: 0 }}`
+

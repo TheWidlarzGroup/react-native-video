@@ -105,8 +105,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mRate = 1.0f;
     private float mActiveRate = 1.0f;
     private boolean mPlayInBackground = false;
-    private boolean mActiveStatePauseStatus = false;
-    private boolean mActiveStatePauseStatusInitialized = false;
+    private boolean mBackgroundPaused = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -132,7 +131,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             @Override
             public void run() {
 
-                if (mMediaPlayerValid && !isCompleted &&!mPaused) {
+                if (mMediaPlayerValid && !isCompleted && !mPaused && !mBackgroundPaused) {
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
@@ -348,11 +347,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         mPaused = paused;
 
-        if ( !mActiveStatePauseStatusInitialized ) {
-            mActiveStatePauseStatus = mPaused;
-            mActiveStatePauseStatusInitialized = true;
-        }
-
         if (!mMediaPlayerValid) {
             return;
         }
@@ -424,8 +418,16 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         if (mMediaPlayerValid) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!mPaused) { // Applying the rate while paused will cause the video to start
-                    mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
-                    mActiveRate = rate;
+                    /* Per https://stackoverflow.com/questions/39442522/setplaybackparams-causes-illegalstateexception
+                     * Some devices throw an IllegalStateException if you set the rate without first calling reset()
+                     * TODO: Call reset() then reinitialize the player
+                     */
+                    try {
+                        mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
+                        mActiveRate = rate;
+                    } catch (Exception e) {
+                        Log.e(ReactVideoViewManager.REACT_CLASS, "Unable to set rate, unsupported on this device");
+                    }
                 }
             } else {
                 Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android versions below 6.0");
@@ -603,25 +605,27 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onHostPause() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
-            mActiveStatePauseStatus = mPaused;
-
-            // Pause the video in background
-            setPausedModifier(true);
+        if (mMediaPlayerValid && !mPaused && !mPlayInBackground) {
+            /* Pause the video in background
+             * Don't update the paused prop, developers should be able to update it on background
+             *  so that when you return to the app the video is paused
+             */
+            mBackgroundPaused = true;
+            mMediaPlayer.pause();
         }
     }
 
     @Override
     public void onHostResume() {
-        if (mMediaPlayer != null && !mPlayInBackground) {
+        mBackgroundPaused = false;
+        if (mMediaPlayerValid && !mPlayInBackground && !mPaused) {
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
                     // Restore original state
-                    setPausedModifier(mActiveStatePauseStatus);
+                    setPausedModifier(false);
                 }
             });
-
         }
     }
 
