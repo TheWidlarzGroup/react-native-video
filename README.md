@@ -5,11 +5,31 @@ A `<Video>` component for react-native, as seen in
 
 Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
-### Add it to your project
+### Version 3.0 breaking changes
+Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
 
-Run `npm i -S react-native-video`
+## TOC
 
-#### iOS
+* [Installation](#installation)
+* [Usage](#usage)
+* [Updating](#updating)
+
+## Installation
+
+Using npm:
+
+```shell
+npm install --save react-native-video
+```
+
+or using yarn:
+
+```shell
+yarn add react-native-video
+```
+
+<details>
+  <summary>iOS</summary>
 
 Run `react-native link` to link the react-native-video library.
 
@@ -28,9 +48,11 @@ If you would like to allow other apps to play music over your video component, a
 }
 ```
 Note: you can also use the `ignoreSilentSwitch` prop, shown below.
+</details>
 
-#### tvOS
-
+<details>
+  <summary>tvOS</summary>
+  
 Run `react-native link` to link the react-native-video library.
 
 `react-native link` don’t works properly with the tvOS target so we need to add the library manually.
@@ -50,10 +72,10 @@ Scroll to « Linked Frameworks and Libraries » and tap on the + button
 Select RCTVideo-tvOS
 
 <img src="./docs/tvOS-step-4.jpg" width="40%">
+</details>
 
-That’s all, you can use react-native-video for your tvOS application
-
-#### Android
+<details>
+  <summary>Android</summary>
 
 Run `react-native link` to link the react-native-video library.
 
@@ -61,10 +83,20 @@ Or if you have trouble, make the following additions to the given files manually
 
 **android/settings.gradle**
 
+The newer ExoPlayer library will work for most people.
+
+```gradle
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+```
+
+If you need to use the old Android MediaPlayer based player, use the following instead:
+
 ```gradle
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
+
 
 **android/app/build.gradle**
 
@@ -94,8 +126,10 @@ protected List<ReactPackage> getPackages() {
     );
 }
 ```
+</details>
 
-#### Windows
+<details>
+  <summary>Windows</summary>
 
 Make the following additions to the given files manually:
 
@@ -104,19 +138,17 @@ Make the following additions to the given files manually:
 Add the `ReactNativeVideo` project to your solution.
 
 1. Open the solution in Visual Studio 2015
-2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
-3.
-  UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
-  WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
+2. Right-click Solution icon in Solution Explorer > Add > Existing Project
+  * UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
+  * WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
 
 **windows/myapp/myapp.csproj**
 
 Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
 1. Right-click main application project > Add > Reference...
-2.
-  UWP: Check `ReactNativeVideo` from Solution Projects.
-  WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
+  * UWP: Check `ReactNativeVideo` from Solution Projects.
+  * WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
 
 **MainPage.cs**
 
@@ -143,6 +175,7 @@ using System.Collections.Generic;
 
 ...
 ```
+</details>
 
 ## Usage
 
@@ -155,27 +188,22 @@ using System.Collections.Generic;
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
-       rate={1.0}                              // 0 is paused, 1 is normal.
-       volume={1.0}                            // 0 is muted, 1 is normal.
-       muted={false}                           // Mutes the audio entirely.
-       paused={false}                          // Pauses playback entirely.
-       resizeMode="cover"                      // Fill the whole screen at aspect ratio.*
-       repeat={true}                           // Repeat forever.
-       playInBackground={false}                // Audio continues to play when app entering background.
-       playWhenInactive={false}                // [iOS] Video continues to play when control or notification center are shown.
-       ignoreSilentSwitch={"ignore"}           // [iOS] ignore | obey - When 'ignore', audio will still play with the iOS hard silent switch set to silent. When 'obey', audio will toggle with the switch. When not specified, will inherit audio settings as usual.
-       progressUpdateInterval={250.0}          // [iOS] Interval to fire onProgress (default to ~250ms)
-       onLoadStart={this.loadStart}            // Callback when video starts to load
-       onLoad={this.setDuration}               // Callback when video loads
-       onProgress={this.setTime}               // Callback every ~250ms with currentTime
+       onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
-       onBuffer={this.onBuffer}                // Callback when remote video is buffering
+       onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
+       onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
+       onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
+       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
+       onProgress={this.setTime}               // Callback every ~250ms with currentTime
        onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
 this.player.presentFullscreenPlayer()
+
+// Disable fullscreen
+this.player.dismissFullscreenPlayer()
 
 // To set video position in seconds (seek)
 this.player.seek(0)
@@ -192,10 +220,349 @@ var styles = StyleSheet.create({
 });
 ```
 
-- * *For iOS you also need to specify muted for this to work*
+### Configurable props
+* [allowsExternalPlayback](#allowsexternalplayback)
+* [audioOnly](#audioonly)
+* [ignoreSilentSwitch](#ignoresilentswitch)
+* [muted](#muted)
+* [paused](#paused)
+* [playInBackground](#playinbackground)
+* [playWhenInactive](#playwheninactive)
+* [poster](#poster)
+* [posterResizeMode](#posterresizemode)
+* [progressUpdateInterval](#progressupdateinterval)
+* [rate](#rate)
+* [repeat](#repeat)
+* [resizeMode](#resizemode)
+* [selectedTextTrack](#selectedtexttrack)
+* [stereoPan](#stereopan)
+* [textTracks](#texttracks)
+* [useTextureView](#usetextureview)
+* [volume](#volume)
 
-## Android Expansion File Usage
-Expansions files allow you to ship assets that don't need to be updated each time you push an app update.
+### Event props
+* [onLoad](#onload)
+* [onLoadStart](#onloadstart)
+
+### Methods
+* [seek](#seek)
+
+### Configurable props
+
+#### allowsExternalPlayback
+Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
+* **true (default)** - allow switching to external playback mode
+* **false** -  Don't allow switching to external playback mode
+
+Platforms: iOS
+
+#### audioOnly
+Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.
+* **false (default)** - Display the video as normal
+* **true** - Show the poster and play the audio
+
+For this to work, the poster prop must be set.
+
+Platforms: all
+
+#### ignoreSilentSwitch
+Controls the iOS silent switch behavior
+* **"inherit" (default)** - Use the default AVPlayer behavior
+* **"ignore"** - Play audio even if the silent switch is set
+* **"obey"** - Don't play audio if the silent switch is set
+
+Platforms: iOS
+
+#### muted
+Controls whether the audio is muted
+* **false (default)** - Don't mute audio
+* **true** - Mute audio
+
+Platforms: all
+
+#### paused
+Controls whether the media is paused
+* **false (default)** - Pause the media
+* **true** - Don't pause the media
+
+Platforms: all
+
+#### playInBackground
+Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+To use this feature on iOS, you must:
+* [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3) in your Xcode project
+* Set the ignoreSilentSwitch prop to "ignore"
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### playWhenInactive
+Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
+* **false (default)** - Don't continue playing the media
+* **true** - Continue playing the media
+
+Platforms: iOS
+
+#### poster
+An image to display while the video is loading
+<br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
+
+Platforms: all
+
+#### posterResizeMode
+Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
+* **"contain" (default)** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"center"** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
+* **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"none"** - Don't apply resize
+* **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+
+Platforms: all
+
+#### progressUpdateInterval
+Delay in milliseconds between onProgress events in milliseconds.
+
+Default: 250.0
+
+Platforms: all
+
+### rate
+Speed at which the media should play. 
+* **0.0** - Pauses the video
+* **1.0** - Play at normal speed
+* **Other values** - Slow down or speed up playback
+
+Platforms: all
+
+Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+#### repeat
+Determine whether to repeat the video when the end is reached
+* **false (default)** - Don't repeat the video
+* **true** - Repeat the video
+
+Platforms: all
+
+#### resizeMode
+Determines how to resize the video when the frame doesn't match the raw video dimensions.
+* **"none" (default)** - Don't apply resize
+* **"contain"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the video will be equal to or less than the corresponding dimension of the view (minus padding).
+* **"cover"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+* **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### selectedTextTrack
+Configure which text track (caption or subtitle), if any, is shown.
+
+```
+selectedTextTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedTextTrack={{
+  type: "title",
+  value: "English Subtitles"
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Display captions only if the system preference for captions is enabled
+"disabled" | N/A | Don't display a text track
+"title" | string | Display the text track with the title specified as the Value, e.g. "French 1"
+"language" | string | Display the text track with the language specified as the Value, e.g. "fr"
+"index" | number | Display the text track with the index specified as the value, e.g. 0
+
+Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it. 
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
+
+Platforms: Android ExoPlayer, iOS
+
+#### stereoPan
+Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
+* **-1.0** - Full left
+* **0.0 (default)** - Center
+* **1.0** - Full right
+
+Platforms: Android MediaPlayer
+
+#### textTracks
+Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
+
+Property | Description
+--- | ---
+title | Descriptive name for the track
+language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
+type | Mime type of the track<br> * TextTrackType.SRT - .srt SubRip Subtitle<br> * TextTrackType.TTML - .ttml TTML<br> * TextTrackType.VTT - .vtt WebVTT
+uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
+
+Example:
+```
+import { TextTrackType }, Video from 'react-native-video';
+
+textTracks={[
+  {
+    title: "English CC",
+    language: "en",
+    type: "text/vtt", TextTrackType.VTT,
+    uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt"
+  },
+  {
+    title: "Spanish Subtitles",
+    language: "es",
+    type: "application/x-subrip", TextTrackType.SRT,
+    uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
+  }
+]}
+```
+
+This isn't support on iOS because AVPlayer doesn't support it. Text tracks must be loaded as part of an HLS playlist.
+
+Platforms: Android ExoPlayer
+
+#### useTextureView
+Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
+* It can't be animated, transformed or scaled
+* You can't overlay multiple SurfaceViews
+
+useTextureView can only be set at same time you're setting the source.
+
+* **false (default)** - Use a SurfaceView
+* **true** - Use a TextureView
+
+Platforms: Android ExoPlayer
+
+#### volume
+Adjust the volume.
+* **1.0 (default)** - Play at full volume
+* **0.0** - Mute the audio
+* **Other values** - Reduce volume
+
+Platforms: all
+
+### Event props
+
+#### onLoad
+Callback function that is called when the media is loaded and ready to play.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+currentPosition | number | Time in seconds where the media will start
+duration | number | Length of the media in seconds
+naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code<br> * type - Mime type of track
+
+Example:
+```
+{ 
+  canPlaySlowForward: true,
+  canPlayReverse: false,
+  canPlaySlowReverse: false,
+  canPlayFastForward: false,
+  canStepForward: false,
+  canStepBackward: false,
+  currentTime: 0,
+  duration: 5910.208984375,
+  naturalSize: {
+     height: 1080
+     orientation: 'landscape'
+     width: '1920'
+  },
+  textTracks: [
+    { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
+    { title: '#2 English CC', language: 'en', index: 1, type: 'text/vtt' },
+    { title: '#3 English Director Commentary', language: 'en', index: 2, type: 'text/vtt' }
+  ]
+}
+```
+
+Platforms: all
+
+#### onLoadStart
+Callback function that is called when the media starts loading.
+
+Payload:
+
+Property | Description
+--- | ---
+isNetwork | Boolean indicating if the media is being loaded from the network
+type | Type of the media. Not available on Windows
+uri | URI for the media source. Not available on Windows
+
+Example:
+```
+{
+  isNetwork: true,
+  type: '',
+  uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
+}
+```
+
+Platforms: all
+
+### Methods
+Methods operate on a ref to the Video element. You can create a ref using code like:
+```
+return (
+  <Video source={...}
+    ref => (this.player = ref) />
+);
+```
+
+#### seek()
+`seek(seconds)`
+
+Seek to the specified position represented by seconds. seconds is a float value.
+
+`seek()` can only be called after the `onLoad` event has fired.
+
+Example:
+```
+this.player.seek(200); // Seek to 3 minutes, 20 seconds
+```
+
+Platforms: all
+
+##### Exact seek
+
+By default iOS seeks within 100 milliseconds of the target position. If you need more accuracy, you can use the seek with tolerance method:
+
+`seek(seconds, tolerance)`
+
+tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
+
+Example:
+```
+this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
+```
+
+Platforms: iOS
+
+
+### Additional props
+
+To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
+
+- By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
+
+<img src="./docs/AppTransportSecuritySetting.png" width="50%">
+
+For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
+</details>
+
+### Android Expansion File Usage
+Expansions files allow you to ship assets that exceed the 100MB apk size limit and don't need to be updated each time you push an app update.
 
 This only supports mp4 files and they must not be compressed. Example command line for preventing compression:
 ```bash
@@ -209,44 +576,19 @@ zip -r -n .mp4 *.mp4 player.video.example.com
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        style={styles.backgroundVideo} />
 
-// Later on in your styles..
-var styles = Stylesheet.create({
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-});
-```
-
 ### Load files with the RN Asset System
 
 The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
 
 ```
 <Video
-  repeat
-  resizeMode='cover'
   source={require('../assets/video/turntable.mp4')}
-  style={styles.backgroundVideo}
 />
 ```
 
 ### Play in background on iOS
 
 To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
-
-## Static Methods
-
-`seek(seconds)`
-
-Seeks the video to the specified time (in seconds). Access using a ref to the component
-
-`presentFullscreenPlayer()`
-
-Toggles a fullscreen player. Access using a ref to the component.
 
 ## Examples
 
@@ -265,9 +607,47 @@ Toggles a fullscreen player. Access using a ref to the component.
 
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
+## Updating
+
+### Version 3.0
+
+#### All platforms now auto-play
+Previously, on Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.
+
+#### All platforms now keep their paused state when returning from the background
+Previously, on Android MediaPlayer if you setup an AppState event when the app went into the background and set a paused prop so that when you returned to the app the video would be paused it would be ignored.
+
+Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
+
+#### Use Android SDK 27 by default
+Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
+
+You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
+
+##### Using app build settings
+You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
+```
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ... // Various other settings go here
+}
+
+allprojects {
+    ... // Various other settings go here
+
+    project.ext {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.1"
+
+        minSdkVersion = 16
+        targetSdkVersion = 22
+    }
+}
+```
+
 ## TODOS
 
-- [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [x] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
