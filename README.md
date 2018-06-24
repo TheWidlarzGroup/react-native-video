@@ -562,14 +562,19 @@ For more detailed info check this [article](https://cocoacasts.com/how-to-add-ap
 </details>
 
 ### Android Expansion File Usage
-Within your render function, assuming you have a file called
-"background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+Expansions files allow you to ship assets that exceed the 100MB apk size limit and don't need to be updated each time you push an app update.
+
+This only supports mp4 files and they must not be compressed. Example command line for preventing compression:
+```bash
+zip -r -n .mp4 *.mp4 player.video.example.com
 ```
-<Video
-  source={{uri: "background", type: "mp4", mainVer: 1, patchVer: 0}}
-/>
-```
-This will look for an .mp4 file (background.mp4) in the given expansion version.
+
+```javascript
+// Within your render function, assuming you have a file called
+// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
+       resizeMode="cover"           // Fill the whole screen at aspect ratio.
+       style={styles.backgroundVideo} />
 
 ### Load files with the RN Asset System
 
