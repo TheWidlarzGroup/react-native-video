@@ -195,27 +195,18 @@ var styles = StyleSheet.create({
 - * *For iOS you also need to specify muted for this to work*
 
 ## Android Expansion File Usage
-Only supports .mp4 files.
-The video files have not to be compressed.
-Linux command example to exclude .mp4 files from zip compression:
+Expansions files allow you to ship assets that don't need to be updated each time you push an app update.
+
+This only supports mp4 files and they must not be compressed. Example command line for preventing compression:
 ```bash
-zip -r -n.mp4 *.mp4 main.1.com.exmample.com
+zip -r -n .mp4 *.mp4 player.video.example.com
 ```
+
 ```javascript
 // Within your render function, assuming you have a file called
 // "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
 <Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
-       rate={1.0}                   // 0 is paused, 1 is normal.
-       volume={1.0}                 // 0 is muted, 1 is normal.
-       muted={false}                // Mutes the audio entirely.
-       paused={false}               // Pauses playback entirely.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
-       repeat={true}                // Repeat forever.
-       onLoadStart={this.loadStart} // Callback when video starts to load
-       onLoad={this.setDuration}    // Callback when video loads
-       onProgress={this.setTime}    // Callback every ~250ms with currentTime
-       onEnd={this.onEnd}           // Callback when playback finishes
-       onError={this.videoError}    // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
 // Later on in your styles..
