@@ -37,7 +37,6 @@ public class ReactVideoView extends ScalableVideoView implements
     MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener,
     MediaPlayer.OnBufferingUpdateListener,
-    MediaPlayer.OnTimedMetaDataAvailableListener,
     MediaPlayer.OnCompletionListener,
     MediaPlayer.OnInfoListener,
     LifecycleEventListener,
@@ -197,8 +196,10 @@ public class ReactVideoView extends ScalableVideoView implements
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnBufferingUpdateListener(this);
             mMediaPlayer.setOnCompletionListener(this);
-            mMediaPlayer.setOnTimedMetaDataAvailableListener(this);
             mMediaPlayer.setOnInfoListener(this);
+            if (Build.VERSION.SDK_INT >= 23) {
+                mMediaPlayer.setOnTimedMetaDataAvailableListener(new TimedMetaDataAvailableListener());
+            }
         }
     }
 
@@ -551,29 +552,34 @@ public class ReactVideoView extends ScalableVideoView implements
         isCompleted = true;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
     }
+        
+    // This is not fully tested and does not work for all forms of timed metadata
+    @TargetApi(23) // 6.0
+    public class TimedMetaDataAvailableListener
+            implements MediaPlayer.OnTimedMetaDataAvailableListener
+    {
+        public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
+            WritableMap event = Arguments.createMap();
 
-    @Override
-    public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
-        WritableMap event = Arguments.createMap();
+            try {
+                String rawMeta  = new String(data.getMetaData(), "UTF-8");
+                WritableMap id3 = Arguments.createMap();
 
-        try {
-            String rawMeta  = new String(data.getMetaData(), "UTF-8");
-            WritableMap id3 = Arguments.createMap();
+                id3.putString(EVENT_PROP_METADATA_VALUE, rawMeta.substring(rawMeta.lastIndexOf("\u0003") + 1));
+                id3.putString(EVENT_PROP_METADATA_IDENTIFIER, "id3/TDEN");
 
-            id3.putString(EVENT_PROP_METADATA_VALUE, rawMeta.substring(rawMeta.lastIndexOf("\u0003") + 1));
-            id3.putString(EVENT_PROP_METADATA_IDENTIFIER, "id3/TDEN");
+                WritableArray metadata = new WritableNativeArray();
 
-            WritableArray metadata = new WritableNativeArray();
+                metadata.pushMap(id3);
 
-            metadata.pushMap(id3);
+                event.putArray(EVENT_PROP_METADATA, metadata);
+                event.putDouble(EVENT_PROP_TARGET, getId());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
 
-            event.putArray(EVENT_PROP_METADATA, metadata);
-            event.putDouble(EVENT_PROP_TARGET, getId());
-        } catch(UnsupportedEncodingException e) {
-            e.printStackTrace();
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_TIMED_METADATA.toString(), event);
         }
-
-        mEventEmitter.receiveEvent(getId(), Events.EVENT_TIMED_METADATA.toString(), event);
     }
 
     @Override
