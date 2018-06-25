@@ -196,7 +196,6 @@ using System.Collections.Generic;
        onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
        onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        onProgress={this.setTime}               // Callback every ~250ms with currentTime
-       onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
@@ -243,6 +242,7 @@ var styles = StyleSheet.create({
 ### Event props
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [seek](#seek)
@@ -510,6 +510,28 @@ Example:
 ```
 
 Platforms: all
+
+#### onTimedMetadata
+Callback function that is called when timed metadata becomes available
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+metadata | array | Array of metadata objects
+
+Example:
+```
+{
+  metadata: [
+    { value: 'Streaming Encoder', identifier: 'TRSN' },
+    { value: 'Internet Stream', identifier: 'TRSO' },
+    { value: 'Any Time You Like', identifier: 'TIT2' }
+  ]
+}
+```
+
+Platforms: Android ExoPlayer, iOS
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
