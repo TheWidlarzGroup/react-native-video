@@ -195,7 +195,6 @@ using System.Collections.Generic;
        onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
        onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
        onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
-       onProgress={this.setTime}               // Callback every ~250ms with currentTime
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
@@ -242,6 +241,7 @@ var styles = StyleSheet.create({
 ### Event props
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onProgress](#onprogress)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
@@ -496,9 +496,9 @@ Payload:
 
 Property | Description
 --- | ---
-isNetwork | Boolean indicating if the media is being loaded from the network
-type | Type of the media. Not available on Windows
-uri | URI for the media source. Not available on Windows
+isNetwork | boolean | Boolean indicating if the media is being loaded from the network
+type | string | Type of the media. Not available on Windows
+uri | string | URI for the media source. Not available on Windows
 
 Example:
 ```
@@ -510,6 +510,24 @@ Example:
 ```
 
 Platforms: all
+
+#### onProgress
+Callback function that is called every progressInterval seconds with info about which position the media is currently playing.
+
+Property | Description
+--- | ---
+currentTime | number | Current position in seconds
+playableDuration | number | Position to where the media can be played to using just the buffer in seconds
+seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
+
+Example:
+```
+{
+  currentTime: 5.2,
+  playableDuration: 34.6,
+  seekableDuration: 888
+}
+```
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
