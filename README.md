@@ -55,7 +55,7 @@ Note: you can also use the `ignoreSilentSwitch` prop, shown below.
   
 Run `react-native link` to link the react-native-video library.
 
-`react-native link` don’t works properly with the tvOS target so we need to add the library manually.
+`react-native link` doesn’t work properly with the tvOS target so we need to add the library manually.
 
 First select your project in Xcode.
 
