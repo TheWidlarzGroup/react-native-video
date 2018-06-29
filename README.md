@@ -686,6 +686,8 @@ allprojects {
 }
 ```
 
+If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
+
 ## TODOS
 
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
