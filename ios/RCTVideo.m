@@ -95,7 +95,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
     RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
-    playerLayer.showsPlaybackControls = NO;
+    playerLayer.showsPlaybackControls = _controls;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = player;
@@ -768,7 +768,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                 self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
             }
             [viewController presentViewController:_playerViewController animated:true completion:^{
-                _playerViewController.showsPlaybackControls = YES;
+                _playerViewController.showsPlaybackControls = _controls;
                 _fullscreenPlayerPresented = fullscreen;
                 if(self.onVideoFullscreenPlayerDidPresent) {
                     self.onVideoFullscreenPlayerDidPresent(@{@"target": self.reactTag});
