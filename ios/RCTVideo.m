@@ -26,6 +26,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
   BOOL _playbackRateObserverRegistered;
+  BOOL _videoLoadStarted;
 
   bool _pendingSeek;
   float _pendingSeekTime;
@@ -96,7 +97,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
     RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
-    playerLayer.showsPlaybackControls = NO;
+    playerLayer.showsPlaybackControls = YES;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = player;
@@ -324,6 +325,7 @@ static NSString *const timedMetadata = @"timedMetadata";
         }
     });
   });
+  _videoLoadStarted = YES;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
@@ -350,14 +352,24 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSString *uri = [source objectForKey:@"uri"];
   NSString *subtitleUri = _selectedTextTrack[@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  NSDictionary *headers = [source objectForKey:@"requestHeaders"];
 
   AVURLAsset *asset;
   AVURLAsset *subAsset;
 
   if (isNetwork) {
+    NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc]init];
+    /* Per #1091, this is not a public API. We need to either get approval from Apple to use this
+     * or use a different approach.
+    if ([headers count] > 0) {
+      [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
+    }
+    */
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:uri] options:@{AVURLAssetHTTPCookiesKey : cookies}];
-    subAsset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:subtitleUri] options:@{AVURLAssetHTTPCookiesKey : cookies}];
+    [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
+
+    asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:uri] options:assetOptions];
+    subAsset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:subtitleUri] options:assetOptions];
   }
   else if (isAsset) //  assets on iOS have to be in the Documents folder
   {
@@ -404,66 +416,62 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-   if (object == _playerItem) {
-
+  if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
-    if ([keyPath isEqualToString: timedMetadata])
-    {
-
-
-        NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
-        if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
-
-            NSMutableArray *array = [NSMutableArray new];
-            for (AVMetadataItem *item in items) {
-
-                NSString *value = item.value;
-                NSString *identifier = item.identifier;
-
-                if (![value isEqual: [NSNull null]]) {
-                    NSDictionary *dictionary = [[NSDictionary alloc] initWithObjects:@[value, identifier] forKeys:@[@"value", @"identifier"]];
-
-                    [array addObject:dictionary];
-                }
-            }
-
-            self.onTimedMetadata(@{
-                                   @"target": self.reactTag,
-                                   @"metadata": array
-                                   });
+    if ([keyPath isEqualToString:timedMetadata]) {
+      NSArray<AVMetadataItem *> *items = [change objectForKey:@"new"];
+      if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
+        NSMutableArray *array = [NSMutableArray new];
+        for (AVMetadataItem *item in items) {
+          NSString *value = item.value;
+          NSString *identifier = item.identifier;
+          
+          if (![value isEqual: [NSNull null]]) {
+            NSDictionary *dictionary = [[NSDictionary alloc] initWithObjects:@[value, identifier] forKeys:@[@"value", @"identifier"]];
+            
+            [array addObject:dictionary];
+          }
         }
+        
+        self.onTimedMetadata(@{
+                               @"target": self.reactTag,
+                               @"metadata": array
+                               });
+      }
     }
-
+    
     if ([keyPath isEqualToString:statusKeyPath]) {
       // Handle player item status change.
       if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
         float duration = CMTimeGetSeconds(_playerItem.asset.duration);
-
+        
         if (isnan(duration)) {
           duration = 0.0;
         }
-
+        
         NSObject *width = @"undefined";
         NSObject *height = @"undefined";
         NSString *orientation = @"undefined";
-
+        
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
-          AVAssetTrack *videoAsset = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
-            
-          width = [NSNumber numberWithFloat:videoAsset.naturalSize.width];
-          height = [NSNumber numberWithFloat:videoAsset.naturalSize.height];
-          CGAffineTransform preferredTransform = [videoAsset preferredTransform];
 
-          if ((videoAsset.naturalSize.width == preferredTransform.tx
-            && videoAsset.naturalSize.height == preferredTransform.ty)
-            || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
+          AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+          width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
+          height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
+          CGAffineTransform preferredTransform = [videoTrack preferredTransform];
+          
+          if ((videoTrack.naturalSize.width == preferredTransform.tx
+               && videoTrack.naturalSize.height == preferredTransform.ty)
+              || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
+
           {
             orientation = @"landscape";
-          } else
+          } else {
             orientation = @"portrait";
+          }
         }
-
-      if(self.onVideoLoad) {
+        
+        if (self.onVideoLoad && _videoLoadStarted) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
                              @"canPlayReverse": [NSNumber numberWithBool:_playerItem.canPlayReverse],
@@ -473,21 +481,21 @@ static NSString *const timedMetadata = @"timedMetadata";
                              @"canStepBackward": [NSNumber numberWithBool:_playerItem.canStepBackward],
                              @"canStepForward": [NSNumber numberWithBool:_playerItem.canStepForward],
                              @"naturalSize": @{
-                                     @"width": width,
-                                     @"height": height,
-                                     @"orientation": orientation
-                                     },
+                                 @"width": width,
+                                 @"height": height,
+                                 @"orientation": orientation
+                                 },
                              @"textTracks": [self getTextTrackInfo],
                              @"target": self.reactTag});
-      }
-
-
+        }
+        _videoLoadStarted = NO;
+        
         [self attachListeners];
         [self applyModifiers];
-      } else if(_playerItem.status == AVPlayerItemStatusFailed && self.onVideoError) {
+      } else if (_playerItem.status == AVPlayerItemStatusFailed && self.onVideoError) {
         self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: _playerItem.error.code],
                                         @"domain": _playerItem.error.domain},
-                                        @"target": self.reactTag});
+                            @"target": self.reactTag});
       }
     } else if ([keyPath isEqualToString:playbackBufferEmptyKeyPath]) {
       _playerBufferEmpty = YES;
@@ -500,28 +508,28 @@ static NSString *const timedMetadata = @"timedMetadata";
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
     }
-   } else if (object == _playerLayer) {
-      if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
-        if([change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
-          self.onReadyForDisplay(@{@"target": self.reactTag});
-        }
+  } else if (object == _playerLayer) {
+    if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
+      if([change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
+        self.onReadyForDisplay(@{@"target": self.reactTag});
+      }
     }
   } else if (object == _player) {
-      if([keyPath isEqualToString:playbackRate]) {
-          if(self.onPlaybackRateChange) {
-              self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
-                                          @"target": self.reactTag});
-          }
-          if(_playbackStalled && _player.rate > 0) {
-              if(self.onPlaybackResume) {
-                  self.onPlaybackResume(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
-                                          @"target": self.reactTag});
-              }
-              _playbackStalled = NO;
-          }
+    if([keyPath isEqualToString:playbackRate]) {
+      if(self.onPlaybackRateChange) {
+        self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
+                                    @"target": self.reactTag});
       }
+      if(_playbackStalled && _player.rate > 0) {
+        if(self.onPlaybackResume) {
+          self.onPlaybackResume(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
+                                  @"target": self.reactTag});
+        }
+        _playbackStalled = NO;
+      }
+    }
   } else {
-      [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
 

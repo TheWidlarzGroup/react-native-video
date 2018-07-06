@@ -5,10 +5,14 @@ A `<Video>` component for react-native, as seen in
 
 Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
 
+### Version 3.0 breaking changes
+Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
+
 ## TOC
 
 * [Installation](#installation)
 * [Usage](#usage)
+* [Updating](#updating)
 
 ## Installation
 
@@ -51,7 +55,7 @@ Note: you can also use the `ignoreSilentSwitch` prop, shown below.
   
 Run `react-native link` to link the react-native-video library.
 
-`react-native link` don’t works properly with the tvOS target so we need to add the library manually.
+`react-native link` doesn’t work properly with the tvOS target so we need to add the library manually.
 
 First select your project in Xcode.
 
@@ -191,8 +195,6 @@ using System.Collections.Generic;
        onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
        onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
        onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
-       onProgress={this.setTime}               // Callback every ~250ms with currentTime
-       onTimedMetadata={this.onTimedMetadata}  // Callback when the stream receive some metadata
        style={styles.backgroundVideo} />
 
 // Later to trigger fullscreen
@@ -239,6 +241,8 @@ var styles = StyleSheet.create({
 ### Event props
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onProgress](#onprogress)
+* [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [seek](#seek)
@@ -492,9 +496,9 @@ Payload:
 
 Property | Description
 --- | ---
-isNetwork | Boolean indicating if the media is being loaded from the network
-type | Type of the media. Not available on Windows
-uri | URI for the media source. Not available on Windows
+isNetwork | boolean | Boolean indicating if the media is being loaded from the network
+type | string | Type of the media. Not available on Windows
+uri | string | URI for the media source. Not available on Windows
 
 Example:
 ```
@@ -506,6 +510,46 @@ Example:
 ```
 
 Platforms: all
+
+#### onProgress
+Callback function that is called every progressInterval seconds with info about which position the media is currently playing.
+
+Property | Description
+--- | ---
+currentTime | number | Current position in seconds
+playableDuration | number | Position to where the media can be played to using just the buffer in seconds
+seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
+
+Example:
+```
+{
+  currentTime: 5.2,
+  playableDuration: 34.6,
+  seekableDuration: 888
+}
+```
+
+#### onTimedMetadata
+Callback function that is called when timed metadata becomes available
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+metadata | array | Array of metadata objects
+
+Example:
+```
+{
+  metadata: [
+    { value: 'Streaming Encoder', identifier: 'TRSN' },
+    { value: 'Internet Stream', identifier: 'TRSO' },
+    { value: 'Any Time You Like', identifier: 'TIT2' }
+  ]
+}
+```
+
+Platforms: Android ExoPlayer, iOS
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
@@ -558,14 +602,19 @@ For more detailed info check this [article](https://cocoacasts.com/how-to-add-ap
 </details>
 
 ### Android Expansion File Usage
-Within your render function, assuming you have a file called
-"background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+Expansions files allow you to ship assets that exceed the 100MB apk size limit and don't need to be updated each time you push an app update.
+
+This only supports mp4 files and they must not be compressed. Example command line for preventing compression:
+```bash
+zip -r -n .mp4 *.mp4 player.video.example.com
 ```
-<Video
-  source={{uri: "background", mainVer: 1, patchVer: 0}}
-/>
-```
-This will look for an .mp4 file (background.mp4) in the given expansion version.
+
+```javascript
+// Within your render function, assuming you have a file called
+// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
+<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
+       resizeMode="cover"           // Fill the whole screen at aspect ratio.
+       style={styles.backgroundVideo} />
 
 ### Load files with the RN Asset System
 
@@ -598,9 +647,49 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
+## Updating
+
+### Version 3.0
+
+#### All platforms now auto-play
+Previously, on Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.
+
+#### All platforms now keep their paused state when returning from the background
+Previously, on Android MediaPlayer if you setup an AppState event when the app went into the background and set a paused prop so that when you returned to the app the video would be paused it would be ignored.
+
+Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
+
+#### Use Android SDK 27 by default
+Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
+
+You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
+
+##### Using app build settings
+You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
+```
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ... // Various other settings go here
+}
+
+allprojects {
+    ... // Various other settings go here
+
+    project.ext {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.1"
+
+        minSdkVersion = 16
+        targetSdkVersion = 22
+    }
+}
+```
+
+If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
+
 ## TODOS
 
-- [ ] Add support for captions
 - [ ] Add support for playing multiple videos in a sequence (will interfere with current `repeat` implementation)
 - [x] Callback to get buffering progress for remote videos
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)

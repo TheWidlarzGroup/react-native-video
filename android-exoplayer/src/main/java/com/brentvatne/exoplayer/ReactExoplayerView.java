@@ -66,6 +66,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
+import java.util.Map;
 import java.lang.Object;
 import java.util.ArrayList;
 
@@ -103,7 +104,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean loadVideoStarted;
     private boolean isFullscreen;
     private boolean isInBackground;
-    private boolean isPaused = true;
+    private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
 
@@ -118,6 +119,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean useTextureView = false;
+    private Map<String, String> requestHeaders;
     // \ End props
 
     // React
@@ -135,7 +137,7 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlayWhenReady()
                             ) {
                         long pos = player.getCurrentPosition();
-                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration();
+                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
@@ -417,7 +419,7 @@ class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, useBandwidthMeter ? BANDWIDTH_METER : null);
+        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, useBandwidthMeter ? BANDWIDTH_METER : null, requestHeaders);
     }
 
     // AudioManager.OnAudioFocusChangeListener implementation
@@ -661,14 +663,15 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final String extension) {
+    public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER);
+            this.requestHeaders = headers;
+            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();

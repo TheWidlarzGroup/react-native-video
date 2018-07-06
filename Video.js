@@ -26,6 +26,29 @@ export default class Video extends Component {
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
+  
+  toTypeString(x) {
+    switch (typeof x) {
+      case "object":
+        return x instanceof Date 
+          ? x.toISOString() 
+          : JSON.stringify(x); // object, null
+      case "undefined":
+        return "";
+      default: // boolean, number, string
+        return x.toString();      
+    }
+  }
+
+  stringsOnlyObject(obj) {
+    const strObj = {};
+
+    Object.keys(obj).forEach(x => {
+      strObj[x] = this.toTypeString(obj[x]);
+    });
+
+    return strObj;
+  }
 
   seek = (time, tolerance = 100) => {
     if (Platform.OS === 'ios') {
@@ -202,6 +225,7 @@ export default class Video extends Component {
         type: source.type || '',
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
+        requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {}
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
