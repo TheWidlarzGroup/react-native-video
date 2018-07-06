@@ -34,11 +34,17 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataRenderer;
+import com.google.android.exoplayer2.offline.DownloadAction;
+import com.google.android.exoplayer2.offline.DownloadManager;
+import com.google.android.exoplayer2.offline.DownloadService;
+import com.google.android.exoplayer2.offline.Downloader;
+import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
+import com.google.android.exoplayer2.offline.ProgressiveDownloadAction;
+import com.google.android.exoplayer2.offline.ProgressiveDownloader;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -47,9 +53,12 @@ import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
+import com.google.android.exoplayer2.source.dash.offline.DashDownloadAction;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.source.hls.offline.HlsDownloadAction;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
+import com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloadAction;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
@@ -58,9 +67,17 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.util.MimeTypes;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.TransferListener;
+import com.google.android.exoplayer2.upstream.cache.Cache;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
+import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -82,6 +99,14 @@ class ReactExoplayerView extends FrameLayout implements
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
+//    private static final String DOWNLOAD_ACTION_FILE = "actions";
+//    private static final DownloadAction.Deserializer[] DOWNLOAD_DESERIALIZERS =
+//            new DownloadAction.Deserializer[] {
+//                    DashDownloadAction.DESERIALIZER,
+//                    HlsDownloadAction.DESERIALIZER,
+//                    SsDownloadAction.DESERIALIZER,
+//                    ProgressiveDownloadAction.DESERIALIZER
+//            };
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -93,10 +118,13 @@ class ReactExoplayerView extends FrameLayout implements
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
 
+    private SimpleCache downloadCache;
+//    private DownloadManager downloadManager;
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private MappingTrackSelector trackSelector;
     private boolean playerNeedsSource;
+//    protected String userAgent;
 
     private int resumeWindow;
     private long resumePosition;
@@ -154,6 +182,7 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+//        userAgent = Util.getUserAgent(context, "ReactExoPlayer");
 
         initializePlayer();
     }
@@ -168,6 +197,19 @@ class ReactExoplayerView extends FrameLayout implements
     private void createViews() {
         clearResumePosition();
         mediaDataSourceFactory = buildDataSourceFactory(true);
+        downloadCache = ExoPlayerCache.getInstance(getContext());
+
+//        DownloaderConstructorHelper downloaderConstructorHelper =
+//                new DownloaderConstructorHelper(
+//                        downloadCache, buildHttpDataSourceFactory(/* listener= */ null));
+//        downloadManager =
+//                new DownloadManager(
+//                        downloaderConstructorHelper,
+//                        4,
+//                        DownloadManager.DEFAULT_MIN_RETRY_COUNT,
+//                        new File(getContext().getCacheDir(), DOWNLOAD_ACTION_FILE),
+//                        DOWNLOAD_DESERIALIZERS);
+
         mainHandler = new Handler();
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
@@ -181,6 +223,12 @@ class ReactExoplayerView extends FrameLayout implements
 
         addView(exoPlayerView, 0, layoutParams);
     }
+
+//    /** Returns a {@link HttpDataSource.Factory}. */
+//    public HttpDataSource.Factory buildHttpDataSourceFactory(
+//            TransferListener<? super DataSource> listener) {
+//        return new DefaultHttpDataSourceFactory(userAgent, listener);
+//    }
 
     @Override
     protected void onAttachedToWindow() {
@@ -261,6 +309,9 @@ class ReactExoplayerView extends FrameLayout implements
             player.prepare(mediaSource, !haveResumePosition, false);
             playerNeedsSource = false;
 
+            DownloadAction downloadAction = new ProgressiveDownloadAction(srcUri, false, null, null);
+            DownloadService.startWithAction(getContext(), CacheDownloadService.class, downloadAction, true);
+
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
@@ -279,8 +330,10 @@ class ReactExoplayerView extends FrameLayout implements
             case C.TYPE_HLS:
                 return new HlsMediaSource(uri, mediaDataSourceFactory, mainHandler, null);
             case C.TYPE_OTHER:
-                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
-                        mainHandler, null);
+                return new ExtractorMediaSource.Factory(new CacheDataSourceFactory(downloadCache, mediaDataSourceFactory))
+                        .createMediaSource(uri);
+//                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
+//                        mainHandler, null);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
@@ -723,57 +776,57 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSelectedTextTrack(String type, Dynamic value) {
-        textTrackType = type;
-        textTrackValue = value;
-
-        int index = getTextTrackRendererIndex();
-        if (index == C.INDEX_UNSET) {
-            return;
-        }
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        if (info == null) {
-            return;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(index);
-        int trackIndex = C.INDEX_UNSET;
-        if (TextUtils.isEmpty(type)) {
-            // Do nothing
-        } else if (type.equals("disabled")) {
-            trackSelector.setSelectionOverride(index, groups, null);
-            return;
-        } else if (type.equals("language")) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.language != null && format.language.equals(value.asString())) {
-                    trackIndex = i;
-                    break;
-                }
-            }
-        } else if (type.equals("title")) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value.asString())) {
-                    trackIndex = i;
-                    break;
-                }
-            }
-        } else if (type.equals("index")) {
-            trackIndex = value.asInt();
-        } else { // default. invalid type or "system"
-            trackSelector.clearSelectionOverrides(index);
-            return;
-        }
-
-        if (trackIndex == C.INDEX_UNSET) {
-            trackSelector.clearSelectionOverrides(trackIndex);
-            return;
-        }
-
-        MappingTrackSelector.SelectionOverride override
-                = new MappingTrackSelector.SelectionOverride(
-                        new FixedTrackSelection.Factory(), trackIndex, 0);
-        trackSelector.setSelectionOverride(index, groups, override);
+//        textTrackType = type;
+//        textTrackValue = value;
+//
+//        int index = getTextTrackRendererIndex();
+//        if (index == C.INDEX_UNSET) {
+//            return;
+//        }
+//        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+//        if (info == null) {
+//            return;
+//        }
+//
+//        TrackGroupArray groups = info.getTrackGroups(index);
+//        int trackIndex = C.INDEX_UNSET;
+//        if (TextUtils.isEmpty(type)) {
+//            // Do nothing
+//        } else if (type.equals("disabled")) {
+//            trackSelector.setSelectionOverride(index, groups, null);
+//            return;
+//        } else if (type.equals("language")) {
+//            for (int i = 0; i < groups.length; ++i) {
+//                Format format = groups.get(i).getFormat(0);
+//                if (format.language != null && format.language.equals(value.asString())) {
+//                    trackIndex = i;
+//                    break;
+//                }
+//            }
+//        } else if (type.equals("title")) {
+//            for (int i = 0; i < groups.length; ++i) {
+//                Format format = groups.get(i).getFormat(0);
+//                if (format.id != null && format.id.equals(value.asString())) {
+//                    trackIndex = i;
+//                    break;
+//                }
+//            }
+//        } else if (type.equals("index")) {
+//            trackIndex = value.asInt();
+//        } else { // default. invalid type or "system"
+//            trackSelector.clearSelectionOverrides(index);
+//            return;
+//        }
+//
+//        if (trackIndex == C.INDEX_UNSET) {
+//            trackSelector.clearSelectionOverrides(trackIndex);
+//            return;
+//        }
+//
+//        MappingTrackSelector.SelectionOverride override
+//                = new MappingTrackSelector.SelectionOverride(
+//                        new FixedTrackSelection.Factory(), trackIndex, 0);
+//        trackSelector.setSelectionOverride(index, groups, override);
     }
 
     public void setPausedModifier(boolean paused) {
