@@ -350,7 +350,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
-  NSString *subtitleUri = _selectedTextTrack[@"uri"];
+  NSString *subtitleUri = self.selectedTextTrack[@"uri"];
   NSString *type = [source objectForKey:@"type"];
   NSDictionary *headers = [source objectForKey:@"requestHeaders"];
 
@@ -381,7 +381,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   }
   
-  if (!_textTracks || !_selectedTextTrack) return [AVPlayerItem playerItemWithAsset:asset];
+  if (!_textTracks || !self.selectedTextTrack) return [AVPlayerItem playerItemWithAsset:asset];
   
   // otherwise sideload text tracks
   AVAssetTrack *videoAsset = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
@@ -721,19 +721,20 @@ static NSString *const timedMetadata = @"timedMetadata";
   _repeat = repeat;
 }
 
+- (NSDictionary*) selectedTextTrack {
+  if (_textTracks) {
+    [self setSideloadedTextTrack];
+  }
+  else  [self setStreamingTextTrack];
+  
+  return _selectedTextTrack;
+}
+
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
   
   _selectedTextTrack = selectedTextTrack;
   
-  // when textTracks exist, we set side-loaded subtitles
-  if (_textTracks) {
-    [self setSideloadedTextTrack];
-    return;
-  }
-  
-  // otherwise check for subtitles in the streaming asset (.m3u8)
-  
-  [self setStreamingTextTrack];
+
 }
 
 - (void)setSideloadedTextTrack {
