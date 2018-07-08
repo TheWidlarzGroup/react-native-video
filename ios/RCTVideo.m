@@ -548,7 +548,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
   _ignoreSilentSwitch = ignoreSilentSwitch;
-  [self applyModifiers];
+  [self applyModifiersWithFilter];
 }
 
 - (void)setPaused:(BOOL)paused
@@ -629,18 +629,25 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setRate:(float)rate
 {
   _rate = rate;
-  [self applyModifiers];
+  [self applyModifiersWithFilter];
 }
 
 - (void)setMuted:(BOOL)muted
 {
   _muted = muted;
-  [self applyModifiers];
+  [self applyModifiersWithFilter];
 }
 
 - (void)setVolume:(float)volume
 {
   _volume = volume;
+  [self applyModifiersWithFilter];
+}
+
+- (void)applyModifiersWithFilter {
+  if (_playerItem.status != AVPlayerItemStatusReadyToPlay) {
+    return;
+  }
   [self applyModifiers];
 }
 
