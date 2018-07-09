@@ -47,7 +47,6 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _allowsExternalPlayback;
   NSArray * _textTracks;
   NSDictionary * _selectedTextTrack;
-  NSDictionary * _selectedText;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
@@ -352,67 +351,67 @@ static NSString *const timedMetadata = @"timedMetadata";
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
-  NSString *subtitleUri = _selectedText[@"uri"];
   NSString *type = [source objectForKey:@"type"];
-  NSDictionary *headers = [source objectForKey:@"requestHeaders"];
-
+  
   AVURLAsset *asset;
-  AVURLAsset *subAsset;
+  NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
 
   if (isNetwork) {
-    NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc]init];
     /* Per #1091, this is not a public API. We need to either get approval from Apple to use this
      * or use a different approach.
+    NSDictionary *headers = [source objectForKey:@"requestHeaders"];
     if ([headers count] > 0) {
       [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
     }
     */
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
-
     asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:uri] options:assetOptions];
-    subAsset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:subtitleUri] options:assetOptions];
-  }
-  else if (isAsset) //  assets on iOS have to be in the Documents folder
-  {
+  } else if (isAsset) { //  assets on iOS have to be in the Documents folder
     asset = [AVURLAsset URLAssetWithURL:[self urlFilePath:uri] options:nil];
-    subAsset = [AVURLAsset URLAssetWithURL:[self urlFilePath:subtitleUri] options:nil];
-  }
-  else // file passed in through JS, or an asset in the Xcode project
-  {
+  } else { // file passed in through JS, or an asset in the Xcode project
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   }
   
-  if (!_textTracks || !_selectedText) return [AVPlayerItem playerItemWithAsset:asset];
+  if (!_textTracks) {
+    return [AVPlayerItem playerItemWithAsset:asset];
+  }
   
-  // otherwise sideload text tracks
-  AVAssetTrack *videoAsset = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
-  AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
-  AVAssetTrack *textAsset = [subAsset tracksWithMediaType:AVMediaTypeText].firstObject;
-  
-  NSLog(@"assets: %@,%@,%@", videoAsset, audioAsset, textAsset);
-  
-  
+  // sideload text tracks
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
+  
+  AVAssetTrack *videoAsset = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
   AVMutableCompositionTrack *videoCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
-  AVMutableCompositionTrack *audioCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-  AVMutableCompositionTrack *subtitleCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeText preferredTrackID:kCMPersistentTrackID_Invalid];
-  
   [videoCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                      ofTrack:videoAsset
-                       atTime:kCMTimeZero
-                        error:nil];
-  
+                          ofTrack:videoAsset
+                           atTime:kCMTimeZero
+                            error:nil];
+
+  AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
+  AVMutableCompositionTrack *audioCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
   [audioCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                      ofTrack:audioAsset
-                       atTime:kCMTimeZero
-                        error:nil];
-  
-  [subtitleCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                         ofTrack:textAsset
-                          atTime:kCMTimeZero
-                           error:nil];
-  
+                          ofTrack:audioAsset
+                           atTime:kCMTimeZero
+                            error:nil];
+
+  for (int i = 0; i < _textTracks.count; ++i) {
+    AVURLAsset *textURLAsset;
+    NSString *textUri = [_textTracks objectAtIndex:i][@"uri"];
+    if ([[textUri lowercaseString] hasPrefix:@"http"]) {
+      textURLAsset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:textUri] options:assetOptions];
+    } else {
+      textURLAsset = [AVURLAsset URLAssetWithURL:[self urlFilePath:textUri] options:nil];
+    }
+    AVAssetTrack *textTrackAsset = [textURLAsset tracksWithMediaType:AVMediaTypeText].firstObject;
+    AVMutableCompositionTrack *textCompTrack = [mixComposition
+                                                addMutableTrackWithMediaType:AVMediaTypeText
+                                                preferredTrackID:kCMPersistentTrackID_Invalid];
+    [textCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+                               ofTrack:textTrackAsset
+                                atTime:kCMTimeZero
+                                 error:nil];
+  }
+
   return [AVPlayerItem playerItemWithAsset:mixComposition];
 }
 
@@ -425,7 +424,7 @@ static NSString *const timedMetadata = @"timedMetadata";
       if (items && ![items isEqual:[NSNull null]] && items.count > 0) {
         NSMutableArray *array = [NSMutableArray new];
         for (AVMetadataItem *item in items) {
-          NSString *value = item.value;
+          NSString *value = (NSString *)item.value;
           NSString *identifier = item.identifier;
           
           if (![value isEqual: [NSNull null]]) {
@@ -729,30 +728,36 @@ static NSString *const timedMetadata = @"timedMetadata";
 }
 
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
-    _selectedTextTrack = selectedTextTrack;
-  
-    if (_textTracks) {
-      [self setSideloadedText];
-    }
-    else  [self setStreamingText];
+  _selectedTextTrack = selectedTextTrack;
+  if (_textTracks) {
+    [self setSideloadedText];
+  } else {
+    [self setStreamingText];
+  }
 }
 
 - (void) setSideloadedText {
   NSString *type = _selectedTextTrack[@"type"];
   NSArray* textTracks = [self getTextTrackInfo];
   
-  _selectedText = nil;
+  // The first few tracks will be audio & video track
+  int firstTextIndex = 0;
+  for (firstTextIndex = 0; firstTextIndex < _player.currentItem.tracks.count; ++firstTextIndex) {
+    if ([_player.currentItem.tracks[firstTextIndex].assetTrack hasMediaCharacteristic:AVMediaCharacteristicLegible]) {
+      break;
+    }
+  }
+  
+  int selectedTrackIndex = -1;
   
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
   } else if ([type isEqualToString:@"language"]) {
     NSString *selectedValue = _selectedTextTrack[@"value"];
-    
     for (int i = 0; i < textTracks.count; ++i) {
       NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
-      
       if ([selectedValue isEqualToString:currentTextTrack[@"language"]]) {
-        _selectedText = currentTextTrack;
+        selectedTrackIndex = i;
         break;
       }
     }
@@ -760,9 +765,8 @@ static NSString *const timedMetadata = @"timedMetadata";
     NSString *selectedValue = _selectedTextTrack[@"value"];
     for (int i = 0; i < textTracks.count; ++i) {
       NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
-      
       if ([selectedValue isEqualToString:currentTextTrack[@"title"]]) {
-        _selectedText = currentTextTrack;
+        selectedTrackIndex = i;
         break;
       }
     }
@@ -770,29 +774,33 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([_selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
       int index = [_selectedTextTrack[@"value"] intValue];
       if (textTracks.count > index) {
-        _selectedText = [textTracks objectAtIndex:index];
+        selectedTrackIndex = index;
       }
     }
   }
   
   // user's selected language might not be available, or system defaults have captions enabled
-  if (_selectedText==nil || [type isEqualToString:@"default"]) {
+  if (selectedTrackIndex == -1 || [type isEqualToString:@"default"]) {
       CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
       NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
       if ([captionSettings containsObject: AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
         // iterate through the textTracks to find a matching option, or default to the first object.
-        _selectedText = textTracks.firstObject;
+        selectedTrackIndex = firstTextIndex;
         
         NSString * systemLanguage = [[NSLocale preferredLanguages] firstObject];
         for (int i = 0; i < textTracks.count; ++i) {
           NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
-          
           if ([systemLanguage isEqualToString:currentTextTrack[@"language"]]) {
-            _selectedText = currentTextTrack;
+            selectedTrackIndex = i;
             break;
           }
         }
       }
+  }
+  
+  for (int i = firstTextIndex; i < _player.currentItem.tracks.count; ++i) {
+    BOOL isEnabled = i == selectedTrackIndex + firstTextIndex;
+    [_player.currentItem.tracks[i] setEnabled:isEnabled];
   }
 }
 
