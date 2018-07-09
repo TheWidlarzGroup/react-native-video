@@ -20,6 +20,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
+  BOOL _playerLayerObserverSet;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
 
@@ -46,6 +47,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   BOOL _allowsExternalPlayback;
   NSArray * _textTracks;
   NSDictionary * _selectedTextTrack;
+  NSDictionary * _selectedText;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
@@ -350,7 +352,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
-  NSString *subtitleUri = self.selectedTextTrack[@"uri"];
+  NSString *subtitleUri = _selectedText[@"uri"];
   NSString *type = [source objectForKey:@"type"];
   NSDictionary *headers = [source objectForKey:@"requestHeaders"];
 
@@ -376,19 +378,19 @@ static NSString *const timedMetadata = @"timedMetadata";
     asset = [AVURLAsset URLAssetWithURL:[self urlFilePath:uri] options:nil];
     subAsset = [AVURLAsset URLAssetWithURL:[self urlFilePath:subtitleUri] options:nil];
   }
-  else if (!isNetwork && !isAsset) // this is a relative file hardcoded in the app?
+  else // file passed in through JS, or an asset in the Xcode project
   {
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   }
   
-  if (!_textTracks || !self.selectedTextTrack) return [AVPlayerItem playerItemWithAsset:asset];
+  if (!_textTracks || !_selectedText) return [AVPlayerItem playerItemWithAsset:asset];
   
   // otherwise sideload text tracks
   AVAssetTrack *videoAsset = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
   AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
-  AVAssetTrack *subtitleAsset = [subAsset tracksWithMediaType:AVMediaTypeText].firstObject;
+  AVAssetTrack *textAsset = [subAsset tracksWithMediaType:AVMediaTypeText].firstObject;
   
-  NSLog(@"assets: %@,%@,%@", videoAsset, audioAsset, subtitleAsset);
+  NSLog(@"assets: %@,%@,%@", videoAsset, audioAsset, textAsset);
   
   
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
@@ -407,7 +409,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                         error:nil];
   
   [subtitleCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                         ofTrack:subtitleAsset
+                         ofTrack:textAsset
                           atTime:kCMTimeZero
                            error:nil];
   
@@ -454,7 +456,6 @@ static NSString *const timedMetadata = @"timedMetadata";
         NSString *orientation = @"undefined";
         
         if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
-
           AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
           width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
           height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
@@ -463,7 +464,6 @@ static NSString *const timedMetadata = @"timedMetadata";
           if ((videoTrack.naturalSize.width == preferredTransform.tx
                && videoTrack.naturalSize.height == preferredTransform.ty)
               || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
-
           {
             orientation = @"landscape";
           } else {
@@ -638,23 +638,30 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)setCurrentTime:(float)currentTime
 {
-  [self setSeek: currentTime];
+  NSDictionary *info = @{
+                         @"time": [NSNumber numberWithFloat:currentTime],
+                         @"tolerance": [NSNumber numberWithInt:100]
+                         };
+  [self setSeek:info];
 }
 
-- (void)setSeek:(float)seekTime
+- (void)setSeek:(NSDictionary *)info
 {
-  int timeScale = 10000;
-
+  NSNumber *seekTime = info[@"time"];
+  NSNumber *seekTolerance = info[@"tolerance"];
+  
+  int timeScale = 1000;
+  
   AVPlayerItem *item = _player.currentItem;
   if (item && item.status == AVPlayerItemStatusReadyToPlay) {
     // TODO check loadedTimeRanges
-
-    CMTime cmSeekTime = CMTimeMakeWithSeconds(seekTime, timeScale);
+    
+    CMTime cmSeekTime = CMTimeMakeWithSeconds([seekTime floatValue], timeScale);
     CMTime current = item.currentTime;
     // TODO figure out a good tolerance level
-    CMTime tolerance = CMTimeMake(1000, timeScale);
+    CMTime tolerance = CMTimeMake([seekTolerance floatValue], timeScale);
     BOOL wasPaused = _paused;
-
+    
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!wasPaused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
@@ -662,22 +669,22 @@ static NSString *const timedMetadata = @"timedMetadata";
           [self addPlayerTimeObserver];
         }
         if (!wasPaused) {
-            [self setPaused:false];
+          [self setPaused:false];
         }
         if(self.onVideoSeek) {
-            self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
-                               @"seekTime": [NSNumber numberWithFloat:seekTime],
-                               @"target": self.reactTag});
+          self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+                             @"seekTime": seekTime,
+                             @"target": self.reactTag});
         }
       }];
-
+      
       _pendingSeek = false;
     }
-
+    
   } else {
     // TODO: See if this makes sense and if so, actually implement it
     _pendingSeek = true;
-    _pendingSeekTime = seekTime;
+    _pendingSeekTime = [seekTime floatValue];
   }
 }
 
@@ -721,32 +728,20 @@ static NSString *const timedMetadata = @"timedMetadata";
   _repeat = repeat;
 }
 
-- (NSDictionary*) selectedTextTrack {
-  if (_textTracks) {
-    [self setSideloadedTextTrack];
-  }
-  else  [self setStreamingTextTrack];
-  
-  return _selectedTextTrack;
-}
-
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
+    _selectedTextTrack = selectedTextTrack;
   
-  _selectedTextTrack = selectedTextTrack;
-  
-
+    if (_textTracks) {
+      [self setSideloadedText];
+    }
+    else  [self setStreamingText];
 }
 
-- (void)setSideloadedTextTrack {
+- (void) setSideloadedText {
   NSString *type = _selectedTextTrack[@"type"];
   NSArray* textTracks = [self getTextTrackInfo];
   
-  if (textTracks==nil) {
-    _selectedTextTrack = nil;
-    return;
-  }
-  
-  NSDictionary* selectedCaption = nil;
+  _selectedText = nil;
   
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
@@ -754,20 +749,20 @@ static NSString *const timedMetadata = @"timedMetadata";
     NSString *selectedValue = _selectedTextTrack[@"value"];
     
     for (int i = 0; i < textTracks.count; ++i) {
-      NSDictionary *currentCaption = [textTracks objectAtIndex:i];
+      NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
       
-      if ([selectedValue isEqualToString:currentCaption[@"language"]]) {
-        selectedCaption = currentCaption;
+      if ([selectedValue isEqualToString:currentTextTrack[@"language"]]) {
+        _selectedText = currentTextTrack;
         break;
       }
     }
   } else if ([type isEqualToString:@"title"]) {
     NSString *selectedValue = _selectedTextTrack[@"value"];
     for (int i = 0; i < textTracks.count; ++i) {
-      NSDictionary *currentCaption = [textTracks objectAtIndex:i];
+      NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
       
-      if ([selectedValue isEqualToString:currentCaption[@"title"]]) {
-        selectedCaption = currentCaption;
+      if ([selectedValue isEqualToString:currentTextTrack[@"title"]]) {
+        _selectedText = currentTextTrack;
         break;
       }
     }
@@ -775,28 +770,37 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([_selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
       int index = [_selectedTextTrack[@"value"] intValue];
       if (textTracks.count > index) {
-        selectedCaption = [textTracks objectAtIndex:index];
+        _selectedText = [textTracks objectAtIndex:index];
       }
     }
   }
   
   // user's selected language might not be available, or system defaults have captions enabled
-  if (selectedCaption==nil || [type isEqualToString:@"default"]) {
+  if (_selectedText==nil || [type isEqualToString:@"default"]) {
       CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
       NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
       if ([captionSettings containsObject: AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
-        selectedCaption = textTracks.firstObject;
+        // iterate through the textTracks to find a matching option, or default to the first object.
+        _selectedText = textTracks.firstObject;
+        
+        NSString * systemLanguage = [[NSLocale preferredLanguages] firstObject];
+        for (int i = 0; i < textTracks.count; ++i) {
+          NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
+          
+          if ([systemLanguage isEqualToString:currentTextTrack[@"language"]]) {
+            _selectedText = currentTextTrack;
+            break;
+          }
+        }
       }
   }
-  
-  _selectedTextTrack = selectedCaption;
 }
 
--(void) setStreamingTextTrack {
+-(void) setStreamingText {
   NSString *type = _selectedTextTrack[@"type"];
   AVMediaSelectionGroup *group = [_player.currentItem.asset
                                   mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
-  AVMediaSelectionOption *option;
+  AVMediaSelectionOption *mediaOption;
   
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
@@ -813,7 +817,7 @@ static NSString *const timedMetadata = @"timedMetadata";
                        objectAtIndex:0];
       }
       if ([value isEqualToString:optionValue]) {
-        option = currentOption;
+        mediaOption = currentOption;
         break;
       }
     }
@@ -823,7 +827,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     if ([_selectedTextTrack[@"value"] isKindOfClass:[NSNumber class]]) {
       int index = [_selectedTextTrack[@"value"] intValue];
       if (group.options.count > index) {
-        option = [group.options objectAtIndex:index];
+        mediaOption = [group.options objectAtIndex:index];
       }
     }
   } else { // default. invalid type or "system"
@@ -832,12 +836,15 @@ static NSString *const timedMetadata = @"timedMetadata";
   }
   
   // If a match isn't found, option will be nil and text tracks will be disabled
-  [_player.currentItem selectMediaOption:option inMediaSelectionGroup:group];
+  [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
 }
 
 - (void)setTextTracks:(NSArray*) textTracks;
 {
   _textTracks = textTracks;
+
+  // in case textTracks was set after selectedTextTrack
+  if (_selectedTextTrack) [self setSelectedTextTrack:_selectedTextTrack];
 }
 
 - (NSArray *)getTextTrackInfo
@@ -852,13 +859,16 @@ static NSString *const timedMetadata = @"timedMetadata";
                                   mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
   for (int i = 0; i < group.options.count; ++i) {
     AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-    NSString *title = [[[currentOption commonMetadata]
-                        valueForKey:@"value"]
-                       objectAtIndex:0];
+    NSString *title = @"";
+    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+    if (values.count > 0) {
+      title = [values objectAtIndex:0];
+    }
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
     NSDictionary *textTrack = @{
                                 @"index": [NSNumber numberWithInt:i],
                                 @"title": title,
-                                @"language": [currentOption extendedLanguageTag]
+                                @"language": language
                                 };
     [textTracks addObject:textTrack];
   }
@@ -931,20 +941,21 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)usePlayerLayer
 {
-    if( _player )
-    {
-      _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
-      _playerLayer.frame = self.bounds;
-      _playerLayer.needsDisplayOnBoundsChange = YES;
-
-      // to prevent video from being animated when resizeMode is 'cover'
-      // resize mode must be set before layer is added
-      [self setResizeMode:_resizeMode];
-      [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
-
-      [self.layer addSublayer:_playerLayer];
-      self.layer.needsDisplayOnBoundsChange = YES;
-    }
+  if( _player )
+  {
+    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+    _playerLayer.frame = self.bounds;
+    _playerLayer.needsDisplayOnBoundsChange = YES;
+    
+    // to prevent video from being animated when resizeMode is 'cover'
+    // resize mode must be set before layer is added
+    [self setResizeMode:_resizeMode];
+    [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
+    _playerLayerObserverSet = YES;
+    
+    [self.layer addSublayer:_playerLayer];
+    self.layer.needsDisplayOnBoundsChange = YES;
+  }
 }
 
 - (void)setControls:(BOOL)controls
@@ -978,9 +989,12 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)removePlayerLayer
 {
-    [_playerLayer removeFromSuperlayer];
+  [_playerLayer removeFromSuperlayer];
+  if (_playerLayerObserverSet) {
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
-    _playerLayer = nil;
+    _playerLayerObserverSet = NO;
+  }
+  _playerLayer = nil;
 }
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
