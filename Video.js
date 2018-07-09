@@ -235,6 +235,7 @@ export default class Video extends Component {
       onVideoEnd: this._onEnd,
       onVideoBuffer: this._onBuffer,
       onTimedMetadata: this._onTimedMetadata,
+      onVideoAudioFocusChanged: this._onAudioFocusChanged,
       onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
       onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
       onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
@@ -243,8 +244,8 @@ export default class Video extends Component {
       onPlaybackStalled: this._onPlaybackStalled,
       onPlaybackResume: this._onPlaybackResume,
       onPlaybackRateChange: this._onPlaybackRateChange,
-      onAudioFocusChanged: this._onAudioFocusChanged,
-      onAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onVideoAudioFocusChanged: this._onVideoAudioFocusChanged,
+      onVideoAudioBecomingNoisy: this._onVideoAudioBecomingNoisy,
     });
 
     if (this.props.poster && this.state.showPoster) {
@@ -296,6 +297,8 @@ Video.propTypes = {
   onVideoSeek: PropTypes.func,
   onVideoEnd: PropTypes.func,
   onTimedMetadata: PropTypes.func,
+  onVideoAudioBecomingNoisy: PropTypes.func,
+  onVideoAudioFocusChanged: PropTypes.func,
   onVideoFullscreenPlayerWillPresent: PropTypes.func,
   onVideoFullscreenPlayerDidPresent: PropTypes.func,
   onVideoFullscreenPlayerWillDismiss: PropTypes.func,
