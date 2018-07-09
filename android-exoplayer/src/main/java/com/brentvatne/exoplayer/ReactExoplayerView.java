@@ -105,7 +105,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean loadVideoStarted;
     private boolean isFullscreen;
     private boolean isInBackground;
-    private boolean isPaused = true;
+    private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
 
@@ -739,10 +739,11 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         int trackIndex = C.INDEX_UNSET;
+        trackSelector.setSelectionOverride(index, groups, null);
+
         if (TextUtils.isEmpty(type)) {
             // Do nothing
         } else if (type.equals("disabled")) {
-            trackSelector.setSelectionOverride(index, groups, null);
             return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
@@ -762,10 +763,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         } else if (type.equals("index")) {
             trackIndex = value.asInt();
-        } else { // default. invalid type or "system"
-            trackSelector.clearSelectionOverrides(index);
-            trackSelector.setSelectionOverride(index, groups, null);
-
+        } else { // default. Use system settings if possible
             int sdk = android.os.Build.VERSION.SDK_INT;
             if (sdk>18 && groups.length>0) {
                 CaptioningManager captioningManager = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
