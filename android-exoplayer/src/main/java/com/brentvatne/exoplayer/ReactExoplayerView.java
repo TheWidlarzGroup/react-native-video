@@ -69,6 +69,7 @@ import java.lang.Math;
 import java.util.Map;
 import java.lang.Object;
 import java.util.ArrayList;
+import java.util.Locale;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -104,7 +105,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean loadVideoStarted;
     private boolean isFullscreen;
     private boolean isInBackground;
-    private boolean isPaused;
+    private boolean isPaused = true;
     private boolean isBuffering;
     private float rate = 1f;
 
@@ -768,7 +769,19 @@ class ReactExoplayerView extends FrameLayout implements
             int sdk = android.os.Build.VERSION.SDK_INT;
             if (sdk>18 && groups.length>0) {
                 CaptioningManager captioningManager = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-                if (captioningManager.isEnabled()) trackIndex=0;
+                if (captioningManager.isEnabled()) {
+                    // default is to take the first object
+                    trackIndex = 0;
+
+                    String locale = Locale.getDefault().getDisplayLanguage();
+                    for (int i = 0; i < groups.length; ++i) {
+                        Format format = groups.get(i).getFormat(0);
+                        if (format.language != null && format.language.equals(locale)) {
+                            trackIndex = i;
+                            break;
+                        }
+                    }
+                }
             } else return;
 
         }
