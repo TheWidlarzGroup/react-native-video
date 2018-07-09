@@ -88,6 +88,16 @@ static NSString *const timedMetadata = @"timedMetadata";
                                              selector:@selector(applicationWillEnterForeground:)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioRouteChanged:)
+                                                 name:AVAudioSessionRouteChangeNotification
+                                               object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioSessionInterrupted:)
+                                                 name:AVAudioSessionInterruptionNotification
+                                               object:nil];
   }
 
   return self;
@@ -185,6 +195,36 @@ static NSString *const timedMetadata = @"timedMetadata";
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
+}
+
+#pragma mark - Audio events
+
+- (void)audioRouteChanged:(NSNotification *)notification
+{
+    NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
+    NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
+    if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+        self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
+    }
+}
+
+- (void)audioSessionInterrupted: (NSNotification *)notification
+{
+    NSNumber *interruptionType = [[notification userInfo] objectForKey:AVAudioSessionInterruptionTypeKey];
+    NSNumber *interruptionOption = [[notification userInfo] objectForKey:AVAudioSessionInterruptionOptionKey];
+    
+    switch (interruptionType.unsignedIntegerValue) {
+        case AVAudioSessionInterruptionTypeBegan:
+            self.onVideoAudioFocusChanged(@{@"hasAudioFocus":[NSNumber numberWithBool:NO],
+                                            @"target": self.reactTag});
+            break;
+        case AVAudioSessionInterruptionTypeEnded:
+            self.onVideoAudioFocusChanged(@{@"hasAudioFocus":[NSNumber numberWithBool:YES],
+                                            @"target": self.reactTag});
+            break;
+        default:
+            break;
+    }
 }
 
 #pragma mark - Progress
