@@ -239,6 +239,8 @@ var styles = StyleSheet.create({
 * [volume](#volume)
 
 ### Event props
+* [onAudioBecomingNoisy](onaudiobecomingnoisy)
+* [onAudioFocusChanged](onaudiofocuschanged)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
@@ -450,6 +452,35 @@ Adjust the volume.
 Platforms: all
 
 ### Event props
+
+#### onAudioBecomingNoisy
+
+Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker.
+
+Payload: none
+
+Platforms: Android ExoPlayer, iOS
+
+#### onAudioFocusChanged
+
+Callback function that is called when the audio focus changes or is interrupted. This can happen when another app begins playing audio or an interruption like a phone call happens. When the phone call ends, the focus will return.
+
+The player will automatically pause when another app starts playing. For temporary interruptions like phone calls, the player will automatically resume. However, this event allows you to update the status of your UI to show that it's paused in the controls.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+hasAudioFocus | boolean | Whether the app has audio focus
+
+Example:
+```
+{
+  hasAudioFocus: true
+}
+```
+
+Platforms: Android ExoPlayer, iOS
 
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
