@@ -783,7 +783,7 @@ static NSString *const timedMetadata = @"timedMetadata";
       NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
       if ([captionSettings containsObject: AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
         // iterate through the textTracks to find a matching option, or default to the first object.
-        selectedTrackIndex = firstTextIndex;
+        selectedTrackIndex = 0;
         
         NSString * systemLanguage = [[NSLocale preferredLanguages] firstObject];
         for (int i = 0; i < textTracks.count; ++i) {
