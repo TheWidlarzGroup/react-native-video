@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.widget.MediaController;
 
@@ -88,7 +89,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private Runnable mProgressUpdateRunnable = null;
     private Handler videoControlHandler = new Handler();
     private MediaController mediaController;
-
 
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
@@ -591,12 +591,30 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
+        
+        if (mThemedReactContext != null) {
+            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mThemedReactContext.getCurrentActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+        }   
     }
 
     @Override
     protected void onAttachedToWindow() {
 
         super.onAttachedToWindow();
+
+        if (mThemedReactContext != null) {
+            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mThemedReactContext.getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+        }
 
         if(mMainVer>0) {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders, mMainVer, mPatchVer);
