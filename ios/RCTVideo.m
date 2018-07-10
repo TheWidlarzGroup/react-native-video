@@ -311,20 +311,18 @@ static NSString *const timedMetadata = @"timedMetadata";
     
     [self addPlayerTimeObserver];
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-      
-        //Perform on next run loop, otherwise onVideoLoadStart is nil
-        if(self.onVideoLoadStart) {
-          id uri = [source objectForKey:@"uri"];
-          id type = [source objectForKey:@"type"];
-          self.onVideoLoadStart(@{@"src": @{
-                                            @"uri": uri ? uri : [NSNull null],
-                                            @"type": type ? type : [NSNull null],
-                                            @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                                            @"target": self.reactTag
-                                            });
-        }
-    });
+    //Perform on next run loop, otherwise onVideoLoadStart is nil
+    if(self.onVideoLoadStart) {
+      id uri = [source objectForKey:@"uri"];
+      id type = [source objectForKey:@"type"];
+      self.onVideoLoadStart(@{@"src": @{
+                                        @"uri": uri ? uri : [NSNull null],
+                                        @"type": type ? type : [NSNull null],
+                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                        @"target": self.reactTag
+                                        });
+    }
+
   });
   _videoLoadStarted = YES;
 }
