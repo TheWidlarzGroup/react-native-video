@@ -2,9 +2,14 @@ package com.brentvatne.exoplayer;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
+import com.google.android.exoplayer2.upstream.cache.CacheUtil;
+import com.google.android.exoplayer2.upstream.cache.CacheUtil.CachingCounters;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.offline.DownloadAction;
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloadService;
@@ -12,6 +17,8 @@ import com.google.android.exoplayer2.offline.Downloader;
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
 import com.google.android.exoplayer2.offline.ProgressiveDownloadAction;
 import com.google.android.exoplayer2.offline.ProgressiveDownloader;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -31,14 +38,44 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
     }
     
     @Override
-  public String getName() {
-    return "ExoPlayerCache";
-  }
+    public String getName() {
+        return "ExoPlayerCache";
+    }
 
     @ReactMethod
-    public void preloadVideo(String url) {
-        DownloadAction downloadAction = new ProgressiveDownloadAction(Uri.parse(url), false, null, null);
-        DownloadService.startWithAction(getReactApplicationContext(), CacheDownloadService.class, downloadAction, true);
+    public void preloadVideo(final String url) {
+        Log.d(getName(), "preloadVideo");
+
+        Thread cacheThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(getName(), "Caching...");
+                Log.d(getName(), url);
+                final Uri uri = Uri.parse(url);
+                final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null);
+                final SimpleCache downloadCache = ExoPlayerCache.getInstance(getReactApplicationContext());
+                
+                try {
+                    CacheUtil.cache(
+                        dataSpec, 
+                        downloadCache,
+                        new CacheDataSourceFactory(downloadCache, DataSourceUtil.getDefaultDataSourceFactory(
+                            getReactApplicationContext(),
+                            null,
+                            null
+                        )).createDataSource(),
+                        null,
+                        null
+                    );
+
+                    Log.d(getName(), "Cache succeeded");
+                } catch (Exception e) {
+                    Log.d(getName(), "Cache error");
+                    e.printStackTrace();
+                }
+            }
+        }, "cache_thread");
+        cacheThread.start();
     }
 
     public static SimpleCache getInstance(Context context) {
