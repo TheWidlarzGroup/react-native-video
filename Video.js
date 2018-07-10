@@ -1,6 +1,16 @@
-import React, {Component} from 'react';
+import React, {
+  Component
+} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform} from 'react-native';
+import {
+  StyleSheet,
+  requireNativeComponent,
+  NativeModules,
+  View,
+  ViewPropTypes,
+  Image,
+  Platform
+} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import VideoResizeMode from './VideoResizeMode.js';
@@ -11,7 +21,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType };
+const {
+  ExoPlayerCache
+} = NativeModules;
+
+export {
+  TextTrackType,
+  ExoPlayerCache,
+};
 
 export default class Video extends Component {
 
@@ -26,17 +43,17 @@ export default class Video extends Component {
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
-  
+
   toTypeString(x) {
     switch (typeof x) {
       case "object":
-        return x instanceof Date 
-          ? x.toISOString() 
-          : JSON.stringify(x); // object, null
+        return x instanceof Date ?
+          x.toISOString() :
+          JSON.stringify(x); // object, null
       case "undefined":
         return "";
       default: // boolean, number, string
-        return x.toString();      
+        return x.toString();
     }
   }
 
@@ -59,16 +76,22 @@ export default class Video extends Component {
         }
       });
     } else {
-      this.setNativeProps({ seek: time });
+      this.setNativeProps({
+        seek: time
+      });
     }
   };
 
   presentFullscreenPlayer = () => {
-    this.setNativeProps({ fullscreen: true });
+    this.setNativeProps({
+      fullscreen: true
+    });
   };
 
   dismissFullscreenPlayer = () => {
-    this.setNativeProps({ fullscreen: false });
+    this.setNativeProps({
+      fullscreen: false
+    });
   };
 
   _assignRoot = (component) => {
@@ -101,7 +124,9 @@ export default class Video extends Component {
 
   _onSeek = (event) => {
     if (this.state.showPoster && !this.props.audioOnly) {
-      this.setState({showPoster: false});
+      this.setState({
+        showPoster: false
+      });
     }
 
     if (this.props.onSeek) {
@@ -165,7 +190,9 @@ export default class Video extends Component {
 
   _onPlaybackRateChange = (event) => {
     if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
-      this.setState({showPoster: false});
+      this.setState({
+        showPoster: false
+      });
     }
 
     if (this.props.onPlaybackRateChange) {
@@ -257,24 +284,34 @@ export default class Video extends Component {
         resizeMode: this.props.posterResizeMode || 'contain'
       };
 
-      return (
-        <View style={nativeProps.style}>
-          <RCTVideo
-            ref={this._assignRoot}
-            {...nativeProps}
-          />
-          <Image
-            style={posterStyle}
-            source={{uri: this.props.poster}}
-          />
-        </View>
+      return ( <
+        View style = {
+          nativeProps.style
+        } >
+        <
+        RCTVideo ref = {
+          this._assignRoot
+        } { ...nativeProps
+        }
+        /> <
+        Image style = {
+          posterStyle
+        }
+        source = {
+          {
+            uri: this.props.poster
+          }
+        }
+        /> <
+        /View>
       );
     }
 
-    return (
-      <RCTVideo
-        ref={this._assignRoot}
-        {...nativeProps}
+    return ( <
+      RCTVideo ref = {
+        this._assignRoot
+      } { ...nativeProps
+      }
       />
     );
   }

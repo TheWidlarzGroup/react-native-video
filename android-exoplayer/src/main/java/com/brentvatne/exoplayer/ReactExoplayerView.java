@@ -99,14 +99,6 @@ class ReactExoplayerView extends FrameLayout implements
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
-//    private static final String DOWNLOAD_ACTION_FILE = "actions";
-//    private static final DownloadAction.Deserializer[] DOWNLOAD_DESERIALIZERS =
-//            new DownloadAction.Deserializer[] {
-//                    DashDownloadAction.DESERIALIZER,
-//                    HlsDownloadAction.DESERIALIZER,
-//                    SsDownloadAction.DESERIALIZER,
-//                    ProgressiveDownloadAction.DESERIALIZER
-//            };
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -119,12 +111,10 @@ class ReactExoplayerView extends FrameLayout implements
     private ExoPlayerView exoPlayerView;
 
     private SimpleCache downloadCache;
-//    private DownloadManager downloadManager;
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private MappingTrackSelector trackSelector;
     private boolean playerNeedsSource;
-//    protected String userAgent;
 
     private int resumeWindow;
     private long resumePosition;
@@ -182,7 +172,6 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-//        userAgent = Util.getUserAgent(context, "ReactExoPlayer");
 
         initializePlayer();
     }
@@ -199,17 +188,6 @@ class ReactExoplayerView extends FrameLayout implements
         mediaDataSourceFactory = buildDataSourceFactory(true);
         downloadCache = ExoPlayerCache.getInstance(getContext());
 
-//        DownloaderConstructorHelper downloaderConstructorHelper =
-//                new DownloaderConstructorHelper(
-//                        downloadCache, buildHttpDataSourceFactory(/* listener= */ null));
-//        downloadManager =
-//                new DownloadManager(
-//                        downloaderConstructorHelper,
-//                        4,
-//                        DownloadManager.DEFAULT_MIN_RETRY_COUNT,
-//                        new File(getContext().getCacheDir(), DOWNLOAD_ACTION_FILE),
-//                        DOWNLOAD_DESERIALIZERS);
-
         mainHandler = new Handler();
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
@@ -223,12 +201,6 @@ class ReactExoplayerView extends FrameLayout implements
 
         addView(exoPlayerView, 0, layoutParams);
     }
-
-//    /** Returns a {@link HttpDataSource.Factory}. */
-//    public HttpDataSource.Factory buildHttpDataSourceFactory(
-//            TransferListener<? super DataSource> listener) {
-//        return new DefaultHttpDataSourceFactory(userAgent, listener);
-//    }
 
     @Override
     protected void onAttachedToWindow() {
@@ -308,9 +280,6 @@ class ReactExoplayerView extends FrameLayout implements
             }
             player.prepare(mediaSource, !haveResumePosition, false);
             playerNeedsSource = false;
-
-            DownloadAction downloadAction = new ProgressiveDownloadAction(srcUri, false, null, null);
-            DownloadService.startWithAction(getContext(), CacheDownloadService.class, downloadAction, true);
 
             eventEmitter.loadStart();
             loadVideoStarted = true;
