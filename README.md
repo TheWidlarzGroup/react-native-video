@@ -282,8 +282,8 @@ Platforms: all
 
 #### paused
 Controls whether the media is paused
-* **false (default)** - Pause the media
-* **true** - Don't pause the media
+* **false (default)** - Don't pause the media
+* **true** - Pause the media
 
 Platforms: all
 
