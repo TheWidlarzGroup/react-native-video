@@ -358,10 +358,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         if (mPaused) {
             if (mMediaPlayer.isPlaying()) {
                 pause();
+                setPreventScreenFromDimmingFlag(false);
             }
         } else {
             if (!mMediaPlayer.isPlaying()) {
                 start();
+                setPreventScreenFromDimmingFlag(true);
                 // Setting the rate unpauses, so we have to wait for an unpause
                 if (mRate != mActiveRate) { 
                     setRateModifier(mRate);
@@ -455,6 +457,42 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setControls(boolean controls) {
         this.mUseNativeControls = controls;
+    }
+
+    public boolean isPreventScreenFromDimmingFlagOn() {
+        int flags = mThemedReactContext.getCurrentActivity().getWindow().getAttributes().flags;
+
+        if ((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void setPreventScreenFromDimmingFlag(final boolean state) {
+        if (!mMediaPlayerValid && mThemedReactContext == null) {
+            return;
+        }
+
+        final boolean isFlagOn = isPreventScreenFromDimmingFlagOn();
+
+        if (state && !isFlagOn) {
+            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mThemedReactContext.getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+        }
+        
+        if (!state && isFlagOn) {
+            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mThemedReactContext.getCurrentActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+        }
     }
 
 
@@ -592,14 +630,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
         
-        if (mThemedReactContext != null) {
-            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mThemedReactContext.getCurrentActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                }
-            });
-        }   
+        setPreventScreenFromDimmingFlag(false);
     }
 
     @Override
@@ -607,14 +638,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         super.onAttachedToWindow();
 
-        if (mThemedReactContext != null) {
-            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mThemedReactContext.getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                }
-            });
-        }
+        setPreventScreenFromDimmingFlag(true);
 
         if(mMainVer>0) {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders, mMainVer, mPatchVer);
