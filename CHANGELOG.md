@@ -1,5 +1,8 @@
 ## Changelog
 
+### Next Version
+* Support sidecar text tracks on iOS [#1109](https://github.com/react-native-community/react-native-video/pull/1109)
+
 ### Version 3.0
 * Inherit Android buildtools and SDK version from the root project [#1081](https://github.com/react-native-community/react-native-video/pull/1081)
 * Automatically play on ExoPlayer when the paused prop is not set [#1083](https://github.com/react-native-community/react-native-video/pull/1083)
