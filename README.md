@@ -402,7 +402,7 @@ Property | Description
 --- | ---
 title | Descriptive name for the track
 language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
-type | Mime type of the track<br> * TextTrackType.SRT - .srt SubRip Subtitle<br> * TextTrackType.TTML - .ttml TTML<br> * TextTrackType.VTT - .vtt WebVTT
+type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>Android supports all 3 types, iOS only supports VTT
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
 
 Example:
@@ -413,21 +413,21 @@ textTracks={[
   {
     title: "English CC",
     language: "en",
-    type: "text/vtt", TextTrackType.VTT,
+    type: TextTrackType.VTT, // "text/vtt"
     uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt"
   },
   {
     title: "Spanish Subtitles",
     language: "es",
-    type: "application/x-subrip", TextTrackType.SRT,
+    type: TextTrackType.SRT, // "application/x-subrip"
     uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
   }
 ]}
 ```
 
-This isn't support on iOS because AVPlayer doesn't support it. Text tracks must be loaded as part of an HLS playlist.
+On iOS, sidecar text tracks are not supported for HLS playlists. For HLS playlists, you should include the text tracks as part of the playlist.
 
-Platforms: Android ExoPlayer
+Platforms: Android ExoPlayer, iOS
 
 #### useTextureView
 Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
