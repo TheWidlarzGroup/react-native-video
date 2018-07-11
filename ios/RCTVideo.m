@@ -3,6 +3,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
+#import "RCTVideoCache.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -344,7 +345,12 @@ static NSString *const timedMetadata = @"timedMetadata";
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
     
-    asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    RCTVideoCache *sharedCache = [RCTVideoCache sharedCache];
+    if ([sharedCache.videoCache objectForKey:uri]) {
+      asset = sharedCache.videoCache[uri];
+    } else {
+      asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    }
     [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
     return [AVPlayerItem playerItemWithAsset:asset];
   }
