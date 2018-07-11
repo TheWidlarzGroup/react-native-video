@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -68,6 +69,7 @@ import java.lang.Math;
 import java.util.Map;
 import java.lang.Object;
 import java.util.ArrayList;
+import java.util.Locale;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -737,10 +739,11 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         int trackIndex = C.INDEX_UNSET;
+        trackSelector.setSelectionOverride(index, groups, null);
+
         if (TextUtils.isEmpty(type)) {
             // Do nothing
         } else if (type.equals("disabled")) {
-            trackSelector.setSelectionOverride(index, groups, null);
             return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
@@ -760,9 +763,25 @@ class ReactExoplayerView extends FrameLayout implements
             }
         } else if (type.equals("index")) {
             trackIndex = value.asInt();
-        } else { // default. invalid type or "system"
-            trackSelector.clearSelectionOverrides(index);
-            return;
+        } else { // default. Use system settings if possible
+            int sdk = android.os.Build.VERSION.SDK_INT;
+            if (sdk>18 && groups.length>0) {
+                CaptioningManager captioningManager = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+                if (captioningManager.isEnabled()) {
+                    // default is to take the first object
+                    trackIndex = 0;
+
+                    String locale = Locale.getDefault().getDisplayLanguage();
+                    for (int i = 0; i < groups.length; ++i) {
+                        Format format = groups.get(i).getFormat(0);
+                        if (format.language != null && format.language.equals(locale)) {
+                            trackIndex = i;
+                            break;
+                        }
+                    }
+                }
+            } else return;
+
         }
 
         if (trackIndex == C.INDEX_UNSET) {
