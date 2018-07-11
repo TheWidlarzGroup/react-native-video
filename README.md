@@ -402,8 +402,10 @@ Property | Description
 --- | ---
 title | Descriptive name for the track
 language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
-type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>Android supports all 3 types, iOS only supports VTT
+type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>iOS only supports VTT, Android ExoPlayer supports all 3
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
+
+On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
 Example:
 ```
@@ -425,7 +427,6 @@ textTracks={[
 ]}
 ```
 
-On iOS, sidecar text tracks are not supported for HLS playlists. For HLS playlists, you should include the text tracks as part of the playlist.
 
 Platforms: Android ExoPlayer, iOS
 
