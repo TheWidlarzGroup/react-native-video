@@ -120,6 +120,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean useTextureView = false;
+    private boolean doNotDetach = false;
     private Map<String, String> requestHeaders;
     // \ End props
 
@@ -193,7 +194,9 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        stopPlayback();
+        if(!doNotDetach) {
+          stopPlayback();
+        }
     }
 
     // LifecycleEventListener implementation
@@ -842,6 +845,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableFocus(boolean disableFocus) {
         this.disableFocus = disableFocus;
+    }
+
+    public void setDoNotDetach(boolean doNotDetach) {
+        this.doNotDetach = doNotDetach;
     }
 
     public void setFullscreen(boolean fullscreen) {
