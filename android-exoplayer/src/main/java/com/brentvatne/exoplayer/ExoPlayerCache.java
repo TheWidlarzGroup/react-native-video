@@ -7,18 +7,8 @@ import android.util.Log;
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.upstream.cache.CacheUtil;
-import com.google.android.exoplayer2.upstream.cache.CacheUtil.CachingCounters;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.offline.DownloadAction;
-import com.google.android.exoplayer2.offline.DownloadManager;
-import com.google.android.exoplayer2.offline.DownloadService;
-import com.google.android.exoplayer2.offline.Downloader;
-import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
-import com.google.android.exoplayer2.offline.ProgressiveDownloadAction;
-import com.google.android.exoplayer2.offline.ProgressiveDownloader;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
