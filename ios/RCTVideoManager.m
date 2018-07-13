@@ -46,6 +46,7 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoAudioBecomingNoisy, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillPresent, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidPresent, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillDismiss, RCTBubblingEventBlock);

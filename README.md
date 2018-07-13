@@ -239,6 +239,7 @@ var styles = StyleSheet.create({
 * [volume](#volume)
 
 ### Event props
+* [onAudioBecomingNoisy](#onaudiobecomingnoisy)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
@@ -451,6 +452,13 @@ Adjust the volume.
 Platforms: all
 
 ### Event props
+
+#### onAudioBecomingNoisy
+Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker. It's a good idea to pause the media when this happens so the speaker doesn't start blasting sound.
+
+Payload: none
+
+Platforms: Android ExoPlayer, iOS
 
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.

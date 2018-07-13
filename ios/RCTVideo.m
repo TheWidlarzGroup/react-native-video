@@ -91,6 +91,11 @@ static NSString *const timedMetadata = @"timedMetadata";
                                              selector:@selector(applicationWillEnterForeground:)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioRouteChanged:)
+                                                 name:AVAudioSessionRouteChangeNotification
+                                               object:nil];
   }
 
   return self;
@@ -188,6 +193,17 @@ static NSString *const timedMetadata = @"timedMetadata";
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
+}
+
+#pragma mark - Audio events
+
+- (void)audioRouteChanged:(NSNotification *)notification
+{
+    NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
+    NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
+    if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+        self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
+    }
 }
 
 #pragma mark - Progress
