@@ -1,41 +1,48 @@
 {
-  "name": "react-native-video",
-  "version": "2.0.0",
-  "description": "A <Video /> element for react-native",
-  "main": "Video.js",
-  "license": "MIT",
-  "author":
-    "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
-  "contributors": [
-    {
-      "name": "Isaiah Grey",
-      "email": "isaiahgrey@gmail.com"
+    "name": "react-native-video",
+    "version": "3.1.0",
+    "description": "A <Video /> element for react-native",
+    "main": "Video.js",
+    "license": "MIT",
+    "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
+    "contributors": [
+        {
+            "name": "Isaiah Grey",
+            "email": "isaiahgrey@gmail.com"
+        },
+        {
+            "name": "Johannes Lumpe",
+            "email": "johannes@lum.pe"
+        },
+        {
+            "name": "Baris Sencan",
+            "email": "baris.sncn@gmail.com"
+        },
+        {
+            "name": "Hampton Maxwell",
+            "email": "me@hamptonmaxwell.com"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:brentvatne/react-native-video.git"
     },
-    {
-      "name": "Johannes Lumpe",
-      "email": "johannes@lum.pe"
+    "devDependencies": {
+        "eslint": "1.10.3",
+        "babel-eslint": "5.0.0-beta8",
+        "eslint-plugin-react": "3.16.1",
+        "eslint-config-airbnb": "4.0.0"
     },
-    {
-      "name": "Baris Sencan",
-      "email": "baris.sncn@gmail.com"
+    "dependencies": {
+        "keymirror": "0.1.1",
+        "prop-types": "^15.5.10"
+    },
+    "scripts": {
+        "test": "node_modules/.bin/eslint *.js"
+    },
+    "rnpm": {
+        "android": {
+            "sourceDir": "./android-exoplayer"
+        }
     }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:brentvatne/react-native-video.git"
-  },
-  "devDependencies": {
-    "babel-eslint": "^8.2.2",
-    "eslint": "^4.18.1",
-    "eslint-config-airbnb": "^16.1.0",
-    "eslint-plugin-react": "^7.7.0",
-    "jest-cli": "^22.4.2"
-  },
-  "dependencies": {
-    "keymirror": "0.1.1",
-    "prop-types": "^15.5.10"
-  },
-  "scripts": {
-    "test": "node_modules/.bin/eslint *.js"
-  }
 }
