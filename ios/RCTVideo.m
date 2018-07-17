@@ -348,38 +348,39 @@ static NSString *const timedMetadata = @"timedMetadata";
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     
     // perform on next run loop, otherwise other passed react-props may not be set
-    _playerItem = [self playerItemForSource:source];
-    [self addPlayerItemObservers];
-    
-    [_player pause];
-    [_playerViewController.view removeFromSuperview];
-    _playerViewController = nil;
-    
-    if (_playbackRateObserverRegistered) {
-      [_player removeObserver:self forKeyPath:playbackRate context:nil];
-      _playbackRateObserverRegistered = NO;
-    }
-    
-    _player = [AVPlayer playerWithPlayerItem:_playerItem];
-    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    
-    [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-    _playbackRateObserverRegistered = YES;
-    
-    [self addPlayerTimeObserver];
-
-    //Perform on next run loop, otherwise onVideoLoadStart is nil
-    if(self.onVideoLoadStart) {
-      id uri = [source objectForKey:@"uri"];
-      id type = [source objectForKey:@"type"];
-      self.onVideoLoadStart(@{@"src": @{
-                                  @"uri": uri ? uri : [NSNull null],
-                                  @"type": type ? type : [NSNull null],
-                                  @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                              @"target": self.reactTag
-                              });
-    }
-
+    [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
+        _playerItem = playerItem;
+      [self addPlayerItemObservers];
+      
+      [_player pause];
+      [_playerViewController.view removeFromSuperview];
+      _playerViewController = nil;
+        
+      if (_playbackRateObserverRegistered) {
+        [_player removeObserver:self forKeyPath:playbackRate context:nil];
+        _playbackRateObserverRegistered = NO;
+      }
+        
+      _player = [AVPlayer playerWithPlayerItem:_playerItem];
+      _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+        
+      [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+      _playbackRateObserverRegistered = YES;
+        
+      [self addPlayerTimeObserver];
+        
+      //Perform on next run loop, otherwise onVideoLoadStart is nil
+      if(self.onVideoLoadStart) {
+        id uri = [source objectForKey:@"uri"];
+        id type = [source objectForKey:@"type"];
+        self.onVideoLoadStart(@{@"src": @{
+                                        @"uri": uri ? uri : [NSNull null],
+                                        @"type": type ? type : [NSNull null],
+                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                    @"target": self.reactTag
+                                });
+      }
+    }];
   });
   _videoLoadStarted = YES;
 }
@@ -401,7 +402,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   return nil;
 }
 
-- (void)playerItemPrepareText:(AVAsset *)asset withCallback:(void(^)(AVPlayerItem *))handler
+- (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSMutableDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
   if (!_textTracks) {
     handler([AVPlayerItem playerItemWithAsset:asset]);
@@ -455,28 +456,30 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSURL *url = (isNetwork || isAsset) ?
   [NSURL URLWithString:uri] :
   [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
   if (isNetwork) {
     [_videoCache getItemForUri:uri withCallback:^(AVAsset * _Nullable asset) {
       if (asset) {
-        [self playerItemPrepareText:asset withCallback:handler];
+        [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
         return;
       }
       NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-      DVURLAsset * dvAsset = [[DVURLAsset alloc] initWithURL:url options:@{AVURLAssetHTTPCookiesKey : cookies} networkTimeout: 10000];
+      [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
+      DVURLAsset * dvAsset = [[DVURLAsset alloc] initWithURL:url options:assetOptions networkTimeout: 10000];
       dvAsset.loaderDelegate = self;
-      [self playerItemPrepareText:dvAsset withCallback:handler];
+      [self playerItemPrepareText:dvAsset assetOptions:assetOptions withCallback:handler];
     }];
     return;
   }
   else if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    [self playerItemPrepareText:asset withCallback:handler];
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
     return;
   }
 
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
-  [self playerItemPrepareText:asset withCallback:handler];
+  [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -1067,6 +1070,18 @@ static NSString *const timedMetadata = @"timedMetadata";
     _playerLayerObserverSet = NO;
   }
   _playerLayer = nil;
+}
+
+#pragma mark - DVAssetLoaderDelegate
+
+- (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
+                  didLoadData:(NSData *)data
+                       forURL:(NSURL *)url {
+    [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
+#ifdef DEBUG
+        NSLog(@"data stored succesfully 🎉");
+#endif
+    }];
 }
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate

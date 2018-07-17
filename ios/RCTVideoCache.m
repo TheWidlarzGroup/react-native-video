@@ -36,7 +36,7 @@
 #endif
     [self createTemporaryPath];
     self.videoCache = [[SPTPersistentCache alloc] initWithOptions:options];
-    [self.videoCache scheduleGarbageCollection];
+    [self.videoCache scheduleGarbageCollector];
   }
   return self;
 }

@@ -7,13 +7,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "16.2.0",
-    "react-native-video": "file:../../react-native-video-2.0.0.tgz",
-    "react-native": "0.53.3"
+    "react": "16.4.1",
+    "react-native": "0.56.0",
+    "react-native-video": "file:../.."
   },
   "devDependencies": {
     "babel-jest": "22.4.1",
-    "babel-preset-react-native": "4.0.0",
+    "babel-preset-react-native": "5.0.2",
     "express": "^4.16.2",
     "jest": "22.4.2",
     "react-test-renderer": "16.2.0"
