@@ -318,38 +318,11 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void) didSetPlayerItemWithSource:(NSDictionary *)source playerItem:(AVPlayerItem *) playerItem
 {
-  _playerItem = playerItem;
-  [self addPlayerItemObservers];
-  
-  [_player pause];
-  [self removePlayerLayer];
-  [_playerViewController.view removeFromSuperview];
-  _playerViewController = nil;
-  
-  if (_playbackRateObserverRegistered) {
-    [_player removeObserver:self forKeyPath:playbackRate context:nil];
-    _playbackRateObserverRegistered = NO;
-  }
-  
-  _player = [AVPlayer playerWithPlayerItem:_playerItem];
-  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-  
-  [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-  _playbackRateObserverRegistered = YES;
-  
-  const Float64 progressUpdateIntervalMS = _progressUpdateInterval / 1000;
-  // @see endScrubbing in AVPlayerDemoPlaybackViewController.m of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
-  __weak RCTVideo *weakSelf = self;
-  _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
-                                                        queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
-                   ];
-  
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
-        _playerItem = playerItem;
+      _playerItem = playerItem;
       [self addPlayerItemObservers];
       
       [_player pause];
