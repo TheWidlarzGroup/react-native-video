@@ -113,6 +113,9 @@ class ReactExoplayerView extends FrameLayout implements
     private Uri srcUri;
     private String extension;
     private boolean repeat;
+    private String audioTrackType;
+    private Dynamic audioTrackValue;
+    private ReadableArray audioTracks;
     private String textTrackType;
     private Dynamic textTrackValue;
     private ReadableArray textTracks;
@@ -501,20 +504,43 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
+            setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getTextTrackInfo());
+                    getAudioTrackInfo(), getTextTrackInfo());
         }
+    }
+
+    private WritableArray getAudioTrackInfo() {
+        WritableArray audioTracks = Arguments.createArray();
+
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
+        if (info == null || index == C.INDEX_UNSET) {
+            return audioTracks;
+        }
+
+        TrackGroupArray groups = info.getTrackGroups(index);
+        for (int i = 0; i < groups.length; ++i) {
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            audioTracks.pushMap(textTrack);
+        }
+        return audioTracks;
     }
 
     private WritableArray getTextTrackInfo() {
         WritableArray textTracks = Arguments.createArray();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        int index = getTextTrackRendererIndex();
+        int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
         if (info == null || index == C.INDEX_UNSET) {
             return textTracks;
         }
@@ -647,10 +673,10 @@ class ReactExoplayerView extends FrameLayout implements
         return false;
     }
 
-    public int getTextTrackRendererIndex() {
+    public int getTrackRendererIndex(int trackType) {
         int rendererCount = player.getRendererCount();
         for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
-            if (player.getRendererType(rendererIndex) == C.TRACK_TYPE_TEXT) {
+            if (player.getRendererType(rendererIndex) == trackType) {
                 return rendererIndex;
             }
         }
@@ -724,12 +750,9 @@ class ReactExoplayerView extends FrameLayout implements
         this.repeat = repeat;
     }
 
-    public void setSelectedTextTrack(String type, Dynamic value) {
-        textTrackType = type;
-        textTrackValue = value;
-
-        int index = getTextTrackRendererIndex();
-        if (index == C.INDEX_UNSET) {
+    public void setSelectedTrack(int trackType, String type, Dynamic value) {
+        int rendererIndex = getTrackRendererIndex(trackType);
+        if (rendererIndex == C.INDEX_UNSET) {
             return;
         }
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
@@ -737,13 +760,15 @@ class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
-        TrackGroupArray groups = info.getTrackGroups(index);
+        TrackGroupArray groups = info.getTrackGroups(rendererIndex);
         int trackIndex = C.INDEX_UNSET;
-        trackSelector.setSelectionOverride(index, groups, null);
 
         if (TextUtils.isEmpty(type)) {
-            // Do nothing
-        } else if (type.equals("disabled")) {
+            type = "default";
+        }
+
+        if (type.equals("disabled")) {
+            trackSelector.setSelectionOverride(rendererIndex, groups, null);
             return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
@@ -762,26 +787,25 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if (type.equals("index")) {
-            trackIndex = value.asInt();
-        } else { // default. Use system settings if possible
-            int sdk = android.os.Build.VERSION.SDK_INT;
-            if (sdk>18 && groups.length>0) {
-                CaptioningManager captioningManager = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-                if (captioningManager.isEnabled()) {
-                    // default is to take the first object
-                    trackIndex = 0;
-
-                    String locale = Locale.getDefault().getDisplayLanguage();
-                    for (int i = 0; i < groups.length; ++i) {
-                        Format format = groups.get(i).getFormat(0);
-                        if (format.language != null && format.language.equals(locale)) {
-                            trackIndex = i;
-                            break;
-                        }
+            if (value.asInt() < groups.length) {
+                trackIndex = value.asInt();
+            }
+        } else { // default
+            if (rendererIndex == C.TRACK_TYPE_TEXT) { // Use system settings if possible
+                int sdk = android.os.Build.VERSION.SDK_INT;
+                if (sdk > 18 && groups.length > 0) {
+                    CaptioningManager captioningManager
+                            = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+                    if (captioningManager != null && captioningManager.isEnabled()) {
+                        trackIndex = getTrackIndexForDefaultLocale(groups);
                     }
+                } else {
+                    trackSelector.setSelectionOverride(rendererIndex, groups, null);
+                    return;
                 }
-            } else return;
-
+            } else if (rendererIndex == C.TRACK_TYPE_AUDIO) {
+                trackIndex = getTrackIndexForDefaultLocale(groups);
+            }
         }
 
         if (trackIndex == C.INDEX_UNSET) {
@@ -791,8 +815,35 @@ class ReactExoplayerView extends FrameLayout implements
 
         MappingTrackSelector.SelectionOverride override
                 = new MappingTrackSelector.SelectionOverride(
-                        new FixedTrackSelection.Factory(), trackIndex, 0);
-        trackSelector.setSelectionOverride(index, groups, override);
+                new FixedTrackSelection.Factory(), trackIndex, 0);
+        trackSelector.setSelectionOverride(rendererIndex, groups, override);
+    }
+
+    private int getTrackIndexForDefaultLocale(TrackGroupArray groups) {
+        int trackIndex = 0; // default if no match
+        String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
+        String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
+        for (int i = 0; i < groups.length; ++i) {
+            Format format = groups.get(i).getFormat(0);
+            String language = format.language;
+            if (language != null && (language.equals(locale2) || language.equals(locale3))) {
+                trackIndex = i;
+                break;
+            }
+        }
+        return trackIndex;
+    }
+
+    public void setSelectedAudioTrack(String type, Dynamic value) {
+        audioTrackType = type;
+        audioTrackValue = value;
+        setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
+    }
+
+    public void setSelectedTextTrack(String type, Dynamic value) {
+        textTrackType = type;
+        textTrackValue = value;
+        setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
     }
 
     public void setPausedModifier(boolean paused) {
