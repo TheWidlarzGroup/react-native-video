@@ -191,20 +191,7 @@ using System.Collections.Generic;
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
-       onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
-       onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
-       onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
-       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        style={styles.backgroundVideo} />
-
-// Later to trigger fullscreen
-this.player.presentFullscreenPlayer()
-
-// Disable fullscreen
-this.player.dismissFullscreenPlayer()
-
-// To set video position in seconds (seek)
-this.player.seek(0)
 
 // Later on in your styles..
 var styles = StyleSheet.create({
@@ -240,12 +227,18 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
+* [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
+* [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
+* [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
+* [dismissFullscreenPlayer](#dismissfullscreenplayer)
+* [presentFullscreenPlayer](#presentfullscreenplayer)
 * [seek](#seek)
 
 ### Configurable props
@@ -460,6 +453,34 @@ Payload: none
 
 Platforms: Android ExoPlayer, iOS
 
+#### onFullscreenPlayerWillPresent
+Callback function that is called when the player is about to enter fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerDidPresent
+Callback function that is called when the player has entered fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerWillDismiss
+Callback function that is called when the player is about to exit fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerDidDismiss
+Callback function that is called when the player has exited fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
 
@@ -568,6 +589,34 @@ return (
     ref => (this.player = ref) />
 );
 ```
+
+#### dismissFullscreenPlayer
+`dismissFullscreenPlayer()`
+
+Take the player out of fullscreen mode.
+
+Example:
+```
+this.player.dismissFullscreenPlayer();
+```
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### FullscreenPlayer
+`presentFullscreenPlayer()`
+
+Put the player in fullscreen mode.
+
+On iOS, this displays the video in a fullscreen view controller with controls.
+
+On Android ExoPlayer & MediaPlayer, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+
+Example:
+```
+this.player.presentFullscreenPlayer();
+```
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
 #### seek()
 `seek(seconds)`
