@@ -1,5 +1,8 @@
 ## Changelog
 
+### vNEXT
+* Support video cachging for iOS ([#955](https://github.com/react-native-community/react-native-video/pull/955))
+
 ### Version 3.1.0
 * Support sidecar text tracks on iOS [#1109](https://github.com/react-native-community/react-native-video/pull/1109)
 * Support onAudioBecomingNoisy on iOS [#1131](https://github.com/react-native-community/react-native-video/pull/1131)
