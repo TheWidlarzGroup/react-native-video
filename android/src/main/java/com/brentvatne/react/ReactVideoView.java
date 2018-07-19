@@ -1,6 +1,7 @@
 package com.brentvatne.react;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
@@ -9,6 +10,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.Window;
 import android.webkit.CookieManager;
 import android.widget.MediaController;
 
@@ -46,7 +49,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         EVENT_END("onVideoEnd"),
         EVENT_STALLED("onPlaybackStalled"),
         EVENT_RESUME("onPlaybackResume"),
-        EVENT_READY_FOR_DISPLAY("onReadyForDisplay");
+        EVENT_READY_FOR_DISPLAY("onReadyForDisplay"),
+        EVENT_FULLSCREEN_WILL_PRESENT("onVideoFullscreenPlayerWillPresent"),
+        EVENT_FULLSCREEN_DID_PRESENT("onVideoFullscreenPlayerDidPresent"),
+        EVENT_FULLSCREEN_WILL_DISMISS("onVideoFullscreenPlayerWillDismiss"),
+        EVENT_FULLSCREEN_DID_DISMISS("onVideoFullscreenPlayerDidDismiss");
 
         private final String mName;
 
@@ -106,6 +113,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mActiveRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mBackgroundPaused = false;
+    private boolean mIsFullscreen = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -207,6 +215,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         if ( mMediaPlayer != null ) {
             mMediaPlayerValid = false;
             release();
+        }
+        if (mIsFullscreen) {
+            setFullscreen(false);
         }
     }
 
@@ -436,6 +447,39 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             } else {
                 Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android versions below 6.0");
             }
+        }
+    }
+
+    public void setFullscreen(boolean isFullscreen) {
+        if (isFullscreen == mIsFullscreen) {
+            return; // Avoid generating events when nothing is changing
+        }
+        mIsFullscreen = isFullscreen;
+
+        Activity activity = mThemedReactContext.getCurrentActivity();
+        if (activity == null) {
+            return;
+        }
+        Window window = activity.getWindow();
+        View decorView = window.getDecorView();
+        int uiOptions;
+        if (mIsFullscreen) {
+            if (Build.VERSION.SDK_INT >= 19) { // 4.4+
+                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | SYSTEM_UI_FLAG_FULLSCREEN;
+            } else {
+                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | SYSTEM_UI_FLAG_FULLSCREEN;
+            }
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_FULLSCREEN_WILL_PRESENT.toString(), null);
+            decorView.setSystemUiVisibility(uiOptions);
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_FULLSCREEN_DID_PRESENT.toString(), null);
+        } else {
+            uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_FULLSCREEN_WILL_DISMISS.toString(), null);
+            decorView.setSystemUiVisibility(uiOptions);
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_FULLSCREEN_DID_DISMISS.toString(), null);
         }
     }
 
