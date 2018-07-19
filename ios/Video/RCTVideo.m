@@ -1,5 +1,4 @@
 #import <React/RCTConvert.h>
-#import "RCTVideoCache.h"
 #import "RCTVideo.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
@@ -55,7 +54,9 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
+#if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
+#endif
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -78,8 +79,9 @@ static NSString *const timedMetadata = @"timedMetadata";
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+#if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
-    
+#endif
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
                                                  name:UIApplicationWillResignActiveNotification
@@ -432,17 +434,25 @@ static NSString *const timedMetadata = @"timedMetadata";
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
   if (isNetwork) {
-    [_videoCache getItemForUri:uri withCallback:^(AVAsset * _Nullable asset) {
-      if (asset) {
-        [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+    [_videoCache getItemForUri:uri withCallback:^(AVAsset * _Nullable cachedAsset) {
+      if (cachedAsset) {
+        [self playerItemPrepareText:cachedAsset assetOptions:assetOptions withCallback:handler];
         return;
       }
+#endif
       NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
       [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
-      DVURLAsset * dvAsset = [[DVURLAsset alloc] initWithURL:url options:assetOptions networkTimeout: 10000];
-      dvAsset.loaderDelegate = self;
-      [self playerItemPrepareText:dvAsset assetOptions:assetOptions withCallback:handler];
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+      DVURLAsset *asset = [[DVURLAsset alloc] initWithURL:url options:assetOptions networkTimeout: 10000];
+      asset.loaderDelegate = self;
+#else
+      AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+#endif
+      [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+#if __has_include(<react-native-video/RCTVideoCache.h>)
     }];
+#endif
     return;
   }
   else if (isAsset) {
@@ -1045,8 +1055,8 @@ static NSString *const timedMetadata = @"timedMetadata";
   _playerLayer = nil;
 }
 
+#if __has_include(<react-native-video/RCTVideoCache.h>)
 #pragma mark - DVAssetLoaderDelegate
-
 - (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
                   didLoadData:(NSData *)data
                        forURL:(NSURL *)url {
@@ -1056,6 +1066,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 #endif
     }];
 }
+#endif
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
 

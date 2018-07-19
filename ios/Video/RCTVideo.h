@@ -4,12 +4,18 @@
 #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
-#import "RCTVideoCache.h"
+
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+#import <react-native-video/RCTVideoCache.h>
 #import "DVURLAsset.h"
+#endif
 
 @class RCTEventDispatcher;
-
+#if __has_include(<react-native-video/RCTVideoCache.h>)
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
+#else
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
+#endif
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;

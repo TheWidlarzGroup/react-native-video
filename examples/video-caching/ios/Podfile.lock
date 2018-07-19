@@ -1,7 +1,7 @@
 PODS:
   - boost-for-react-native (1.63.0)
   - DoubleConversion (1.1.5)
-  - DVAssetLoaderDelegate (0.3.1)
+  - DVAssetLoaderDelegate (0.3.2)
   - Folly (2016.10.31.00):
     - boost-for-react-native
     - DoubleConversion
@@ -9,10 +9,13 @@ PODS:
   - glog (0.3.4)
   - React (0.56.0):
     - React/Core (= 0.56.0)
-  - react-native-video (3.1.0):
-    - DVAssetLoaderDelegate (= 0.3.1)
+  - react-native-video/Video (3.1.0):
     - React
-    - SPTPersistentCache (= 1.1.0)
+  - react-native-video/VideoCaching (3.1.0):
+    - DVAssetLoaderDelegate (~> 0.3.1)
+    - React
+    - react-native-video/Video
+    - SPTPersistentCache (~> 1.1.0)
   - React/Core (0.56.0):
     - yoga (= 0.56.0.React)
   - React/CxxBridge (0.56.0):
@@ -70,7 +73,7 @@ DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/GLog.podspec`)
-  - react-native-video (from `../node_modules/react-native-video/react-native-video.podspec`)
+  - react-native-video/VideoCaching (from `../node_modules/react-native-video/react-native-video.podspec`)
   - React/Core (from `../node_modules/react-native`)
   - React/CxxBridge (from `../node_modules/react-native`)
   - React/DevSupport (from `../node_modules/react-native`)
@@ -112,14 +115,14 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: a9706f16e388b53ff12cca34473428ee29746a26
-  DVAssetLoaderDelegate: 7d1e43ec1e98660b918a65fc50edf3d73e1f0ea6
+  DVAssetLoaderDelegate: 38a24530292bf77900fdfdf635434f7f9b49486d
   Folly: c89ac2d5c6ab169cd7397ef27485c44f35f742c7
   glog: b3b0330915eccea41c5cc9731a77cf564a9be5ea
   React: 1fe0eb13d90b625d94c3b117c274dcfd2e760e11
-  react-native-video: 87e0a64ccdeca6ff26182a036650cc13e3817e3f
+  react-native-video: 44c6befbc1526283ca1919891fcebe4680feade4
   SPTPersistentCache: df36ea46762d7cf026502bbb86a8b79d0080dff4
   yoga: b1ce48b6cf950b98deae82838f5173ea7cf89e85
 
-PODFILE CHECKSUM: a72d15643ecf681eee8bfdb9918eaa0cba0620f7
+PODFILE CHECKSUM: f4123c35c77493d6ddbcb86898737abdf5e0fac8
 
 COCOAPODS: 1.5.3
