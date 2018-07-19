@@ -284,7 +284,6 @@ export default class Video extends Component {
 Video.propTypes = {
   /* Native only */
   src: PropTypes.object,
-  cache: PropTypes.bool,
   seek: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.object

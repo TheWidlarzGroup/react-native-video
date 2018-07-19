@@ -303,11 +303,6 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 #pragma mark - Player and source
 
-- (void)setCache:(BOOL *)cache
-{
-  
-}
-
 - (void)setSrc:(NSDictionary *)source
 {
   [self removePlayerLayer];
