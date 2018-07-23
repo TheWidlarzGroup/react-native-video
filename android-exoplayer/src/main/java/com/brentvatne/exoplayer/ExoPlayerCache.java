@@ -93,6 +93,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                     );
 
                     // TODO check counters for when download is not complete
+                    Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (start)");
 
                     DataSourceInputStream inputStream = new DataSourceInputStream(createDataSource(downloadCache), dataSpec);
 
@@ -109,6 +110,14 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                         Log.d(getName(), "Read error");
                         e.printStackTrace();
                     }
+
+                    CacheUtil.getCached(
+                        dataSpec, 
+                        downloadCache,
+                        counters
+                    );
+
+                    Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (end)");
 
                     Log.d(getName(), "Export succeeded");
                     Log.d(getName(), targetFile.getPath());
