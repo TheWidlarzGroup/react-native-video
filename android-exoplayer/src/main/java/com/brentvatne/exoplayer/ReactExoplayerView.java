@@ -285,8 +285,6 @@ class ReactExoplayerView extends FrameLayout implements
             case C.TYPE_OTHER:
                 return new ExtractorMediaSource.Factory(new CacheDataSourceFactory(downloadCache, mediaDataSourceFactory))
                         .createMediaSource(uri);
-//                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
-//                        mainHandler, null);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
