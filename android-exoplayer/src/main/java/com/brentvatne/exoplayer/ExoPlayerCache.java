@@ -81,7 +81,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                 Log.d(getName(), "Exporting...");
                 Log.d(getName(), url);
                 final Uri uri = Uri.parse(url);
-                final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null);
+                final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null); // TODO won't work for video's over 100 MB
                 final SimpleCache downloadCache = ExoPlayerCache.getInstance(getReactApplicationContext());
                 CacheUtil.CachingCounters counters = new CacheUtil.CachingCounters();
                 
@@ -92,7 +92,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                         counters
                     );
 
-                    // TODO check counters for when download is not complete
+                    // TODO check counters for when download is not complete // Download can complete during writing
                     Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (start)");
 
                     DataSourceInputStream inputStream = new DataSourceInputStream(createDataSource(downloadCache), dataSpec);
@@ -107,6 +107,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                             outStream.write(buffer, 0, bytesRead);
                         }
                     } catch (IOException e) {
+                        // TODO this exception should not be thrown
                         Log.d(getName(), "Read error");
                         e.printStackTrace();
                     }
@@ -117,6 +118,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                         counters
                     );
 
+                    // TODO are we sure the complete video is downloaded?
                     Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (end)");
 
                     Log.d(getName(), "Export succeeded");
