@@ -180,6 +180,10 @@ using System.Collections.Generic;
 ## Usage
 
 ```javascript
+// Load the module
+
+import Video from 'react-native-video';
+
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
