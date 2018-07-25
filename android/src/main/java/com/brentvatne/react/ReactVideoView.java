@@ -508,7 +508,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             return;
         }
 
-        Activity activity = mThemedReactContext.getCurrentActivity();
+        final Activity activity = mThemedReactContext.getCurrentActivity();
         if (activity == null) {
             return;
         }
