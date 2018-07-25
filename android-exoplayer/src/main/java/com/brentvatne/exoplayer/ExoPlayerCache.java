@@ -40,38 +40,6 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void preloadVideo(final String url) {
-        Log.d(getName(), "preloadVideo");
-
-        Thread cacheThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(getName(), "Caching...");
-                Log.d(getName(), url);
-                final Uri uri = Uri.parse(url);
-                final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null);
-                final SimpleCache downloadCache = ExoPlayerCache.getInstance(getReactApplicationContext());
-                
-                try {
-                    CacheUtil.cache(
-                        dataSpec, 
-                        downloadCache,
-                        createDataSource(downloadCache),
-                        null,
-                        null
-                    );
-
-                    Log.d(getName(), "Cache succeeded");
-                } catch (Exception e) {
-                    Log.d(getName(), "Cache error");
-                    e.printStackTrace();
-                }
-            }
-        }, "cache_thread");
-        cacheThread.start();
-    }
-
-    @ReactMethod
     public void exportVideo(final String url, final Promise promise) {
         Log.d(getName(), "exportVideo");
 
