@@ -508,20 +508,25 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             return;
         }
 
+        Activity activity = mThemedReactContext.getCurrentActivity();
+        if (activity == null) {
+            return;
+        }
+
         if (state) {
-            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+            activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mThemedReactContext.getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
         
         if (!state) {
-            mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+            activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mThemedReactContext.getCurrentActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
