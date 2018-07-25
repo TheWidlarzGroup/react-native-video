@@ -547,7 +547,7 @@ Example:
   },
   audioTracks: [
     { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0 },
-    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 } ],
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
   ],
   textTracks: [
     { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
