@@ -28,6 +28,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
+    private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
+    private static final String PROP_SELECTED_AUDIO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_AUDIO_TRACK_VALUE = "value";
     private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
     private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
@@ -125,6 +128,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
+    }
+
+    @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
+    public void setSelectedAudioTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedAudioTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedAudioTrack != null) {
+            typeString = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_TYPE)
+                    ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
+            value = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_VALUE)
+                    ? selectedAudioTrack.getDynamic(PROP_SELECTED_AUDIO_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedAudioTrack(typeString, value);
     }
 
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)

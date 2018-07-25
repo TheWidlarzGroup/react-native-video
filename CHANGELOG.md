@@ -1,5 +1,13 @@
 ## Changelog
 
+### Next Version
+* Basic fullscreen support for Android MediaPlayer [#1138](https://github.com/react-native-community/react-native-video/pull/1138)
+* Simplify default Android SDK code [#1145](https://github.com/react-native-community/react-native-video/pull/1145) [#1146](https://github.com/react-native-community/react-native-video/pull/1146)
+
+### Version 3.1.0
+* Support sidecar text tracks on iOS [#1109](https://github.com/react-native-community/react-native-video/pull/1109)
+* Support onAudioBecomingNoisy on iOS [#1131](https://github.com/react-native-community/react-native-video/pull/1131)
+
 ### Version 3.0
 * Inherit Android buildtools and SDK version from the root project [#1081](https://github.com/react-native-community/react-native-video/pull/1081)
 * Automatically play on ExoPlayer when the paused prop is not set [#1083](https://github.com/react-native-community/react-native-video/pull/1083)

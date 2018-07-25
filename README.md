@@ -180,6 +180,10 @@ using System.Collections.Generic;
 ## Usage
 
 ```javascript
+// Load the module
+
+import Video from 'react-native-video';
+
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
@@ -191,20 +195,7 @@ using System.Collections.Generic;
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
        onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
-       onFullscreenPlayerWillPresent={this.fullScreenPlayerWillPresent} // Callback before fullscreen starts
-       onFullscreenPlayerDidPresent={this.fullScreenPlayerDidPresent}   // Callback after fullscreen started
-       onFullscreenPlayerWillDismiss={this.fullScreenPlayerWillDismiss} // Callback before fullscreen stops
-       onFullscreenPlayerDidDismiss={this.fullScreenPlayerDidDismiss}  // Callback after fullscreen stopped
        style={styles.backgroundVideo} />
-
-// Later to trigger fullscreen
-this.player.presentFullscreenPlayer()
-
-// Disable fullscreen
-this.player.dismissFullscreenPlayer()
-
-// To set video position in seconds (seek)
-this.player.seek(0)
 
 // Later on in your styles..
 var styles = StyleSheet.create({
@@ -232,6 +223,7 @@ var styles = StyleSheet.create({
 * [rate](#rate)
 * [repeat](#repeat)
 * [resizeMode](#resizemode)
+* [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -239,12 +231,19 @@ var styles = StyleSheet.create({
 * [volume](#volume)
 
 ### Event props
+* [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
+* [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
+* [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
+* [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
+* [dismissFullscreenPlayer](#dismissfullscreenplayer)
+* [presentFullscreenPlayer](#presentfullscreenplayer)
 * [seek](#seek)
 
 ### Configurable props
@@ -355,6 +354,36 @@ Determines how to resize the video when the frame doesn't match the raw video di
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
 
+#### selectedAudioTrack
+Configure which audio track, if any, is played.
+
+```
+selectedAudioTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedAudioTrack={{
+  type: "title",
+  value: "Dubbing"
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Play the audio track that matches the system language. If none match, play the first track.
+"disabled" | N/A | Turn off audio
+"title" | string | Play the audio track with the title specified as the Value, e.g. "French"
+"language" | string | Play the audio track with the language specified as the Value, e.g. "fr"
+"index" | number | Play the audio track with the index specified as the value, e.g. 0
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
+
+Platforms: Android ExoPlayer, iOS
+
 #### selectedTextTrack
 Configure which text track (caption or subtitle), if any, is shown.
 
@@ -402,8 +431,10 @@ Property | Description
 --- | ---
 title | Descriptive name for the track
 language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
-type | Mime type of the track<br> * TextTrackType.SRT - .srt SubRip Subtitle<br> * TextTrackType.TTML - .ttml TTML<br> * TextTrackType.VTT - .vtt WebVTT
+type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>iOS only supports VTT, Android ExoPlayer supports all 3
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
+
+On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
 Example:
 ```
@@ -413,21 +444,20 @@ textTracks={[
   {
     title: "English CC",
     language: "en",
-    type: "text/vtt", TextTrackType.VTT,
+    type: TextTrackType.VTT, // "text/vtt"
     uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt"
   },
   {
     title: "Spanish Subtitles",
     language: "es",
-    type: "application/x-subrip", TextTrackType.SRT,
+    type: TextTrackType.SRT, // "application/x-subrip"
     uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
   }
 ]}
 ```
 
-This isn't support on iOS because AVPlayer doesn't support it. Text tracks must be loaded as part of an HLS playlist.
 
-Platforms: Android ExoPlayer
+Platforms: Android ExoPlayer, iOS
 
 #### useTextureView
 Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
@@ -451,6 +481,41 @@ Platforms: all
 
 ### Event props
 
+#### onAudioBecomingNoisy
+Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker. It's a good idea to pause the media when this happens so the speaker doesn't start blasting sound.
+
+Payload: none
+
+Platforms: Android ExoPlayer, iOS
+
+#### onFullscreenPlayerWillPresent
+Callback function that is called when the player is about to enter fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerDidPresent
+Callback function that is called when the player has entered fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerWillDismiss
+Callback function that is called when the player is about to exit fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onFullscreenPlayerDidDismiss
+Callback function that is called when the player has exited fullscreen mode.
+
+Payload: none
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
 
@@ -461,7 +526,8 @@ Property | Type | Description
 currentPosition | number | Time in seconds where the media will start
 duration | number | Length of the media in seconds
 naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
-textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code<br> * type - Mime type of track
+audioTracks | array | An array of audio track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
 
 Example:
 ```
@@ -479,6 +545,10 @@ Example:
      orientation: 'landscape'
      width: '1920'
   },
+  audioTracks: [
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0 },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 } ],
+  ],
   textTracks: [
     { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
     { title: '#2 English CC', language: 'en', index: 1, type: 'text/vtt' },
@@ -559,6 +629,34 @@ return (
     ref => (this.player = ref) />
 );
 ```
+
+#### dismissFullscreenPlayer
+`dismissFullscreenPlayer()`
+
+Take the player out of fullscreen mode.
+
+Example:
+```
+this.player.dismissFullscreenPlayer();
+```
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### FullscreenPlayer
+`presentFullscreenPlayer()`
+
+Put the player in fullscreen mode.
+
+On iOS, this displays the video in a fullscreen view controller with controls.
+
+On Android ExoPlayer & MediaPlayer, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+
+Example:
+```
+this.player.presentFullscreenPlayer();
+```
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
 #### seek()
 `seek(seconds)`
