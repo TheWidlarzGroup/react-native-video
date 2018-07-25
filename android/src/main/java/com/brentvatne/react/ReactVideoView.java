@@ -503,24 +503,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         this.mUseNativeControls = controls;
     }
 
-    public boolean isPreventScreenFromDimmingFlagOn() {
-        int flags = mThemedReactContext.getCurrentActivity().getWindow().getAttributes().flags;
-
-        if ((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) == 0) {
-            return false;
-        }
-
-        return true;
-    }
-
     public void setPreventScreenFromDimmingFlag(final boolean state) {
-        if (!mMediaPlayerValid && mThemedReactContext == null) {
+        if (!mMediaPlayerValid || mThemedReactContext == null) {
             return;
         }
 
-        final boolean isFlagOn = isPreventScreenFromDimmingFlagOn();
-
-        if (state && !isFlagOn) {
+        if (state) {
             mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -529,7 +517,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             });
         }
         
-        if (!state && isFlagOn) {
+        if (!state) {
             mThemedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
