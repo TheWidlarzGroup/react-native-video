@@ -47,9 +47,9 @@ export default class Video extends Component {
   toTypeString(x) {
     switch (typeof x) {
       case "object":
-        return x instanceof Date ?
-          x.toISOString() :
-          JSON.stringify(x); // object, null
+        return x instanceof Date 
+          ? x.toISOString()
+          : JSON.stringify(x); // object, null
       case "undefined":
         return "";
       default: // boolean, number, string
@@ -284,34 +284,24 @@ export default class Video extends Component {
         resizeMode: this.props.posterResizeMode || 'contain'
       };
 
-      return ( <
-        View style = {
-          nativeProps.style
-        } >
-        <
-        RCTVideo ref = {
-          this._assignRoot
-        } { ...nativeProps
-        }
-        /> <
-        Image style = {
-          posterStyle
-        }
-        source = {
-          {
-            uri: this.props.poster
-          }
-        }
-        /> <
-        /View>
+      return (
+        <View style={nativeProps.style}>
+          <RCTVideo
+            ref={this._assignRoot}
+            {...nativeProps}
+          />
+          <Image
+            style={posterStyle}
+            source={{uri: this.props.poster}}
+          />
+        </View>
       );
     }
 
-    return ( <
-      RCTVideo ref = {
-        this._assignRoot
-      } { ...nativeProps
-      }
+    return (
+      <RCTVideo
+        ref={this._assignRoot}
+        {...nativeProps}
       />
     );
   }
