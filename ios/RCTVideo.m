@@ -13,6 +13,8 @@ static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
 
+static int const RCTVideoUnset = -1;
+
 @implementation RCTVideo
 {
   AVPlayer *_player;
@@ -807,7 +809,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void) setSideloadedText {
   NSString *type = _selectedTextTrack[@"type"];
-  NSArray* textTracks = [self getTextTrackInfo];
+  NSArray *textTracks = [self getTextTrackInfo];
   
   // The first few tracks will be audio & video track
   int firstTextIndex = 0;
@@ -817,7 +819,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     }
   }
   
-  int selectedTrackIndex = -1;
+  int selectedTrackIndex = RCTVideoUnset;
   
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
@@ -846,29 +848,27 @@ static NSString *const timedMetadata = @"timedMetadata";
         selectedTrackIndex = index;
       }
     }
-  }
-  
-  // user's selected language might not be available, or system defaults have captions enabled
-  if (selectedTrackIndex == -1 || [type isEqualToString:@"default"]) {
-      CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
-      NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
-      if ([captionSettings containsObject: AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
-        // iterate through the textTracks to find a matching option, or default to the first object.
-        selectedTrackIndex = 0;
-        
-        NSString * systemLanguage = [[NSLocale preferredLanguages] firstObject];
-        for (int i = 0; i < textTracks.count; ++i) {
-          NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
-          if ([systemLanguage isEqualToString:currentTextTrack[@"language"]]) {
-            selectedTrackIndex = i;
-            break;
-          }
+  } else { // type "system"
+    CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
+    NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
+    if ([captionSettings containsObject:AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
+      selectedTrackIndex = 0; // If we can't find a match, use the first available track
+      NSString *systemLanguage = [[NSLocale preferredLanguages] firstObject];
+      for (int i = 0; i < textTracks.count; ++i) {
+        NSDictionary *currentTextTrack = [textTracks objectAtIndex:i];
+        if ([systemLanguage isEqualToString:currentTextTrack[@"language"]]) {
+          selectedTrackIndex = i;
+          break;
         }
       }
+    }
   }
-  
+    
   for (int i = firstTextIndex; i < _player.currentItem.tracks.count; ++i) {
-    BOOL isEnabled = i == selectedTrackIndex + firstTextIndex;
+    BOOL isEnabled = NO;
+    if (selectedTrackIndex != RCTVideoUnset) {
+      isEnabled = i == selectedTrackIndex + firstTextIndex;
+    }
     [_player.currentItem.tracks[i] setEnabled:isEnabled];
   }
 }
