@@ -206,6 +206,10 @@ using System.Collections.Generic;
 ## Usage
 
 ```javascript
+// Load the module
+
+import Video from 'react-native-video';
+
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
 // on a single screen if you like.
@@ -245,6 +249,7 @@ var styles = StyleSheet.create({
 * [rate](#rate)
 * [repeat](#repeat)
 * [resizeMode](#resizemode)
+* [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -374,6 +379,36 @@ Determines how to resize the video when the frame doesn't match the raw video di
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### selectedAudioTrack
+Configure which audio track, if any, is played.
+
+```
+selectedAudioTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedAudioTrack={{
+  type: "title",
+  value: "Dubbing"
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"system" (default) | N/A | Play the audio track that matches the system language. If none match, play the first track.
+"disabled" | N/A | Turn off audio
+"title" | string | Play the audio track with the title specified as the Value, e.g. "French"
+"language" | string | Play the audio track with the language specified as the Value, e.g. "fr"
+"index" | number | Play the audio track with the index specified as the value, e.g. 0
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
+
+Platforms: Android ExoPlayer, iOS
 
 #### selectedTextTrack
 Configure which text track (caption or subtitle), if any, is shown.
@@ -517,7 +552,8 @@ Property | Type | Description
 currentPosition | number | Time in seconds where the media will start
 duration | number | Length of the media in seconds
 naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
-textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code<br> * type - Mime type of track
+audioTracks | array | An array of audio track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
 
 Example:
 ```
@@ -535,6 +571,10 @@ Example:
      orientation: 'landscape'
      width: '1920'
   },
+  audioTracks: [
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0 },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
+  ],
   textTracks: [
     { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
     { title: '#2 English CC', language: 'en', index: 1, type: 'text/vtt' },

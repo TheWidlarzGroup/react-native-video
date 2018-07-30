@@ -16,7 +16,6 @@ export default class App extends Component<Props> {
     return (
       <View style={styles.container}>
         <Video
-          cache={true}
           source={{
             uri:
               "https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4"
