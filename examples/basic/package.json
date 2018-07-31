@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node_modules/react-native/packager/packager.sh"
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
   },
   "dependencies": {
-    "react": "15.4.2",
-    "react-native": "^0.42.0",
-    "react-native-video": "file:../",
-    "react-native-windows": "^0.40.0"
+    "react": "16.4.1",
+    "react-native": "0.56.0",
+    "react-native-video": "file:../.."
   },
   "devDependencies": {
-    "rnpm-plugin-windows": "~0.2.3"
+    "babel-jest": "22.4.1",
+    "babel-preset-react-native": "5.0.2",
+    "express": "^4.16.2",
+    "jest": "22.4.2",
+    "react-test-renderer": "16.2.0"
   }
 }
