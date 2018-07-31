@@ -31,7 +31,7 @@ yarn add react-native-video
 <details>
   <summary>iOS</summary>
 
-Run `react-native link` to link the react-native-video library.
+Run `react-native link react-native-video` to link the react-native-video library.
 
 If you would like to allow other apps to play music over your video component, add:
 
@@ -53,9 +53,7 @@ Note: you can also use the `ignoreSilentSwitch` prop, shown below.
 <details>
   <summary>tvOS</summary>
   
-Run `react-native link` to link the react-native-video library.
-
-`react-native link` doesn’t work properly with the tvOS target so we need to add the library manually.
+`react-native link-video` doesn’t work properly with the tvOS target so we need to add the library manually.
 
 First select your project in Xcode.
 
@@ -77,7 +75,7 @@ Select RCTVideo-tvOS
 <details>
   <summary>Android</summary>
 
-Run `react-native link` to link the react-native-video library.
+Run `react-native link react-native-video` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
