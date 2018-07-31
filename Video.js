@@ -11,7 +11,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType };
+const {
+  ExoPlayerConfig
+} = NativeModules
+
+const VideoPlayerConfig = Platform.OS === "android" ? ExoPlayerConfig : undefined;
+
+export { TextTrackType, VideoPlayerConfig};
 
 export default class Video extends Component {
 
