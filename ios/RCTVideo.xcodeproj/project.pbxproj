@@ -7,58 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		31CAFB211CADA8CD009BCF6F /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
-		31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
-		49AF269E2048C5CA001DA6AA /* RCTVideoCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 49AF269D2048C5CA001DA6AA /* RCTVideoCache.m */; };
-		49AF269F2048C5CA001DA6AA /* RCTVideoCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 49AF269D2048C5CA001DA6AA /* RCTVideoCache.m */; };
-		49E995722048B4CE00EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
-		49E995752048B4D900EA7890 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */; };
-		49E995962048B7F100EA7890 /* DVAssetLoaderError.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */; };
-		49E995972048B7F100EA7890 /* DVAssetLoaderError.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */; };
-		49E995982048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */; };
-		49E995992048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */; };
-		49E9959A2048B7F100EA7890 /* DVURLAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995922048B7F100EA7890 /* DVURLAsset.m */; };
-		49E9959B2048B7F100EA7890 /* DVURLAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995922048B7F100EA7890 /* DVURLAsset.m */; };
-		49E9959C2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */; };
-		49E9959D2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */; };
-		641E284D1F0EECF100443AF6 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
-		641E284E1F0EECF100443AF6 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */; };
-		641E284F1F0EECF100443AF6 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
-		641E28501F0EECF100443AF6 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */; };
-		BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */; };
-		BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */; };
+		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
+		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
+		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
+		D1107C0D2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
+		D1107C0E2110259000073188 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C062110259000073188 /* RCTVideoManager.m */; };
+		D1107C0F2110259000073188 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C062110259000073188 /* RCTVideoManager.m */; };
+		D1107C102110259000073188 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C082110259000073188 /* RCTVideoPlayerViewController.m */; };
+		D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C082110259000073188 /* RCTVideoPlayerViewController.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		49E9956B2048B4A500EA7890 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0510FF131BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentCache;
-		};
-		49E9956D2048B4A500EA7890 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0510FF1E1BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentCacheTests;
-		};
-		49E9956F2048B4C900EA7890 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentCache;
-		};
-		49E995732048B4D300EA7890 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentCache;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
@@ -83,29 +40,16 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		31CAFB1F1CADA8CD009BCF6F /* UIView+FindUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+FindUIViewController.h"; sourceTree = "<group>"; };
-		31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+FindUIViewController.m"; sourceTree = "<group>"; };
-		31CAFB2D1CADC77F009BCF6F /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
-		31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
-		31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
-		49AF269B2048C5CA001DA6AA /* RCTVideoCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoCache.h; sourceTree = "<group>"; };
-		49AF269D2048C5CA001DA6AA /* RCTVideoCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoCache.m; sourceTree = "<group>"; };
-		49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = Vendor/SPTPersistentCache/SPTPersistentCache.xcodeproj; sourceTree = SOURCE_ROOT; };
-		49E9958C2048B7F100EA7890 /* DVAssetLoaderDelegatesDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderDelegatesDelegate.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegatesDelegate.h; sourceTree = SOURCE_ROOT; };
-		49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderError.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderError.m; sourceTree = SOURCE_ROOT; };
-		49E9958E2048B7F100EA7890 /* DVAssetLoaderError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderError.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderError.h; sourceTree = SOURCE_ROOT; };
-		49E9958F2048B7F100EA7890 /* DVAssetLoaderHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderHelpers.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderHelpers.h; sourceTree = SOURCE_ROOT; };
-		49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderDelegate.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegate.m; sourceTree = SOURCE_ROOT; };
-		49E995912048B7F100EA7890 /* DVURLAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVURLAsset.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVURLAsset.h; sourceTree = SOURCE_ROOT; };
-		49E995922048B7F100EA7890 /* DVURLAsset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVURLAsset.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVURLAsset.m; sourceTree = SOURCE_ROOT; };
-		49E995932048B7F100EA7890 /* DVAssetLoaderDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoaderDelegate.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderDelegate.h; sourceTree = SOURCE_ROOT; };
-		49E995942048B7F100EA7890 /* DVAssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVAssetLoader.h; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoader.h; sourceTree = SOURCE_ROOT; };
-		49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVAssetLoaderHelpers.m; path = Vendor/DVAssetLoaderDelegate/DVAssetLoaderDelegate/Classes/DVAssetLoaderHelpers.m; sourceTree = SOURCE_ROOT; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BBD49E391AC8DEF000610F8E /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
-		BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideo.m; sourceTree = "<group>"; };
-		BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTVideoManager.h; sourceTree = "<group>"; };
-		BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTVideoManager.m; sourceTree = "<group>"; };
+		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
+		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
+		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
+		D1107C042110259000073188 /* UIView+FindUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIView+FindUIViewController.h"; path = "Video/UIView+FindUIViewController.h"; sourceTree = "<group>"; };
+		D1107C052110259000073188 /* RCTVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideo.m; path = Video/RCTVideo.m; sourceTree = "<group>"; };
+		D1107C062110259000073188 /* RCTVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideoManager.m; path = Video/RCTVideoManager.m; sourceTree = "<group>"; };
+		D1107C072110259000073188 /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideo.h; path = Video/RCTVideo.h; sourceTree = "<group>"; };
+		D1107C082110259000073188 /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideoPlayerViewController.m; path = Video/RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
+		D1107C092110259000073188 /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoManager.h; path = Video/RCTVideoManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +57,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49E995722048B4CE00EA7890 /* libSPTPersistentCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,7 +64,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49E995752048B4D900EA7890 /* libSPTPersistentCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,25 +78,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		49E995652048B48A00EA7890 /* Vendor */ = {
-			isa = PBXGroup;
-			children = (
-				49E9958B2048B7CA00EA7890 /* DVAssetLoaderDelegate */,
-				49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */,
-			);
-			name = Vendor;
-			path = "New Group";
-			sourceTree = "<group>";
-		};
-		49E995672048B4A500EA7890 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */,
-				49E9956E2048B4A500EA7890 /* SPTPersistentCacheTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		49E995712048B4CE00EA7890 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -162,38 +85,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		49E9958B2048B7CA00EA7890 /* DVAssetLoaderDelegate */ = {
-			isa = PBXGroup;
-			children = (
-				49E995942048B7F100EA7890 /* DVAssetLoader.h */,
-				49E995932048B7F100EA7890 /* DVAssetLoaderDelegate.h */,
-				49E995902048B7F100EA7890 /* DVAssetLoaderDelegate.m */,
-				49E9958C2048B7F100EA7890 /* DVAssetLoaderDelegatesDelegate.h */,
-				49E9958E2048B7F100EA7890 /* DVAssetLoaderError.h */,
-				49E9958D2048B7F100EA7890 /* DVAssetLoaderError.m */,
-				49E9958F2048B7F100EA7890 /* DVAssetLoaderHelpers.h */,
-				49E995952048B7F100EA7890 /* DVAssetLoaderHelpers.m */,
-				49E995912048B7F100EA7890 /* DVURLAsset.h */,
-				49E995922048B7F100EA7890 /* DVURLAsset.m */,
-			);
-			name = DVAssetLoaderDelegate;
-			sourceTree = "<group>";
-		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				49E995652048B48A00EA7890 /* Vendor */,
-				BBD49E391AC8DEF000610F8E /* RCTVideo.h */,
-				BBD49E3A1AC8DEF000610F8E /* RCTVideo.m */,
-				49AF269B2048C5CA001DA6AA /* RCTVideoCache.h */,
-				49AF269D2048C5CA001DA6AA /* RCTVideoCache.m */,
-				31CAFB301CAE6B5F009BCF6F /* RCTVideoPlayerViewControllerDelegate.h */,
-				31CAFB2D1CADC77F009BCF6F /* RCTVideoPlayerViewController.h */,
-				31CAFB2E1CADC77F009BCF6F /* RCTVideoPlayerViewController.m */,
-				BBD49E3B1AC8DEF000610F8E /* RCTVideoManager.h */,
-				BBD49E3C1AC8DEF000610F8E /* RCTVideoManager.m */,
-				31CAFB1F1CADA8CD009BCF6F /* UIView+FindUIViewController.h */,
-				31CAFB201CADA8CD009BCF6F /* UIView+FindUIViewController.m */,
+				D1107C072110259000073188 /* RCTVideo.h */,
+				D1107C052110259000073188 /* RCTVideo.m */,
+				D1107C092110259000073188 /* RCTVideoManager.h */,
+				D1107C062110259000073188 /* RCTVideoManager.m */,
+				D1107C012110259000073188 /* RCTVideoPlayerViewController.h */,
+				D1107C082110259000073188 /* RCTVideoPlayerViewController.m */,
+				D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */,
+				D1107C042110259000073188 /* UIView+FindUIViewController.h */,
+				D1107C032110259000073188 /* UIView+FindUIViewController.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				641E28441F0EEC8500443AF6 /* libRCTVideo.a */,
 				49E995712048B4CE00EA7890 /* Frameworks */,
@@ -214,7 +117,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				49E995702048B4C900EA7890 /* PBXTargetDependency */,
 			);
 			name = RCTVideo;
 			productName = RCTDataManager;
@@ -232,7 +134,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				49E995742048B4D300EA7890 /* PBXTargetDependency */,
 			);
 			name = "RCTVideo-tvOS";
 			productName = "RCTVideo-tvOS";
@@ -267,12 +168,6 @@
 			mainGroup = 58B511D21A9E6C8500147676;
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 49E995672048B4A500EA7890 /* Products */;
-					ProjectRef = 49E995662048B4A500EA7890 /* SPTPersistentCache.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTVideo */,
@@ -281,37 +176,15 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXReferenceProxy section */
-		49E9956C2048B4A500EA7890 /* libSPTPersistentCache.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSPTPersistentCache.a;
-			remoteRef = 49E9956B2048B4A500EA7890 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		49E9956E2048B4A500EA7890 /* SPTPersistentCacheTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SPTPersistentCacheTests.xctest;
-			remoteRef = 49E9956D2048B4A500EA7890 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
-
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				31CAFB211CADA8CD009BCF6F /* UIView+FindUIViewController.m in Sources */,
-				31CAFB2F1CADC77F009BCF6F /* RCTVideoPlayerViewController.m in Sources */,
-				49E995982048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */,
-				49E9959A2048B7F100EA7890 /* DVURLAsset.m in Sources */,
-				49E995962048B7F100EA7890 /* DVAssetLoaderError.m in Sources */,
-				49AF269E2048C5CA001DA6AA /* RCTVideoCache.m in Sources */,
-				49E9959C2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */,
-				BBD49E3F1AC8DEF000610F8E /* RCTVideo.m in Sources */,
-				BBD49E401AC8DEF000610F8E /* RCTVideoManager.m in Sources */,
+				D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */,
+				D1107C102110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
+				D1107C0E2110259000073188 /* RCTVideoManager.m in Sources */,
+				D1107C0C2110259000073188 /* RCTVideo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,32 +192,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				641E284D1F0EECF100443AF6 /* RCTVideo.m in Sources */,
-				641E284E1F0EECF100443AF6 /* RCTVideoPlayerViewController.m in Sources */,
-				49E995992048B7F100EA7890 /* DVAssetLoaderDelegate.m in Sources */,
-				49E9959B2048B7F100EA7890 /* DVURLAsset.m in Sources */,
-				49E995972048B7F100EA7890 /* DVAssetLoaderError.m in Sources */,
-				49AF269F2048C5CA001DA6AA /* RCTVideoCache.m in Sources */,
-				49E9959D2048B7F100EA7890 /* DVAssetLoaderHelpers.m in Sources */,
-				641E284F1F0EECF100443AF6 /* RCTVideoManager.m in Sources */,
-				641E28501F0EECF100443AF6 /* UIView+FindUIViewController.m in Sources */,
+				D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */,
+				D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
+				D1107C0F2110259000073188 /* RCTVideoManager.m in Sources */,
+				D1107C0D2110259000073188 /* RCTVideo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		49E995702048B4C900EA7890 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SPTPersistentCache;
-			targetProxy = 49E9956F2048B4C900EA7890 /* PBXContainerItemProxy */;
-		};
-		49E995742048B4D300EA7890 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SPTPersistentCache;
-			targetProxy = 49E995732048B4D300EA7890 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		58B511ED1A9E6C8500147676 /* Debug */ = {
