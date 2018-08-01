@@ -483,6 +483,13 @@ Platforms: all
 #### loadControl
 Adjust the load control parameters: minBufferMs, maxBufferMs, bufferForPlaybackMs and playbackAfterRebufferMs.
 
+Property | Description
+--- | ---
+minBufferMs | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.
+maxBufferMs | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
+bufferForPlaybackMs | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
+playbackAfterRebufferMs | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
+
 ```
 loadControl={{
   minBufferMs: number,
