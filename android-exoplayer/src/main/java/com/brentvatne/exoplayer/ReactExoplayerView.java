@@ -91,11 +91,6 @@ class ReactExoplayerView extends FrameLayout implements
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
-    private static int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-    private static int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-    private static int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-    private static int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
-
     private final VideoEventEmitter eventEmitter;
 
     private Handler mainHandler;
@@ -114,6 +109,11 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
+
+    private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
+    private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
+    private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
+    private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
     private Uri srcUri;
@@ -940,20 +940,13 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setUseTextureView(useTextureView);
     }
 
-
-    public static void setMinBufferMs(int newMinBufferMs) {
-        minBufferMs = newMinBufferMs;
-    }
-
-    public static void setMaxBufferMs(int newMaxBufferMs) {
-        maxBufferMs = newMaxBufferMs;
-    }
-
-    public static void setBufferForPlaybackMs(int newBufferForPlaybackMs) {
-        bufferForPlaybackMs = newBufferForPlaybackMs;
-    }
-
-    public static void setBufferForPlaybackAfterRebufferMs(int newBufferForPlaybackAfterRebufferMs) {
-        bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
+    public void setLoadControl(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
+        player.release();
+        this.player = null;
+        this.minBufferMs = newMinBufferMs;
+        this.maxBufferMs = newMaxBufferMs;
+        this.bufferForPlaybackMs = newBufferForPlaybackMs;
+        this.bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
+        initializePlayer();
     }
 }

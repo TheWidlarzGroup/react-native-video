@@ -11,6 +11,7 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.HashMap;
@@ -38,6 +39,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
+    private static final String PROP_LOAD_CONTROL = "loadControl";
+    private static final String PROP_LOAD_CONTROL_MIN_BUFFER_MS = "minBufferMs";
+    private static final String PROP_LOAD_CONTROL_MAX_BUFFER_MS = "maxBufferMs";
+    private static final String PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
+    private static final String PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
@@ -212,6 +218,25 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_LOAD_CONTROL)
+    public void setLoadControl(final ReactExoplayerView videoView, @Nullable ReadableMap loadControl) {
+        int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
+        int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
+        int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
+        int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+        if (loadControl != null) {
+            minBufferMs = loadControl.hasKey(PROP_LOAD_CONTROL_MIN_BUFFER_MS)
+                    ? loadControl.getInt(PROP_LOAD_CONTROL_MIN_BUFFER_MS) : minBufferMs;
+            maxBufferMs = loadControl.hasKey(PROP_LOAD_CONTROL_MAX_BUFFER_MS)
+                    ? loadControl.getInt(PROP_LOAD_CONTROL_MAX_BUFFER_MS) : maxBufferMs;
+            bufferForPlaybackMs = loadControl.hasKey(PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS)
+                    ? loadControl.getInt(PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
+            bufferForPlaybackAfterRebufferMs = loadControl.hasKey(PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
+                    ? loadControl.getInt(PROP_LOAD_CONTROL_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
+            videoView.setLoadControl(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
     }
 
     private boolean startsWithValidScheme(String uriString) {

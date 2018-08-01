@@ -229,6 +229,7 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+* [loadControl](#loadcontrol)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -478,6 +479,30 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
+#### loadControl
+Adjust the load control parameters: minBufferMs, maxBufferMs, bufferForPlaybackMs and playbackAfterRebufferMs.
+
+```
+loadControl={{
+  minBufferMs: number,
+  maxBufferMs: number,
+  bufferForPlaybackMs: number,
+  bufferForPlaybackAfterRebufferMs: number,
+}}
+```
+
+Example with default values:
+```
+loadControl={{
+  minBufferMs: 15000,
+  maxBufferMs: 50000,
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000,
+}}
+```
+
+Platforms: AndroidExoplayer
 
 ### Event props
 
