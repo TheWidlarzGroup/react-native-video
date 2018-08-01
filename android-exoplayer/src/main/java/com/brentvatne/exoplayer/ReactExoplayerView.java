@@ -727,57 +727,57 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSelectedTextTrack(String type, Dynamic value) {
-//        textTrackType = type;
-//        textTrackValue = value;
-//
-//        int index = getTextTrackRendererIndex();
-//        if (index == C.INDEX_UNSET) {
-//            return;
-//        }
-//        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-//        if (info == null) {
-//            return;
-//        }
-//
-//        TrackGroupArray groups = info.getTrackGroups(index);
-//        int trackIndex = C.INDEX_UNSET;
-//        if (TextUtils.isEmpty(type)) {
-//            // Do nothing
-//        } else if (type.equals("disabled")) {
-//            trackSelector.setSelectionOverride(index, groups, null);
-//            return;
-//        } else if (type.equals("language")) {
-//            for (int i = 0; i < groups.length; ++i) {
-//                Format format = groups.get(i).getFormat(0);
-//                if (format.language != null && format.language.equals(value.asString())) {
-//                    trackIndex = i;
-//                    break;
-//                }
-//            }
-//        } else if (type.equals("title")) {
-//            for (int i = 0; i < groups.length; ++i) {
-//                Format format = groups.get(i).getFormat(0);
-//                if (format.id != null && format.id.equals(value.asString())) {
-//                    trackIndex = i;
-//                    break;
-//                }
-//            }
-//        } else if (type.equals("index")) {
-//            trackIndex = value.asInt();
-//        } else { // default. invalid type or "system"
-//            trackSelector.clearSelectionOverrides(index);
-//            return;
-//        }
-//
-//        if (trackIndex == C.INDEX_UNSET) {
-//            trackSelector.clearSelectionOverrides(trackIndex);
-//            return;
-//        }
-//
-//        MappingTrackSelector.SelectionOverride override
-//                = new MappingTrackSelector.SelectionOverride(
-//                        new FixedTrackSelection.Factory(), trackIndex, 0);
-//        trackSelector.setSelectionOverride(index, groups, override);
+        textTrackType = type;
+        textTrackValue = value;
+
+        int index = getTextTrackRendererIndex();
+        if (index == C.INDEX_UNSET) {
+            return;
+        }
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        if (info == null) {
+            return;
+        }
+
+        TrackGroupArray groups = info.getTrackGroups(index);
+        int trackIndex = C.INDEX_UNSET;
+        if (TextUtils.isEmpty(type)) {
+            // Do nothing
+        } else if (type.equals("disabled")) {
+            trackSelector.setSelectionOverride(index, groups, null);
+            return;
+        } else if (type.equals("language")) {
+            for (int i = 0; i < groups.length; ++i) {
+                Format format = groups.get(i).getFormat(0);
+                if (format.language != null && format.language.equals(value.asString())) {
+                    trackIndex = i;
+                    break;
+                }
+            }
+        } else if (type.equals("title")) {
+            for (int i = 0; i < groups.length; ++i) {
+                Format format = groups.get(i).getFormat(0);
+                if (format.id != null && format.id.equals(value.asString())) {
+                    trackIndex = i;
+                    break;
+                }
+            }
+        } else if (type.equals("index")) {
+            trackIndex = value.asInt();
+        } else { // default. invalid type or "system"
+            trackSelector.clearSelectionOverrides(index);
+            return;
+        }
+
+        if (trackIndex == C.INDEX_UNSET) {
+            trackSelector.clearSelectionOverrides(trackIndex);
+            return;
+        }
+
+        MappingTrackSelector.SelectionOverride override
+                = new MappingTrackSelector.SelectionOverride(
+                        new FixedTrackSelection.Factory(), trackIndex, 0);
+        trackSelector.setSelectionOverride(index, groups, override);
     }
 
     public void setPausedModifier(boolean paused) {
