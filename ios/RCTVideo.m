@@ -308,26 +308,26 @@ static int const RCTVideoUnset = -1;
   [self removePlayerItemObservers];
   
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    
+
     // perform on next run loop, otherwise other passed react-props may not be set
     _playerItem = [self playerItemForSource:source];
     [self addPlayerItemObservers];
-    
+
     [_player pause];
     [_playerViewController.view removeFromSuperview];
     _playerViewController = nil;
-    
+
     if (_playbackRateObserverRegistered) {
       [_player removeObserver:self forKeyPath:playbackRate context:nil];
       _playbackRateObserverRegistered = NO;
     }
-    
+
     _player = [AVPlayer playerWithPlayerItem:_playerItem];
     _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    
+
     [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
     _playbackRateObserverRegistered = YES;
-    
+
     [self addPlayerTimeObserver];
 
     //Perform on next run loop, otherwise onVideoLoadStart is nil
@@ -347,8 +347,12 @@ static int const RCTVideoUnset = -1;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  if ([filepath containsString:@"file://"]) {
+    return [NSURL URLWithString:filepath];
+  }
   
+  // code to support local caching
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
   NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
@@ -384,7 +388,7 @@ static int const RCTVideoUnset = -1;
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
     asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:uri] options:assetOptions];
-  } else if (isAsset) { //  assets on iOS have to be in the Documents folder
+  } else if (isAsset) { //  assets on iOS can be in the Bundle or Documents folder
     asset = [AVURLAsset URLAssetWithURL:[self urlFilePath:uri] options:nil];
   } else { // file passed in through JS, or an asset in the Xcode project
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
