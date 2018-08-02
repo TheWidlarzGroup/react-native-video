@@ -55,6 +55,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playWhenInactive;
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
+  BOOL _fullscreen;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
 }
@@ -329,6 +330,8 @@ static int const RCTVideoUnset = -1;
     _playbackRateObserverRegistered = YES;
 
     [self addPlayerTimeObserver];
+    
+    [self setFullscreen:_fullscreen];
 
     //Perform on next run loop, otherwise onVideoLoadStart is nil
     if(self.onVideoLoadStart) {
@@ -994,7 +997,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setFullscreen:(BOOL)fullscreen
 {
-    if( fullscreen && !_fullscreenPlayerPresented )
+    _fullscreen = fullscreen;
+    if( fullscreen && !_fullscreenPlayerPresented && _player )
     {
         // Ensure player view controller is not null
         if( !_playerViewController )

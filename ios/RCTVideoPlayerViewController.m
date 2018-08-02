@@ -13,4 +13,18 @@
   [_rctDelegate videoPlayerViewControllerDidDismiss:self];
 }
 
+- (BOOL)shouldAutorotate {
+  return YES;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+  
+  return UIInterfaceOrientationMaskLandscape;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+  
+  return UIInterfaceOrientationLandscapeLeft;
+}
+
 @end
