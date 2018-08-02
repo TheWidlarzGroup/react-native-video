@@ -940,13 +940,12 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setUseTextureView(useTextureView);
     }
 
-    public void setLoadControl(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
-        player.release();
-        this.player = null;
-        this.minBufferMs = newMinBufferMs;
-        this.maxBufferMs = newMaxBufferMs;
-        this.bufferForPlaybackMs = newBufferForPlaybackMs;
-        this.bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
+    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
+        stopPlayback();
+        minBufferMs = newMinBufferMs;
+        maxBufferMs = newMaxBufferMs;
+        bufferForPlaybackMs = newBufferForPlaybackMs;
+        bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         initializePlayer();
     }
 }

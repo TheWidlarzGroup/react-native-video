@@ -345,7 +345,7 @@ Video.propTypes = {
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
-  loadControl: PropTypes.shape({
+  bufferConfig: PropTypes.shape({
     minBufferMs: PropTypes.number,
     maxBufferMs: PropTypes.number,
     bufferForPlaybackMs: PropTypes.number,

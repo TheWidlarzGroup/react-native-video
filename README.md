@@ -480,8 +480,9 @@ Adjust the volume.
 
 Platforms: all
 
-#### loadControl
-Adjust the load control parameters: minBufferMs, maxBufferMs, bufferForPlaybackMs and playbackAfterRebufferMs.
+#### bufferConfig
+Adjust the video load control parameters: minBufferMs, maxBufferMs, bufferForPlaybackMs and playbackAfterRebufferMs.
+Note: these values can not be changed after the video component is loaded.
 
 Property | Description
 --- | ---
@@ -491,7 +492,7 @@ bufferForPlaybackMs | The default duration of media that must be buffered for pl
 playbackAfterRebufferMs | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
 
 ```
-loadControl={{
+bufferConfig={{
   minBufferMs: number,
   maxBufferMs: number,
   bufferForPlaybackMs: number,
@@ -501,7 +502,7 @@ loadControl={{
 
 Example with default values:
 ```
-loadControl={{
+bufferConfig={{
   minBufferMs: 15000,
   maxBufferMs: 50000,
   bufferForPlaybackMs: 2500,
