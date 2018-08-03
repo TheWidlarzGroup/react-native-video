@@ -104,12 +104,13 @@ static int const RCTVideoUnset = -1;
   return self;
 }
 
-- (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
+//Modifying the player creation to get the AVURLAsset instead of passing player
+- (AVPlayerViewController*)createPlayerViewControllerWithPlayerItem:(AVPlayerItem*)playerItem {
     RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
     playerLayer.showsPlaybackControls = YES;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
-    playerLayer.player = player;
+    playerLayer.player = [[AVPlayer alloc] initWithURL:[self urlOfCurrentlyPlayingInPlayer:_player]];
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
@@ -987,6 +988,17 @@ static int const RCTVideoUnset = -1;
   return textTracks;
 }
 
+#pragma mark - Fullscreen AVURLAsset management
+
+- (NSURL *)urlOfCurrentlyPlayingInPlayer:(AVPlayer *)player{
+    // get current asset
+    AVAsset *currentPlayerAsset = player.currentItem.asset;
+    // make sure the current asset is an AVURLAsset
+    if (![currentPlayerAsset isKindOfClass:AVURLAsset.class]) return nil;
+    // return the NSURL
+    return [(AVURLAsset *)currentPlayerAsset URL];
+}
+
 - (BOOL)getFullscreen
 {
     return _fullscreenPlayerPresented;
@@ -1043,7 +1055,7 @@ static int const RCTVideoUnset = -1;
 {
     if( _player )
     {
-        _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+        _playerViewController = [self createPlayerViewControllerWithPlayerItem:_playerItem];
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         [self setResizeMode:_resizeMode];
