@@ -212,6 +212,7 @@ var styles = StyleSheet.create({
 ### Configurable props
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
+* [bufferConfig](#bufferconfig)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -229,7 +230,6 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
-* [bufferConfig](#bufferconfig)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -264,6 +264,30 @@ Indicates whether the player should only play the audio track and instead of dis
 For this to work, the poster prop must be set.
 
 Platforms: all
+
+#### bufferConfig
+Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
+
+This prop can only be set when you are setting a new source, changing it after the media is loaded will cause it to restart.
+
+Property | Type | Description
+--- | --- | ---
+minBufferMs | number | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.
+maxBufferMs | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
+bufferForPlaybackMs | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
+playbackAfterRebufferMs | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
+
+Example with default values:
+```
+bufferConfig={{
+  minBufferMs: 15000,
+  maxBufferMs: 50000,
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000
+}}
+```
+
+Platforms: Android ExoPlayer
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
@@ -479,38 +503,6 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
-
-#### bufferConfig
-Adjust the video load control parameters: minBufferMs, maxBufferMs, bufferForPlaybackMs and playbackAfterRebufferMs.
-Note: these values can not be changed after the video component is loaded.
-
-Property | Description
---- | ---
-minBufferMs | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.
-maxBufferMs | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
-bufferForPlaybackMs | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
-playbackAfterRebufferMs | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
-
-```
-bufferConfig={{
-  minBufferMs: number,
-  maxBufferMs: number,
-  bufferForPlaybackMs: number,
-  bufferForPlaybackAfterRebufferMs: number,
-}}
-```
-
-Example with default values:
-```
-bufferConfig={{
-  minBufferMs: 15000,
-  maxBufferMs: 50000,
-  bufferForPlaybackMs: 2500,
-  bufferForPlaybackAfterRebufferMs: 5000,
-}}
-```
-
-Platforms: AndroidExoplayer
 
 ### Event props
 
