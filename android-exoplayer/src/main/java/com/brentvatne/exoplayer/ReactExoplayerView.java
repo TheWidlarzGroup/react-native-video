@@ -328,7 +328,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
-            isPaused = player.getPlayWhenReady();
             updateResumePosition();
             player.release();
             player.setMetadataOutput(null);
@@ -941,11 +940,11 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
-        stopPlayback();
         minBufferMs = newMinBufferMs;
         maxBufferMs = newMaxBufferMs;
         bufferForPlaybackMs = newBufferForPlaybackMs;
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
+        releasePlayer();
         initializePlayer();
     }
 }
