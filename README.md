@@ -266,14 +266,14 @@ Platforms: all
 #### bufferConfig
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
-This prop can only be set when you are setting a new source, changing it after the media is loaded will cause it to restart.
-
 Property | Type | Description
 --- | --- | ---
 minBufferMs | number | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.
 maxBufferMs | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
 bufferForPlaybackMs | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
 playbackAfterRebufferMs | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
+
+This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 
 Example with default values:
 ```
