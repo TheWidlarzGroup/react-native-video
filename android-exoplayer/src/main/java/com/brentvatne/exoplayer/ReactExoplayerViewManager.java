@@ -220,7 +220,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setUseTextureView(useTextureView);
     }
 
-    @ReactProp(name = PROP_BUFFER_CONFIG )
+    @ReactProp(name = PROP_BUFFER_CONFIG)
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
         int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
         int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
