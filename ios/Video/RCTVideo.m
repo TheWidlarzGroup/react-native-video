@@ -311,13 +311,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
-  [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
-    [self didSetPlayerItemWithSource:source playerItem:playerItem];
-  }];
-}
 
-- (void) didSetPlayerItemWithSource:(NSDictionary *)source playerItem:(AVPlayerItem *) playerItem
-{
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     
     // perform on next run loop, otherwise other passed react-props may not be set
@@ -433,10 +427,29 @@ static int const RCTVideoUnset = -1;
   
   if (isNetwork) {
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-    [_videoCache getItemForUri:uri withCallback:^(AVAsset * _Nullable cachedAsset) {
-      if (cachedAsset) {
-        [self playerItemPrepareText:cachedAsset assetOptions:assetOptions withCallback:handler];
-        return;
+    [_videoCache getItemForUri:uri withCallback:^(RCTVideoCacheStatus videoCacheStatus, AVAsset * _Nullable cachedAsset) {
+      switch (videoCacheStatus) {
+        case RCTVideoCacheStatusMissingFileExtension: {
+#ifdef DEBUG
+          NSLog(@"Could not generate cache key for uri '%@'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md.", uri);
+#endif
+          AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+          [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+          return;
+        }
+        case RCTVideoCacheStatusUnsupportedFileExtension: {
+#ifdef DEBUG
+          NSLog(@"Could not generate cache key for uri '%@'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md.", uri);
+#endif
+          AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+          [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+          return;
+        }
+        default:
+          if (cachedAsset) {
+            [self playerItemPrepareText:cachedAsset assetOptions:assetOptions withCallback:handler];
+            return;
+          }
       }
 #endif
       NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
@@ -1138,6 +1151,7 @@ static int const RCTVideoUnset = -1;
 #endif
     }];
 }
+
 #endif
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate

@@ -57,7 +57,11 @@
 
 - (void)storeItem:(NSData *)data forUri:(NSString *)uri withCallback:(void(^)(BOOL))handler;
 {
-  NSString * key = [[self generateHashForUrl:uri] stringByAppendingPathExtension: [uri pathExtension]];
+  NSString *key = [self generateCacheKeyForUri:uri];
+  if (key == nil) {
+    handler(NO);
+    return;
+  }
   [self saveDataToTemporaryStorage:data key:key];
   [self.videoCache storeData:data forKey:key locked:NO withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
     if (response.error) {
@@ -90,23 +94,68 @@
   return YES;
 }
 
-- (void)getItemForUri:(NSString *)uri withCallback:(void(^)(AVAsset * _Nullable)) handler {
-  NSString * key = [[self generateHashForUrl:uri] stringByAppendingPathExtension: [uri pathExtension]];
+- (NSString *)generateCacheKeyForUri:(NSString *)uri {
+  NSString *uriWithoutQueryParams = uri;
 
-  AVURLAsset * temporaryAsset = [self getItemFromTemporaryStorage:key];
-  if (temporaryAsset != nil) {
-    handler(temporaryAsset);
-    return;
+  // parse file extension
+  if ([uri rangeOfString:@"?"].location != NSNotFound) {
+    NSArray<NSString*> * components = [uri componentsSeparatedByString:@"?"];
+    uriWithoutQueryParams = [components objectAtIndex:0];
   }
-  
-  [self.videoCache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
-    if (response.record == nil || response.record.data == nil) {
-      handler(nil);
+
+  NSString * pathExtension = [uriWithoutQueryParams pathExtension];
+  NSArray * supportedExtensions = @[@"m4v", @"mp4", @"mov"];
+  if ([supportedExtensions containsObject:pathExtension] == NO) {
+    NSDictionary *userInfo = @{
+                               NSLocalizedDescriptionKey: NSLocalizedString(@"Missing file extension.", nil),
+                               NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Missing file extension.", nil),
+                               NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Missing file extension.", nil)
+                               };
+    NSError *error = [NSError errorWithDomain:@"RCTVideoCache"
+                                         code:RCTVideoCacheStatusMissingFileExtension userInfo:userInfo];
+    @throw error;
+  } else if ([pathExtension isEqualToString:@"m3u8"]) {
+    NSDictionary *userInfo = @{
+                               NSLocalizedDescriptionKey: NSLocalizedString(@"Missing file extension.", nil),
+                               NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Missing file extension.", nil),
+                               NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Missing file extension.", nil)
+                               };
+    NSError *error = [NSError errorWithDomain:@"RCTVideoCache"
+                                         code:RCTVideoCacheStatusUnsupportedFileExtension userInfo:userInfo];
+    @throw error;
+  }
+  return [[self generateHashForUrl:uri] stringByAppendingPathExtension:pathExtension];
+}
+
+- (void)getItemForUri:(NSString *)uri withCallback:(void(^)(RCTVideoCacheStatus, AVAsset * _Nullable)) handler {
+  @try {
+    NSString *key = [self generateCacheKeyForUri:uri];
+    AVURLAsset * temporaryAsset = [self getItemFromTemporaryStorage:key];
+    if (temporaryAsset != nil) {
+      handler(RCTVideoCacheStatusAvailable, temporaryAsset);
       return;
     }
-    [self saveDataToTemporaryStorage:response.record.data key:key];
-    handler([self getItemFromTemporaryStorage:key]);
-  } onQueue:dispatch_get_main_queue()];
+    
+    [self.videoCache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
+      if (response.record == nil || response.record.data == nil) {
+        handler(RCTVideoCacheStatusNotAvailable, nil);
+        return;
+      }
+      [self saveDataToTemporaryStorage:response.record.data key:key];
+      handler(RCTVideoCacheStatusAvailable, [self getItemFromTemporaryStorage:key]);
+    } onQueue:dispatch_get_main_queue()];
+  } @catch (NSError * err) {
+    switch (err.code) {
+      case RCTVideoCacheStatusMissingFileExtension:
+        handler(RCTVideoCacheStatusMissingFileExtension, nil);
+        return;
+      case RCTVideoCacheStatusUnsupportedFileExtension:
+        handler(RCTVideoCacheStatusUnsupportedFileExtension, nil);
+        return;
+      default:
+        @throw err;
+    }
+  }
 }
 
 - (NSString *) generateHashForUrl:(NSString *)string {
