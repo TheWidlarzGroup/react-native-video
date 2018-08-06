@@ -548,7 +548,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
   _ignoreSilentSwitch = ignoreSilentSwitch;
-  [self applyModifiersWithFilter];
+  [self applyModifiers];
 }
 
 - (void)setPaused:(BOOL)paused
@@ -629,19 +629,19 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setRate:(float)rate
 {
   _rate = rate;
-  [self applyModifiersWithFilter];
+  [self applyModifiers];
 }
 
 - (void)setMuted:(BOOL)muted
 {
   _muted = muted;
-  [self applyModifiersWithFilter];
+  [self applyModifiers];
 }
 
 - (void)setVolume:(float)volume
 {
   _volume = volume;
-  [self applyModifiersWithFilter];
+  [self applyModifiers];
 }
 
 - (void)applyModifiersWithFilter {
@@ -653,18 +653,20 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)applyModifiers
 {
-  if (_muted) {
-    [_player setVolume:0];
-    [_player setMuted:YES];
-  } else {
-    [_player setVolume:_volume];
-    [_player setMuted:NO];
+  if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
+    if (_muted) {
+      [_player setVolume:0];
+      [_player setMuted:YES];
+    } else {
+      [_player setVolume:_volume];
+      [_player setMuted:NO];
+    }
+    [self setPaused:_paused];
   }
 
   [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
-  [self setPaused:_paused];
   [self setControls:_controls];
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
