@@ -1061,6 +1061,7 @@ static int const RCTVideoUnset = -1;
         [self setResizeMode:_resizeMode];
         [self addSubview:_playerViewController.view];
     }
+    [_playerViewController.player seekToTime:CMTimeMake(_playerItem.currentTime.value, _playerItem.currentTime.timescale)];
 }
 
 - (void)usePlayerLayer
