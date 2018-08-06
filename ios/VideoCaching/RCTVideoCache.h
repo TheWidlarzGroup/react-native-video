@@ -4,6 +4,13 @@
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 #import <CommonCrypto/CommonDigest.h>
 
+typedef NS_ENUM(NSUInteger, RCTVideoCacheStatus) {
+  RCTVideoCacheStatusMissingFileExtension,
+  RCTVideoCacheStatusUnsupportedFileExtension,
+  RCTVideoCacheStatusNotAvailable,
+  RCTVideoCacheStatusAvailable
+};
+
 @class SPTPersistentCache;
 @class SPTPersistentCacheOptions;
 
@@ -22,7 +29,7 @@
 
 + (RCTVideoCache *)sharedInstance;
 - (void)storeItem:(NSData *)data forUri:(NSString *)uri withCallback:(void(^)(BOOL))handler;
-- (void)getItemForUri:(NSString *)url withCallback:(void(^)(AVAsset * _Nullable)) handler;
+- (void)getItemForUri:(NSString *)url withCallback:(void(^)(RCTVideoCacheStatus, AVAsset * _Nullable)) handler;
 - (NSURL *)createUniqueTemporaryFileUrl:(NSString * _Nonnull)url withExtension:(NSString * _Nonnull) extension;
 - (AVURLAsset *)getItemFromTemporaryStorage:(NSString *)key;
 - (BOOL)saveDataToTemporaryStorage:(NSData *)data key:(NSString *)key;
