@@ -1,5 +1,9 @@
 ## Changelog
 
+### Next Version
+
+* Support video cachging for iOS ([#955](https://github.com/react-native-community/react-native-video/pull/955))
+
 ### Version 3.2.0
 * Basic fullscreen support for Android MediaPlayer [#1138](https://github.com/react-native-community/react-native-video/pull/1138)
 * Simplify default Android SDK code [#1145](https://github.com/react-native-community/react-native-video/pull/1145) [#1146](https://github.com/react-native-community/react-native-video/pull/1146)
