@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.view.View;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -95,7 +96,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private Runnable mProgressUpdateRunnable = null;
     private Handler videoControlHandler = new Handler();
     private MediaController mediaController;
-
 
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
@@ -359,7 +359,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     public void setPausedModifier(final boolean paused) {
-
         mPaused = paused;
 
         if (!mMediaPlayerValid) {
@@ -382,6 +381,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
+        setKeepScreenOn(!mPaused);
     }
 
     // reduces the volume based on stereoPan
@@ -500,7 +500,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setControls(boolean controls) {
         this.mUseNativeControls = controls;
     }
-
 
     @Override
     public void onPrepared(MediaPlayer mp) {
@@ -625,21 +624,22 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
         isCompleted = true;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
+        if (!mRepeat) {
+            setKeepScreenOn(false);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
-
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
+        setKeepScreenOn(false);
     }
 
     @Override
     protected void onAttachedToWindow() {
-
         super.onAttachedToWindow();
 
         if(mMainVer>0) {
@@ -648,7 +648,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         else {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders);
         }
-
+        setKeepScreenOn(true);
     }
 
     @Override

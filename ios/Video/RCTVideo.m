@@ -313,7 +313,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerItemObservers];
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    
+
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
@@ -353,8 +353,12 @@ static int const RCTVideoUnset = -1;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  if ([filepath containsString:@"file://"]) {
+    return [NSURL URLWithString:filepath];
+  }
   
+  // code to support local caching
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
   NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
@@ -392,6 +396,7 @@ static int const RCTVideoUnset = -1;
                            atTime:kCMTimeZero
                             error:nil];
 
+  NSMutableArray* validTextTracks = [NSMutableArray array];
   for (int i = 0; i < _textTracks.count; ++i) {
     AVURLAsset *textURLAsset;
     NSString *textUri = [_textTracks objectAtIndex:i][@"uri"];
@@ -401,6 +406,8 @@ static int const RCTVideoUnset = -1;
       textURLAsset = [AVURLAsset URLAssetWithURL:[self urlFilePath:textUri] options:nil];
     }
     AVAssetTrack *textTrackAsset = [textURLAsset tracksWithMediaType:AVMediaTypeText].firstObject;
+    if (!textTrackAsset) continue; // fix when there's no textTrackAsset
+    [validTextTracks addObject:[_textTracks objectAtIndex:i]];
     AVMutableCompositionTrack *textCompTrack = [mixComposition
                                                 addMutableTrackWithMediaType:AVMediaTypeText
                                                 preferredTrackID:kCMPersistentTrackID_Invalid];
@@ -408,6 +415,9 @@ static int const RCTVideoUnset = -1;
                                ofTrack:textTrackAsset
                                 atTime:kCMTimeZero
                                  error:nil];
+  }
+  if (validTextTracks.count != _textTracks.count) {
+    [self setTextTracks:validTextTracks];
   }
 
   handler([AVPlayerItem playerItemWithAsset:mixComposition]);
@@ -892,7 +902,10 @@ static int const RCTVideoUnset = -1;
         selectedTrackIndex = index;
       }
     }
-  } else { // type "system"
+  }
+  
+  // in the situation that a selected text track is not available (eg. specifies a textTrack not available)
+  if (![type isEqualToString:@"disabled"] && selectedTrackIndex == RCTVideoUnset) {
     CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
     NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
     if ([captionSettings containsObject:AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {

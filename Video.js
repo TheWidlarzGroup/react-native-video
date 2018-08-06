@@ -345,6 +345,12 @@ Video.propTypes = {
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
+  bufferConfig: PropTypes.shape({
+    minBufferMs: PropTypes.number,
+    maxBufferMs: PropTypes.number,
+    bufferForPlaybackMs: PropTypes.number,
+    bufferForPlaybackAfterRebufferMs: PropTypes.number,
+  }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
   playInBackground: PropTypes.bool,
