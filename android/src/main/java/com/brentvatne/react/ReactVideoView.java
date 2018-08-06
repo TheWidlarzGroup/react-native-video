@@ -624,9 +624,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
         isCompleted = true;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
+        if (!mRepeat) {
+            setKeepScreenOn(false);
+        }
     }
 
     @Override
