@@ -644,13 +644,6 @@ static NSString *const timedMetadata = @"timedMetadata";
   [self applyModifiers];
 }
 
-- (void)applyModifiersWithFilter {
-  if (_playerItem.status != AVPlayerItemStatusReadyToPlay) {
-    return;
-  }
-  [self applyModifiers];
-}
-
 - (void)applyModifiers
 {
   if (_playerItem.status == AVPlayerItemStatusReadyToPlay) {
