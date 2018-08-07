@@ -15,6 +15,9 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 static int const RCTVideoUnset = -1;
 
+static NSNumber *currentTime;
+static NSNumber *timescale;
+
 @implementation RCTVideo
 {
   AVPlayer *_player;
@@ -149,7 +152,13 @@ static int const RCTVideoUnset = -1;
   __weak RCTVideo *weakSelf = self;
   _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(progressUpdateIntervalMS, NSEC_PER_SEC)
                                                         queue:NULL
-                                                   usingBlock:^(CMTime time) { [weakSelf sendProgressUpdate]; }
+                                                   usingBlock:^(CMTime time) {
+                                                       if (! [weakSelf getFullscreen] && !_playerViewController) {
+                                                           currentTime = [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value/(int32_t)_playerItem.currentTime.timescale];
+                                                           timescale = [NSNumber numberWithFloat:(int32_t)_playerItem.currentTime.timescale];
+                                                           [weakSelf sendProgressUpdate];
+                                                       }
+                                                   }
                    ];
 }
 
@@ -224,22 +233,23 @@ static int const RCTVideoUnset = -1;
       return;
    }
 
-   CMTime currentTime = _player.currentTime;
-   const Float64 duration = CMTimeGetSeconds(playerDuration);
-   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
-
-   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
-
-   if( currentTimeSecs >= 0 && self.onVideoProgress) {
-      self.onVideoProgress(@{
-                             @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                             @"playableDuration": [self calculatePlayableDuration],
-                             @"atValue": [NSNumber numberWithLongLong:currentTime.value],
-                             @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                             @"target": self.reactTag,
-                             @"seekableDuration": [self calculateSeekableDuration],
-                            });
-   }
+    const Float64 duration = CMTimeGetSeconds(playerDuration);
+    const Float64 currentTimeSecs = CMTimeGetSeconds(_playerItem.currentTime);
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
+    
+    if (!_playerViewController && !_fullscreenPlayerPresented) {
+        if( currentTimeSecs >= 0 && self.onVideoProgress) {
+            self.onVideoProgress(@{
+                                   @"currentTime": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value/(int32_t)_playerItem.currentTime.timescale],
+                                   @"playableDuration": [self calculatePlayableDuration],
+                                   @"atValue": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value],
+                                   @"atTimescale": [NSNumber numberWithInt:(int32_t)_playerItem.currentTime.timescale],
+                                   @"target": self.reactTag,
+                                   @"seekableDuration": [self calculateSeekableDuration],
+                                   });
+        }
+    }
 }
 
 /*!
@@ -661,13 +671,13 @@ static int const RCTVideoUnset = -1;
 
 - (float)getCurrentTime
 {
-  return _playerItem != NULL ? CMTimeGetSeconds(_playerItem.currentTime) : 0;
+  return _playerItem != NULL ? (Float64)_playerItem.currentTime.value : 0;
 }
 
 - (void)setCurrentTime:(float)currentTime
 {
   NSDictionary *info = @{
-                         @"time": [NSNumber numberWithFloat:currentTime],
+                         @"time": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value],
                          @"tolerance": [NSNumber numberWithInt:100]
                          };
   [self setSeek:info];
@@ -700,7 +710,7 @@ static int const RCTVideoUnset = -1;
           [self setPaused:false];
         }
         if(self.onVideoSeek) {
-          self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+          self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value],
                              @"seekTime": seekTime,
                              @"target": self.reactTag});
         }
@@ -1038,6 +1048,7 @@ static int const RCTVideoUnset = -1;
                 _fullscreenPlayerPresented = fullscreen;
                 if(self.onVideoFullscreenPlayerDidPresent) {
                     self.onVideoFullscreenPlayerDidPresent(@{@"target": self.reactTag});
+                    [_playerViewController.player.currentItem seekToTime:CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue)];
                 }
             }];
         }
@@ -1061,7 +1072,6 @@ static int const RCTVideoUnset = -1;
         [self setResizeMode:_resizeMode];
         [self addSubview:_playerViewController.view];
     }
-    [_playerViewController.player seekToTime:CMTimeMake(_playerItem.currentTime.value, _playerItem.currentTime.timescale)];
 }
 
 - (void)usePlayerLayer
