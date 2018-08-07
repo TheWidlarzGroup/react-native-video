@@ -243,7 +243,7 @@ static NSNumber *timescale;
             self.onVideoProgress(@{
                                    @"currentTime": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value/(int32_t)_playerItem.currentTime.timescale],
                                    @"playableDuration": [self calculatePlayableDuration],
-                                   @"atValue": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value],
+                                   @"atValue": [NSNumber numberWithFloat:(Float64)_playerItem.currentTime.value/(int32_t)_playerItem.currentTime.timescale],
                                    @"atTimescale": [NSNumber numberWithInt:(int32_t)_playerItem.currentTime.timescale],
                                    @"target": self.reactTag,
                                    @"seekableDuration": [self calculateSeekableDuration],
@@ -414,16 +414,16 @@ static NSNumber *timescale;
   
   AVAssetTrack *videoAsset = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
   AVMutableCompositionTrack *videoCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
-  [videoCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+  [videoCompTrack insertTimeRange:CMTimeRangeMake(CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue), videoAsset.timeRange.duration)
                           ofTrack:videoAsset
-                           atTime:kCMTimeZero
+                           atTime:CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue)
                             error:nil];
 
   AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
   AVMutableCompositionTrack *audioCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-  [audioCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+  [audioCompTrack insertTimeRange:CMTimeRangeMake(CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue), videoAsset.timeRange.duration)
                           ofTrack:audioAsset
-                           atTime:kCMTimeZero
+                           atTime:CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue)
                             error:nil];
 
   NSMutableArray* validTextTracks = [NSMutableArray array];
@@ -441,9 +441,9 @@ static NSNumber *timescale;
     AVMutableCompositionTrack *textCompTrack = [mixComposition
                                                 addMutableTrackWithMediaType:AVMediaTypeText
                                                 preferredTrackID:kCMPersistentTrackID_Invalid];
-    [textCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+    [textCompTrack insertTimeRange:CMTimeRangeMake(CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue), videoAsset.timeRange.duration)
                                ofTrack:textTrackAsset
-                                atTime:kCMTimeZero
+                                atTime:CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue)
                                  error:nil];
   }
   if (validTextTracks.count != _textTracks.count) {
@@ -1048,6 +1048,9 @@ static NSNumber *timescale;
                 _fullscreenPlayerPresented = fullscreen;
                 if(self.onVideoFullscreenPlayerDidPresent) {
                     self.onVideoFullscreenPlayerDidPresent(@{@"target": self.reactTag});
+                    if ([_playerViewController.player rate] == 0) {
+                        [_playerViewController.player play];
+                    }
                     [_playerViewController.player.currentItem seekToTime:CMTimeMakeWithSeconds((Float64)currentTime.floatValue, (int32_t)timescale.intValue)];
                 }
             }];
@@ -1066,6 +1069,7 @@ static NSNumber *timescale;
 {
     if( _player )
     {
+        [_player setMuted:true];
         _playerViewController = [self createPlayerViewControllerWithPlayerItem:_playerItem];
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
