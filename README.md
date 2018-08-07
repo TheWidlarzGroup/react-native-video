@@ -642,7 +642,9 @@ Example:
 }
 ```
 
-Platforms: Android ExoPlayer, iOS
+Support for timed metadata on Android MediaPlayer is limited at best and only compatible with some videos. It requires a target SDK of 23 or higher.
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
