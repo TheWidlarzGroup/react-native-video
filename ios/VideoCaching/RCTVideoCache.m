@@ -7,8 +7,7 @@
 @synthesize cacheIdentifier;
 @synthesize temporaryCachePath;
 
-+ (RCTVideoCache *) sharedInstance
-{
++ (RCTVideoCache *)sharedInstance {
   static RCTVideoCache *sharedInstance = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
@@ -41,9 +40,8 @@
   return self;
 }
 
-- (void) createTemporaryPath
-{
-  NSError * error = nil;
+- (void) createTemporaryPath {
+  NSError *error = nil;
   BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:self.temporaryCachePath
                                            withIntermediateDirectories:YES
                                                             attributes:nil
@@ -77,19 +75,19 @@
 }
 
 - (AVURLAsset *)getItemFromTemporaryStorage:(NSString *)key {
-  NSString * temporaryFilePath =[self.temporaryCachePath stringByAppendingPathComponent:key];
+  NSString * temporaryFilePath = [self.temporaryCachePath stringByAppendingPathComponent:key];
   
   BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:temporaryFilePath];
   if (!fileExists) {
     return nil;
   }
-  NSURL * assetUrl = [[NSURL alloc] initFileURLWithPath:temporaryFilePath];
+  NSURL *assetUrl = [[NSURL alloc] initFileURLWithPath:temporaryFilePath];
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:assetUrl options:nil];
   return asset;
 }
 
 - (BOOL)saveDataToTemporaryStorage:(NSData *)data key:(NSString *)key {
-  NSString * temporaryFilePath = [self.temporaryCachePath stringByAppendingPathComponent:key];
+  NSString *temporaryFilePath = [self.temporaryCachePath stringByAppendingPathComponent:key];
   [data writeToFile:temporaryFilePath atomically:YES];
   return YES;
 }
@@ -159,7 +157,7 @@
   }
 }
 
-- (NSString *) generateHashForUrl:(NSString *)string {
+- (NSString *)generateHashForUrl:(NSString *)string {
   const char *cStr = [string UTF8String];
   unsigned char result[CC_MD5_DIGEST_LENGTH];
   CC_MD5( cStr, (CC_LONG)strlen(cStr), result );
