@@ -54,6 +54,32 @@ Note: you can also use the `ignoreSilentSwitch` prop, shown below.
 </details>
 
 <details>
+  <summary>iOS (CocoaPods)</summary>
+Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
+
+Depending on your requirements you have to choose between the two possible subpodspecs:
+
+video only:
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+
++  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
+```
+
+video with caching (you can learn more about caching [here](docs/caching.md):
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+
++  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
+```
+
+</details>
+
+<details>
   <summary>tvOS</summary>
   
 `react-native link react-native-video` doesn’t work properly with the tvOS target so we need to add the library manually.

@@ -33,7 +33,13 @@ local.properties
 # node.js
 #
 node_modules/
-npm-debug.log
+*.log
+
+# yarn
+yarn.lock
+
+# editor workspace settings
+.vscode
 
 # BUCK
 buck-out/
