@@ -105,7 +105,7 @@
 
   NSString * pathExtension = [uriWithoutQueryParams pathExtension];
   NSArray * supportedExtensions = @[@"m4v", @"mp4", @"mov"];
-  if ([supportedExtensions containsObject:pathExtension] == NO) {
+  if ([pathExtension isEqualToString:@""]) {
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: NSLocalizedString(@"Missing file extension.", nil),
                                NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Missing file extension.", nil),
@@ -114,11 +114,12 @@
     NSError *error = [NSError errorWithDomain:@"RCTVideoCache"
                                          code:RCTVideoCacheStatusMissingFileExtension userInfo:userInfo];
     @throw error;
-  } else if ([pathExtension isEqualToString:@"m3u8"]) {
+  } else if (![supportedExtensions containsObject:pathExtension]) {
+    // Notably, we don't currently support m3u8 (HLS playlists)
     NSDictionary *userInfo = @{
-                               NSLocalizedDescriptionKey: NSLocalizedString(@"Missing file extension.", nil),
-                               NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Missing file extension.", nil),
-                               NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Missing file extension.", nil)
+                               NSLocalizedDescriptionKey: NSLocalizedString(@"Unsupported file extension.", nil),
+                               NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Unsupported file extension.", nil),
+                               NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Unsupported file extension.", nil)
                                };
     NSError *error = [NSError errorWithDomain:@"RCTVideoCache"
                                          code:RCTVideoCacheStatusUnsupportedFileExtension userInfo:userInfo];
