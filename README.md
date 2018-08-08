@@ -3,10 +3,10 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.40.0, for RN support of 0.19.0 - 0.39.0 please use a pre 1.0 version.
+Requires react-native >= 0.40.0
 
 ### Version 4.0.0 breaking changes
-Version 4.0 now requires Android SDK 26 or higher to use ExoPlayer. This is the default version as of React Native 0.56 and will be required by Google for all apps in October 2018.
+Version 4.0.0 now requires Android SDK 26 or higher to use ExoPlayer. This is the default version as of React Native 0.56 and will be required by Google for all apps in October 2018.
 
 ### Version 3.0.0 breaking changes
 Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
