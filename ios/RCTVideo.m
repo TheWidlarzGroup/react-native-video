@@ -606,9 +606,11 @@ static NSNumber *timescale;
   }
 
   if (_repeat) {
-    AVPlayerItem *item = [notification object];
-    [item seekToTime:kCMTimeZero];
-    [self applyModifiers];
+      if (!_fullscreenPlayerPresented && !_presentingViewController) {
+          AVPlayerItem *item = [notification object];
+          [item seekToTime:kCMTimeZero];
+          [self applyModifiers];
+      }
   } else {
     [self removePlayerTimeObserver];
   }
