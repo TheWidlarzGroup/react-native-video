@@ -7,7 +7,8 @@
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 #import <react-native-video/RCTVideoCache.h>
-#import "DVURLAsset.h"
+#import <DVAssetLoaderDelegate/DVURLAsset.h>
+#import <DVAssetLoaderDelegate/DVAssetLoaderDelegate.h>
 #endif
 
 @class RCTEventDispatcher;
