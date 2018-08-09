@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
+import android.media.TimedMetaData;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.view.View;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -21,6 +23,8 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableType;
@@ -29,6 +33,7 @@ import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
@@ -37,14 +42,21 @@ import java.math.BigDecimal;
 import javax.annotation.Nullable;
 
 @SuppressLint("ViewConstructor")
-public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnPreparedListener, MediaPlayer
-        .OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
+public class ReactVideoView extends ScalableVideoView implements
+    MediaPlayer.OnPreparedListener,
+    MediaPlayer.OnErrorListener,
+    MediaPlayer.OnBufferingUpdateListener,
+    MediaPlayer.OnCompletionListener,
+    MediaPlayer.OnInfoListener,
+    LifecycleEventListener,
+    MediaController.MediaPlayerControl {
 
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
         EVENT_LOAD("onVideoLoad"),
         EVENT_ERROR("onVideoError"),
         EVENT_PROGRESS("onVideoProgress"),
+        EVENT_TIMED_METADATA("onTimedMetadata"),
         EVENT_SEEK("onVideoSeek"),
         EVENT_END("onVideoEnd"),
         EVENT_STALLED("onPlaybackStalled"),
@@ -83,6 +95,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public static final String EVENT_PROP_WIDTH = "width";
     public static final String EVENT_PROP_HEIGHT = "height";
     public static final String EVENT_PROP_ORIENTATION = "orientation";
+    public static final String EVENT_PROP_METADATA = "metadata";
+    public static final String EVENT_PROP_TARGET = "target";
+    public static final String EVENT_PROP_METADATA_IDENTIFIER = "identifier";
+    public static final String EVENT_PROP_METADATA_VALUE = "value";
 
     public static final String EVENT_PROP_ERROR = "error";
     public static final String EVENT_PROP_WHAT = "what";
@@ -95,7 +111,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private Runnable mProgressUpdateRunnable = null;
     private Handler videoControlHandler = new Handler();
     private MediaController mediaController;
-
 
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
@@ -199,6 +214,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             mMediaPlayer.setOnBufferingUpdateListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.setOnInfoListener(this);
+            if (Build.VERSION.SDK_INT >= 23) {
+                mMediaPlayer.setOnTimedMetaDataAvailableListener(new TimedMetaDataAvailableListener());
+            }
         }
     }
 
@@ -359,7 +377,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     }
 
     public void setPausedModifier(final boolean paused) {
-
         mPaused = paused;
 
         if (!mMediaPlayerValid) {
@@ -382,6 +399,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
+        setKeepScreenOn(!mPaused);
     }
 
     // reduces the volume based on stereoPan
@@ -501,7 +519,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         this.mUseNativeControls = controls;
     }
 
-
     @Override
     public void onPrepared(MediaPlayer mp) {
 
@@ -545,6 +562,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 }
             });
         }
+
+        // Select track (so we can use it to listen to timed meta data updates)
+        mp.selectTrack(0);
     }
 
     @Override
@@ -579,6 +599,9 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        // Select track (so we can use it to listen to timed meta data updates)
+        mp.selectTrack(0);
+
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
 
@@ -625,21 +648,51 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
         isCompleted = true;
         mEventEmitter.receiveEvent(getId(), Events.EVENT_END.toString(), null);
+        if (!mRepeat) {
+            setKeepScreenOn(false);
+        }
+    }
+        
+    // This is not fully tested and does not work for all forms of timed metadata
+    @TargetApi(23) // 6.0
+    public class TimedMetaDataAvailableListener
+            implements MediaPlayer.OnTimedMetaDataAvailableListener
+    {
+        public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data) {
+            WritableMap event = Arguments.createMap();
+
+            try {
+                String rawMeta  = new String(data.getMetaData(), "UTF-8");
+                WritableMap id3 = Arguments.createMap();
+
+                id3.putString(EVENT_PROP_METADATA_VALUE, rawMeta.substring(rawMeta.lastIndexOf("\u0003") + 1));
+                id3.putString(EVENT_PROP_METADATA_IDENTIFIER, "id3/TDEN");
+
+                WritableArray metadata = new WritableNativeArray();
+
+                metadata.pushMap(id3);
+
+                event.putArray(EVENT_PROP_METADATA, metadata);
+                event.putDouble(EVENT_PROP_TARGET, getId());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            mEventEmitter.receiveEvent(getId(), Events.EVENT_TIMED_METADATA.toString(), event);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
-
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
+        setKeepScreenOn(false);
     }
 
     @Override
     protected void onAttachedToWindow() {
-
         super.onAttachedToWindow();
 
         if(mMainVer>0) {
@@ -648,7 +701,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         else {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders);
         }
-
+        setKeepScreenOn(true);
     }
 
     @Override
