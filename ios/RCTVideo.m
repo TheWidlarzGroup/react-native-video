@@ -151,6 +151,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 {
   if (_playInBackground || _playWhenInactive || _paused) return;
 
+  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
   [_player pause];
   [_player setRate:0.0];
 }
@@ -267,6 +268,7 @@ static NSString *const timedMetadata = @"timedMetadata";
   _playerItem = [self playerItemForSource:source];
   [self addPlayerItemObservers];
 
+  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
   [_player pause];
   [self removePlayerLayer];
   [_playerViewController.view removeFromSuperview];
@@ -519,6 +521,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
     [_player pause];
     [_player setRate:0.0];
   } else {
@@ -527,6 +530,7 @@ static NSString *const timedMetadata = @"timedMetadata";
     } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
       [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
     [_player play];
     [_player setRate:_rate];
   }
@@ -558,9 +562,15 @@ static NSString *const timedMetadata = @"timedMetadata";
     CMTime tolerance = CMTimeMake(1000, timeScale);
 
     if (CMTimeCompare(current, cmSeekTime) != 0) {
-      if (!_paused) [_player pause];
+      if (!_paused) {
+        [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+        [_player pause];
+      }
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        if (!_paused) [_player play];
+        if (!_paused) {
+          [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+          [_player play];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
@@ -814,6 +824,7 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 - (void)removeFromSuperview
 {
+  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
   [_player pause];
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
