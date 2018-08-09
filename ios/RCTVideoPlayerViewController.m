@@ -6,6 +6,14 @@
 
 @implementation RCTVideoPlayerViewController
 
+- (id)init {
+  self = [super init];
+  if (self) {
+    self.autorotate = false;
+  }
+  return self;
+}
+
 - (void)viewDidDisappear:(BOOL)animated
 {
   [super viewDidDisappear:animated];
@@ -14,17 +22,25 @@
 }
 
 - (BOOL)shouldAutorotate {
-  return YES;
+  return self.autorotate;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
   
-  return UIInterfaceOrientationMaskLandscape;
+  return UIInterfaceOrientationMaskAll;
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-  
-  return UIInterfaceOrientationLandscapeLeft;
+  if ([self.preferredOrientation.lowercaseString isEqualToString:@"landscape"]) {
+    return UIInterfaceOrientationLandscapeLeft;
+  }
+  else if ([self.preferredOrientation.lowercaseString isEqualToString:@"portrait"]) {
+    return UIInterfaceOrientationPortrait;
+  }
+  else { // default case
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    return orientation;
+  }
 }
 
 @end
