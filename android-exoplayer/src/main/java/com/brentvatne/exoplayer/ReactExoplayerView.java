@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
+import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.R;
@@ -705,7 +706,15 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
+            this.mediaDataSourceFactory = null;
+
+            if (URLUtil.isFileUrl(uri.toString())) {
+                this.mediaDataSourceFactory = DataSourceUtil.getFileDataSourceFactory(uri);
+            }
+
+            if (this.mediaDataSourceFactory == null) {
+                this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
+            }
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();

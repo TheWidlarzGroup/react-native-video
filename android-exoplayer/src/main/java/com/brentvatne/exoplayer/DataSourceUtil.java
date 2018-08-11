@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.net.Uri;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
@@ -40,6 +41,10 @@ public class DataSourceUtil {
         return userAgent;
     }
 
+    public static DataSource.Factory getFileDataSourceFactory(Uri uri) {
+        return new FileDataSourceFactory(uri);
+    }
+
     public static DataSource.Factory getRawDataSourceFactory(ReactContext context) {
         if (rawDataSourceFactory == null) {
             rawDataSourceFactory = buildRawDataSourceFactory(context);
@@ -50,7 +55,6 @@ public class DataSourceUtil {
     public static void setRawDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
-
 
     public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
