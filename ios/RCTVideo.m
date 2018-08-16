@@ -129,24 +129,24 @@ static int const RCTVideoUnset = -1;
 
 - (CMTime)playerItemDuration
 {
-    AVPlayerItem *playerItem = [_player currentItem];
-    if (playerItem.status == AVPlayerItemStatusReadyToPlay)
-    {
-        return([playerItem duration]);
-    }
-
-    return(kCMTimeInvalid);
+  AVPlayerItem *playerItem = [_player currentItem];
+  if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+  {
+    return([playerItem duration]);
+  }
+  
+  return(kCMTimeInvalid);
 }
 
 - (CMTimeRange)playerItemSeekableTimeRange
 {
-    AVPlayerItem *playerItem = [_player currentItem];
-    if (playerItem.status == AVPlayerItemStatusReadyToPlay)
-    {
-        return [playerItem seekableTimeRanges].firstObject.CMTimeRangeValue;
-    }
-
-    return (kCMTimeRangeZero);
+  AVPlayerItem *playerItem = [_player currentItem];
+  if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+  {
+    return [playerItem seekableTimeRanges].firstObject.CMTimeRangeValue;
+  }
+  
+  return (kCMTimeRangeZero);
 }
 
 -(void)addPlayerTimeObserver
@@ -164,11 +164,11 @@ static int const RCTVideoUnset = -1;
 /* Cancels the previously registered time observer. */
 -(void)removePlayerTimeObserver
 {
-    if (_timeObserver)
-    {
-        [_player removeTimeObserver:_timeObserver];
-        _timeObserver = nil;
-    }
+  if (_timeObserver)
+  {
+    [_player removeTimeObserver:_timeObserver];
+    _timeObserver = nil;
+  }
 }
 
 #pragma mark - Progress
@@ -211,43 +211,43 @@ static int const RCTVideoUnset = -1;
 
 - (void)audioRouteChanged:(NSNotification *)notification
 {
-    NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
-    NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
-    if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
-        self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
-    }
+  NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
+  NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
+  if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+    self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
+  }
 }
 
 #pragma mark - Progress
 
 - (void)sendProgressUpdate
 {
-   AVPlayerItem *video = [_player currentItem];
-   if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
-     return;
-   }
-
-   CMTime playerDuration = [self playerItemDuration];
-   if (CMTIME_IS_INVALID(playerDuration)) {
-      return;
-   }
-
-   CMTime currentTime = _player.currentTime;
-   const Float64 duration = CMTimeGetSeconds(playerDuration);
-   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
-
-   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
-
-   if( currentTimeSecs >= 0 && self.onVideoProgress) {
-      self.onVideoProgress(@{
-                             @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
-                             @"playableDuration": [self calculatePlayableDuration],
-                             @"atValue": [NSNumber numberWithLongLong:currentTime.value],
-                             @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                             @"target": self.reactTag,
-                             @"seekableDuration": [self calculateSeekableDuration],
-                            });
-   }
+  AVPlayerItem *video = [_player currentItem];
+  if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
+    return;
+  }
+  
+  CMTime playerDuration = [self playerItemDuration];
+  if (CMTIME_IS_INVALID(playerDuration)) {
+    return;
+  }
+  
+  CMTime currentTime = _player.currentTime;
+  const Float64 duration = CMTimeGetSeconds(playerDuration);
+  const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+  
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
+  
+  if( currentTimeSecs >= 0 && self.onVideoProgress) {
+    self.onVideoProgress(@{
+                           @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(currentTime)],
+                           @"playableDuration": [self calculatePlayableDuration],
+                           @"atValue": [NSNumber numberWithLongLong:currentTime.value],
+                           @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
+                           @"target": self.reactTag,
+                           @"seekableDuration": [self calculateSeekableDuration],
+                           });
+  }
 }
 
 /*!
@@ -277,12 +277,12 @@ static int const RCTVideoUnset = -1;
 
 - (NSNumber *)calculateSeekableDuration
 {
-    CMTimeRange timeRange = [self playerItemSeekableTimeRange];
-    if (CMTIME_IS_NUMERIC(timeRange.duration))
-    {
-        return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.duration)];
-    }
-    return [NSNumber numberWithInteger:0];
+  CMTimeRange timeRange = [self playerItemSeekableTimeRange];
+  if (CMTIME_IS_NUMERIC(timeRange.duration))
+  {
+    return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.duration)];
+  }
+  return [NSNumber numberWithInteger:0];
 }
 
 - (void)addPlayerItemObservers
@@ -346,19 +346,19 @@ static int const RCTVideoUnset = -1;
       id uri = [source objectForKey:@"uri"];
       id type = [source objectForKey:@"type"];
       self.onVideoLoadStart(@{@"src": @{
-                                        @"uri": uri ? uri : [NSNull null],
-                                        @"type": type ? type : [NSNull null],
-                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                                        @"target": self.reactTag
-                                        });
+                                  @"uri": uri ? uri : [NSNull null],
+                                  @"type": type ? type : [NSNull null],
+                                  @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                              @"target": self.reactTag
+                              });
     }
-
+    
   });
   _videoLoadStarted = YES;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  if ([filepath containsString:@"file://"]) {
+  if ([filepath containsString:@"file://"] && ![filepath containsString:@"/Documents/"]) {
     return [NSURL URLWithString:filepath];
   }
   
@@ -391,11 +391,11 @@ static int const RCTVideoUnset = -1;
   if (isNetwork) {
     /* Per #1091, this is not a public API. We need to either get approval from Apple to use this
      * or use a different approach.
-    NSDictionary *headers = [source objectForKey:@"requestHeaders"];
-    if ([headers count] > 0) {
-      [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
-    }
-    */
+     NSDictionary *headers = [source objectForKey:@"requestHeaders"];
+     if ([headers count] > 0) {
+     [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
+     }
+     */
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
     asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:uri] options:assetOptions];
@@ -442,9 +442,9 @@ static int const RCTVideoUnset = -1;
                                                 addMutableTrackWithMediaType:AVMediaTypeText
                                                 preferredTrackID:kCMPersistentTrackID_Invalid];
     [textCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                               ofTrack:textTrackAsset
-                                atTime:kCMTimeZero
-                                 error:nil];
+                           ofTrack:textTrackAsset
+                            atTime:kCMTimeZero
+                             error:nil];
   }
   if (validTextTracks.count != _textTracks.count) {
     [self setTextTracks:validTextTracks];
@@ -602,7 +602,7 @@ static int const RCTVideoUnset = -1;
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
   if(self.onVideoEnd) {
-      self.onVideoEnd(@{@"target": self.reactTag});
+    self.onVideoEnd(@{@"target": self.reactTag});
   }
   
   if (_repeat) {
@@ -636,8 +636,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
 {
-    _allowsExternalPlayback = allowsExternalPlayback;
-    _player.allowsExternalPlayback = _allowsExternalPlayback;
+  _allowsExternalPlayback = allowsExternalPlayback;
+  _player.allowsExternalPlayback = _allowsExternalPlayback;
 }
 
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
@@ -770,52 +770,52 @@ static int const RCTVideoUnset = -1;
 - (void)setMediaSelectionTrackForCharacteristic:(AVMediaCharacteristic)characteristic
                                    withCriteria:(NSDictionary *)criteria
 {
-    NSString *type = criteria[@"type"];
-    AVMediaSelectionGroup *group = [_player.currentItem.asset
-                                    mediaSelectionGroupForMediaCharacteristic:characteristic];
-    AVMediaSelectionOption *mediaOption;
-    
-    if ([type isEqualToString:@"disabled"]) {
-        // Do nothing. We want to ensure option is nil
-    } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
-        NSString *value = criteria[@"value"];
-        for (int i = 0; i < group.options.count; ++i) {
-            AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-            NSString *optionValue;
-            if ([type isEqualToString:@"language"]) {
-                optionValue = [currentOption extendedLanguageTag];
-            } else {
-                optionValue = [[[currentOption commonMetadata]
-                                valueForKey:@"value"]
-                               objectAtIndex:0];
-            }
-            if ([value isEqualToString:optionValue]) {
-                mediaOption = currentOption;
-                break;
-            }
-        }
-        //} else if ([type isEqualToString:@"default"]) {
-        //  option = group.defaultOption; */
-    } else if ([type isEqualToString:@"index"]) {
-        if ([criteria[@"value"] isKindOfClass:[NSNumber class]]) {
-            int index = [criteria[@"value"] intValue];
-            if (group.options.count > index) {
-                mediaOption = [group.options objectAtIndex:index];
-            }
-        }
-    } else { // default. invalid type or "system"
-        [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
-        return;
+  NSString *type = criteria[@"type"];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:characteristic];
+  AVMediaSelectionOption *mediaOption;
+  
+  if ([type isEqualToString:@"disabled"]) {
+    // Do nothing. We want to ensure option is nil
+  } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
+    NSString *value = criteria[@"value"];
+    for (int i = 0; i < group.options.count; ++i) {
+      AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+      NSString *optionValue;
+      if ([type isEqualToString:@"language"]) {
+        optionValue = [currentOption extendedLanguageTag];
+      } else {
+        optionValue = [[[currentOption commonMetadata]
+                        valueForKey:@"value"]
+                       objectAtIndex:0];
+      }
+      if ([value isEqualToString:optionValue]) {
+        mediaOption = currentOption;
+        break;
+      }
     }
-    
-    // If a match isn't found, option will be nil and text tracks will be disabled
-    [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
+    //} else if ([type isEqualToString:@"default"]) {
+    //  option = group.defaultOption; */
+  } else if ([type isEqualToString:@"index"]) {
+    if ([criteria[@"value"] isKindOfClass:[NSNumber class]]) {
+      int index = [criteria[@"value"] intValue];
+      if (group.options.count > index) {
+        mediaOption = [group.options objectAtIndex:index];
+      }
+    }
+  } else { // default. invalid type or "system"
+    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+    return;
+  }
+  
+  // If a match isn't found, option will be nil and text tracks will be disabled
+  [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
 }
 
 - (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {
-    _selectedAudioTrack = selectedAudioTrack;
-    [self setMediaSelectionTrackForCharacteristic:AVMediaCharacteristicAudible
-                                        withCriteria:_selectedAudioTrack];
+  _selectedAudioTrack = selectedAudioTrack;
+  [self setMediaSelectionTrackForCharacteristic:AVMediaCharacteristicAudible
+                                   withCriteria:_selectedAudioTrack];
 }
 
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
@@ -950,25 +950,25 @@ static int const RCTVideoUnset = -1;
 
 - (NSArray *)getAudioTrackInfo
 {
-    NSMutableArray *audioTracks = [[NSMutableArray alloc] init];
-    AVMediaSelectionGroup *group = [_player.currentItem.asset
-                                    mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
-    for (int i = 0; i < group.options.count; ++i) {
-        AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-        NSString *title = @"";
-        NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
-        if (values.count > 0) {
-            title = [values objectAtIndex:0];
-        }
-        NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
-        NSDictionary *audioTrack = @{
-                                    @"index": [NSNumber numberWithInt:i],
-                                    @"title": title,
-                                    @"language": language
-                                    };
-        [audioTracks addObject:audioTrack];
+  NSMutableArray *audioTracks = [[NSMutableArray alloc] init];
+  AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
+  for (int i = 0; i < group.options.count; ++i) {
+    AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+    NSString *title = @"";
+    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+    if (values.count > 0) {
+      title = [values objectAtIndex:0];
     }
-    return audioTracks;
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+    NSDictionary *audioTrack = @{
+                                 @"index": [NSNumber numberWithInt:i],
+                                 @"title": title,
+                                 @"language": language
+                                 };
+    [audioTracks addObject:audioTrack];
+  }
+  return audioTracks;
 }
 
 - (NSArray *)getTextTrackInfo
@@ -1000,7 +1000,7 @@ static int const RCTVideoUnset = -1;
 
 - (BOOL)getFullscreen
 {
-    return _fullscreenPlayerPresented;
+  return _fullscreenPlayerPresented;
 }
 
 - (void)setFullscreen:(BOOL) fullscreen {
@@ -1010,11 +1010,11 @@ static int const RCTVideoUnset = -1;
   
   if (!_fullscreenOptions) {
     [self setFullscreenOptions:
-      @{
-        @"enabled": enabled,
-        @"autorotate": @"0",
-        @"preferredOrientation": @"default"
-        }];
+     @{
+       @"enabled": enabled,
+       @"autorotate": @"0",
+       @"preferredOrientation": @"default"
+       }];
   }
   else {
     [_fullscreenOptions setValue:enabled forKey:@"enabled"];
@@ -1077,14 +1077,14 @@ static int const RCTVideoUnset = -1;
 
 - (void)usePlayerViewController
 {
-    if( _player )
-    {
-        _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
-        // to prevent video from being animated when resizeMode is 'cover'
-        // resize mode must be set before subview is added
-        [self setResizeMode:_resizeMode];
-        [self addSubview:_playerViewController.view];
-    }
+  if( _player )
+  {
+    _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    // to prevent video from being animated when resizeMode is 'cover'
+    // resize mode must be set before subview is added
+    [self setResizeMode:_resizeMode];
+    [self addSubview:_playerViewController.view];
+  }
 }
 
 - (void)usePlayerLayer
@@ -1108,21 +1108,21 @@ static int const RCTVideoUnset = -1;
 
 - (void)setControls:(BOOL)controls
 {
-    if( _controls != controls || (!_playerLayer && !_playerViewController) )
+  if( _controls != controls || (!_playerLayer && !_playerViewController) )
+  {
+    _controls = controls;
+    if( _controls )
     {
-        _controls = controls;
-        if( _controls )
-        {
-            [self removePlayerLayer];
-            [self usePlayerViewController];
-        }
-        else
-        {
-            [_playerViewController.view removeFromSuperview];
-            _playerViewController = nil;
-            [self usePlayerLayer];
-        }
+      [self removePlayerLayer];
+      [self usePlayerViewController];
     }
+    else
+    {
+      [_playerViewController.view removeFromSuperview];
+      _playerViewController = nil;
+      [self usePlayerLayer];
+    }
+  }
 }
 
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval
@@ -1149,24 +1149,24 @@ static int const RCTVideoUnset = -1;
 
 - (void)videoPlayerViewControllerWillDismiss:(AVPlayerViewController *)playerViewController
 {
-    if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
-    {
-        self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
-    }
+  if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
+  {
+    self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
+  }
 }
 
 - (void)videoPlayerViewControllerDidDismiss:(AVPlayerViewController *)playerViewController
 {
-    if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
-    {
-        _fullscreenPlayerPresented = false;
-        _presentingViewController = nil;
-        _playerViewController = nil;
-        [self applyModifiers];
-        if(self.onVideoFullscreenPlayerDidDismiss) {
-            self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
-        }
+  if (_playerViewController == playerViewController && _fullscreenPlayerPresented)
+  {
+    _fullscreenPlayerPresented = false;
+    _presentingViewController = nil;
+    _playerViewController = nil;
+    [self applyModifiers];
+    if(self.onVideoFullscreenPlayerDidDismiss) {
+      self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
     }
+  }
 }
 
 #pragma mark - React View Management
@@ -1182,12 +1182,12 @@ static int const RCTVideoUnset = -1;
   
   if( _controls )
   {
-     view.frame = self.bounds;
-     [_playerViewController.contentOverlayView insertSubview:view atIndex:atIndex];
+    view.frame = self.bounds;
+    [_playerViewController.contentOverlayView insertSubview:view atIndex:atIndex];
   }
   else
   {
-     RCTLogError(@"video cannot have any subviews");
+    RCTLogError(@"video cannot have any subviews");
   }
   return;
 }
@@ -1196,7 +1196,7 @@ static int const RCTVideoUnset = -1;
 {
   if( _controls )
   {
-      [subview removeFromSuperview];
+    [subview removeFromSuperview];
   }
   else
   {
@@ -1219,10 +1219,10 @@ static int const RCTVideoUnset = -1;
   }
   else
   {
-      [CATransaction begin];
-      [CATransaction setAnimationDuration:0];
-      _playerLayer.frame = self.bounds;
-      [CATransaction commit];
+    [CATransaction begin];
+    [CATransaction setAnimationDuration:0];
+    _playerLayer.frame = self.bounds;
+    [CATransaction commit];
   }
 }
 
