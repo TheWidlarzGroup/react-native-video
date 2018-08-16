@@ -370,7 +370,7 @@ static int const RCTVideoUnset = -1;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  if ([filepath containsString:@"file://"]) {
+  if ([filepath containsString:@"file://"] && ![filepath containsString:@"/Documents/"]) {
     return [NSURL URLWithString:filepath];
   }
   
@@ -1101,11 +1101,11 @@ static int const RCTVideoUnset = -1;
   
   if (!_fullscreenOptions) {
     [self setFullscreenOptions:
-      @{
-        @"enabled": enabled,
-        @"autorotate": @"0",
-        @"preferredOrientation": @"default"
-        }];
+     @{
+       @"enabled": enabled,
+       @"autorotate": @"0",
+       @"preferredOrientation": @"default"
+       }];
   }
   else {
     [_fullscreenOptions setValue:enabled forKey:@"enabled"];
