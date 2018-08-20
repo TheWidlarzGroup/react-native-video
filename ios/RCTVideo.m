@@ -358,15 +358,17 @@ static int const RCTVideoUnset = -1;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  if ([filepath containsString:@"file://"] && ![filepath containsString:@"/Documents/"]) {
-    return [NSURL URLWithString:filepath];
+  
+  // check if the file exists at the specified location
+  if ([[NSFileManager defaultManager] fileExistsAtPath:filepath]) {
+    return [NSURL fileURLWithPath:filepath];
   }
   
-  // code to support local caching
+  // if no file found, check if the file exists in the Document directory
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
-  NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
+  NSArray* fileComponents = [filepath componentsSeparatedByString:@"/Documents/"];
   if (fileComponents.count>1) {
     relativeFilePath = [fileComponents objectAtIndex:1];
   }

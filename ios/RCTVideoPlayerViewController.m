@@ -9,7 +9,7 @@
 - (id)init {
   self = [super init];
   if (self) {
-    self.autorotate = false;
+    self.autorotate = true; // autorotate should be true by default
   }
   return self;
 }
@@ -27,12 +27,18 @@
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
   
+  if ([self.preferredOrientation.lowercaseString isEqualToString:@"landscape"]) {
+    return UIInterfaceOrientationMaskLandscape;
+  }
+  else if ([self.preferredOrientation.lowercaseString isEqualToString:@"portrait"]) {
+    return UIInterfaceOrientationMaskPortrait;
+  }
   return UIInterfaceOrientationMaskAll;
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
   if ([self.preferredOrientation.lowercaseString isEqualToString:@"landscape"]) {
-    return UIInterfaceOrientationLandscapeLeft;
+    return UIInterfaceOrientationLandscapeRight;
   }
   else if ([self.preferredOrientation.lowercaseString isEqualToString:@"portrait"]) {
     return UIInterfaceOrientationPortrait;
