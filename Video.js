@@ -323,6 +323,13 @@ Video.propTypes = {
       PropTypes.number
     ])
   }),
+  selectedVideoTrack: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ])
+  }),  
   selectedTextTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([

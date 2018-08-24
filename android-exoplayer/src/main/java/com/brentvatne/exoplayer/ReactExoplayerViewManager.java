@@ -51,6 +51,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
 
     @Override
     public String getName() {
@@ -134,6 +137,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
+    }
+
+    @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
+    public void setSelectedVideoTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedVideoTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedVideoTrack != null) {
+            typeString = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_TYPE)
+                    ? selectedVideoTrack.getString(PROP_SELECTED_VIDEO_TRACK_TYPE) : null;
+            value = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_VALUE)
+                    ? selectedVideoTrack.getDynamic(PROP_SELECTED_VIDEO_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedVideoTrack(typeString, value);
     }
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
