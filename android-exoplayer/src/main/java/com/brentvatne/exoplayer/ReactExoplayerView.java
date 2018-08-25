@@ -149,9 +149,10 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlaybackState() == ExoPlayer.STATE_READY
                             && player.getPlayWhenReady()
                             ) {
+                        long bitRateEstimate = BANDWIDTH_METER.getBitrateEstimate();
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), bitRateEstimate);
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -542,6 +543,8 @@ class ReactExoplayerView extends FrameLayout implements
             audioTrack.putString("title", format.id != null ? format.id : "");
             audioTrack.putString("type", format.sampleMimeType);
             audioTrack.putString("language", format.language != null ? format.language : "");
+            audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
+                                    : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
             audioTracks.pushMap(audioTrack);
         }
         return audioTracks;
