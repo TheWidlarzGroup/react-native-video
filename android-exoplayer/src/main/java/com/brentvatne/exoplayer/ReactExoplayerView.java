@@ -86,6 +86,7 @@ class ReactExoplayerView extends FrameLayout implements
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
+    private static final int REPORT_BANDWIDTH = 1;
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -133,6 +134,8 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
+    private float mBandwidthUpdateInterval = 250.0f;
+    private boolean mReportBandwidth = false;
     // \ End props
 
     // React
@@ -149,10 +152,9 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlaybackState() == ExoPlayer.STATE_READY
                             && player.getPlayWhenReady()
                             ) {
-                        long bitRateEstimate = BANDWIDTH_METER.getBitrateEstimate();
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), bitRateEstimate);
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -160,6 +162,23 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     };
+
+    private final Handler bandwidthReporter = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case REPORT_BANDWIDTH:
+                    if (player != null) {
+                        long bitRateEstimate = BANDWIDTH_METER.getBitrateEstimate();
+
+                        eventEmitter.bandwidthReport(bitRateEstimate);
+                        msg = obtainMessage(REPORT_BANDWIDTH);
+                        sendMessageDelayed(msg, Math.round(mBandwidthUpdateInterval));
+                    }
+                    break;
+            }
+        }
+    };    
 
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
@@ -338,6 +357,7 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
             trackSelector = null;
         }
+        bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
@@ -579,7 +599,6 @@ class ReactExoplayerView extends FrameLayout implements
 
                 videoTracks.pushMap(videoTrack);
             }
-
         }
         return videoTracks;
     }
@@ -757,6 +776,20 @@ class ReactExoplayerView extends FrameLayout implements
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
         mProgressUpdateInterval = progressUpdateInterval;
     }
+
+    public void setBandwidthUpdateInterval(final float bandwidthUpdateInterval) {
+        mBandwidthUpdateInterval = bandwidthUpdateInterval;
+    }    
+
+    public void setReportBandwidthModifier(boolean reportBandwidth) {
+        mReportBandwidth = reportBandwidth;
+        if (mReportBandwidth) {
+            bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
+            bandwidthReporter.sendEmptyMessage(REPORT_BANDWIDTH);
+        } else {
+            bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
+        }
+    }    
 
     public void setRawSrc(final Uri uri, final String extension) {
         if (uri != null) {

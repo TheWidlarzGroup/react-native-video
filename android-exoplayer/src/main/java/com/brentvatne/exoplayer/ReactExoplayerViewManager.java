@@ -45,6 +45,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
+    private static final String PROP_BANDWIDTH_UPDATE_INTERVAL = "bandwidthUpdateInterval";
+    private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
@@ -205,6 +207,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)
     public void setProgressUpdateInterval(final ReactExoplayerView videoView, final float progressUpdateInterval) {
         videoView.setProgressUpdateInterval(progressUpdateInterval);
+    }
+
+    @ReactProp(name = PROP_BANDWIDTH_UPDATE_INTERVAL, defaultFloat = 250.0f)
+    public void setBandwidthUpdateInterval(final ReactExoplayerView videoView, final float bandwidthUpdateInterval) {
+        videoView.setBandwidthUpdateInterval(bandwidthUpdateInterval);
+    }
+
+    @ReactProp(name = PROP_REPORT_BANDWIDTH, defaultBoolean = false)
+    public void setReportBandwidth(final ReactExoplayerView videoView, final boolean reportBandwidth) {
+        videoView.setReportBandwidthModifier(reportBandwidth);
     }
 
     @ReactProp(name = PROP_SEEK)

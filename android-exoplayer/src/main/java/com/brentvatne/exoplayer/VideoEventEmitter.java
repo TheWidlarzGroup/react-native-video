@@ -29,6 +29,7 @@ class VideoEventEmitter {
     private static final String EVENT_LOAD = "onVideoLoad";
     private static final String EVENT_ERROR = "onVideoError";
     private static final String EVENT_PROGRESS = "onVideoProgress";
+    private static final String EVENT_BANDWIDTH = "onBandwidthUpdate";
     private static final String EVENT_SEEK = "onVideoSeek";
     private static final String EVENT_END = "onVideoEnd";
     private static final String EVENT_FULLSCREEN_WILL_PRESENT = "onVideoFullscreenPlayerWillPresent";
@@ -66,6 +67,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_BANDWIDTH,
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -89,6 +91,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_BANDWIDTH,
     })
     @interface VideoEvents {
     }
@@ -103,7 +106,6 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
-    private static final String EVENT_PROP_BITRATE_ESTIMATE = "bitrateEstimate";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
@@ -122,6 +124,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR_EXCEPTION = "";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
+
+    private static final String EVENT_PROP_BITRATE_ESTIMATE = "bitrateEstimate";   
 
 
     void setViewId(int viewId) {
@@ -164,14 +168,19 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double bitRateEstimate) {
+    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
-        event.putDouble(EVENT_PROP_BITRATE_ESTIMATE, bitRateEstimate / 1000D);
         receiveEvent(EVENT_PROGRESS, event);
     }
+
+    void bandwidthReport(double bitRateEstimate) {
+        WritableMap event = Arguments.createMap();
+        event.putDouble(EVENT_PROP_BITRATE_ESTIMATE, bitRateEstimate / 1000D);
+        receiveEvent(EVENT_BANDWIDTH, event);
+    }    
 
     void seek(long currentPosition, long seekTime) {
         WritableMap event = Arguments.createMap();
