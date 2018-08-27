@@ -151,6 +151,12 @@ export default class Video extends Component {
     }
   };
 
+  _onCaptionsDeviceSetting = (event) => {
+    if (this.props.onCaptionsDeviceSetting) {
+      this.props.onCaptionsDeviceSetting(event.nativeEvent);
+    }
+  };
+
   _onPlaybackStalled = (event) => {
     if (this.props.onPlaybackStalled) {
       this.props.onPlaybackStalled(event.nativeEvent);
@@ -241,6 +247,7 @@ export default class Video extends Component {
       onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
       onVideoFullscreenPlayerDidDismiss: this._onFullscreenPlayerDidDismiss,
       onReadyForDisplay: this._onReadyForDisplay,
+      onCaptionsDeviceSetting: this._onCaptionsDeviceSetting,
       onPlaybackStalled: this._onPlaybackStalled,
       onPlaybackResume: this._onPlaybackResume,
       onPlaybackRateChange: this._onPlaybackRateChange,
@@ -379,6 +386,7 @@ Video.propTypes = {
   onFullscreenPlayerWillDismiss: PropTypes.func,
   onFullscreenPlayerDidDismiss: PropTypes.func,
   onReadyForDisplay: PropTypes.func,
+  onCaptionsDeviceSetting: PropTypes.func,
   onPlaybackStalled: PropTypes.func,
   onPlaybackResume: PropTypes.func,
   onPlaybackRateChange: PropTypes.func,
