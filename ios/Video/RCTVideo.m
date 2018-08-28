@@ -15,6 +15,12 @@ static NSString *const timedMetadata = @"timedMetadata";
 
 static int const RCTVideoUnset = -1;
 
+#ifdef DEBUG
+    #define DebugLog(...) NSLog(__VA_ARGS__)
+#else
+    #define DebugLog(...) (void)0
+#endif
+
 @implementation RCTVideo
 {
   AVPlayer *_player;
@@ -312,7 +318,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
 
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
 
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
@@ -337,7 +343,7 @@ static int const RCTVideoUnset = -1;
       [self addPlayerTimeObserver];
         
       //Perform on next run loop, otherwise onVideoLoadStart is nil
-      if(self.onVideoLoadStart) {
+      if (self.onVideoLoadStart) {
         id uri = [source objectForKey:@"uri"];
         id type = [source objectForKey:@"type"];
         self.onVideoLoadStart(@{@"src": @{
@@ -362,7 +368,7 @@ static int const RCTVideoUnset = -1;
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
   NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
-  if (fileComponents.count>1) {
+  if (fileComponents.count > 1) {
     relativeFilePath = [fileComponents objectAtIndex:1];
   }
   
@@ -373,12 +379,13 @@ static int const RCTVideoUnset = -1;
   return nil;
 }
 
-- (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSMutableDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
+- (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
   if (!_textTracks) {
     handler([AVPlayerItem playerItemWithAsset:asset]);
     return;
   }
+
   // sideload text tracks
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
   
@@ -430,53 +437,38 @@ static int const RCTVideoUnset = -1;
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
 
-  NSURL *url = (isNetwork || isAsset) ?
-  [NSURL URLWithString:uri] :
-  [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  NSURL *url = isNetwork || isAsset
+    ? [NSURL URLWithString:uri]
+    : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
   if (isNetwork) {
+    /* Per #1091, this is not a public API.
+     * We need to either get approval from Apple to use this  or use a different approach.
+     NSDictionary *headers = [source objectForKey:@"requestHeaders"];
+     if ([headers count] > 0) {
+       [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
+     }
+     */
+    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
+
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-    [_videoCache getItemForUri:uri withCallback:^(RCTVideoCacheStatus videoCacheStatus, AVAsset * _Nullable cachedAsset) {
-      switch (videoCacheStatus) {
-        case RCTVideoCacheStatusMissingFileExtension: {
-#ifdef DEBUG
-          NSLog(@"Could not generate cache key for uri '%@'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md.", uri);
+    if (!_textTracks) {
+      /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
+       *  to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
+       * Until this is fixed, we need to bypass caching when text tracks are specified.
+       */
+      DebugLog(@"Caching is not supported for uri '%@' because text tracks are not compatible with the cache. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
+      [self playerItemForSourceUsingCache:uri assetOptions:assetOptions withCallback:handler];
+      return;
+    }
 #endif
-          AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-          [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
-          return;
-        }
-        case RCTVideoCacheStatusUnsupportedFileExtension: {
-#ifdef DEBUG
-          NSLog(@"Could not generate cache key for uri '%@'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md.", uri);
-#endif
-          AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-          [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
-          return;
-        }
-        default:
-          if (cachedAsset) {
-            [self playerItemPrepareText:cachedAsset assetOptions:assetOptions withCallback:handler];
-            return;
-          }
-      }
-#endif
-      NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-      [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-      DVURLAsset *asset = [[DVURLAsset alloc] initWithURL:url options:assetOptions networkTimeout: 10000];
-      asset.loaderDelegate = self;
-#else
-      AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-#endif
-      [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-    }];
-#endif
+
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
     return;
-  }
-  else if (isAsset) {
+  } else if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
     return;
@@ -485,6 +477,61 @@ static int const RCTVideoUnset = -1;
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
 }
+
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+
+- (void)playerItemForSourceUsingCache:(NSString *)uri assetOptions:(NSDictionary *)options withCallback:(void(^)(AVPlayerItem *))handler {
+    NSURL *url = [NSURL URLWithString:uri];
+    [_videoCache getItemForUri:uri withCallback:^(RCTVideoCacheStatus videoCacheStatus, AVAsset * _Nullable cachedAsset) {
+        switch (videoCacheStatus) {
+            case RCTVideoCacheStatusMissingFileExtension: {
+                DebugLog(@"Could not generate cache key for uri '%@'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
+                AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:options];
+                [self playerItemPrepareText:asset assetOptions:options withCallback:handler];
+                return;
+            }
+            case RCTVideoCacheStatusUnsupportedFileExtension: {
+                DebugLog(@"Could not generate cache key for uri '%@'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
+                AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:options];
+                [self playerItemPrepareText:asset assetOptions:options withCallback:handler];
+                return;
+            }
+            default:
+                if (cachedAsset) {
+                    DebugLog(@"Playing back uri '%@' from cache", uri);
+                    // See note in playerItemForSource about not being able to support text tracks & caching
+                    handler([AVPlayerItem playerItemWithAsset:asset]);
+                    return;
+                }
+        }
+
+        DVURLAsset *asset = [[DVURLAsset alloc] initWithURL:url options:options networkTimeout:10000];
+        asset.loaderDelegate = self;
+        
+        /* More granular code to have control over the DVURLAsset
+        DVAssetLoaderDelegate *resourceLoaderDelegate = [[DVAssetLoaderDelegate alloc] initWithURL:url];
+        resourceLoaderDelegate.delegate = self;
+        NSURLComponents *components = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
+        components.scheme = [DVAssetLoaderDelegate scheme];
+        AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:[components URL] options:options];
+        [asset.resourceLoader setDelegate:resourceLoaderDelegate queue:dispatch_get_main_queue()];
+        */
+
+        handler([AVPlayerItem playerItemWithAsset:asset]);
+    }];
+}
+
+#pragma mark - DVAssetLoaderDelegate
+
+- (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
+                  didLoadData:(NSData *)data
+                       forURL:(NSURL *)url {
+    [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
+        DebugLog(@"Cache data stored successfully 🎉");
+    }];
+}
+
+#endif
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
@@ -1152,20 +1199,6 @@ static int const RCTVideoUnset = -1;
   }
   _playerLayer = nil;
 }
-
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-#pragma mark - DVAssetLoaderDelegate
-- (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
-                  didLoadData:(NSData *)data
-                       forURL:(NSURL *)url {
-    [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
-#ifdef DEBUG
-        NSLog(@"data stored succesfully 🎉");
-#endif
-    }];
-}
-
-#endif
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate
 

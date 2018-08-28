@@ -9,11 +9,13 @@ The cache is backed by [SPTPersistentCache](https://github.com/spotify/SPTPersis
 # How Does It Work
 
 The caching is based on the url of the asset.
-SPTPersistentCache is a LRU ([last recently used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU))) cache.
+SPTPersistentCache is a LRU ([Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU))) cache.
 
 # Restrictions
 
-Currenly the uri of the resource that should be cached needs to have the appropriate file extension (one of `mp4`, `m4v` or `mov`). In order to be cached. In future versions (once dependencies allow access to the `content-type` header) this will no longer be necessary. You will also receive warnings in the xcode logs by using the `debug` mode. So if you are not 100% sure if your video is cached, check your xcode logs!
+Currently, caching is only supported for URLs that end in a `.mp4`, `.m4v`, or `.mov` extension. In future versions, URLs that end in a query string (e.g. test.mp4?resolution=480p) will be support once dependencies allow access to the `Content-Type` header.  At this time, HLS playlists (.m3u8) and videos that sideload text tracks are not supported and will bypass the cache.
+
+You will also receive warnings in the Xcode logs by using the `debug` mode. So if you are not 100% sure if your video is cached, check your Xcode logs!
 
 By default files expire after 30 days and the maxmimum cache size is 100mb.
 
