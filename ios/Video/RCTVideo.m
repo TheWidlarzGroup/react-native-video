@@ -31,7 +31,6 @@ static int const RCTVideoUnset = -1;
   BOOL _playerLayerObserverSet;
   AVPlayerViewController *_playerViewController;
   NSURL *_videoURL;
-  AVURLAsset *_testAsset;
   
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
