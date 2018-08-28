@@ -11,10 +11,13 @@ Version 4.0.0 now requires Android SDK 26 or higher to use ExoPlayer. This is th
 ### Version 3.0.0 breaking changes
 Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
 
-## TOC
+## Table of Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
+* [iOS App Transport Security](#ios-app-transport-security)
+* [Audio Mixing](#audio-mixing)
+* [Android Expansion File Usage](#android-expansion-file-usage)
 * [Updating](#updating)
 
 ## Installation
@@ -31,26 +34,37 @@ or using yarn:
 yarn add react-native-video
 ```
 
+Then follow the instructions for your platform to link react-native-video into your project:
+
 <details>
   <summary>iOS</summary>
 
+### Standard Method
+
 Run `react-native link react-native-video` to link the react-native-video library.
 
-If you would like to allow other apps to play music over your video component, add:
+### Using CocoaPods (required to enable caching)
 
-**AppDelegate.m**
+Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
 
-```objective-c
-#import <AVFoundation/AVFoundation.h>  // import
+Depending on your requirements you have to choose between the two possible subpodspecs:
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  ...
-  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
-  ...
-}
+Video only:
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
++  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
 ```
-Note: you can also use the `ignoreSilentSwitch` prop, shown below.
+
+Video with caching ([more info](docs/caching.md)):
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
++  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
+```
+
 </details>
 
 <details>
@@ -716,15 +730,35 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 Platforms: iOS
 
 
-### Additional props
+### iOS App Transport Security
 
-To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
-
-- By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
+- By default, iOS will only load encrypted (https) urls. If you want to load content from an unencrypted (http) source, you will need to modify your Info.plist file and add the following entry:
 
 <img src="./docs/AppTransportSecuritySetting.png" width="50%">
 
 For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
+</details>
+
+### Audio Mixing
+
+At some point in the future, react-native-video will include an Audio Manager for configuring how videos mix with other apps playing sounds on the device.
+
+On iOS, if you would like to allow other apps to play music over your video component, make the following change:
+
+**AppDelegate.m**
+
+```objective-c
+#import <AVFoundation/AVFoundation.h>  // import
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ...
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
+  ...
+}
+```
+
+You can also use the [ignoreSilentSwitch](ignoresilentswitch) prop.
 </details>
 
 ### Android Expansion File Usage
