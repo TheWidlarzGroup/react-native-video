@@ -382,6 +382,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
+  if (!_textTracks) {
+    handler([AVPlayerItem playerItemWithAsset:asset]);
+    return;
+  }
+
   // sideload text tracks
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
   
@@ -439,30 +444,29 @@ static int const RCTVideoUnset = -1;
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
   if (isNetwork) {
-      /* Per #1091, this is not a public API.
-       * We need to either get approval from Apple to use this  or use a different approach.
-       NSDictionary *headers = [source objectForKey:@"requestHeaders"];
-       if ([headers count] > 0) {
-         [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
-       }
-       */
-      NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-      [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
+    /* Per #1091, this is not a public API.
+     * We need to either get approval from Apple to use this  or use a different approach.
+     NSDictionary *headers = [source objectForKey:@"requestHeaders"];
+     if ([headers count] > 0) {
+       [assetOptions setObject:headers forKey:@"AVURLAssetHTTPHeaderFieldsKey"];
+     }
+     */
+    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
+
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-      if (_textTracks) {
-        /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
-         * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
-         * Until this is fixed, we need to bypass caching when text tracks are specified.
-         */
-        AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-        [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
-      } else {
-        [self playerItemForSourceUsingCache:uri assetOptions:assetOptions withCallback:handler];
-      }
-#else
-      AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-      [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+    if (!_textTracks) {
+      /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
+       *  to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
+       * Until this is fixed, we need to bypass caching when text tracks are specified.
+       */
+      [self playerItemForSourceUsingCache:uri assetOptions:assetOptions withCallback:handler];
+      return;
+    }
 #endif
+
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
     return;
   } else if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
@@ -495,7 +499,8 @@ static int const RCTVideoUnset = -1;
             default:
                 if (cachedAsset) {
                     DebugLog(@"Playing back uri '%@' from cache", uri);
-                    [self playerItemPrepareText:cachedAsset assetOptions:options withCallback:handler];
+                    // See note in playerItemForSource about not being able to support text tracks & caching
+                    handler([AVPlayerItem playerItemWithAsset:asset]);
                     return;
                 }
         }
@@ -503,7 +508,7 @@ static int const RCTVideoUnset = -1;
         DVURLAsset *asset = [[DVURLAsset alloc] initWithURL:url options:options networkTimeout:10000];
         asset.loaderDelegate = self;
         
-        /* More granular code to 
+        /* More granular code to have control over the DVURLAsset
         DVAssetLoaderDelegate *resourceLoaderDelegate = [[DVAssetLoaderDelegate alloc] initWithURL:url];
         resourceLoaderDelegate.delegate = self;
         NSURLComponents *components = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
