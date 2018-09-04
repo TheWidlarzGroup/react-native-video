@@ -228,6 +228,8 @@ var styles = StyleSheet.create({
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
+* [fullscreen (deprecated)](#fullscreen)
+* [fullscreenOptions](#fullscreenOptions)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -304,6 +306,33 @@ bufferConfig={{
 ```
 
 Platforms: Android ExoPlayer
+
+#### fullscreen (deprecated)
+
+Controls whether the player enters fullscreen on play. Use fullscreenOptions for extended behaviour.
+
+Platforms: iOS
+
+#### fullscreenOptions
+
+Controls behaviour of the player entering fullscreen, such as forcing landscape playback on portrait devices
+
+Property | Type | Description
+--- | --- | ---
+enabled | boolean | determines whether to enter fullscreen on video play
+preferredOrientation | landscape, portrait, default | Defaults to the current device orientation; otherwise will force fullscreen video playback into landscape or portrait
+autorotate | boolean | determines whether the video player will rotate to the preferredOrientation automatically
+
+Example with default values
+```
+fullscreenOptions={{ 
+  enabled: false,
+  preferredOrientation: 'default'
+  autorotate: true 
+}}
+```
+
+Platforms: iOS
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
