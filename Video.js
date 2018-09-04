@@ -289,6 +289,11 @@ Video.propTypes = {
     PropTypes.object
   ]),
   fullscreen: PropTypes.bool,
+  fullscreenOptions: PropTypes.shape({
+    enabled: PropTypes.bool,
+    preferredOrientation: PropTypes.string,
+    autorotate: PropTypes.bool
+  }),
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,
   onVideoBuffer: PropTypes.func,
