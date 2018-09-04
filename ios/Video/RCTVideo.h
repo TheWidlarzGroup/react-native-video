@@ -32,7 +32,6 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillDismiss;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidDismiss;
 @property (nonatomic, copy) RCTBubblingEventBlock onReadyForDisplay;
-@property (nonatomic, copy) RCTBubblingEventBlock onCaptionsDeviceSetting;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackStalled;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;

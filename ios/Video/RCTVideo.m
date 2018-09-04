@@ -68,7 +68,6 @@ static int const RCTVideoUnset = -1;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
-  BOOL _deviceCaptionsEnabled;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -364,12 +363,6 @@ static int const RCTVideoUnset = -1;
                                         @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
                                     @"target": self.reactTag
                                 });
-      }
-
-      if (self.onCaptionsDeviceSetting) {
-        self.onCaptionsDeviceSetting(@{@"deviceCaptionsEnabled": [NSNumber numberWithBool:_deviceCaptionsEnabled],
-                                     @"target": self.reactTag
-                                     });
       }
     }];
   });
@@ -973,7 +966,9 @@ static int const RCTVideoUnset = -1;
   
   // in the situation that a selected text track is not available (eg. specifies a textTrack not available)
   if (![type isEqualToString:@"disabled"] && selectedTrackIndex == RCTVideoUnset) {
-    if (_deviceCaptionsEnabled) {
+    CFArrayRef captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(kMACaptionAppearanceDomainUser);
+    NSArray *captionSettings = (__bridge NSArray*)captioningMediaCharacteristics;
+    if ([captionSettings containsObject:AVMediaCharacteristicTranscribesSpokenDialogForAccessibility]) {
       selectedTrackIndex = 0; // If we can't find a match, use the first available track
       NSString *systemLanguage = [[NSLocale preferredLanguages] firstObject];
       for (int i = 0; i < textTracks.count; ++i) {
