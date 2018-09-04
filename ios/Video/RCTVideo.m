@@ -119,19 +119,19 @@ static int const RCTVideoUnset = -1;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
   
-  RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
-  playerLayer.showsPlaybackControls = YES;
-  playerLayer.rctDelegate = self;
-  
-  if (_fullscreenOptions) {
-    playerLayer.preferredOrientation = [RCTConvert NSString:[_fullscreenOptions objectForKey:@"preferredOrientation"]];
-    playerLayer.autorotate = [RCTConvert BOOL:[_fullscreenOptions objectForKey:@"autorotate"]];
-  }
-  
-  playerLayer.view.frame = self.bounds;
-  playerLayer.player = player;
-  playerLayer.view.frame = self.bounds;
-  return playerLayer;
+    RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
+    playerLayer.showsPlaybackControls = YES;
+    playerLayer.rctDelegate = self;
+    
+    if (_fullscreenOptions) {
+      playerLayer.preferredOrientation = [RCTConvert NSString:[_fullscreenOptions objectForKey:@"preferredOrientation"]];
+      playerLayer.autorotate = [RCTConvert BOOL:[_fullscreenOptions objectForKey:@"autorotate"]];
+    }
+    
+    playerLayer.view.frame = self.bounds;
+    playerLayer.player = player;
+    playerLayer.view.frame = self.bounds;
+    return playerLayer;
 }
 
 /* ---------------------------------------------------------
@@ -222,11 +222,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)audioRouteChanged:(NSNotification *)notification
 {
-  NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
-  NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
-  if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
-    self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
-  }
+    NSNumber *reason = [[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey];
+    NSNumber *previousRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
+    if (reason.unsignedIntValue == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+      self.onVideoAudioBecomingNoisy(@{@"target": self.reactTag});
+    }
 }
 
 #pragma mark - Progress
@@ -381,7 +381,7 @@ static int const RCTVideoUnset = -1;
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
   NSArray* fileComponents = [filepath componentsSeparatedByString:@"/Documents/"];
-  if (fileComponents.count>1) {
+  if (fileComponents.count > 1) {
     relativeFilePath = [fileComponents objectAtIndex:1];
   }
   
@@ -729,8 +729,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
 {
-  _allowsExternalPlayback = allowsExternalPlayback;
-  _player.allowsExternalPlayback = _allowsExternalPlayback;
+    _allowsExternalPlayback = allowsExternalPlayback;
+    _player.allowsExternalPlayback = _allowsExternalPlayback;
 }
 
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive
@@ -863,52 +863,52 @@ static int const RCTVideoUnset = -1;
 - (void)setMediaSelectionTrackForCharacteristic:(AVMediaCharacteristic)characteristic
                                    withCriteria:(NSDictionary *)criteria
 {
-  NSString *type = criteria[@"type"];
-  AVMediaSelectionGroup *group = [_player.currentItem.asset
-                                  mediaSelectionGroupForMediaCharacteristic:characteristic];
-  AVMediaSelectionOption *mediaOption;
+    NSString *type = criteria[@"type"];
+    AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                    mediaSelectionGroupForMediaCharacteristic:characteristic];
+    AVMediaSelectionOption *mediaOption;
   
-  if ([type isEqualToString:@"disabled"]) {
-    // Do nothing. We want to ensure option is nil
-  } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
-    NSString *value = criteria[@"value"];
-    for (int i = 0; i < group.options.count; ++i) {
-      AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-      NSString *optionValue;
-      if ([type isEqualToString:@"language"]) {
-        optionValue = [currentOption extendedLanguageTag];
-      } else {
-        optionValue = [[[currentOption commonMetadata]
-                        valueForKey:@"value"]
-                       objectAtIndex:0];
+    if ([type isEqualToString:@"disabled"]) {
+      // Do nothing. We want to ensure option is nil
+    } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
+        NSString *value = criteria[@"value"];
+        for (int i = 0; i < group.options.count; ++i) {
+            AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+            NSString *optionValue;
+            if ([type isEqualToString:@"language"]) {
+              optionValue = [currentOption extendedLanguageTag];
+            } else {
+              optionValue = [[[currentOption commonMetadata]
+                              valueForKey:@"value"]
+                             objectAtIndex:0];
+            }
+            if ([value isEqualToString:optionValue]) {
+              mediaOption = currentOption;
+              break;
+            }
       }
-      if ([value isEqualToString:optionValue]) {
-        mediaOption = currentOption;
-        break;
-      }
+      //} else if ([type isEqualToString:@"default"]) {
+      //  option = group.defaultOption; */
+    } else if ([type isEqualToString:@"index"]) {
+        if ([criteria[@"value"] isKindOfClass:[NSNumber class]]) {
+          int index = [criteria[@"value"] intValue];
+          if (group.options.count > index) {
+            mediaOption = [group.options objectAtIndex:index];
+          }
+        }
+    } else { // default. invalid type or "system"
+      [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+      return;
     }
-    //} else if ([type isEqualToString:@"default"]) {
-    //  option = group.defaultOption; */
-  } else if ([type isEqualToString:@"index"]) {
-    if ([criteria[@"value"] isKindOfClass:[NSNumber class]]) {
-      int index = [criteria[@"value"] intValue];
-      if (group.options.count > index) {
-        mediaOption = [group.options objectAtIndex:index];
-      }
-    }
-  } else { // default. invalid type or "system"
-    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
-    return;
-  }
   
-  // If a match isn't found, option will be nil and text tracks will be disabled
-  [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
+    // If a match isn't found, option will be nil and text tracks will be disabled
+    [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
 }
 
 - (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {
-  _selectedAudioTrack = selectedAudioTrack;
-  [self setMediaSelectionTrackForCharacteristic:AVMediaCharacteristicAudible
-                                   withCriteria:_selectedAudioTrack];
+    _selectedAudioTrack = selectedAudioTrack;
+    [self setMediaSelectionTrackForCharacteristic:AVMediaCharacteristicAudible
+                                     withCriteria:_selectedAudioTrack];
 }
 
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
@@ -1043,25 +1043,25 @@ static int const RCTVideoUnset = -1;
 
 - (NSArray *)getAudioTrackInfo
 {
-  NSMutableArray *audioTracks = [[NSMutableArray alloc] init];
-  AVMediaSelectionGroup *group = [_player.currentItem.asset
-                                  mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
-  for (int i = 0; i < group.options.count; ++i) {
-    AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
-    NSString *title = @"";
-    NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
-    if (values.count > 0) {
-      title = [values objectAtIndex:0];
+    NSMutableArray *audioTracks = [[NSMutableArray alloc] init];
+    AVMediaSelectionGroup *group = [_player.currentItem.asset
+                                    mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
+    for (int i = 0; i < group.options.count; ++i) {
+        AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+        NSString *title = @"";
+        NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
+        if (values.count > 0) {
+          title = [values objectAtIndex:0];
+        }
+        NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+        NSDictionary *audioTrack = @{
+                                     @"index": [NSNumber numberWithInt:i],
+                                     @"title": title,
+                                     @"language": language
+                                     };
+        [audioTracks addObject:audioTrack];
     }
-    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
-    NSDictionary *audioTrack = @{
-                                 @"index": [NSNumber numberWithInt:i],
-                                 @"title": title,
-                                 @"language": language
-                                 };
-    [audioTracks addObject:audioTrack];
-  }
-  return audioTracks;
+    return audioTracks;
 }
 
 - (NSArray *)getTextTrackInfo
