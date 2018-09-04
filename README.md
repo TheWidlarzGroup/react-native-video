@@ -682,8 +682,8 @@ Platforms: all
 #### onProgress
 Callback function that is called every progressInterval seconds with info about which position the media is currently playing.
 
-Property | Description
---- | ---
+Property | Type | Description
+--- | --- | ---
 currentTime | number | Current position in seconds
 playableDuration | number | Position to where the media can be played to using just the buffer in seconds
 seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
