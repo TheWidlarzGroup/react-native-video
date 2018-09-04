@@ -241,6 +241,7 @@ var styles = StyleSheet.create({
 * [resizeMode](#resizemode)
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
+* [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
@@ -455,6 +456,63 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
 Platforms: Android ExoPlayer, iOS
+
+#### source
+Sets the media source. You can pass an asset loaded via require or an object with a uri.
+
+The docs for this prop are incomplete and will be updated as each option is investigated and tested.
+
+##### Asset loaded via require
+
+Example: 
+```
+const sintel = require('./sintel.mp4');
+
+source={sintel}
+```
+
+##### URI string
+
+A number of URI schemes are supported by passing an object with a `uri` attribute.
+
+###### Web address (http://, https://)
+
+Example:
+```
+source={ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }
+```
+
+Platforms: all
+
+###### File path (file://)
+
+Example:
+```
+source={ uri: 'file:///sdcard/Movies/sintel.mp4' }
+```
+
+Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
+
+Platforms: Android ExoPlayer, Android MediaPlayer, possibly others
+
+###### iPod Library (ipod-library://)
+
+Path to a sound file in your iTunes library. Typically shared from iTunes to your app.
+
+Example:
+```
+source={ uri: 'ipod-library:///path/to/music.mp3' }
+```
+
+Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
+
+Platforms: iOS
+
+###### Other protocols
+
+The following other types are supported on some platforms, but aren't fully documented yet:
+`content://, ms-appx://, ms-appdata://, assets-library://`
+
 
 #### stereoPan
 Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
