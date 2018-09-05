@@ -106,7 +106,13 @@ class VideoPlayer extends Component {
             ref={(ref: Video) => { this.video = ref }}
             /* For ExoPlayer */
             /* source={{ uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0', type: 'mpd' }} */
-            source={require('./broadchurch.mp4')}
+            /* source={require('./broadchurch.mp4')} */
+            source={{
+             	uri: 'http://public_seriously.s3.amazonaws.com/shaka_encrypted/dash/DashBigBuckBunny.mpd',
+              	type: 'mpd',
+            	drm: '{\"drmScheme\": \"widevine\", \"licensingServerUrl\": \"https:\/\/poc-dynopkgwidevine.sd-ngp.net\/proxy\",\"croToken\": \"bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkaWNlIiwiaXNzIjoiaHR0cDovL2R5bmFtaWNfcGFja2FnZXJfYXBpX2FwaS5zZC1ucGcubmV0IiwiaWF0IjoxNTM2MTM1MTYwLCJkaWQiOiJ0ZXN0X2RldmljZV9pZCIsImp0aSI6IjEwMjRmZmZjLWNmZDctNDQ5Ny1iNjUxLWJkODQ4MzkwNWY1MSIsImVpZCI6ImRpY2Vfc3RyZWFtXzEiLCJleHAiOjE1OTEzOTQ5MjMsImFpZCI6InRlc3RfYWNjb3VudF9pZCIsInBsYyI6dHJ1ZSwiZGVmIjoiaGQifQ.Y5eU0V11RWh4f65Ir_qlT0kJL4XPCkr5P5LCbSvIvRk\"}'
+            	/* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
+            	}}
             style={styles.fullScreen}
             rate={this.state.rate}
             paused={this.state.paused}

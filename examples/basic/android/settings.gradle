@@ -8,5 +8,9 @@ include ':app',
 //project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../android')
 //project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../android-exoplayer')
 
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../android')
-project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../android-exoplayer')
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../../android')
+project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../../android-exoplayer')
+
+//FIXME:
+include ':fea_dice_shield_dlm'
+project(':fea_dice_shield_dlm').projectDir = new File(rootProject.projectDir, '../../../../fea_dice_shield_dlm/dice-shield')
