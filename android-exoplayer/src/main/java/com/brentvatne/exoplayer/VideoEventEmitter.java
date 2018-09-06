@@ -121,7 +121,7 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
-    private static final String EVENT_PROP_ERROR_EXCEPTION = "";
+    private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
