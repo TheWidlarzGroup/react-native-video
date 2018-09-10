@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-  <string name="error_no_decoder">This device does not provide a decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="error_no_decoder">This device does not provide a decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
 
-  <string name="error_no_secure_decoder">This device does not provide a secure decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="error_no_secure_decoder">This device does not provide a secure decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
 
-  <string name="error_querying_decoders">Unable to query device decoders</string>
+    <string name="error_querying_decoders">Unable to query device decoders</string>
 
-  <string name="error_instantiating_decoder">Unable to instantiate decoder <xliff:g id="decoder_name">%1$s</xliff:g></string>
+    <string name="error_instantiating_decoder">Unable to instantiate decoder <xliff:g id="decoder_name">%1$s</xliff:g></string>
 
-  <string name="unrecognized_media_format">Unrecognized media format</string>
+    <string name="unrecognized_media_format">Unrecognized media format</string>
+
+    <string name="default_time">00:00:00</string>
+    <string name="play_video">Play video</string>
+    <string name="rewind_video">Rewind video</string>
+    <string name="forward_video">Forward video</string>
+    <string name="fullscreen">Fullscreen</string>
+    <string name="preview_image">Preview image</string>
+    <string name="live">LIVE</string>
 
 </resources>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottomBarWidget"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingBottom="12dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="0dp"
+    android:paddingTop="8dp">
+
+    <TextView
+        android:id="@+id/currentTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginBottom="1dp"
+        android:gravity="center"
+        android:paddingBottom="1dp"
+        android:text="@string/default_time"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="12sp" />
+
+    <com.previewseekbar.PreviewSeekBarLayout
+        android:id="@+id/previewSeekBarLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- TODO: Enable the following when adding the thumbnails -->
+        <!-- set width to @dimen/video_preview_width -->
+        <!-- set height to @dimen/video_preview_height -->
+        <FrameLayout
+            android:id="@+id/previewFrameLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#a00"
+                android:contentDescription="@string/preview_image" />
+
+        </FrameLayout>
+
+        <com.previewseekbar.PreviewSeekBar
+            android:id="@+id/previewSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_below="@id/previewFrameLayout"
+            android:maxHeight="@dimen/previewseekbar_progress_height"
+            android:minHeight="@dimen/previewseekbar_progress_height"
+            android:minWidth="@dimen/previewseekbar_progress_width"
+            android:maxWidth="@dimen/previewseekbar_progress_width"
+            android:progressDrawable="@drawable/previewseekbar_progress_drawable" />
+
+    </com.previewseekbar.PreviewSeekBarLayout>
+
+    <TextView
+        android:id="@+id/durationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginBottom="1dp"
+        android:gravity="center"
+        android:paddingBottom="1dp"
+        android:text="@string/default_time"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/liveTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="0dp"
+        android:layout_marginStart="0dp"
+        android:background="@drawable/bg_live"
+        android:gravity="center"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/live"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
+
+    <ImageButton
+        android:id="@+id/bottomRightIconButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center"
+        android:background="#00000000"
+        android:contentDescription="@string/fullscreen"
+        android:gravity="center"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_fullscreen_off" />
+
+</LinearLayout>

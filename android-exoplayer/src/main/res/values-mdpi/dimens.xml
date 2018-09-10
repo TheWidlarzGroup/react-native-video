@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="previewseekbar_indicator_width">10dp</dimen>
+    <dimen name="previewseekbar_thumb_offset">10dp</dimen>
+    <dimen name="previewseekbar_progress_height">4dp</dimen>
+    <dimen name="previewseekbar_progress_width">4dp</dimen>
+    <dimen name="previewseekbar_progress_corner_radius">8dp</dimen>
+</resources>
