@@ -108,12 +108,12 @@ public final class ExoPlayerView extends FrameLayout {
 
     /**
      * Set the {@link SimpleExoPlayer} to use. The {@link SimpleExoPlayer#setTextOutput} and
-     * {@link SimpleExoPlayer#setVideoListener} method of the player will be called and previous
+     * {@link SimpleExoPlayer#setVideoListener} method of the controls will be called and previous
      * assignments are overridden.
      *
      * @param player The {@link SimpleExoPlayer} to use.
      */
-    public void setPlayer(SimpleExoPlayer player) {
+    public void setPlayer(SimpleExoPlayer player, boolean subtitlesEnabled) {
         if (this.player == player) {
             return;
         }
@@ -130,6 +130,9 @@ public final class ExoPlayerView extends FrameLayout {
             player.setVideoListener(componentListener);
             player.addListener(componentListener);
             player.setTextOutput(componentListener);
+            if (subtitlesEnabled) {
+                player.setTextOutput(componentListener);
+            }
         }
     }
 

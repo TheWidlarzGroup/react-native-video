@@ -45,6 +45,10 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_BOTTOM_RIGHT_ICON_CLICK = "onBottomRightIconClick";
+    private static final String EVENT_CONTROLS_VISIBILITY_CHANGE = "onControlsVisibilityChange";
+    private static final String EVENT_TOUCH_ACTION_MOVE = "onTouchActionMove";
+    private static final String EVENT_TOUCH_ACTION_UP = "onTouchActionUp";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -66,6 +70,10 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_BOTTOM_RIGHT_ICON_CLICK,
+            EVENT_CONTROLS_VISIBILITY_CHANGE,
+            EVENT_TOUCH_ACTION_MOVE,
+            EVENT_TOUCH_ACTION_UP,
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -89,6 +97,10 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_BOTTOM_RIGHT_ICON_CLICK,
+            EVENT_CONTROLS_VISIBILITY_CHANGE,
+            EVENT_TOUCH_ACTION_MOVE,
+            EVENT_TOUCH_ACTION_UP,
     })
     @interface VideoEvents {
     }
@@ -114,6 +126,9 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
+    private static final String EVENT_PROP_CONTROLS_VISIBLE = "controlsVisible";
+    private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DX = "dx";
+    private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DY = "dy";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -223,6 +238,27 @@ class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
+    }
+
+    void bottomRightIconClick() {
+        receiveEvent(EVENT_BOTTOM_RIGHT_ICON_CLICK, null);
+    }
+
+    void controlsVisibilityChange(boolean visible) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_CONTROLS_VISIBLE, visible);
+        receiveEvent(EVENT_CONTROLS_VISIBILITY_CHANGE, map);
+    }
+
+    void touchActionMove(double dx, double dy) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_TOUCH_ACTION_MOVE_DX, dx);
+        map.putDouble(EVENT_PROP_TOUCH_ACTION_MOVE_DY, dy);
+        receiveEvent(EVENT_TOUCH_ACTION_MOVE, map);
+    }
+
+    void touchActionUp() {
+        receiveEvent(EVENT_TOUCH_ACTION_UP, null);
     }
 
     void timedMetadata(Metadata metadata) {
