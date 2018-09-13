@@ -830,6 +830,10 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private int getTrackIndexForDefaultLocale(TrackGroupArray groups) {
+        if (groups.length == 0) { // Avoid a crash if we try to select a non-existant group
+            return C.INDEX_UNSET;
+        }
+
         int trackIndex = 0; // default if no match
         String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
         String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
