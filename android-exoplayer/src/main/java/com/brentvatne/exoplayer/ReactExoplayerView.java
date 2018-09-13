@@ -816,7 +816,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         if (trackIndex == C.INDEX_UNSET) {
-            trackSelector.clearSelectionOverrides(trackIndex);
+            trackSelector.clearSelectionOverrides(rendererIndex);
             return;
         }
 
