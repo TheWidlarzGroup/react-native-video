@@ -203,6 +203,10 @@ export default class Video extends Component {
     const isNetwork = !!(uri && uri.match(/^https?:/));
     const isAsset = !!(uri && uri.match(/^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/));
 
+    if (Platform.OS === "android" && Platform.Version <= 17) {
+        uri = uri.replace(/^file:\/\//, "")
+    }
+
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleToFill;
