@@ -12,6 +12,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
+static NSString *const externalPlaybackActive = @"externalPlaybackActive";
 
 static int const RCTVideoUnset = -1;
 
@@ -35,6 +36,7 @@ static int const RCTVideoUnset = -1;
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
   BOOL _playbackRateObserverRegistered;
+  BOOL _isExternalPlaybackActiveObserverRegistered;
   BOOL _videoLoadStarted;
 
   bool _pendingSeek;
@@ -74,6 +76,7 @@ static int const RCTVideoUnset = -1;
     _eventDispatcher = eventDispatcher;
     
     _playbackRateObserverRegistered = NO;
+    _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
     _rate = 1.0;
     _volume = 1.0;
@@ -333,12 +336,19 @@ static int const RCTVideoUnset = -1;
         [_player removeObserver:self forKeyPath:playbackRate context:nil];
         _playbackRateObserverRegistered = NO;
       }
+      if (_isExternalPlaybackActiveObserverRegistered) {
+        [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
+        _isExternalPlaybackActiveObserverRegistered = NO;
+      }
         
       _player = [AVPlayer playerWithPlayerItem:_playerItem];
       _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
         
       [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
       _playbackRateObserverRegistered = YES;
+      
+      [_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
+      _isExternalPlaybackActiveObserverRegistered = YES;
         
       [self addPlayerTimeObserver];
         
@@ -645,6 +655,12 @@ static int const RCTVideoUnset = -1;
         }
         _playbackStalled = NO;
       }
+    }
+    else if([keyPath isEqualToString:externalPlaybackActive]) {
+        if(self.onExternalPlaybackChange) {
+          self.onExternalPlaybackChange(@{@"isExternalPlaybackActive": [NSNumber numberWithBool:_player.isExternalPlaybackActive],
+                                          @"target": self.reactTag});
+        }
     }
   } else {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -1289,6 +1305,10 @@ static int const RCTVideoUnset = -1;
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
+  }
+  if (_isExternalPlaybackActiveObserverRegistered) {
+    [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
+    _isExternalPlaybackActiveObserverRegistered = NO;
   }
   _player = nil;
   
