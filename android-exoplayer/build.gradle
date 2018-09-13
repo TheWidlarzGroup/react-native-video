@@ -33,5 +33,5 @@ dependencies {
     }
     compile 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    compile project(path: ':dice-shield')
+    compile project(path: ':dice-shield-android')
 }
