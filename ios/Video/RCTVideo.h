@@ -5,9 +5,18 @@
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
 
-@class RCTEventDispatcher;
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+#import <react-native-video/RCTVideoCache.h>
+#import <DVAssetLoaderDelegate/DVURLAsset.h>
+#import <DVAssetLoaderDelegate/DVAssetLoaderDelegate.h>
+#endif
 
+@class RCTEventDispatcher;
+#if __has_include(<react-native-video/RCTVideoCache.h>)
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
+#else
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
+#endif
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;
@@ -17,6 +26,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoSeek;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoEnd;
 @property (nonatomic, copy) RCTBubblingEventBlock onTimedMetadata;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoAudioBecomingNoisy;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidPresent;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillDismiss;
