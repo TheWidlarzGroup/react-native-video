@@ -32,6 +32,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playerLayerObserverSet;
   RCTVideoPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+  BOOL _pendingFullScreenRequest;
   
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -94,6 +95,7 @@ static int const RCTVideoUnset = -1;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _pendingFullScreenRequest = false;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -357,6 +359,11 @@ static int const RCTVideoUnset = -1;
       _isExternalPlaybackActiveObserverRegistered = YES;
         
       [self addPlayerTimeObserver];
+
+      if(_pendingFullScreenRequest) {
+        [self setFullscreen:YES];
+        _pendingFullScreenRequest = false;
+      }
 
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
@@ -1106,8 +1113,15 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setFullscreen:(BOOL) fullscreen {
-  if( fullscreen && !_fullscreenPlayerPresented && _player )
+  if( fullscreen && !_fullscreenPlayerPresented )
   {
+    // Ensure player is initialized before trying to fullscreen it
+    if(!_player)
+    {
+        _pendingFullScreenRequest = true;
+        return;
+    }
+
     // Ensure player view controller is not null
     if( !_playerViewController )
     {
