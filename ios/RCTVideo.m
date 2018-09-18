@@ -578,6 +578,22 @@ static int const RCTVideoUnset = -1;
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
                                              object:nil];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemNewAccessLogEntryNotification
+                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleAVPlayerAccess:)
+                                               name:AVPlayerItemNewAccessLogEntryNotification
+                                             object:nil];
+
+}
+
+- (void)handleAVPlayerAccess:(NSNotification *)notification {
+    AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+    AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+    float lastEventNumber = lastEvent.indicatedBitrate;
+    RCTLog(@"Switch indicatedBitrate from: %f to: %f", lastEvent.observedBitrate, lastEvent.indicatedBitrate);
 }
 
 - (void)playbackStalled:(NSNotification *)notification
