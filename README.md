@@ -257,6 +257,7 @@ var styles = StyleSheet.create({
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
 * [onTimedMetadata](#ontimedmetadata)
+* [onExternalPlaybackChange](#onexternalplaybackchange)
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
@@ -720,6 +721,24 @@ Example:
 Support for timed metadata on Android MediaPlayer is limited at best and only compatible with some videos. It requires a target SDK of 23 or higher.
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
+
+#### onExternalPlaybackChange
+Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+isExternalPlaybackActive | boolean | Boolean indicating is external playback mode is active
+
+Example:
+```
+{
+  isExternalPlaybackActive: true
+}
+```
+
+Platforms: iOS
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
