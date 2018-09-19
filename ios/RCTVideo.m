@@ -592,8 +592,10 @@ static int const RCTVideoUnset = -1;
 - (void)handleAVPlayerAccess:(NSNotification *)notification {
     AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
     AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
-    float lastEventNumber = lastEvent.indicatedBitrate;
-    RCTLog(@"Switch indicatedBitrate from: %f to: %f", lastEvent.observedBitrate, lastEvent.indicatedBitrate);
+    
+    if (self.onBandwidthUpdate) {
+        self.onBandwidthUpdate(@{@"bitrateEstimate": [NSNumber numberWithFloat:(lastEvent.observedBitrate/1000)]});
+    }
 }
 
 - (void)playbackStalled:(NSNotification *)notification
