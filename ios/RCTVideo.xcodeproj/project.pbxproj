@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B283A5C92152B5FE0069C818 /* dce_shield_dlm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A5C82152B5EA0069C818 /* dce_shield_dlm.framework */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
@@ -16,6 +17,16 @@
 		D1107C102110259000073188 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C082110259000073188 /* RCTVideoPlayerViewController.m */; };
 		D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C082110259000073188 /* RCTVideoPlayerViewController.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B283A5C72152B5EA0069C818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B283A5C02152B5E90069C818 /* dce-shield-dlm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B283A5012152AE870069C818;
+			remoteInfo = "dce-shield-dlm";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
@@ -41,6 +52,7 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A5C02152B5E90069C818 /* dce-shield-dlm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "dce-shield-dlm.xcodeproj"; path = "../node_modules/dice-shield-dlm/dce-shield-dlm/dce-shield-dlm.xcodeproj"; sourceTree = "<group>"; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
@@ -57,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B283A5C92152B5FE0069C818 /* dce_shield_dlm.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +101,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				B283A5BF2152B5CC0069C818 /* Libraries */,
 				D1107C072110259000073188 /* RCTVideo.h */,
 				D1107C052110259000073188 /* RCTVideo.m */,
 				D1107C092110259000073188 /* RCTVideoManager.h */,
@@ -101,6 +115,22 @@
 				641E28441F0EEC8500443AF6 /* libRCTVideo.a */,
 				49E995712048B4CE00EA7890 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		B283A5BF2152B5CC0069C818 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				B283A5C02152B5E90069C818 /* dce-shield-dlm.xcodeproj */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		B283A5C12152B5E90069C818 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B283A5C82152B5EA0069C818 /* dce_shield_dlm.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,6 +198,12 @@
 			mainGroup = 58B511D21A9E6C8500147676;
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B283A5C12152B5E90069C818 /* Products */;
+					ProjectRef = B283A5C02152B5E90069C818 /* dce-shield-dlm.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTVideo */,
@@ -175,6 +211,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B283A5C82152B5EA0069C818 /* dce_shield_dlm.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = dce_shield_dlm.framework;
+			remoteRef = B283A5C72152B5EA0069C818 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
