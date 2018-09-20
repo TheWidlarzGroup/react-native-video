@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include <dce_shield_dlm/dce_shield_dlm-Swift.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -464,6 +465,19 @@ static int const RCTVideoUnset = -1;
       return;
     }
 #endif
+      
+      id drmObject = [source objectForKey:@"drm"];
+      if (drmObject) {
+          ActionToken* ac = [ActionToken createFrom: drmObject contentUrl:uri];
+          if (ac) {
+              AVURLAsset* asset = [ac urlAsset];
+              [self playerItemPrepareText:asset assetOptions:[NSDictionary alloc] withCallback:handler];
+//              handler([AVPlayerItem playerItemWithAsset:asset]);
+              return;
+          } else {
+              DebugLog(@"Failed to created action token for playback.");
+          }
+      }
 
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
     [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];

@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-        "dice-shield-dlm": "git+ssh://git@bitbucket.org:saffrondigital/dice-shield-dlm.git#3d34e76569bcebbe019548233a93ccb3d53ff33c"
+        "dice-shield-dlm": "git+ssh://git@bitbucket.org:saffrondigital/dice-shield-dlm.git#f17849bb012b1e6a016a8ae9181cc5d78ad74dcb"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
