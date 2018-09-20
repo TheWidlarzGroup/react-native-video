@@ -436,7 +436,7 @@ static int const RCTVideoUnset = -1;
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
-  if([uri isEqualToString:@""] || [type isEqualToString:@""]) {
+  if([uri isEqualToString:@""] && [type isEqualToString:@""]) {
     DebugLog(@"Could not find video URL in source '%@'", source);
     return;
   }
