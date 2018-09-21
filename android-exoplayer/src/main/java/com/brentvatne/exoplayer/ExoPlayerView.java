@@ -19,9 +19,10 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.text.TextRenderer;
+import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
+import com.google.android.exoplayer2.video.VideoListener;
 
 import java.util.List;
 
@@ -161,17 +162,16 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setVisibility(VISIBLE);
     }
 
-    private final class ComponentListener implements SimpleExoPlayer.VideoListener,
-            TextRenderer.Output, Player.EventListener {
+    private final class ComponentListener implements VideoListener, TextOutput, Player.EventListener {
 
-        // TextRenderer.Output implementation
+        // TextOutput implementation
 
         @Override
         public void onCues(List<Cue> cues) {
             subtitleLayout.onCues(cues);
         }
 
-        // SimpleExoPlayer.VideoListener implementation
+        // VideoListener implementation
 
         @Override
         public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
