@@ -10,7 +10,6 @@
     "url": "git@github.com:drivetribe/react-native-video.git"
   },
   "devDependencies": {
-    "@babel/core": "7.1.0",
     "babel-eslint": "9.0.0",
     "eslint": "5.6.0",
     "eslint-config-prettier": "3.0.1",

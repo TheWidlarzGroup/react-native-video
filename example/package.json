@@ -6,8 +6,15 @@
     "start": "node_modules/react-native/packager/packager.sh"
   },
   "dependencies": {
-    "react": "16.5.2",
+    "react": "16.5.1",
     "react-native": "0.57.0",
     "@drivetribe/react-native-video": "file:../"
+  },
+  "devDependencies": {
+    "@babel/core": "7.1.0",
+    "metro-react-native-babel-preset": "0.45.5"
+  },
+  "yarnResolutions": {
+    "metro-react-native-babel-preset": "0.45.5"
   }
 }
