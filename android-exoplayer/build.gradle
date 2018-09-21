@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 ext {
-    exoPlayerVersion = '2.8.0'
+    exoPlayerVersion = '2.8.4'
 }
 
 android {
@@ -10,18 +10,18 @@ android {
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 27
     }
 }
 
 dependencies {
     compileOnly 'com.facebook.react:react-native:0.57.0'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.10.0'
+
     implementation "com.google.android.exoplayer:exoplayer-core:$exoPlayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exoPlayerVersion"
-    implementation "com.google.android.exoplayer:exoplayer-dash:$exoPlayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoPlayerVersion"
     implementation("com.google.android.exoplayer:extension-okhttp:$exoPlayerVersion") {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }
