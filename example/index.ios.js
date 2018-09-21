@@ -2,9 +2,7 @@
  * @flow
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   AlertIOS,
@@ -39,83 +37,126 @@ class VideoPlayer extends Component {
 
   onLoad(data) {
     console.log('On load fired!');
-    this.setState({duration: data.duration});
+    this.setState({ duration: data.duration });
   }
 
   onProgress(data) {
-    this.setState({currentTime: data.currentTime});
+    this.setState({ currentTime: data.currentTime });
   }
 
   onBuffer({ isBuffering }: { isBuffering: boolean }) {
     this.setState({ isBuffering });
   }
 
-  getCurrentTimePercentage() {
+  getCurrentTimePercentage(): React$Element<*> {
     if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+      return (
+        parseFloat(this.state.currentTime) / parseFloat(this.state.duration)
+      );
     } else {
       return 0;
     }
   }
 
-  renderSkinControl(skin) {
-    const isSelected = this.state.skin == skin;
-    const selectControls = skin == 'native' || skin == 'embed';
+  renderSkinControl(skin): React$Element<*> {
+    const isSelected = this.state.skin === skin;
+    const selectControls = skin === 'native' || skin === 'embed';
     return (
-      <TouchableOpacity onPress={() => { this.setState({
-          controls: selectControls,
-          skin: skin
-        }) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({
+            controls: selectControls,
+            skin: skin,
+          });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {skin}
         </Text>
       </TouchableOpacity>
     );
   }
 
-  renderRateControl(rate) {
-    const isSelected = (this.state.rate == rate);
+  renderRateControl(rate): React$Element<*> {
+    const isSelected = this.state.rate === rate;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ rate: rate });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {rate}x
         </Text>
       </TouchableOpacity>
-    )
+    );
   }
 
-  renderResizeModeControl(resizeMode) {
-    const isSelected = (this.state.resizeMode == resizeMode);
+  renderResizeModeControl(resizeMode): React$Element<*> {
+    const isSelected = this.state.resizeMode === resizeMode;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ resizeMode: resizeMode });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {resizeMode}
         </Text>
       </TouchableOpacity>
-    )
+    );
   }
 
-  renderVolumeControl(volume) {
-    const isSelected = (this.state.volume == volume);
+  renderVolumeControl(volume): React$Element<*> {
+    const isSelected = this.state.volume === volume;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ volume: volume });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {volume * 100}%
         </Text>
       </TouchableOpacity>
-    )
+    );
   }
 
-  renderCustomSkin() {
+  renderCustomSkin(): React$Element<*> {
     const flexCompleted = this.getCurrentTimePercentage() * 100;
     const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
+        <TouchableOpacity
+          style={styles.fullScreen}
+          onPress={() => {
+            this.setState({ paused: !this.state.paused });
+          }}
+        >
           <Video
             source={require('./broadchurch.mp4')}
             style={styles.fullScreen}
@@ -127,7 +168,9 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => {
+              AlertIOS.alert('Done!');
+            }}
             repeat={true}
           />
         </TouchableOpacity>
@@ -162,8 +205,12 @@ class VideoPlayer extends Component {
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
-              <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
-              <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
+              <View
+                style={[styles.innerProgressCompleted, { flex: flexCompleted }]}
+              />
+              <View
+                style={[styles.innerProgressRemaining, { flex: flexRemaining }]}
+              />
             </View>
           </View>
         </View>
@@ -171,8 +218,11 @@ class VideoPlayer extends Component {
     );
   }
 
-  renderNativeSkin() {
-    const videoStyle = this.state.skin == 'embed' ? styles.nativeVideoControls : styles.fullScreen;
+  renderNativeSkin(): React$Element<*> {
+    const videoStyle =
+      this.state.skin === 'embed'
+        ? styles.nativeVideoControls
+        : styles.fullScreen;
     return (
       <View style={styles.container}>
         <View style={styles.fullScreen}>
@@ -187,7 +237,9 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => {
+              AlertIOS.alert('Done!');
+            }}
             repeat={true}
             controls={this.state.controls}
           />
@@ -220,13 +272,14 @@ class VideoPlayer extends Component {
             </View>
           </View>
         </View>
-
       </View>
     );
   }
 
-  render() {
-    return this.state.controls ? this.renderNativeSkin() : this.renderCustomSkin();
+  render(): React$Element<*> {
+    return this.state.controls
+      ? this.renderNativeSkin()
+      : this.renderCustomSkin();
   }
 }
 
@@ -245,7 +298,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   controls: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderRadius: 5,
     position: 'absolute',
     bottom: 44,
@@ -291,20 +344,20 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   controlOption: {
     alignSelf: 'center',
     fontSize: 11,
-    color: "white",
+    color: 'white',
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
   },
   nativeVideoControls: {
     top: 184,
-    height: 300
-  }
+    height: 300,
+  },
 });
 
 AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);

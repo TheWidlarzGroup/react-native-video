@@ -1,0 +1,70 @@
+{
+  "extends": [
+    "plugin:flowtype/recommended",
+    "plugin:react/recommended",
+    "prettier",
+    "prettier/flowtype",
+    "prettier/react",
+    "prettier/standard",
+    "standard"
+  ],
+  "plugins": [
+    "flowtype",
+    "prettier",
+    "react-native",
+    "react",
+    "standard"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "react-native/react-native": true
+  },
+  "rules": {
+    "no-return-assign": 2,
+    "consistent-return": 2,
+    "comma-dangle": [2, "always-multiline"],
+    "no-extra-semi": 0,
+    "semi": 0,
+    "space-before-function-paren": 0,
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "parser": "flow",
+        "trailingComma": "all"
+      }
+    ],
+    "import/no-duplicates": 2,
+    "import/imports-first": 2,
+    "import/newline-after-import": 0,
+    "import/first": 0,
+    "react-native/no-unused-styles": 2,
+    "react-native/split-platform-components": 2,
+    "flowtype/require-return-type": [
+      1,
+      "always",
+      {
+        "annotateUndefined": "never",
+        "excludeArrowFunctions": "expressionsOnly"
+      }
+    ]
+  },
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": true
+    },
+    "react": {
+      "pragma": "React",
+      "version": "16.5",
+      "flowVersion": "0.78"
+    }
+  }
+}
