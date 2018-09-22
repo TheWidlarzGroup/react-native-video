@@ -7,6 +7,8 @@
 * Video caching cleanups [#1172](https://github.com/react-native-community/react-native-video/pull/1172)
 * Add ipod-library support [#926](https://github.com/react-native-community/react-native-video/pull/926/files)
 * Fix crash on ExoPlayer when there are no audio tracks [#1233](https://github.com/react-native-community/react-native-video/pull/1233)
+* Reduce package size [#1231](https://github.com/react-native-community/react-native-video/pull/1231)
+* Remove unnecessary import in TextTrackType [#1229](https://github.com/react-native-community/react-native-video/pull/1229)
 
 ### Version 3.2.0
 * Basic fullscreen support for Android MediaPlayer [#1138](https://github.com/react-native-community/react-native-video/pull/1138)
