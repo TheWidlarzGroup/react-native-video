@@ -44,5 +44,14 @@
         "android": {
             "sourceDir": "./android-exoplayer"
         }
-    }
+    },
+    "files":[
+        "android-exoplayer",
+        "android",
+        "ios",
+        "windows",
+        "TextTrackType.js",
+        "react-native-video.podspec",
+        "VideoResizeMode.js"
+    ]
 }
