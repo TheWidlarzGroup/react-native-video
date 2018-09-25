@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.IntegerRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GestureDetectorCompat;
 import android.text.TextUtils;
@@ -494,7 +495,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                                                     drmCallback.setKeyRequestProperty("X-DRM-INFO", header);
                                                 }
                                             }
-                                        }), (List<RepresentationKey>) getOfflineStreamKeys(uri)))
+                                        }), getOfflineStreamKeys(uri)))
                         .createMediaSource(uri);
 
             case C.TYPE_HLS:
@@ -508,12 +509,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         }
     }
 
-    private DefaultDrmSessionManager createDrmSessionManager(ActionToken drmParam) throws UnsupportedDrmException {
-
-        if (drmParam == null) {
-            return null;
-        }
-
+    private DefaultDrmSessionManager createDrmSessionManager(@NonNull ActionToken drmParam) throws UnsupportedDrmException {
         DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
         final String drmLicenseUrl = drmParam.getLicensingServerUrl();
         final HashMap<String, String> keyRequestProperties = Utils.getParams(drmParam);
@@ -557,7 +553,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     private DefaultDrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(
-            UUID uuid, String licenseUrl, HashMap<String, String> requestProperties, boolean multiSession)
+            @NonNull UUID uuid, @NonNull String licenseUrl, @Nullable Map<String, String> requestProperties, boolean multiSession)
             throws UnsupportedDrmException {
         HttpDataSource.Factory licenseDataSourceFactory =
                 (DlmWrapper.getInstance(getContext().getApplicationContext())).buildHttpDataSourceFactory(/* listener= */ null);
@@ -582,7 +578,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         drmCallback = null;
     }
 
-    private List<?> getOfflineStreamKeys(Uri uri) {
+    private List<RepresentationKey> getOfflineStreamKeys(@NonNull Uri uri) {
+        //ToDo: implement this method when download quality selection is added to download flow. For now using all streams.
         return Collections.emptyList();
     }
 
@@ -624,6 +621,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
+        releaseMediaDrm();
     }
 
     private boolean requestAudioFocus() {
@@ -1051,7 +1049,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final String extension, ActionToken actionToken, Map<String, String> headers) {
+    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken, @Nullable final Map<String, String> headers) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
@@ -1070,7 +1068,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         }
     }
 
-    public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
+    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final Map<String, String> headers) {
         setSrc(uri, extension, null, headers);
     }
 
@@ -1078,7 +1076,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         mProgressUpdateInterval = progressUpdateInterval;
     }
 
-    public void setRawSrc(final Uri uri, final String extension) {
+    public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);

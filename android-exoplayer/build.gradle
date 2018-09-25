@@ -25,7 +25,7 @@ dependencies {
 
     // All support libs must use the same version
     compile "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
-    compile "com.android.support:support-compat:${safeExtGet('supportLibVersion', '+')}"
+    compile "com.android.support:appcompat-v7:${safeExtGet('supportLibVersion', '+')}"
     compile "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
 
     compile('com.google.android.exoplayer:extension-okhttp:2.8.2') {
@@ -33,5 +33,5 @@ dependencies {
     }
     compile 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    compile project(path: ':fea_dice_shield_dlm')
+    compile project(path: ':dice-shield-android')
 }
