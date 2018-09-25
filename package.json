@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-        "dice-shield-dlm": "git+ssh://git@bitbucket.org:saffrondigital/dice-shield-dlm.git#93b28975537007b2ff3e89f5d47396444b29f187"
+        "dice-shield-dlm": "git+ssh://git@bitbucket.org:saffrondigital/dice-shield-dlm.git#93b28975537007b2ff3e89f5d47396444b29f187",
         "dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#d93f436c284d88aa4bd220610cf9e044e294acfc"
     },
     "scripts": {
