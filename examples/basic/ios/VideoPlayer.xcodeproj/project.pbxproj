@@ -25,6 +25,18 @@
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C2A0F791E25608300E31596 /* libRCTVideo.a */; };
+		B283A7172153DD630069C818 /* dce_shield_dlm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A68A2153B2FC0069C818 /* dce_shield_dlm.framework */; };
+		B283A7182153DD630069C818 /* dce_shield_dlm.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A68A2153B2FC0069C818 /* dce_shield_dlm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B283A71D2153DDF10069C818 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71C2153DDF10069C818 /* RxSwift.framework */; };
+		B283A71E2153DDF10069C818 /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71C2153DDF10069C818 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B283A7202153DDFB0069C818 /* XCGLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71F2153DDFB0069C818 /* XCGLogger.framework */; };
+		B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71F2153DDFB0069C818 /* XCGLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; };
+		B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B283A7262153DE700069C818 /* Realm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7252153DE700069C818 /* Realm.framework */; };
+		B283A7272153DE700069C818 /* Realm.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7252153DE700069C818 /* Realm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B283A72D2153DEC20069C818 /* RealmSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A72C2153DEC20069C818 /* RealmSwift.framework */; };
+		B283A72E2153DEC20069C818 /* RealmSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A72C2153DEC20069C818 /* RealmSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -217,6 +229,27 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTVideo;
 		};
+		B283A6892153B2FC0069C818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B283A5012152AE870069C818;
+			remoteInfo = "dce-shield-dlm";
+		};
+		B283A6E02153B67B0069C818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B283A5002152AE870069C818;
+			remoteInfo = "dce-shield-dlm";
+		};
+		B283A7192153DD630069C818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B283A5002152AE870069C818;
+			remoteInfo = "dce-shield-dlm";
+		};
 		D1107C532111145500073188 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */;
@@ -296,6 +329,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		B283A71B2153DD630069C818 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B283A71E2153DDF10069C818 /* RxSwift.framework in Embed Frameworks */,
+				B283A7182153DD630069C818 /* dce_shield_dlm.framework in Embed Frameworks */,
+				B283A72E2153DEC20069C818 /* RealmSwift.framework in Embed Frameworks */,
+				B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */,
+				B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */,
+				B283A7272153DE700069C818 /* Realm.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
@@ -320,6 +372,12 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/ios/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "dce-shield-dlm.xcodeproj"; path = "../node_modules/dice-shield-dlm/dce-shield-dlm/dce-shield-dlm.xcodeproj"; sourceTree = "<group>"; };
+		B283A71C2153DDF10069C818 /* RxSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RxSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A71F2153DDFB0069C818 /* XCGLogger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = XCGLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ObjcExceptionBridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A7252153DE700069C818 /* Realm.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Realm.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A72C2153DEC20069C818 /* RealmSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RealmSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -337,8 +395,11 @@
 			files = (
 				8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
+				B283A72D2153DEC20069C818 /* RealmSwift.framework in Frameworks */,
+				B283A71D2153DDF10069C818 /* RxSwift.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
+				B283A7202153DDFB0069C818 /* XCGLogger.framework in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
@@ -346,6 +407,9 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
+				B283A7172153DD630069C818 /* dce_shield_dlm.framework in Frameworks */,
+				B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */,
+				B283A7262153DE700069C818 /* Realm.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -473,7 +537,7 @@
 			isa = PBXGroup;
 			children = (
 				5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */,
-				5E9157351DD0AC6500FF2AA8 /* libRCTAnimation-tvOS.a */,
+				5E9157351DD0AC6500FF2AA8 /* libRCTAnimation.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -490,6 +554,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */,
 				8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -518,10 +583,16 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				B283A72C2153DEC20069C818 /* RealmSwift.framework */,
+				B283A7252153DE700069C818 /* Realm.framework */,
+				B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */,
+				B283A71F2153DDFB0069C818 /* XCGLogger.framework */,
+				B283A71C2153DDF10069C818 /* RxSwift.framework */,
 				13B07FAE1A68108700A75B9A /* VideoPlayer */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* VideoPlayerTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
+				B283A6B02153B4E40069C818 /* Frameworks */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -543,6 +614,21 @@
 				D1107C542111145500073188 /* libRCTVideo.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B283A6832153B2FB0069C818 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B283A68A2153B2FC0069C818 /* dce_shield_dlm.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B283A6B02153B4E40069C818 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -574,10 +660,13 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				B283A71B2153DD630069C818 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B283A6E12153B67B0069C818 /* PBXTargetDependency */,
+				B283A71A2153DD630069C818 /* PBXTargetDependency */,
 			);
 			name = VideoPlayer;
 			productName = "Hello World";
@@ -611,6 +700,10 @@
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = B283A6832153B2FB0069C818 /* Products */;
+					ProjectRef = B283A6822153B2FB0069C818 /* dce-shield-dlm.xcodeproj */;
+				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
 					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
@@ -823,7 +916,7 @@
 			remoteRef = 5E9157321DD0AC6500FF2AA8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		5E9157351DD0AC6500FF2AA8 /* libRCTAnimation-tvOS.a */ = {
+		5E9157351DD0AC6500FF2AA8 /* libRCTAnimation.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRCTAnimation.a;
@@ -849,6 +942,13 @@
 			fileType = archive.ar;
 			path = libRCTVideo.a;
 			remoteRef = 8C2A0F781E25608300E31596 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B283A68A2153B2FC0069C818 /* dce_shield_dlm.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = dce_shield_dlm.framework;
+			remoteRef = B283A6892153B2FC0069C818 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D1107C542111145500073188 /* libRCTVideo.a */ = {
@@ -962,7 +1062,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -992,6 +1092,16 @@
 			target = 13B07F861A680F5B00A75B9A /* VideoPlayer */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		B283A6E12153B67B0069C818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "dce-shield-dlm";
+			targetProxy = B283A6E02153B67B0069C818 /* PBXContainerItemProxy */;
+		};
+		B283A71A2153DD630069C818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "dce-shield-dlm";
+			targetProxy = B283A7192153DD630069C818 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1016,7 +1126,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = VideoPlayerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoPlayer.app/VideoPlayer";
@@ -1029,7 +1139,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = VideoPlayerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoPlayer.app/VideoPlayer";
@@ -1039,6 +1149,7 @@
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
@@ -1057,6 +1168,7 @@
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = VideoPlayer/Info.plist;
@@ -1105,7 +1217,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1140,7 +1252,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

@@ -128,7 +128,17 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
-            source={require('./broadchurch.mp4')}
+            // source={require('./broadchurch.mp4')}
+            source={{
+                uri: 'https://public_seriously.s3.amazonaws.com/shaka_encrypted/hls_encrypted/HLSBigBuckBunny_video/main.m3u8',
+                type: 'hls',
+                drm: '{\"id\":"15", ' +
+                    '\"drmScheme\": \"fairplay\", ' +
+                    '\"licensingServerUrl\": \"https://qa-shield-drm.sd-ngp.net/api/v2/license\",' +
+                    '\"croToken\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20uZGljZS50ZXN0X2NsaWVudCIsImNpZCI6ImRpY2VfdGVzdF9jbGllbnQiLCJwbGMiOnRydWUsImp0aSI6IjUzYzY5MDAzLTIwNTAtNGQxMS1iOGMxLWRlNjMyMmVmNjZlOCIsImVpZCI6ImZlMzk2YmU5LTlkNDYtNGRlMC04MDdhLTk4M2Q0NGE0N2JhMSIsImV4cCI6MTUzNzQ2NTQ1MywiaWF0IjoxNTM3NDU4MTUzLCJkZWYiOiJzZCJ9.rP9tsDBPH3SEMpE3FxEcrbXwP19fU_QJ66OReRzVxSo\",' +
+                    '\"persistentLicense\": false}'
+                /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
+            }}
             style={styles.fullScreen}
             rate={this.state.rate}
             paused={this.state.paused}
