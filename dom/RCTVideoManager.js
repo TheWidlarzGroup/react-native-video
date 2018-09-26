@@ -17,31 +17,42 @@ class RCTVideoManager extends RCTViewManager {
   describeProps() {
     return super
       .describeProps()
-      .addObjectProp("src", this.setSource)
-      .addNumberProp("resizeMode", this.setResizeMode)
-      .addBooleanProp("repeat", this.setRepeat)
+      .addBooleanProp("controls", this.setControls)
+      .addBooleanProp("muted", this.setMuted)
       .addBooleanProp("paused", this.setPaused)
-      .addBooleanProp("muted", this.setMuted);
+      .addBooleanProp("rate", this.setRate)
+      .addBooleanProp("repeat", this.setRepeat)
+      .addNumberProp("resizeMode", this.setResizeMode)
+      .addObjectProp("src", this.setSource)
+      .addNumberProp("volume", this.setVolume);
   }
 
-  setSource(view: RCTVideo, value: VideoSource) {
-    view.source = value;
+  setControls(view: RCTVideo, value: boolean) {
+    view.controls = value;
   }
 
-  setResizeMode(view: RCTVideo, value: number) {
-    view.resizeMode = value;
-  }
-
-  setRepeat(view: RCTVideo, value: boolean) {
-    view.repeat = value;
+  setMuted(view: RCTVideo, value: boolean) {
+    view.muted = value;
   }
 
   setPaused(view: RCTVideo, value: boolean) {
     view.paused = value;
   }
 
-  setMuted(view: RCTVideo, value: boolean) {
-    view.muted = value;
+  setRate(view: RCTVideo, value: number) {
+    view.rate = value;
+  }
+
+  setRepeat(view: RCTVideo, value: boolean) {
+    view.repeat = value;
+  }
+  
+  setResizeMode(view: RCTVideo, value: number) {
+    view.resizeMode = value;
+  }
+
+  setSource(view: RCTVideo, value: VideoSource) {
+    view.source = value;
   }
 
   constantsToExport() {

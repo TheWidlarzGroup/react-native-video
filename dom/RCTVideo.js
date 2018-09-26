@@ -15,7 +15,10 @@ class RCTVideo extends RCTView {
     super(bridge);
 
     this.videoElement = this.initializeVideoElement();
-    this.muted = true;
+    this.controls = false;
+    this.muted = false;
+    this.rate = 1.0;
+    this.volume = 1.0;
     this.childContainer.appendChild(this.videoElement);
   }
 
@@ -34,20 +37,13 @@ class RCTVideo extends RCTView {
     return elem;
   }
 
-  set source(value: VideoSource) {
-    let uri = value.uri;
-
-    if (uri.startsWith("blob:")) {
-      let blob = this.bridge.blobManager.resolveURL(uri);
-      if (blob.type === "text/xml") {
-        blob = new Blob([blob], { type: "video/mp4" });
-      }
-      uri = URL.createObjectURL(blob);
-    }
-
-    this.videoElement.setAttribute("src", uri);
-    if (!this._paused) {
-      this.playPromise = this.videoElement.play();
+  set controls(value: boolean) {
+    if (value) {
+      this.videoElement.setAttribute("controls", "true");
+      this.videoElement.controls = true;
+    } else {
+      this.videoElement.removeAttribute("controls");
+      this.videoElement.controls = false;
     }
   }
 
@@ -59,6 +55,21 @@ class RCTVideo extends RCTView {
       this.videoElement.removeAttribute("muted");
       this.videoElement.muted = false;
     }
+  }
+
+  set paused(value: boolean) {
+    this.playPromise.then(() => {
+      if (value) {
+        this.videoElement.pause();
+      } else {
+        this.playPromise = this.videoElement.play().catch(console.error);
+      }
+    });
+    this._paused = value;
+  }
+
+  set rate(value: number) {
+    this.videoElement.setAttribute("playbackRate", value);
   }
 
   set repeat(value: boolean) {
@@ -90,15 +101,30 @@ class RCTVideo extends RCTView {
     }
   }
 
-  set paused(value: boolean) {
-    this.playPromise.then(() => {
-      if (value) {
-        this.videoElement.pause();
-      } else {
-        this.playPromise = this.videoElement.play().catch(console.error);
+  set source(value: VideoSource) {
+    let uri = value.uri;
+
+    if (uri.startsWith("blob:")) {
+      let blob = this.bridge.blobManager.resolveURL(uri);
+      if (blob.type === "text/xml") {
+        blob = new Blob([blob], { type: "video/mp4" });
       }
-    });
-    this._paused = value;
+      uri = URL.createObjectURL(blob);
+    }
+
+    this.videoElement.setAttribute("src", uri);
+    if (!this._paused) {
+      this.playPromise = this.videoElement.play();
+    }
+  }
+
+  set volume(value: number) {
+    this.videoElement.setAttribute("volume", value);
+    if (this.value === 0) {
+      this.muted = true;
+    } else {
+      this.muted = false;
+    }
   }
 }
 
