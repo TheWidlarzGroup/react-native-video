@@ -192,6 +192,31 @@ using System.Collections.Generic;
 ```
 </details>
 
+<details>
+  <summary>DOM</summary>
+
+Make the following additions to the given files manually:
+
+**dom/bootstrap.js**
+
+Import RCTVideoManager and add it to the list of nativeModules:
+
+```javascript
+import { RNDomInstance } from "react-native-dom";
+import { name as appName } from "../app.json";
+import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
+
+// Path to RN Bundle Entrypoint ================================================
+const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
+
+// React Native DOM Runtime Options =============================================
+const ReactNativeDomOptions = {
+  enableHotReload: false,
+  nativeModules: [RCTVideoManager] // Add this
+};
+```
+</details>
+
 ## Usage
 
 ```javascript
