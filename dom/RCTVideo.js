@@ -69,7 +69,10 @@ class RCTVideo extends RCTView {
   }
 
   set rate(value: number) {
+    this.videoElement.setAttribute("defaultPlaybackRate", value);
     this.videoElement.setAttribute("playbackRate", value);
+    this.videoElement.defaultPlaybackRate = value; // playbackRate doesn't work on Chrome
+    this.videoElement.playbackRate = value;
   }
 
   set repeat(value: boolean) {
