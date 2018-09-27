@@ -467,7 +467,7 @@ static int const RCTVideoUnset = -1;
 #endif
       
       id drmObject = [source objectForKey:@"drm"];
-      if (drmObject) {
+      if (drmObject && [drmObject isKindOfClass:NSDictionary.class]) {
           ActionToken* ac = [ActionToken createFrom: drmObject contentUrl:uri];
           if (ac) {
               AVURLAsset* asset = [ac urlAsset];
