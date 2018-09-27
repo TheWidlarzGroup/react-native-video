@@ -9,6 +9,7 @@
 * Fix crash on ExoPlayer when there are no audio tracks [#1233](https://github.com/react-native-community/react-native-video/pull/1233)
 * Reduce package size [#1231](https://github.com/react-native-community/react-native-video/pull/1231)
 * Remove unnecessary import in TextTrackType [#1229](https://github.com/react-native-community/react-native-video/pull/1229)
+* Prevent flash between poster and video [#1167](https://github.com/react-native-community/react-native-video/pull/1167)
 
 ### Version 3.2.0
 * Basic fullscreen support for Android MediaPlayer [#1138](https://github.com/react-native-community/react-native-video/pull/1138)
