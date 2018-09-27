@@ -1,25 +1,57 @@
 // @flow
 
-import { RCTView, type RCTBridge } from "react-native-dom";
+import { RCTEvent, RCTView, type RCTBridge } from "react-native-dom";
 
 import resizeModes from "./resizeModes";
 import type { VideoSource } from "./types";
+import RCTVideoEvent from "./RCTVideoEvent";
 
 class RCTVideo extends RCTView {
   playPromise: Promise<void> = Promise.resolve();
+  progressTimer: number;
   videoElement: HTMLVideoElement;
 
+  onEnd: boolean = false;
+  onLoad: boolean = false;
+  onLoadStart: boolean = false;
+  onProgress: boolean = false;
+
   _paused: boolean = false;
+  _progressUpdateInterval: number = 250.0;
+  _savedVolume: number = 1.0;
 
   constructor(bridge: RCTBridge) {
     super(bridge);
 
+    this.eventDispatcher = bridge.getModuleByName("EventDispatcher");
+
+    this.onEnd = this.onEnd.bind(this);
+    this.onLoad = this.onLoad.bind(this);
+    this.onLoadStart = this.onLoadStart.bind(this);
+    this.onPlay = this.onPlay.bind(this);
+    this.onProgress = this.onProgress.bind(this);
+
     this.videoElement = this.initializeVideoElement();
-    this.controls = false;
+    this.videoElement.addEventListener("ended", this.onEnd);
+    this.videoElement.addEventListener("loadeddata", this.onLoad);
+    this.videoElement.addEventListener("loadstart", this.onLoadStart);
+    this.videoElement.addEventListener("pause", this.onPause);
+    this.videoElement.addEventListener("play", this.onPlay);
+
     this.muted = false;
     this.rate = 1.0;
     this.volume = 1.0;
     this.childContainer.appendChild(this.videoElement);
+  }
+
+  detachFromView(view: UIView) {
+    this.videoElement.removeEventListener("ended", this.onEnd);
+    this.videoElement.removeEventListener("loadeddata", this.onLoad);
+    this.videoElement.removeEventListener("loadstart", this.onLoadStart);
+    this.videoElement.removeEventListener("pause", this.onPause);
+    this.videoElement.removeEventListener("play", this.onPlay);
+
+    this.stopProgressTimer();
   }
 
   initializeVideoElement() {
@@ -31,28 +63,31 @@ class RCTVideo extends RCTView {
       top: "0",
       left: "0",
       width: "100%",
-      height: "100%",
+      height: "100%"
     });
 
     return elem;
   }
 
+  presentFullscreenPlayer() {
+    console.log("V PF");
+    this.videoElement.webkitRequestFullScreen();
+  }
+
   set controls(value: boolean) {
     if (value) {
-      this.videoElement.setAttribute("controls", "true");
       this.videoElement.controls = true;
+      this.videoElement.style.pointerEvents = "auto";
     } else {
-      this.videoElement.removeAttribute("controls");
       this.videoElement.controls = false;
+      this.videoElement.style.pointerEvents = "";
     }
   }
 
   set muted(value: boolean) {
     if (value) {
-      this.videoElement.setAttribute("muted", "true");
       this.videoElement.muted = true;
     } else {
-      this.videoElement.removeAttribute("muted");
       this.videoElement.muted = false;
     }
   }
@@ -68,9 +103,13 @@ class RCTVideo extends RCTView {
     this._paused = value;
   }
 
+  set progressUpdateInterval(value: number) {
+    this._progressUpdateInterval = value;
+    this.stopProgressTimer();
+    this.startProgressTimer();
+  }
+
   set rate(value: number) {
-    this.videoElement.setAttribute("defaultPlaybackRate", value);
-    this.videoElement.setAttribute("playbackRate", value);
     this.videoElement.defaultPlaybackRate = value; // playbackRate doesn't work on Chrome
     this.videoElement.playbackRate = value;
   }
@@ -104,6 +143,10 @@ class RCTVideo extends RCTView {
     }
   }
 
+  set seek(value: number) {
+    this.videoElement.currentTime = value;
+  }
+
   set source(value: VideoSource) {
     let uri = value.uri;
 
@@ -122,11 +165,77 @@ class RCTVideo extends RCTView {
   }
 
   set volume(value: number) {
-    this.videoElement.setAttribute("volume", value);
-    if (this.value === 0) {
+    if (value === 0) {
       this.muted = true;
     } else {
+      this.videoElement.volume = value;
       this.muted = false;
+    }
+  }
+
+  onEnd = () => {
+    this.onProgress();
+    this.sendEvent("topVideoEnd", null);
+    this.stopProgressTimer();    
+  }
+
+  onLoad = () => {
+    // height & width are safe with audio, will be 0
+    const height = this.videoElement.videoHeight;
+    const width = this.videoElement.videoWidth;
+    const payload = {
+      currentPosition: this.videoElement.currentTime,
+      duration: this.videoElement.duration,
+      naturalSize: {
+        width,
+        height,
+        orientation: width >= height ? "landscape" : "portrait"
+      }
+    };
+    this.sendEvent("topVideoLoad", payload);
+  }
+
+  onLoadStart = () => {
+    const src = this.videoElement.currentSrc;
+    const payload = {
+      isNetwork: !src.match(/^https?:\/\/localhost/), // require is served from localhost
+      uri: this.videoElement.currentSrc
+    };
+    this.sendEvent("topVideoLoadStart", payload);
+  }
+
+  onPause = () => {
+    this.stopProgressTimer();
+  }
+
+  onPlay = () => {
+    this.startProgressTimer();
+  }
+
+  onProgress = () => {
+    const payload = {
+      currentTime: this.videoElement.currentTime,
+      duration: this.videoElement.duration
+    };
+    this.sendEvent("topVideoProgress", payload);
+  }
+
+  sendEvent(eventName, payload) {
+    const event = new RCTVideoEvent(eventName, this.reactTag, 0, payload);
+    this.eventDispatcher.sendEvent(event);
+  }
+
+  startProgressTimer() {
+    if (!this.progressTimer && this._progressUpdateInterval) {
+      this.onProgress();
+      this.progressTimer = setInterval(this.onProgress, this._progressUpdateInterval);
+    }
+  }
+
+  stopProgressTimer() {
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+      this.progressTimer = null;
     }
   }
 }

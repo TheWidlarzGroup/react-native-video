@@ -20,11 +20,21 @@ class RCTVideoManager extends RCTViewManager {
       .addBooleanProp("controls", this.setControls)
       .addBooleanProp("muted", this.setMuted)
       .addBooleanProp("paused", this.setPaused)
+      .addNumberProp("progressUpdateInterval", this.setProgressUpdateInterval)
       .addBooleanProp("rate", this.setRate)
       .addBooleanProp("repeat", this.setRepeat)
       .addNumberProp("resizeMode", this.setResizeMode)
+      .addNumberProp("seek", this.setSeek)
       .addObjectProp("src", this.setSource)
-      .addNumberProp("volume", this.setVolume);
+      .addNumberProp("volume", this.setVolume)
+      .addDirectEvent("onVideoEnd")
+      .addDirectEvent("onVideoLoad")
+      .addDirectEvent("onVideoLoadStart")
+      .addDirectEvent("onVideoProgress");
+  }
+
+  presentFullscreenPlayer() {
+    // not currently working
   }
 
   setControls(view: RCTVideo, value: boolean) {
@@ -46,9 +56,13 @@ class RCTVideoManager extends RCTViewManager {
   setRepeat(view: RCTVideo, value: boolean) {
     view.repeat = value;
   }
-  
+
   setResizeMode(view: RCTVideo, value: number) {
     view.resizeMode = value;
+  }
+
+  setSeek(view: RCTVideo, value: number) {
+    view.seek = value;
   }
 
   setSource(view: RCTVideo, value: VideoSource) {
