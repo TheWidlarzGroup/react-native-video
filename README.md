@@ -233,7 +233,6 @@ import Video from 'react-native-video';
          this.player = ref
        }}                                      // Store reference
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
-       onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
@@ -253,6 +252,7 @@ var styles = StyleSheet.create({
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
+* [controls](#controls)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -274,6 +274,7 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onEnd](#onend)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
 * [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
 * [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
@@ -329,6 +330,15 @@ bufferConfig={{
 ```
 
 Platforms: Android ExoPlayer
+
+#### controls
+Determines whether to show player controls.
+* ** false (default)** - Don't show player controls
+* **true** - Show player controls
+
+Note on iOS, controls are always shown when in fullscreen mode.
+
+Platforms: DOM, iOS
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
@@ -611,6 +621,13 @@ Payload: none
 
 Platforms: Android ExoPlayer, iOS
 
+#### onEnd
+Callback function that is called when the player reaches the end of the media.
+
+Payload: none
+
+Platforms: all
+
 #### onFullscreenPlayerWillPresent
 Callback function that is called when the player is about to enter fullscreen mode.
 
@@ -722,6 +739,8 @@ Example:
 }
 ```
 
+Platforms: all
+
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
 
@@ -767,7 +786,7 @@ this.player.dismissFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
-#### FullscreenPlayer
+#### presentFullscreenPlayer
 `presentFullscreenPlayer()`
 
 Put the player in fullscreen mode.
