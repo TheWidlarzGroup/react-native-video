@@ -253,6 +253,7 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [headers](#headers)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -339,6 +340,21 @@ Determines whether to show player controls.
 Note on iOS, controls are always shown when in fullscreen mode.
 
 Platforms: DOM, iOS
+
+#### headers
+Pass headers to the HTTP client. Can be used for authorization.
+
+To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
+
+Example:
+```
+headers = {{
+  Authorization: 'bearer some-token-value',
+  'X-Custom-Header': 'some value'
+}}
+```
+
+Platforms: Android ExoPlayer
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
