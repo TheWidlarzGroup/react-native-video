@@ -41,6 +41,7 @@ class RCTVideo extends RCTView {
     this.muted = false;
     this.rate = 1.0;
     this.volume = 1.0;
+    this.videoElement.autoplay = true;
     this.childContainer.appendChild(this.videoElement);
   }
 
@@ -97,7 +98,7 @@ class RCTVideo extends RCTView {
       if (value) {
         this.videoElement.pause();
       } else {
-        this.playPromise = this.videoElement.play().catch(console.error);
+        this.playPromise = this.videoElement.play();
       }
     });
     this._paused = value;
@@ -106,7 +107,9 @@ class RCTVideo extends RCTView {
   set progressUpdateInterval(value: number) {
     this._progressUpdateInterval = value;
     this.stopProgressTimer();
-    this.startProgressTimer();
+    if (!this._paused) {
+      this.startProgressTimer();
+    }
   }
 
   set rate(value: number) {
