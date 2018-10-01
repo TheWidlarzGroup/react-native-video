@@ -823,8 +823,13 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             int secs = (int) (currentMillis / 1000) % 60;
             int mins = (int) ((currentMillis / (1000 * 60)) % 60);
             int hours = (int) ((currentMillis / (1000 * 60 * 60)) % 24);
+            boolean showHours = false;
+            if (duration != C.TIME_UNSET) {
+                showHours = ((int) ((duration / (1000 * 60 * 60)) % 24)) > 0;
+            }
+
             String currentString = "";
-            if (hours > 0) {
+            if (hours > 0 || showHours) {
                 currentString = String.format(Locale.UK, "%02d:%02d:%02d", hours, mins, secs);
             } else {
                 currentString = String.format(Locale.UK, "%02d:%02d", mins, secs);
