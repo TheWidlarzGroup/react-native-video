@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-        "dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#841e633ad006615ef188bf5a7e069a9f0c784b87"
+        "dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#aacf8f3f58c19eb75c0d8e4c0b806fdb2fa89167"
     },
     "scripts": {
         "postinstall": "",
