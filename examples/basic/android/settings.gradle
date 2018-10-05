@@ -9,4 +9,4 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../../android-exoplayer')
 
 include ':dice-shield-android'
-project(':dice-shield-android').projectDir = new File(rootProject.projectDir, '../../../node_modules/dice-shield-android/dice-shield')
+project(':dice-shield-android').projectDir = new File(rootProject.projectDir, '../../../node_modules/@imggaming/dice-shield-android/dice-shield')
