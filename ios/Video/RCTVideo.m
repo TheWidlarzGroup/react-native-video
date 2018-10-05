@@ -12,6 +12,7 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
+static NSString *const loadedTimeRangesKeyPath = @"loadedTimeRanges";
 
 static int const RCTVideoUnset = -1;
 
@@ -293,6 +294,7 @@ static int const RCTVideoUnset = -1;
   [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
   [_playerItem addObserver:self forKeyPath:timedMetadata options:NSKeyValueObservingOptionNew context:nil];
+  [_playerItem addObserver:self forKeyPath:loadedTimeRangesKeyPath options:0 context:nil];
   _playerItemObserversSet = YES;
 }
 
@@ -306,6 +308,7 @@ static int const RCTVideoUnset = -1;
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     [_playerItem removeObserver:self forKeyPath:timedMetadata];
+    [_playerItem removeObserver:self forKeyPath:loadedTimeRangesKeyPath];
     _playerItemObserversSet = NO;
   }
 }
@@ -625,6 +628,16 @@ static int const RCTVideoUnset = -1;
       }
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
+    } else if ([keyPath isEqualToString:loadedTimeRangesKeyPath]) {
+      const float playableDuration = [self calculatePlayableDuration].floatValue;
+      const Float64 totalDuration = CMTimeGetSeconds(_playerItem.duration);
+      if (totalDuration <= 0.0) {
+        return;
+      }
+      if (self.onVideoBufferProgress) {
+        self.onVideoBufferProgress(@{@"bufferedPercentage": @(playableDuration / totalDuration * 100.0),
+                                     @"playableDuration": [NSNumber numberWithFloat:playableDuration]});
+      }
     }
   } else if (object == _playerLayer) {
     if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
