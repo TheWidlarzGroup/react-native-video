@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#include <dce_shield_dlm/dce_shield_dlm-Swift.h>
+#import <dice_shield_ios/dice_shield_ios-Swift.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
