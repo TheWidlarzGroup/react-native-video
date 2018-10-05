@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include <dce_shield_dlm/dce_shield_dlm-Swift.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -312,6 +313,42 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - Player and source
 
+static void extracted(RCTVideo *object, NSDictionary *source) {
+    [object playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
+        object->_playerItem = playerItem;
+        [object addPlayerItemObservers];
+        
+        [object->_player pause];
+        [object->_playerViewController.view removeFromSuperview];
+        object->_playerViewController = nil;
+        
+        if (object->_playbackRateObserverRegistered) {
+            [object->_player removeObserver:object forKeyPath:playbackRate context:nil];
+            object->_playbackRateObserverRegistered = NO;
+        }
+        
+        object->_player = [AVPlayer playerWithPlayerItem:object->_playerItem];
+        object->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+        
+        [object->_player addObserver:object forKeyPath:playbackRate options:0 context:nil];
+        object->_playbackRateObserverRegistered = YES;
+        
+        [object addPlayerTimeObserver];
+        
+        //Perform on next run loop, otherwise onVideoLoadStart is nil
+        if (object.onVideoLoadStart) {
+            id uri = [source objectForKey:@"uri"];
+            id type = [source objectForKey:@"type"];
+            object.onVideoLoadStart(@{@"src": @{
+                                              @"uri": uri ? uri : [NSNull null],
+                                              @"type": type ? type : [NSNull null],
+                                              @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                      @"target": object.reactTag
+                                      });
+        }
+    }];
+}
+
 - (void)setSrc:(NSDictionary *)source
 {
   [self removePlayerLayer];
@@ -321,39 +358,7 @@ static int const RCTVideoUnset = -1;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
 
     // perform on next run loop, otherwise other passed react-props may not be set
-    [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
-      _playerItem = playerItem;
-      [self addPlayerItemObservers];
-      
-      [_player pause];
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
-        
-      if (_playbackRateObserverRegistered) {
-        [_player removeObserver:self forKeyPath:playbackRate context:nil];
-        _playbackRateObserverRegistered = NO;
-      }
-        
-      _player = [AVPlayer playerWithPlayerItem:_playerItem];
-      _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-        
-      [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-      _playbackRateObserverRegistered = YES;
-        
-      [self addPlayerTimeObserver];
-        
-      //Perform on next run loop, otherwise onVideoLoadStart is nil
-      if (self.onVideoLoadStart) {
-        id uri = [source objectForKey:@"uri"];
-        id type = [source objectForKey:@"type"];
-        self.onVideoLoadStart(@{@"src": @{
-                                        @"uri": uri ? uri : [NSNull null],
-                                        @"type": type ? type : [NSNull null],
-                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
-                                    @"target": self.reactTag
-                                });
-      }
-    }];
+      extracted(self, source);
   });
   _videoLoadStarted = YES;
 }
@@ -441,6 +446,28 @@ static int const RCTVideoUnset = -1;
     ? [NSURL URLWithString:uri]
     : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
+    
+  id drmObject = [source objectForKey:@"drm"];
+  
+    
+  if (drmObject) {
+      ActionToken* ac = nil;
+      if ([drmObject isKindOfClass:NSDictionary.class]) {
+          NSDictionary* drmDictionary = drmObject;
+          ac = [[ActionToken alloc] initWithDict:drmDictionary contentUrl:uri];
+      } else if ([drmObject isKindOfClass:NSString.class]) {
+          NSString* drmString = drmObject;
+          ac = [ActionToken createFrom: drmString contentUrl:uri];
+      }
+      if (ac) {
+        AVURLAsset* asset = [ac urlAsset];
+        [self playerItemPrepareText:asset assetOptions:[NSDictionary alloc] withCallback:handler];
+        return;
+      } else {
+        DebugLog(@"Failed to created action token for playback.");
+      }
+
+  }
   
   if (isNetwork) {
     /* Per #1091, this is not a public API.

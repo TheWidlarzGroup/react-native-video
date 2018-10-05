@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B283A6752153B0E80069C818 /* dce_shield_dlm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A6742153B0E80069C818 /* dce_shield_dlm.framework */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
@@ -41,6 +42,7 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B283A6742153B0E80069C818 /* dce_shield_dlm.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = dce_shield_dlm.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B283A6752153B0E80069C818 /* dce_shield_dlm.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +84,7 @@
 		49E995712048B4CE00EA7890 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B283A6742153B0E80069C818 /* dce_shield_dlm.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
