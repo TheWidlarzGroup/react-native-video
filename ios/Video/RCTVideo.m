@@ -635,7 +635,8 @@ static int const RCTVideoUnset = -1;
         return;
       }
       if (self.onVideoBufferProgress) {
-        self.onVideoBufferProgress(@{@"bufferedPercentage": @(playableDuration / totalDuration * 100.0)});
+        self.onVideoBufferProgress(@{@"bufferedPercentage": @(playableDuration / totalDuration * 100.0),
+                                     @"playableDuration": [NSNumber numberWithFloat:playableDuration]});
       }
     }
   } else if (object == _playerLayer) {
