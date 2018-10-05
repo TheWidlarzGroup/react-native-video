@@ -1,8 +1,6 @@
 'use strict';
 
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   AppRegistry,
@@ -15,7 +13,6 @@ import {
 import Video from 'react-native-video';
 
 class VideoPlayer extends Component {
-
   state = {
     rate: 1,
     volume: 1,
@@ -37,31 +34,42 @@ class VideoPlayer extends Component {
   };
 
   onEnd = () => {
-    this.setState({ paused: true })
-    this.video.seek(0)
+    this.setState({ paused: true });
+    this.video.seek(0);
   };
 
   onAudioBecomingNoisy = () => {
-    this.setState({ paused: true })
+    this.setState({ paused: true });
   };
 
   onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
-    this.setState({ paused: !event.hasAudioFocus })
+    this.setState({ paused: !event.hasAudioFocus });
   };
 
   getCurrentTimePercentage() {
     if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+      return (
+        parseFloat(this.state.currentTime) / parseFloat(this.state.duration)
+      );
     }
     return 0;
-  };
+  }
 
   renderRateControl(rate) {
-    const isSelected = (this.state.rate === rate);
+    const isSelected = this.state.rate === rate;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ rate }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ rate });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {rate}x
         </Text>
       </TouchableOpacity>
@@ -69,27 +77,45 @@ class VideoPlayer extends Component {
   }
 
   renderResizeModeControl(resizeMode) {
-    const isSelected = (this.state.resizeMode === resizeMode);
+    const isSelected = this.state.resizeMode === resizeMode;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ resizeMode }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ resizeMode });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {resizeMode}
         </Text>
       </TouchableOpacity>
-    )
+    );
   }
 
   renderVolumeControl(volume) {
-    const isSelected = (this.state.volume === volume);
+    const isSelected = this.state.volume === volume;
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ volume }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ volume });
+        }}
+      >
+        <Text
+          style={[
+            styles.controlOption,
+            { fontWeight: isSelected ? 'bold' : 'normal' },
+          ]}
+        >
           {volume * 100}%
         </Text>
       </TouchableOpacity>
-    )
+    );
   }
 
   render() {
@@ -98,16 +124,27 @@ class VideoPlayer extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity
+        <View
           style={styles.fullScreen}
           onPress={() => this.setState({ paused: !this.state.paused })}
         >
           <Video
-            ref={(ref: Video) => { this.video = ref }}
+            ref={(ref: Video) => {
+              this.video = ref;
+            }}
             /* For ExoPlayer */
             /* source={{ uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0', type: 'mpd' }} */
-            source={require('./broadchurch.mp4')}
-            style={styles.fullScreen}
+            /* source={require('./broadchurch.mp4')} */
+            source={{
+             	uri: 'http://public_seriously.s3.amazonaws.com/shaka_encrypted/dash/DashBigBuckBunny.mpd',
+              	type: 'mpd',
+            	drm: '{\"drmScheme\": \"widevine\", \"licensingServerUrl\": \"https:\/\/poc-dynopkgwidevine.sd-ngp.net\/proxy\",\"croToken\": \"bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkaWNlIiwiaXNzIjoiaHR0cDovL2R5bmFtaWNfcGFja2FnZXJfYXBpX2FwaS5zZC1ucGcubmV0IiwiaWF0IjoxNTM2MTM1MTYwLCJkaWQiOiJ0ZXN0X2RldmljZV9pZCIsImp0aSI6IjEwMjRmZmZjLWNmZDctNDQ5Ny1iNjUxLWJkODQ4MzkwNWY1MSIsImVpZCI6ImRpY2Vfc3RyZWFtXzEiLCJleHAiOjE1OTEzOTQ5MjMsImFpZCI6InRlc3RfYWNjb3VudF9pZCIsInBsYyI6dHJ1ZSwiZGVmIjoiaGQifQ.Y5eU0V11RWh4f65Ir_qlT0kJL4XPCkr5P5LCbSvIvRk\"}'
+            	/* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
+            	}}
+            style={[
+              styles.fullScreen,
+              { paddingBottom: this.state.fullScreen ? 8 : 90 },
+            ]}
             rate={this.state.rate}
             paused={this.state.paused}
             volume={this.state.volume}
@@ -119,8 +156,29 @@ class VideoPlayer extends Component {
             onAudioBecomingNoisy={this.onAudioBecomingNoisy}
             onAudioFocusChanged={this.onAudioFocusChanged}
             repeat={false}
+            colorProgressBar={'#FFFF00'}
+            iconBottomRight={
+              this.state.fullScreen ? 'fullscreenOn' : 'fullscreenOff'
+            }
+            progressBarMarginBottom={this.state.fullScreen ? 12 : -12}
+            stateOverlay={'ACTIVE'}
+            stateMiddleCoreControls={'ACTIVE'}
+            stateProgressBar={'ACTIVE'}
+            controlsVisibilityGestureDisabled={true}
+            fullscreen={this.state.fullScreen}
+            live={false}
+            controlsOpacity={1}
+            onBottomRightIconClick={() => {
+              this.setState({ fullScreen: !this.state.fullScreen });
+            }}
+            onTouchActionMove={(event) => {
+              /* event.nativeEvent touchSwipeHorizontal */
+            }}
+            onTouchActionUp={(event) => {
+              /* event.nativeEvent null */
+            }}
           />
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.controls}>
           <View style={styles.generalControls}>
@@ -147,8 +205,12 @@ class VideoPlayer extends Component {
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
-              <View style={[styles.innerProgressCompleted, { flex: flexCompleted }]} />
-              <View style={[styles.innerProgressRemaining, { flex: flexRemaining }]} />
+              <View
+                style={[styles.innerProgressCompleted, { flex: flexCompleted }]}
+              />
+              <View
+                style={[styles.innerProgressRemaining, { flex: flexRemaining }]}
+              />
             </View>
           </View>
         </View>
@@ -156,7 +218,6 @@ class VideoPlayer extends Component {
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -224,6 +285,10 @@ const styles = StyleSheet.create({
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
+    display: 'none',
+  },
+  trackingControls: {
+    display: 'none',
   },
 });
 

@@ -35,9 +35,11 @@
     },
     "dependencies": {
         "keymirror": "0.1.1",
-        "prop-types": "^15.5.10"
+        "prop-types": "^15.5.10",
+        "dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#772a405fd75106a95e6881cb9c9418ab2404d590"
     },
     "scripts": {
+        "postinstall": "",
         "test": "node_modules/.bin/eslint *.js"
     },
     "rnpm": {
