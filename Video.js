@@ -191,6 +191,12 @@ export default class Video extends Component {
     }
   };
 
+  _onBufferProgress = (event) => {
+    if (this.props.onBufferProgress) {
+      this.props.onBufferProgress(event.nativeEvent);
+    }
+  };
+
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
@@ -234,6 +240,7 @@ export default class Video extends Component {
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
       onVideoBuffer: this._onBuffer,
+      onVideoBufferProgress: this._onBufferProgress,
       onTimedMetadata: this._onTimedMetadata,
       onVideoAudioBecomingNoisy: this._onAudioBecomingNoisy,
       onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
@@ -278,6 +285,7 @@ Video.propTypes = {
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,
   onVideoBuffer: PropTypes.func,
+  onVideoBufferProgress: PropTypes.func,
   onVideoError: PropTypes.func,
   onVideoProgress: PropTypes.func,
   onVideoSeek: PropTypes.func,
@@ -351,6 +359,7 @@ Video.propTypes = {
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,
+  onBufferProgress: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
   onSeek: PropTypes.func,
