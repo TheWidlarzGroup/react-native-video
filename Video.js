@@ -255,35 +255,21 @@ export default class Video extends Component {
       onExternalPlaybackChange: this._onExternalPlaybackChange,
     });
 
-    if (this.props.poster && this.state.showPoster) {
-      const posterStyle = {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        resizeMode: this.props.posterResizeMode || 'contain'
-      };
-
-      return (
-        <View style={nativeProps.style}>
-          <RCTVideo
-            ref={this._assignRoot}
-            {...nativeProps}
-          />
-          <Image
-            style={posterStyle}
-            source={{uri: this.props.poster}}
-          />
-        </View>
-      );
-    }
+    const posterStyle = {
+      ...StyleSheet.absoluteFillObject,
+      resizeMode: this.props.posterResizeMode || 'contain',
+    };
 
     return (
-      <RCTVideo
-        ref={this._assignRoot}
-        {...nativeProps}
-      />
+      <React.Fragment>
+        <RCTVideo ref={this._assignRoot} {...nativeProps} />
+        {this.props.poster &&
+          this.state.showPoster && (
+            <View style={nativeProps.style}>
+              <Image style={posterStyle} source={{ uri: this.props.poster }} />
+            </View>
+          )}
+      </React.Fragment>
     );
   }
 }
