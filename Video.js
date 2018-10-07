@@ -242,6 +242,7 @@ export default class Video extends Component {
       onVideoBuffer: this._onBuffer,
       onTimedMetadata: this._onTimedMetadata,
       onVideoAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onVideoExternalPlaybackChange: this._onExternalPlaybackChange,
       onVideoFullscreenPlayerWillPresent: this._onFullscreenPlayerWillPresent,
       onVideoFullscreenPlayerDidPresent: this._onFullscreenPlayerDidPresent,
       onVideoFullscreenPlayerWillDismiss: this._onFullscreenPlayerWillDismiss,
@@ -252,7 +253,6 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
-      onExternalPlaybackChange: this._onExternalPlaybackChange,
     });
 
     const posterStyle = {
@@ -291,6 +291,7 @@ Video.propTypes = {
   onVideoEnd: PropTypes.func,
   onTimedMetadata: PropTypes.func,
   onVideoAudioBecomingNoisy: PropTypes.func,
+  onVideoExternalPlaybackChange: PropTypes.func,
   onVideoFullscreenPlayerWillPresent: PropTypes.func,
   onVideoFullscreenPlayerDidPresent: PropTypes.func,
   onVideoFullscreenPlayerWillDismiss: PropTypes.func,
