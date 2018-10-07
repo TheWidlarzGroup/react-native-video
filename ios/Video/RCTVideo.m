@@ -657,8 +657,8 @@ static int const RCTVideoUnset = -1;
       }
     }
     else if([keyPath isEqualToString:externalPlaybackActive]) {
-        if(self.onExternalPlaybackChange) {
-          self.onExternalPlaybackChange(@{@"isExternalPlaybackActive": [NSNumber numberWithBool:_player.isExternalPlaybackActive],
+        if(self.onVideoExternalPlaybackChange) {
+          self.onVideoExternalPlaybackChange(@{@"isExternalPlaybackActive": [NSNumber numberWithBool:_player.isExternalPlaybackActive],
                                           @"target": self.reactTag});
         }
     }
