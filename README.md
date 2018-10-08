@@ -254,7 +254,8 @@ var styles = StyleSheet.create({
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [fullscreen](#fullscreen)
-* [fullscreenOptions](#fullscreenOptions)
+* [fullscreenAutorotate](#fullscreenautorotate)
+* [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
@@ -346,8 +347,19 @@ Platforms: DOM, iOS
 
 #### fullscreen
 Controls whether the player enters fullscreen on play. Use fullscreenOptions for extended behaviour.
+* **false (default)** - Don't display the video in fullscreen
+* **true** - Display the video in fullscreen
 
 Platforms: iOS
+
+#### fullscreenAutorotate
+If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation when the video enters fullscreen.
+
+#### fullscreenOrientation
+
+* **all (default)** - 
+* **landscape**
+* **portrait**
 
 #### fullscreenOptions
 Controls behaviour of the player entering fullscreen, such as forcing landscape playback on portrait devices

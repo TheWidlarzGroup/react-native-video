@@ -30,7 +30,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
   BOOL _playerLayerObserverSet;
-  AVPlayerViewController *_playerViewController;
+  RCTVideoPlayerViewController *_playerViewController;
   NSURL *_videoURL;
   
   /* Required to publish events */
@@ -64,7 +64,8 @@ static int const RCTVideoUnset = -1;
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreen;
-  NSDictionary* _fullscreenOptions;
+  BOOL _fullscreenAutorotate;
+  NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
@@ -83,6 +84,8 @@ static int const RCTVideoUnset = -1;
     _rate = 1.0;
     _volume = 1.0;
     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
+    _fullscreenAutorotate = YES;
+    _fullscreenOrientation = @"default";
     _pendingSeek = false;
     _pendingSeekTime = 0.0f;
     _lastSeekTime = 0.0f;
@@ -120,21 +123,18 @@ static int const RCTVideoUnset = -1;
   return self;
 }
 
-- (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem {
-  
-    RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
-    playerLayer.showsPlaybackControls = YES;
-    playerLayer.rctDelegate = self;
+- (RCTVideoPlayerViewController*)createPlayerViewController:(AVPlayer*)player
+                                             withPlayerItem:(AVPlayerItem*)playerItem {
+    RCTVideoPlayerViewController* viewController = [[RCTVideoPlayerViewController alloc] init];
+    viewController.showsPlaybackControls = YES;
+    viewController.rctDelegate = self;
+    viewController.autorotate = _fullscreenAutorotate;
+    viewController.preferredOrientation = _fullscreenOrientation;
     
-    if (_fullscreenOptions) {
-      playerLayer.preferredOrientation = [RCTConvert NSString:[_fullscreenOptions objectForKey:@"preferredOrientation"]];
-      playerLayer.autorotate = [RCTConvert BOOL:[_fullscreenOptions objectForKey:@"autorotate"]];
-    }
-    
-    playerLayer.view.frame = self.bounds;
-    playerLayer.player = player;
-    playerLayer.view.frame = self.bounds;
-    return playerLayer;
+    viewController.view.frame = self.bounds;
+    viewController.player = player;
+    viewController.view.frame = self.bounds;
+    return viewController;
 }
 
 /* ---------------------------------------------------------
@@ -361,8 +361,6 @@ static int const RCTVideoUnset = -1;
         
       [self addPlayerTimeObserver];
 
-      [self setFullscreenOptions:_fullscreenOptions];
-        
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
         id uri = [source objectForKey:@"uri"];
@@ -380,17 +378,15 @@ static int const RCTVideoUnset = -1;
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
-  
-  // check if the file exists at the specified location
-  if ([[NSFileManager defaultManager] fileExistsAtPath:filepath]) {
-    return [NSURL fileURLWithPath:filepath];
+  if ([filepath containsString:@"file://"]) {
+    return [NSURL URLWithString:filepath];
   }
   
   // if no file found, check if the file exists in the Document directory
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString* relativeFilePath = [filepath lastPathComponent];
   // the file may be multiple levels below the documents directory
-  NSArray* fileComponents = [filepath componentsSeparatedByString:@"/Documents/"];
+  NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
   if (fileComponents.count > 1) {
     relativeFilePath = [fileComponents objectAtIndex:1];
   }
@@ -1113,33 +1109,7 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setFullscreen:(BOOL) fullscreen {
-  _fullscreen = fullscreen;
-  
-  NSString* enabled = _fullscreen ? @"1" : @"0";
-  
-  if (!_fullscreenOptions) {
-    [self setFullscreenOptions:
-     @{
-       @"enabled": enabled,
-       @"autorotate": @"0",
-       @"preferredOrientation": @"default"
-       }];
-  }
-  else {
-    [_fullscreenOptions setValue:enabled forKey:@"enabled"];
-    [self setFullscreenOptions:_fullscreenOptions];
-  }
-}
-
-- (void)setFullscreenOptions:(NSDictionary*) fullscreenOptions
-{
-  _fullscreenOptions = fullscreenOptions;
-  
-  if (!_fullscreenOptions) return;
-  
-  BOOL fullscreenEnabled = [RCTConvert BOOL:[_fullscreenOptions objectForKey:@"enabled"]];
-  
-  if( fullscreenEnabled && !_fullscreenPlayerPresented && _player )
+  if( fullscreen && !_fullscreenPlayerPresented )
   {
     // Ensure player view controller is not null
     if( !_playerViewController )
@@ -1168,19 +1138,33 @@ static int const RCTVideoUnset = -1;
       }
       [viewController presentViewController:_playerViewController animated:true completion:^{
         _playerViewController.showsPlaybackControls = YES;
-        _fullscreenPlayerPresented = fullscreenEnabled;
+        _fullscreenPlayerPresented = fullscreen;
         if(self.onVideoFullscreenPlayerDidPresent) {
           self.onVideoFullscreenPlayerDidPresent(@{@"target": self.reactTag});
         }
       }];
     }
   }
-  else if ( !fullscreenEnabled && _fullscreenPlayerPresented )
+  else if ( !fullscreen && _fullscreenPlayerPresented )
   {
     [self videoPlayerViewControllerWillDismiss:_playerViewController];
     [_presentingViewController dismissViewControllerAnimated:true completion:^{
       [self videoPlayerViewControllerDidDismiss:_playerViewController];
     }];
+  }
+}
+
+- (void)setFullscreenAutorotate:(BOOL)autorotate {
+  _fullscreenAutorotate = autorotate;
+  if (_fullscreenPlayerPresented) {
+    _playerViewController.autorotate = autorotate;
+  }
+}
+
+- (void)setFullscreenOrientation:(NSString *)orientation {
+  _fullscreenOrientation = orientation;
+  if (_fullscreenPlayerPresented) {
+    _playerViewController.preferredOrientation = orientation;
   }
 }
 
