@@ -15,3 +15,6 @@ If the PR requires special testing setup provide all the relevant instructions a
 #### Focus the PR on only one area
 Testing multiple features takes longer than isolated changes and if there is a bug in one feature, prevents the other parts of your PR from getting merged until it gets fixed.
 If you're touching multiple different areas that aren't related, break the changes up into multiple PRs.
+
+#### Describe the changes
+Add a note describing what your PR does. If there is a change to the behavior of the code, explain why it needs to be updated.
