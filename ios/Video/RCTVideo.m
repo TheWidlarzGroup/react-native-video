@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#import <math.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -622,7 +623,7 @@ static int const RCTVideoUnset = -1;
     } else if ([keyPath isEqualToString:loadedTimeRangesKeyPath]) {
       const float playableDuration = [self calculatePlayableDuration].floatValue;
       const Float64 totalDuration = CMTimeGetSeconds(_playerItem.duration);
-      if (totalDuration <= 0.0) {
+      if (isnan(totalDuration) || isinf(totalDuration) || totalDuration <= 0.0) {
         return;
       }
       if (self.onVideoBufferProgress) {
