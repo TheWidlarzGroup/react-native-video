@@ -6,12 +6,11 @@
 
 @implementation RCTVideoPlayerViewController
 
-- (id)init {
-  self = [super init];
-  if (self) {
-    self.autorotate = true; // autorotate should be true by default
-  }
-  return self;
+- (BOOL)shouldAutorotate {
+  if (self.preferredOrientation.lowercaseString == nil || [self.preferredOrientation.lowercaseString isEqualToString:@"all"])
+    return YES;
+  
+  return NO;
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -21,18 +20,8 @@
   [_rctDelegate videoPlayerViewControllerDidDismiss:self];
 }
 
-- (BOOL)shouldAutorotate {
-  return self.autorotate;
-}
-
+#if !TARGET_OS_TV
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-  
-  if ([self.preferredOrientation.lowercaseString isEqualToString:@"landscape"]) {
-    return UIInterfaceOrientationMaskLandscape;
-  }
-  else if ([self.preferredOrientation.lowercaseString isEqualToString:@"portrait"]) {
-    return UIInterfaceOrientationMaskPortrait;
-  }
   return UIInterfaceOrientationMaskAll;
 }
 
@@ -48,5 +37,6 @@
     return orientation;
   }
 }
+#endif
 
 @end

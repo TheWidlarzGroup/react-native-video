@@ -254,7 +254,6 @@ var styles = StyleSheet.create({
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [fullscreen](#fullscreen)
-* [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
 * [ignoreSilentSwitch](#ignoresilentswitch)
@@ -346,38 +345,17 @@ Note on iOS, controls are always shown when in fullscreen mode.
 Platforms: DOM, iOS
 
 #### fullscreen
-Controls whether the player enters fullscreen on play. Use fullscreenOptions for extended behaviour.
+Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
 Platforms: iOS
-
-#### fullscreenAutorotate
-If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation when the video enters fullscreen.
 
 #### fullscreenOrientation
 
 * **all (default)** - 
 * **landscape**
 * **portrait**
-
-#### fullscreenOptions
-Controls behaviour of the player entering fullscreen, such as forcing landscape playback on portrait devices
-
-Property | Type | Description
---- | --- | ---
-enabled | boolean | determines whether to enter fullscreen on video play
-preferredOrientation | landscape, portrait, default | Defaults to the current device orientation; otherwise will force fullscreen video playback into landscape or portrait
-autorotate | boolean | determines whether the video player will rotate to the preferredOrientation automatically
-
-Example with default values
-```
-fullscreenOptions={{ 
-  enabled: false,
-  preferredOrientation: 'default'
-  autorotate: true 
-}}
-```
 
 Platforms: iOS
 
