@@ -98,7 +98,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
-    private DefaultTrackSelector trackSelector;
+    private MappingTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
     private int resumeWindow;
@@ -533,12 +533,12 @@ class ReactExoplayerView extends FrameLayout implements
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
-            WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putInt("index", i);
-            audioTrack.putString("title", format.id != null ? format.id : "");
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTracks.pushMap(audioTrack);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            audioTracks.pushMap(textTrack);
         }
         return audioTracks;
     }
@@ -554,13 +554,13 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id != null ? format.id : "");
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language != null ? format.language : "");
-             textTracks.pushMap(textTrack);
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            textTracks.pushMap(textTrack);
         }
         return textTracks;
     }
@@ -774,13 +774,8 @@ class ReactExoplayerView extends FrameLayout implements
             type = "default";
         }
 
-        DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
-
         if (type.equals("disabled")) {
-            trackSelector.setParameters(disableParameters);
+            trackSelector.setSelectionOverride(rendererIndex, groups, null);
             return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
@@ -803,12 +798,17 @@ class ReactExoplayerView extends FrameLayout implements
                 trackIndex = value.asInt();
             }
         } else { // default
-            if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18 && groups.length > 0) {
-                // Use system settings if possible
-                CaptioningManager captioningManager
-                        = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-                if (captioningManager != null && captioningManager.isEnabled()) {
-                    trackIndex = getTrackIndexForDefaultLocale(groups);
+            if (rendererIndex == C.TRACK_TYPE_TEXT) { // Use system settings if possible
+                int sdk = android.os.Build.VERSION.SDK_INT;
+                if (sdk > 18 && groups.length > 0) {
+                    CaptioningManager captioningManager
+                            = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+                    if (captioningManager != null && captioningManager.isEnabled()) {
+                        trackIndex = getTrackIndexForDefaultLocale(groups);
+                    }
+                } else {
+                    trackSelector.setSelectionOverride(rendererIndex, groups, null);
+                    return;
                 }
             } else if (rendererIndex == C.TRACK_TYPE_AUDIO) {
                 trackIndex = getTrackIndexForDefaultLocale(groups);
@@ -816,17 +816,14 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         if (trackIndex == C.INDEX_UNSET) {
-            trackSelector.setParameters(disableParameters);
+            trackSelector.clearSelectionOverrides(rendererIndex);
             return;
         }
 
-        DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
-                .build();
-        trackSelector.setParameters(selectionParameters);
+        MappingTrackSelector.SelectionOverride override
+                = new MappingTrackSelector.SelectionOverride(
+                new FixedTrackSelection.Factory(), trackIndex, 0);
+        trackSelector.setSelectionOverride(rendererIndex, groups, override);
     }
 
     private int getTrackIndexForDefaultLocale(TrackGroupArray groups) {
@@ -892,12 +889,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
-      rate = newRate;
+        rate = newRate;
 
-      if (player != null) {
-          PlaybackParameters params = new PlaybackParameters(rate, 1f);
-          player.setPlaybackParameters(params);
-      }
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
+        }
     }
 
 
