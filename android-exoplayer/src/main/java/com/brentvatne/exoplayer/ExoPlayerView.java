@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -238,7 +237,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+        public void onTimelineChanged(Timeline timeline, Object manifest) {
             // Do nothing.
         }
 

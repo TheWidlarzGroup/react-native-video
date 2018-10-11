@@ -241,7 +241,7 @@ class ReactExoplayerView extends FrameLayout implements
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-            DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
+            DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
             player.addListener(this);
             player.setMetadataOutput(this);
@@ -595,7 +595,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
         // Do nothing.
     }
 
