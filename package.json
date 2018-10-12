@@ -35,7 +35,8 @@
     },
     "dependencies": {
         "keymirror": "0.1.1",
-        "prop-types": "^15.5.10"
+        "prop-types": "^15.5.10",
+	"shaka-player": "2.4.4"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
