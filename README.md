@@ -254,6 +254,7 @@ var styles = StyleSheet.create({
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [headers](#headers)
+* [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -349,13 +350,23 @@ To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment t
 
 Example:
 ```
-headers = {{
+headers={{
   Authorization: 'bearer some-token-value',
   'X-Custom-Header': 'some value'
 }}
 ```
 
 Platforms: Android ExoPlayer
+
+#### id
+Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
+
+Example:
+```
+id="video"
+```
+
+Platforms: DOM
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
