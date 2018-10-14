@@ -4,12 +4,17 @@ A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
 Version 4.x requires react-native >= 0.57.0
+
 Version 3.x requires react-native >= 0.40.0
 
 ### Version 4.0.0 breaking changes
-Version 4.0.0 now requires Gradle 3 and Android SDK 26 or higher for Android in order to support ExoPlayer 2.9.0. React Native 0.57 uses Gradle 3 & SDK 27 by default. Google is dropping support for apps using SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. If you need to support an older React Native version, you should use react-native-video 3.2.1.
-
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
+
+Version 4.0.0 now requires Android SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. 
+
+React Native 0.57 uses Gradle 3 & SDK 27 by default. Google is dropping support for apps using SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. 
+
+If you need to support an older React Native version, you should use react-native-video 3.2.1.
 
 ### Version 3.0.0 breaking changes
 Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
