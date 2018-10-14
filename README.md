@@ -253,6 +253,8 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [fullscreen](#fullscreen)
+* [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
@@ -342,6 +344,21 @@ Determines whether to show player controls.
 Note on iOS, controls are always shown when in fullscreen mode.
 
 Platforms: DOM, iOS
+
+#### fullscreen
+Controls whether the player enters fullscreen on play.
+* **false (default)** - Don't display the video in fullscreen
+* **true** - Display the video in fullscreen
+
+Platforms: iOS
+
+#### fullscreenOrientation
+
+* **all (default)** - 
+* **landscape**
+* **portrait**
+
+Platforms: iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization.

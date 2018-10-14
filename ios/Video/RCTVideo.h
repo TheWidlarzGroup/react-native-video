@@ -1,9 +1,9 @@
-#import <React/RCTView.h>
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
 #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import <React/RCTComponent.h>
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 #import <react-native-video/RCTVideoCache.h>

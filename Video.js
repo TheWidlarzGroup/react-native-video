@@ -354,6 +354,7 @@ Video.propTypes = {
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
+  fullscreenOrientation: PropTypes.oneOf(['all','landscape','portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
   onLoadStart: PropTypes.func,
