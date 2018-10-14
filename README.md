@@ -644,14 +644,16 @@ textTracks={[
 Platforms: Android ExoPlayer, iOS
 
 #### useTextureView
-Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
+Controls whether to output to a TextureView or SurfaceView.
+
+SurfaceView is more efficient and provides better performance but has two limitations:
 * It can't be animated, transformed or scaled
 * You can't overlay multiple SurfaceViews
 
 useTextureView can only be set at same time you're setting the source.
 
-* **false (default)** - Use a SurfaceView
-* **true** - Use a TextureView
+* **true (default)** - Use a TextureView
+* **false** - Use a SurfaceView
 
 Platforms: Android ExoPlayer
 
