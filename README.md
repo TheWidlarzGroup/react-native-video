@@ -192,6 +192,31 @@ using System.Collections.Generic;
 ```
 </details>
 
+<details>
+  <summary>DOM</summary>
+
+Make the following additions to the given files manually:
+
+**dom/bootstrap.js**
+
+Import RCTVideoManager and add it to the list of nativeModules:
+
+```javascript
+import { RNDomInstance } from "react-native-dom";
+import { name as appName } from "../app.json";
+import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
+
+// Path to RN Bundle Entrypoint ================================================
+const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
+
+// React Native DOM Runtime Options =============================================
+const ReactNativeDomOptions = {
+  enableHotReload: false,
+  nativeModules: [RCTVideoManager] // Add this
+};
+```
+</details>
+
 ## Usage
 
 ```javascript
@@ -208,7 +233,6 @@ import Video from 'react-native-video';
          this.player = ref
        }}                                      // Store reference
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
-       onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
@@ -228,6 +252,11 @@ var styles = StyleSheet.create({
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
+* [controls](#controls)
+* [fullscreen](#fullscreen)
+* [fullscreenOrientation](#fullscreenorientation)
+* [headers](#headers)
+* [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -249,6 +278,8 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onEnd](#onend)
+* [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
 * [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
 * [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
@@ -304,6 +335,55 @@ bufferConfig={{
 ```
 
 Platforms: Android ExoPlayer
+
+#### controls
+Determines whether to show player controls.
+* ** false (default)** - Don't show player controls
+* **true** - Show player controls
+
+Note on iOS, controls are always shown when in fullscreen mode.
+
+Platforms: DOM, iOS
+
+#### fullscreen
+Controls whether the player enters fullscreen on play.
+* **false (default)** - Don't display the video in fullscreen
+* **true** - Display the video in fullscreen
+
+Platforms: iOS
+
+#### fullscreenOrientation
+
+* **all (default)** - 
+* **landscape**
+* **portrait**
+
+Platforms: iOS
+
+#### headers
+Pass headers to the HTTP client. Can be used for authorization.
+
+To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
+
+Example:
+```
+headers={{
+  Authorization: 'bearer some-token-value',
+  'X-Custom-Header': 'some value'
+}}
+```
+
+Platforms: Android ExoPlayer
+
+#### id
+Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
+
+Example:
+```
+id="video"
+```
+
+Platforms: DOM
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
@@ -586,6 +666,31 @@ Payload: none
 
 Platforms: Android ExoPlayer, iOS
 
+#### onEnd
+Callback function that is called when the player reaches the end of the media.
+
+Payload: none
+
+Platforms: all
+
+#### onExternalPlaybackChange
+Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+isExternalPlaybackActive | boolean | Boolean indicating whether external playback mode is active
+
+Example:
+```
+{
+  isExternalPlaybackActive: true
+}
+```
+
+Platforms: iOS
+
 #### onFullscreenPlayerWillPresent
 Callback function that is called when the player is about to enter fullscreen mode.
 
@@ -680,7 +785,7 @@ Example:
 Platforms: all
 
 #### onProgress
-Callback function that is called every progressInterval seconds with info about which position the media is currently playing.
+Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
 
 Property | Type | Description
 --- | --- | ---
@@ -696,6 +801,8 @@ Example:
   seekableDuration: 888
 }
 ```
+
+Platforms: all
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -742,7 +849,7 @@ this.player.dismissFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
-#### FullscreenPlayer
+#### presentFullscreenPlayer
 `presentFullscreenPlayer()`
 
 Put the player in fullscreen mode.
