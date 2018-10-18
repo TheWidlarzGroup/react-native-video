@@ -397,10 +397,13 @@ static int const RCTVideoUnset = -1;
 
 - (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
-  if (!_textTracks) {
+  if (!_textTracks || _textTracks.count==0) {
     handler([AVPlayerItem playerItemWithAsset:asset]);
     return;
   }
+  
+  // AVPlayer can't airplay AVMutableCompositions
+  _allowsExternalPlayback = NO;
 
   // sideload text tracks
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
