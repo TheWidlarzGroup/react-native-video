@@ -199,7 +199,7 @@ using System.Collections.Generic;
 </details>
 
 <details>
-  <summary>DOM</summary>
+  <summary>react-native-dom</summary>
 
 Make the following additions to the given files manually:
 
@@ -349,7 +349,7 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
-Platforms: DOM, iOS
+Platforms: iOS, react-native-dom
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
@@ -389,7 +389,7 @@ Example:
 id="video"
 ```
 
-Platforms: DOM
+Platforms: react-native-dom
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
