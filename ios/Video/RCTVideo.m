@@ -500,7 +500,7 @@ static int const RCTVideoUnset = -1;
                 if (cachedAsset) {
                     DebugLog(@"Playing back uri '%@' from cache", uri);
                     // See note in playerItemForSource about not being able to support text tracks & caching
-                    handler([AVPlayerItem playerItemWithAsset:asset]);
+                    handler([AVPlayerItem playerItemWithAsset:cachedAsset]);
                     return;
                 }
         }
