@@ -1,6 +1,8 @@
 ## Changelog
 
 ### Next Version
+
+* Fix ExoPlayer: avoid stretching of HLS when aspect ratio changes [#1302](https://github.com/react-native-community/react-native-video/pull/1302)
 * Partial support for timed metadata on Android MediaPlayer [#707](https://github.com/react-native-community/react-native-video/pull/707)
 * Support video caching for iOS [#955](https://github.com/react-native-community/react-native-video/pull/955)
 * Video caching cleanups [#1172](https://github.com/react-native-community/react-native-video/pull/1172)
