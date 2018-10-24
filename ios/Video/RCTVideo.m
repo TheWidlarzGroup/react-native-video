@@ -5,7 +5,11 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#if TAGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
+#elif TARGET_OS_TV
+#import <dice_shield_tvos/dice_shield_tvos-Swift.h>
+#endif
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -64,6 +68,8 @@ static int const RCTVideoUnset = -1;
   NSString * _resizeMode;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
+  // keep reference to actionToken so resourceLoaderDelegate is not garbage collected
+  ActionToken* _actionToken;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -460,6 +466,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
           ac = [ActionToken createFrom: drmString contentUrl:uri];
       }
       if (ac) {
+        _actionToken = ac;
         AVURLAsset* asset = [ac urlAsset];
         [self playerItemPrepareText:asset assetOptions:[NSDictionary alloc] withCallback:handler];
         return;
