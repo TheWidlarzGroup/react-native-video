@@ -205,9 +205,7 @@ public final class ExoPlayerView extends FrameLayout {
             layout.setAspectRatio(height == 0 ? 1 : (width * pixelWidthHeightRatio) / height);
 
             // React native workaround for measuring and layout on initial load.
-            if (isInitialRatio) {
-                post(measureAndLayout);
-            }
+            post(measureAndLayout);
         }
 
         @Override
