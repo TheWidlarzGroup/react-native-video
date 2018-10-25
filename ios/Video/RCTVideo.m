@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#if TAGET_OS_IOS
+#if TARGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
 #elif TARGET_OS_TV
 #import <dice_shield_tvos/dice_shield_tvos-Swift.h>
