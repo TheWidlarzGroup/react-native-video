@@ -274,7 +274,10 @@ export default class Video extends Component {
   }
 }
 
+Video.filterTypes = ['Normal', 'Country', 'Winter', 'Black N White', 'Sunrise', 'Artistic'];
+
 Video.propTypes = {
+  filter: PropTypes.oneOf(Video.filterTypes),
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
