@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import VideoResizeMode from './VideoResizeMode.js';
@@ -70,6 +70,10 @@ export default class Video extends Component {
   dismissFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: false });
   };
+
+  saveAsync = async (options?) => {
+    return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
+  }
 
   _assignRoot = (component) => {
     this._root = component;

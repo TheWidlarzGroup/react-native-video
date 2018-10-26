@@ -1,13 +1,12 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
 #import <React/RCTBridge.h>
+#import <React/RCTUIManager.h>
 #import <AVFoundation/AVFoundation.h>
 
 @implementation RCTVideoManager
 
 RCT_EXPORT_MODULE();
-
-@synthesize bridge = _bridge;
 
 - (UIView *)view
 {
@@ -16,7 +15,7 @@ RCT_EXPORT_MODULE();
 
 - (dispatch_queue_t)methodQueue
 {
-    return dispatch_get_main_queue();
+    return self.bridge.uiManager.methodQueue;
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
@@ -59,6 +58,22 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoSaved, RCTBubblingEventBlock);
+RCT_REMAP_METHOD(save,
+        options:(NSDictionary *)options
+        reactTag:(nonnull NSNumber *)reactTag
+        resolver:(RCTPromiseResolveBlock)resolve
+        rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+        RCTVideo *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[RCTVideo class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+        } else {
+            [view save:options resolve:resolve reject:reject];
+        }
+    }];
+}
 
 - (NSDictionary *)constantsToExport
 {
