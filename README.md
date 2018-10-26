@@ -298,6 +298,8 @@ var styles = StyleSheet.create({
 * [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
 * [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
 * [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
+* [onIsPictureInPictureActive](#onispictureinpictureactive)
+* [onIsPictureInPictureSupported](#onispictureinpicturesupported)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
@@ -308,7 +310,10 @@ var styles = StyleSheet.create({
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
 * [save](#save)
+* [restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)
+* [startPictureInPicture](#startpictureinpicture)
 * [seek](#seek)
+* [stopPictureInPicture](#stoppictureinpicture)
 
 ### Configurable props
 
@@ -861,6 +866,38 @@ Payload: none
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### onIsPictureInPictureActive
+Callback function that is called when picture in picture becames active on inactive.
+
+Property | Type | Description
+--- | --- | ---
+active | boolean | Boolean indicating whether picture in picture is active
+
+Example:
+```
+{
+  active: true
+}
+```
+
+Platforms:  iOS
+
+#### onIsPictureInPictureSupported
+Callback function that is called initially to determine whether or not picture in picture is supported.
+
+Property | Type | Description
+--- | --- | ---
+supported | boolean | Boolean indicating whether picture in picture is supported
+
+Example:
+```
+{
+  supported: true
+}
+```
+
+Platforms:  iOS
+
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
 
@@ -1057,6 +1094,30 @@ Future:
  
 Platforms: iOS
 
+#### restoreUserInterfaceForPictureInPictureStop
+`restoreUserInterfaceForPictureInPictureStop(restore)`
+
+This function corresponds to Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: After picture in picture stops, this function must be called.
+
+Example:
+```
+this.player.restoreUserInterfaceForPictureInPictureStop(true);
+```
+
+Platforms: iOS
+
+#### startPictureInPicture
+`startPictureInPicture()`
+
+Calling this function will start picture in picture if it is supported.
+
+Example:
+```
+this.player.startPictureInPicture();
+```
+
+Platforms: iOS
+
 #### seek()
 `seek(seconds)`
 
@@ -1082,6 +1143,18 @@ tolerance is the max distance in milliseconds from the seconds position that's a
 Example:
 ```
 this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
+```
+
+Platforms: iOS
+
+#### stopPictureInPicture
+`stopPictureInPicture()`
+
+Calling this function will stop picture in picture if it is currently active.
+
+Example:
+```
+this.player.stopPictureInPicture();
 ```
 
 Platforms: iOS

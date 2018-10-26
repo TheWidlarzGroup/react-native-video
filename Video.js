@@ -78,6 +78,18 @@ export default class Video extends Component {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
+  startPictureInPicture = () => {
+    this.setNativeProps({ pictureInPicture: true });
+  };
+
+  stopPictureInPicture = () => {
+    this.setNativeProps({ pictureInPicture: false });
+  };
+
+  restoreUserInterfaceForPictureInPictureStop = (restore) => {
+    this.setNativeProps({ restoreUserInterfaceForPIPStopCompletionHandler: restore });
+  };
+
   _assignRoot = (component) => {
     this._root = component;
   };
@@ -198,6 +210,18 @@ export default class Video extends Component {
     }
   };
 
+  _onIsPictureInPictureSupported = (event) => {
+    if (this.props.onIsPictureInPictureSupported) {
+      this.props.onIsPictureInPictureSupported(event.nativeEvent);
+    }
+  };
+
+  _onIsPictureInPictureActive = (event) => {
+    if (this.props.onIsPictureInPictureActive) {
+      this.props.onIsPictureInPictureActive(event.nativeEvent);
+    }
+  };
+
   _onAudioFocusChanged = (event) => {
     if (this.props.onAudioFocusChanged) {
       this.props.onAudioFocusChanged(event.nativeEvent);
@@ -267,6 +291,8 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onIsPictureInPictureSupported: this._onIsPictureInPictureSupported,
+      onIsPictureInPictureActive: this._onIsPictureInPictureActive,
     });
 
     const posterStyle = {
@@ -420,6 +446,8 @@ Video.propTypes = {
   onPlaybackRateChange: PropTypes.func,
   onAudioFocusChanged: PropTypes.func,
   onAudioBecomingNoisy: PropTypes.func,
+  onIsPictureInPictureSupported: PropTypes.func,
+  onIsPictureInPictureActive: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
 
   /* Required by react-native */
