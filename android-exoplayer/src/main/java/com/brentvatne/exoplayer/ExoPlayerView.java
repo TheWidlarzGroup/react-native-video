@@ -201,10 +201,7 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-            boolean isInitialRatio = layout.getAspectRatio() == 0;
             layout.setAspectRatio(height == 0 ? 1 : (width * pixelWidthHeightRatio) / height);
-
-            // React native workaround for measuring and layout on initial load.
             post(measureAndLayout);
         }
 
