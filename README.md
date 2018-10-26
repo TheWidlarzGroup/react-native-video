@@ -281,6 +281,7 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+* [filter](#filter)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -299,6 +300,7 @@ var styles = StyleSheet.create({
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
 * [seek](#seek)
+* [saveAsync](#saveAsync())
 
 ### Configurable props
 
@@ -665,6 +667,17 @@ Adjust the volume.
 
 Platforms: all
 
+#### filter
+Add video filter
+* **Normal (default)** - Normal Filter
+* **Country** - Sepia Filter
+* **Winter** - Cool Filter
+* **Black N White** - Black and White Filter
+* **Sunrise** - Warm Filter
+* **Artistic** - Posterize Filter
+
+Platforms: iOS
+
 ### Event props
 
 #### onAudioBecomingNoisy
@@ -898,6 +911,19 @@ tolerance is the max distance in milliseconds from the seconds position that's a
 Example:
 ```
 this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
+```
+
+Platforms: iOS
+
+##### saveAsync()
+`saveAsync(): Promise`
+
+Save video with current filter. Returns promise.
+
+Example:
+```
+let response = await this.save();
+let path = response.uri;
 ```
 
 Platforms: iOS
