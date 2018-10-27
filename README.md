@@ -3,18 +3,27 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
-Requires react-native >= 0.40.0
+Version 4.x requires react-native >= 0.57.0
+
+Version 3.x requires react-native >= 0.40.0
 
 ### Version 4.0.0 breaking changes
-Version 4.0.0 now requires Android SDK 26 or higher to use ExoPlayer. This is the default version as of React Native 0.56 and will be required by Google for all apps in October 2018.
+Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
+
+Version 4.0.0 now requires Android SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
+
+If you need to support an older React Native version, you should use react-native-video 3.2.1.
 
 ### Version 3.0.0 breaking changes
 Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
 
-## TOC
+## Table of Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
+* [iOS App Transport Security](#ios-app-transport-security)
+* [Audio Mixing](#audio-mixing)
+* [Android Expansion File Usage](#android-expansion-file-usage)
 * [Updating](#updating)
 
 ## Installation
@@ -31,26 +40,37 @@ or using yarn:
 yarn add react-native-video
 ```
 
+Then follow the instructions for your platform to link react-native-video into your project:
+
 <details>
   <summary>iOS</summary>
 
+### Standard Method
+
 Run `react-native link react-native-video` to link the react-native-video library.
 
-If you would like to allow other apps to play music over your video component, add:
+### Using CocoaPods (required to enable caching)
 
-**AppDelegate.m**
+Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
 
-```objective-c
-#import <AVFoundation/AVFoundation.h>  // import
+Depending on your requirements you have to choose between the two possible subpodspecs:
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  ...
-  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
-  ...
-}
+Video only:
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
++  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
 ```
-Note: you can also use the `ignoreSilentSwitch` prop, shown below.
+
+Video with caching ([more info](docs/caching.md)):
+
+```diff
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
++  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+end
+```
+
 </details>
 
 <details>
@@ -178,6 +198,31 @@ using System.Collections.Generic;
 ```
 </details>
 
+<details>
+  <summary>react-native-dom</summary>
+
+Make the following additions to the given files manually:
+
+**dom/bootstrap.js**
+
+Import RCTVideoManager and add it to the list of nativeModules:
+
+```javascript
+import { RNDomInstance } from "react-native-dom";
+import { name as appName } from "../app.json";
+import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
+
+// Path to RN Bundle Entrypoint ================================================
+const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
+
+// React Native DOM Runtime Options =============================================
+const ReactNativeDomOptions = {
+  enableHotReload: false,
+  nativeModules: [RCTVideoManager] // Add this
+};
+```
+</details>
+
 ## Usage
 
 ```javascript
@@ -194,7 +239,6 @@ import Video from 'react-native-video';
          this.player = ref
        }}                                      // Store reference
        onBuffer={this.onBuffer}                // Callback when remote video is buffering
-       onEnd={this.onEnd}                      // Callback when playback finishes
        onError={this.videoError}               // Callback when video cannot be loaded
        style={styles.backgroundVideo} />
 
@@ -214,6 +258,11 @@ var styles = StyleSheet.create({
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
+* [controls](#controls)
+* [fullscreen](#fullscreen)
+* [fullscreenOrientation](#fullscreenorientation)
+* [headers](#headers)
+* [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
 * [paused](#paused)
@@ -227,6 +276,7 @@ var styles = StyleSheet.create({
 * [resizeMode](#resizemode)
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
+* [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
@@ -234,6 +284,8 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onEnd](#onend)
+* [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
 * [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
 * [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
@@ -289,6 +341,55 @@ bufferConfig={{
 ```
 
 Platforms: Android ExoPlayer
+
+#### controls
+Determines whether to show player controls.
+* ** false (default)** - Don't show player controls
+* **true** - Show player controls
+
+Note on iOS, controls are always shown when in fullscreen mode.
+
+Platforms: iOS, react-native-dom
+
+#### fullscreen
+Controls whether the player enters fullscreen on play.
+* **false (default)** - Don't display the video in fullscreen
+* **true** - Display the video in fullscreen
+
+Platforms: iOS
+
+#### fullscreenOrientation
+
+* **all (default)** - 
+* **landscape**
+* **portrait**
+
+Platforms: iOS
+
+#### headers
+Pass headers to the HTTP client. Can be used for authorization.
+
+To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
+
+Example:
+```
+headers={{
+  Authorization: 'bearer some-token-value',
+  'X-Custom-Header': 'some value'
+}}
+```
+
+Platforms: Android ExoPlayer
+
+#### id
+Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
+
+Example:
+```
+id="video"
+```
+
+Platforms: react-native-dom
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
@@ -442,6 +543,63 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: Android ExoPlayer, iOS
 
+#### source
+Sets the media source. You can pass an asset loaded via require or an object with a uri.
+
+The docs for this prop are incomplete and will be updated as each option is investigated and tested.
+
+##### Asset loaded via require
+
+Example: 
+```
+const sintel = require('./sintel.mp4');
+
+source={sintel}
+```
+
+##### URI string
+
+A number of URI schemes are supported by passing an object with a `uri` attribute.
+
+###### Web address (http://, https://)
+
+Example:
+```
+source={ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }
+```
+
+Platforms: all
+
+###### File path (file://)
+
+Example:
+```
+source={ uri: 'file:///sdcard/Movies/sintel.mp4' }
+```
+
+Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
+
+Platforms: Android ExoPlayer, Android MediaPlayer, possibly others
+
+###### iPod Library (ipod-library://)
+
+Path to a sound file in your iTunes library. Typically shared from iTunes to your app.
+
+Example:
+```
+source={ uri: 'ipod-library:///path/to/music.mp3' }
+```
+
+Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
+
+Platforms: iOS
+
+###### Other protocols
+
+The following other types are supported on some platforms, but aren't fully documented yet:
+`content://, ms-appx://, ms-appdata://, assets-library://`
+
+
 #### stereoPan
 Adjust the balance of the left and right audio channels.  Any value between –1.0 and 1.0 is accepted.
 * **-1.0** - Full left
@@ -486,14 +644,16 @@ textTracks={[
 Platforms: Android ExoPlayer, iOS
 
 #### useTextureView
-Output to a TextureView instead of the default SurfaceView. In general, you will want to use SurfaceView because it is more efficient and provides better performance. However, SurfaceViews has two limitations:
+Controls whether to output to a TextureView or SurfaceView.
+
+SurfaceView is more efficient and provides better performance but has two limitations:
 * It can't be animated, transformed or scaled
 * You can't overlay multiple SurfaceViews
 
 useTextureView can only be set at same time you're setting the source.
 
-* **false (default)** - Use a SurfaceView
-* **true** - Use a TextureView
+* **true (default)** - Use a TextureView
+* **false** - Use a SurfaceView
 
 Platforms: Android ExoPlayer
 
@@ -513,6 +673,31 @@ Callback function that is called when the audio is about to become 'noisy' due t
 Payload: none
 
 Platforms: Android ExoPlayer, iOS
+
+#### onEnd
+Callback function that is called when the player reaches the end of the media.
+
+Payload: none
+
+Platforms: all
+
+#### onExternalPlaybackChange
+Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+isExternalPlaybackActive | boolean | Boolean indicating whether external playback mode is active
+
+Example:
+```
+{
+  isExternalPlaybackActive: true
+}
+```
+
+Platforms: iOS
 
 #### onFullscreenPlayerWillPresent
 Callback function that is called when the player is about to enter fullscreen mode.
@@ -608,10 +793,10 @@ Example:
 Platforms: all
 
 #### onProgress
-Callback function that is called every progressInterval seconds with info about which position the media is currently playing.
+Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
 
-Property | Description
---- | ---
+Property | Type | Description
+--- | --- | ---
 currentTime | number | Current position in seconds
 playableDuration | number | Position to where the media can be played to using just the buffer in seconds
 seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
@@ -624,6 +809,8 @@ Example:
   seekableDuration: 888
 }
 ```
+
+Platforms: all
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -670,7 +857,7 @@ this.player.dismissFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
-#### FullscreenPlayer
+#### presentFullscreenPlayer
 `presentFullscreenPlayer()`
 
 Put the player in fullscreen mode.
@@ -716,15 +903,35 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 Platforms: iOS
 
 
-### Additional props
+### iOS App Transport Security
 
-To see the full list of available props, you can check the [propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
-
-- By default, iOS 9+ will only load encrypted HTTPS urls. If you need to load content from a webserver that only supports HTTP, you will need to modify your Info.plist file and add the following entry:
+- By default, iOS will only load encrypted (https) urls. If you want to load content from an unencrypted (http) source, you will need to modify your Info.plist file and add the following entry:
 
 <img src="./docs/AppTransportSecuritySetting.png" width="50%">
 
 For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
+</details>
+
+### Audio Mixing
+
+At some point in the future, react-native-video will include an Audio Manager for configuring how videos mix with other apps playing sounds on the device.
+
+On iOS, if you would like to allow other apps to play music over your video component, make the following change:
+
+**AppDelegate.m**
+
+```objective-c
+#import <AVFoundation/AVFoundation.h>  // import
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ...
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
+  ...
+}
+```
+
+You can also use the [ignoreSilentSwitch](ignoresilentswitch) prop.
 </details>
 
 ### Android Expansion File Usage
@@ -775,7 +982,35 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
 ## Updating
 
-### Version 3.0
+### Version 4.0.0
+
+#### Gradle 3 and SDK 26 requirement
+In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57. ExoPlayer 
+
+#### ExoPlayer 2.9.0 Java 1.8 requirement
+ExoPlayer 2.9.0 uses some Java 1.8 features, so you may need to enable support for Java 1.8 in your app/build.gradle file. If you get an error, compiling with ExoPlayer like:
+`Default interface methods are only supported starting with Android N (--min-api 24)`
+
+Add the following to your app/build.gradle file:
+```
+android {
+   ... // Various other settings go here
+   compileOptions {
+     targetCompatibility JavaVersion.VERSION_1_8
+   }
+}
+```
+
+#### ExoPlayer no longer detaches
+When using a router like the react-navigation TabNavigator, switching between tab routes would previously cause ExoPlayer to detach causing the video player to pause. We now don't detach the view, allowing the video to continue playing in a background tab. This matches the behavior for iOS. Android MediaPlayer will crash if it detaches when switching routes, so its behavior has not been changed.
+
+#### useTextureView now defaults to true
+The SurfaceView, which ExoPlayer has been using by default has a number of quirks that people are unaware of and often cause issues. This includes not supporting animations or scaling. It also causes strange behavior if you overlay two videos on top of each other, because the SurfaceView will [punch a hole](https://developer.android.com/reference/android/view/SurfaceView) through other views. Since TextureView doesn't have these issues and behaves in the way most developers expect, it makes sense to make it the default.
+
+TextureView is not as fast as SurfaceView, so you may still want to enable SurfaceView support. To do this, you can set `useTextureView={false}`.
+
+
+### Version 3.0.0
 
 #### All platforms now auto-play
 Previously, on Android ExoPlayer if the paused prop was not set, the media would not automatically start playing. The only way it would work was if you set `paused={false}`. This has been changed to automatically play if paused is not set so that the behavior is consistent across platforms.

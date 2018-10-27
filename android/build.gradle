@@ -21,6 +21,6 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile 'com.yqritc:android-scalablevideoview:1.0.4'
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation 'com.yqritc:android-scalablevideoview:1.0.4'
 }
