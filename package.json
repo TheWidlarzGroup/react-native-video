@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -28,7 +28,6 @@
         "url": "git@github.com:brentvatne/react-native-video.git"
     },
     "devDependencies": {
-        "jest-cli": "0.2.1",
         "eslint": "1.10.3",
         "babel-eslint": "5.0.0-beta8",
         "eslint-plugin-react": "3.16.1",
@@ -36,7 +35,8 @@
     },
     "dependencies": {
         "keymirror": "0.1.1",
-        "prop-types": "^15.5.10"
+        "prop-types": "^15.5.10",
+	"shaka-player": "2.4.4"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
@@ -45,5 +45,14 @@
         "android": {
             "sourceDir": "./android-exoplayer"
         }
-    }
+    },
+    "files":[
+        "android-exoplayer",
+        "android",
+        "ios",
+        "windows",
+        "TextTrackType.js",
+        "react-native-video.podspec",
+        "VideoResizeMode.js"
+    ]
 }
