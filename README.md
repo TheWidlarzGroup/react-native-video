@@ -583,6 +583,9 @@ Sets the media source. You can pass an asset loaded via require or an object wit
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
+#### maximumBitRate
+Sets the maximum bit rate for HLS media sources. If an HLS m3u8 manifest describes multiple streams, the maximum bit rate determines the video stream selected
+
 ##### Asset loaded via require
 
 Example: 
