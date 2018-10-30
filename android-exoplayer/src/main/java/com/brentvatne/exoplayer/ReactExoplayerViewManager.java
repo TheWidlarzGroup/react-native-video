@@ -3,10 +3,12 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
@@ -15,6 +17,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -48,6 +51,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
+    private static final String PROP_DRM_LICENSE_URL = "drmUrl";
+    private static final String PROP_DRM_LICENSE_HEADER = "drmHeader";
+    private static final String PROP_DRM_NAME = "drmName";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
@@ -236,6 +242,34 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
+    }
+
+    @ReactProp(name = PROP_DRM_LICENSE_URL)
+    public void setDrmUrl(final ReactExoplayerView videoView, @Nullable String licenseUrl){
+        Log.d("setDrmUrl", licenseUrl);
+        videoView.setDrmLicenseUrl(licenseUrl);
+    }
+
+    @ReactProp(name = PROP_DRM_LICENSE_HEADER)
+    public void setDrmHeader(final ReactExoplayerView videoView, @Nullable ReadableMap headers){
+        ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
+        ReadableMapKeySetIterator itr = headers.keySetIterator();
+        while (itr.hasNextKey()) {
+            String key = itr.nextKey();
+            drmKeyRequestPropertiesList.add(key);
+            drmKeyRequestPropertiesList.add(headers.getString(key));
+        }
+        videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
+    }
+    
+    @ReactProp(name = PROP_DRM_NAME)
+    public void setDrmName(final ReactExoplayerView videoView, final String drmName){
+        try {
+            videoView.setDrmName(drmName);
+        }
+        catch (Exception ex){
+            Log.e("DRM Info", ex.toString());
         }
     }
 
