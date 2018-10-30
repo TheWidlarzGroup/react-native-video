@@ -326,6 +326,7 @@ class ReactExoplayerView extends FrameLayout implements
         return new DefaultDrmSessionManager<>(uuid,
                 FrameworkMediaDrm.newInstance(uuid), drmCallback, null, mainHandler, this);
     }
+
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
         return new DefaultHttpDataSourceFactory("sctv", useBandwidthMeter ? BANDWIDTH_METER : null);
     }
@@ -998,6 +999,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onDrmSessionManagerError(Exception e) {
+        Log.e("DRM Error", "exception", e);
         Log.d("DRM Info", "onDrmSessionManagerError");
     }
 
