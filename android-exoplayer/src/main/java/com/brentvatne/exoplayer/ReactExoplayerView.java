@@ -1261,7 +1261,13 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     public void setRateModifier(float newRate) {
-        rate = newRate;
+
+        if (newRate == 0.0) {
+            setPausedModifier(true);
+        } else {
+            setPausedModifier(false);
+            rate = newRate;
+        }
 
         if (player != null) {
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
