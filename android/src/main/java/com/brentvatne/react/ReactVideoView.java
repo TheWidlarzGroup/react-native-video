@@ -392,7 +392,7 @@ public class ReactVideoView extends ScalableVideoView implements
             if (!mMediaPlayer.isPlaying()) {
                 start();
                 // Setting the rate unpauses, so we have to wait for an unpause
-                if (mRate != mActiveRate) { 
+                if (mRate != mActiveRate) {
                     setRateModifier(mRate);
                 }
 
@@ -601,7 +601,7 @@ public class ReactVideoView extends ScalableVideoView implements
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         // Select track (so we can use it to listen to timed meta data updates)
-        mp.selectTrack(0);
+        // mp.selectTrack(0);
 
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
@@ -655,7 +655,7 @@ public class ReactVideoView extends ScalableVideoView implements
             setKeepScreenOn(false);
         }
     }
-        
+
     // This is not fully tested and does not work for all forms of timed metadata
     @TargetApi(23) // 6.0
     public class TimedMetaDataAvailableListener
