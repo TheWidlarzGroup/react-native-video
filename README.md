@@ -235,6 +235,7 @@ import Video from 'react-native-video';
 // on a single screen if you like.
 
 <Video source={{uri: "background"}}   // Can be a URL or a local file.
+       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
        ref={(ref) => {
          this.player = ref
        }}                                      // Store reference
@@ -934,6 +935,7 @@ On iOS, if you would like to allow other apps to play music over your video comp
 You can also use the [ignoreSilentSwitch](ignoresilentswitch) prop.
 </details>
 
+<<<<<<< HEAD
 ### Android Expansion File Usage
 Expansions files allow you to ship assets that exceed the 100MB apk size limit and don't need to be updated each time you push an app update.
 
@@ -941,11 +943,24 @@ This only supports mp4 files and they must not be compressed. Example command li
 ```bash
 zip -r -n .mp4 *.mp4 player.video.example.com
 ```
+=======
+To see full list of available props, you can check [the propTypes](https://github.com/react-native-community/react-native-video/blob/master/Video.js#L246) of the Video.js component.
+
+## Android Expansion File Usage
+>>>>>>> master
 
 ```javascript
 // Within your render function, assuming you have a file called
 // "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
 <Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
+<<<<<<< HEAD
+=======
+       poster="https://baconmockup.com/300/200/" // uri to an image to display until the video plays
+       rate={1.0}                   // 0 is paused, 1 is normal.
+       volume={1.0}                 // 0 is muted, 1 is normal.
+       muted={false}                // Mutes the audio entirely.
+       paused={false}               // Pauses playback entirely.
+>>>>>>> master
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        style={styles.backgroundVideo} />
 
