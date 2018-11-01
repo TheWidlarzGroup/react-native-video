@@ -328,7 +328,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        return new DefaultHttpDataSourceFactory("sctv", useBandwidthMeter ? BANDWIDTH_METER : null);
+        return new DefaultHttpDataSourceFactory("ExoPlayer/2.0.18 (Linux;Android 7.0) ExoPlayerLib/2.2.0", useBandwidthMeter ? BANDWIDTH_METER : null);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
