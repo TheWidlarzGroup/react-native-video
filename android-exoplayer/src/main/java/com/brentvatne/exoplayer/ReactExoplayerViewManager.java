@@ -4,13 +4,17 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.facebook.react.bridge.Dynamic;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -22,16 +26,31 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
+    private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
+    private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
+    private static final String PROP_SELECTED_AUDIO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_AUDIO_TRACK_VALUE = "value";
+    private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
+    private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
+    private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
+    private static final String PROP_BUFFER_CONFIG = "bufferConfig";
+    private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs";
+    private static final String PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs";
+    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
+    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
+    private static final String PROP_FULLSCREEN = "fullscreen";
+    private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
 
     @Override
     public String getName() {
@@ -72,6 +91,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
+        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -81,7 +102,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, extension);
+                videoView.setSrc(srcUri, extension, headers);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -113,6 +134,40 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
+    }
+
+    @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
+    public void setSelectedAudioTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedAudioTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedAudioTrack != null) {
+            typeString = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_TYPE)
+                    ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
+            value = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_VALUE)
+                    ? selectedAudioTrack.getDynamic(PROP_SELECTED_AUDIO_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedAudioTrack(typeString, value);
+    }
+
+    @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
+    public void setSelectedTextTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedTextTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedTextTrack != null) {
+            typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
+                    ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
+            value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
+                    ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedTextTrack(typeString, value);
+    }
+
+    @ReactProp(name = PROP_TEXT_TRACKS)
+    public void setPropTextTracks(final ReactExoplayerView videoView,
+                                  @Nullable ReadableArray textTracks) {
+        videoView.setTextTracks(textTracks);
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
@@ -155,6 +210,35 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setDisableFocus(disableFocus);
     }
 
+    @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)
+    public void setFullscreen(final ReactExoplayerView videoView, final boolean fullscreen) {
+        videoView.setFullscreen(fullscreen);
+    }
+
+    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
+    public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
+        videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_BUFFER_CONFIG)
+    public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
+        int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
+        int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
+        int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
+        int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+        if (bufferConfig != null) {
+            minBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MS)
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MIN_BUFFER_MS) : minBufferMs;
+            maxBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MAX_BUFFER_MS)
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MAX_BUFFER_MS) : maxBufferMs;
+            bufferForPlaybackMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS)
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
+            bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
+            videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
+    }
+
     private boolean startsWithValidScheme(String uriString) {
         return uriString.startsWith("http://")
                 || uriString.startsWith("https://")
@@ -169,5 +253,29 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             return ResizeMode.toResizeMode(resizeModeOrdinal);
         }
         return ResizeMode.RESIZE_MODE_FIT;
+    }
+
+    /**
+     * toStringMap converts a {@link ReadableMap} into a HashMap.
+     *
+     * @param readableMap The ReadableMap to be conveted.
+     * @return A HashMap containing the data that was in the ReadableMap.
+     * @see 'Adapted from https://github.com/artemyarulin/react-native-eval/blob/master/android/src/main/java/com/evaluator/react/ConversionUtil.java'
+     */
+    public static Map<String, String> toStringMap(@Nullable ReadableMap readableMap) {
+        if (readableMap == null)
+            return null;
+
+        com.facebook.react.bridge.ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+        if (!iterator.hasNextKey())
+            return null;
+
+        Map<String, String> result = new HashMap<>();
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            result.put(key, readableMap.getString(key));
+        }
+
+        return result;
     }
 }
