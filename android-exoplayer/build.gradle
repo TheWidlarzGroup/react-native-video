@@ -18,18 +18,24 @@ android {
 
 dependencies {
     compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation('com.google.android.exoplayer:exoplayer:2.9.0') {
-        exclude group: 'com.android.support'
-    }
+    // implementation('com.google.android.exoplayer:exoplayer:2.9.0') {
+    //     exclude group: 'com.android.support'
+    // }
+    implementation project(':exoplayer-library-core')
+    implementation project(':exoplayer-library-dash')
+    implementation project(':exoplayer-library-ui')
+    implementation project(':exoplayer-library-smoothstreaming')
+    implementation project(':exoplayer-library-hls')
+    implementation project(':exoplayer-extension-okhttp')
 
     // All support libs must use the same version
     implementation "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
     implementation "com.android.support:support-compat:${safeExtGet('supportLibVersion', '+')}"
     implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.9.0') {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
+    // implementation('com.google.android.exoplayer:extension-okhttp:2.9.0') {
+    //     exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    // }
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
 }

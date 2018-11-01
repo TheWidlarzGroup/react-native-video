@@ -60,6 +60,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
@@ -83,7 +84,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private static final String TAG = "ReactExoplayerView";
 
-    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+    private static DefaultBandwidthMeter BANDWIDTH_METER; // = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
     private static final int REPORT_BANDWIDTH = 1;
@@ -183,6 +184,9 @@ class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
+
+        buildBandwidthMeter();
+
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -261,6 +265,25 @@ class ReactExoplayerView extends FrameLayout implements
 
 
     // Internal methods
+    private void buildBandwidthMeter() {
+        BANDWIDTH_METER = new DefaultBandwidthMeter(new Handler(), new BandwidthMeter.EventListener() {
+            @Override
+            public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
+                String bw = humanReadableByteCount(bitrate, true, true);
+                System.out.println("Debug::::In function onBandwidthSample,  elapsedMs = " + elapsedMs + "  bytes = " + bytes + "  bitrate = " + bitrate);
+            }
+
+            public String  humanReadableByteCount(long bytes, boolean si, boolean isBits) {
+                int unit = !si ? 1000 : 1024;
+                if (bytes < unit)
+                  return bytes + " KB";
+                int exp = (int) (Math.log(bytes) / Math.log(unit));
+                String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1)
+                        + (si ? "" : "i");
+                return isBits ? String.format("%.1f %sb", bytes / Math.pow(unit, exp), pre) : String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+            }
+        });
+    }
 
     private void initializePlayer() {
         if (player == null) {
