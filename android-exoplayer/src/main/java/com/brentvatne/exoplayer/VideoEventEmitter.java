@@ -29,7 +29,7 @@ class VideoEventEmitter {
     private static final String EVENT_LOAD = "onVideoLoad";
     private static final String EVENT_ERROR = "onVideoError";
     private static final String EVENT_PROGRESS = "onVideoProgress";
-    private static final String EVENT_BANDWIDTH = "onBandwidthUpdate";
+    private static final String EVENT_BANDWIDTH = "onVideoBandwidthUpdate";
     private static final String EVENT_SEEK = "onVideoSeek";
     private static final String EVENT_END = "onVideoEnd";
     private static final String EVENT_FULLSCREEN_WILL_PRESENT = "onVideoFullscreenPlayerWillPresent";
@@ -178,7 +178,7 @@ class VideoEventEmitter {
 
     void bandwidthReport(double bitRateEstimate) {
         WritableMap event = Arguments.createMap();
-        event.putDouble(EVENT_PROP_BITRATE_ESTIMATE, bitRateEstimate / 1000D);
+        event.putDouble(EVENT_PROP_BITRATE_ESTIMATE, bitRateEstimate / 1024D);
         receiveEvent(EVENT_BANDWIDTH, event);
     }    
 

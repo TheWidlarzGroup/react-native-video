@@ -78,13 +78,14 @@ import java.util.Locale;
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
         ExoPlayer.EventListener,
+        BandwidthMeter.EventListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataRenderer.Output {
 
     private static final String TAG = "ReactExoplayerView";
 
-    private static DefaultBandwidthMeter BANDWIDTH_METER;
+    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
     private static final int REPORT_BANDWIDTH = 1;
@@ -95,7 +96,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private final VideoEventEmitter eventEmitter;
-
+    
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
 
@@ -135,7 +136,6 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
-    private float mBandwidthUpdateInterval = 250.0f;
     private boolean mReportBandwidth = false;
     // \ End props
 
@@ -164,31 +164,14 @@ class ReactExoplayerView extends FrameLayout implements
         }
     };
 
-    private final Handler bandwidthReporter = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case REPORT_BANDWIDTH:
-                    if (player != null) {
-                        long bitRateEstimate = BANDWIDTH_METER.getBitrateEstimate();
-
-                        eventEmitter.bandwidthReport(bitRateEstimate);
-                        msg = obtainMessage(REPORT_BANDWIDTH);
-                        sendMessageDelayed(msg, Math.round(mBandwidthUpdateInterval));
-                    }
-                    break;
-            }
-        }
-    };    
-
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
 
-        buildBandwidthMeter();
+        this.eventEmitter = new VideoEventEmitter(context);
 
         createViews();
-        this.eventEmitter = new VideoEventEmitter(context);
+        
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -263,17 +246,15 @@ class ReactExoplayerView extends FrameLayout implements
         stopPlayback();
     }
 
-
-    // Internal methods
-    private void buildBandwidthMeter() {
-        BANDWIDTH_METER = new DefaultBandwidthMeter(new Handler(), new BandwidthMeter.EventListener() {
-            @Override
-            public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
-                System.out.println("Debug::::In function onBandwidthSample,  elapsedMs = " + elapsedMs + "  bytes = " + bytes + "  bitrate = " + bitrate);
-            }
-        });
+    //BandwidthMeter.EventListener implementation
+    @Override
+    public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
+        if (mReportBandwidth == true) {
+            eventEmitter.bandwidthReport(bitrate);
+        }
     }
 
+    // Internal methods
     private void initializePlayer() {
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
@@ -285,6 +266,7 @@ class ReactExoplayerView extends FrameLayout implements
             player.setMetadataOutput(this);
             exoPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
+            BANDWIDTH_METER.addEventListener(new Handler(), this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
 
@@ -372,10 +354,10 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
             trackSelector = null;
         }
-        bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
+        BANDWIDTH_METER.removeEventListener(this);
     }
 
     private boolean requestAudioFocus() {
@@ -792,19 +774,9 @@ class ReactExoplayerView extends FrameLayout implements
         mProgressUpdateInterval = progressUpdateInterval;
     }
 
-    public void setBandwidthUpdateInterval(final float bandwidthUpdateInterval) {
-        mBandwidthUpdateInterval = bandwidthUpdateInterval;
-    }    
-
-    public void setReportBandwidthModifier(boolean reportBandwidth) {
+    public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
-        if (mReportBandwidth) {
-            bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
-            bandwidthReporter.sendEmptyMessage(REPORT_BANDWIDTH);
-        } else {
-            bandwidthReporter.removeMessages(REPORT_BANDWIDTH);
-        }
-    }    
+    }   
 
     public void setRawSrc(final Uri uri, final String extension) {
         if (uri != null) {
