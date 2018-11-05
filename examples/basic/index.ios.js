@@ -129,14 +129,25 @@ class VideoPlayer extends Component {
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
             // source={require('./broadchurch.mp4')}
+            // source={{
+            //     uri: 'https://public_seriously.s3.amazonaws.com/shaka_encrypted/hls_encrypted/HLSBigBuckBunny_video/main.m3u8',
+            //     type: 'hls',
+            //     drm: '{\"id\":"15", ' +
+            //         '\"drmScheme\": \"fairplay\", ' +
+            //         '\"licensingServerUrl\": \"https://qa-shield-drm.sd-ngp.net/api/v2/license\",' +
+            //         '\"croToken\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20uZGljZS50ZXN0X2NsaWVudCIsImNpZCI6ImRpY2VfdGVzdF9jbGllbnQiLCJwbGMiOnRydWUsImp0aSI6IjUzYzY5MDAzLTIwNTAtNGQxMS1iOGMxLWRlNjMyMmVmNjZlOCIsImVpZCI6ImZlMzk2YmU5LTlkNDYtNGRlMC04MDdhLTk4M2Q0NGE0N2JhMSIsImV4cCI6MTUzNzQ2NTQ1MywiaWF0IjoxNTM3NDU4MTUzLCJkZWYiOiJzZCJ9.rP9tsDBPH3SEMpE3FxEcrbXwP19fU_QJ66OReRzVxSo\",' +
+            //         '\"persistentLicense\": false}'
+            //     /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
+            // }}
+
             source={{
-                uri: 'https://public_seriously.s3.amazonaws.com/shaka_encrypted/hls_encrypted/HLSBigBuckBunny_video/main.m3u8',
+                uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                 type: 'hls',
-                drm: '{\"id\":"15", ' +
-                    '\"drmScheme\": \"fairplay\", ' +
-                    '\"licensingServerUrl\": \"https://qa-shield-drm.sd-ngp.net/api/v2/license\",' +
-                    '\"croToken\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20uZGljZS50ZXN0X2NsaWVudCIsImNpZCI6ImRpY2VfdGVzdF9jbGllbnQiLCJwbGMiOnRydWUsImp0aSI6IjUzYzY5MDAzLTIwNTAtNGQxMS1iOGMxLWRlNjMyMmVmNjZlOCIsImVpZCI6ImZlMzk2YmU5LTlkNDYtNGRlMC04MDdhLTk4M2Q0NGE0N2JhMSIsImV4cCI6MTUzNzQ2NTQ1MywiaWF0IjoxNTM3NDU4MTUzLCJkZWYiOiJzZCJ9.rP9tsDBPH3SEMpE3FxEcrbXwP19fU_QJ66OReRzVxSo\",' +
-                    '\"persistentLicense\": false}'
+                beacon: {
+                    url: 'http://localhost:8000/testBeaconResponse.json',
+                    headers: { 'X-Custom-Header':'Custom header contents', 'Authorization':'Bearer asdasdsdfgfdadsfgg' },
+                    body: { id: '123', video:12345 }
+                }
                 /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
             }}
             style={styles.fullScreen}
@@ -208,7 +219,16 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <View style={styles.fullScreen}>
           <Video
-            source={require('./broadchurch.mp4')}
+              source={{
+                  uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+                  type: 'hls',
+                  beacon: {
+                    url: 'http://localhost:8000/testBeaconResponse.json',
+                    headers: { 'X-Custom-Header':'Custom header contents', 'Authorization':'Bearer asdasdsdfgfdadsfgg' },
+                    body: { id: '123', video:12345 }
+                  }
+                  /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
+              }}
             style={videoStyle}
             rate={this.state.rate}
             paused={this.state.paused}

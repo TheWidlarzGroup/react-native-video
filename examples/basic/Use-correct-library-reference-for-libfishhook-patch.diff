@@ -1,0 +1,71 @@
+From a8b74576da6f1a42fde4e39f97e88c8f45a3a51d Mon Sep 17 00:00:00 2001
+From: Eli Perkins <eli@clubhouse.io>
+Date: Tue, 5 Jun 2018 14:14:17 -0700
+Subject: [PATCH] Use correct library reference for libfishhook.a in
+ RCTWebSocket (#19579)
+
+Summary:
+This uses the reference for `libfishhook.a` from the Products, rather than
+the reference from the Frameworks group.
+
+This fixes the build for the new Xcode build system, on both Xcode 9 and
+Xcode 10.
+
+Fixes #19569
+
+- Using Xcode 10:
+	- Open `RNTester/RNTester.xcodeproj`
+	- Build RNTester, noting build errors
+- Using Xcode 9:
+	- Open `RNTester/RNTester.xcodeproj`
+	- Switch to using new build system in `File > Project Settings > Build System`, selecting `New Build System (Preview)`
+	- Build RNTester, noting build errors
+
+none
+
+[IOS] [BUGFIX] [RCTWebSocket] - Fix build for new Xcode build system
+Closes https://github.com/facebook/react-native/pull/19579
+
+Differential Revision: D8287487
+
+Pulled By: hramos
+
+fbshipit-source-id: 5bfc9decb09ebc763824df8474b5897099d39ad7
+---
+ Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj b/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
+index 525452a558..f5e60eb166 100644
+--- a/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
++++ b/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
+@@ -9,7 +9,7 @@
+ /* Begin PBXBuildFile section */
+ 		1338BBE01B04ACC80064A9C9 /* RCTSRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDD1B04ACC80064A9C9 /* RCTSRWebSocket.m */; };
+ 		1338BBE11B04ACC80064A9C9 /* RCTWebSocketExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDF1B04ACC80064A9C9 /* RCTWebSocketExecutor.m */; };
+-		13526A521F362F7F0008EF00 /* libfishhook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 13526A511F362F7F0008EF00 /* libfishhook.a */; };
++		2D3ABDC220C7206E00DF56E9 /* libfishhook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBE0D001F3B181A0099AA32 /* libfishhook.a */; };
+ 		2D3B5F3D1D9B165B00451313 /* RCTSRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDD1B04ACC80064A9C9 /* RCTSRWebSocket.m */; };
+ 		2D3B5F3E1D9B165B00451313 /* RCTWebSocketExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDF1B04ACC80064A9C9 /* RCTWebSocketExecutor.m */; };
+ 		2D3B5F401D9B165B00451313 /* RCTWebSocketModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C86DF7B1ADF695F0047B81A /* RCTWebSocketModule.m */; };
+@@ -87,7 +87,7 @@
+ 			isa = PBXFrameworksBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				13526A521F362F7F0008EF00 /* libfishhook.a in Frameworks */,
++				2D3ABDC220C7206E00DF56E9 /* libfishhook.a in Frameworks */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+@@ -435,7 +435,7 @@
+ 				EXECUTABLE_PREFIX = lib;
+ 				GCC_PREPROCESSOR_DEFINITIONS = (
+ 					"DEBUG=1",
+-          "RCT_METRO_PORT=${RCT_METRO_PORT}",
++					"RCT_METRO_PORT=${RCT_METRO_PORT}",
+ 					"$(inherited)",
+ 				);
+ 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+-- 
+2.17.1
+
