@@ -259,6 +259,7 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [filter](#filter)
 * [fullscreen](#fullscreen)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
@@ -281,7 +282,6 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
-* [filter](#filter)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -299,8 +299,8 @@ var styles = StyleSheet.create({
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
+* [save](#save)
 * [seek](#seek)
-* [saveAsync](#saveAsync())
 
 ### Configurable props
 
@@ -352,6 +352,17 @@ Determines whether to show player controls.
 Note on iOS, controls are always shown when in fullscreen mode.
 
 Platforms: iOS, react-native-dom
+
+#### filter
+Add video filter
+* **Normal (default)** - Normal Filter
+* **Artistic** - Posterize Filter
+* **Black N White** - Black and White Filter
+* **Country** - Sepia Filter
+* **Sunrise** - Warm Filter
+* **Winter** - Cool Filter
+
+Platforms: iOS
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
@@ -667,16 +678,6 @@ Adjust the volume.
 
 Platforms: all
 
-#### filter
-Add video filter
-* **Normal (default)** - Normal Filter
-* **Country** - Sepia Filter
-* **Winter** - Cool Filter
-* **Black N White** - Black and White Filter
-* **Sunrise** - Warm Filter
-* **Artistic** - Posterize Filter
-
-Platforms: iOS
 
 ### Event props
 
@@ -886,6 +887,19 @@ this.player.presentFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### save
+`save(): Promise`
+
+Save video with current filter prop. Returns promise.
+
+Example:
+```
+let response = await this.save();
+let path = response.uri;
+```
+
+Platforms: iOS
+
 #### seek()
 `seek(seconds)`
 
@@ -915,18 +929,7 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
-##### saveAsync()
-`saveAsync(): Promise`
 
-Save video with current filter. Returns promise.
-
-Example:
-```
-let response = await this.save();
-let path = response.uri;
-```
-
-Platforms: iOS
 
 
 ### iOS App Transport Security
