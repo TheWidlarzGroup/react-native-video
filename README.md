@@ -436,7 +436,7 @@ Controls the iOS silent switch behavior
 Platforms: iOS
 
 #### maxBitRate
-Sets the desired limit, in bits per second, when multiple video streams are available for a playlist.
+Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
 
 Example:
 ```
