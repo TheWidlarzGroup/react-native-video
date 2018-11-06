@@ -66,7 +66,7 @@ static int const RCTVideoUnset = -1;
   BOOL _fullscreen;
   NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
-  NSString *_filter;
+  NSString *_filterName;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
@@ -862,7 +862,7 @@ static int const RCTVideoUnset = -1;
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  [self setFilter:_filter];
+  [self setFilter:_filterName];
   [self setControls:_controls];
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
@@ -1254,24 +1254,14 @@ static int const RCTVideoUnset = -1;
   }
 }
 
-- (void)setFilter:(NSString *)filter {
+- (void)setFilter:(NSString *)filterName {
 
-    _filter = filter;
+    _filterName = filterName;
 
     AVAsset *asset = _playerItem.asset;
 
     if (asset != nil) {
 
-        NSDictionary *filters = @{
-                @"Normal": @"",
-                @"Country": @"CISepiaTone",
-                @"Winter": @"CIPhotoEffectProcess",
-                @"Black N White": @"CIPhotoEffectNoir",
-                @"Sunrise": @"CIPhotoEffectTransfer",
-                @"Artistic": @"CIColorPosterize",
-        };
-
-        NSString *filterName = filters[filter];
         CIFilter *filter = [CIFilter filterWithName:filterName];
 
         _playerItem.videoComposition = [AVVideoComposition

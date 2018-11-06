@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
+import FilterType from './FilterType';
 import VideoResizeMode from './VideoResizeMode.js';
 
 const styles = StyleSheet.create({
@@ -11,7 +12,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType };
+export { TextTrackType, FilterType };
 
 export default class Video extends Component {
 
@@ -71,7 +72,7 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
-  saveAsync = async (options?) => {
+  save = async (options?) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
@@ -278,10 +279,25 @@ export default class Video extends Component {
   }
 }
 
-Video.filterTypes = ['Normal', 'Country', 'Winter', 'Black N White', 'Sunrise', 'Artistic'];
-
 Video.propTypes = {
-  filter: PropTypes.oneOf(Video.filterTypes),
+  filter: PropTypes.oneOf([
+      FilterType.NONE,
+      FilterType.INVERT,
+      FilterType.MONOCHROME,
+      FilterType.POSTERIZE,
+      FilterType.FALSE,
+      FilterType.MAXIMUMCOMPONENT,
+      FilterType.MINIMUMCOMPONENT,
+      FilterType.CHROME,
+      FilterType.FADE,
+      FilterType.INSTANT,
+      FilterType.MONO,
+      FilterType.NOIR,
+      FilterType.PROCESS,
+      FilterType.TONAL,
+      FilterType.TRANSFER,
+      FilterType.SEPIA
+  ]),
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
