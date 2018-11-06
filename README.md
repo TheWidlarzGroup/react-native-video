@@ -902,13 +902,25 @@ Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 #### save
 `save(): Promise`
 
-Save video with current filter prop. Returns promise.
+Save video to your Photos with current filter prop. Returns promise.
 
 Example:
 ```
 let response = await this.save();
 let path = response.uri;
 ```
+
+Notes:
+ - Currently only supports highest quality export
+ - Currently only supports MP4 export
+ - Currently only supports exporting to user's cache directory with the file name "Filter.mp4"
+ - User will need to remove the saved video through their Photos app
+ 
+Future: 
+ - Will support multiple qualities through options
+ - Will support more formats in the future through options
+ - Will support custom directory and file name through options
+ 
 
 Platforms: iOS
 
