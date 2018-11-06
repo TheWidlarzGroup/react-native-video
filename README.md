@@ -355,12 +355,24 @@ Platforms: iOS, react-native-dom
 
 #### filter
 Add video filter
-* **Normal (default)** - Normal Filter
-* **Artistic** - Posterize Filter
-* **Black N White** - Black and White Filter
-* **Country** - Sepia Filter
-* **Sunrise** - Warm Filter
-* **Winter** - Cool Filter
+* **FilterType.NONE (default)** - No Filter
+* **FilterType.INVERT** - CIColorInvert
+* **FilterType.MONOCHROME** - CIColorMonochrome
+* **FilterType.POSTERIZE** - CIColorPosterize
+* **FilterType.FALSE** - CIFalseColor
+* **FilterType.MAXIMUMCOMPONENT** - CIMaximumComponent
+* **FilterType.MINIMUMCOMPONENT** - CIMinimumComponent
+* **FilterType.CHROME** - CIPhotoEffectChrome
+* **FilterType.FADE** - CIPhotoEffectFade
+* **FilterType.INSTANT** - CIPhotoEffectInstant
+* **FilterType.MONO** - CIPhotoEffectMono
+* **FilterType.NOIR** - CIPhotoEffectNoir
+* **FilterType.PROCESS** - CIPhotoEffectProcess
+* **FilterType.TONAL** - CIPhotoEffectTonal
+* **FilterType.TRANSFER** - CIPhotoEffectTransfer
+* **FilterType.SEPIA** - CISepiaTone
+
+For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
 
 Platforms: iOS
 
