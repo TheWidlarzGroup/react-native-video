@@ -89,6 +89,7 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.imggaming.mux.MuxStats;
 import com.imggaming.utils.DensityPixels;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
@@ -224,10 +225,14 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     };
     private boolean playInBackground = false;
 
+    //Drm
     private FrameworkMediaDrm mediaDrm;
     private HttpMediaDrmCallback drmCallback;
     private ActionToken actionToken;
 
+    //Mux
+    private MuxStats muxStats;
+    private Map<String, Object> muxData;
 
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
@@ -463,6 +468,15 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
             eventEmitter.loadStart();
             loadVideoStarted = true;
+
+            if (muxData != null) {
+                if (muxStats == null) {
+                    muxStats = new MuxStats(getContext(), player, muxData);
+                } else {
+                    muxStats.setVideoData(muxData);
+                }
+                muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
+            }
         }
     }
 
@@ -610,6 +624,10 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     private void releasePlayer() {
+        if (muxStats != null) {
+            muxStats.release();
+            muxStats = null;
+        }
         if (player != null) {
             updateResumePosition();
             player.release();
@@ -1054,7 +1072,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken, @Nullable final Map<String, String> headers) {
+    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken,
+                       @Nullable final Map<String, String> headers,  @Nullable final Map<String, Object> muxData) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
@@ -1064,6 +1083,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             this.actionToken = actionToken;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory = buildDataSourceFactory(false);
+            this.muxData = muxData;
 
             initializePlayer();
 
@@ -1074,7 +1094,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final Map<String, String> headers) {
-        setSrc(uri, extension, null, headers);
+        setSrc(uri, extension, null, headers, null);
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
@@ -1505,6 +1525,15 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             case UNKNOWN:
             default:
                 return 1.0f;
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        if (muxStats != null) {
+            muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
         }
     }
 }
