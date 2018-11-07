@@ -1390,7 +1390,7 @@ static int const RCTVideoUnset = -1;
         if (exportSession != nil) {
             NSString *path = nil;
             NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-            path = [self generatePathInDirectory:[[self cacheDirectoryPath] stringByAppendingPathComponent:@"Filter"]
+            path = [self generatePathInDirectory:[[self cacheDirectoryPath] stringByAppendingPathComponent:@"Videos"]
                                    withExtension:@".mp4"];
             NSURL *url = [NSURL fileURLWithPath:path];
             exportSession.outputFileType = AVFileTypeMPEG4;

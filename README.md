@@ -913,15 +913,17 @@ let path = response.uri;
 Notes:
  - Currently only supports highest quality export
  - Currently only supports MP4 export
- - Currently only supports exporting to user's cache directory with the file name "Filter.mp4"
+ - Currently only supports exporting to user's cache directory with a generated UUID filename. 
  - User will need to remove the saved video through their Photos app
+ - Works with cached videos as well. (Checkout video-caching example)
+ - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
+ - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
  
 Future: 
  - Will support multiple qualities through options
  - Will support more formats in the future through options
  - Will support custom directory and file name through options
  
-
 Platforms: iOS
 
 #### seek()
