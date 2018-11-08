@@ -39,6 +39,7 @@
         "@imggaming/dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=1.0.6-rc.0"
     },
     "scripts": {
+        "install": "./scripts/install-dependencies",
         "postinstall": "",
         "test": "node_modules/.bin/eslint *.js"
     },

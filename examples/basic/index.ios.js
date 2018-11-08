@@ -144,6 +144,19 @@ class VideoPlayer extends Component {
                 uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                 type: 'hls',
                 config: {
+                    muxData: {
+                        envKey: "4004c26186c29919e27fa9f6c",
+                        viewerUserId: "fake_exid",
+                        experimentName: "A/B test one",
+                        subPropertyId: "realmInformation",
+                        videoId: "fake_id",
+                        videoTitle: "Big Buck Bunny",
+                        videoSeries: "Test Show",
+                        //videoDuration: 48000, 
+                        videoIsLive: false,
+                        videoStreamType: "on-demand",
+                        videoCdn: "standard"
+                    },
                     beacon: {
                         url: 'http://localhost:8000/testBeaconResponse.json',
                         headers: {
@@ -228,6 +241,19 @@ class VideoPlayer extends Component {
                   uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                   type: 'hls',
                   config: {
+                      muxData: {
+                        envKey: "4004c26186c29919e27fa9f6c",
+                        viewerUserId: "fake_exid",
+                        experimentName: "A/B test one",
+                        subPropertyId: "realmInformation",
+                        videoId: "fake_id",
+                        videoTitle: "Big Buck Bunny",
+                        videoSeries: "Test Show",
+                        //videoDuration: 48000, 
+                        videoIsLive: false,
+                        videoStreamType: "on-demand",
+                        videoCdn: "standard"
+                      },
                       beacon: {
                           url: 'http://localhost:8000/testBeaconResponse.json',
                           headers: {

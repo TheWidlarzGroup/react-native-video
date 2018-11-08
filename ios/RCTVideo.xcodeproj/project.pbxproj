@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B20B994621945477007D1184 /* MuxCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20B994521945477007D1184 /* MuxCore.framework */; };
+		B20B994821945488007D1184 /* MuxCoreTv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20B994721945488007D1184 /* MuxCoreTv.framework */; };
+		B20B994A219454A8007D1184 /* MUXSDKStats.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20B9949219454A8007D1184 /* MUXSDKStats.framework */; };
+		B20B994C219454B6007D1184 /* MUXSDKStatsTv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20B994B219454B6007D1184 /* MUXSDKStatsTv.framework */; };
+		B20B99862194703C007D1184 /* MUXSDKStats.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = B20B9949219454A8007D1184 /* MUXSDKStats.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B20B99872194703C007D1184 /* MuxCore.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = B20B994521945477007D1184 /* MuxCore.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B20B998921947490007D1184 /* GoogleInteractiveMediaAds.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20B998821947490007D1184 /* GoogleInteractiveMediaAds.framework */; };
+		B20B998A2194749D007D1184 /* GoogleInteractiveMediaAds.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = B20B998821947490007D1184 /* GoogleInteractiveMediaAds.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B225D44F2189C36D0016F315 /* DiceHTTPRequester.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D44D2189C36D0016F315 /* DiceHTTPRequester.m */; };
 		B225D4502189C36D0016F315 /* DiceHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D44E2189C36D0016F315 /* DiceHTTPRequest.m */; };
 		B225D4552189C3C10016F315 /* DiceBeaconRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D4532189C3C10016F315 /* DiceBeaconRequest.m */; };
@@ -42,11 +50,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B20B99852194701C007D1184 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 11;
+			files = (
+				B20B998A2194749D007D1184 /* GoogleInteractiveMediaAds.framework in CopyFiles */,
+				B20B99862194703C007D1184 /* MUXSDKStats.framework in CopyFiles */,
+				B20B99872194703C007D1184 /* MuxCore.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20B994521945477007D1184 /* MuxCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MuxCore.framework; path = "../native_dependency/stats-sdk-objc/Frameworks/iOS/fat/MuxCore.framework"; sourceTree = "<group>"; };
+		B20B994721945488007D1184 /* MuxCoreTv.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MuxCoreTv.framework; path = "../native_dependency/stats-sdk-objc/Frameworks/tvOS/fat/MuxCoreTv.framework"; sourceTree = "<group>"; };
+		B20B9949219454A8007D1184 /* MUXSDKStats.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MUXSDKStats.framework; path = "../native_dependency/mux-stats-sdk-avplayer/Frameworks/iOS/fat/MUXSDKStats.framework"; sourceTree = "<group>"; };
+		B20B994B219454B6007D1184 /* MUXSDKStatsTv.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MUXSDKStatsTv.framework; path = "../native_dependency/mux-stats-sdk-avplayer/Frameworks/tvOS/fat/MUXSDKStatsTv.framework"; sourceTree = "<group>"; };
+		B20B998821947490007D1184 /* GoogleInteractiveMediaAds.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleInteractiveMediaAds.framework; path = ../native_dependency/GoogleInteractiveMediaAds.framework; sourceTree = "<group>"; };
 		B225D44B2189C36C0016F315 /* DiceHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiceHTTPRequest.h; sourceTree = "<group>"; };
 		B225D44C2189C36D0016F315 /* DiceHTTPRequester.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiceHTTPRequester.h; sourceTree = "<group>"; };
 		B225D44D2189C36D0016F315 /* DiceHTTPRequester.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiceHTTPRequester.m; sourceTree = "<group>"; };
@@ -74,6 +99,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20B994621945477007D1184 /* MuxCore.framework in Frameworks */,
+				B20B994A219454A8007D1184 /* MUXSDKStats.framework in Frameworks */,
+				B20B998921947490007D1184 /* GoogleInteractiveMediaAds.framework in Frameworks */,
 				B24E5C8621677B5A00CF0225 /* dice_shield_ios.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -82,6 +110,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20B994C219454B6007D1184 /* MUXSDKStatsTv.framework in Frameworks */,
+				B20B994821945488007D1184 /* MuxCoreTv.framework in Frameworks */,
 				B2B173E0218082D7002AAC20 /* dice_shield_tvos.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -100,6 +130,11 @@
 		49E995712048B4CE00EA7890 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B20B998821947490007D1184 /* GoogleInteractiveMediaAds.framework */,
+				B20B994B219454B6007D1184 /* MUXSDKStatsTv.framework */,
+				B20B9949219454A8007D1184 /* MUXSDKStats.framework */,
+				B20B994521945477007D1184 /* MuxCore.framework */,
+				B20B994721945488007D1184 /* MuxCoreTv.framework */,
 				B2B173DF218082D7002AAC20 /* dice_shield_tvos.framework */,
 				B24E5C8521677B5A00CF0225 /* dice_shield_ios.framework */,
 			);
@@ -159,6 +194,7 @@
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
+				B20B99852194701C007D1184 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -272,6 +308,10 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../native_dependency/**",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -286,7 +326,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -313,6 +353,10 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../native_dependency/**",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -320,7 +364,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

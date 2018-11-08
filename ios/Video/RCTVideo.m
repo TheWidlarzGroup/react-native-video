@@ -8,11 +8,17 @@
 #include "DiceUtils.h"
 #include "DiceBeaconRequest.h"
 #include "DiceHTTPRequester.h"
+
 #if TARGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
+@import MuxCore;
+@import MUXSDKStats;
 #elif TARGET_OS_TV
 #import <dice_shield_tvos/dice_shield_tvos-Swift.h>
+@import MuxCoreTv;
+@import MUXSDKStatsTv;
 #endif
+
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -20,6 +26,8 @@ static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
+
+static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 static int const RCTVideoUnset = -1;
 
@@ -72,9 +80,11 @@ static int const RCTVideoUnset = -1;
   BOOL _fullscreenPlayerPresented;
   UIViewController * _presentingViewController;
   // keep reference to actionToken so resourceLoaderDelegate is not garbage collected
-  ActionToken* _actionToken;
-  DiceBeaconRequest* _diceBeaconRequst;
+  ActionToken * _actionToken;
+  DiceBeaconRequest * _diceBeaconRequst;
   BOOL _diceBeaconRequestOngoing;
+  MUXSDKCustomerVideoData * _videoData;
+  MUXSDKCustomerPlayerData * _playerData;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -299,11 +309,151 @@ static int const RCTVideoUnset = -1;
     }
 }
 
+#pragma mark - Mux Data
+- (NSString * _Nullable)stringFromDict:(NSDictionary *)dict forKey:(id _Nonnull)key
+{
+    id obj = [dict objectForKey:key];
+    if (obj != nil && [obj isKindOfClass:NSString.class]) {
+        return obj;
+    }
+    return nil;
+}
+
+- (void)setupMuxDataFromSource:(NSDictionary *)source
+{
+    id configObject = [source objectForKey:@"config"];
+    id muxData = nil;
+    if (configObject != nil && [configObject isKindOfClass:NSDictionary.class]) {
+        muxData = [((NSDictionary *)configObject) objectForKey:@"muxData"];
+    }
+    
+    if (muxData != nil) {
+        if ([muxData isKindOfClass:NSString.class]) {
+            NSString * muxDataString = muxData;
+            NSError *error = nil;
+            muxData = [NSJSONSerialization JSONObjectWithData:[muxDataString dataUsingEncoding:kCFStringEncodingUTF8]  options:0 error:&error];
+            if (error != nil) {
+                DICELog(@"Failed to create JSON object from provided playbackData: %@", muxDataString);
+            }
+        }
+        if ([muxData isKindOfClass:NSDictionary.class]) {
+            /*
+             {
+                muxData: {
+                    envKey:"theKey"
+                    viewerUserId: "userId",
+                    experimentName: "",
+                    playerName: "",
+                    playerVersion: "",
+                    subPropertyId: "",
+                    videoId:"",
+                    videoTitle:""
+                    videoSeries:""
+                    videoDuration:11111, //in miliseconds
+                    videoIsLive:true,
+                    videoStreamType: "",
+                    videoCdn:""
+                }
+            }
+             */
+            NSDictionary *muxDict = muxData;
+
+            NSString* envKey = [muxDict objectForKey:@"envKey"];
+            if (envKey == nil) {
+                DICELog(@"envKey is not present. Mux will not be available.");
+                return;
+            }
+            
+            NSString *value = nil;
+            // Video metadata (cleared with videoChangeForPlayer:withVideoData:)
+            BOOL isReplace = NO;
+            if (_videoData != nil) {
+                isReplace = YES;
+            } else {
+                // Environment and player data that persists until the player is destroyed
+                _playerData = [[MUXSDKCustomerPlayerData alloc] initWithEnvironmentKey:envKey];
+                // ...insert player metadata
+                value = [self stringFromDict:muxDict forKey:@"viewerUserId"];
+                [_playerData setViewerUserId:value];
+                
+                [_playerData setPlayerVersion:playerVersion];
+                
+                [_playerData setPlayerName:@"react-native-video/dice"];
+                
+                value = [self stringFromDict:muxDict forKey:@"subPropertyId"];
+                [_playerData setSubPropertyId:value];
+                
+                value = [self stringFromDict:muxDict forKey:@"experimentName"];
+                [_playerData setExperimentName:value];
+            }
+            
+            _videoData = [MUXSDKCustomerVideoData new];
+            
+            // ...insert video metadata
+            value = [self stringFromDict:muxDict forKey:@"videoTitle"];
+            [_videoData setVideoTitle:value];
+            
+            value = [self stringFromDict:muxDict forKey:@"videoId"];
+            [_videoData setVideoId:value];
+            
+            value = [self stringFromDict:muxDict forKey:@"videoSeries"];
+            [_videoData setVideoSeries:value];
+            
+            value = [self stringFromDict:muxDict forKey:@"videoCdn"];
+            [_videoData setVideoCdn:value];
+            
+            id videoIsLive = [muxDict objectForKey:@"videoIsLive"];
+            if (videoIsLive != nil && [videoIsLive isKindOfClass:NSNumber.class]) {
+                NSNumber* num = videoIsLive;
+                [_videoData setVideoIsLive:num];
+            } else {
+                [_videoData setVideoIsLive:nil];
+            }
+            
+            id videoDuration = [muxDict objectForKey:@"videoDuration"];
+            if (videoDuration != nil && [videoDuration isKindOfClass:NSNumber.class]) {
+                [_videoData setVideoDuration:((NSNumber*)videoDuration)];
+            } else {
+                [_videoData setVideoDuration:nil];
+            }
+            
+            value = [self stringFromDict:muxDict forKey:@"videoStreamType"];
+            [_videoData setVideoStreamType:value];
+            
+            
+            if (isReplace) {
+                [MUXSDKStats videoChangeForPlayer:@"dicePlayer" withVideoData:_videoData];
+            } else {
+                [self setupMux];
+            }
+        } else {
+            DICELog(@"Failed to read dictionary object provided playbackData: %@", muxData);
+        }
+    }
+}
+
+- (void)setupMux
+{
+    if (_playerData == nil || _videoData == nil) {
+        return;
+    }
+    if (_playerLayer != nil) {
+        [MUXSDKStats monitorAVPlayerLayer:_playerLayer withPlayerName:@"dicePlayer" playerData:_playerData videoData:_videoData];
+    } else if (_playerViewController != nil) {
+        [MUXSDKStats monitorAVPlayerViewController:_playerViewController withPlayerName:@"dicePlayer" playerData:_playerData videoData:_videoData];
+    }
+}
+
 
 #pragma mark - Progress
 
 - (void)dealloc
 {
+  if (_playerData || _videoData) {
+    [MUXSDKStats destroyPlayer:@"dicePlayer"];
+    _playerData = nil;
+    _videoData = nil;
+  }
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self removePlayerLayer];
   [self removePlayerItemObservers];
@@ -597,6 +747,8 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
       }
 
   }
+    
+  [self setupMuxDataFromSource:source];
   
   if (isNetwork) {
     [self setupBeaconFromSource:source];
@@ -1302,6 +1454,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
     [self addSubview:_playerViewController.view];
+    [self setupMux];
   }
 }
 
@@ -1321,6 +1474,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
+    [self setupMux];
   }
 }
 
