@@ -143,10 +143,15 @@ class VideoPlayer extends Component {
             source={{
                 uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                 type: 'hls',
-                beacon: {
-                    url: 'http://localhost:8000/testBeaconResponse.json',
-                    headers: { 'X-Custom-Header':'Custom header contents', 'Authorization':'Bearer asdasdsdfgfdadsfgg' },
-                    body: { id: '123', video:12345 }
+                config: {
+                    beacon: {
+                        url: 'http://localhost:8000/testBeaconResponse.json',
+                        headers: {
+                            'X-Custom-Header': 'Custom header contents',
+                            'Authorization': 'Bearer asdasdsdfgfdadsfgg'
+                        },
+                        body: {id: '123', video: 12345}
+                    }
                 }
                 /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
             }}
@@ -222,10 +227,15 @@ class VideoPlayer extends Component {
               source={{
                   uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                   type: 'hls',
-                  beacon: {
-                    url: 'http://localhost:8000/testBeaconResponse.json',
-                    headers: { 'X-Custom-Header':'Custom header contents', 'Authorization':'Bearer asdasdsdfgfdadsfgg' },
-                    body: { id: '123', video:12345 }
+                  config: {
+                      beacon: {
+                          url: 'http://localhost:8000/testBeaconResponse.json',
+                          headers: {
+                              'X-Custom-Header': 'Custom header contents',
+                              'Authorization': 'Bearer asdasdsdfgfdadsfgg'
+                          },
+                          body: {id: '123', video: 12345}
+                      }
                   }
                   /* drm: '{\"drmScheme\": \"widevine\", \"offlineLicense\": \"a3NpZDVFRUI2QkM1\"}' */ //offline playback action token
               }}

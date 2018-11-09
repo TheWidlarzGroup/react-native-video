@@ -271,7 +271,12 @@ static int const RCTVideoUnset = -1;
 
 - (void)setupBeaconFromSource:(NSDictionary *)source
 {
-    id beaconObject= [source objectForKey:@"beacon"];
+    id configObject = [source objectForKey:@"config"];
+    id beaconObject = nil;
+    if (configObject != nil && [configObject isKindOfClass:NSDictionary.class]) {
+         beaconObject = [((NSDictionary *)configObject) objectForKey:@"beacon"];
+    }
+    
     if (beaconObject != nil) {
         if ([beaconObject isKindOfClass:NSString.class]) {
             NSString * beaconString = beaconObject;

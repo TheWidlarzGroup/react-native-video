@@ -230,7 +230,7 @@ export default class Video extends Component {
         patchVer: source.patchVer || 0,
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
         drm: source.drm,
-        beacon: source.beacon
+        config: source.config
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
