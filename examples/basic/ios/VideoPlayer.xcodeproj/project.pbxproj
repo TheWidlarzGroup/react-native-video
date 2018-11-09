@@ -33,10 +33,6 @@
 		B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71F2153DDFB0069C818 /* XCGLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; };
 		B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B283A7262153DE700069C818 /* Realm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7252153DE700069C818 /* Realm.framework */; };
-		B283A7272153DE700069C818 /* Realm.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7252153DE700069C818 /* Realm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B283A72D2153DEC20069C818 /* RealmSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A72C2153DEC20069C818 /* RealmSwift.framework */; };
-		B283A72E2153DEC20069C818 /* RealmSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A72C2153DEC20069C818 /* RealmSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -338,10 +334,8 @@
 			files = (
 				B283A71E2153DDF10069C818 /* RxSwift.framework in Embed Frameworks */,
 				B283A7182153DD630069C818 /* dice_shield_ios.framework in Embed Frameworks */,
-				B283A72E2153DEC20069C818 /* RealmSwift.framework in Embed Frameworks */,
 				B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */,
 				B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */,
-				B283A7272153DE700069C818 /* Realm.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -376,8 +370,6 @@
 		B283A71C2153DDF10069C818 /* RxSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RxSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B283A71F2153DDFB0069C818 /* XCGLogger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = XCGLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ObjcExceptionBridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B283A7252153DE700069C818 /* Realm.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Realm.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B283A72C2153DEC20069C818 /* RealmSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RealmSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -395,7 +387,6 @@
 			files = (
 				8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
-				B283A72D2153DEC20069C818 /* RealmSwift.framework in Frameworks */,
 				B283A71D2153DDF10069C818 /* RxSwift.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
@@ -409,7 +400,6 @@
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				B283A7172153DD630069C818 /* dice_shield_ios.framework in Frameworks */,
 				B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */,
-				B283A7262153DE700069C818 /* Realm.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -583,8 +573,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				B283A72C2153DEC20069C818 /* RealmSwift.framework */,
-				B283A7252153DE700069C818 /* Realm.framework */,
 				B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */,
 				B283A71F2153DDFB0069C818 /* XCGLogger.framework */,
 				B283A71C2153DDF10069C818 /* RxSwift.framework */,
@@ -685,6 +673,13 @@
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					13B07F861A680F5B00A75B9A = {
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};

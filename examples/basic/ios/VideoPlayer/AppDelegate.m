@@ -11,7 +11,7 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
-#import <dce_shield_dlm/dce_shield_dlm-Swift.h>
+#import <dice_shield_ios/dice_shield_ios-Swift.h>
 
 @implementation AppDelegate
 

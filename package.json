@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "3.2.0",
+    "version": "3.3.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-        "@imggaming/dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=1.0.4"
+        "@imggaming/dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=1.0.6-rc.0"
     },
     "scripts": {
         "postinstall": "",
