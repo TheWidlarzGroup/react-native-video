@@ -5,6 +5,9 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include "DiceUtils.h"
+#include "DiceBeaconRequest.h"
+#include "DiceHTTPRequester.h"
 #if TARGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
 #elif TARGET_OS_TV
@@ -70,6 +73,8 @@ static int const RCTVideoUnset = -1;
   UIViewController * _presentingViewController;
   // keep reference to actionToken so resourceLoaderDelegate is not garbage collected
   ActionToken* _actionToken;
+  DiceBeaconRequest* _diceBeaconRequst;
+  BOOL _diceBeaconRequestOngoing;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -95,6 +100,7 @@ static int const RCTVideoUnset = -1;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _diceBeaconRequestOngoing = NO;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -180,6 +186,120 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+#pragma mark - DICE Beacon
+
+- (void)startDiceBeaconCallsAfter:(long)seconds
+{
+    [self startDiceBeaconCallsAfter:seconds ongoing:NO];
+}
+
+- (void)startDiceBeaconCallsAfter:(long)seconds ongoing:(BOOL)ongoing
+{
+    if (_diceBeaconRequst == nil) {
+        return;
+    }
+    if (_diceBeaconRequestOngoing && !ongoing) {
+        DICELog(@"startDiceBeaconCallsAfter ONGOING request. INGNORING.");
+        return;
+    }
+    _diceBeaconRequestOngoing = YES;
+    DICELog(@"startDiceBeaconCallsAfter %ld", seconds);
+    __weak RCTVideo *weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        // in case there is ongoing request
+        [_diceBeaconRequst cancel];
+        [_diceBeaconRequst makeRequestWithCompletionHandler:^(DiceBeaconResponse *response, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf handleBeaconResponse:response error:error];
+            });
+        }];
+    });
+}
+
+-(void)handleBeaconResponse:(DiceBeaconResponse *)response error:(NSError *)error
+{
+    DICELog(@"handleBeaconResponse error=%@", error);
+    if (_player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
+        // video is not playing back, so no point
+        DICELog(@"handleBeaconResponse player is paused. STOP beacons.");
+        _diceBeaconRequestOngoing = NO;
+        return;
+    }
+    
+    if (error != nil) {
+        DICELog(@"handleBeaconResponse error on call. STOP beacons.");
+        // raise an error and stop playback
+        NSNumber *code = [[NSNumber alloc] initWithInt:-1];
+        self.onVideoError(@{@"error": @{@"code": code,
+                                        @"domain": @"DiceBeacon",
+                                        @"messages": @[@"Failed to make beacon request", error.localizedDescription]
+                                        },
+                            @"rawError": RCTJSErrorFromNSError(error),
+                            @"target": self.reactTag});
+        _diceBeaconRequestOngoing = NO;
+        return;
+    }
+    
+    if (response == nil || !response.OK) {
+        // raise an error and stop playback
+        NSNumber *code = [[NSNumber alloc] initWithInt:-2];
+        NSString *rawResponse = @"";
+        NSArray<NSString *> *errorMessages = @[];
+        if (response != nil) {
+            if (response.rawResponse != nil && response.rawResponse.length > 0) {
+                rawResponse = [NSString stringWithUTF8String:[response.rawResponse bytes]];
+            }
+            if (rawResponse == nil) {
+                rawResponse = @"";
+            }
+            if (response.errorMessages != nil) {
+                errorMessages = response.errorMessages;
+            }
+        }
+        self.onVideoError(@{@"error": @{@"code": code,
+                                        @"domain": @"DiceBeacon",
+                                        @"messages": errorMessages
+                                        },
+                            @"rawResponse": rawResponse,
+                            @"target": self.reactTag});
+        [self setPaused:YES];
+        _diceBeaconRequestOngoing = NO;
+        return;
+    }
+    [self startDiceBeaconCallsAfter:response.frequency ongoing:YES];
+}
+
+- (void)setupBeaconFromSource:(NSDictionary *)source
+{
+    id configObject = [source objectForKey:@"config"];
+    id beaconObject = nil;
+    if (configObject != nil && [configObject isKindOfClass:NSDictionary.class]) {
+         beaconObject = [((NSDictionary *)configObject) objectForKey:@"beacon"];
+    }
+    
+    if (beaconObject != nil) {
+        if ([beaconObject isKindOfClass:NSString.class]) {
+            NSString * beaconString = beaconObject;
+            NSError *error = nil;
+            beaconObject = [NSJSONSerialization JSONObjectWithData:[beaconString dataUsingEncoding:kCFStringEncodingUTF8]  options:0 error:&error];
+            if (error != nil) {
+                DICELog(@"Failed to create JSON object from provided beacon: %@", beaconString);
+            }
+        }
+        if ([beaconObject isKindOfClass:NSDictionary.class]) {
+            NSDictionary *beacon = beaconObject;
+            NSString* url = [beacon objectForKey:@"url"];
+            NSDictionary<NSString *, NSString *> *headers = [beacon objectForKey:@"headers"];
+            NSDictionary* body = [beacon objectForKey:@"body"];
+            _diceBeaconRequst = [DiceBeaconRequest requestWithURLString:url headers:headers body:body];
+            [self startDiceBeaconCallsAfter:0];
+        } else {
+            DICELog(@"Failed to read dictionary object provided beacon: %@", beaconObject);
+        }
+    }
+}
+
+
 #pragma mark - Progress
 
 - (void)dealloc
@@ -188,6 +308,8 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
+  [_diceBeaconRequst cancel];
+  _diceBeaconRequst = nil;
 }
 
 #pragma mark - App lifecycle handlers
@@ -477,6 +599,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   }
   
   if (isNetwork) {
+    [self setupBeaconFromSource:source];
     /* Per #1091, this is not a public API.
      * We need to either get approval from Apple to use this  or use a different approach.
      NSDictionary *headers = [source objectForKey:@"requestHeaders"];
@@ -672,6 +795,11 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
         self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                     @"target": self.reactTag});
       }
+      if(_player.rate > 0) {
+          [self startDiceBeaconCallsAfter:0];
+      } else {
+          [_diceBeaconRequst cancel];
+      }
       if(_playbackStalled && _player.rate > 0) {
         if(self.onPlaybackResume) {
           self.onPlaybackResume(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
@@ -778,6 +906,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     }
     [_player play];
     [_player setRate:_rate];
+    [self startDiceBeaconCallsAfter:0];
   }
   
   _paused = paused;

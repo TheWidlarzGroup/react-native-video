@@ -225,13 +225,6 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTVideo;
 		};
-		B225D4222189C16B0016F315 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B283A6822153B2FB0069C818 /* dice-shield-ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B24F30612176456300203BE9;
-			remoteInfo = "dice-shield-tvos";
-		};
 		B283A6892153B2FC0069C818 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B283A6822153B2FB0069C818 /* dice-shield-ios.xcodeproj */;
@@ -615,7 +608,6 @@
 			isa = PBXGroup;
 			children = (
 				B283A68A2153B2FC0069C818 /* dice_shield_ios.framework */,
-				B225D4232189C16B0016F315 /* dice_shield_tvos.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -681,6 +673,13 @@
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					13B07F861A680F5B00A75B9A = {
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -938,13 +937,6 @@
 			fileType = archive.ar;
 			path = libRCTVideo.a;
 			remoteRef = 8C2A0F781E25608300E31596 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		B225D4232189C16B0016F315 /* dice_shield_tvos.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = dice_shield_tvos.framework;
-			remoteRef = B225D4222189C16B0016F315 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		B283A68A2153B2FC0069C818 /* dice_shield_ios.framework */ = {
