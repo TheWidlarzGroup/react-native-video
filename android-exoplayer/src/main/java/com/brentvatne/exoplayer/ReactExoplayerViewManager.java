@@ -29,6 +29,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
+    private static final String PROP_SRC_CONFIG = "config";
+    private static final String PROP_SRC_MUX_DATA = "muxData";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -107,6 +109,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String drm = src.hasKey(PROP_SRC_DRM) ? src.getString(PROP_SRC_DRM) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
+        ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
+        ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -117,7 +121,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             ActionToken actionToken = ActionToken.fromJson(drm);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, extension, actionToken, headers);
+                videoView.setSrc(srcUri, extension, actionToken, headers, muxData != null ? muxData.toHashMap() : null);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
