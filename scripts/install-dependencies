@@ -1,0 +1,50 @@
+#!/bin/bash
+
+clone_repository() {
+	local url=$1
+	local folder=$2
+	local tag=$3
+
+	if [ ! -d "$folder" ] ; then
+    	printf "git clone --recurse-submodules $url $folder \n"
+    	git clone $url $folder
+    	pushd $folder;
+    	if [ -z $tag ]; then
+	    	echo "";
+	    else
+	    	git checkout $tag
+	    fi
+    	printf "pushd $folder; git submodule update --init --recursive; popd \n"
+	    git submodule update --init --recursive; popd
+	else
+	    printf "pushd $folder; git pull; git submodule update --init --recursive; popd \n"
+	    pushd $folder;  
+	    git fetch;
+	    if [ -z $tag ]; then
+	    	echo "";
+	    else
+	    	git checkout $tag
+	    fi
+	    git submodule update --init --recursive; 
+	    popd
+	fi
+}
+
+baseDir="./native_dependency"
+
+if [ -z ${1+x} ]; then 
+	echo "var is unset"; 
+else 
+	echo "var is set to '$1'"; 
+	baseDir=$1
+fi
+
+
+clone_repository "https://github.com/muxinc/stats-sdk-objc.git" "$baseDir/stats-sdk-objc" "v2.0.6"
+clone_repository "https://github.com/muxinc/mux-stats-sdk-avplayer.git" "$baseDir/mux-stats-sdk-avplayer" "v0.1.5"
+
+pushd $baseDir
+curl -O https://imasdk.googleapis.com/native/downloads/ima-ios-v3.7.3.zip
+unzip -o ima-ios-v3.7.3.zip
+rm ima-ios-v3.7.3.zip
+popd
