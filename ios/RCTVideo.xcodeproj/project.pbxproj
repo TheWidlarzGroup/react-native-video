@@ -20,6 +20,8 @@
 		B225D4552189C3C10016F315 /* DiceBeaconRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D4532189C3C10016F315 /* DiceBeaconRequest.m */; };
 		B225D4562189C3C10016F315 /* DiceBeaconResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D4542189C3C10016F315 /* DiceBeaconResponse.m */; };
 		B24E5C8621677B5A00CF0225 /* dice_shield_ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B24E5C8521677B5A00CF0225 /* dice_shield_ios.framework */; };
+		B2AEE7E6219B275C0079C074 /* DiceBeaconRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D4532189C3C10016F315 /* DiceBeaconRequest.m */; };
+		B2AEE7E7219B275F0079C074 /* DiceBeaconResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B225D4542189C3C10016F315 /* DiceBeaconResponse.m */; };
 		B2B173E0218082D7002AAC20 /* dice_shield_tvos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2B173DF218082D7002AAC20 /* dice_shield_tvos.framework */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
@@ -279,7 +281,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */,
+				B2AEE7E7219B275F0079C074 /* DiceBeaconResponse.m in Sources */,
 				D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
+				B2AEE7E6219B275C0079C074 /* DiceBeaconRequest.m in Sources */,
 				D1107C0F2110259000073188 /* RCTVideoManager.m in Sources */,
 				D1107C0D2110259000073188 /* RCTVideo.m in Sources */,
 			);
