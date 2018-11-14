@@ -867,7 +867,7 @@ Payload: none
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
 #### onIsPictureInPictureActive
-Callback function that is called when picture in picture becames active on inactive.
+Callback function that is called when picture in picture becomes active or inactive.
 
 Property | Type | Description
 --- | --- | ---
