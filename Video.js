@@ -51,6 +51,8 @@ export default class Video extends Component {
   }
 
   seek = (time, tolerance = 100) => {
+    if (isNaN(time)) throw new Error('Specified time is not a number');
+    
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
@@ -354,6 +356,7 @@ Video.propTypes = {
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
+  fullscreenAutorotate: PropTypes.bool,
   fullscreenOrientation: PropTypes.oneOf(['all','landscape','portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
