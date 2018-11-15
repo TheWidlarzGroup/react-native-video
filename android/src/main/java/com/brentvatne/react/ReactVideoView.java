@@ -232,11 +232,18 @@ public class ReactVideoView extends ScalableVideoView implements
             mediaController.hide();
         }
         if ( mMediaPlayer != null ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mMediaPlayer.setOnTimedMetaDataAvailableListener(null);
+            }
             mMediaPlayerValid = false;
             release();
         }
         if (mIsFullscreen) {
             setFullscreen(false);
+        }
+        if (mThemedReactContext != null) {
+            mThemedReactContext.removeLifecycleEventListener(this);
+            mThemedReactContext = null;
         }
     }
 
@@ -565,7 +572,10 @@ public class ReactVideoView extends ScalableVideoView implements
         }
 
         // Select track (so we can use it to listen to timed meta data updates)
-        mp.selectTrack(0);
+        try{
+            mp.selectTrack(0);
+        }catch (Throwable t){
+        }
     }
 
     @Override
@@ -601,7 +611,10 @@ public class ReactVideoView extends ScalableVideoView implements
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         // Select track (so we can use it to listen to timed meta data updates)
-        mp.selectTrack(0);
+        try{
+            mp.selectTrack(0);
+        }catch (Throwable t){
+        }
 
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
