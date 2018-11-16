@@ -733,6 +733,24 @@ Payload: none
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### onAudioFocusChanged
+Callback function that is called when audio focus has been lost - pause if focus has been lost.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+hasAudioFocus | boolean | Boolean indicating whether has audio focus
+
+Example:
+```
+onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
+    this.setState({ paused: !event.hasAudioFocus })
+  };
+```
+
+Platforms: Android ExoPlayer
+
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
 
