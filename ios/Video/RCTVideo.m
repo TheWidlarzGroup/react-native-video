@@ -334,7 +334,8 @@ static int const RCTVideoUnset = -1;
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
       [self addPlayerItemObservers];
-      
+      [self setFilter:_filterName];
+
       [_player pause];
       [_playerViewController.view removeFromSuperview];
       _playerViewController = nil;
@@ -862,7 +863,6 @@ static int const RCTVideoUnset = -1;
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
   [self setPaused:_paused];
-  [self setFilter:_filterName];
   [self setControls:_controls];
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
