@@ -375,6 +375,10 @@ Add video filter
 
 For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
 
+Notes: 
+1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
+2. Video filter is currently not supported on HLS playlists.
+
 Platforms: iOS
 
 #### fullscreen
