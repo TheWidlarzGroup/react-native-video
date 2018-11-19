@@ -180,6 +180,7 @@ class VideoPlayer extends Component {
             onProgress={this.onProgress}
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
+            onPlaybackRateChange={(args)=>console.log("onPlaybackRateChange", args)}
           />
         </TouchableOpacity>
 
@@ -278,6 +279,7 @@ class VideoPlayer extends Component {
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
             controls={this.state.controls}
+            onPlaybackRateChange={(args)=>console.log("onPlaybackRateChange", args)}
           />
         </View>
         <View style={styles.controls}>
