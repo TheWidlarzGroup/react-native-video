@@ -27,12 +27,12 @@
 		8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C2A0F791E25608300E31596 /* libRCTVideo.a */; };
 		B283A7172153DD630069C818 /* dice_shield_ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A68A2153B2FC0069C818 /* dice_shield_ios.framework */; };
 		B283A7182153DD630069C818 /* dice_shield_ios.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A68A2153B2FC0069C818 /* dice_shield_ios.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B283A71D2153DDF10069C818 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71C2153DDF10069C818 /* RxSwift.framework */; };
-		B283A71E2153DDF10069C818 /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71C2153DDF10069C818 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B283A7202153DDFB0069C818 /* XCGLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71F2153DDFB0069C818 /* XCGLogger.framework */; };
-		B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A71F2153DDFB0069C818 /* XCGLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; };
-		B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555D421A2D3A8001C6E2E /* GoogleInteractiveMediaAds.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2A555AD21A2D3A7001C6E2E /* GoogleInteractiveMediaAds.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555D621A2D3C5001C6E2E /* MUXSDKStats.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2A555D521A2D3C5001C6E2E /* MUXSDKStats.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555D821A2D421001C6E2E /* MuxCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2A555D721A2D421001C6E2E /* MuxCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555D921A2D542001C6E2E /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE6A12199A2600079C074 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555DA21A2D548001C6E2E /* XCGLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE69F2199A2600079C074 /* XCGLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2A555DB21A2D54C001C6E2E /* ObjcExceptionBridging.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE69D2199A25F0079C074 /* ObjcExceptionBridging.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -339,10 +339,13 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B283A71E2153DDF10069C818 /* RxSwift.framework in Embed Frameworks */,
+				B2A555DB21A2D54C001C6E2E /* ObjcExceptionBridging.framework in Embed Frameworks */,
+				B2A555DA21A2D548001C6E2E /* XCGLogger.framework in Embed Frameworks */,
+				B2A555D921A2D542001C6E2E /* RxSwift.framework in Embed Frameworks */,
+				B2A555D821A2D421001C6E2E /* MuxCore.framework in Embed Frameworks */,
+				B2A555D621A2D3C5001C6E2E /* MUXSDKStats.framework in Embed Frameworks */,
+				B2A555D421A2D3A8001C6E2E /* GoogleInteractiveMediaAds.framework in Embed Frameworks */,
 				B283A7182153DD630069C818 /* dice_shield_ios.framework in Embed Frameworks */,
-				B283A7242153DE050069C818 /* ObjcExceptionBridging.framework in Embed Frameworks */,
-				B283A7212153DDFB0069C818 /* XCGLogger.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -374,9 +377,12 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/ios/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
 		B283A6822153B2FB0069C818 /* dice-shield-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "dice-shield-ios.xcodeproj"; path = "../node_modules/@imggaming/dice-shield-ios/dice-shield-ios/dice-shield-ios.xcodeproj"; sourceTree = "<group>"; };
-		B283A71C2153DDF10069C818 /* RxSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RxSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B283A71F2153DDFB0069C818 /* XCGLogger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = XCGLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ObjcExceptionBridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2A555AD21A2D3A7001C6E2E /* GoogleInteractiveMediaAds.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleInteractiveMediaAds.framework; path = "../node_modules/react-native-video/native_dependency/GoogleInteractiveMediaAds.framework"; sourceTree = "<group>"; };
+		B2A555D521A2D3C5001C6E2E /* MUXSDKStats.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MUXSDKStats.framework; path = "../node_modules/react-native-video/native_dependency/mux-stats-sdk-avplayer/Frameworks/iOS/fat/MUXSDKStats.framework"; sourceTree = "<group>"; };
+		B2A555D721A2D421001C6E2E /* MuxCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MuxCore.framework; path = "../node_modules/react-native-video/native_dependency/stats-sdk-objc/Frameworks/iOS/fat/MuxCore.framework"; sourceTree = "<group>"; };
+		B2AEE69D2199A25F0079C074 /* ObjcExceptionBridging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ObjcExceptionBridging.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/ObjcExceptionBridging.framework"; sourceTree = "<group>"; };
+		B2AEE69F2199A2600079C074 /* XCGLogger.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCGLogger.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/XCGLogger.framework"; sourceTree = "<group>"; };
+		B2AEE6A12199A2600079C074 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/RxSwift.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -394,10 +400,8 @@
 			files = (
 				8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
-				B283A71D2153DDF10069C818 /* RxSwift.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
-				B283A7202153DDFB0069C818 /* XCGLogger.framework in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
@@ -406,7 +410,6 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				B283A7172153DD630069C818 /* dice_shield_ios.framework in Frameworks */,
-				B283A7232153DE050069C818 /* ObjcExceptionBridging.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -580,9 +583,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				B283A7222153DE050069C818 /* ObjcExceptionBridging.framework */,
-				B283A71F2153DDFB0069C818 /* XCGLogger.framework */,
-				B283A71C2153DDF10069C818 /* RxSwift.framework */,
+				B2A555D721A2D421001C6E2E /* MuxCore.framework */,
+				B2A555D521A2D3C5001C6E2E /* MUXSDKStats.framework */,
+				B2A555AD21A2D3A7001C6E2E /* GoogleInteractiveMediaAds.framework */,
 				13B07FAE1A68108700A75B9A /* VideoPlayer */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* VideoPlayerTests */,
@@ -623,6 +626,9 @@
 		B283A6B02153B4E40069C818 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B2AEE69D2199A25F0079C074 /* ObjcExceptionBridging.framework */,
+				B2AEE69F2199A2600079C074 /* XCGLogger.framework */,
+				B2AEE6A12199A2600079C074 /* RxSwift.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
