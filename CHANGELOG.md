@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 4.0.1
+* Add missing files to package.json [#1342](https://github.com/react-native-community/react-native-video/pull/1342)
+
 ### Version 4.0.0
 * Partial support for timed metadata on Android MediaPlayer [#707](https://github.com/react-native-community/react-native-video/pull/707)
 * Support video caching for iOS [#955](https://github.com/react-native-community/react-native-video/pull/955)
