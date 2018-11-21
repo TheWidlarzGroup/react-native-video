@@ -1082,7 +1082,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             this.extension = extension;
             this.actionToken = actionToken;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = buildDataSourceFactory(false);
+            this.mediaDataSourceFactory = buildDataSourceFactory(true);
             this.muxData = muxData;
 
             initializePlayer();
