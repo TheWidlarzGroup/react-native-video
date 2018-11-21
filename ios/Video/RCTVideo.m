@@ -67,6 +67,7 @@ static int const RCTVideoUnset = -1;
   BOOL _fullscreenAutorotate;
   NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
+  NSString *_filterName;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
@@ -335,7 +336,8 @@ static int const RCTVideoUnset = -1;
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
       [self addPlayerItemObservers];
-      
+      [self setFilter:_filterName];
+
       [_player pause];
       [_playerViewController.view removeFromSuperview];
       _playerViewController = nil;
@@ -1262,6 +1264,42 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+- (void)setFilter:(NSString *)filterName {
+
+    _filterName = filterName;
+
+    AVAsset *asset = _playerItem.asset;
+
+    if (asset != nil) {
+
+        CIFilter *filter = [CIFilter filterWithName:filterName];
+
+        _playerItem.videoComposition = [AVVideoComposition
+                videoCompositionWithAsset:asset
+             applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+
+                 if (filter == nil) {
+
+                     [request finishWithImage:request.sourceImage context:nil];
+
+                 } else {
+
+                     CIImage *image = request.sourceImage.imageByClampingToExtent;
+
+                     [filter setValue:image forKey:kCIInputImageKey];
+
+                     CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+
+                     [request finishWithImage:output context:nil];
+
+                 }
+
+             }];
+
+    }
+
+}
+
 #pragma mark - React View Management
 
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
@@ -1346,6 +1384,80 @@ static int const RCTVideoUnset = -1;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   [super removeFromSuperview];
+}
+
+#pragma mark - Export
+
+- (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+
+    AVAsset *asset = _playerItem.asset;
+
+    if (asset != nil) {
+
+        AVAssetExportSession *exportSession = [AVAssetExportSession
+                exportSessionWithAsset:asset presetName:AVAssetExportPresetHighestQuality];
+
+        if (exportSession != nil) {
+            NSString *path = nil;
+            NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+            path = [self generatePathInDirectory:[[self cacheDirectoryPath] stringByAppendingPathComponent:@"Videos"]
+                                   withExtension:@".mp4"];
+            NSURL *url = [NSURL fileURLWithPath:path];
+            exportSession.outputFileType = AVFileTypeMPEG4;
+            exportSession.outputURL = url;
+            exportSession.videoComposition = _playerItem.videoComposition;
+            exportSession.shouldOptimizeForNetworkUse = true;
+            [exportSession exportAsynchronouslyWithCompletionHandler:^{
+
+                switch ([exportSession status]) {
+                    case AVAssetExportSessionStatusFailed:
+                        reject(@"ERROR_COULD_NOT_EXPORT_VIDEO", @"Could not export video", exportSession.error);
+                        break;
+                    case AVAssetExportSessionStatusCancelled:
+                        reject(@"ERROR_EXPORT_SESSION_CANCELLED", @"Export session was cancelled", exportSession.error);
+                        break;
+                    default:
+                        resolve(@{@"uri": url.absoluteString});
+                        break;
+                }
+
+            }];
+
+        } else {
+
+            reject(@"ERROR_COULD_NOT_CREATE_EXPORT_SESSION", @"Could not create export session", nil);
+
+        }
+
+    } else {
+
+        reject(@"ERROR_ASSET_NIL", @"Asset is nil", nil);
+
+    }
+}
+
+- (BOOL)ensureDirExistsWithPath:(NSString *)path {
+    BOOL isDir = NO;
+    NSError *error;
+    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
+    if (!(exists && isDir)) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];
+        if (error) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+- (NSString *)generatePathInDirectory:(NSString *)directory withExtension:(NSString *)extension {
+    NSString *fileName = [[[NSUUID UUID] UUIDString] stringByAppendingString:extension];
+    [self ensureDirExistsWithPath:directory];
+    return [directory stringByAppendingPathComponent:fileName];
+}
+
+- (NSString *)cacheDirectoryPath {
+    NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    return array[0];
 }
 
 @end
