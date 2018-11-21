@@ -1002,7 +1002,10 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
         Exception ex = e;
-        if (e.type == ExoPlaybackException.TYPE_RENDERER) {
+        if (isBehindLiveWindow(e)) {
+            errorString = getResources().getString(R.string.error_behind_live_window);
+            ex = new Exception("BehindLiveWindowException");
+        } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
                 // Special case for decoder initialization failures.
@@ -1033,10 +1036,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
-        if (isBehindLiveWindow(e)) {
-            clearResumePosition();
-            initializePlayer();
-        } else {
+        if (!isBehindLiveWindow(e)) {
             updateResumePosition();
         }
     }
