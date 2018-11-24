@@ -321,6 +321,7 @@ Video.propTypes = {
   onVideoFullscreenPlayerDidPresent: PropTypes.func,
   onVideoFullscreenPlayerWillDismiss: PropTypes.func,
   onVideoFullscreenPlayerDidDismiss: PropTypes.func,
+  onVideoSaved: PropTypes.func,
 
   /* Wrapper component */
   source: PropTypes.oneOfType([
