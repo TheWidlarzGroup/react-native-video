@@ -78,16 +78,8 @@ export default class Video extends Component {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
-  startPictureInPicture = () => {
-    this.setNativeProps({ pictureInPicture: true });
-  };
-
-  stopPictureInPicture = () => {
-    this.setNativeProps({ pictureInPicture: false });
-  };
-
-  restoreUserInterfaceForPictureInPictureStop = (restore) => {
-    this.setNativeProps({ restoreUserInterfaceForPIPStopCompletionHandler: restore });
+  restoreUserInterfaceForPictureInPictureStopCompleted = (restored) => {
+    this.setNativeProps({ restoreUserInterfaceForPIPStopCompletionHandler: restored });
   };
 
   _assignRoot = (component) => {
@@ -210,15 +202,15 @@ export default class Video extends Component {
     }
   };
 
-  _onIsPictureInPictureSupported = (event) => {
-    if (this.props.onIsPictureInPictureSupported) {
-      this.props.onIsPictureInPictureSupported(event.nativeEvent);
+  _onPictureInPictureStatusChanged = (event) => {
+    if (this.props.onPictureInPictureStatusChanged) {
+      this.props.onPictureInPictureStatusChanged(event.nativeEvent);
     }
   };
 
-  _onIsPictureInPictureActive = (event) => {
-    if (this.props.onIsPictureInPictureActive) {
-      this.props.onIsPictureInPictureActive(event.nativeEvent);
+  _onRestoreUserInterfaceForPictureInPictureStop = (event) => {
+  	if (this.props.onRestoreUserInterfaceForPictureInPictureStop) {
+      this.props.onRestoreUserInterfaceForPictureInPictureStop();
     }
   };
 
@@ -291,8 +283,8 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
-      onIsPictureInPictureSupported: this._onIsPictureInPictureSupported,
-      onIsPictureInPictureActive: this._onIsPictureInPictureActive,
+      onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
+      onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
     });
 
     const posterStyle = {
@@ -415,6 +407,7 @@ Video.propTypes = {
   }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
+  pictureInPicture: PropTypes.bool,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
@@ -446,8 +439,8 @@ Video.propTypes = {
   onPlaybackRateChange: PropTypes.func,
   onAudioFocusChanged: PropTypes.func,
   onAudioBecomingNoisy: PropTypes.func,
-  onIsPictureInPictureSupported: PropTypes.func,
-  onIsPictureInPictureActive: PropTypes.func,
+  onPictureInPictureStatusChanged: PropTypes.func,
+  needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
 
   /* Required by react-native */
