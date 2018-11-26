@@ -110,7 +110,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isBuffering;
     private float rate = 1f;
     private float audioVolume = 1f;
-    private int maximumBitRate = 0;
+    private int maxBitRate = 0;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -246,7 +246,7 @@ class ReactExoplayerView extends FrameLayout implements
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             trackSelector.setParameters(trackSelector.buildUponParameters()
-                            .setMaxVideoBitrate(maximumBitRate));
+                            .setMaxVideoBitrate(maxBitRate));
 
             DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
@@ -910,13 +910,13 @@ class ReactExoplayerView extends FrameLayout implements
       }
     }
 
-    public void setMaximumBitRateModifier(int newMaximumBitRate) {
-        if (newMaximumBitRate==0) newMaximumBitRate =  Integer.MAX_VALUE;
-        maximumBitRate = newMaximumBitRate;
+    public void setMaxBitRateModifier(int newMaxBitRate) {
+        if (newMaxBitRate==0) newMaxBitRate =  Integer.MAX_VALUE;
+        maxBitRate = newMaxBitRate;
 
         if (player != null) {
             trackSelector.setParameters(trackSelector.buildUponParameters()
-                    .setMaxVideoBitrate(maximumBitRate));
+                    .setMaxVideoBitrate(maxBitRate));
         }
     }
 
