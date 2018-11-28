@@ -693,6 +693,14 @@ useTextureView can only be set at same time you're setting the source.
 
 Platforms: Android ExoPlayer
 
+#### hideShutterView
+Controls ExoPlayer shutterView(black screen while loading) visibility
+
+* **false (default)** - Show shutterView 
+* **true** - Hide shutterView
+
+Platforms: Android ExoPlayer
+
 #### volume
 Adjust the volume.
 * **1.0 (default)** - Play at full volume
