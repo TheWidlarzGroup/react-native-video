@@ -110,6 +110,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isBuffering;
     private float rate = 1f;
     private float audioVolume = 1f;
+    private long seekTime = C.TIME_UNSET;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -605,7 +606,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onSeekProcessed() {
-        // Do nothing.
+        eventEmitter.seek(player.getCurrentPosition(), seekTime);
+        seekTime = C.TIME_UNSET;
     }
 
     @Override
@@ -892,7 +894,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
+            seekTime = positionMs;
             player.seekTo(positionMs);
         }
     }
