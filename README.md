@@ -295,6 +295,7 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
+* [onSeek](#onseek)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
@@ -848,6 +849,29 @@ Example:
 
 Platforms: all
 
+#### onSeek
+Callback function that is called when a seek completes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+currentTime | number | The current time after the seek
+seekTime | number | The requested time
+
+Example:
+```
+{
+  currentTime: 100.5
+  seekTime: 100
+}
+```
+
+Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
+
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
 
@@ -941,7 +965,7 @@ Platforms: iOS
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
 ```
