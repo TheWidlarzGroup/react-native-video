@@ -339,13 +339,13 @@ On iOS, only `bufferForPlaybackMs` and `bufferForPlaybackAfterRebufferMs` is sup
 Example with default values:
 ```
 bufferConfig={{
-	minBufferMs: 15000, // not supported on iOS
-	maxBufferMs: 50000, // not supported on iOS
-	bufferForPlaybackMs: 2500,
-	bufferForPlaybackAfterRebufferMs: 5000
+  minBufferMs: 15000, // not supported on iOS
+  maxBufferMs: 50000, // not supported on iOS
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000
 }}
 ```
-		
+
 Platforms: Android ExoPlayer, iOS
 
 #### controls
