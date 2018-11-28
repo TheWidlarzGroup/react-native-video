@@ -666,9 +666,7 @@ static int const RCTVideoUnset = -1;
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
     } else if ([keyPath isEqualToString:loadedTimeRangesKeyPath]) {
-      DebugLog(@"frikkie: loadedTimeRangesKeyPath");
       if (_bufferConfig) {
-        DebugLog(@"frikkie: bufferConfig exists");
         double buffered = [[self calculatePlayableDuration] doubleValue] - [[NSNumber numberWithFloat:CMTimeGetSeconds(_player.currentTime)] doubleValue];
         double threshold = 0.0;
         if (_bufferConfig[@"bufferForPlaybackAfterRebufferMs"]) {
@@ -680,7 +678,6 @@ static int const RCTVideoUnset = -1;
           double bufferForPlaybackMs = [_bufferConfig[@"bufferForPlaybackMs"] doubleValue];
           threshold = bufferForPlaybackMs / 1000; // bufferForPlaybackMs
         }
-        DebugLog(@"frikkie: buffered: %f, threshold %f", buffered, threshold);
         if (threshold > 0.0 && buffered >= threshold && !_paused) {
           [_player playImmediatelyAtRate:1];
         }
