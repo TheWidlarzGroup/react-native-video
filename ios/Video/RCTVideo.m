@@ -679,7 +679,7 @@ static int const RCTVideoUnset = -1;
           threshold = bufferForPlaybackMs / 1000; // bufferForPlaybackMs
         }
         if (threshold > 0.0 && buffered >= threshold && !_paused) {
-          [_player playImmediatelyAtRate:1];
+          [_player playImmediatelyAtRate:_rate];
         }
       }
     }
