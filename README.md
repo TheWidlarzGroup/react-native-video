@@ -282,6 +282,7 @@ var styles = StyleSheet.create({
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
+* [hideShutterView](#hideshutterview)
 * [volume](#volume)
 
 ### Event props
