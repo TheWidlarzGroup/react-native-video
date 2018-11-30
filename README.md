@@ -264,6 +264,7 @@ var styles = StyleSheet.create({
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
@@ -282,7 +283,6 @@ var styles = StyleSheet.create({
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
-* [hideShutterView](#hideshutterview)
 * [volume](#volume)
 
 ### Event props
@@ -415,6 +415,14 @@ headers={{
   'X-Custom-Header': 'some value'
 }}
 ```
+
+Platforms: Android ExoPlayer
+
+#### hideShutterView
+Controls ExoPlayer shutterView(black screen while loading) visibility
+
+* **false (default)** - Show shutterView 
+* **true** - Hide shutterView
 
 Platforms: Android ExoPlayer
 
@@ -691,14 +699,6 @@ useTextureView can only be set at same time you're setting the source.
 
 * **true (default)** - Use a TextureView
 * **false** - Use a SurfaceView
-
-Platforms: Android ExoPlayer
-
-#### hideShutterView
-Controls ExoPlayer shutterView(black screen while loading) visibility
-
-* **false (default)** - Show shutterView 
-* **true** - Hide shutterView
 
 Platforms: Android ExoPlayer
 
