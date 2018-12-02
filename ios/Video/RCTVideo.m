@@ -1274,27 +1274,23 @@ static int const RCTVideoUnset = -1;
 
         CIFilter *filter = [CIFilter filterWithName:filterName];
 
-        _playerItem.videoComposition = [AVVideoComposition
-                videoCompositionWithAsset:asset
-             applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+        if (filter != nil) {
 
-                 if (filter == nil) {
+            _playerItem.videoComposition = [AVVideoComposition
+                    videoCompositionWithAsset:asset
+                 applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
 
-                     [request finishWithImage:request.sourceImage context:nil];
+                   CIImage *image = request.sourceImage.imageByClampingToExtent;
 
-                 } else {
+                   [filter setValue:image forKey:kCIInputImageKey];
 
-                     CIImage *image = request.sourceImage.imageByClampingToExtent;
+                   CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
 
-                     [filter setValue:image forKey:kCIInputImageKey];
+                   [request finishWithImage:output context:nil];
 
-                     CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
 
-                     [request finishWithImage:output context:nil];
-
-                 }
-
-             }];
+                 }];
+        }
 
     }
 
