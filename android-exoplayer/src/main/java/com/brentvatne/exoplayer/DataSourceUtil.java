@@ -9,6 +9,7 @@ import com.facebook.react.modules.network.ForwardingCookieHandler;
 import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
@@ -72,16 +73,28 @@ public class DataSourceUtil {
                 buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
     }
 
-    private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
-        CookieJarContainer container = (CookieJarContainer) client.cookieJar();
-        ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
-        container.setCookieJar(new JavaNetCookieJar(handler));
-        OkHttpDataSourceFactory okHttpDataSourceFactory = new OkHttpDataSourceFactory(client, getUserAgent(context), bandwidthMeter);
+  private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context,
+      DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+    /*
+     * OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
+     * CookieJarContainer container = (CookieJarContainer) client.cookieJar();
+     * ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
+     * container.setCookieJar(new JavaNetCookieJar(handler));
+     * OkHttpDataSourceFactory okHttpDataSourceFactory = new
+     * OkHttpDataSourceFactory(client, getUserAgent(context), bandwidthMeter);
+     * 
+     * if (requestHeaders != null) {
+     * okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders); }
+     * 
+     * return okHttpDataSourceFactory;
+     */
 
-        if (requestHeaders != null)
-            okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders);
+    DefaultHttpDataSourceFactory factory = new DefaultHttpDataSourceFactory(getUserAgent(context));
 
-        return okHttpDataSourceFactory;
+    if (requestHeaders != null) {
+      factory.getDefaultRequestProperties().set(requestHeaders);
     }
+
+    return factory;
+  }
 }
