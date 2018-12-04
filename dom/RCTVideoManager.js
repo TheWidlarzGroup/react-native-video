@@ -18,6 +18,7 @@ class RCTVideoManager extends RCTViewManager {
     return super
       .describeProps()
       .addBooleanProp("controls", this.setControls)
+      .addStringProp("id", this.setId)
       .addBooleanProp("muted", this.setMuted)
       .addBooleanProp("paused", this.setPaused)
       .addNumberProp("progressUpdateInterval", this.setProgressUpdateInterval)
@@ -28,9 +29,14 @@ class RCTVideoManager extends RCTViewManager {
       .addObjectProp("src", this.setSource)
       .addNumberProp("volume", this.setVolume)
       .addDirectEvent("onVideoEnd")
+      .addDirectEvent("onVideoError")
       .addDirectEvent("onVideoLoad")
       .addDirectEvent("onVideoLoadStart")
       .addDirectEvent("onVideoProgress");
+  }
+
+  dismissFullscreenPlayer() {
+    // not currently working
   }
 
   presentFullscreenPlayer() {
@@ -39,6 +45,10 @@ class RCTVideoManager extends RCTViewManager {
 
   setControls(view: RCTVideo, value: boolean) {
     view.controls = value;
+  }
+
+  setId(view: RCTVideo, value: string) {
+    view.id = value;
   }
 
   setMuted(view: RCTVideo, value: boolean) {

@@ -47,6 +47,7 @@ public class ReactVideoView extends ScalableVideoView implements
     MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener,
     MediaPlayer.OnBufferingUpdateListener,
+    MediaPlayer.OnSeekCompleteListener,
     MediaPlayer.OnCompletionListener,
     MediaPlayer.OnInfoListener,
     LifecycleEventListener,
@@ -127,6 +128,7 @@ public class ReactVideoView extends ScalableVideoView implements
     private float mProgressUpdateInterval = 250.0f;
     private float mRate = 1.0f;
     private float mActiveRate = 1.0f;
+    private long mSeekTime = 0;
     private boolean mPlayInBackground = false;
     private boolean mBackgroundPaused = false;
     private boolean mIsFullscreen = false;
@@ -213,6 +215,7 @@ public class ReactVideoView extends ScalableVideoView implements
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnBufferingUpdateListener(this);
+            mMediaPlayer.setOnSeekCompleteListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.setOnInfoListener(this);
             if (Build.VERSION.SDK_INT >= 23) {
@@ -606,15 +609,18 @@ public class ReactVideoView extends ScalableVideoView implements
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
 
+    public void onSeekComplete(MediaPlayer mp) {
+        WritableMap event = Arguments.createMap();
+        event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
+        event.putDouble(EVENT_PROP_SEEK_TIME, mSeekTime / 1000.0);
+        mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
+        mSeekTime = 0;
+    }
+
     @Override
     public void seekTo(int msec) {
-
         if (mMediaPlayerValid) {
-            WritableMap event = Arguments.createMap();
-            event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
-            event.putDouble(EVENT_PROP_SEEK_TIME, msec / 1000.0);
-            mEventEmitter.receiveEvent(getId(), Events.EVENT_SEEK.toString(), event);
-
+            mSeekTime = msec;
             super.seekTo(msec);
             if (isCompleted && mVideoDuration != 0 && msec < mVideoDuration) {
                 isCompleted = false;

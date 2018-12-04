@@ -1,8 +1,10 @@
 ## Changelog
 
-### Next Version
+### Version 4.0.1
+* Add missing files to package.json [#1342](https://github.com/react-native-community/react-native-video/pull/1342)
+
+### Version 4.0.0
 * Partial support for timed metadata on Android MediaPlayer [#707](https://github.com/react-native-community/react-native-video/pull/707)
-* Update to ExoPlayer 2.8.2. Android SDK 26 now required [#1170](https://github.com/react-native-community/react-native-video/pull/1170)
 * Support video caching for iOS [#955](https://github.com/react-native-community/react-native-video/pull/955)
 * Video caching cleanups [#1172](https://github.com/react-native-community/react-native-video/pull/1172)
 * Add ipod-library support [#926](https://github.com/react-native-community/react-native-video/pull/926/files)
@@ -11,6 +13,16 @@
 * Remove unnecessary import in TextTrackType [#1229](https://github.com/react-native-community/react-native-video/pull/1229)
 * Prevent flash between poster and video [#1167](https://github.com/react-native-community/react-native-video/pull/1167)
 * Support react-native-dom [#1253](https://github.com/react-native-community/react-native-video/pull/1253)
+* Update to ExoPlayer 2.8.2. Android SDK 26 now required [#1170](https://github.com/react-native-community/react-native-video/pull/1170)
+* Update to ExoPlayer 2.8.4 [#1266](https://github.com/react-native-community/react-native-video/pull/1266)
+* Add fullscreenOrientation option for iOS [#1215](https://github.com/react-native-community/react-native-video/pull/1215)
+* Update to ExoPlayer 2.9.0 [#1285](https://github.com/react-native-community/react-native-video/pull/1285)
+* Switch useTextureView to default to `true` [#1286](https://github.com/react-native-community/react-native-video/pull/1286)
+* Re-add fullscreenAutorotate prop [#1303](https://github.com/react-native-community/react-native-video/pull/1303)
+* Make seek throw a useful error for NaN values [#1283](https://github.com/react-native-community/react-native-video/pull/1283)
+* Video Filters and Save Video [#1306](https://github.com/react-native-community/react-native-video/pull/1306)
+* Fix: volume should not change on onAudioFocusChange event [#1327](https://github.com/react-native-community/react-native-video/pull/1327)
+* Update ExoPlayer to 2.9.1 and OkHTTP to 3.12.0 [#1338](https://github.com/react-native-community/react-native-video/pull/1338)
 
 ### Version 3.2.0
 * Basic fullscreen support for Android MediaPlayer [#1138](https://github.com/react-native-community/react-native-video/pull/1138)
