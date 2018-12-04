@@ -1,9 +1,10 @@
-#import <React/RCTView.h>
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
 #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import <React/RCTComponent.h>
+#import <React/RCTBridgeModule.h>
 
 #import "RCTVideoCache.h"
 #import <DVAssetLoaderDelegate/DVURLAsset.h>
@@ -31,9 +32,12 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackStalled;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
+
+- (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 @end
