@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
 import Video from "react-native-video";
 
 const { height, width } = Dimensions.get("screen");
@@ -28,6 +28,16 @@ export default class App extends Component<Props> {
           }}
           style={{ flex: 1, height, width }}
         />
+        <TouchableOpacity
+          onPress={async () => {
+            let response = await this.player.save();
+            let uri = response.uri;
+            console.log("Download URI", uri);
+          }}
+          style={styles.button}
+        >
+          <Text style={{color: 'white'}}>Save</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -39,6 +49,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5FCFF"
+  },
+  button: {
+    position: 'absolute',
+    top: 50,
+    right: 16,
+    padding: 10,
+    backgroundColor: '#9B2FAE',
+    borderRadius: 8
   },
   welcome: {
     fontSize: 20,
