@@ -1266,33 +1266,38 @@ static int const RCTVideoUnset = -1;
 
 - (void)setFilter:(NSString *)filterName {
 
-    _filterName = filterName;
+  _filterName = filterName;
 
-    AVAsset *asset = _playerItem.asset;
+  AVAsset *asset = _playerItem.asset;
 
-    if (asset != nil) {
+  if (asset != nil && filterName != nil) {
 
-        CIFilter *filter = [CIFilter filterWithName:filterName];
+    CIFilter *filter = [CIFilter filterWithName:filterName];
 
-        if (filter != nil) {
+    _playerItem.videoComposition = [AVVideoComposition
+            videoCompositionWithAsset:asset
+         applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
 
-            _playerItem.videoComposition = [AVVideoComposition
-                    videoCompositionWithAsset:asset
-                 applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+             if (filter == nil) {
 
-                   CIImage *image = request.sourceImage.imageByClampingToExtent;
+               [request finishWithImage:request.sourceImage context:nil];
 
-                   [filter setValue:image forKey:kCIInputImageKey];
+             } else {
 
-                   CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+               CIImage *image = request.sourceImage.imageByClampingToExtent;
 
-                   [request finishWithImage:output context:nil];
+               [filter setValue:image forKey:kCIInputImageKey];
+
+               CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+
+               [request finishWithImage:output context:nil];
+
+             }
 
 
-                 }];
-        }
+         }];
 
-    }
+  }
 
 }
 
