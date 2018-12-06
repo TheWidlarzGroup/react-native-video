@@ -7,6 +7,7 @@
 
 ### Version 4.0.1
 * Add missing files to package.json [#1342](https://github.com/react-native-community/react-native-video/pull/1342)
+* Add possibility to remove black screen while video is loading in Exoplayer [#1355](https://github.com/react-native-community/react-native-video/pull/1355)
 
 ### Version 4.0.0
 * Partial support for timed metadata on Android MediaPlayer [#707](https://github.com/react-native-community/react-native-video/pull/707)
