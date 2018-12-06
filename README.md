@@ -419,10 +419,10 @@ headers={{
 Platforms: Android ExoPlayer
 
 #### hideShutterView
-Controls ExoPlayer shutterView(black screen while loading) visibility
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
 
-* **false (default)** - Show shutterView 
-* **true** - Hide shutterView
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
 
