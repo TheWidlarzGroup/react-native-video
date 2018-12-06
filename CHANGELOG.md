@@ -3,6 +3,7 @@
 ### Version 4.0.2
 * Generate onSeek on Android ExoPlayer & MediaPlayer after seek completes [#1351](https://github.com/react-native-community/react-native-video/pull/1351)
 * Remove unneeded onVideoSaved event [#1350](https://github.com/react-native-community/react-native-video/pull/1350)
+* Disable AirPlay if sidecar text tracks are enabled [#1304](https://github.com/react-native-community/react-native-video/pull/1304)
 
 ### Version 4.0.1
 * Add missing files to package.json [#1342](https://github.com/react-native-community/react-native-video/pull/1342)
