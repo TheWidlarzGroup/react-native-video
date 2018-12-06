@@ -656,6 +656,8 @@ uri | URL for the text track. Currently, only tracks hosted on a webserver are s
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
+
 Example:
 ```
 import { TextTrackType }, Video from 'react-native-video';
