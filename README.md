@@ -264,6 +264,7 @@ var styles = StyleSheet.create({
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
@@ -414,6 +415,14 @@ headers={{
   'X-Custom-Header': 'some value'
 }}
 ```
+
+Platforms: Android ExoPlayer
+
+#### hideShutterView
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
 
@@ -655,6 +664,8 @@ type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * Text
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
+
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
 
 Example:
 ```
