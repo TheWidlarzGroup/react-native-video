@@ -37,6 +37,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
+    private static final String PROP_FOCUSED = "focused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
@@ -173,6 +174,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
+    }
+
+    @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
+    public void setFocused(final ReactExoplayerView videoView, final boolean focused) {
+        //
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
