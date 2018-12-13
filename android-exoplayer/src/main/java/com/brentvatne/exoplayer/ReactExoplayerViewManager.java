@@ -52,6 +52,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
 
     @Override
     public String getName() {
@@ -224,6 +225,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
+    public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
+        videoView.setHideShutterView(hideShutterView);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)

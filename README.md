@@ -264,6 +264,7 @@ var styles = StyleSheet.create({
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
@@ -296,6 +297,7 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
+* [onSeek](#onseek)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
@@ -414,6 +416,14 @@ headers={{
   'X-Custom-Header': 'some value'
 }}
 ```
+
+Platforms: Android ExoPlayer
+
+#### hideShutterView
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
 
@@ -667,6 +677,8 @@ uri | URL for the text track. Currently, only tracks hosted on a webserver are s
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
+
 Example:
 ```
 import { TextTrackType }, Video from 'react-native-video';
@@ -860,6 +872,29 @@ Example:
 
 Platforms: all
 
+#### onSeek
+Callback function that is called when a seek completes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+currentTime | number | The current time after the seek
+seekTime | number | The requested time
+
+Example:
+```
+{
+  currentTime: 100.5
+  seekTime: 100
+}
+```
+
+Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
+
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
 
@@ -953,7 +988,7 @@ Platforms: iOS
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
 ```

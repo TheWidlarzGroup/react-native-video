@@ -1,5 +1,14 @@
 ## Changelog
 
+### Version 4.1.1
+* Don't initialize filters on iOS unless a filter is set. This was causing a startup performance regression [#1360](https://github.com/react-native-community/react-native-video/pull/1360)
+
+### Version 4.1.0
+* Generate onSeek on Android ExoPlayer & MediaPlayer after seek completes [#1351](https://github.com/react-native-community/react-native-video/pull/1351)
+* Remove unneeded onVideoSaved event [#1350](https://github.com/react-native-community/react-native-video/pull/1350)
+* Disable AirPlay if sidecar text tracks are enabled [#1304](https://github.com/react-native-community/react-native-video/pull/1304)
+* Add possibility to remove black screen while video is loading in Exoplayer [#1355](https://github.com/react-native-community/react-native-video/pull/1355)
+
 ### Version 4.0.1
 * Add missing files to package.json [#1342](https://github.com/react-native-community/react-native-video/pull/1342)
 

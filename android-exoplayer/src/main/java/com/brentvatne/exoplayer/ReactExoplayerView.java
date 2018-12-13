@@ -111,6 +111,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float rate = 1f;
     private float audioVolume = 1f;
     private int maxBitRate = 0;
+    private long seekTime = C.TIME_UNSET;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -131,6 +132,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean useTextureView = false;
+    private boolean hideShutterView = false;
     private Map<String, String> requestHeaders;
     // \ End props
 
@@ -609,7 +611,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onSeekProcessed() {
-        // Do nothing.
+        eventEmitter.seek(player.getCurrentPosition(), seekTime);
+        seekTime = C.TIME_UNSET;
     }
 
     @Override
@@ -896,7 +899,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
+            seekTime = positionMs;
             player.seekTo(positionMs);
         }
     }
@@ -964,6 +967,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setUseTextureView(boolean useTextureView) {
         exoPlayerView.setUseTextureView(useTextureView);
+    }
+
+    public void setHideShutterView(boolean hideShutterView) {
+        exoPlayerView.setHideShutterView(hideShutterView);
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
