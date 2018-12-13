@@ -235,11 +235,18 @@ public class ReactVideoView extends ScalableVideoView implements
             mediaController.hide();
         }
         if ( mMediaPlayer != null ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mMediaPlayer.setOnTimedMetaDataAvailableListener(null);
+            }
             mMediaPlayerValid = false;
             release();
         }
         if (mIsFullscreen) {
             setFullscreen(false);
+        }
+        if (mThemedReactContext != null) {
+            mThemedReactContext.removeLifecycleEventListener(this);
+            mThemedReactContext = null;
         }
     }
 
@@ -567,8 +574,7 @@ public class ReactVideoView extends ScalableVideoView implements
             });
         }
 
-        // Select track (so we can use it to listen to timed meta data updates)
-        mp.selectTrack(0);
+        selectTimedMetadataTrack(mp);
     }
 
     @Override
@@ -603,9 +609,7 @@ public class ReactVideoView extends ScalableVideoView implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        // Select track (so we can use it to listen to timed meta data updates)
-        mp.selectTrack(0);
-
+        selectTimedMetadataTrack(mp);
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
 
@@ -760,5 +764,21 @@ public class ReactVideoView extends ScalableVideoView implements
         }
 
         return result;
+    }
+        
+    // Select track (so we can use it to listen to timed meta data updates)
+    private void selectTimedMetadataTrack(MediaPlayer mp) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        try { // It's possible this could throw an exception if the framework doesn't support getting track info
+            MediaPlayer.TrackInfo[] trackInfo = mp.getTrackInfo();
+            for (int i = 0; i < trackInfo.length; ++i) {
+                if (trackInfo[i].getTrackType() == MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) {
+                    mp.selectTrack(i);
+                    break;
+                }
+            }
+        } catch (Exception e) {}
     }
 }
