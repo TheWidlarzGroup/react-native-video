@@ -1265,35 +1265,29 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setFilter:(NSString *)filterName {
-
     _filterName = filterName;
-
     AVAsset *asset = _playerItem.asset;
-
-    if (asset != nil) {
-
-        CIFilter *filter = [CIFilter filterWithName:filterName];
-
-        if (filter != nil) {
-
-            _playerItem.videoComposition = [AVVideoComposition
-                    videoCompositionWithAsset:asset
-                 applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
-
-                   CIImage *image = request.sourceImage.imageByClampingToExtent;
-
-                   [filter setValue:image forKey:kCIInputImageKey];
-
-                   CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
-
-                   [request finishWithImage:output context:nil];
-
-
-                 }];
-        }
-
+    
+    if (!asset) {
+        return;
+    } else if (!_playerItem.videoComposition && (filterName == nil || [filterName isEqualToString:@""])) {
+        return; // Setting up an empty filter has a cost so avoid whenever possible
     }
+    // TODO: filters don't work for HLS, check & return
 
+    CIFilter *filter = [CIFilter filterWithName:filterName];
+    _playerItem.videoComposition = [AVVideoComposition
+                                    videoCompositionWithAsset:asset
+                                    applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+        if (filter == nil) {
+            [request finishWithImage:request.sourceImage context:nil];
+        } else {
+            CIImage *image = request.sourceImage.imageByClampingToExtent;
+            [filter setValue:image forKey:kCIInputImageKey];
+            CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+            [request finishWithImage:output context:nil];
+        }
+    }];
 }
 
 #pragma mark - React View Management
