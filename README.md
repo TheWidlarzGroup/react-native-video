@@ -267,6 +267,7 @@ var styles = StyleSheet.create({
 * [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
+* [maxBitRate](#maxbitrate)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -444,6 +445,18 @@ Controls the iOS silent switch behavior
 
 Platforms: iOS
 
+#### maxBitRate
+Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
+
+Default: 0. Don't limit the maxBitRate.
+
+Example:
+```
+maxBitRate={2000000} // 2 megabits
+```
+
+Platforms: Android ExoPlayer, iOS
+
 #### muted
 Controls whether the audio is muted
 * **false (default)** - Don't mute audio
@@ -592,6 +605,7 @@ Platforms: Android ExoPlayer, iOS
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
+
 
 ##### Asset loaded via require
 
