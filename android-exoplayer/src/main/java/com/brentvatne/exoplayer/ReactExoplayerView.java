@@ -248,7 +248,7 @@ class ReactExoplayerView extends FrameLayout implements
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             trackSelector.setParameters(trackSelector.buildUponParameters()
-                            .setMaxVideoBitrate(maxBitRate));
+                            .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
             DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
@@ -914,12 +914,10 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setMaxBitRateModifier(int newMaxBitRate) {
-        if (newMaxBitRate==0) newMaxBitRate =  Integer.MAX_VALUE;
         maxBitRate = newMaxBitRate;
-
         if (player != null) {
             trackSelector.setParameters(trackSelector.buildUponParameters()
-                    .setMaxVideoBitrate(maxBitRate));
+                    .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
         }
     }
 
