@@ -674,7 +674,8 @@ To configure DRM it is necessary to add the poperties:
 * **playready**
 * **cenc**
 
-`drmUrl` Which is the license server URL
+`drmUrl` Which is the license server URL.
+
 `drmHeader` Which are the DRM custom headers.
 
 Platforms: Android ExoPlayer
