@@ -4,6 +4,7 @@
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
 #import <React/RCTComponent.h>
+#import <React/RCTBridgeModule.h>
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 #import <react-native-video/RCTVideoCache.h>
@@ -40,5 +41,7 @@
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
+
+- (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 @end

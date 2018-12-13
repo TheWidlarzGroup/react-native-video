@@ -121,6 +121,8 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
+    private float audioVolume = 1f;
+    private long seekTime = C.TIME_UNSET;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -141,6 +143,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean useTextureView = false;
+    private boolean hideShutterView = false;
     private Map<String, String> requestHeaders;
     private UUID drmUUID = null;
     private String drmLicenseUrl = null;
@@ -503,10 +506,10 @@ class ReactExoplayerView extends FrameLayout implements
         if (player != null) {
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 // Lower the volume
-                player.setVolume(0.8f);
+                player.setVolume(audioVolume * 0.8f);
             } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                 // Raise it back to normal
-                player.setVolume(1);
+                player.setVolume(audioVolume * 1);
             }
         }
     }
@@ -653,7 +656,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onSeekProcessed() {
-        // Do nothing.
+        eventEmitter.seek(player.getCurrentPosition(), seekTime);
+        seekTime = C.TIME_UNSET;
     }
 
     @Override
@@ -924,21 +928,23 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setMutedModifier(boolean muted) {
+        audioVolume = muted ? 0.f : 1.f;
         if (player != null) {
-            player.setVolume(muted ? 0 : 1);
+            player.setVolume(audioVolume);
         }
     }
 
 
     public void setVolumeModifier(float volume) {
+        audioVolume = volume;
         if (player != null) {
-            player.setVolume(volume);
+            player.setVolume(audioVolume);
         }
     }
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
+            seekTime = positionMs;
             player.seekTo(positionMs);
         }
     }
@@ -1048,6 +1054,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setUseTextureView(boolean useTextureView) {
         exoPlayerView.setUseTextureView(useTextureView);
+    }
+
+    public void setHideShutterView(boolean hideShutterView) {
+        exoPlayerView.setHideShutterView(hideShutterView);
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {

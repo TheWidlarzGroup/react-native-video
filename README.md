@@ -259,9 +259,12 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [filter](#filter)
 * [fullscreen](#fullscreen)
+* [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [muted](#muted)
@@ -294,11 +297,13 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
+* [onSeek](#onseek)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
+* [save](#save)
 * [seek](#seek)
 
 ### Configurable props
@@ -352,10 +357,42 @@ Note on iOS, controls are always shown when in fullscreen mode.
 
 Platforms: iOS, react-native-dom
 
+#### filter
+Add video filter
+* **FilterType.NONE (default)** - No Filter
+* **FilterType.INVERT** - CIColorInvert
+* **FilterType.MONOCHROME** - CIColorMonochrome
+* **FilterType.POSTERIZE** - CIColorPosterize
+* **FilterType.FALSE** - CIFalseColor
+* **FilterType.MAXIMUMCOMPONENT** - CIMaximumComponent
+* **FilterType.MINIMUMCOMPONENT** - CIMinimumComponent
+* **FilterType.CHROME** - CIPhotoEffectChrome
+* **FilterType.FADE** - CIPhotoEffectFade
+* **FilterType.INSTANT** - CIPhotoEffectInstant
+* **FilterType.MONO** - CIPhotoEffectMono
+* **FilterType.NOIR** - CIPhotoEffectNoir
+* **FilterType.PROCESS** - CIPhotoEffectProcess
+* **FilterType.TONAL** - CIPhotoEffectTonal
+* **FilterType.TRANSFER** - CIPhotoEffectTransfer
+* **FilterType.SEPIA** - CISepiaTone
+
+For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
+
+Notes: 
+1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
+2. Video filter is currently not supported on HLS playlists.
+
+Platforms: iOS
+
 #### fullscreen
 Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
+
+Platforms: iOS
+
+#### fullscreenAutorotate
+If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
 
 Platforms: iOS
 
@@ -379,6 +416,14 @@ headers={{
   'X-Custom-Header': 'some value'
 }}
 ```
+
+Platforms: Android ExoPlayer
+
+#### hideShutterView
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
 
@@ -621,6 +666,8 @@ uri | URL for the text track. Currently, only tracks hosted on a webserver are s
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
+
 Example:
 ```
 import { TextTrackType }, Video from 'react-native-video';
@@ -827,6 +874,29 @@ Example:
 
 Platforms: all
 
+#### onSeek
+Callback function that is called when a seek completes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+currentTime | number | The current time after the seek
+seekTime | number | The requested time
+
+Example:
+```
+{
+  currentTime: 100.5
+  seekTime: 100
+}
+```
+
+Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
+
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
 
@@ -888,12 +958,39 @@ this.player.presentFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### save
+`save(): Promise`
+
+Save video to your Photos with current filter prop. Returns promise.
+
+Example:
+```
+let response = await this.save();
+let path = response.uri;
+```
+
+Notes:
+ - Currently only supports highest quality export
+ - Currently only supports MP4 export
+ - Currently only supports exporting to user's cache directory with a generated UUID filename. 
+ - User will need to remove the saved video through their Photos app
+ - Works with cached videos as well. (Checkout video-caching example)
+ - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
+ - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
+ 
+Future: 
+ - Will support multiple qualities through options
+ - Will support more formats in the future through options
+ - Will support custom directory and file name through options
+ 
+Platforms: iOS
+
 #### seek()
 `seek(seconds)`
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
 ```
@@ -916,6 +1013,8 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 ```
 
 Platforms: iOS
+
+
 
 
 ### iOS App Transport Security
