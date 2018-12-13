@@ -448,6 +448,8 @@ Platforms: iOS
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
 
+Default: 0. Don't limit the maxBitRate.
+
 Example:
 ```
 maxBitRate={2000000} // 2 megabits
