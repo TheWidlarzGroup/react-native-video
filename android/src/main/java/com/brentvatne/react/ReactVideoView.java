@@ -765,7 +765,7 @@ public class ReactVideoView extends ScalableVideoView implements
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
-        try {
+        try { // It's possible this could throw an exception if the framework doesn't support getting track info
             MediaPlayer.TrackInfo[] trackInfo = mp.getTrackInfo();
             for (int i = 0; i < trackInfo.length; ++i) {
                 if (trackInfo[i].getTrackType() == MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) {
