@@ -571,11 +571,7 @@ public class ReactVideoView extends ScalableVideoView implements
             });
         }
 
-        // Select track (so we can use it to listen to timed meta data updates)
-        try{
-            mp.selectTrack(0);
-        }catch (Throwable t){
-        }
+        selectTimedMetadataTrack(mp);
     }
 
     @Override
@@ -610,12 +606,7 @@ public class ReactVideoView extends ScalableVideoView implements
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        // Select track (so we can use it to listen to timed meta data updates)
-        try{
-            mp.selectTrack(0);
-        }catch (Throwable t){
-        }
-
+        selectTimedMetadataTrack(mp);
         mVideoBufferedDuration = (int) Math.round((double) (mVideoDuration * percent) / 100.0);
     }
 
@@ -767,5 +758,21 @@ public class ReactVideoView extends ScalableVideoView implements
         }
 
         return result;
+    }
+        
+    // Select track (so we can use it to listen to timed meta data updates)
+    private void selectTimedMetadataTrack(MediaPlayer mp) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        try {
+            MediaPlayer.TrackInfo[] trackInfo = mp.getTrackInfo();
+            for (int i = 0; i < trackInfo.length; ++i) {
+                if (trackInfo[i].getTrackType() == MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) {
+                    mp.selectTrack(i);
+                    break;
+                }
+            }
+        } catch (Exception e) {}
     }
 }
