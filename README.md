@@ -281,6 +281,7 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+* [drm](#drm)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -664,6 +665,19 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
+#### drm
+To configure DRM it is necessary to add the poperties
+drmName="widevine"
+            drmUrl={playerInfo.license}
+            drmHeader={headers}
+`drmName` Which is the DRM type. It can take a value of these DRM's
+* **widevine**
+* **playready**
+* **cenc**
+
+`drmUrl` Which is the license server URL
+`drmHeader` Which are the DRM custom headers.
 
 ### Event props
 
