@@ -1213,6 +1213,7 @@ static int const RCTVideoUnset = -1;
       if (motion == nil) { return ;}
       if (_playerItem == nil) { return; }
       if (_playerLayer == nil) { return; }
+      if (!_focused) { return; }
       CMAcceleration gravity = motion.gravity;
 
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
