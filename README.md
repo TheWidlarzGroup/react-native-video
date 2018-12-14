@@ -260,6 +260,7 @@ var styles = StyleSheet.create({
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [filter](#filter)
+* [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
@@ -379,6 +380,15 @@ For more details on these filters refer to the [iOS docs](https://developer.appl
 Notes: 
 1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
 2. Video filter is currently not supported on HLS playlists.
+3. `filterEnabled` must be set to `true`
+
+Platforms: iOS
+
+#### filterEnabled
+Enable video filter. 
+
+* **false (default)** - Don't enable filter
+* **true** - Enable filter
 
 Platforms: iOS
 
