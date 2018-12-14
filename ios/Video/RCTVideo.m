@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include <CoreMotion/CoreMotion.h>
 #import <math.h>
 
 static NSString *const statusKeyPath = @"status";
