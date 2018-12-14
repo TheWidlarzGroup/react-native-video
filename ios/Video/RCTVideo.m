@@ -68,6 +68,7 @@ static int const RCTVideoUnset = -1;
   NSString * _resizeMode;
   BOOL _fullscreen;
   BOOL _fullscreenAutorotate;
+  BOOL _focused;
   NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
   NSString *_filterName;
@@ -1163,6 +1164,10 @@ static int const RCTVideoUnset = -1;
   if (_fullscreenPlayerPresented) {
     _playerViewController.autorotate = autorotate;
   }
+}
+
+- (void)setFocused:(BOOL) focused {
+  _focused = focused;
 }
 
 - (void)setFullscreenOrientation:(NSString *)orientation {
