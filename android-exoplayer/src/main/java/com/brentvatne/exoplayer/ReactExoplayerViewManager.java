@@ -47,10 +47,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
+    private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
 
     @Override
     public String getName() {
@@ -200,6 +202,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setRateModifier(rate);
     }
 
+    @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
+    public void setMaxBitRate(final ReactExoplayerView videoView, final int maxBitRate) {
+        videoView.setMaxBitRateModifier(maxBitRate);
+    }
+
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
     public void setPlayInBackground(final ReactExoplayerView videoView, final boolean playInBackground) {
         videoView.setPlayInBackground(playInBackground);
@@ -218,6 +225,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
+    public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
+        videoView.setHideShutterView(hideShutterView);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)

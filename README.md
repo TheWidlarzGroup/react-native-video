@@ -265,8 +265,10 @@ var styles = StyleSheet.create({
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
+* [maxBitRate](#maxbitrate)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -427,6 +429,14 @@ headers={{
 
 Platforms: Android ExoPlayer
 
+#### hideShutterView
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
+
+Platforms: Android ExoPlayer
+
 #### id
 Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
 
@@ -444,6 +454,18 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### maxBitRate
+Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
+
+Default: 0. Don't limit the maxBitRate.
+
+Example:
+```
+maxBitRate={2000000} // 2 megabits
+```
+
+Platforms: Android ExoPlayer, iOS
 
 #### muted
 Controls whether the audio is muted
@@ -594,6 +616,7 @@ Sets the media source. You can pass an asset loaded via require or an object wit
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
+
 ##### Asset loaded via require
 
 Example: 
@@ -665,6 +688,8 @@ type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * Text
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
+
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
 
 Example:
 ```
