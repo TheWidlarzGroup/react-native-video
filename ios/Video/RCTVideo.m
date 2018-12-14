@@ -72,6 +72,10 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   UIViewController * _presentingViewController;
   RCTVideoCache * _videoCache;
+
+  /// Rotato
+  CMMotionManager *_motionManager;
+
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -1195,6 +1199,26 @@ static int const RCTVideoUnset = -1;
 
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
+    /// Rotato
+    _motionManager = [[CMMotionManager alloc] init];
+    _motionManager.deviceMotionUpdateInterval = 0.01;
+    [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
+      if (self == nil) { return; }
+      if (motion == nil) { return ;}
+      if (_playerItem == nil) { return; }
+      if (_playerLayer == nil) { return; }
+      CMAcceleration gravity = motion.gravity;
+
+      double rotation = atan2(gravity.x, gravity.y) - M_PI;
+      double ratio =  _playerItem.asset.naturalSize.height / _playerItem.asset.naturalSize.width;
+      double zoomFactor = 2;
+      double scale = ((zoomFactor + 1) - cos(2*rotation)) / zoomFactor;
+
+      CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
+      transform = CGAffineTransformRotate(transform, rotation);
+      self.transform = transform;
+    }];
+
   }
 }
 
