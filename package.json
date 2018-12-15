@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "4.2.0",
+    "version": "4.2.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-	"shaka-player": "2.4.4"
+        "shaka-player": "2.4.4"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
@@ -46,7 +46,7 @@
             "sourceDir": "./android-exoplayer"
         }
     },
-    "files":[
+    "files": [
         "android-exoplayer",
         "android",
         "dom",
