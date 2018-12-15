@@ -480,7 +480,7 @@ static int const RCTVideoUnset = -1;
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-    if (!_textTracks) {
+    if (_textTracks) {
       /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
        *  to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
        * Until this is fixed, we need to bypass caching when text tracks are specified.
