@@ -1494,10 +1494,6 @@ static int const RCTVideoUnset = -1;
 
 
 - (float) getScaleWithViewWidth: (int)view_width viewHeight:(int) view_height videoWidth:(int) video_width videoHeight:(int) video_height radius:(double) rad {
-  printf("view_width: %d\n", view_width);
-  printf("view_height: %d\n", view_height);
-  printf("video_width: %d\n", video_width);
-  printf("video_height: %d\n", video_height);
   if (view_width == 0 || view_height == 0)   // video is the outer rectangle, view is the inner rectangle
     return 1.0;                             // the formula of the oval is x^2/a^2 + y^2/b^2 = 1
   // a = half_video_width, b = half_video_height
@@ -1513,10 +1509,7 @@ static int const RCTVideoUnset = -1;
 
   double scale_x = (double)view_width / (double)video_width;
   double scale_y = (double)view_height / (double)video_height;
-  printf("scale_x: %f",scale_x);
-  printf("scale_y: %f",scale_y);
   double original_video_scale = scale_x > scale_y ? scale_x : scale_y;  // the original scale of the video
-  printf("original_video_scale: %f",original_video_scale);
 
   double xc1 = half_view_width * cos(rad) - half_view_height * sin(rad);  // the top right corner of inner rectangle
   double yc1 = half_view_width * sin(rad) + half_view_height * cos(rad);
