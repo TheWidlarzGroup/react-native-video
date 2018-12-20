@@ -1288,17 +1288,13 @@ static int const RCTVideoUnset = -1;
         return;
     } else if ([[_source objectForKey:@"uri"] rangeOfString:@"m3u8"].location != NSNotFound) {
         return; // filters don't work for HLS... return
-    }
-
-    AVAsset *asset = _playerItem.asset;
-    
-    if (!asset) {
+    } else if (!_playerItem.asset) {
         return;
     }
-
+    
     CIFilter *filter = [CIFilter filterWithName:filterName];
     _playerItem.videoComposition = [AVVideoComposition
-                                    videoCompositionWithAsset:asset
+                                    videoCompositionWithAsset:_playerItem.asset
                                     applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
         if (filter == nil) {
             [request finishWithImage:request.sourceImage context:nil];
