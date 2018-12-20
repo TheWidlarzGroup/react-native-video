@@ -870,14 +870,16 @@ class ReactExoplayerView extends FrameLayout implements
 
             /*0 is auto mode. Add all tracks of group 0*/
             if (0 == value.asInt()) {
-                TrackGroup group = groups.get(0);
+                if (groups.length > 0) {
+                    TrackGroup group = groups.get(0);
 
-                tracks = new int[group.length];
+                    tracks = new int[group.length];
 
-                groupIndex = 0;
+                    groupIndex = 0;
 
-                for (int j = 0; j < group.length; j++) {
-                    tracks[j] = j;
+                    for (int j = 0; j < group.length; j++) {
+                        tracks[j] = j;
+                    }
                 }
             } else {
                 /*Search for the exact video Height*/
