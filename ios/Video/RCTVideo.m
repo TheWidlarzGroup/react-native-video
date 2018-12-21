@@ -7,6 +7,7 @@
 #include <AVFoundation/AVFoundation.h>
 #include <CoreMotion/CoreMotion.h>
 #import <math.h>
+#import "FWScaler.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -77,6 +78,7 @@ static int const RCTVideoUnset = -1;
 
   /// Rotato
   CMMotionManager *_motionManager;
+  FWScaler *_scaler;
 
 }
 
@@ -1208,6 +1210,7 @@ static int const RCTVideoUnset = -1;
     /// Rotato
     _motionManager = [[CMMotionManager alloc] init];
     _motionManager.deviceMotionUpdateInterval = 0.01;
+    _scaler = [[Scaler alloc] init];
     [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
       if (self == nil) { return; }
       if (motion == nil) { return ;}
@@ -1218,12 +1221,12 @@ static int const RCTVideoUnset = -1;
 
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
       double scale =
-      [self getScaleWithViewWidth: roundf(self.frame.size.width)
-                       viewHeight: roundf(self.frame.size.height)
-                       videoWidth: roundf(_playerItem.asset.naturalSize.width)
-                      videoHeight: roundf(_playerItem.asset.naturalSize.height)
-                           radius:rotation];
-
+      [_scaler getScaleWithViewWidth:roundf(self.bounds.size.width)
+                          viewHeight:roundf(self.bounds.size.height)
+                          videoWidth:roundf(_playerItem.asset.naturalSize.width)
+                         videoHeight:roundf(_playerItem.asset.naturalSize.height)
+                                 rad:rotation
+                                 raw:NO];
 
       CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
       transform = CGAffineTransformRotate(transform, rotation);
@@ -1490,44 +1493,6 @@ static int const RCTVideoUnset = -1;
 - (NSString *)cacheDirectoryPath {
     NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return array[0];
-}
-
-
-- (float) getScaleWithViewWidth: (int)view_width viewHeight:(int) view_height videoWidth:(int) video_width videoHeight:(int) video_height radius:(double) rad {
-  if (view_width == 0 || view_height == 0)   // video is the outer rectangle, view is the inner rectangle
-    return 1.0;                             // the formula of the oval is x^2/a^2 + y^2/b^2 = 1
-  // a = half_video_width, b = half_video_height
-
-  // x = scale * (half_view_width * cos(theta) - half_view_height * sin(theta)
-  // y = scale * (half_view_width * sin(theta) + half_view_height * cos(theta)
-
-  video_width = (video_width == -1 || video_width == 0) ? view_width : video_width;
-  video_height = (video_height == -1 || video_height == 0) ? view_height : video_height;
-
-  double half_view_width = 0.5 * view_width, half_view_height = 0.5 * view_height;
-  double half_video_width = 0.5 * video_width, half_video_height = 0.5 * video_height;
-
-  double scale_x = (double)view_width / (double)video_width;
-  double scale_y = (double)view_height / (double)video_height;
-  double original_video_scale = scale_x > scale_y ? scale_x : scale_y;  // the original scale of the video
-
-  double xc1 = half_view_width * cos(rad) - half_view_height * sin(rad);  // the top right corner of inner rectangle
-  double yc1 = half_view_width * sin(rad) + half_view_height * cos(rad);
-
-  double xc2 = -half_view_width * cos(rad) - half_view_height * sin(rad); // the top left corner of inner rectangle
-  double yc2 = -half_view_width * sin(rad) + half_view_height * cos(rad);
-
-  double r2_1 = xc1 * xc1 / half_video_width / half_video_width + yc1 * yc1 / half_video_height / half_video_height;
-  // the square of minimal scale that guarantee the top right corner stays inside the oval
-  double r2_2 = xc2 * xc2 / half_video_width / half_video_width + yc2 * yc2 / half_video_height / half_video_height;
-  // the square of minimal scale that guarantee the top left corner stays inside the oval
-
-  double r2 = r2_1 > r2_2 ? r2_1 : r2_2; // use the bigger one
-  if (video_width == -1) {
-    return (float)sqrt(r2);
-  } else {
-    return (float)(sqrt(r2) / original_video_scale);  // how much we need to scale further
-  }
 }
 
 @end
