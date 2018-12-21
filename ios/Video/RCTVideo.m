@@ -1210,7 +1210,7 @@ static int const RCTVideoUnset = -1;
     /// Rotato
     _motionManager = [[CMMotionManager alloc] init];
     _motionManager.deviceMotionUpdateInterval = 0.01;
-    _scaler = [[Scaler alloc] init];
+    _scaler = [[FWScaler alloc] init];
     [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
       if (self == nil) { return; }
       if (motion == nil) { return ;}
