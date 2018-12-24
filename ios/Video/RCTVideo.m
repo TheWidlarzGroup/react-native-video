@@ -584,8 +584,8 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setMaxBitRate:(float) maxBitRate {
-    _maxBitRate = maxBitRate;
-    _playerItem.preferredPeakBitRate = maxBitRate;
+  _maxBitRate = maxBitRate;
+  _playerItem.preferredPeakBitRate = maxBitRate;
 }
 
 - (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
