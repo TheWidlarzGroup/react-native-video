@@ -624,7 +624,7 @@ A number of URI schemes are supported by passing an object with a `uri` attribut
 
 Example:
 ```
-source={ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }
+source={{uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }}
 ```
 
 Platforms: all
@@ -633,7 +633,7 @@ Platforms: all
 
 Example:
 ```
-source={ uri: 'file:///sdcard/Movies/sintel.mp4' }
+source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 ```
 
 Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
@@ -646,7 +646,7 @@ Path to a sound file in your iTunes library. Typically shared from iTunes to you
 
 Example:
 ```
-source={ uri: 'ipod-library:///path/to/music.mp3' }
+source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 ```
 
 Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
