@@ -300,6 +300,7 @@ Video.propTypes = {
       FilterType.TRANSFER,
       FilterType.SEPIA
   ]),
+  filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
