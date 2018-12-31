@@ -1,5 +1,9 @@
 ## Changelog
 
+### Next Version
+* Fix iOS video not displaying after switching source [#1395](https://github.com/react-native-community/react-native-video/pull/1395)
+* Add the filterEnabled flag, fixes iOS video start time regression [#1384](https://github.com/react-native-community/react-native-video/pull/1384)
+
 ### Version 4.2.0
 * Don't initialize filters on iOS unless a filter is set. This was causing a startup performance regression [#1360](https://github.com/react-native-community/react-native-video/pull/1360)
 * Support setting the maxBitRate [#1310](https://github.com/react-native-community/react-native-video/pull/1310)
