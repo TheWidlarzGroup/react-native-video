@@ -733,7 +733,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getRawDataSourceFactory(this.themedReactContext);
+            this.mediaDataSourceFactory = buildDataSourceFactory(true);
 
             if (!isOriginalSourceNull && !isSourceEqual) {
                 reloadSource();
