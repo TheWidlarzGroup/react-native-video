@@ -720,7 +720,7 @@ static int const RCTVideoUnset = -1;
     AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
     
     if (self.onBandwidthUpdate) {
-        self.onBandwidthUpdate(@{@"bitrateEstimate": [NSNumber numberWithFloat:(lastEvent.observedBitrate/1000)]});
+        self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
     }
 }
 
