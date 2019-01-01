@@ -125,7 +125,7 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
-    private static final String EVENT_PROP_BITRATE_ESTIMATE = "bitrateEstimate";   
+    private static final String EVENT_PROP_BITRATE = "bitrate";   
 
 
     void setViewId(int viewId) {
@@ -178,7 +178,7 @@ class VideoEventEmitter {
 
     void bandwidthReport(double bitRateEstimate) {
         WritableMap event = Arguments.createMap();
-        event.putDouble(EVENT_PROP_BITRATE_ESTIMATE, bitRateEstimate / 1024D);
+        event.putDouble(EVENT_PROP_BITRATE, bitRate);
         receiveEvent(EVENT_BANDWIDTH, event);
     }    
 
