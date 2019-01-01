@@ -259,11 +259,16 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [filter](#filter)
+* [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
+* [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
 * [headers](#headers)
+* [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
+* [maxBitRate](#maxbitrate)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -293,11 +298,13 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onProgress](#onprogress)
+* [onSeek](#onseek)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
+* [save](#save)
 * [seek](#seek)
 
 ### Configurable props
@@ -349,12 +356,55 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
+Controls are not available Android because the system does not provide a stock set of controls. You will need to build your own or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
+
 Platforms: iOS, react-native-dom
+
+#### filter
+Add video filter
+* **FilterType.NONE (default)** - No Filter
+* **FilterType.INVERT** - CIColorInvert
+* **FilterType.MONOCHROME** - CIColorMonochrome
+* **FilterType.POSTERIZE** - CIColorPosterize
+* **FilterType.FALSE** - CIFalseColor
+* **FilterType.MAXIMUMCOMPONENT** - CIMaximumComponent
+* **FilterType.MINIMUMCOMPONENT** - CIMinimumComponent
+* **FilterType.CHROME** - CIPhotoEffectChrome
+* **FilterType.FADE** - CIPhotoEffectFade
+* **FilterType.INSTANT** - CIPhotoEffectInstant
+* **FilterType.MONO** - CIPhotoEffectMono
+* **FilterType.NOIR** - CIPhotoEffectNoir
+* **FilterType.PROCESS** - CIPhotoEffectProcess
+* **FilterType.TONAL** - CIPhotoEffectTonal
+* **FilterType.TRANSFER** - CIPhotoEffectTransfer
+* **FilterType.SEPIA** - CISepiaTone
+
+For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
+
+Notes: 
+1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
+2. Video filter is currently not supported on HLS playlists.
+3. `filterEnabled` must be set to `true`
+
+Platforms: iOS
+
+#### filterEnabled
+Enable video filter. 
+
+* **false (default)** - Don't enable filter
+* **true** - Enable filter
+
+Platforms: iOS
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
+
+Platforms: iOS
+
+#### fullscreenAutorotate
+If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
 
 Platforms: iOS
 
@@ -381,6 +431,14 @@ headers={{
 
 Platforms: Android ExoPlayer
 
+#### hideShutterView
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+* **false (default)** - Show shutter view 
+* **true** - Hide shutter view
+
+Platforms: Android ExoPlayer
+
 #### id
 Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
 
@@ -398,6 +456,18 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### maxBitRate
+Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
+
+Default: 0. Don't limit the maxBitRate.
+
+Example:
+```
+maxBitRate={2000000} // 2 megabits
+```
+
+Platforms: Android ExoPlayer, iOS
 
 #### muted
 Controls whether the audio is muted
@@ -548,6 +618,7 @@ Sets the media source. You can pass an asset loaded via require or an object wit
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
+
 ##### Asset loaded via require
 
 Example: 
@@ -565,7 +636,7 @@ A number of URI schemes are supported by passing an object with a `uri` attribut
 
 Example:
 ```
-source={ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }
+source={{uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }}
 ```
 
 Platforms: all
@@ -574,7 +645,7 @@ Platforms: all
 
 Example:
 ```
-source={ uri: 'file:///sdcard/Movies/sintel.mp4' }
+source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 ```
 
 Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
@@ -587,7 +658,7 @@ Path to a sound file in your iTunes library. Typically shared from iTunes to you
 
 Example:
 ```
-source={ uri: 'ipod-library:///path/to/music.mp3' }
+source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 ```
 
 Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
@@ -619,6 +690,8 @@ type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * Text
 uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
+
+Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
 
 Example:
 ```
@@ -664,6 +737,7 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
 
 ### Event props
 
@@ -812,6 +886,29 @@ Example:
 
 Platforms: all
 
+#### onSeek
+Callback function that is called when a seek completes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+currentTime | number | The current time after the seek
+seekTime | number | The requested time
+
+Example:
+```
+{
+  currentTime: 100.5
+  seekTime: 100
+}
+```
+
+Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
+
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
 
@@ -873,12 +970,39 @@ this.player.presentFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### save
+`save(): Promise`
+
+Save video to your Photos with current filter prop. Returns promise.
+
+Example:
+```
+let response = await this.save();
+let path = response.uri;
+```
+
+Notes:
+ - Currently only supports highest quality export
+ - Currently only supports MP4 export
+ - Currently only supports exporting to user's cache directory with a generated UUID filename. 
+ - User will need to remove the saved video through their Photos app
+ - Works with cached videos as well. (Checkout video-caching example)
+ - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
+ - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
+ 
+Future: 
+ - Will support multiple qualities through options
+ - Will support more formats in the future through options
+ - Will support custom directory and file name through options
+ 
+Platforms: iOS
+
 #### seek()
 `seek(seconds)`
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
 ```
@@ -901,6 +1025,8 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 ```
 
 Platforms: iOS
+
+
 
 
 ### iOS App Transport Security

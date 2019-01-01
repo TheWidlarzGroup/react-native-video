@@ -38,7 +38,8 @@ public final class ExoPlayerView extends FrameLayout {
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
 
-    private boolean useTextureView = false;
+    private boolean useTextureView = true;
+    private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -106,6 +107,10 @@ public final class ExoPlayerView extends FrameLayout {
         }
     }
 
+    private void updateShutterViewVisibility() {
+        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
+    }
+
     /**
      * Set the {@link SimpleExoPlayer} to use. The {@link SimpleExoPlayer#setTextOutput} and
      * {@link SimpleExoPlayer#setVideoListener} method of the player will be called and previous
@@ -157,8 +162,15 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        this.useTextureView = useTextureView;
-        updateSurfaceView();
+        if (useTextureView != this.useTextureView) {
+            this.useTextureView = useTextureView;
+            updateSurfaceView();
+        }
+    }
+
+    public void setHideShutterView(boolean hideShutterView) {
+        this.hideShutterView = hideShutterView;
+        updateShutterViewVisibility();
     }
 
     private final Runnable measureAndLayout = new Runnable() {

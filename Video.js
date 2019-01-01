@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
+import FilterType from './FilterType';
 import VideoResizeMode from './VideoResizeMode.js';
 
 const styles = StyleSheet.create({
@@ -11,7 +12,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType };
+export { TextTrackType, FilterType };
 
 export default class Video extends Component {
 
@@ -51,6 +52,8 @@ export default class Video extends Component {
   }
 
   seek = (time, tolerance = 100) => {
+    if (isNaN(time)) throw new Error('Specified time is not a number');
+    
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
@@ -70,6 +73,10 @@ export default class Video extends Component {
   dismissFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: false });
   };
+
+  save = async (options?) => {
+    return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
+  }
 
   _assignRoot = (component) => {
     this._root = component;
@@ -282,6 +289,25 @@ export default class Video extends Component {
 }
 
 Video.propTypes = {
+  filter: PropTypes.oneOf([
+      FilterType.NONE,
+      FilterType.INVERT,
+      FilterType.MONOCHROME,
+      FilterType.POSTERIZE,
+      FilterType.FALSE,
+      FilterType.MAXIMUMCOMPONENT,
+      FilterType.MINIMUMCOMPONENT,
+      FilterType.CHROME,
+      FilterType.FADE,
+      FilterType.INSTANT,
+      FilterType.MONO,
+      FilterType.NOIR,
+      FilterType.PROCESS,
+      FilterType.TONAL,
+      FilterType.TRANSFER,
+      FilterType.SEPIA
+  ]),
+  filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
@@ -313,6 +339,7 @@ Video.propTypes = {
     // Opaque type returned by require('./video.mp4')
     PropTypes.number
   ]),
+  maxBitRate: PropTypes.number,
   resizeMode: PropTypes.string,
   poster: PropTypes.string,
   posterResizeMode: Image.propTypes.resizeMode,
@@ -370,9 +397,11 @@ Video.propTypes = {
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
+  fullscreenAutorotate: PropTypes.bool,
   fullscreenOrientation: PropTypes.oneOf(['all','landscape','portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
+  hideShutterView: PropTypes.bool,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,

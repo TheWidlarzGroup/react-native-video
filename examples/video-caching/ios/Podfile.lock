@@ -9,9 +9,9 @@ PODS:
   - glog (0.3.4)
   - React (0.56.0):
     - React/Core (= 0.56.0)
-  - react-native-video/Video (3.1.0):
+  - react-native-video/Video (3.2.2):
     - React
-  - react-native-video/VideoCaching (3.1.0):
+  - react-native-video/VideoCaching (3.2.2):
     - DVAssetLoaderDelegate (~> 0.3.1)
     - React
     - react-native-video/Video
