@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle,ImageBackground} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -266,17 +266,13 @@ export default class Video extends Component {
       ...StyleSheet.absoluteFillObject,
       resizeMode: this.props.posterResizeMode || 'contain',
     };
-
     return (
-      <React.Fragment>
+      <ImageBackground 
+        {...nativeProps} 
+        source={this.props.poster && this.props.showPoster && this.props.poster}
+      >
         <RCTVideo ref={this._assignRoot} {...nativeProps} />
-        {this.props.poster &&
-          this.state.showPoster && (
-            <View style={nativeProps.style}>
-              <Image style={posterStyle} source={{ uri: this.props.poster }} />
-            </View>
-          )}
-      </React.Fragment>
+      </ImageBackground>
     );
   }
 }
