@@ -704,6 +704,24 @@ static int const RCTVideoUnset = -1;
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
                                              object:nil];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemNewAccessLogEntryNotification
+                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleAVPlayerAccess:)
+                                               name:AVPlayerItemNewAccessLogEntryNotification
+                                             object:nil];
+
+}
+
+- (void)handleAVPlayerAccess:(NSNotification *)notification {
+    AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+    AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+    
+    if (self.onBandwidthUpdate) {
+        self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
+    }
 }
 
 - (void)playbackStalled:(NSNotification *)notification

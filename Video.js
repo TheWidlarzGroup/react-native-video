@@ -106,6 +106,12 @@ export default class Video extends Component {
     }
   };
 
+  _onBandwidthUpdate = (event) => {
+    if (this.props.onBandwidthUpdate) {
+      this.props.onBandwidthUpdate(event.nativeEvent);
+    }
+  };  
+
   _onSeek = (event) => {
     if (this.state.showPoster && !this.props.audioOnly) {
       this.setState({showPoster: false});
@@ -247,6 +253,7 @@ export default class Video extends Component {
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
       onVideoBuffer: this._onBuffer,
+      onVideoBandwidthUpdate: this._onBandwidthUpdate,
       onTimedMetadata: this._onTimedMetadata,
       onVideoAudioBecomingNoisy: this._onAudioBecomingNoisy,
       onVideoExternalPlaybackChange: this._onExternalPlaybackChange,
@@ -313,6 +320,7 @@ Video.propTypes = {
   onVideoBuffer: PropTypes.func,
   onVideoError: PropTypes.func,
   onVideoProgress: PropTypes.func,
+  onVideoBandwidthUpdate: PropTypes.func,
   onVideoSeek: PropTypes.func,
   onVideoEnd: PropTypes.func,
   onTimedMetadata: PropTypes.func,
@@ -344,6 +352,13 @@ Video.propTypes = {
       PropTypes.number
     ])
   }),
+  selectedVideoTrack: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ])
+  }),  
   selectedTextTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
@@ -377,6 +392,7 @@ Video.propTypes = {
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
+  reportBandwidth: PropTypes.bool,
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
@@ -391,6 +407,7 @@ Video.propTypes = {
   onBuffer: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
+  onBandwidthUpdate: PropTypes.func,
   onSeek: PropTypes.func,
   onEnd: PropTypes.func,
   onFullscreenPlayerWillPresent: PropTypes.func,

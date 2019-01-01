@@ -45,6 +45,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
+    private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
@@ -52,6 +53,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
 
     @Override
@@ -138,6 +142,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setRepeatModifier(repeat);
     }
 
+    @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
+    public void setSelectedVideoTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedVideoTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedVideoTrack != null) {
+            typeString = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_TYPE)
+                    ? selectedVideoTrack.getString(PROP_SELECTED_VIDEO_TRACK_TYPE) : null;
+            value = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_VALUE)
+                    ? selectedVideoTrack.getDynamic(PROP_SELECTED_VIDEO_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedVideoTrack(typeString, value);
+    }
+
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedAudioTrack) {
@@ -190,6 +208,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)
     public void setProgressUpdateInterval(final ReactExoplayerView videoView, final float progressUpdateInterval) {
         videoView.setProgressUpdateInterval(progressUpdateInterval);
+    }
+
+    @ReactProp(name = PROP_REPORT_BANDWIDTH, defaultBoolean = false)
+    public void setReportBandwidth(final ReactExoplayerView videoView, final boolean reportBandwidth) {
+        videoView.setReportBandwidth(reportBandwidth);
     }
 
     @ReactProp(name = PROP_SEEK)
