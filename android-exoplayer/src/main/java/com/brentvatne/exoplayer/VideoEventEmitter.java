@@ -178,7 +178,7 @@ class VideoEventEmitter {
 
     void bandwidthReport(double bitRateEstimate) {
         WritableMap event = Arguments.createMap();
-        event.putDouble(EVENT_PROP_BITRATE, bitRate);
+        event.putDouble(EVENT_PROP_BITRATE, bitRateEstimate);
         receiveEvent(EVENT_BANDWIDTH, event);
     }    
 
