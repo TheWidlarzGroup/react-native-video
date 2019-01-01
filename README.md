@@ -278,9 +278,11 @@ var styles = StyleSheet.create({
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
+* [reportBandwidth](#reportbandwidth)
 * [resizeMode](#resizemode)
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
+* [selectedVideoTrack](#selectedvideotrack)
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -289,6 +291,7 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onBandwidthUpdate](#onbandwidthupdate)
 * [onEnd](#onend)
 * [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
@@ -542,6 +545,14 @@ Determine whether to repeat the video when the end is reached
 
 Platforms: all
 
+#### reportBandwidth
+Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
+
+* **false (default)** - Generate onBandwidthUpdate events
+* **true** - Don't generate onBandwidthUpdate events
+
+Platforms: Android ExoPlayer
+
 #### resizeMode
 Determines how to resize the video when the frame doesn't match the raw video dimensions.
 * **"none" (default)** - Don't apply resize
@@ -612,6 +623,35 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
 Platforms: Android ExoPlayer, iOS
+
+#### selectedVideoTrack
+Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
+
+```
+selectedVideoTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedVideoTrack={{
+  type: "resolution",
+  value: 480
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"auto" (default) | N/A | Let the player determine which track to play using ABR
+"disabled" | N/A | Turn off video
+"resolution" | number | Play the video track with the height specified, e.g. 480 for the 480p stream
+"index" | number | Play the video track with the index specified as the value, e.g. 0
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, ABR will be used.
+
+Platforms: Android ExoPlayer
 
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
@@ -745,6 +785,26 @@ Platforms: all
 Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker. It's a good idea to pause the media when this happens so the speaker doesn't start blasting sound.
 
 Payload: none
+
+Platforms: Android ExoPlayer, iOS
+
+#### onBandwidthUpdate
+Callback function that is called when the available bandwidth changes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+bitrate | number | The estimated bitrate in bits/sec
+
+Example:
+```
+{
+  bitrate: 1000000
+}
+```
+
+Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
 
 Platforms: Android ExoPlayer, iOS
 
