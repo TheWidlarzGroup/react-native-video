@@ -806,7 +806,7 @@ Example:
 
 Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
 
-Platforms: Android ExoPlayer, iOS
+Platforms: Android ExoPlayer
 
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
