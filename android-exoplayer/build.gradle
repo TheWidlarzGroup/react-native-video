@@ -21,12 +21,6 @@ dependencies {
     implementation('com.google.android.exoplayer:exoplayer:2.9.3') {
         exclude group: 'com.android.support'
     }
-    implementation project(':exoplayer-library-core')
-    implementation project(':exoplayer-library-dash')
-    implementation project(':exoplayer-library-ui')
-    implementation project(':exoplayer-library-smoothstreaming')
-    implementation project(':exoplayer-library-hls')
-    implementation project(':exoplayer-extension-okhttp')
 
     // All support libs must use the same version
     implementation "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
