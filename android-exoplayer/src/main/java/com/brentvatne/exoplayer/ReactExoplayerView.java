@@ -249,7 +249,7 @@ class ReactExoplayerView extends FrameLayout implements
     //BandwidthMeter.EventListener implementation
     @Override
     public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
-        if (mReportBandwidth == true) {
+        if (mReportBandwidth) {
             eventEmitter.bandwidthReport(bitrate);
         }
     }
@@ -566,7 +566,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
         return audioTracks;
     }
-
     private WritableArray getVideoTrackInfo() {
         WritableArray videoTracks = Arguments.createArray();
 
@@ -582,18 +581,13 @@ class ReactExoplayerView extends FrameLayout implements
 
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
-
                 WritableMap videoTrack = Arguments.createMap();
-
-                videoTrack.putString("width", 
-                                    format.width == Format.NO_VALUE ? "" : format.width + "");
-                videoTrack.putString("height", 
-                                    format.height == Format.NO_VALUE ? "" : format.height + "");
-                videoTrack.putString("bitrate", 
-                                    format.bitrate == Format.NO_VALUE ? ""
-                                    : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
-                videoTrack.putString("trackid", format.id == null ? "" : "" + format.id + "");
-
+                videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
+                videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
+                videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+                videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
+                videoTrack.putString("trackId",
+                        format.id == null ? String.valueOf(trackIndex) : format.id);
                 videoTracks.pushMap(videoTrack);
             }
         }
@@ -819,7 +813,6 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSelectedTrack(int trackType, String type, Dynamic value) {
-
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
@@ -865,65 +858,38 @@ class ReactExoplayerView extends FrameLayout implements
             if (value.asInt() < groups.length) {
                 groupIndex = value.asInt();
             }
-        } else if (type.equals("videoHeight")) {
-            groupIndex = C.INDEX_UNSET;
-
-            /*0 is auto mode. Add all tracks of group 0*/
-            if (0 == value.asInt()) {
-                if (groups.length > 0) {
-                    TrackGroup group = groups.get(0);
-
-                    tracks = new int[group.length];
-
-                    groupIndex = 0;
-
-                    for (int j = 0; j < group.length; j++) {
-                        tracks[j] = j;
-                    }
-                }
-            } else {
-                /*Search for the exact video Height*/
-                for (int i = 0; i < groups.length; ++i) {
-                    TrackGroup group = groups.get(i);
-
-                    for (int j = 0; j < group.length; j++) {
-                        Format format = group.getFormat(j);
-
-                        if (format.height == value.asInt()) {
-                            groupIndex = i;
-                            tracks[0] = j;
-                            break;
-                        }
-                    }
-                }
-
-                /*If exact height not found then make it auto. Add all tracks of group 0*/
-                if (groupIndex == C.INDEX_UNSET) {
-                    TrackGroup group = groups.get(0);
-
-                    tracks = new int[group.length];
-
-                    groupIndex = 0;
-
-                    for (int j = 0; j < group.length; j++) {
-                        tracks[j] = j;
+        } else if (type.equals("resolution")) {
+            int height = value.asInt();
+            for (int i = 0; i < groups.length; ++i) { // Search for the exact height
+                TrackGroup group = groups.get(i);
+                for (int j = 0; j < group.length; j++) {
+                    Format format = group.getFormat(j);
+                    if (format.height == value.asInt()) {
+                        groupIndex = i;
+                        tracks[0] = j;
+                        break;
                     }
                 }
             }
-        } else { // default
-            if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18 && groups.length > 0) {
-                // Use system settings if possible
-                CaptioningManager captioningManager
-                        = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-                if (captioningManager != null && captioningManager.isEnabled()) {
-                    groupIndex = getGroupIndexForDefaultLocale(groups);
-                }
-            } else if (rendererIndex == C.TRACK_TYPE_AUDIO) {
+        } else if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
+            // Use system settings if possible
+            CaptioningManager captioningManager
+                    = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+            if (captioningManager != null && captioningManager.isEnabled()) {
                 groupIndex = getGroupIndexForDefaultLocale(groups);
             }
+        } else if (rendererIndex == C.TRACK_TYPE_AUDIO) { // Audio default
+            groupIndex = getGroupIndexForDefaultLocale(groups);
         }
 
-        if (groupIndex == C.INDEX_UNSET) {
+        if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO) { // Video auto
+            TrackGroup group = groups.get(0);
+            tracks = new int[group.length];
+            groupIndex = 0;
+            for (int j = 0; j < group.length; j++) {
+                tracks[j] = j;
+            }
+        } else if (groupIndex == C.INDEX_UNSET) {
             trackSelector.setParameters(disableParameters);
             return;
         }
@@ -938,6 +904,10 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private int getGroupIndexForDefaultLocale(TrackGroupArray groups) {
+        if (groups.length == 0){
+            return C.INDEX_UNSET;
+        }
+
         int groupIndex = 0; // default if no match
         String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
         String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
