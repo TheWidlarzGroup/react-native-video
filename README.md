@@ -260,6 +260,7 @@ var styles = StyleSheet.create({
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [filter](#filter)
+* [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
@@ -277,9 +278,11 @@ var styles = StyleSheet.create({
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
+* [reportBandwidth](#reportbandwidth)
 * [resizeMode](#resizemode)
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
+* [selectedVideoTrack](#selectedvideotrack)
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -288,6 +291,7 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onBandwidthUpdate](#onbandwidthupdate)
 * [onEnd](#onend)
 * [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
@@ -355,6 +359,8 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
+Controls are not available Android because the system does not provide a stock set of controls. You will need to build your own or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
+
 Platforms: iOS, react-native-dom
 
 #### filter
@@ -381,6 +387,15 @@ For more details on these filters refer to the [iOS docs](https://developer.appl
 Notes: 
 1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
 2. Video filter is currently not supported on HLS playlists.
+3. `filterEnabled` must be set to `true`
+
+Platforms: iOS
+
+#### filterEnabled
+Enable video filter. 
+
+* **false (default)** - Don't enable filter
+* **true** - Enable filter
 
 Platforms: iOS
 
@@ -530,6 +545,14 @@ Determine whether to repeat the video when the end is reached
 
 Platforms: all
 
+#### reportBandwidth
+Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
+
+* **false (default)** - Generate onBandwidthUpdate events
+* **true** - Don't generate onBandwidthUpdate events
+
+Platforms: Android ExoPlayer
+
 #### resizeMode
 Determines how to resize the video when the frame doesn't match the raw video dimensions.
 * **"none" (default)** - Don't apply resize
@@ -601,6 +624,35 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: Android ExoPlayer, iOS
 
+#### selectedVideoTrack
+Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
+
+```
+selectedVideoTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedVideoTrack={{
+  type: "resolution",
+  value: 480
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"auto" (default) | N/A | Let the player determine which track to play using ABR
+"disabled" | N/A | Turn off video
+"resolution" | number | Play the video track with the height specified, e.g. 480 for the 480p stream
+"index" | number | Play the video track with the index specified as the value, e.g. 0
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, ABR will be used.
+
+Platforms: Android ExoPlayer
+
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
 
@@ -624,7 +676,7 @@ A number of URI schemes are supported by passing an object with a `uri` attribut
 
 Example:
 ```
-source={ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }
+source={{uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }}
 ```
 
 Platforms: all
@@ -633,7 +685,7 @@ Platforms: all
 
 Example:
 ```
-source={ uri: 'file:///sdcard/Movies/sintel.mp4' }
+source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 ```
 
 Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
@@ -646,7 +698,7 @@ Path to a sound file in your iTunes library. Typically shared from iTunes to you
 
 Example:
 ```
-source={ uri: 'ipod-library:///path/to/music.mp3' }
+source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 ```
 
 Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
@@ -735,6 +787,26 @@ Callback function that is called when the audio is about to become 'noisy' due t
 Payload: none
 
 Platforms: Android ExoPlayer, iOS
+
+#### onBandwidthUpdate
+Callback function that is called when the available bandwidth changes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+bitrate | number | The estimated bitrate in bits/sec
+
+Example:
+```
+{
+  bitrate: 1000000
+}
+```
+
+Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
+
+Platforms: Android ExoPlayer
 
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
