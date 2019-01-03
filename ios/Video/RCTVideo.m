@@ -77,6 +77,7 @@ static int const RCTVideoUnset = -1;
   RCTVideoCache * _videoCache;
 
   /// Rotato
+  BOOL _frameless;
   CMMotionManager *_motionManager;
   FWScaler *_scaler;
 
@@ -106,6 +107,8 @@ static int const RCTVideoUnset = -1;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _videoCache = [RCTVideoCache sharedInstance];
+    _frameless = NO;
+    _scaler = [[FWScaler alloc] init];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -1172,6 +1175,10 @@ static int const RCTVideoUnset = -1;
   _focused = focused;
 }
 
+- (void)setFrameless:(BOOL) frameless {
+  _frameless = frameless;
+}
+
 - (void)setFullscreenOrientation:(NSString *)orientation {
   _fullscreenOrientation = orientation;
   if (_fullscreenPlayerPresented) {
@@ -1208,9 +1215,11 @@ static int const RCTVideoUnset = -1;
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
     /// Rotato
+    if (!_frameless) { return; }
+    
+    self.transform = [self transformWithRotation:0];
     _motionManager = [[CMMotionManager alloc] init];
-    _motionManager.deviceMotionUpdateInterval = 0.01;
-    _scaler = [[FWScaler alloc] init];
+    _motionManager.deviceMotionUpdateInterval = 1/60;
     [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
       if (self == nil) { return; }
       if (motion == nil) { return ;}
@@ -1218,22 +1227,25 @@ static int const RCTVideoUnset = -1;
       if (_playerLayer == nil) { return; }
       if (!_focused) { return; }
       CMAcceleration gravity = motion.gravity;
-
+      
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
-      double scale =
-      [_scaler getScaleWithViewWidth:roundf(self.bounds.size.width)
-                          viewHeight:roundf(self.bounds.size.height)
-                          videoWidth:roundf(_playerItem.asset.naturalSize.width)
-                         videoHeight:roundf(_playerItem.asset.naturalSize.height)
-                                 rad:rotation
-                                 raw:NO];
-
-      CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
-      transform = CGAffineTransformRotate(transform, rotation);
-      self.transform = transform;
+      self.transform = [self transformWithRotation:rotation];
     }];
 
   }
+}
+
+- (CGAffineTransform) transformWithRotation: (CGFloat) rotation {
+  double scale =
+  [_scaler getScaleWithViewWidth:roundf(self.bounds.size.width)
+                      viewHeight:roundf(self.bounds.size.height)
+                      videoWidth:roundf(_playerItem.asset.naturalSize.width)
+                     videoHeight:roundf(_playerItem.asset.naturalSize.height)
+                             rad:rotation
+                             raw:NO];
+  
+  CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
+  return CGAffineTransformRotate(transform, rotation);
 }
 
 - (void)setControls:(BOOL)controls
