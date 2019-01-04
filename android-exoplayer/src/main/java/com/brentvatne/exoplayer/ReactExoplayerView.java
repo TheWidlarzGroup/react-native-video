@@ -889,11 +889,13 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO) { // Video auto
-            TrackGroup group = groups.get(0);
-            tracks = new int[group.length];
-            groupIndex = 0;
-            for (int j = 0; j < group.length; j++) {
-                tracks[j] = j;
+            if (groups.length != 0) {
+                TrackGroup group = groups.get(0);
+                tracks = new int[group.length];
+                groupIndex = 0;
+                for (int j = 0; j < group.length; j++) {
+                    tracks[j] = j;
+                }
             }
         } else if (groupIndex == C.INDEX_UNSET) {
             trackSelector.setParameters(disableParameters);
