@@ -64,6 +64,8 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+//Import PlayerControlView
+import com.google.android.exoplayer2.ui.PlayerControlView;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -96,6 +98,8 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private final VideoEventEmitter eventEmitter;
+    //Create playerControlView instance
+    private PlayerControlView playerControlView;
     
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
@@ -257,6 +261,41 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     // Internal methods
+
+    /**
+     * Toggling the visibility of the player control view 
+     */
+    private void togglePlayerControlVisibility() {
+        if(playerControlView.isVisible()) {
+            playerControlView.setVisibility(INVISIBLE);
+        } else {
+            playerControlView.setVisibility(VISIBLE);
+        }
+    }
+
+    /**
+     * Initialising Player control
+     */
+    private void initialisePlayerControl() {
+        playerControlView = new PlayerControlView(getContext());
+        LayoutParams layoutParams = new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+        playerControlView.setLayoutParams(layoutParams);
+        addView(playerControlView, 1, layoutParams);
+
+        //Setting the player for the playerControlView
+        playerControlView.setPlayer(player);
+
+        //Invoking onClick event for exoplayerView
+        exoPlayerView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePlayerControlVisibility();
+            }
+        });
+    }
+
     private void initializePlayer() {
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
@@ -517,6 +556,10 @@ class ReactExoplayerView extends FrameLayout implements
                 onBuffering(false);
                 startProgressHandler();
                 videoLoaded();
+                //Setting the visibility for the playerControlView
+                if(playerControlView != null) {
+                    playerControlView.setVisibility(VISIBLE);
+                }
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
@@ -1055,5 +1098,17 @@ class ReactExoplayerView extends FrameLayout implements
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
         initializePlayer();
+    }
+
+    /**
+     * Handling controls prop
+     * 
+     * @param controls  value of the controls prop passed from react-native
+     */
+    public void setControls(boolean controls) {
+        if(controls && (exoPlayerView != null)) {
+            //Initialise playerControlView
+            initialisePlayerControl();
+        }
     }
 }
