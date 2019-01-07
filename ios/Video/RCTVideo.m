@@ -7,7 +7,7 @@
 #include <AVFoundation/AVFoundation.h>
 #include <CoreMotion/CoreMotion.h>
 #import <math.h>
-#import "FWScaler.h"
+#import "OvalCalculator.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -78,7 +78,7 @@ static int const RCTVideoUnset = -1;
   /// Rotato
   BOOL _frameless;
   CMMotionManager *_motionManager;
-  FWScaler *_scaler;
+  OvalCalculator *_scaler;
 
 }
 
@@ -107,7 +107,7 @@ static int const RCTVideoUnset = -1;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _videoCache = [RCTVideoCache sharedInstance];
     _frameless = NO;
-    _scaler = [[FWScaler alloc] init];
+    _scaler = [[OvalCalculator alloc] init];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -1231,13 +1231,12 @@ static int const RCTVideoUnset = -1;
 
 - (CGAffineTransform) transformWithRotation: (CGFloat) rotation {
   double scale =
-  [_scaler getScaleWithViewWidth:roundf(self.bounds.size.width)
-                      viewHeight:roundf(self.bounds.size.height)
-                      videoWidth:roundf(_playerItem.asset.naturalSize.width)
-                     videoHeight:roundf(_playerItem.asset.naturalSize.height)
-                             rad:rotation
-                             raw:NO];
-  
+  [_scaler get_scaleWithDouble:self.bounds.size.width
+                    withDouble:self.bounds.size.height
+                    withDouble:_playerItem.asset.naturalSize.width
+                    withDouble:_playerItem.asset.naturalSize.height
+                    withDouble:rotation];
+
   CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
   return CGAffineTransformRotate(transform, rotation);
 }
