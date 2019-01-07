@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -14,6 +15,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +55,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+
+    private ArrayList<ReactExoplayerView> view_list = new ArrayList<ReactExoplayerView>();
 
     @Override
     public String getName() {
@@ -172,14 +176,56 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setTextTracks(textTracks);
     }
 
+    public void setRotation(float degree)
+    {
+        double rad = degree / 180.0 * Math.PI;
+        for(ReactExoplayerView view : view_list) {
+            if (!view.isTextureView())
+                continue;
+
+            float scale = (float)view.ovalCalculator.get_scale(view.getWidth(), view.getHeight(), view.getVideoWidth(), view.getVideoHeight(), rad);
+
+            //Log.v("Rotato", "view id = " + view.getId() + ", (" + view.getWidth() + "x" + view.getHeight() + ") video (" +view.getVideoWidth() + "x" + view.getVideoHeight() + ") " + degree+ ", " + scale);
+
+            view.setScaleX(scale);
+            view.setScaleY(scale);
+            view.setRotation(degree);
+
+            if (view.ovalCalculator.is_shift_on_landscape())
+            {
+                view.setTranslationX((float) view.ovalCalculator.get_landscape_offset_x(rad));
+                view.setTranslationY((float) view.ovalCalculator.get_landscape_offset_y(rad));
+            }
+        }
+    }
+
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
+        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + ")");
+        if (!paused)
+        {
+            for(ReactExoplayerView view : view_list)
+                if (view.getId() == videoView.getId())
+                    return;
+            view_list.add(videoView);
+        }
+        else
+            view_list.remove(videoView);
     }
 
     @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
     public void setFocused(final ReactExoplayerView videoView, final boolean focused) {
-        //
+        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + ")");
+        if (focused)
+        {
+            for(ReactExoplayerView view : view_list)
+                if (view.getId() == videoView.getId())
+                    return;
+            view_list.add(videoView);
+        }
+        else
+            view_list.remove(videoView);
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
