@@ -140,6 +140,9 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
+    public OvalCalculator ovalCalculator = new OvalCalculator();  // rotato
+    private int videoWidth = -1, videoHeight = -1;
+
     private final Handler progressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -191,9 +194,17 @@ class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
+        setUseTextureView(true);  // rotato
+        useTextureView = true;    // rotato
+
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
+    }
+
+    public boolean isTextureView()
+    {
+        return useTextureView;
     }
 
     @Override
@@ -520,11 +531,22 @@ class ReactExoplayerView extends FrameLayout implements
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
-            int width = videoFormat != null ? videoFormat.width : 0;
-            int height = videoFormat != null ? videoFormat.height : 0;
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
+            videoWidth = videoFormat != null ? videoFormat.width : 0;
+            videoHeight = videoFormat != null ? videoFormat.height : 0;
+
+            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), videoWidth, videoHeight,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
+    }
+
+    public int getVideoWidth()
+    {
+        return (!loadVideoStarted && videoWidth != 0) ? videoWidth : -1;
+    }
+
+    public int getVideoHeight()
+    {
+        return (!loadVideoStarted && videoHeight != 0) ? videoHeight : -1;
     }
 
     private WritableArray getAudioTrackInfo() {
@@ -560,13 +582,13 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id != null ? format.id : "");
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language != null ? format.language : "");
-             textTracks.pushMap(textTrack);
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            textTracks.pushMap(textTrack);
         }
         return textTracks;
     }
@@ -901,12 +923,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
-      rate = newRate;
+        rate = newRate;
 
-      if (player != null) {
-          PlaybackParameters params = new PlaybackParameters(rate, 1f);
-          player.setPlaybackParameters(params);
-      }
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
+        }
     }
 
 
