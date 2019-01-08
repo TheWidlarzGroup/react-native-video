@@ -186,7 +186,7 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
 }
 
 - (double)get_landscase_offsetWithDouble:(double)rad {
-  return abs(sin(rad)) * landscape_offset_percentage_ * view_height_;
+  return fabs(sin(rad)) * landscape_offset_percentage_ * view_height_;
 }
 
 - (double)get_landscape_offset_xWithDouble:(double)rad {
@@ -232,16 +232,16 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
 - (double)get_scale_rawWithDouble:(double)rad {
   if (slow_start_) {
     double r = OvalCalculator_regularize_radWithDouble_(self, rad);
-    if (abs(r) <= slow_start_rad_ || abs(r) >= M_PI - slow_start_rad_) return [self get_scale_raw_WithDouble:slow_start_percentage_ * slow_start_rad_];
-    else if (slow_start_end_rad_ <= abs(r) && abs(r) <= M_PI - slow_start_end_rad_) return [self get_scale_raw_WithDouble:r];
+    if (fabs(r) <= slow_start_rad_ || fabs(r) >= M_PI - slow_start_rad_) return [self get_scale_raw_WithDouble:slow_start_percentage_ * slow_start_rad_];
+    else if (slow_start_end_rad_ <= fabs(r) && fabs(r) <= M_PI - slow_start_end_rad_) return [self get_scale_raw_WithDouble:r];
     else {
       double scale_0 = [self get_scale_raw_WithDouble:slow_start_percentage_ * slow_start_rad_];
       double scale_r = [self get_scale_raw_WithDouble:r];
-      if (abs(r) < slow_start_end_rad_) {
-        return scale_0 * (slow_start_end_rad_ - abs(r)) / (slow_start_end_rad_ - slow_start_rad_) + scale_r * (abs(r) - slow_start_rad_) / (slow_start_end_rad_ - slow_start_rad_);
+      if (fabs(r) < slow_start_end_rad_) {
+        return scale_0 * (slow_start_end_rad_ - fabs(r)) / (slow_start_end_rad_ - slow_start_rad_) + scale_r * (fabs(r) - slow_start_rad_) / (slow_start_end_rad_ - slow_start_rad_);
       }
       else {
-        return scale_0 * (slow_start_end_rad_ - M_PI + abs(r)) / (slow_start_end_rad_ - slow_start_rad_) + scale_r * (M_PI - abs(r) - slow_start_rad_) / (slow_start_end_rad_ - slow_start_rad_);
+        return scale_0 * (slow_start_end_rad_ - M_PI + fabs(r)) / (slow_start_end_rad_ - slow_start_rad_) + scale_r * (M_PI - fabs(r) - slow_start_rad_) / (slow_start_end_rad_ - slow_start_rad_);
       }
     }
   }
@@ -339,16 +339,16 @@ float OvalCalculator_rescale_avoid_landscale_dropWithDouble_withDouble_withDoubl
   rad = OvalCalculator_regularize_radWithDouble_(self, rad);
   if (self->asd_max_scale_ == -1 || scale_ > self->asd_max_scale_) {
     self->asd_max_scale_ = scale_;
-    rad = abs(rad);
+    rad = fabs(rad);
     self->asd_max_rad_ = (rad > 0.5 * M_PI) ? M_PI - rad : rad;
   }
   else if (scale_ == self->asd_max_scale_) {
-    rad = abs(rad);
+    rad = fabs(rad);
     rad = (rad > 0.5 * M_PI) ? M_PI - rad : rad;
     if ((video_width < video_height && rad < self->asd_max_rad_) || (video_width > video_height && rad > self->asd_max_rad_)) rad = self->asd_max_rad_;
   }
   else if (scale_ < self->asd_max_scale_) {
-    rad = abs(rad);
+    rad = fabs(rad);
     rad = (rad > 0.5 * M_PI) ? M_PI - rad : rad;
     if ((video_width < video_height && rad > self->asd_max_rad_) || (video_width > video_height && rad < self->asd_max_rad_)) scale_ = self->asd_max_scale_;
   }
