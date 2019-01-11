@@ -1135,7 +1135,7 @@ class ReactExoplayerView extends FrameLayout implements
             case "playready":
                 this.drmUUID = C.PLAYREADY_UUID;
                 break;
-            case "cenc":
+            case "clearkey":
                 this.drmUUID = C.CLEARKEY_UUID;
                 break;
             default:
