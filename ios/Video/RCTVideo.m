@@ -1230,13 +1230,16 @@ static int const RCTVideoUnset = -1;
 }
 
 - (CGAffineTransform) transformWithRotation: (CGFloat) rotation {
+  double videoWidth = _playerItem.asset.naturalSize.width;
+  double videoHeight = _playerItem.asset.naturalSize.height;
+  
+  [_scaler set_fit];
   double scale =
   [_scaler get_scaleWithDouble:self.bounds.size.width
                     withDouble:self.bounds.size.height
-                    withDouble:_playerItem.asset.naturalSize.width
-                    withDouble:_playerItem.asset.naturalSize.height
+                    withDouble:videoWidth
+                    withDouble:videoHeight
                     withDouble:rotation];
-
   CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
   return CGAffineTransformRotate(transform, rotation);
 }
