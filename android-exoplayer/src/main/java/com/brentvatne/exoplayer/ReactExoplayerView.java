@@ -383,7 +383,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void startPlayback() {
         if (player != null) {
-            debug("Player state for " + getId() + " = " + player.getPlaybackState());
             switch (player.getPlaybackState()) {
 	    case ExoPlayer.STATE_IDLE:
 		initializePlayer();
