@@ -1,5 +1,4 @@
 package com.brentvatne.exoplayer;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -421,7 +420,12 @@ class ReactExoplayerView extends FrameLayout implements
                     ReactExoplayerView.this.wait(3000);
                     if(player == null) return;
                     if (player != null && (player.getPlaybackState() == ExoPlayer.STATE_IDLE || player.getPlaybackState() == ExoPlayer.STATE_BUFFERING)) {
-                        resetDataSourceFactory();
+                        ReactExoplayerView.this.post(new Runnable() {
+                            @Override
+				public void run() {
+                                resetDataSourceFactory();
+                            }
+			    });
                     }
                 }catch(InterruptedException ie){
 
@@ -433,12 +437,10 @@ class ReactExoplayerView extends FrameLayout implements
     private void resetDataSourceFactory() {
         DataSourceUtil.setDefaultDataSourceFactory(null);
         this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
-        post(new Runnable() {
-            @Override
-		public void run() {
-                reloadSource();
-            }
-	    });
+
+
+        reloadSource();
+
     }
 
 
