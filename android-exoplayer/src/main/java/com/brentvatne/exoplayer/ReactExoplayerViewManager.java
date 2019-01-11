@@ -124,7 +124,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     Map<String, String> drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? toStringMap(drm.getString(PROP_SRC_DRM_HEADERS)) : null;
                     videoView.setDrmName(drmType);
                     videoView.setDrmLicenseUrl(drmLicenseServer);
-                    videoView.setDrmLicenseHeader(drmHeaders)
+                    videoView.setDrmLicenseHeader(drmHeaders);
                 }
             }
         } else {
@@ -288,34 +288,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
-        }
-    }
-    
-    @ReactProp(name = PROP_DRM_LICENSE_URL)
-    public void setDrmUrl(final ReactExoplayerView videoView, @Nullable String licenseUrl){
-        Log.d("setDrmUrl", licenseUrl);
-        videoView.setDrmLicenseUrl(licenseUrl);
-    }
-
-    @ReactProp(name = PROP_DRM_LICENSE_HEADER)
-    public void setDrmHeader(final ReactExoplayerView videoView, @Nullable ReadableMap headers){
-        ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-        ReadableMapKeySetIterator itr = headers.keySetIterator();
-        while (itr.hasNextKey()) {
-            String key = itr.nextKey();
-            drmKeyRequestPropertiesList.add(key);
-            drmKeyRequestPropertiesList.add(headers.getString(key));
-        }
-        videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
-    }
-
-    @ReactProp(name = PROP_DRM_NAME)
-    public void setDrmName(final ReactExoplayerView videoView, final String drmName){
-        try {
-            videoView.setDrmName(drmName);
-        }
-        catch (Exception ex){
-            Log.e("DRM Info", ex.toString());
         }
     }
 
