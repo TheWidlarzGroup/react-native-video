@@ -385,7 +385,9 @@ class ReactExoplayerView extends FrameLayout implements
             switch (player.getPlaybackState()) {
 	    case ExoPlayer.STATE_IDLE:
 		initializePlayer();
-		watchDogRunnable.start();
+		if(watchDogRunnable.getState() == Thread.State.NEW) {
+		    watchDogRunnable.start();
+		}
 		break;
 	    case ExoPlayer.STATE_ENDED:
 		initializePlayer();
@@ -394,7 +396,9 @@ class ReactExoplayerView extends FrameLayout implements
 		if (!player.getPlayWhenReady()) {
 		    setPlayWhenReady(true);
 		}
-		watchDogRunnable.start();
+		if(watchDogRunnable.getState() == Thread.State.NEW) {
+		    watchDogRunnable.start();
+		}
 		break;
 	    case ExoPlayer.STATE_READY:
 		if (!player.getPlayWhenReady()) {
@@ -418,15 +422,14 @@ class ReactExoplayerView extends FrameLayout implements
             synchronized (ReactExoplayerView.this) {
 		try {
                     ReactExoplayerView.this.wait(3000);
+
                     if(player == null) return;
-                    if (player != null && (player.getPlaybackState() == ExoPlayer.STATE_IDLE || player.getPlaybackState() == ExoPlayer.STATE_BUFFERING)) {
-                        ReactExoplayerView.this.post(new Runnable() {
+		    ReactExoplayerView.this.post(new Runnable() {
                             @Override
 				public void run() {
                                 resetDataSourceFactory();
                             }
-			    });
-                    }
+                        });
                 }catch(InterruptedException ie){
 
                 }
@@ -435,14 +438,13 @@ class ReactExoplayerView extends FrameLayout implements
 	};
 
     private void resetDataSourceFactory() {
-        DataSourceUtil.setDefaultDataSourceFactory(null);
-        this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
+        if (player != null && player.getPlayWhenReady() && (player.getPlaybackState() == ExoPlayer.STATE_IDLE || player.getPlaybackState() == ExoPlayer.STATE_BUFFERING)){
+            DataSourceUtil.setDefaultDataSourceFactory(null);
+            this.mediaDataSourceFactory=DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,BANDWIDTH_METER,this.requestHeaders);
 
-
-        reloadSource();
-
+            reloadSource();
+        }
     }
-
 
     private void pausePlayback() {
         if (player != null) {
