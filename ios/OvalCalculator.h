@@ -39,6 +39,8 @@
 
 - (double)get_video_height;
 
+- (int)get_video_stretch_mode;
+
 - (double)get_video_width;
 
 - (double)get_view_height;
@@ -53,6 +55,10 @@
                        withDouble:(double)video_height;
 
 - (void)set_avoid_scale_drop_landscapeWithBoolean:(BOOL)flag;
+
+- (void)set_fill;
+
+- (void)set_fit;
 
 - (void)set_initWithBoolean:(BOOL)init_;
 
