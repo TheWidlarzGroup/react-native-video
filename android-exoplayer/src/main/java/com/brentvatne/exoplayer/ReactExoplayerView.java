@@ -383,21 +383,29 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void startPlayback() {
         if (player != null) {
+            debug("Player state for " + getId() + " = " + player.getPlaybackState());
             switch (player.getPlaybackState()) {
-                case ExoPlayer.STATE_IDLE:
-                case ExoPlayer.STATE_ENDED:
-                    initializePlayer();
-                    break;
-                case ExoPlayer.STATE_BUFFERING:
-                case ExoPlayer.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
-                        setPlayWhenReady(true);
-                    }
-                    break;
-                default:
-                    break;
+	    case ExoPlayer.STATE_IDLE:
+		initializePlayer();
+		watchDogRunnable.start();
+		break;
+	    case ExoPlayer.STATE_ENDED:
+		initializePlayer();
+		break;
+	    case ExoPlayer.STATE_BUFFERING:
+		if (!player.getPlayWhenReady()) {
+		    setPlayWhenReady(true);
+		}
+		watchDogRunnable.start();
+		break;
+	    case ExoPlayer.STATE_READY:
+		if (!player.getPlayWhenReady()) {
+		    setPlayWhenReady(true);
+		}
+		break;
+	    default:
+		break;
             }
-
         } else {
             initializePlayer();
         }
@@ -405,6 +413,35 @@ class ReactExoplayerView extends FrameLayout implements
             setKeepScreenOn(true);
         }
     }
+
+    private Thread watchDogRunnable = new Thread() {
+        @Override
+	    public void run() {
+            synchronized (ReactExoplayerView.this) {
+		try {
+                    ReactExoplayerView.this.wait(3000);
+                    if(player == null) return;
+                    if (player != null && (player.getPlaybackState() == ExoPlayer.STATE_IDLE || player.getPlaybackState() == ExoPlayer.STATE_BUFFERING)) {
+                        resetDataSourceFactory();
+                    }
+                }catch(InterruptedException ie){
+
+                }
+            }
+        }
+	};
+
+    private void resetDataSourceFactory() {
+        DataSourceUtil.setDefaultDataSourceFactory(null);
+        this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
+        post(new Runnable() {
+            @Override
+		public void run() {
+                reloadSource();
+            }
+	    });
+    }
+
 
     private void pausePlayback() {
         if (player != null) {
