@@ -29,6 +29,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
+    private static final String PROP_SRC_DRM = "drm";
+    private static final String PROP_SRC_DRM_TYPE = "type";
+    private static final String PROP_SRC_DRM_LICENSESERVER = "licenseServer";
+    private static final String PROP_SRC_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -60,9 +64,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
-    private static final String PROP_DRM_LICENSE_URL = "drmUrl";
-    private static final String PROP_DRM_LICENSE_HEADER = "drmHeader";
-    private static final String PROP_DRM_NAME = "drmName";
 
     @Override
     public String getName() {
@@ -105,6 +106,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+        ReadableMap drm = src.hasKey(PROP_SRC_DRM) ? src.getMap(PROP_SRC_DRM) : null;
 
 
         if (TextUtils.isEmpty(uriString)) {
@@ -116,6 +118,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
             if (srcUri != null) {
                 videoView.setSrc(srcUri, extension, headers);
+                if (drm != null && drm.hasKey(PROP_SRC_DRM_TYPE)) {
+                    String drmType = drm.hasKey(PROP_SRC_DRM_TYPE) ? drm.getString(PROP_SRC_DRM_TYPE) : null;
+                    String drmLicenseServer = drm.hasKey(PROP_SRC_DRM_LICENSESERVER) ? drm.getString(PROP_SRC_DRM_LICENSESERVER) : null;
+                    Map<String, String> drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? toStringMap(drm.getString(PROP_SRC_DRM_HEADERS)) : null;
+                    videoView.setDrmName(drmType);
+                    videoView.setDrmLicenseUrl(drmLicenseServer);
+                    videoView.setDrmLicenseHeader(drmHeaders)
+                }
             }
         } else {
             int identifier = context.getResources().getIdentifier(
