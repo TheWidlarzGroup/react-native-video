@@ -183,6 +183,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             if (!view.isTextureView())
                 continue;
 
+            if (view.ovalCalculator.get_video_width() >= view.ovalCalculator.get_video_height() && view.ovalCalculator.get_video_stretch_mode() == 0)
+                view.ovalCalculator.set_fit();
+            else if (view.ovalCalculator.get_video_width() < view.ovalCalculator.get_video_height() && view.ovalCalculator.get_video_stretch_mode() == 1)
+                view.ovalCalculator.set_fill();
+
             float scale = (float)view.ovalCalculator.get_scale(view.getWidth(), view.getHeight(), view.getVideoWidth(), view.getVideoHeight(), rad);
 
             //Log.v("Rotato", "view id = " + view.getId() + ", (" + view.getWidth() + "x" + view.getHeight() + ") video (" +view.getVideoWidth() + "x" + view.getVideoHeight() + ") " + degree+ ", " + scale);
@@ -199,25 +204,38 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
     }
 
+    public void changeOffset(float offset_change)
+    {
+        for(ReactExoplayerView view : view_list) {
+            if (!view.isTextureView())
+                continue;
+            double offset = view.ovalCalculator.get_landscape_offset_percentage();
+            view.ovalCalculator.set_landscape_offset(offset + offset_change);
+        }
+    }
+
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
-        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + ")");
+        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), paused = " + (paused ? "true" : "false"));
         if (!paused)
         {
             for(ReactExoplayerView view : view_list)
                 if (view.getId() == videoView.getId())
                     return;
             view_list.add(videoView);
+            Log.v("RotatoView", "view id = " + videoView.getId() + " added, " + view_list.size() + " view(s) now");
         }
-        else
+        else {
             view_list.remove(videoView);
+            Log.v("RotatoView", "view id = " + videoView.getId() + " removed, " + view_list.size() + " view(s) left");
+        }
     }
 
     @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
     public void setFocused(final ReactExoplayerView videoView, final boolean focused) {
-        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + ")");
-        if (focused)
+        //Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), focused = " + (focused ? "true" : "false"));
+        /*if (focused)
         {
             for(ReactExoplayerView view : view_list)
                 if (view.getId() == videoView.getId())
@@ -225,7 +243,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             view_list.add(videoView);
         }
         else
-            view_list.remove(videoView);
+            view_list.remove(videoView);*/
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)

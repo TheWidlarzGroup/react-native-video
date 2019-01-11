@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import android.util.Log;
+
 public class OvalCalculator {
 
     //  This class calculates corresponding scale, given view/video dimension
@@ -9,6 +11,8 @@ public class OvalCalculator {
     //
     //  Usage: on handling sensor data changed, the changed 'degree' (for instance, -180 to 180)*
     //  or 'rad' (-PI to PI)* is calculated,
+    //
+    //  view.oValCalculator.set_fit() or set_fill(), depending on how your view stretch video
     //
     //  float scale = (float)view.ovalCalculator.get_scale(view.getWidth(), view.getHeight(), view.getVideoWidth(), view.getVideoHeight(), rad);
     //
@@ -30,10 +34,12 @@ public class OvalCalculator {
 
     //private double min_scale = -1, max_scale = -1, zoom_factor = -1;
 
-    private double landscape_offset_percentage = 0f;
+    private int fill_mode = 0; // 0: preserve_ratio_fill, 1: preserve_ratio_fit
+    private double landscape_offset_percentage = 0;
 
     private double trim_percentage = 0;
-    private double trim_videoWidth = 3, trim_videoHeight = 4; // default trim is on
+    //private double trim_videoWidth = 3, trim_videoHeight = 4; // default trim is on
+    private double trim_videoWidth = 0, trim_videoHeight = 0;
 
     private boolean reduceZoomFactor = true;
     private double reduceZoomFactor_viewWidth = 9, reduceZoomFactor_viewHeight = 16;
@@ -42,10 +48,17 @@ public class OvalCalculator {
     private double asd_max_rad = -1, asd_max_scale = -1;
     private double asd_view_width = -1, asd_view_height = -1, asd_video_width = -1, asd_video_height = -1;
 
-    private boolean slow_start = false;
-    private double slow_start_percentage = 0.50;
-    private double slow_start_rad = 16.6 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
-    private double slow_start_end_rad = 55.0 * Math.PI / 180.0;  //
+    private boolean slow_start_landscape = true;
+    //private double slow_start_percentage = 1;
+    private double slow_start_rad_landscape = 9.0 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
+
+    private boolean slow_start_portrait = true;
+    //private double slow_start_percentage = 1;
+    private double slow_start_rad_portrait = 18.0 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
+    //private double slow_start_end_rad = 57.0 * Math.PI / 180.0;  //
+    //private double slow_start_percentage = 0.5;
+    //private double slow_start_rad = 16.6 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
+    //private double slow_start_end_rad = 55.0 * Math.PI / 180.0;  //
 
     private boolean init = false;
 
@@ -171,7 +184,18 @@ public class OvalCalculator {
 
     public double get_landscase_offset(double rad)
     {
-        return Math.abs(Math.sin(rad)) * landscape_offset_percentage * view_height;
+        if (video_width >= video_height)
+            return 0;
+        if (!slow_start_portrait)
+            return Math.abs(Math.sin(rad)) * landscape_offset_percentage * view_height;
+
+        double r = regularize_rad(rad);
+        if (Math.abs(r) <= slow_start_rad_portrait || Math.abs(r) >= Math.PI - slow_start_rad_portrait)   // give a constant scale within the given (slow start) rad
+            return 0;
+        else if (Math.abs(r) <= 0.5 * Math.PI)
+            return Math.abs(Math.sin((Math.abs(r) -  slow_start_rad_portrait) * 0.5 * Math.PI / (0.5 * Math.PI - slow_start_rad_portrait))) * landscape_offset_percentage * view_height;
+        else
+            return Math.abs(Math.sin(Math.PI - ((Math.PI - Math.abs(r) - slow_start_rad_portrait) * 0.5 * Math.PI / (0.5 * Math.PI - slow_start_rad_portrait)))) * landscape_offset_percentage * view_height;
     }
 
     public double get_landscape_offset_x(double rad)
@@ -220,11 +244,28 @@ public class OvalCalculator {
         return get_scale(rad);
     }
 
+    public void set_fill()
+    {
+        fill_mode = 0;
+    }
+
+    public void set_fit()
+    {
+        fill_mode = 1;
+    }
+
+    public int get_video_stretch_mode()
+    {
+        return fill_mode;
+    }
+
     public double get_scale(double rad)
     {
         double scale_x = view_width / video_width;
         double scale_y = view_height / video_height;
         double original_video_scale = scale_x > scale_y ? scale_x : scale_y;  // the original scale of the video
+        if (fill_mode == 1)
+            original_video_scale = scale_x > scale_y ? scale_y : scale_x;
 
         double raw_scale = get_scale_raw(rad);
 
@@ -234,27 +275,19 @@ public class OvalCalculator {
 
     public double get_scale_raw(double rad)
     {
-        if (slow_start)
-        {
+        if (slow_start_portrait && video_width < video_height) {
             double r = regularize_rad(rad);
-            if (Math.abs(r) <= slow_start_rad || Math.abs(r) >= Math.PI - slow_start_rad)   // give a constant scale within the given (slow start) rad
-                return get_scale_raw_(slow_start_percentage * slow_start_rad);
-            else if (slow_start_end_rad <= Math.abs(r) && Math.abs(r) <= Math.PI - slow_start_end_rad)  // after rad > slow_start_end_rad, return the same scale
+            if (Math.abs(r) <= slow_start_rad_portrait || Math.abs(r) >= Math.PI - slow_start_rad_portrait)   // give a constant scale within the given (slow start) rad
+                return get_scale_raw_(slow_start_rad_portrait);
+            else
                 return get_scale_raw_(r);
-            else  // linear interpolation
-            {
-                double scale_0 = get_scale_raw_(slow_start_percentage * slow_start_rad), scale_r = get_scale_raw_(r);
-                if (Math.abs(r) < slow_start_end_rad)
-                {
-                    return scale_0 * (slow_start_end_rad - Math.abs(r)) / (slow_start_end_rad - slow_start_rad)
-                            + scale_r * (Math.abs(r) - slow_start_rad) / (slow_start_end_rad - slow_start_rad);
-                }
-                else
-                {
-                    return scale_0 * (slow_start_end_rad - Math.PI + Math.abs(r)) / (slow_start_end_rad - slow_start_rad)
-                            + scale_r * (Math.PI - Math.abs(r) - slow_start_rad) / (slow_start_end_rad - slow_start_rad);
-                }
-            }
+        }
+        else if (slow_start_landscape && video_width > video_height) {
+            double r = regularize_rad(rad + 0.5 * Math.PI);
+            if (Math.abs(r) <= slow_start_rad_landscape || Math.abs(r) >= Math.PI - slow_start_rad_landscape)   // give a constant scale within the given (slow start) rad
+                return get_scale_raw_(slow_start_rad_landscape + 0.5 * Math.PI);
+            else
+                return get_scale_raw_(regularize_rad(rad));
         }
         else
             return get_scale_raw_(rad);
@@ -275,15 +308,6 @@ public class OvalCalculator {
             video_width = get_trimmed_video_width();
             video_height = get_trimmed_video_height();
         }
-
-        /*if (slow_start)  // older algorithm
-        {
-            double r = regularize_rad(rad);
-            if (Math.abs(r) < slow_start_rad)
-                rad = r > 0 ? slow_start_rad : -slow_start_rad;
-            else if (Math.abs(r) > Math.PI - slow_start_rad)
-                rad = r > 0 ? Math.PI - slow_start_rad : -Math.PI + slow_start_rad;
-        }*/
 
         // a = half_video_width, b = half_video_height           // this is the equation of eclipse
         // x = scale * (a * cos(theta) - b * sin(theta)
@@ -337,7 +361,7 @@ public class OvalCalculator {
 
     private double regularize_rad(double rad) // make sure rad is between -PI and PI
     {
-        while (rad <= Math.PI)
+        while (rad <= -Math.PI)
             rad += 2.0 * Math.PI;
         while (rad > Math.PI)
             rad -= 2.0 * Math.PI;
