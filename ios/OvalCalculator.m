@@ -68,6 +68,35 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
 
 @implementation OvalCalculator
 
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self) {
+    self->fill_mode_ = 0;
+    self->landscape_offset_percentage_ = 0;
+    self->trim_percentage_ = 0;
+    self->trim_videoWidth_ = 0;
+    self->trim_videoHeight_ = 0;
+    self->reduceZoomFactor_ = true;
+    self->reduceZoomFactor_viewWidth_ = 9;
+    self->reduceZoomFactor_viewHeight_ = 16;
+    self->avoidScaleDropLandscape_ = true;
+    self->asd_max_rad_ = -1;
+    self->asd_max_scale_ = -1;
+    self->asd_view_width_ = -1;
+    self->asd_view_height_ = -1;
+    self->asd_video_width_ = -1;
+    self->asd_video_height_ = -1;
+    self->slow_start_landscape_ = true;
+    self->slow_start_rad_landscape_ = 9.0 * M_PI / 180.0;
+    self->slow_start_portrait_ = true;
+    self->slow_start_rad_portrait_ = 18.0 * M_PI / 180.0;
+    self->init__ = false;
+  }
+  return self;
+}
+
 - (BOOL)is_init {
   return init__;
 }
@@ -232,8 +261,12 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
 - (double)get_scale_rawWithDouble:(double)rad {
   if (slow_start_portrait_ && video_width_ < video_height_) {
     double r = OvalCalculator_regularize_radWithDouble_(self, rad);
-    if (fabs(r) <= slow_start_rad_portrait_ || fabs(r) >= M_PI - slow_start_rad_portrait_) return [self get_scale_raw_WithDouble:slow_start_rad_portrait_];
-    else return [self get_scale_raw_WithDouble:r];
+    if (fabs(r) <= slow_start_rad_portrait_ || fabs(r) >= M_PI - slow_start_rad_portrait_) {
+      return [self get_scale_raw_WithDouble:slow_start_rad_portrait_];}
+    else {
+      return [self get_scale_raw_WithDouble:r];
+      
+    }
   }
   else if (slow_start_landscape_ && video_width_ > video_height_) {
     double r = OvalCalculator_regularize_radWithDouble_(self, rad + 0.5 * M_PI);
@@ -292,28 +325,6 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
 
 @end
 
-void OvalCalculator_init(OvalCalculator *self) {
-  self->fill_mode_ = 0;
-  self->landscape_offset_percentage_ = 0;
-  self->trim_percentage_ = 0;
-  self->trim_videoWidth_ = 0;
-  self->trim_videoHeight_ = 0;
-  self->reduceZoomFactor_ = true;
-  self->reduceZoomFactor_viewWidth_ = 9;
-  self->reduceZoomFactor_viewHeight_ = 16;
-  self->avoidScaleDropLandscape_ = true;
-  self->asd_max_rad_ = -1;
-  self->asd_max_scale_ = -1;
-  self->asd_view_width_ = -1;
-  self->asd_view_height_ = -1;
-  self->asd_video_width_ = -1;
-  self->asd_video_height_ = -1;
-  self->slow_start_landscape_ = true;
-  self->slow_start_rad_landscape_ = 9.0 * M_PI / 180.0;
-  self->slow_start_portrait_ = true;
-  self->slow_start_rad_portrait_ = 18.0 * M_PI / 180.0;
-  self->init__ = false;
-}
 
 
 BOOL OvalCalculator_check_invalid_init(OvalCalculator *self) {
