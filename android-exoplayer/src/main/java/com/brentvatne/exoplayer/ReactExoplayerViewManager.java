@@ -71,6 +71,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @Override
     public void onDropViewInstance(ReactExoplayerView view) {
         view.cleanUpResources();
+	view_list.remove(view);
     }
 
     @Override
@@ -218,18 +219,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
         Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), paused = " + (paused ? "true" : "false"));
-        if (!paused)
-        {
+        /*if (!paused)
+	  {*/
             for(ReactExoplayerView view : view_list)
                 if (view.getId() == videoView.getId())
                     return;
             view_list.add(videoView);
-            Log.v("RotatoView", "view id = " + videoView.getId() + " added, " + view_list.size() + " view(s) now");
-        }
-        else {
+	    // }
+	/*        else {
             view_list.remove(videoView);
             Log.v("RotatoView", "view id = " + videoView.getId() + " removed, " + view_list.size() + " view(s) left");
-        }
+	    }*/
     }
 
     @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
