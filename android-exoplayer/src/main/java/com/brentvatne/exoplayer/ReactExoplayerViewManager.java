@@ -121,10 +121,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 if (drm != null && drm.hasKey(PROP_SRC_DRM_TYPE)) {
                     String drmType = drm.hasKey(PROP_SRC_DRM_TYPE) ? drm.getString(PROP_SRC_DRM_TYPE) : null;
                     String drmLicenseServer = drm.hasKey(PROP_SRC_DRM_LICENSESERVER) ? drm.getString(PROP_SRC_DRM_LICENSESERVER) : null;
-                    Map<String, String> drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? toStringMap(drm.getMap(PROP_SRC_DRM_HEADERS)) : null;
+                    ReadableMap drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? drm.getMap(PROP_SRC_DRM_HEADERS) : null;
                     videoView.setDrmName(drmType);
                     videoView.setDrmLicenseUrl(drmLicenseServer);
-                    videoView.setDrmLicenseHeader(drmHeaders);
+                    if (drmHeaders != null) {
+                        ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
+                        ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
+                        while (itr.hasNextKey()) {
+                            String key = itr.nextKey();
+                            drmKeyRequestPropertiesList.add(key);
+                            drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
+                        }
+                        videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
+                    }
                 }
             }
         } else {
