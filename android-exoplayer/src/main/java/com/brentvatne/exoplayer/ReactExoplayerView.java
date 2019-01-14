@@ -1123,29 +1123,9 @@ class ReactExoplayerView extends FrameLayout implements
         releasePlayer();
         initializePlayer();
     }
-    /**
-     *
-     * @param drmName
-     */
-    public void setDrmName(String drmName) throws ParserException{
-        switch (Util.toLowerInvariant(drmName)) {
-            case "widevine":
-                this.drmUUID = C.WIDEVINE_UUID;
-                break;
-            case "playready":
-                this.drmUUID = C.PLAYREADY_UUID;
-                break;
-            case "clearkey":
-                this.drmUUID = C.CLEARKEY_UUID;
-                break;
-            default:
-                try {
-                    this.drmUUID = UUID.fromString(drmName);
-                } catch (RuntimeException e) {
-                    throw new ParserException("Unsupported drm type: " + drmName);
-                }
-        }
-        Log.d("setDrmLicenseUrl", drmName);
+
+    public void setDrmType(UUID drmType) throws ParserException{
+        this.drmUUID = drmType;
     }
 
     public void setDrmLicenseUrl(String licenseUrl){

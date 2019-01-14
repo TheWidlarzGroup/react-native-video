@@ -13,6 +13,7 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
@@ -122,8 +123,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     String drmType = drm.hasKey(PROP_SRC_DRM_TYPE) ? drm.getString(PROP_SRC_DRM_TYPE) : null;
                     String drmLicenseServer = drm.hasKey(PROP_SRC_DRM_LICENSESERVER) ? drm.getString(PROP_SRC_DRM_LICENSESERVER) : null;
                     ReadableMap drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? drm.getMap(PROP_SRC_DRM_HEADERS) : null;
-                    if (drmType != null && drmLicenseServer != null) {
-                        videoView.setDrmName(drmType);
+                    if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
+                        Log.d("setDrmLicenseUrl", drmType);
+                        UUID drmUUID = Util.getDrmUuid(drmType);
+                        videoView.setDrmType(drmUUID);
                         videoView.setDrmLicenseUrl(drmLicenseServer);
                         if (drmHeaders != null) {
                             ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
