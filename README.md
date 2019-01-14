@@ -705,6 +705,38 @@ Note: Using this feature adding an entry for NSAppleMusicUsageDescription to you
 
 Platforms: iOS
 
+##### Explicit mimetype for the stream
+
+Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object.
+
+Example:
+```
+source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
+type: 'mpd' }}
+```
+
+##### Provide DRM data
+
+You can provide some configuration to allow DRM playback.
+This feature will disable the use of `TextureView` on Android.
+DRM options are `type`, `licenseServer`, `headers`.
+
+Example:
+```
+source={{
+    uri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p.mpd',
+    drm: {
+        type: 'widevine',
+        licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+        headers: {
+            'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImZpcnN0X3BsYXlfZXhwaXJhdGlvbiI6NjAsInBsYXlyZWFkeSI6eyJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.FAbIiPxX8BHi9RwfzD7Yn-wugU19ghrkBFKsaCPrZmU'
+        },
+    }
+}}
+```
+
+Platforms: Android
+
 ###### Other protocols
 
 The following other types are supported on some platforms, but aren't fully documented yet:
