@@ -1124,7 +1124,7 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setDrmType(UUID drmType) throws ParserException{
+    public void setDrmType(UUID drmType) {
         this.drmUUID = drmType;
     }
 
