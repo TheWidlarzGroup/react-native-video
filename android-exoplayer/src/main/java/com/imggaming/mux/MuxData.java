@@ -15,6 +15,8 @@ public class MuxData {
 
     private static final String KEY_ENV_KEY = "envKey";
     private static final String KEY_USER_ID = "viewerUserId";
+    private static final String KEY_SUB_PROPERTY_ID = "subPropertyId";
+    private static final String KEY_EXPERIMENT_NAME = "experimentName";
 
     private static final String KEY_VIDEO_TITLE = "videoTitle";
     private static final String KEY_VIDEO_ID = "videoId";
@@ -82,6 +84,8 @@ public class MuxData {
                 customerPlayerData.setViewerUserId(castToString(playbackData.get(KEY_USER_ID)));
                 customerPlayerData.setPlayerName(MUX_PLAYER_NAME);
                 customerPlayerData.setPlayerVersion(ExoPlayerLibraryInfo.VERSION_SLASHY);
+                customerPlayerData.setSubPropertyId(castToString(playbackData.get(KEY_SUB_PROPERTY_ID)));
+                customerPlayerData.setExperimentName(castToString(playbackData.get(KEY_EXPERIMENT_NAME)));
                 return customerPlayerData;
             }
         }
