@@ -125,7 +125,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     String drmLicenseServer = drm.hasKey(PROP_SRC_DRM_LICENSESERVER) ? drm.getString(PROP_SRC_DRM_LICENSESERVER) : null;
                     ReadableMap drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? drm.getMap(PROP_SRC_DRM_HEADERS) : null;
                     if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
-                        Log.d("setDrmLicenseUrl", drmType);
+                        Log.d("setDrmType", drmType);
                         UUID drmUUID = Util.getDrmUuid(drmType);
                         videoView.setDrmType(drmUUID);
                         videoView.setDrmLicenseUrl(drmLicenseServer);
@@ -138,9 +138,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                                 drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
                             }
                             videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
-                            videoView.setUseTextureView(false);
                         }
-
+                        Log.d("Disabling TextureView (needed for DRM)");
+                        videoView.setUseTextureView(false);
                     }
                 }
             }
