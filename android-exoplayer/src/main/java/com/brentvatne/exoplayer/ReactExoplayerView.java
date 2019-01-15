@@ -100,6 +100,7 @@ class ReactExoplayerView extends FrameLayout implements
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
+    private boolean isFrameless;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -141,6 +142,16 @@ class ReactExoplayerView extends FrameLayout implements
 
     public OvalCalculator ovalCalculator = new OvalCalculator();  // rotato
     private int videoWidth = -1, videoHeight = -1;
+
+    public void setFrameless(boolean frameless)
+    {
+        this.isFrameless = frameless;
+    }
+
+    public boolean getIsFrameless()
+    {
+        return this.isFrameless;
+    }
 
     private final Handler progressHandler = new Handler() {
         @Override

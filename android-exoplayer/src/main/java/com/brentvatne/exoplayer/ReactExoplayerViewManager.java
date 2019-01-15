@@ -23,6 +23,8 @@ import javax.annotation.Nullable;
 
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
 
+    private boolean force_frameless = false;
+
     private static final String REACT_CLASS = "RCTVideo";
 
     private static final String PROP_SRC = "src";
@@ -40,6 +42,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_FOCUSED = "focused";
+    private static final String PROP_FRAMELESS = "frameless";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
@@ -57,6 +60,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
 
     private ArrayList<ReactExoplayerView> view_list = new ArrayList<ReactExoplayerView>();
+
+    public void set_force_frameless(boolean force_frameless)
+    {
+        this.force_frameless = force_frameless;
+    }
 
     @Override
     public String getName() {
@@ -133,6 +141,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
     }
 
+    @ReactProp(name = PROP_FRAMELESS, defaultBoolean = false)
+    public void setFrameless(final ReactExoplayerView videoView, final boolean frameless) {
+        videoView.setFrameless(frameless);
+    }
+
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
         videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
@@ -181,7 +194,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     {
         double rad = degree / 180.0 * Math.PI;
         for(ReactExoplayerView view : view_list) {
-            if (!view.isTextureView())
+            if (!force_frameless && (!view.getIsFrameless() || !view.isTextureView()))
                 continue;
 
             if (view.ovalCalculator.get_video_width() >= view.ovalCalculator.get_video_height() && view.ovalCalculator.get_video_stretch_mode() == 0)
@@ -218,32 +231,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
-        Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), paused = " + (paused ? "true" : "false"));
-        /*if (!paused)
-	  {*/
-            for(ReactExoplayerView view : view_list)
-                if (view.getId() == videoView.getId())
-                    return;
-            view_list.add(videoView);
-	    // }
-	/*        else {
-            view_list.remove(videoView);
-            Log.v("RotatoView", "view id = " + videoView.getId() + " removed, " + view_list.size() + " view(s) left");
-	    }*/
+        //Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), paused = " + (paused ? "true" : "false"));
+        for(ReactExoplayerView view : view_list)
+            if (view.getId() == videoView.getId())
+                return;
+        view_list.add(videoView);
     }
 
     @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
     public void setFocused(final ReactExoplayerView videoView, final boolean focused) {
-        //Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), focused = " + (focused ? "true" : "false"));
-        /*if (focused)
-        {
-            for(ReactExoplayerView view : view_list)
-                if (view.getId() == videoView.getId())
-                    return;
-            view_list.add(videoView);
-        }
-        else
-            view_list.remove(videoView);*/
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)

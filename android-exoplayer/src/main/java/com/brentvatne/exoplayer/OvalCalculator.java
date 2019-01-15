@@ -41,7 +41,7 @@ public class OvalCalculator {
     //private double trim_videoWidth = 3, trim_videoHeight = 4; // default trim is on
     private double trim_videoWidth = 0, trim_videoHeight = 0;
 
-    private boolean reduceZoomFactor = true;
+    private boolean reduceZoomFactor = false;
     private double reduceZoomFactor_viewWidth = 9, reduceZoomFactor_viewHeight = 16;
 
     private boolean avoidScaleDropLandscape = true;
@@ -50,7 +50,7 @@ public class OvalCalculator {
 
     private boolean slow_start_landscape = true;
     //private double slow_start_percentage = 1;
-    private double slow_start_rad_landscape = 9.0 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
+    private double slow_start_rad_landscape = 3.0 * Math.PI / 180.0;      // if rad < slow_start_rad, a constant scale will be returned
 
     private boolean slow_start_portrait = true;
     //private double slow_start_percentage = 1;
