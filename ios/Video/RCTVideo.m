@@ -33,6 +33,9 @@ static int const RCTVideoUnset = -1;
   BOOL _playerLayerObserverSet;
   RCTVideoPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+
+  /* DRM */
+  NSDictionary *_drm;
   
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -372,9 +375,11 @@ static int const RCTVideoUnset = -1;
       if (self.onVideoLoadStart) {
         id uri = [source objectForKey:@"uri"];
         id type = [source objectForKey:@"type"];
+        _drm = [source objectForKey:@"drm"];
         self.onVideoLoadStart(@{@"src": @{
                                         @"uri": uri ? uri : [NSNull null],
                                         @"type": type ? type : [NSNull null],
+                                        @"drm": drm ? drm : [NSNull null],
                                         @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
                                     @"target": self.reactTag
                                 });
@@ -465,6 +470,7 @@ static int const RCTVideoUnset = -1;
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  NSDictionary *drm = [source objectForKey:@"drm"];
 
   NSURL *url = isNetwork || isAsset
     ? [NSURL URLWithString:uri]
@@ -1488,6 +1494,35 @@ static int const RCTVideoUnset = -1;
 - (NSString *)cacheDirectoryPath {
     NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return array[0];
+}
+
+- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
+    NSURL *url = loadingRequest.request.URL;
+    NSString *identifier = url.host;
+    if (_fairplayCertificate != nil && _contentId != nil) {
+        NSData* contentIdData = [_contentId dataUsingEncoding:NSUTF8StringEncoding];
+        NSData* certificateData = [_fairplayCertificate dataUsingEncoding:NSUTF8StringEncoding];
+        NSError* error = nil;
+        [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&error];
+    }   
+}
+
+- (NSString *) getDataFrom:(NSData *)url{
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setHTTPMethod:@"GET"];
+    [request setURL:[NSURL URLWithString:url]];
+
+    NSError *error = nil;
+    NSHTTPURLResponse *responseCode = nil;
+
+    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+
+    if([responseCode statusCode] != 200){
+        NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+        return nil;
+    }
+
+    return oResponseData;
 }
 
 @end
