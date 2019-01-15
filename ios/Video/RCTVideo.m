@@ -202,6 +202,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
+  [_motionManager stopDeviceMotionUpdates];
 }
 
 #pragma mark - App lifecycle handlers

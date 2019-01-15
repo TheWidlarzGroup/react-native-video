@@ -88,7 +88,7 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
     self->asd_view_height_ = -1;
     self->asd_video_width_ = -1;
     self->asd_video_height_ = -1;
-    self->slow_start_landscape_ = true;
+    self->slow_start_landscape_ = false;
     self->slow_start_rad_landscape_ = 9.0 * M_PI / 180.0;
     self->slow_start_portrait_ = true;
     self->slow_start_rad_portrait_ = 18.0 * M_PI / 180.0;
@@ -265,7 +265,7 @@ __attribute__((unused)) static float OvalCalculator_rescale_avoid_landscale_drop
       return [self get_scale_raw_WithDouble:slow_start_rad_portrait_];}
     else {
       return [self get_scale_raw_WithDouble:r];
-      
+
     }
   }
   else if (slow_start_landscape_ && video_width_ > video_height_) {
