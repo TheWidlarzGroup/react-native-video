@@ -1211,7 +1211,12 @@ static int const RCTVideoUnset = -1;
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
     /// Rotato
-    if (!_frameless) { return; }
+    if (!_frameless) {
+      if (_motionManager) {
+        [_motionManager stopDeviceMotionUpdates];
+      }
+      return;
+    }
     
     self.transform = [self transformWithRotation:0];
     _motionManager = [[CMMotionManager alloc] init];
