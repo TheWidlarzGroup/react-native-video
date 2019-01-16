@@ -1501,30 +1501,30 @@ static int const RCTVideoUnset = -1;
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     NSURL *url = loadingRequest.request.URL;
     NSString *identifier = url.host;
-    if (_fairplayCertificate != nil && _contentId != nil) {
-        NSData* contentIdData = [_contentId dataUsingEncoding:NSUTF8StringEncoding];
-        NSData* certificateData = [_fairplayCertificate dataUsingEncoding:NSUTF8StringEncoding];
-        NSError* error = nil;
-        [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&error];
-    }   
+    // if (_fairplayCertificate != nil && _contentId != nil) {
+    //     NSData* contentIdData = [_contentId dataUsingEncoding:NSUTF8StringEncoding];
+    //     NSData* certificateData = [_fairplayCertificate dataUsingEncoding:NSUTF8StringEncoding];
+    //     NSError* error = nil;
+    //     [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&error];
+    // }   
 }
 
-- (NSString *) getDataFrom:(NSData *)url{
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    [request setHTTPMethod:@"GET"];
-    [request setURL:[NSURL URLWithString:url]];
+// - (NSString *) getDataFrom:(NSData *)url{
+//     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+//     [request setHTTPMethod:@"GET"];
+//     [request setURL:[NSURL URLWithString:url]];
 
-    NSError *error = nil;
-    NSHTTPURLResponse *responseCode = nil;
+//     NSError *error = nil;
+//     NSHTTPURLResponse *responseCode = nil;
 
-    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+//     NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
 
-    if([responseCode statusCode] != 200){
-        NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
-        return nil;
-    }
+//     if([responseCode statusCode] != 200){
+//         NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+//         return nil;
+//     }
 
-    return oResponseData;
-}
+//     return oResponseData;
+// }
 
 @end
