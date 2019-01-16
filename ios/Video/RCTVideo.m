@@ -1403,8 +1403,8 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - Lifecycle
 
-- (void)removeFromSuperview
-{
+- (void)removeFromSuperview {
+  [_motionManager stopDeviceMotionUpdates];
   [_player pause];
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
