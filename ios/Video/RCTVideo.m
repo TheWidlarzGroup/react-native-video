@@ -1227,7 +1227,8 @@ static int const RCTVideoUnset = -1;
       if (_playerItem == nil) { return; }
       if (_playerLayer == nil) { return; }
       CMAcceleration gravity = motion.gravity;
-      
+      if (fabs(gravity.x) < 0.04 && fabs(gravity.y) < 0.04) { return; }
+
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
       self.transform = [self transformWithRotation:rotation];
     }];
