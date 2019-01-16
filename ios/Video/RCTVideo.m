@@ -1496,6 +1496,8 @@ static int const RCTVideoUnset = -1;
     return array[0];
 }
 
+#pragma mark - AVAssetResourceLoaderDelegate
+
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     NSURL *url = loadingRequest.request.URL;
     NSString *identifier = url.host;
