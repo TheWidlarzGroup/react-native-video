@@ -221,6 +221,9 @@ static int const RCTVideoUnset = -1;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
   }
+  if (_motionManager) {
+    [_motionManager stopDeviceMotionUpdates];
+  }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
