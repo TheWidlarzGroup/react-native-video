@@ -379,7 +379,7 @@ static int const RCTVideoUnset = -1;
         self.onVideoLoadStart(@{@"src": @{
                                         @"uri": uri ? uri : [NSNull null],
                                         @"type": type ? type : [NSNull null],
-                                        @"drm": drm ? drm : [NSNull null],
+                                        @"drm": _drm ? _drm : [NSNull null],
                                         @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
                                     @"target": self.reactTag
                                 });
@@ -1501,6 +1501,7 @@ static int const RCTVideoUnset = -1;
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     NSURL *url = loadingRequest.request.URL;
     NSString *identifier = url.host;
+    return true;
     // if (_fairplayCertificate != nil && _contentId != nil) {
     //     NSData* contentIdData = [_contentId dataUsingEncoding:NSUTF8StringEncoding];
     //     NSData* certificateData = [_fairplayCertificate dataUsingEncoding:NSUTF8StringEncoding];
