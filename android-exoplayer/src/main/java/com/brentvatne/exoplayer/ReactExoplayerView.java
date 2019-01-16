@@ -64,7 +64,6 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
-//Import PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerControlView;
 
 import java.net.CookieHandler;
@@ -98,7 +97,6 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private final VideoEventEmitter eventEmitter;
-    //Create playerControlView instance
     private PlayerControlView playerControlView;
     
     private Handler mainHandler;
@@ -274,9 +272,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     /**
-     * Initialising Player control
+     * Initializing Player control
      */
-    private void initialisePlayerControl() {
+    private void initializePlayerControl() {
         playerControlView = new PlayerControlView(getContext());
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -1107,8 +1105,8 @@ class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
         if(controls && (exoPlayerView != null)) {
-            //Initialise playerControlView
-            initialisePlayerControl();
+            //Initialize playerControlView
+            initializePlayerControl();
         }
     }
 }
