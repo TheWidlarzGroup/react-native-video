@@ -507,7 +507,7 @@ static int const RCTVideoUnset = -1;
   } else {
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   }
-  dispatch_queue_t queue = dispatch_queue_create("recordingQueue", nil);
+  dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
   [asset.resourceLoader setDelegate:self queue:queue];
 
   [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
@@ -1520,43 +1520,61 @@ static int const RCTVideoUnset = -1;
                         NSData *spcData = [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
-                        if (licenseServer != nil && spcData != nil) {
-                            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-                            [request setHTTPMethod:@"POST"];
-                            [request setURL:[NSURL URLWithString:licenseServer]];
-                            [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                            [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-                            NSString *spcData64 = [self base64forData:spcData];
-                            
-                            NSDictionary *jsonBodyDict = @{@"releasePid":contentId, @"spcMessage":spcData64};
-                            NSDictionary *getLicenseBody = @{@"getFairplayLicense":jsonBodyDict};
-                            
-                            [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:getLicenseBody options:kNilOptions error:nil]];
-                            
-                            NSError *error = nil;
-                            NSHTTPURLResponse *responseCode = nil;
-                            
-                            NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-                            
-                            if([responseCode statusCode] != 200){
-                                NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
-                                return nil;
+                        NSString *getLicenseMethod = (NSString *)[_drm objectForKey:@"getLicense"];
+                        if (spcData != nil && licenseServer != nil || getLicenseMethod != nil) {
+                            NSData *respondData;
+                            if (getLicenseMethod != nil) {
+                                
+                            } else {
+                                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+                                [request setHTTPMethod:@"POST"];
+                                [request setURL:[NSURL URLWithString:licenseServer]];
+                                [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+                                [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+                                NSString *spcData64 = [self base64forData:spcData];
+                                
+//                                PFX specific
+//                                NSDictionary *jsonBodyDict = @{@"releasePid":contentId, @"spcMessage":spcData64};
+//                                NSDictionary *getLicenseBody = @{@"getFairplayLicense":jsonBodyDict};
+                                
+                                [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:spcData64 options:kNilOptions error:nil]];
+                                
+                                NSError *error = nil;
+                                NSHTTPURLResponse *responseCode = nil;
+                                // TODO: async
+                                NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+                                
+                                if([responseCode statusCode] != 200){
+                                    // TODO: Error
+                                    NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+                                    [loadingRequest finishLoadingWithError:nil];
+                                    return false;
+                                }
+                                respondData = oResponseData;
                             }
                             
-                            if (oResponseData != nil) {
-                                // The CKC is correctly returned and is now send to the `AVPlayer` instance so we
-                                // can continue to play the stream.
-                                NSError* error;
-                                NSDictionary* json = [NSJSONSerialization JSONObjectWithData:oResponseData
-                                                                                     options:kNilOptions
-                                                                                       error:&error];
-                                
-                                NSDictionary* getFairplayLicenseResponse = [json objectForKey:@"getFairplayLicenseResponse"];
-                                NSString* ckcResponse = [getFairplayLicenseResponse objectForKey:@"ckcResponse"];
-                                NSData *respondData = [self base64DataFromString:ckcResponse];
-                                
+//                            if (oResponseData != nil) {
+//                                // The CKC is correctly returned and is now send to the `AVPlayer` instance so we
+//                                // can continue to play the stream.
+//                                NSError* error;
+//                                NSDictionary* json = [NSJSONSerialization JSONObjectWithData:oResponseData
+//                                                                                     options:kNilOptions
+//                                                                                       error:&error];
+//
+//                                NSDictionary* getFairplayLicenseResponse = [json objectForKey:@"getFairplayLicenseResponse"];
+//                                NSString* ckcResponse = [getFairplayLicenseResponse objectForKey:@"ckcResponse"];
+//                                respondData = [self base64DataFromString:ckcResponse];
+//
+//                                [dataRequest respondWithData:respondData];
+//                                [loadingRequest finishLoading];
+//                            }
+                            
+                            if (respondData != nil) {
                                 [dataRequest respondWithData:respondData];
                                 [loadingRequest finishLoading];
+                            } else {
+                                [loadingRequest finishLoadingWithError:nil];
+                                return false;
                             }
                             
                         } else {
