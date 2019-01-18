@@ -210,6 +210,15 @@ export default class Video extends Component {
     }
   };
 
+  _onGetLicense = (getLicense) => {
+    if (getLicense instanceof Function) {
+      const result = getLicense();
+      if (result !== undefined) {
+        return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
+      }
+    }
+  }
+
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
@@ -269,6 +278,10 @@ export default class Video extends Component {
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
     });
+
+    if (nativeProps.src && nativeProps.src.drm && nativeProps.src.drm.getLicense) {
+      this._onGetLicense(nativeProps.src.drm.getLicense)
+    }
 
     const posterStyle = {
       ...StyleSheet.absoluteFillObject,
