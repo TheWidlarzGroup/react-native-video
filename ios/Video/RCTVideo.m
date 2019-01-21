@@ -1472,6 +1472,10 @@ static int const RCTVideoUnset = -1;
     }
 }
 
+- (void)setLicenseResult:(NSString * )license {
+
+}
+
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
     BOOL isDir = NO;
     NSError *error;
@@ -1521,23 +1525,26 @@ static int const RCTVideoUnset = -1;
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
                         NSString *getLicenseMethod = (NSString *)[_drm objectForKey:@"getLicense"];
-                        if (spcData != nil && licenseServer != nil || getLicenseMethod != nil) {
+                        if (spcData != nil && (licenseServer != nil || getLicenseMethod != nil)) {
                             NSData *respondData;
                             if (getLicenseMethod != nil) {
-                                
+                                NSString* spcStr = [[NSString alloc] initWithData:spcData encoding:NSUTF8StringEncoding];
+                                getLicenseMethod(spcStr);
+                                return true;
                             } else {
                                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                                 [request setHTTPMethod:@"POST"];
                                 [request setURL:[NSURL URLWithString:licenseServer]];
-                                [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                                [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-                                NSString *spcData64 = [self base64forData:spcData];
                                 
 //                                PFX specific
+                                // [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+                                // [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+                                // NSString *spcData64 = [self base64forData:spcData];
 //                                NSDictionary *jsonBodyDict = @{@"releasePid":contentId, @"spcMessage":spcData64};
 //                                NSDictionary *getLicenseBody = @{@"getFairplayLicense":jsonBodyDict};
                                 
-                                [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:spcData64 options:kNilOptions error:nil]];
+                                // [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:spcData64 options:kNilOptions error:nil]];
+                                [request setHTTPBody: spcData];
                                 
                                 NSError *error = nil;
                                 NSHTTPURLResponse *responseCode = nil;
