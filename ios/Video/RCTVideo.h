@@ -38,11 +38,13 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onGetLicense;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
 
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+- (void)setLicenseResult:(NSString * )license;
 
 @end

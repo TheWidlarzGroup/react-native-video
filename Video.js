@@ -210,15 +210,22 @@ export default class Video extends Component {
     }
   };
 
-  _onGetLicense = (getLicense) => {
+  _onGetLicense = (event) => {
     if (this.props.source && this.props.source.drm && this.props.source.drm.getLicense instanceof Function) {
-      const getLicenseOverride = this.props.source.drm.getLicense();
-      const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
-      getLicensePromise.then((result => {
-        if (result !== undefined) {
-          NativeModules.VideoManager.setLicense(result, findNodeHandle(this._root));
-        }
-      }));
+      const data = event.nativeEvent;
+      if (data && data.spc) {
+        const getLicenseOverride = this.props.source.drm.getLicense(data.spc, this.props);
+        const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
+        getLicensePromise.then((result => {
+          if (result !== undefined) {
+            NativeModules.VideoManager.setLicenseResult(result, findNodeHandle(this._root));
+          }
+        })).catch((error) => {
+          // NativeModules.VideoManager.setLicenseError(result, findNodeHandle(this._root));
+        });
+      }
+    } else {
+      // NativeModules.VideoManager.setLicenseError(result, findNodeHandle(this._root));
     }
   }
 
@@ -280,12 +287,9 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onGetLicense: this._onGetLicense,
     });
-
-    if (nativeProps.src && nativeProps.src.drm && nativeProps.src.drm.getLicense) {
-      this._onGetLicense(nativeProps.src.drm.getLicense)
-    }
-
+    
     const posterStyle = {
       ...StyleSheet.absoluteFillObject,
       resizeMode: this.props.posterResizeMode || 'contain',
@@ -406,9 +410,6 @@ Video.propTypes = {
   }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
-  drmUrl: PropTypes.string,
-  drmName: PropTypes.string,
-  drmHeader: PropTypes.object,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),

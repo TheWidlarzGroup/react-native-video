@@ -36,6 +36,7 @@ static int const RCTVideoUnset = -1;
 
   /* DRM */
   NSDictionary *_drm;
+  AVAssetResourceLoadingRequest *_loadingRequest;
   
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -1473,7 +1474,12 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setLicenseResult:(NSString * )license {
-
+    NSData *respondData = [self base64DataFromString:license];
+    if (_loadingRequest) {
+        AVAssetResourceLoadingDataRequest *dataRequest = [_loadingRequest dataRequest];
+        [dataRequest respondWithData:respondData];
+        [_loadingRequest finishLoading];
+    }
 }
 
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
@@ -1503,6 +1509,7 @@ static int const RCTVideoUnset = -1;
 #pragma mark - AVAssetResourceLoaderDelegate
 
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
+    _loadingRequest = loadingRequest;
     NSURL *url = loadingRequest.request.URL;
     NSString *contentId = url.host;
     if (_drm != nil) {
@@ -1524,83 +1531,48 @@ static int const RCTVideoUnset = -1;
                         NSData *spcData = [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
-                        NSString *getLicenseMethod = (NSString *)[_drm objectForKey:@"getLicense"];
-                        if (spcData != nil && (licenseServer != nil || getLicenseMethod != nil)) {
-                            NSData *respondData;
-                            if (getLicenseMethod != nil) {
-                                NSString* spcStr = [[NSString alloc] initWithData:spcData encoding:NSUTF8StringEncoding];
-                                getLicenseMethod(spcStr);
+                        if (spcError != nil) {
+                            //TODO: Error
+                            [loadingRequest finishLoadingWithError:nil];
+                            return false;
+                        }
+                        if (spcData != nil) {
+                            if(self.onGetLicense) {
+                                NSString *spcStr = [[NSString alloc] initWithData:spcData encoding:NSASCIIStringEncoding];
+                                self.onGetLicense(@{@"spc": spcStr,
+                                                    @"target": self.reactTag});
                                 return true;
                             } else {
                                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                                 [request setHTTPMethod:@"POST"];
                                 [request setURL:[NSURL URLWithString:licenseServer]];
-                                
-//                                PFX specific
-                                // [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                                // [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-                                // NSString *spcData64 = [self base64forData:spcData];
-//                                NSDictionary *jsonBodyDict = @{@"releasePid":contentId, @"spcMessage":spcData64};
-//                                NSDictionary *getLicenseBody = @{@"getFairplayLicense":jsonBodyDict};
-                                
-                                // [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:spcData64 options:kNilOptions error:nil]];
-                                [request setHTTPBody: spcData];
 
+                                [request setHTTPBody: spcData];
+                                NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+                                NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
                                 NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                                     if (error != nil) {
-                                       NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+                                       NSLog(@"Error getting %@, HTTP status code %i", url, [httpResponse statusCode]);
                                             [loadingRequest finishLoadingWithError:nil];
-                                            return false;
                                     } else {
-                                        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                                         if([httpResponse statusCode] != 200){
                                             // TODO: Error
-                                            NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+                                            NSLog(@"Error getting %@, HTTP status code %i", url, [httpResponse statusCode]);
                                             [loadingRequest finishLoadingWithError:nil];
-                                            return false;
                                         }
-                                        respondData = data;
-                                        if (respondData != nil) {
-                                            [dataRequest respondWithData:respondData];
+                                        if (data != nil) {
+                                            [dataRequest respondWithData:data];
                                             [loadingRequest finishLoading];
                                         } else {
                                             [loadingRequest finishLoadingWithError:nil];
-                                            return false;
                                         }
 
                                     }
                                 }];
                                 [postDataTask resume];
                                 return true;
-                                NSError *error = nil;
-                                NSHTTPURLResponse *responseCode = nil;
-                                // TODO: async
-                                NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-                                
-                                if([responseCode statusCode] != 200){
-                                    // TODO: Error
-                                    NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
-                                    [loadingRequest finishLoadingWithError:nil];
-                                    return false;
-                                }
-                                respondData = oResponseData;
                             }
-                            
-//                            if (oResponseData != nil) {
-//                                // The CKC is correctly returned and is now send to the `AVPlayer` instance so we
-//                                // can continue to play the stream.
-//                                NSError* error;
-//                                NSDictionary* json = [NSJSONSerialization JSONObjectWithData:oResponseData
-//                                                                                     options:kNilOptions
-//                                                                                       error:&error];
-//
-//                                NSDictionary* getFairplayLicenseResponse = [json objectForKey:@"getFairplayLicenseResponse"];
-//                                NSString* ckcResponse = [getFairplayLicenseResponse objectForKey:@"ckcResponse"];
-//                                respondData = [self base64DataFromString:ckcResponse];
-//
-//                                [dataRequest respondWithData:respondData];
-//                                [loadingRequest finishLoading];
-//                            }
                             
                         } else {
                             [loadingRequest finishLoadingWithError:nil];
@@ -1631,43 +1603,6 @@ static int const RCTVideoUnset = -1;
     
     
     return true;
-    // if (_fairplayCertificate != nil && _contentId != nil) {
-    //     NSData* contentIdData = [_contentId dataUsingEncoding:NSUTF8StringEncoding];
-    //     NSData* certificateData = [_fairplayCertificate dataUsingEncoding:NSUTF8StringEncoding];
-    //     NSError* error = nil;
-    //     [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&error];
-    // }   
-}
-
-- (NSString*)base64forData:(NSData*)theData {
-    const uint8_t* input = (const uint8_t*)[theData bytes];
-    NSInteger length = [theData length];
-    
-    static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    
-    NSMutableData* data = [NSMutableData dataWithLength:((length + 2) / 3) * 4];
-    uint8_t* output = (uint8_t*)data.mutableBytes;
-    
-    NSInteger i;
-    for (i=0; i < length; i += 3) {
-        NSInteger value = 0;
-        NSInteger j;
-        for (j = i; j < (i + 3); j++) {
-            value <<= 8;
-            
-            if (j < length) {
-                value |= (0xFF & input[j]);
-            }
-        }
-        
-        NSInteger theIndex = (i / 3) * 4;
-        output[theIndex + 0] =                    table[(value >> 18) & 0x3F];
-        output[theIndex + 1] =                    table[(value >> 12) & 0x3F];
-        output[theIndex + 2] = (i + 1) < length ? table[(value >> 6)  & 0x3F] : '=';
-        output[theIndex + 3] = (i + 2) < length ? table[(value >> 0)  & 0x3F] : '=';
-    }
-    
-    return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
 }
 
 - (NSData *)base64DataFromString: (NSString *)string
@@ -1786,23 +1721,35 @@ static int const RCTVideoUnset = -1;
     return theData;
 }
 
-- (NSData *) postDataTo:(NSURL *)url andData:(NSData *)data {
-     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-     [request setHTTPMethod:@"POST"];
-     [request setURL:[NSURL URLWithString:url]];
-     [request setHTTPBody:data];
-
-     NSError *error = nil;
-     NSHTTPURLResponse *responseCode = nil;
-
-     NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-
-     if([responseCode statusCode] != 200){
-         NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
-         return nil;
-     }
-
-     return oResponseData;
- }
+- (NSString*)base64forData:(NSData*)theData {
+    const uint8_t* input = (const uint8_t*)[theData bytes];
+    NSInteger length = [theData length];
+    
+    static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    
+    NSMutableData* data = [NSMutableData dataWithLength:((length + 2) / 3) * 4];
+    uint8_t* output = (uint8_t*)data.mutableBytes;
+    
+    NSInteger i;
+    for (i=0; i < length; i += 3) {
+        NSInteger value = 0;
+        NSInteger j;
+        for (j = i; j < (i + 3); j++) {
+            value <<= 8;
+            
+            if (j < length) {
+                value |= (0xFF & input[j]);
+            }
+        }
+        
+        NSInteger theIndex = (i / 3) * 4;
+        output[theIndex + 0] =                    table[(value >> 18) & 0x3F];
+        output[theIndex + 1] =                    table[(value >> 12) & 0x3F];
+        output[theIndex + 2] = (i + 1) < length ? table[(value >> 6)  & 0x3F] : '=';
+        output[theIndex + 3] = (i + 2) < length ? table[(value >> 0)  & 0x3F] : '=';
+    }
+    
+    return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+}
 
 @end
