@@ -219,13 +219,15 @@ export default class Video extends Component {
         getLicensePromise.then((result => {
           if (result !== undefined) {
             NativeModules.VideoManager.setLicenseResult(result, findNodeHandle(this._root));
+          } else {
+            NativeModules.VideoManager.setLicenseError('Empty license result', findNodeHandle(this._root));
           }
         })).catch((error) => {
-          // NativeModules.VideoManager.setLicenseError(result, findNodeHandle(this._root));
+          NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
         });
       }
     } else {
-      // NativeModules.VideoManager.setLicenseError(result, findNodeHandle(this._root));
+      NativeModules.VideoManager.setLicenseError("No enough data for license override", findNodeHandle(this._root));
     }
   }
 

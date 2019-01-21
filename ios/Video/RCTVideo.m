@@ -371,12 +371,13 @@ static int const RCTVideoUnset = -1;
       _isExternalPlaybackActiveObserverRegistered = YES;
         
       [self addPlayerTimeObserver];
+        
+      _drm = [source objectForKey:@"drm"];
 
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
         id uri = [source objectForKey:@"uri"];
         id type = [source objectForKey:@"type"];
-        _drm = [source objectForKey:@"drm"];
         self.onVideoLoadStart(@{@"src": @{
                                         @"uri": uri ? uri : [NSNull null],
                                         @"type": type ? type : [NSNull null],
@@ -648,6 +649,7 @@ static int const RCTVideoUnset = -1;
         [self applyModifiers];
       } else if (_playerItem.status == AVPlayerItemStatusFailed && self.onVideoError) {
         self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: _playerItem.error.code],
+                                        @"message": [_playerItem.error localizedDescription],
                                         @"domain": _playerItem.error.domain},
                             @"target": self.reactTag});
       }
@@ -1482,6 +1484,21 @@ static int const RCTVideoUnset = -1;
     }
 }
 
+- (BOOL)setLicenseResultError:(NSString * )error {
+    if (_loadingRequest) {
+        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                    code: -1336
+                                                userInfo: @{
+                                                            NSLocalizedDescriptionKey: error,
+                                                            NSLocalizedFailureReasonErrorKey: error,
+                                                            NSLocalizedRecoverySuggestionErrorKey: error
+                                                            }
+                                 ];
+        [_loadingRequest finishLoadingWithError:licenseError];
+    }
+    return false;
+}
+
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
     BOOL isDir = NO;
     NSError *error;
@@ -1532,8 +1549,7 @@ static int const RCTVideoUnset = -1;
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
                         if (spcError != nil) {
-                            //TODO: Error
-                            [loadingRequest finishLoadingWithError:nil];
+                            [loadingRequest finishLoadingWithError:spcError];
                             return false;
                         }
                         if (spcData != nil) {
@@ -1553,19 +1569,33 @@ static int const RCTVideoUnset = -1;
                                 NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                                     if (error != nil) {
-                                       NSLog(@"Error getting %@, HTTP status code %i", url, [httpResponse statusCode]);
-                                            [loadingRequest finishLoadingWithError:nil];
+                                        NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                                       [loadingRequest finishLoadingWithError:error];
                                     } else {
                                         if([httpResponse statusCode] != 200){
-                                            // TODO: Error
-                                            NSLog(@"Error getting %@, HTTP status code %i", url, [httpResponse statusCode]);
-                                            [loadingRequest finishLoadingWithError:nil];
-                                        }
-                                        if (data != nil) {
+                                            NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                                                        code: -1337
+                                                                                    userInfo: @{
+                                                                                                NSLocalizedDescriptionKey: @"Error obtaining license.",
+                                                                                                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"License server responded with status code %li", (long)[httpResponse statusCode]],
+                                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Did you send the correct data to the license Server? Is the server ok?"
+                                                                                                }
+                                                                     ];
+                                            [loadingRequest finishLoadingWithError:licenseError];
+                                        } else if (data != nil) {
                                             [dataRequest respondWithData:data];
                                             [loadingRequest finishLoading];
                                         } else {
-                                            [loadingRequest finishLoadingWithError:nil];
+                                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                                                        code: -1338
+                                                                                    userInfo: @{
+                                                                                                NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                                                NSLocalizedFailureReasonErrorKey: @"No data received from the license server.",
+                                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Is the licenseServer ok?."
+                                                                                                }
+                                                                     ];
+                                            [loadingRequest finishLoadingWithError:licenseError];
                                         }
 
                                     }
@@ -1575,29 +1605,77 @@ static int const RCTVideoUnset = -1;
                             }
                             
                         } else {
-                            [loadingRequest finishLoadingWithError:nil];
+                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                                        code: -1339
+                                                                    userInfo: @{
+                                                                                NSLocalizedDescriptionKey: @"Error obtaining license.",
+                                                                                NSLocalizedFailureReasonErrorKey: @"No spc received.",
+                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM config."
+                                                                                }
+                                                     ];
+                            [loadingRequest finishLoadingWithError:licenseError];
                             return false;
                         }
                         
                     } else {
-                        [loadingRequest finishLoadingWithError:nil];
+                        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                                    code: -1340
+                                                                userInfo: @{
+                                                                            NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                            NSLocalizedFailureReasonErrorKey: @"No dataRequest found.",
+                                                                            NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM configuration."
+                                                                            }
+                                                 ];
+                        [loadingRequest finishLoadingWithError:licenseError];
                         return false;
                     }
                 } else {
-                    [loadingRequest finishLoadingWithError:nil];
+                    NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                                code: -1341
+                                                            userInfo: @{
+                                                                        NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                        NSLocalizedFailureReasonErrorKey: @"No certificate data obtained from the specificied url.",
+                                                                        NSLocalizedRecoverySuggestionErrorKey: @"Have you specified a valid 'certificateUrl'?"
+                                                                        }
+                                             ];
+                    [loadingRequest finishLoadingWithError:licenseError];
                     return false;
                 }
             } else {
-                [loadingRequest finishLoadingWithError:nil];
+                NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                            code: -1342
+                                                        userInfo: @{
+                                                                    NSLocalizedDescriptionKey: @"Error obtaining DRM License.",
+                                                                    NSLocalizedFailureReasonErrorKey: @"No certificate URL has been found.",
+                                                                    NSLocalizedRecoverySuggestionErrorKey: @"Did you specified the prop certificateUrl?"
+                                                                    }
+                                         ];
+                [loadingRequest finishLoadingWithError:licenseError];
                 return false;
             }
         } else {
-            [loadingRequest finishLoadingWithError:nil];
+            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                        code: -1343
+                                                    userInfo: @{
+                                                                NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                NSLocalizedFailureReasonErrorKey: @"Not a valid DRM Scheme has found",
+                                                                NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' 'type' as fairplay?"
+                                                                }
+                                     ];
+            [loadingRequest finishLoadingWithError:licenseError];
             return false;
         }
         
     } else {
-        [loadingRequest finishLoadingWithError:nil];
+        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                                    code: -1344
+                                                userInfo: @{
+                                                            NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                            NSLocalizedFailureReasonErrorKey: @"No drm object found.",
+                                                            NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' prop?"
+                                                            }
+                                 ];
+        [loadingRequest finishLoadingWithError:licenseError];
         return false;
     }
     
