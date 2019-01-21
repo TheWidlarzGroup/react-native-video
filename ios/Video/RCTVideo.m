@@ -1545,7 +1545,33 @@ static int const RCTVideoUnset = -1;
                                 
                                 // [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:spcData64 options:kNilOptions error:nil]];
                                 [request setHTTPBody: spcData];
-                                
+
+                                NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                    if (error != nil) {
+                                       NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+                                            [loadingRequest finishLoadingWithError:nil];
+                                            return false;
+                                    } else {
+                                        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
+                                        if([httpResponse statusCode] != 200){
+                                            // TODO: Error
+                                            NSLog(@"Error getting %@, HTTP status code %i", url, [responseCode statusCode]);
+                                            [loadingRequest finishLoadingWithError:nil];
+                                            return false;
+                                        }
+                                        respondData = data;
+                                        if (respondData != nil) {
+                                            [dataRequest respondWithData:respondData];
+                                            [loadingRequest finishLoading];
+                                        } else {
+                                            [loadingRequest finishLoadingWithError:nil];
+                                            return false;
+                                        }
+
+                                    }
+                                }];
+                                [postDataTask resume];
+                                return true;
                                 NSError *error = nil;
                                 NSHTTPURLResponse *responseCode = nil;
                                 // TODO: async
@@ -1575,14 +1601,6 @@ static int const RCTVideoUnset = -1;
 //                                [dataRequest respondWithData:respondData];
 //                                [loadingRequest finishLoading];
 //                            }
-                            
-                            if (respondData != nil) {
-                                [dataRequest respondWithData:respondData];
-                                [loadingRequest finishLoading];
-                            } else {
-                                [loadingRequest finishLoadingWithError:nil];
-                                return false;
-                            }
                             
                         } else {
                             [loadingRequest finishLoadingWithError:nil];
