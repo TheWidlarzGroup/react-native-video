@@ -420,15 +420,18 @@ Platforms: iOS
 Platforms: iOS
 
 #### headers
-Pass headers to the HTTP client. Can be used for authorization.
+Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
 
 To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```
-headers={{
-  Authorization: 'bearer some-token-value',
-  'X-Custom-Header': 'some value'
+source={{
+  uri: "https://www.example.com/video.mp4",
+  headers: {
+    Authorization: 'bearer some-token-value',
+    'X-Custom-Header': 'some value'
+  }
 }}
 ```
 
