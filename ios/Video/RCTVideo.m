@@ -723,6 +723,13 @@ static int const RCTVideoUnset = -1;
                                            selector:@selector(handleAVPlayerAccess:)
                                                name:AVPlayerItemNewAccessLogEntryNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name: AVPlayerItemFailedToPlayToEndTimeNotification
+                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(didFailToFinishPlaying:)
+                                               name: AVPlayerItemFailedToPlayToEndTimeNotification
+                                             object:nil];
 
 }
 
@@ -735,6 +742,16 @@ static int const RCTVideoUnset = -1;
         self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
     }
     */
+}
+
+- (void)didFailToFinishPlaying:(NSNotification *)notification {
+    NSError *error = notification.userInfo[AVPlayerItemFailedToPlayToEndTimeErrorKey];
+    self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: error.code],
+                                    @"localizedDescription": [error localizedDescription] == nil ? @"" : [error localizedDescription],
+                                    @"localizedFailureReason": [error localizedFailureReason] == nil ? @"" : [error localizedFailureReason],
+                                    @"localizedRecoverySuggestion": [error localizedRecoverySuggestion] == nil ? @"" : [error localizedRecoverySuggestion],
+                                    @"domain": error.domain},
+                        @"target": self.reactTag});
 }
 
 - (void)playbackStalled:(NSNotification *)notification
@@ -1533,6 +1550,11 @@ static int const RCTVideoUnset = -1;
 
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     return [self loadingRequestHandling:loadingRequest];
+}
+ 
+ - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
+        didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
+            NSLog(@"didCancelLoadingRequest");
 }
 
 - (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
