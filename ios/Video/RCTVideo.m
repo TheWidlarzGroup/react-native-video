@@ -1594,6 +1594,15 @@ static int const RCTVideoUnset = -1;
                                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                                 [request setHTTPMethod:@"POST"];
                                 [request setURL:[NSURL URLWithString:licenseServer]];
+                                // HEADERS
+                                NSDictionary *headers = (NSDictionary *)[_drm objectForKey:@"headers"];
+                                if (headers != nil) {
+                                    for (NSString *key in headers) {
+                                        NSString *value = headers[key];
+                                        [request setValue:value forHTTPHeaderField:key];
+                                    }
+                                }                                
+                                //
 
                                 [request setHTTPBody: spcData];
                                 NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
