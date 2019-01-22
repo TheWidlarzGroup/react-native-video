@@ -139,7 +139,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                             }
                             videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
                         }
-                        Log.d("Disabling TextureView (needed for DRM)");
+                        Log.d("setDrm", "Disabling TextureView (needed for DRM)");
                         videoView.setUseTextureView(false);
                     }
                 }
