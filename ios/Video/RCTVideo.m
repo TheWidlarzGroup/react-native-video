@@ -649,7 +649,9 @@ static int const RCTVideoUnset = -1;
         [self applyModifiers];
       } else if (_playerItem.status == AVPlayerItemStatusFailed && self.onVideoError) {
         self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: _playerItem.error.code],
-                                        @"message": [_playerItem.error localizedDescription],
+                                        @"localizedDescription": [_playerItem.error localizedDescription] == nil ? @"" : [_playerItem.error localizedDescription],
+                                        @"localizedFailureReason": [_playerItem.error localizedFailureReason] == nil ? @"" : [_playerItem.error localizedFailureReason],
+                                        @"localizedRecoverySuggestion": [_playerItem.error localizedRecoverySuggestion] == nil ? @"" : [_playerItem.error localizedRecoverySuggestion],
                                         @"domain": _playerItem.error.domain},
                             @"target": self.reactTag});
       }
@@ -1486,7 +1488,7 @@ static int const RCTVideoUnset = -1;
 
 - (BOOL)setLicenseResultError:(NSString * )error {
     if (_loadingRequest) {
-        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+        NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                     code: -1336
                                                 userInfo: @{
                                                             NSLocalizedDescriptionKey: error,
@@ -1525,7 +1527,15 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - AVAssetResourceLoaderDelegate
 
+- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
+    return [self loadingRequestHandling:renewalRequest];
+}
+
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
+    return [self loadingRequestHandling:loadingRequest];
+}
+
+- (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
     _loadingRequest = loadingRequest;
     NSURL *url = loadingRequest.request.URL;
     NSString *contentId = url.host;
@@ -1558,7 +1568,7 @@ static int const RCTVideoUnset = -1;
                                 self.onGetLicense(@{@"spc": spcStr,
                                                     @"target": self.reactTag});
                                 return true;
-                            } else {
+                            } else if(licenseServer != nil) {
                                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                                 [request setHTTPMethod:@"POST"];
                                 [request setURL:[NSURL URLWithString:licenseServer]];
@@ -1574,7 +1584,7 @@ static int const RCTVideoUnset = -1;
                                     } else {
                                         if([httpResponse statusCode] != 200){
                                             NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
-                                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                                         code: -1337
                                                                                     userInfo: @{
                                                                                                 NSLocalizedDescriptionKey: @"Error obtaining license.",
@@ -1587,7 +1597,7 @@ static int const RCTVideoUnset = -1;
                                             [dataRequest respondWithData:data];
                                             [loadingRequest finishLoading];
                                         } else {
-                                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                                            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                                         code: -1338
                                                                                     userInfo: @{
                                                                                                 NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
@@ -1605,7 +1615,7 @@ static int const RCTVideoUnset = -1;
                             }
                             
                         } else {
-                            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                         code: -1339
                                                                     userInfo: @{
                                                                                 NSLocalizedDescriptionKey: @"Error obtaining license.",
@@ -1618,7 +1628,7 @@ static int const RCTVideoUnset = -1;
                         }
                         
                     } else {
-                        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                        NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                     code: -1340
                                                                 userInfo: @{
                                                                             NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
@@ -1630,7 +1640,7 @@ static int const RCTVideoUnset = -1;
                         return false;
                     }
                 } else {
-                    NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                    NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                 code: -1341
                                                             userInfo: @{
                                                                         NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
@@ -1642,7 +1652,7 @@ static int const RCTVideoUnset = -1;
                     return false;
                 }
             } else {
-                NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+                NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                             code: -1342
                                                         userInfo: @{
                                                                     NSLocalizedDescriptionKey: @"Error obtaining DRM License.",
@@ -1654,7 +1664,7 @@ static int const RCTVideoUnset = -1;
                 return false;
             }
         } else {
-            NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                         code: -1343
                                                     userInfo: @{
                                                                 NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
@@ -1667,7 +1677,7 @@ static int const RCTVideoUnset = -1;
         }
         
     } else {
-        NSError *licenseError = [NSError errorWithDomain:_playerItem.error.domain
+        NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                     code: -1344
                                                 userInfo: @{
                                                             NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
