@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType, FilterType };
+export { TextTrackType, FilterType, DRMType };
 
 export default class Video extends Component {
 
