@@ -57,6 +57,7 @@
         "ios",
         "windows",
         "FilterType.js",
+        "DRMType.js",
         "TextTrackType.js",
         "VideoResizeMode.js",
         "react-native-video.podspec"
