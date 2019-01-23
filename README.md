@@ -10,7 +10,7 @@ Version 3.x requires react-native >= 0.40.0
 ### Version 4.0.0 breaking changes
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
 
-Version 4.0.0 now requires Android SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
+Version 4.0.0 now requires Android target SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using target SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
 
 If you need to support an older React Native version, you should use react-native-video 3.2.1.
 
@@ -1173,8 +1173,8 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
 ### Version 4.0.0
 
-#### Gradle 3 and SDK 26 requirement
-In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57. ExoPlayer 
+#### Gradle 3 and target SDK 26 requirement
+In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57.
 
 #### ExoPlayer 2.9.0 Java 1.8 requirement
 ExoPlayer 2.9.0 uses some Java 1.8 features, so you may need to enable support for Java 1.8 in your app/build.gradle file. If you get an error, compiling with ExoPlayer like:
@@ -1209,7 +1209,7 @@ Previously, on Android MediaPlayer if you setup an AppState event when the app w
 
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
-#### Use Android SDK 27 by default
+#### Use Android target SDK 27 by default
 Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
 You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
