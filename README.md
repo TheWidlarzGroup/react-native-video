@@ -715,7 +715,7 @@ source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/mani
 type: 'mpd' }}
 ```
 
-##### Provide DRM data
+##### Provide DRM data (only tested with http/https assets)
 
 You can provide some configuration to allow DRM playback.
 This feature will disable the use of `TextureView` on Android.
@@ -738,9 +738,44 @@ source={{
 
 iOS specific fields for `drm`:
 
-* `certificateUrl` Url to the .cer file.
-* `contentId` (optional) (overridable, otherwise it will take the value at `loadingRequest.request.URL.host`)
-* `getLicense` Overridable method, `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`
+* `certificateUrl` - Url to the .cer file.
+* `contentId` (optional) - (overridable, otherwise it will take the value at `loadingRequest.request.URL.host`)
+* `getLicense` - `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
+  You should return on this method a `CKC`, either by just returning it or returning a `Promise` that resolves with the `CKC`.
+  With this prop you can override the license acquisition flow, as an example:
+
+```js
+  getLicense: (spcString) => {
+    const base64spc = btoa(spcString);
+    return fetch(YOUR_LICENSE_SERVER, {
+        method: 'POST',
+        // Control the headers
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        // Build the data as the server specs it
+        body: JSON.stringify({
+            getFairplayLicense: {
+                releasePid: myPid,
+                spcMessage: base64spc,
+            }
+        })
+    })
+        .then(response => response.json())
+        .then((response) => {
+            // Handle the response as you desire, f.e. when the server does not respond directly with the CKC
+            if (response && response.getFairplayLicenseResponse
+                && response.getFairplayLicenseResponse.ckcResponse) {
+                return response.getFairplayLicenseResponse.ckcResponse;
+            }
+            throw new Error('No correct response');
+        })
+        .catch((error) => {
+            console.error('CKC error', error);
+        });
+}
+```
 
 Platforms: Android, iOS
 
