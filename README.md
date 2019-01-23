@@ -718,18 +718,33 @@ source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/mani
 type: 'mpd' }}
 ```
 
-##### Provide DRM data
+##### Provide DRM data (only tested with http/https assets)
 
 You can provide some configuration to allow DRM playback.
 This feature will disable the use of `TextureView` on Android.
 DRM options are `type`, `licenseServer`, `headers`.
 
+###### type
+
+You can specify the DRM type, either by string or using the exported DRMType enum.
+Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
+for iOS: DRMType.FAIRPLAY
+
+###### licenseServer
+
+The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
+
+###### headers
+
+You can customize headers send to the licenseServer.
+
 Example:
-```
+
+```js
 source={{
     uri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p.mpd',
     drm: {
-        type: 'widevine',
+        type: 'widevine', //or DRMType.WIDEVINE
         licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
         headers: {
             'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImZpcnN0X3BsYXlfZXhwaXJhdGlvbiI6NjAsInBsYXlyZWFkeSI6eyJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.FAbIiPxX8BHi9RwfzD7Yn-wugU19ghrkBFKsaCPrZmU'
@@ -738,7 +753,48 @@ source={{
 }}
 ```
 
-Platforms: Android
+iOS specific fields for `drm`:
+
+* `certificateUrl` - Url to the .cer file.
+* `contentId` (optional) - (overridable, otherwise it will take the value at `loadingRequest.request.URL.host`)
+* `getLicense` - `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
+  You should return on this method a `CKC`, either by just returning it or returning a `Promise` that resolves with the `CKC`.
+  With this prop you can override the license acquisition flow, as an example:
+
+```js
+  getLicense: (spcString) => {
+    const base64spc = btoa(spcString);
+    return fetch(YOUR_LICENSE_SERVER, {
+        method: 'POST',
+        // Control the headers
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        // Build the data as the server specs it
+        body: JSON.stringify({
+            getFairplayLicense: {
+                releasePid: myPid,
+                spcMessage: base64spc,
+            }
+        })
+    })
+        .then(response => response.json())
+        .then((response) => {
+            // Handle the response as you desire, f.e. when the server does not respond directly with the CKC
+            if (response && response.getFairplayLicenseResponse
+                && response.getFairplayLicenseResponse.ckcResponse) {
+                return response.getFairplayLicenseResponse.ckcResponse;
+            }
+            throw new Error('No correct response');
+        })
+        .catch((error) => {
+            console.error('CKC error', error);
+        });
+}
+```
+
+Platforms: Android, iOS
 
 ###### Other protocols
 
