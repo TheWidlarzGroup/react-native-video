@@ -1531,6 +1531,7 @@ static int const RCTVideoUnset = -1;
                             @"target": self.reactTag});
       }
   }
+  return NO;
 }
 
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
