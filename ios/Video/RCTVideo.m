@@ -27,6 +27,7 @@ static int const RCTVideoUnset = -1;
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
+  NSDictionary *_source;
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
@@ -57,6 +58,8 @@ static int const RCTVideoUnset = -1;
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
   float _rate;
+  float _maxBitRate;
+
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
@@ -75,6 +78,7 @@ static int const RCTVideoUnset = -1;
   NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
   NSString *_filterName;
+  BOOL _filterEnabled;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
@@ -346,6 +350,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)setSrc:(NSDictionary *)source
 {
+  _source = source;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
@@ -357,7 +362,8 @@ static int const RCTVideoUnset = -1;
       _playerItem = playerItem;
       [self addPlayerItemObservers];
       [self setFilter:_filterName];
-
+      [self setMaxBitRate:_maxBitRate];
+      
       [_player pause];
       [_playerViewController.view removeFromSuperview];
       _playerViewController = nil;
@@ -421,10 +427,13 @@ static int const RCTVideoUnset = -1;
 
 - (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
-  if (!_textTracks) {
+  if (!_textTracks || _textTracks.count==0) {
     handler([AVPlayerItem playerItemWithAsset:asset]);
     return;
   }
+  
+  // AVPlayer can't airplay AVMutableCompositions
+  _allowsExternalPlayback = NO;
 
   // sideload text tracks
   AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
@@ -732,6 +741,26 @@ static int const RCTVideoUnset = -1;
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
                                              object:nil];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemNewAccessLogEntryNotification
+                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleAVPlayerAccess:)
+                                               name:AVPlayerItemNewAccessLogEntryNotification
+                                             object:nil];
+
+}
+
+- (void)handleAVPlayerAccess:(NSNotification *)notification {
+    AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+    AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+    
+    /* TODO: get this working
+    if (self.onBandwidthUpdate) {
+        self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
+    }
+    */
 }
 
 - (void)playbackStalled:(NSNotification *)notification
@@ -887,6 +916,12 @@ static int const RCTVideoUnset = -1;
   [self applyModifiers];
 }
 
+- (void)setMaxBitRate:(float) maxBitRate {
+  _maxBitRate = maxBitRate;
+  _playerItem.preferredPeakBitRate = maxBitRate;
+}
+
+
 - (void)applyModifiers
 {
   if (_muted) {
@@ -898,6 +933,7 @@ static int const RCTVideoUnset = -1;
   }
 
   [self setBufferConfig:_bufferConfig];
+  [self setMaxBitRate:_maxBitRate];
   [self setSelectedAudioTrack:_selectedAudioTrack];
   [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
@@ -1306,39 +1342,33 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setFilter:(NSString *)filterName {
-
     _filterName = filterName;
 
-    AVAsset *asset = _playerItem.asset;
-
-    if (asset != nil) {
-
-        CIFilter *filter = [CIFilter filterWithName:filterName];
-
-        _playerItem.videoComposition = [AVVideoComposition
-                videoCompositionWithAsset:asset
-             applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
-
-                 if (filter == nil) {
-
-                     [request finishWithImage:request.sourceImage context:nil];
-
-                 } else {
-
-                     CIImage *image = request.sourceImage.imageByClampingToExtent;
-
-                     [filter setValue:image forKey:kCIInputImageKey];
-
-                     CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
-
-                     [request finishWithImage:output context:nil];
-
-                 }
-
-             }];
-
+    if (!_filterEnabled) {
+        return;
+    } else if ([[_source objectForKey:@"uri"] rangeOfString:@"m3u8"].location != NSNotFound) {
+        return; // filters don't work for HLS... return
+    } else if (!_playerItem.asset) {
+        return;
     }
+    
+    CIFilter *filter = [CIFilter filterWithName:filterName];
+    _playerItem.videoComposition = [AVVideoComposition
+                                    videoCompositionWithAsset:_playerItem.asset
+                                    applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+        if (filter == nil) {
+            [request finishWithImage:request.sourceImage context:nil];
+        } else {
+            CIImage *image = request.sourceImage.imageByClampingToExtent;
+            [filter setValue:image forKey:kCIInputImageKey];
+            CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+            [request finishWithImage:output context:nil];
+        }
+    }];
+}
 
+- (void)setFilterEnabled:(BOOL)filterEnabled {
+  _filterEnabled = filterEnabled;
 }
 
 #pragma mark - React View Management
