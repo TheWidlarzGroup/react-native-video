@@ -224,7 +224,6 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Log.d("onAttachedToWindow", "drm url");
         initializePlayer();
     }
 
@@ -275,7 +274,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     // Internal methods
     private void initializePlayer() {
-        Log.d("initializePlayer", "drm url");
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
