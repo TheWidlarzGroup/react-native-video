@@ -1513,7 +1513,7 @@ static int const RCTVideoUnset = -1;
                                                             NSLocalizedRecoverySuggestionErrorKey: error
                                                             }
                                  ];
-        self.finishLoadingWithError(licenseError);
+        [self finishLoadingWithError:licenseError];
     }
     return NO;
 }
@@ -1597,7 +1597,7 @@ static int const RCTVideoUnset = -1;
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
                         if (spcError != nil) {
-                            return self.finishLoadingWithError(spcError);
+                            return [self finishLoadingWithError:spcError];
                         }
                         if (spcData != nil) {
                             if(self.onGetLicense) {
@@ -1626,7 +1626,7 @@ static int const RCTVideoUnset = -1;
                                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                                     if (error != nil) {
                                         NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
-                                       self.finishLoadingWithError(error);
+                                       [self finishLoadingWithError:error];
                                     } else {
                                         if([httpResponse statusCode] != 200){
                                             NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
@@ -1638,7 +1638,7 @@ static int const RCTVideoUnset = -1;
                                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Did you send the correct data to the license Server? Is the server ok?"
                                                                                                 }
                                                                      ];
-                                            self.finishLoadingWithError(licenseError);
+                                            [self finishLoadingWithError:licenseError];
                                         } else if (data != nil) {
                                             [dataRequest respondWithData:data];
                                             [loadingRequest finishLoading];
@@ -1651,7 +1651,7 @@ static int const RCTVideoUnset = -1;
                                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Is the licenseServer ok?."
                                                                                                 }
                                                                      ];
-                                            self.finishLoadingWithError(licenseError);
+                                            [self finishLoadingWithError:licenseError];
                                         }
 
                                     }
@@ -1669,7 +1669,7 @@ static int const RCTVideoUnset = -1;
                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM config."
                                                                                 }
                                                      ];
-                            return self.finishLoadingWithError(licenseError);
+                            return [self finishLoadingWithError:licenseError];
                         }
                         
                     } else {
@@ -1681,7 +1681,7 @@ static int const RCTVideoUnset = -1;
                                                                             NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM configuration."
                                                                             }
                                                  ];
-                        return self.finishLoadingWithError(licenseError);
+                        return [self finishLoadingWithError:licenseError];
                     }
                 } else {
                     NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
@@ -1692,7 +1692,7 @@ static int const RCTVideoUnset = -1;
                                                                         NSLocalizedRecoverySuggestionErrorKey: @"Have you specified a valid 'certificateUrl'?"
                                                                         }
                                              ];
-                    return self.finishLoadingWithError(licenseError);
+                    return [self finishLoadingWithError:licenseError];
                 }
             } else {
                 NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
@@ -1703,7 +1703,7 @@ static int const RCTVideoUnset = -1;
                                                                     NSLocalizedRecoverySuggestionErrorKey: @"Did you specified the prop certificateUrl?"
                                                                     }
                                          ];
-                return self.finishLoadingWithError(licenseError);
+                return [self finishLoadingWithError:licenseError];
             }
         } else {
             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
@@ -1714,7 +1714,7 @@ static int const RCTVideoUnset = -1;
                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' 'type' as fairplay?"
                                                                 }
                                      ];
-            return self.finishLoadingWithError(licenseError);
+            return [self finishLoadingWithError:licenseError];
         }
         
     } else {
@@ -1726,7 +1726,7 @@ static int const RCTVideoUnset = -1;
                                                             NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' prop?"
                                                             }
                                  ];
-        return self.finishLoadingWithError(licenseError);
+        return [self finishLoadingWithError:licenseError];
     }
     
     
