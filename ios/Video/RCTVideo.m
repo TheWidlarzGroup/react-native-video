@@ -1494,7 +1494,7 @@ static int const RCTVideoUnset = -1;
     }
 }
 
-- (void)setLicenseResult:(NSString * )license {
+- (void)setLicenseResult:(NSString *)license {
     NSData *respondData = [self base64DataFromString:license];
     if (_loadingRequest) {
         AVAssetResourceLoadingDataRequest *dataRequest = [_loadingRequest dataRequest];
@@ -1503,8 +1503,8 @@ static int const RCTVideoUnset = -1;
     }
 }
 
-- (BOOL)setLicenseResultError:(NSString * )error {
-    if (_loadingRequest) {
+- (BOOL)setLicenseResultError:(NSString *)error {
+    if (_loadingRequest != nil) {
         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                     code: -1336
                                                 userInfo: @{
@@ -1513,9 +1513,24 @@ static int const RCTVideoUnset = -1;
                                                             NSLocalizedRecoverySuggestionErrorKey: error
                                                             }
                                  ];
-        [_loadingRequest finishLoadingWithError:licenseError];
+        self.finishLoadingWithError(licenseError);
     }
     return false;
+}
+
+- (BOOL)finishLoadingWithError:(NSError *)error {
+  if (_loadingRequest && error != nil) {
+      NSError *licenseError = error;
+      [_loadingRequest finishLoadingWithError:licenseError];
+      if (self.onVideoError) {
+        self.onVideoError(@{@"error": @{@"code": [NSNumber numberWithInteger: error.code],
+                                        @"localizedDescription": [error localizedDescription] == nil ? @"" : [error localizedDescription],
+                                        @"localizedFailureReason": [error localizedFailureReason] == nil ? @"" : [error localizedFailureReason],
+                                        @"localizedRecoverySuggestion": [error localizedRecoverySuggestion] == nil ? @"" : [error localizedRecoverySuggestion],
+                                        @"domain": _playerItem.error.domain},
+                            @"target": self.reactTag});
+      }
+  }
 }
 
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
@@ -1581,7 +1596,7 @@ static int const RCTVideoUnset = -1;
                         // Request CKC to the server
                         NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
                         if (spcError != nil) {
-                            [loadingRequest finishLoadingWithError:spcError];
+                            self.finishLoadingWithError(spcError);
                             return false;
                         }
                         if (spcData != nil) {
@@ -1611,7 +1626,7 @@ static int const RCTVideoUnset = -1;
                                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                                     if (error != nil) {
                                         NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
-                                       [loadingRequest finishLoadingWithError:error];
+                                       self.finishLoadingWithError(error);
                                     } else {
                                         if([httpResponse statusCode] != 200){
                                             NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
@@ -1623,7 +1638,7 @@ static int const RCTVideoUnset = -1;
                                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Did you send the correct data to the license Server? Is the server ok?"
                                                                                                 }
                                                                      ];
-                                            [loadingRequest finishLoadingWithError:licenseError];
+                                            self.finishLoadingWithError(licenseError);
                                         } else if (data != nil) {
                                             [dataRequest respondWithData:data];
                                             [loadingRequest finishLoading];
@@ -1636,7 +1651,7 @@ static int const RCTVideoUnset = -1;
                                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Is the licenseServer ok?."
                                                                                                 }
                                                                      ];
-                                            [loadingRequest finishLoadingWithError:licenseError];
+                                            self.finishLoadingWithError(licenseError);
                                         }
 
                                     }
@@ -1654,7 +1669,7 @@ static int const RCTVideoUnset = -1;
                                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM config."
                                                                                 }
                                                      ];
-                            [loadingRequest finishLoadingWithError:licenseError];
+                            self.finishLoadingWithError(licenseError);
                             return false;
                         }
                         
@@ -1667,7 +1682,7 @@ static int const RCTVideoUnset = -1;
                                                                             NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM configuration."
                                                                             }
                                                  ];
-                        [loadingRequest finishLoadingWithError:licenseError];
+                        self.finishLoadingWithError(licenseError);
                         return false;
                     }
                 } else {
@@ -1679,7 +1694,7 @@ static int const RCTVideoUnset = -1;
                                                                         NSLocalizedRecoverySuggestionErrorKey: @"Have you specified a valid 'certificateUrl'?"
                                                                         }
                                              ];
-                    [loadingRequest finishLoadingWithError:licenseError];
+                    self.finishLoadingWithError(licenseError);
                     return false;
                 }
             } else {
@@ -1691,7 +1706,7 @@ static int const RCTVideoUnset = -1;
                                                                     NSLocalizedRecoverySuggestionErrorKey: @"Did you specified the prop certificateUrl?"
                                                                     }
                                          ];
-                [loadingRequest finishLoadingWithError:licenseError];
+                self.finishLoadingWithError(licenseError);
                 return false;
             }
         } else {
@@ -1703,7 +1718,7 @@ static int const RCTVideoUnset = -1;
                                                                 NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' 'type' as fairplay?"
                                                                 }
                                      ];
-            [loadingRequest finishLoadingWithError:licenseError];
+            self.finishLoadingWithError(licenseError);
             return false;
         }
         
@@ -1716,7 +1731,7 @@ static int const RCTVideoUnset = -1;
                                                             NSLocalizedRecoverySuggestionErrorKey: @"Have you specified the 'drm' prop?"
                                                             }
                                  ];
-        [loadingRequest finishLoadingWithError:licenseError];
+        self.finishLoadingWithError(licenseError);
         return false;
     }
     
