@@ -47,5 +47,6 @@
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)setLicenseResult:(NSString * )license;
 - (void)setLicenseResultError:(NSString * )error;
+- (BOOL)finishLoadingWithError:(NSError *)error
 
 @end
