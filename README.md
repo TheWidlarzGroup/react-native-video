@@ -757,7 +757,7 @@ iOS specific fields for `drm`:
 
 * `certificateUrl` - Url to the .cer file.
 * `contentId` (optional) - (overridable, otherwise it will take the value at `loadingRequest.request.URL.host`)
-* `getLicense` - `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
+* `getLicense` - `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
   You should return on this method a `CKC`, either by just returning it or returning a `Promise` that resolves with the `CKC`.
   With this prop you can override the license acquisition flow, as an example:
 
