@@ -897,7 +897,9 @@ static int const RCTVideoUnset = -1;
     height = [maxResolution[@"height"] intValue];
   }
 
-  _playerItem.preferredMaximumResolution = CGSizeMake(width, height);
+  if (@available(iOS 11.0, *)) {
+    _playerItem.preferredMaximumResolution = CGSizeMake(width, height);
+  }
 }
 
 
