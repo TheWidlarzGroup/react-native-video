@@ -724,16 +724,6 @@ You can provide some configuration to allow DRM playback.
 This feature will disable the use of `TextureView` on Android.
 DRM options are `type`, `licenseServer`, `headers`.
 
-###### type
-
-You can specify the DRM type, either by string or using the exported DRMType enum.
-Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
-for iOS: DRMType.FAIRPLAY
-
-###### licenseServer
-
-The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
-
 ###### headers
 
 You can customize headers send to the licenseServer.
@@ -752,6 +742,10 @@ source={{
     }
 }}
 ```
+
+###### licenseServer
+
+The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
 
 iOS specific fields for `drm`:
 
@@ -795,6 +789,12 @@ iOS specific fields for `drm`:
 ```
 
 Platforms: Android, iOS
+
+###### type
+
+You can specify the DRM type, either by string or using the exported DRMType enum.
+Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
+for iOS: DRMType.FAIRPLAY
 
 ###### Other protocols
 
