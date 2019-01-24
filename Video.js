@@ -339,6 +339,7 @@ Video.propTypes = {
     // Opaque type returned by require('./video.mp4')
     PropTypes.number
   ]),
+  failureRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
   resizeMode: PropTypes.string,
   poster: PropTypes.string,

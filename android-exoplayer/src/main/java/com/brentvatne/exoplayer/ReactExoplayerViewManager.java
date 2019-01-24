@@ -48,6 +48,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
+    private static final String PROP_FAILURE_RETRY_COUNT = "failureRetryCount";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
@@ -228,6 +229,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
     public void setMaxBitRate(final ReactExoplayerView videoView, final int maxBitRate) {
         videoView.setMaxBitRateModifier(maxBitRate);
+    }
+
+    @ReactProp(name = PROP_FAILURE_RETRY_COUNT)
+    public void failureRetryCount(final ReactExoplayerView videoView, final int failureRetryCount) {
+        videoView.setfailureRetryCountModifier(failureRetryCount);
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
