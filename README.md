@@ -269,6 +269,7 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [failureRetryCount](#failureRetryCount)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -474,6 +475,18 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### failureRetryCount
+Sets the number of times the media play failures to be retried. Useful to recover from transient internet faiures. Recoverable failures are retried before reporting the error to the application.
+
+Default: 3. Retry 3 times.
+
+Example:
+```
+failureRetryCount={5} // retry 5 times
+```
+
+Platforms: Android ExoPlayer
 
 #### muted
 Controls whether the audio is muted
