@@ -269,6 +269,7 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [maxResolution](#maxresolution)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -474,6 +475,18 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### maxResolution
+Sets the desired limit to resolution, to limit network bandwidth consumption when multiple video streams are available for a playlist.
+
+Default: 0. Don't limit the maxResolution.
+
+Example:
+```
+maxResolution={width:360, height: 180}
+```
+
+Platforms: iOS
 
 #### muted
 Controls whether the audio is muted
