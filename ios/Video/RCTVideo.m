@@ -1495,11 +1495,13 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setLicenseResult:(NSString *)license {
-    NSData *respondData = [self base64DataFromString:license];
-    if (_loadingRequest) {
+    NSData *respondData = [self base64DataFromBase64String:license];
+    if (_loadingRequest != nil && respondData != nil) {
         AVAssetResourceLoadingDataRequest *dataRequest = [_loadingRequest dataRequest];
         [dataRequest respondWithData:respondData];
         [_loadingRequest finishLoading];
+    } else {
+        [self setLicenseResultError:@"No data from JS license response"];
     }
 }
 
@@ -1733,17 +1735,13 @@ static int const RCTVideoUnset = -1;
     return NO;
 }
 
-- (NSData *)base64DataFromString: (NSString *)string {
-    // Create NSData object
-    NSData *nsdata = [string
-                      dataUsingEncoding:NSUTF8StringEncoding];
-    // Get NSString from NSData object in Base64
-    NSString *base64Encoded = [nsdata base64EncodedStringWithOptions:0];
-    
-    // NSData from the Base64 encoded str
-    NSData *nsdataFromBase64String = [[NSData alloc]
-                                      initWithBase64EncodedString:base64Encoded options:0];
-    return nsdataFromBase64String;
+- (NSData *)base64DataFromBase64String: (NSString *)base64String {
+    if (base64String != nil) {
+        // NSData from the Base64 encoded str
+        NSData *base64Data = [[NSData alloc] initWithBase64EncodedString:base64String options:NSASCIIStringEncoding];
+        return base64Data;
+    }
+    return nil;
 }
 
 @end
