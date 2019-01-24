@@ -893,8 +893,8 @@ static int const RCTVideoUnset = -1;
     width = [maxResolution[@"width"] intValue];
   }
   int height = 0;
-  if ([maxResolution[@"width"] isKindOfClass:[NSNumber class]]) {
-    width = [maxResolution[@"width"] intValue];
+  if ([maxResolution[@"height"] isKindOfClass:[NSNumber class]]) {
+    height = [maxResolution[@"height"] intValue];
   }
 
   _playerItem.preferredMaximumResolution = CGSizeMake(width, height);
