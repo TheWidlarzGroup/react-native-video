@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "4.2.1",
+    "version": "4.3.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -25,18 +25,22 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git@github.com:brentvatne/react-native-video.git"
+        "url": "git@github.com:react-native-community/react-native-video.git"
     },
     "devDependencies": {
-        "eslint": "1.10.3",
         "babel-eslint": "5.0.0-beta8",
+        "eslint": "1.10.3",
+        "eslint-config-airbnb": "4.0.0",
         "eslint-plugin-react": "3.16.1",
-        "eslint-config-airbnb": "4.0.0"
+        "react": "^16.7.0",
+        "react-dom": "^16.7.0",
+        "react-hot-loader": "^4.6.3",
+        "react-native": "^0.57.8"
     },
     "dependencies": {
-        "keymirror": "0.1.1",
+        "keymirror": "^0.1.1",
         "prop-types": "^15.5.10",
-	"shaka-player": "2.4.4"
+        "shaka-player": "^2.4.4"
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
@@ -46,7 +50,7 @@
             "sourceDir": "./android-exoplayer"
         }
     },
-    "files":[
+    "files": [
         "android-exoplayer",
         "android",
         "dom",
