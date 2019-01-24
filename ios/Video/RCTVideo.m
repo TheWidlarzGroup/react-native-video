@@ -1222,8 +1222,15 @@ static int const RCTVideoUnset = -1;
     }
     
     self.transform = [self transformWithRotation:0];
-    _motionManager = [[CMMotionManager alloc] init];
-    _motionManager.deviceMotionUpdateInterval = 1/60;
+    if (_motionManager == nil) {
+      _motionManager = [[CMMotionManager alloc] init];
+      _motionManager.deviceMotionUpdateInterval = 1/60;
+    }
+    NSUInteger sampleCount = 15;
+    __block NSMutableArray<NSNumber*>* pastX = [[NSMutableArray alloc] initWithCapacity:sampleCount];
+    __block NSUInteger bufferHead = 0;
+    __block BOOL shouldAnimate = NO;
+    
     [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
       if (self == nil) { return; }
       if (motion == nil) { return ;}
@@ -1231,9 +1238,34 @@ static int const RCTVideoUnset = -1;
       if (_playerLayer == nil) { return; }
       CMAcceleration gravity = motion.gravity;
       if (fabs(gravity.x) < 0.07 && fabs(gravity.y) < 0.07) { return; }
-
+      
+      pastX[bufferHead++ % sampleCount] = [NSNumber numberWithDouble: gravity.x];
+      double average = 0;
+      for (int i = 0; i < pastX.count - 1; i++) {
+        average += [pastX[i] doubleValue];
+      }
+      average = average / pastX.count;
+      double mse = 0;
+      for (int i = 0; i < pastX.count - 1; i++) {
+        mse += pow(average - [pastX[i] doubleValue], 2);
+      }
+      printf("mse: %.2f\n", mse);
+      if (mse < 0.01) {
+        shouldAnimate = YES;
+        return;
+      } else {
+      }
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
-      self.transform = [self transformWithRotation:rotation];
+      if (shouldAnimate) {
+        [UIView animateWithDuration:0.15 animations:^{
+          self.transform = [self transformWithRotation:rotation];
+        } completion:^(BOOL finished) {
+          shouldAnimate = NO;
+        }];
+      } else {
+        self.transform = [self transformWithRotation:rotation];
+      }
+      
     }];
 
   }
