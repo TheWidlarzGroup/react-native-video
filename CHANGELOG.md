@@ -1,6 +1,6 @@
 ## Changelog
 
-### Version 4.3.1
+### next
 * Support DRM for iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
 
 ### Version 4.3.0
