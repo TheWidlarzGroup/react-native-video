@@ -226,6 +226,8 @@ export default class Video extends Component {
         })).catch((error) => {
           NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
         });
+      } else {
+        NativeModules.VideoManager.setLicenseError("No spc received", findNodeHandle(this._root));
       }
     } else {
       NativeModules.VideoManager.setLicenseError("Not enough data for license override", findNodeHandle(this._root));
