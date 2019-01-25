@@ -1214,22 +1214,15 @@ static int const RCTVideoUnset = -1;
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
     /// Rotato
-    if (!_frameless) {
-      if (_motionManager) {
-        [_motionManager stopDeviceMotionUpdates];
-      }
-      return;
-    }
     
     self.transform = [self transformWithRotation:0];
     if (_motionManager == nil) {
       _motionManager = [[CMMotionManager alloc] init];
       _motionManager.deviceMotionUpdateInterval = 1/60;
     }
-    NSUInteger sampleCount = 15;
-    __block NSMutableArray<NSNumber*>* pastX = [[NSMutableArray alloc] initWithCapacity:sampleCount];
-    __block NSUInteger bufferHead = 0;
-    __block BOOL shouldAnimate = NO;
+    
+    __block double lastX = 0;
+    double decay = 0.92;
     
     [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
       if (self == nil) { return; }
@@ -1239,32 +1232,10 @@ static int const RCTVideoUnset = -1;
       CMAcceleration gravity = motion.gravity;
       if (fabs(gravity.x) < 0.07 && fabs(gravity.y) < 0.07) { return; }
       
-      pastX[bufferHead++ % sampleCount] = [NSNumber numberWithDouble: gravity.x];
-      double average = 0;
-      for (int i = 0; i < pastX.count - 1; i++) {
-        average += [pastX[i] doubleValue];
-      }
-      average = average / pastX.count;
-      double mse = 0;
-      for (int i = 0; i < pastX.count - 1; i++) {
-        mse += pow(average - [pastX[i] doubleValue], 2);
-      }
-      printf("mse: %.2f\n", mse);
-      if (mse < 0.01) {
-        shouldAnimate = YES;
-        return;
-      } else {
-      }
-      double rotation = atan2(gravity.x, gravity.y) - M_PI;
-      if (shouldAnimate) {
-        [UIView animateWithDuration:0.15 animations:^{
-          self.transform = [self transformWithRotation:rotation];
-        } completion:^(BOOL finished) {
-          shouldAnimate = NO;
-        }];
-      } else {
-        self.transform = [self transformWithRotation:rotation];
-      }
+      lastX = lastX * decay + gravity.x * (1 - decay);
+      double rotation = atan2(lastX, gravity.y) - M_PI;
+      
+      self.transform = [self transformWithRotation:rotation];
       
     }];
 
