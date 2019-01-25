@@ -275,7 +275,9 @@ class ReactExoplayerView extends FrameLayout implements
      * Initializing Player control
      */
     private void initializePlayerControl() {
-        playerControlView = new PlayerControlView(getContext());
+        if(playerControlView == null) {
+            playerControlView = new PlayerControlView(getContext());
+        }
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -284,6 +286,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         //Setting the player for the playerControlView
         playerControlView.setPlayer(player);
+        playerControlView.setVisibility(VISIBLE);
 
         //Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
@@ -1104,9 +1107,13 @@ class ReactExoplayerView extends FrameLayout implements
      * @param controls  value of the controls prop passed from react-native
      */
     public void setControls(boolean controls) {
-        if(controls && (exoPlayerView != null)) {
+         if(controls && (exoPlayerView != null)) {
             //Initialize playerControlView
             initializePlayerControl();
+        } else {
+            if(getChildAt(1) instanceof PlayerControlView && (exoPlayerView != null)){
+                removeViewAt(1);
+            }
         }
     }
 }
