@@ -228,7 +228,7 @@ export default class Video extends Component {
         });
       }
     } else {
-      NativeModules.VideoManager.setLicenseError("No enough data for license override", findNodeHandle(this._root));
+      NativeModules.VideoManager.setLicenseError("Not enough data for license override", findNodeHandle(this._root));
     }
   }
 
@@ -294,7 +294,7 @@ export default class Video extends Component {
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
       onGetLicense: this._onGetLicense,
     });
-    
+
     const posterStyle = {
       ...StyleSheet.absoluteFillObject,
       resizeMode: this.props.posterResizeMode || 'contain',
