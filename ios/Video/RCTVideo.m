@@ -1509,7 +1509,7 @@ static int const RCTVideoUnset = -1;
 - (BOOL)setLicenseResultError:(NSString *)error {
     if (_loadingRequest != nil) {
         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                    code: -1336
+                                                    code: RCTVideoErrorFromJSPart
                                                 userInfo: @{
                                                             NSLocalizedDescriptionKey: error,
                                                             NSLocalizedFailureReasonErrorKey: error,
@@ -1634,7 +1634,7 @@ static int const RCTVideoUnset = -1;
                                         if([httpResponse statusCode] != 200){
                                             NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
                                             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                                        code: -1337
+                                                                                        code: RCTVideoErrorLicenseRequestNotOk
                                                                                     userInfo: @{
                                                                                                 NSLocalizedDescriptionKey: @"Error obtaining license.",
                                                                                                 NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"License server responded with status code %li", (long)[httpResponse statusCode]],
@@ -1647,7 +1647,7 @@ static int const RCTVideoUnset = -1;
                                             [loadingRequest finishLoading];
                                         } else {
                                             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                                        code: -1338
+                                                                                        code: RCTVideoErrorNoDataFromLicenseRequest
                                                                                     userInfo: @{
                                                                                                 NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
                                                                                                 NSLocalizedFailureReasonErrorKey: @"No data received from the license server.",
@@ -1665,7 +1665,7 @@ static int const RCTVideoUnset = -1;
                             
                         } else {
                             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                        code: -1339
+                                                                        code: RCTVideoErrorNoSPC
                                                                     userInfo: @{
                                                                                 NSLocalizedDescriptionKey: @"Error obtaining license.",
                                                                                 NSLocalizedFailureReasonErrorKey: @"No spc received.",
@@ -1677,7 +1677,7 @@ static int const RCTVideoUnset = -1;
                         
                     } else {
                         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                    code: -1340
+                                                                    code: RCTVideoErrorNoDataRequest
                                                                 userInfo: @{
                                                                             NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
                                                                             NSLocalizedFailureReasonErrorKey: @"No dataRequest found.",
@@ -1688,7 +1688,7 @@ static int const RCTVideoUnset = -1;
                     }
                 } else {
                     NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                code: -1341
+                                                                code: RCTVideoErrorNoCertificateData
                                                             userInfo: @{
                                                                         NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
                                                                         NSLocalizedFailureReasonErrorKey: @"No certificate data obtained from the specificied url.",
@@ -1699,7 +1699,7 @@ static int const RCTVideoUnset = -1;
                 }
             } else {
                 NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                            code: -1342
+                                                            code: RCTVideoErrorNoCertificateURL
                                                         userInfo: @{
                                                                     NSLocalizedDescriptionKey: @"Error obtaining DRM License.",
                                                                     NSLocalizedFailureReasonErrorKey: @"No certificate URL has been found.",
@@ -1710,7 +1710,7 @@ static int const RCTVideoUnset = -1;
             }
         } else {
             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                        code: -1343
+                                                        code: RCTVideoErrorNoFairplayDRM
                                                     userInfo: @{
                                                                 NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
                                                                 NSLocalizedFailureReasonErrorKey: @"Not a valid DRM Scheme has found",
@@ -1722,7 +1722,7 @@ static int const RCTVideoUnset = -1;
         
     } else {
         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                    code: -1344
+                                                    code: RCTVideoErrorNoDRMData
                                                 userInfo: @{
                                                             NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
                                                             NSLocalizedFailureReasonErrorKey: @"No drm object found.",

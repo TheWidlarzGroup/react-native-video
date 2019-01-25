@@ -40,6 +40,18 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onGetLicense;
 
+typedef NS_ENUM(NSInteger, RCTVideoError) {
+    RCTVideoErrorFromJSPart,
+    RCTVideoErrorLicenseRequestNotOk,
+    RCTVideoErrorNoDataFromLicenseRequest,
+    RCTVideoErrorNoSPC,
+    RCTVideoErrorNoDataRequest,
+    RCTVideoErrorNoCertificateData,
+    RCTVideoErrorNoCertificateURL,
+    RCTVideoErrorNoFairplayDRM,
+    RCTVideoErrorNoDRMData
+};
+
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
