@@ -265,9 +265,9 @@ class ReactExoplayerView extends FrameLayout implements
      */
     private void togglePlayerControlVisibility() {
         if(playerControlView.isVisible()) {
-            playerControlView.setVisibility(INVISIBLE);
+            playerControlView.hide();
         } else {
-            playerControlView.setVisibility(VISIBLE);
+            playerControlView.show();
         }
     }
 
@@ -286,7 +286,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         //Setting the player for the playerControlView
         playerControlView.setPlayer(player);
-        playerControlView.setVisibility(VISIBLE);
+        playerControlView.show();
 
         //Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
@@ -559,7 +559,7 @@ class ReactExoplayerView extends FrameLayout implements
                 videoLoaded();
                 //Setting the visibility for the playerControlView
                 if(playerControlView != null) {
-                    playerControlView.setVisibility(VISIBLE);
+                    playerControlView.show();
                 }
                 break;
             case ExoPlayer.STATE_ENDED:
