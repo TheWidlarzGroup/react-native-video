@@ -35,7 +35,7 @@ public class OvalCalculator {
     //private double min_scale = -1, max_scale = -1, zoom_factor = -1;
 
     private int fill_mode = 0; // 0: preserve_ratio_fill, 1: preserve_ratio_fit
-    private double landscape_offset_percentage = 0;
+    private double landscape_offset_percentage = 0, portrait_offset_percentage = 0;
 
     private double trim_percentage = 0;
     //private double trim_videoWidth = 3, trim_videoHeight = 4; // default trim is on
@@ -127,6 +127,11 @@ public class OvalCalculator {
         this.landscape_offset_percentage = landscape_offset_percentage;
     }
 
+    public void set_portrait_offset(double portrait_offset_percentage)
+    {
+        this.portrait_offset_percentage = portrait_offset_percentage;
+    }
+
     public void set_reduce_zoom_factor(boolean flag)
     {
         reduceZoomFactor = flag;
@@ -177,12 +182,22 @@ public class OvalCalculator {
         return landscape_offset_percentage;
     }
 
+    public double get_portrait_offset_percentage()
+    {
+        return portrait_offset_percentage;
+    }
+
     public boolean is_shift_on_landscape()
     {
         return (landscape_offset_percentage != 0 && video_width < video_height);  // only for portrait video
     }
 
-    public double get_landscase_offset(double rad)
+    public boolean is_shift_on_portrait()
+    {
+        return (portrait_offset_percentage != 0 && video_width > video_height);  // only for portrait video
+    }
+
+    public double get_landscape_offset(double rad)
     {
         if (video_width >= video_height)
             return 0;
@@ -198,14 +213,31 @@ public class OvalCalculator {
             return Math.abs(Math.sin(Math.PI - ((Math.PI - Math.abs(r) - slow_start_rad_portrait) * 0.5 * Math.PI / (0.5 * Math.PI - slow_start_rad_portrait)))) * landscape_offset_percentage * view_height;
     }
 
+    public double get_portrait_offset(double rad) {
+        if (video_width <= video_height)  // portrait (viewport) offset is used for landscape video only
+            return 0;
+        return Math.abs(Math.cos(rad)) * portrait_offset_percentage * view_height;
+    }
+
     public double get_landscape_offset_x(double rad)
     {
-        return get_landscase_offset(rad) * Math.sin(rad);
+        return get_landscape_offset(rad) * Math.sin(rad);
     }
 
     public double get_landscape_offset_y(double rad)
     {
-        return -get_landscase_offset(rad) * Math.cos(rad);
+        return -get_landscape_offset(rad) * Math.cos(rad);
+    }
+
+    public double get_portrait_offset_x(double rad)
+    {
+        return -get_portrait_offset(rad) * Math.cos(rad);
+    }
+
+    public double get_portrait_offset_y(double rad)
+    {
+        //return 0;
+        return -get_portrait_offset(rad) * Math.sin(rad);
     }
 
     private boolean check_invalid_init()
