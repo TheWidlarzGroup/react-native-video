@@ -228,6 +228,7 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
+  [self startFramelessIfNeeded];
 }
 
 #pragma mark - Audio events
@@ -1209,30 +1210,35 @@ static int const RCTVideoUnset = -1;
     
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
-    /// Rotato
-    if (!_frameless) {
-      if (_motionManager) {
-        [_motionManager stopDeviceMotionUpdates];
-        _motionManager = nil;
-      }
-      return;
-    }
     
-    _motionManager = [[RCTMotionManager alloc] init];
-    self.transform = [_motionManager getZeroRotationTransform];
-    if (_playerItem == nil) { return; }
-    if (_playerLayer == nil) { return; }
-    
-    [_motionManager setVideoWidth:_playerItem.asset.naturalSize.width
-                      videoHeight:_playerItem.asset.naturalSize.height
-                        viewWidth:self.bounds.size.width
-                       viewHeight:self.bounds.size.height];
-    
-    [_motionManager startDeviceMotionUpdatesWithHandler:^(CGAffineTransform transform) {
-      self.transform = transform;
-    }];
-    
+    [self startFramelessIfNeeded];
   }
+}
+
+- (void) startFramelessIfNeeded {
+  if (!_frameless) {
+    if (_motionManager) {
+      [_motionManager stopDeviceMotionUpdates];
+      _motionManager = nil;
+    }
+    return;
+  }
+  
+  _motionManager = [[RCTMotionManager alloc] init];
+  self.transform = [_motionManager getZeroRotationTransform];
+  if (_playerItem == nil) { return; }
+  if (_playerLayer == nil) { return; }
+  
+  [_motionManager setVideoWidth:_playerItem.asset.naturalSize.width
+                    videoHeight:_playerItem.asset.naturalSize.height
+                      viewWidth:self.bounds.size.width
+                     viewHeight:self.bounds.size.height];
+  __weak RCTVideo *weakSelf = self;
+  [_motionManager startDeviceMotionUpdatesWithHandler:^(CGAffineTransform transform) {
+    if (weakSelf == nil) { return; }
+    weakSelf.transform = transform;
+  }];
+  
 }
 
 - (void)setControls:(BOOL)controls
