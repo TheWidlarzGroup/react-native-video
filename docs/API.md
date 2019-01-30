@@ -1,7 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
 - [Configurable props](#configurable-props)
   - [allowsExternalPlayback](#allowsexternalplayback)
@@ -25,7 +24,7 @@
   - [poster](#poster)
   - [posterResizeMode](#posterresizemode)
   - [progressUpdateInterval](#progressupdateinterval)
-- [rate](#rate)
+  - [rate](#rate)
   - [repeat](#repeat)
   - [reportBandwidth](#reportbandwidth)
   - [resizeMode](#resizemode)
@@ -324,7 +323,7 @@ Default: 250.0
 
 Platforms: all
 
-### rate
+#### rate
 
 Speed at which the media should play.
 
