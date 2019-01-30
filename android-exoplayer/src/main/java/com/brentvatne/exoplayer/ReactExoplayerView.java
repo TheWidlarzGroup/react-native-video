@@ -876,7 +876,7 @@ class ReactExoplayerView extends FrameLayout implements
                 TrackGroup group = groups.get(i);
                 for (int j = 0; j < group.length; j++) {
                     Format format = group.getFormat(j);
-                    if (format.height == value.asInt()) {
+                    if (format.height == height) {
                         groupIndex = i;
                         tracks[0] = j;
                         break;
@@ -894,14 +894,12 @@ class ReactExoplayerView extends FrameLayout implements
             groupIndex = getGroupIndexForDefaultLocale(groups);
         }
 
-        if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO) { // Video auto
-            if (groups.length != 0) {
-                TrackGroup group = groups.get(0);
-                tracks = new int[group.length];
-                groupIndex = 0;
-                for (int j = 0; j < group.length; j++) {
-                    tracks[j] = j;
-                }
+        if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length > 0) { // Video auto
+            TrackGroup group = groups.get(0);
+            tracks = new int[group.length];
+            groupIndex = 0;
+            for (int j = 0; j < group.length; j++) {
+                tracks[j] = j;
             }
         } else if (groupIndex == C.INDEX_UNSET) {
             trackSelector.setParameters(disableParameters);
