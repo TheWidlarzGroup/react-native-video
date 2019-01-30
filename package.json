@@ -29,6 +29,7 @@
     },
     "devDependencies": {
         "babel-eslint": "5.0.0-beta8",
+        "doctoc": "^1.4.0",
         "eslint": "1.10.3",
         "eslint-config-airbnb": "4.0.0",
         "eslint-plugin-react": "3.16.1",
@@ -43,7 +44,8 @@
         "shaka-player": "^2.4.4"
     },
     "scripts": {
-        "test": "node_modules/.bin/eslint *.js"
+        "test": "node_modules/.bin/eslint *.js",
+        "docs": "doctoc docs/API.md"
     },
     "rnpm": {
         "android": {
