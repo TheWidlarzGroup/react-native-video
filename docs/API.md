@@ -56,6 +56,7 @@
       - [onLoad](#onload)
       - [onLoadStart](#onloadstart)
       - [onProgress](#onprogress)
+      - [onPlaybackRateChange](#onplaybackratechange)
       - [onSeek](#onseek)
       - [onTimedMetadata](#ontimedmetadata)
   - [Methods](#methods)
@@ -798,6 +799,26 @@ Example:
   currentTime: 5.2,
   playableDuration: 34.6,
   seekableDuration: 888
+}
+```
+
+Platforms: all
+
+#### onPlaybackRateChange
+
+Callback function that is called when the playback rate changes.
+
+Payload:
+
+| Property     | Type   | Description |
+| ------------ | ------ | ----------- |
+| playbackRate | number | Rate        |
+
+Example:
+
+```
+{
+  playbackRate: 1
 }
 ```
 
