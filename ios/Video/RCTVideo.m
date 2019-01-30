@@ -221,6 +221,9 @@ static int const RCTVideoUnset = -1;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
   }
+  if (_motionManager) {
+    [_motionManager stopDeviceMotionUpdates];
+  }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
@@ -1211,7 +1214,12 @@ static int const RCTVideoUnset = -1;
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
     /// Rotato
-    if (!_frameless) { return; }
+    if (!_frameless) {
+      if (_motionManager) {
+        [_motionManager stopDeviceMotionUpdates];
+      }
+      return;
+    }
     
     self.transform = [self transformWithRotation:0];
     _motionManager = [[CMMotionManager alloc] init];
@@ -1222,7 +1230,8 @@ static int const RCTVideoUnset = -1;
       if (_playerItem == nil) { return; }
       if (_playerLayer == nil) { return; }
       CMAcceleration gravity = motion.gravity;
-      
+      if (fabs(gravity.x) < 0.07 && fabs(gravity.y) < 0.07) { return; }
+
       double rotation = atan2(gravity.x, gravity.y) - M_PI;
       self.transform = [self transformWithRotation:rotation];
     }];
@@ -1403,8 +1412,8 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - Lifecycle
 
-- (void)removeFromSuperview
-{
+- (void)removeFromSuperview {
+  [_motionManager stopDeviceMotionUpdates];
   [_player pause];
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
