@@ -2,70 +2,73 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Configurable props](#configurable-props)
-  - [allowsExternalPlayback](#allowsexternalplayback)
-  - [audioOnly](#audioonly)
-  - [bufferConfig](#bufferconfig)
-  - [controls](#controls)
-  - [filter](#filter)
-  - [filterEnabled](#filterenabled)
-  - [fullscreen](#fullscreen)
-  - [fullscreenAutorotate](#fullscreenautorotate)
-  - [fullscreenOrientation](#fullscreenorientation)
-  - [headers](#headers)
-  - [hideShutterView](#hideshutterview)
-  - [id](#id)
-  - [ignoreSilentSwitch](#ignoresilentswitch)
-  - [maxBitRate](#maxbitrate)
-  - [muted](#muted)
-  - [paused](#paused)
-  - [playInBackground](#playinbackground)
-  - [playWhenInactive](#playwheninactive)
-  - [poster](#poster)
-  - [posterResizeMode](#posterresizemode)
-  - [progressUpdateInterval](#progressupdateinterval)
-  - [rate](#rate)
-  - [repeat](#repeat)
-  - [reportBandwidth](#reportbandwidth)
-  - [resizeMode](#resizemode)
-  - [selectedAudioTrack](#selectedaudiotrack)
-  - [selectedTextTrack](#selectedtexttrack)
-  - [selectedVideoTrack](#selectedvideotrack)
-  - [source](#source)
-    - [Asset loaded via require](#asset-loaded-via-require)
-    - [URI string](#uri-string)
-      - [Web address (http://, https://)](#web-address-http-https)
-      - [File path (file://)](#file-path-file)
-      - [iPod Library (ipod-library://)](#ipod-library-ipod-library)
-      - [Other protocols](#other-protocols)
-  - [stereoPan](#stereopan)
-  - [textTracks](#texttracks)
-  - [useTextureView](#usetextureview)
-  - [volume](#volume)
-- [Event props](#event-props)
-  - [onAudioBecomingNoisy](#onaudiobecomingnoisy)
-  - [onBandwidthUpdate](#onbandwidthupdate)
-  - [onEnd](#onend)
-  - [onExternalPlaybackChange](#onexternalplaybackchange)
-  - [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
-  - [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
-  - [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
-  - [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
-  - [onLoad](#onload)
-  - [onLoadStart](#onloadstart)
-  - [onProgress](#onprogress)
-  - [onSeek](#onseek)
-  - [onTimedMetadata](#ontimedmetadata)
-- [Methods](#methods)
-  - [dismissFullscreenPlayer](#dismissfullscreenplayer)
-  - [presentFullscreenPlayer](#presentfullscreenplayer)
-  - [save](#save)
-  - [seek()](#seek)
-    - [Exact seek](#exact-seek)
+- [react-native-video API](#react-native-video-api)
+  - [Configurable props](#configurable-props)
+      - [allowsExternalPlayback](#allowsexternalplayback)
+      - [audioOnly](#audioonly)
+      - [bufferConfig](#bufferconfig)
+      - [controls](#controls)
+      - [filter](#filter)
+      - [filterEnabled](#filterenabled)
+      - [fullscreen](#fullscreen)
+      - [fullscreenAutorotate](#fullscreenautorotate)
+      - [fullscreenOrientation](#fullscreenorientation)
+      - [headers](#headers)
+      - [hideShutterView](#hideshutterview)
+      - [id](#id)
+      - [ignoreSilentSwitch](#ignoresilentswitch)
+      - [maxBitRate](#maxbitrate)
+      - [muted](#muted)
+      - [paused](#paused)
+      - [playInBackground](#playinbackground)
+      - [playWhenInactive](#playwheninactive)
+      - [poster](#poster)
+      - [posterResizeMode](#posterresizemode)
+      - [progressUpdateInterval](#progressupdateinterval)
+      - [rate](#rate)
+      - [repeat](#repeat)
+      - [reportBandwidth](#reportbandwidth)
+      - [resizeMode](#resizemode)
+      - [selectedAudioTrack](#selectedaudiotrack)
+      - [selectedTextTrack](#selectedtexttrack)
+      - [selectedVideoTrack](#selectedvideotrack)
+      - [source](#source)
+        - [Asset loaded via require](#asset-loaded-via-require)
+        - [URI string](#uri-string)
+          - [Web address (http://, https://)](#web-address-http-https)
+          - [File path (file://)](#file-path-file)
+          - [iPod Library (ipod-library://)](#ipod-library-ipod-library)
+          - [Other protocols](#other-protocols)
+      - [stereoPan](#stereopan)
+      - [textTracks](#texttracks)
+      - [useTextureView](#usetextureview)
+      - [volume](#volume)
+  - [Event props](#event-props)
+      - [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+      - [onBandwidthUpdate](#onbandwidthupdate)
+      - [onEnd](#onend)
+      - [onExternalPlaybackChange](#onexternalplaybackchange)
+      - [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
+      - [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
+      - [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
+      - [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
+      - [onLoad](#onload)
+      - [onLoadStart](#onloadstart)
+      - [onProgress](#onprogress)
+      - [onSeek](#onseek)
+      - [onTimedMetadata](#ontimedmetadata)
+  - [Methods](#methods)
+      - [dismissFullscreenPlayer](#dismissfullscreenplayer)
+      - [presentFullscreenPlayer](#presentfullscreenplayer)
+      - [save](#save)
+      - [seek()](#seek)
+        - [Exact seek](#exact-seek)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### Configurable props
+# react-native-video API
+
+## Configurable props
 
 #### allowsExternalPlayback
 
@@ -596,7 +599,7 @@ Adjust the volume.
 
 Platforms: all
 
-### Event props
+## Event props
 
 #### onAudioBecomingNoisy
 
@@ -829,7 +832,7 @@ Support for timed metadata on Android MediaPlayer is limited at best and only co
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
-### Methods
+## Methods
 
 Methods operate on a ref to the Video element. You can create a ref using code like:
 
