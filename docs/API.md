@@ -45,6 +45,7 @@
       - [volume](#volume)
   - [Event props](#event-props)
       - [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+      - [onBuffer](#onbuffer)
       - [onBandwidthUpdate](#onbandwidthupdate)
       - [onEnd](#onend)
       - [onExternalPlaybackChange](#onexternalplaybackchange)
@@ -606,6 +607,26 @@ Platforms: all
 Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker. It's a good idea to pause the media when this happens so the speaker doesn't start blasting sound.
 
 Payload: none
+
+Platforms: Android ExoPlayer, iOS
+
+#### onBuffer
+
+Callback function that is called when the buffering state changes.
+
+Payload:
+
+| Property    | Type    | Description     |
+| ----------- | ------- | --------------- |
+| isBuffering | boolean | Buffering state |
+
+Example:
+
+```
+{
+  isBuffering: true
+}
+```
 
 Platforms: Android ExoPlayer, iOS
 
