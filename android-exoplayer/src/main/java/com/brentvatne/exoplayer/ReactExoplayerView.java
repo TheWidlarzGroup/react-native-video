@@ -292,6 +292,7 @@ class ReactExoplayerView extends FrameLayout implements
                             : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                             ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                     Log.d("Drm Info", getResources().getString(errorStringId));
+                    eventEmitter.error(getResources().getString(errorStringId), e);
                     return;
                 }
             }
