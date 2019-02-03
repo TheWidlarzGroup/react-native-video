@@ -24,6 +24,7 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.video.VideoListener;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.source.SinglePeriodTimeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.hls.HlsManifest;
 import com.google.android.exoplayer2.source.hls.playlist.HlsMediaPlaylist;
@@ -37,6 +38,7 @@ import com.google.android.exoplayer2.ui.SubtitleView;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @TargetApi(16)
 public final class ExoPlayerView extends FrameLayout {
@@ -388,7 +390,7 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-            if (manifest instanceof HlsManifest && (reason == Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE)) {
+            if (manifest instanceof HlsManifest && (reason == Player.TIMELINE_CHANGE_REASON_DYNAMIC)) {
                 sendFileChangeEventForTime();
             }
             // Do nothing.

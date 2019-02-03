@@ -212,6 +212,12 @@ export default class Video extends Component {
 		}
 	}
 
+  _onManifestFileChange = (event) => {
+    if (this.props.onManifestFileChange) {
+      this.props.onManifestFileChange(event.nativeEvent);
+    }
+  }
+
   _onPlaybackRateChange = (event) => {
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
