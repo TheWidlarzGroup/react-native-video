@@ -274,7 +274,7 @@ public final class ExoPlayerView extends FrameLayout {
     public void sendFileChangeEventForTime(long time) {
         Object manifest = player.getCurrentManifest();
         if (manifest instanceof HlsManifest) {
-            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", null, 0, 0, time*1000, "", "", 0, 0, false);
+            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", 0, 0, time*1000, "", "", 0, 0, false);
 
             int index = Collections.binarySearch(((HlsManifest) manifest).mediaPlaylist.segments, segment, new Comparator<HlsMediaPlaylist.Segment>() {
                 @Override
@@ -283,8 +283,8 @@ public final class ExoPlayerView extends FrameLayout {
                 }
             });
 
-            if (index < 0) {
-                index = -1 * index - 2;
+            if(index < 0) {
+                index = -1*index - 2;
             }
 
             if (index >= 0 && index < ((HlsManifest) manifest).mediaPlaylist.segments.size()) {
@@ -329,6 +329,11 @@ public final class ExoPlayerView extends FrameLayout {
 
     private final class ComponentListener implements VideoListener,
             TextOutput, ExoPlayer.EventListener {
+        sendFileChangeEventForTime(player.getCurrentPosition());
+    }
+
+    private final class ComponentListener implements SimpleExoPlayer.VideoListener,
+            TextRenderer.Output, ExoPlayer.EventListener {
 
         // TextRenderer.Output implementation
 
