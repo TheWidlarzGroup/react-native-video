@@ -98,6 +98,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private final VideoEventEmitter eventEmitter;
     private PlayerControlView playerControlView;
+    private View playPauseControlContainer;
+    private Player.EventListener eventListener;
     
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
@@ -264,6 +266,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Toggling the visibility of the player control view 
      */
     private void togglePlayerControlVisibility() {
+        reLayout(playerControlView);
         if(playerControlView.isVisible()) {
             playerControlView.hide();
         } else {
@@ -287,6 +290,7 @@ class ReactExoplayerView extends FrameLayout implements
         //Setting the player for the playerControlView
         playerControlView.setPlayer(player);
         playerControlView.show();
+        playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
         //Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
@@ -295,6 +299,29 @@ class ReactExoplayerView extends FrameLayout implements
                 togglePlayerControlVisibility();
             }
         });
+
+        //Invoking onPlayerStateChanged event for Player
+        eventListener = new Player.EventListener() {
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                reLayout(playPauseControlContainer);
+                player.removeListener(eventListener);
+            }
+        };
+        player.addListener(eventListener);
+    }
+
+    /**
+     * Update the layout
+     *
+     * This is a workaround for the open bug in react-native: https://github.com/facebook/react-native/issues/17968
+     * @param view  view needs to update layout
+     */
+    private void reLayout(View view) {
+        if(view == null) return;
+        view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+        view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
     private void initializePlayer() {
