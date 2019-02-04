@@ -73,7 +73,7 @@ public class DataSourceUtil {
     }
 
     private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        OkHttpClient client = OkHttpClientProvider.getOkHttpClient();
+	OkHttpClient client = OkHttpClientProvider.createClientBuilder().build();
         CookieJarContainer container = (CookieJarContainer) client.cookieJar();
         ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
         container.setCookieJar(new JavaNetCookieJar(handler));

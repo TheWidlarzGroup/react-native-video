@@ -1,5 +1,4 @@
 package com.brentvatne.exoplayer;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -101,6 +100,7 @@ class ReactExoplayerView extends FrameLayout implements
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
+    private boolean isFrameless;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -139,6 +139,19 @@ class ReactExoplayerView extends FrameLayout implements
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
+
+    public OvalCalculator ovalCalculator = new OvalCalculator();  // rotato
+    private int videoWidth = -1, videoHeight = -1;
+
+    public void setFrameless(boolean frameless)
+    {
+        this.isFrameless = frameless;
+    }
+
+    public boolean getIsFrameless()
+    {
+        return this.isFrameless;
+    }
 
     private final Handler progressHandler = new Handler() {
         @Override
@@ -191,9 +204,17 @@ class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
+        setUseTextureView(true);  // rotato
+        useTextureView = true;    // rotato
+
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
+    }
+
+    public boolean isTextureView()
+    {
+        return useTextureView;
     }
 
     @Override
@@ -373,25 +394,66 @@ class ReactExoplayerView extends FrameLayout implements
     private void startPlayback() {
         if (player != null) {
             switch (player.getPlaybackState()) {
-                case ExoPlayer.STATE_IDLE:
-                case ExoPlayer.STATE_ENDED:
-                    initializePlayer();
-                    break;
-                case ExoPlayer.STATE_BUFFERING:
-                case ExoPlayer.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
-                        setPlayWhenReady(true);
-                    }
-                    break;
-                default:
-                    break;
+	    case ExoPlayer.STATE_IDLE:
+		initializePlayer();
+		if(watchDogRunnable.getState() == Thread.State.NEW) {
+		    watchDogRunnable.start();
+		}
+		break;
+	    case ExoPlayer.STATE_ENDED:
+		initializePlayer();
+		break;
+	    case ExoPlayer.STATE_BUFFERING:
+		if (!player.getPlayWhenReady()) {
+		    setPlayWhenReady(true);
+		}
+		if(watchDogRunnable.getState() == Thread.State.NEW) {
+		    watchDogRunnable.start();
+		}
+		break;
+	    case ExoPlayer.STATE_READY:
+		if (!player.getPlayWhenReady()) {
+		    setPlayWhenReady(true);
+		}
+		break;
+	    default:
+		break;
             }
-
         } else {
             initializePlayer();
         }
         if (!disableFocus) {
             setKeepScreenOn(true);
+        }
+    }
+
+    private Thread watchDogRunnable = new Thread() {
+        @Override
+	    public void run() {
+            synchronized (ReactExoplayerView.this) {
+		try {
+                    ReactExoplayerView.this.wait(3000);
+
+                    if(player == null) return;
+		    ReactExoplayerView.this.post(new Runnable() {
+                            @Override
+				public void run() {
+                                resetDataSourceFactory();
+                            }
+                        });
+                }catch(InterruptedException ie){
+
+                }
+            }
+        }
+	};
+
+    private void resetDataSourceFactory() {
+        if (player != null && player.getPlayWhenReady() && (player.getPlaybackState() == ExoPlayer.STATE_IDLE || player.getPlaybackState() == ExoPlayer.STATE_BUFFERING)){
+            DataSourceUtil.setDefaultDataSourceFactory(null);
+            this.mediaDataSourceFactory=DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,BANDWIDTH_METER,this.requestHeaders);
+
+            reloadSource();
         }
     }
 
@@ -520,11 +582,22 @@ class ReactExoplayerView extends FrameLayout implements
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
-            int width = videoFormat != null ? videoFormat.width : 0;
-            int height = videoFormat != null ? videoFormat.height : 0;
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
+            videoWidth = videoFormat != null ? videoFormat.width : 0;
+            videoHeight = videoFormat != null ? videoFormat.height : 0;
+
+            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), videoWidth, videoHeight,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
+    }
+
+    public int getVideoWidth()
+    {
+        return (!loadVideoStarted && videoWidth != 0) ? videoWidth : -1;
+    }
+
+    public int getVideoHeight()
+    {
+        return (!loadVideoStarted && videoHeight != 0) ? videoHeight : -1;
     }
 
     private WritableArray getAudioTrackInfo() {
@@ -560,13 +633,13 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id != null ? format.id : "");
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language != null ? format.language : "");
-             textTracks.pushMap(textTrack);
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            textTracks.pushMap(textTrack);
         }
         return textTracks;
     }
@@ -901,12 +974,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
-      rate = newRate;
+        rate = newRate;
 
-      if (player != null) {
-          PlaybackParameters params = new PlaybackParameters(rate, 1f);
-          player.setPlaybackParameters(params);
-      }
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(rate, 1f);
+            player.setPlaybackParameters(params);
+        }
     }
 
 
