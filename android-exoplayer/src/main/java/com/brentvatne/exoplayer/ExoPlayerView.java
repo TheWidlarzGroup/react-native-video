@@ -274,7 +274,7 @@ public final class ExoPlayerView extends FrameLayout {
     public void sendFileChangeEventForTime(long time) {
         Object manifest = player.getCurrentManifest();
         if (manifest instanceof HlsManifest) {
-            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", null,"", 0, 0, time*1000,null, "", "", 0, 0, false, ImmutableList.of());
+            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", null, 0, 0, time*1000, "", "", 0, 0, false);
 
             int index = Collections.binarySearch(((HlsManifest) manifest).mediaPlaylist.segments, segment, new Comparator<HlsMediaPlaylist.Segment>() {
                 @Override
@@ -288,17 +288,11 @@ public final class ExoPlayerView extends FrameLayout {
             }
 
             if (index >= 0 && index < ((HlsManifest) manifest).mediaPlaylist.segments.size()) {
-                try {
-                    String url = ((HlsManifest) manifest).mediaPlaylist.segments.get(index).url;
-                    String file = "";
-                    if (url.contains("ts")) {
-                        String[] urlSplit = ((HlsManifest) manifest).mediaPlaylist.segments.get(index).url.split("-");
-                        long val = Long.parseLong(urlSplit[urlSplit.length - 1].replace(".ts", ""));
-                        file = val + "";
-                    } else if (url.contains("m4s")) {
-                        file = url.replace(".m4s", "");
-                    } else {
-                        file = url;
+                long val = Long.parseLong(((HlsManifest) manifest).mediaPlaylist.segments.get(index).url.replace("alok11-", "").replace(".ts", ""));
+                if (fileChangeListener != null) {
+                    try {
+                        fileChangeListener.onFileChange(val + "", segment.relativeStartTimeUs - ((HlsManifest) manifest).mediaPlaylist.segments.get(index).relativeStartTimeUs, ((HlsManifest) manifest).mediaPlaylist.durationUs);
+                    } catch (Exception ignore) {
                     }
                     if (fileChangeListener != null) {
                         try {
