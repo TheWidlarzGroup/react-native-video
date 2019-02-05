@@ -281,11 +281,6 @@ class ReactExoplayerView extends FrameLayout implements
         if(playerControlView == null) {
             playerControlView = new PlayerControlView(getContext());
         }
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-        playerControlView.setLayoutParams(layoutParams);
-        addView(playerControlView, 1, layoutParams);
 
         //Setting the player for the playerControlView
         playerControlView.setPlayer(player);
@@ -305,10 +300,22 @@ class ReactExoplayerView extends FrameLayout implements
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 reLayout(playPauseControlContainer);
+                //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
             }
         };
         player.addListener(eventListener);
+    }
+
+    /**
+     * Adding Player control to the frame layout
+     */
+    private void addPlayerControl() {
+        LayoutParams layoutParams = new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+        playerControlView.setLayoutParams(layoutParams);
+        addView(playerControlView, 1, layoutParams);
     }
 
     /**
@@ -369,6 +376,9 @@ class ReactExoplayerView extends FrameLayout implements
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
+
+        //Initializing the playerControlView
+        initializePlayerControl();
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
@@ -1135,8 +1145,8 @@ class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
          if(controls && (exoPlayerView != null)) {
-            //Initialize playerControlView
-            initializePlayerControl();
+             //adding the playerControlView
+             addPlayerControl();
         } else {
             if(getChildAt(1) instanceof PlayerControlView && (exoPlayerView != null)){
                 removeViewAt(1);
