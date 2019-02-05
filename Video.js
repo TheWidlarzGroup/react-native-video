@@ -27,17 +27,17 @@ export default class Video extends Component {
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
-  
+
   toTypeString(x) {
     switch (typeof x) {
       case "object":
-        return x instanceof Date 
-          ? x.toISOString() 
+        return x instanceof Date
+          ? x.toISOString()
           : JSON.stringify(x); // object, null
       case "undefined":
         return "";
       default: // boolean, number, string
-        return x.toString();      
+        return x.toString();
     }
   }
 
@@ -53,7 +53,7 @@ export default class Video extends Component {
 
   seek = (time, tolerance = 100) => {
     if (isNaN(time)) throw new Error('Specified time is not a number');
-    
+
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
@@ -179,7 +179,7 @@ export default class Video extends Component {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
   };
-  
+
   _onExternalPlaybackChange = (event) => {
     if (this.props.onExternalPlaybackChange) {
       this.props.onExternalPlaybackChange(event.nativeEvent);
@@ -224,13 +224,13 @@ export default class Video extends Component {
 
     let nativeResizeMode;
     if (resizeMode === VideoResizeMode.stretch) {
-      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleToFill;
+      nativeResizeMode = NativeModules.UIManager.getViewManagerConfig('RCTVideo').Constants.ScaleToFill;
     } else if (resizeMode === VideoResizeMode.contain) {
-      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFit;
+      nativeResizeMode = NativeModules.UIManager.getViewManagerConfig('RCTVideo').Constants.ScaleAspectFit;
     } else if (resizeMode === VideoResizeMode.cover) {
-      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFill;
+      nativeResizeMode = NativeModules.UIManager.getViewManagerConfig('RCTVideo').Constants.ScaleAspectFill;
     } else {
-      nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleNone;
+      nativeResizeMode = NativeModules.UIManager.getViewManagerConfig('RCTVideo').Constants.ScaleNone;
     }
 
     const nativeProps = Object.assign({}, this.props);
