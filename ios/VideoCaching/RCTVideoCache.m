@@ -102,7 +102,7 @@
   }
 
   NSString * pathExtension = [uriWithoutQueryParams pathExtension];
-  NSArray * supportedExtensions = @[@"m4v", @"mp4", @"mov"];
+  NSArray * supportedExtensions = @[@"m4v", @"mp4", @"mov", @"mp3", @"aac"];
   if ([pathExtension isEqualToString:@""]) {
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: NSLocalizedString(@"Missing file extension.", nil),

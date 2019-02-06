@@ -19,6 +19,9 @@ import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import java.util.Map;
 
+import android.net.Uri;
+import com.danikula.videocache.HttpProxyCacheServer;
+
 
 public class DataSourceUtil {
 
@@ -28,10 +31,21 @@ public class DataSourceUtil {
     private static DataSource.Factory rawDataSourceFactory = null;
     private static DataSource.Factory defaultDataSourceFactory = null;
     private static String userAgent = null;
+     private static HttpProxyCacheServer proxy = null;
 
     public static void setUserAgent(String userAgent) {
         DataSourceUtil.userAgent = userAgent;
     }
+
+    public static Uri getCacheUri(Uri uri, Context context) {
+         if (proxy == null) { 
+              proxy = new HttpProxyCacheServer.Builder(context) 
+              .maxCacheSize(1024 * 1024 * 512)
+               .maxCacheFilesCount(20)
+                .build(); 
+                 }
+                 return Uri.parse(proxy.getProxyUrl(uri.toString())); 
+                  }
 
     public static String getUserAgent(ReactContext context) {
         if (userAgent == null) {
