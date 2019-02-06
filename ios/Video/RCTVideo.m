@@ -58,7 +58,7 @@ static int const RCTVideoUnset = -1;
   BOOL _paused;
   BOOL _repeat;
   BOOL _allowsExternalPlayback;
-  NSArray * _textTracks;
+  NSMutableArray * _textTracks;
   NSDictionary * _selectedTextTrack;
   NSDictionary * _selectedAudioTrack;
   BOOL _playbackStalled;
@@ -433,6 +433,29 @@ static int const RCTVideoUnset = -1;
                             error:nil];
   
   NSMutableArray* validTextTracks = [NSMutableArray array];
+  
+
+  /**
+   * Load an useless / almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
+   * This is needed because the player doesn't disable the texttrack otherwise. Now it does because it load a VTT file without content.
+   * More on this issue here: https://github.com/react-native-community/react-native-video/issues/1144
+   */
+  NSError *error;
+  NSString *filePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"empty.vtt"];
+  if (![[NSFileManager defaultManager] isReadableFileAtPath:filePath]){
+    NSString *stringToWrite = @"WEBVTT\n\n1\n98:00:00.100 --> 98:00:00.200\n.\n\n2\n99:00:00.000 --> 99:00:00.100\n..";
+    [stringToWrite writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:&error];
+  }
+  if (error == nil){
+    NSMutableDictionary *emptyVTTDictionary = [[NSMutableDictionary alloc] init];
+    emptyVTTDictionary[@"language"] = @"disabled";
+    emptyVTTDictionary[@"label"] = @"NameIsRequiredButItDoesntMatterBecauseThisIsTheEmptyVttFile";
+    emptyVTTDictionary[@"uri"] = filePath;
+    emptyVTTDictionary[@"type"] = @"text/vtt";
+    
+    [_textTracks addObject:emptyVTTDictionary];
+  }
+  
   for (int i = 0; i < _textTracks.count; ++i) {
     AVURLAsset *textURLAsset;
     NSString *textUri = [_textTracks objectAtIndex:i][@"uri"];
@@ -984,9 +1007,10 @@ static int const RCTVideoUnset = -1;
   }
   
   int selectedTrackIndex = RCTVideoUnset;
-  
+  bool isDisabled = NO;
+
   if ([type isEqualToString:@"disabled"]) {
-    // Do nothing. We want to ensure option is nil
+    isDisabled = YES;
   } else if ([type isEqualToString:@"language"]) {
     NSString *selectedValue = _selectedTextTrack[@"value"];
     for (int i = 0; i < textTracks.count; ++i) {
@@ -1037,6 +1061,11 @@ static int const RCTVideoUnset = -1;
       isEnabled = i == selectedTrackIndex + firstTextIndex;
     }
     [_player.currentItem.tracks[i] setEnabled:isEnabled];
+  }
+  
+  // Make sure that the empty VTT track is enabled when it received: type = disabled
+  if (isDisabled) {
+    [_player.currentItem.tracks[_player.currentItem.tracks.count - 1] setEnabled:YES];
   }
 }
 
