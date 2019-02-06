@@ -327,7 +327,11 @@ public final class ExoPlayerView extends FrameLayout {
                     }
                     if (fileChangeListener != null) {
                         try {
+<<<<<<< HEAD
                             fileChangeListener.onFileChange(file, ((HlsManifest) manifest).mediaPlaylist.segments.get(index).relativeStartTimeUs, ((HlsManifest) manifest).mediaPlaylist.durationUs);
+=======
+                            fileChangeListener.onFileChange(val + "", ((HlsManifest) manifest).mediaPlaylist.segments.get(index).relativeStartTimeUs, ((HlsManifest) manifest).mediaPlaylist.durationUs);
+>>>>>>> 02457061 (Send relative segment time instead of current time)
                         } catch (Exception ignore) {
 //                            ignore.printStackTrace();
                         }
