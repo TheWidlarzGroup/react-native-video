@@ -363,6 +363,13 @@ Controls are not available Android because the system does not provide a stock s
 
 Platforms: iOS, react-native-dom
 
+#### disableFocus
+Determines whether video audio should override background music/audio in Android devices.
+* ** false (default)** - Override background audio/music
+* **true** - Let background audio/music from other apps play
+
+Platforms: Android Exoplayer
+
 #### filter
 Add video filter
 * **FilterType.NONE (default)** - No Filter

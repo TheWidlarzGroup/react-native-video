@@ -1,7 +1,7 @@
 ## Changelog
 
 ### next
-
+* Fix Android videos being able to play with background music/audio from other apps.
 * Fix loading package resolved videos when using video-caching [#1438](https://github.com/react-native-community/react-native-video/pull/1438)
 
 ### Version 4.3.0
