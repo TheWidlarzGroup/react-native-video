@@ -25,6 +25,9 @@ https://github.com/google/ExoPlayer
         disableFocus={true} // disables audio focus and wake lock (default false)
         onAudioBecomingNoisy={this.onAudioBecomingNoisy} // Callback when audio is becoming noisy - should pause video
         onAudioFocusChanged={this.onAudioFocusChanged} // Callback when audio focus has been lost - pause if focus has been lost
+        audioUsage={'alarm'} //Sets audio attribute usage to "USAGE_ALARM" (default is USAGE_MEDIA)
+        audioFlags={'audibility_enforced'} //Sets audio attribute flag to "FLAG_AUDIBILITY_ENFORCED" (default is none)
+        audioContentType={'speech'} //Sets audio attribute content type to "CONTENT_TYPE_SPEECH" (default is CONTENT_TYPE_UNKNOWN)
       />
     )
   }

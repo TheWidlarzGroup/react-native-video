@@ -35,6 +35,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -107,6 +108,7 @@ class ReactExoplayerView extends FrameLayout implements
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private DefaultTrackSelector trackSelector;
+    private AudioAttributes.Builder audioAttributesBuilder = AudioAttributes.Builder();
     private boolean playerNeedsSource;
 
     private int resumeWindow;
@@ -344,6 +346,7 @@ class ReactExoplayerView extends FrameLayout implements
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
             player.addListener(this);
             player.setMetadataOutput(this);
+            player.setAudioAttributes(audioAttributesBuilder.build());
             exoPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             BANDWIDTH_METER.addEventListener(new Handler(), this);
@@ -1053,7 +1056,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-
     public void setVolumeModifier(float volume) {
         audioVolume = volume;
         if (player != null) {
@@ -1160,5 +1162,17 @@ class ReactExoplayerView extends FrameLayout implements
         } else if (getChildAt(1) instanceof PlayerControlView && exoPlayerView != null) {
             removeViewAt(1);
         }
+    }
+
+    public void setAudioUsage(int audioUsage) {
+        audioAttributesBuilder.setUsage(audioUsage)
+    }
+
+    public void setAudioFlags(int audioFlags) {
+        audioAttributesBuilder.setFlags(audioFlags)
+    }
+
+    public void setAudioContentType(int audioContentType) {
+        audioAttributesBuilder.setContentType(audioContentType)
     }
 }

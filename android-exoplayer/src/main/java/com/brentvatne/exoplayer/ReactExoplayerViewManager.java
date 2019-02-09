@@ -11,6 +11,7 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
@@ -59,6 +60,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_AUDIO_USAGE = "audioUsage";
+    private static final String PROP_AUDIO_FLAGS = "audioFlags";
+    private static final String PROP_AUDIO_CONTENT_TYPE = "audioContentType";
 
     @Override
     public String getName() {
@@ -284,6 +288,96 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
+    }
+
+    @ReactProp(name = PROP_AUDIO_USAGE)
+    public void setAudioUsage(final ReactExoplayerView videoView, final String audioUsageStr) {
+        int audioUsage;
+        switch(audioUsageStr) {
+            case "alarm":
+                audioUsage = C.USAGE_ALARM;
+                break;
+            case "assistance_accessibility":
+                audioUsage = C.USAGE_ASSISTANCE_ACCESSIBILITY;
+                break;
+            case "assistance_navigation_guidance":
+                audioUsage = C.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE;
+                break;
+            case "assistance_sonification":
+                audioUsage = C.USAGE_ASSISTANCE_SONIFICATION;
+                break;
+            case "assistant":
+                audioUsage = C.USAGE_ASSISTANT;
+                break;
+            case "game":
+                audioUsage = C.USAGE_GAME;
+                break;
+            case "notification":
+                audioUsage = C.USAGE_NOTIFICATION;
+                break;
+            case "notification_communication_delayed":
+                audioUsage = C.USAGE_NOTIFICATION_COMMUNICATION_DELAYED;
+                break;
+            case "notification_communication_instant":
+                audioUsage = C.USAGE_NOTIFICATION_COMMUNICATION_INSTANT;
+                break;
+            case "notification_communication_request":
+                audioUsage = C.USAGE_NOTIFICATION_COMMUNICATION_REQUEST;
+                break;
+            case "notification_event":
+                audioUsage = C.USAGE_NOTIFICATION_EVENT;
+                break;
+            case "notification_ringtone":
+                audioUsage = C.USAGE_NOTIFICATION_RINGTONE;
+                break;
+            case "unknown":
+                audioUsage = C.USAGE_UNKNOWN;
+                break;
+            case "voice_communication":
+                audioUsage = C.USAGE_VOICE_COMMUNICATION;
+                break;
+            case "voice_communication_signalling":
+                audioUsage = C.USAGE_VOICE_COMMUNICATION_SIGNALLING;
+                break;
+            case "media":
+            default:
+                audioUsage = C.USAGE_MEDIA;
+                break;
+        }
+        videoView.setAudioUsage(audioUsage);
+    }
+
+    @ReactProp(name = PROP_AUDIO_FLAGS)
+    public void setAudioFlags(final ReactExoplayerView videoView, final String audioFlagsStr) {
+        switch(audioFlagsStr) {
+            case "audibility_enforced":
+                videoView.setAudioFlags(C.FLAG_AUDIBILITY_ENFORCED);
+                break;
+        }
+    }
+
+    @ReactProp(name = PROP_AUDIO_CONTENT_TYPE)
+    public void setAudioContentType(final ReactExoplayerView videoView, final String audioContentTypeStr) {
+        int audioContentType;
+        switch(audioContentTypeStr) {
+            case "movie":
+                audioContentType = C.CONTENT_TYPE_MOVIE;
+                break;
+            case "music":
+                audioContentType = C.CONTENT_TYPE_MUSIC;
+                break;
+            case "sonification":
+                audioContentType = C.CONTENT_TYPE_SONIFICATION;
+                break;
+            case "speech":
+                audioContentType = C.CONTENT_TYPE_SPEECH;
+                break;
+            case "unknown":
+            default:
+                audioContentType = C.CONTENT_TYPE_UNKNOWN:
+                break;
+        }
+        videoView.setAudioContentType(audioContentType);
     }
 
     private boolean startsWithValidScheme(String uriString) {
