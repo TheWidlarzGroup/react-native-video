@@ -141,6 +141,7 @@ class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private final long cacheMaxSize = 100000000;
+    private static SimpleCache sDownloadCache;
 
     private Map<String, String> requestHeaders;
     // \ End props
@@ -281,7 +282,10 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayer() {
                 if(cacheMaxSize > 0) {
             File cacheDir = new File(getContext().getCacheDir(), "ReactNativeVideo");
-            cache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(cacheMaxSize));
+            
+            if (sDownloadCache == null) {
+             sDownloadCache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(cacheMaxSize));
+            }
         } else {
             cache = null;
         }
