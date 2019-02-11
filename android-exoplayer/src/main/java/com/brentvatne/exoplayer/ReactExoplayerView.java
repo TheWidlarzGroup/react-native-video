@@ -357,7 +357,7 @@ class ReactExoplayerView extends FrameLayout implements
                     true
             );
 
-        ds = playback.enableCaching(ds);
+        ds = enableCaching(ds);
 
 
         String type = "default";
