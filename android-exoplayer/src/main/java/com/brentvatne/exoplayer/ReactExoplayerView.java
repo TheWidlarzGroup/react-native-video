@@ -757,7 +757,7 @@ System.out.println("hls");
 
             this.srcUri = uri;
             System.out.println(uri.toString());
-            if (extension != "dash" || extension != "hls") {
+            if (!extension.euqals("dash") || !extension.equals("hls")) {
                 this.srcUri = DataSourceUtil.getCacheUri(uri, themedReactContext);
             }
             // don't cache if it's hls
