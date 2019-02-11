@@ -267,7 +267,7 @@ class ReactExoplayerView extends FrameLayout implements
      */
     private void togglePlayerControlVisibility() {
         reLayout(playerControlView);
-        if(playerControlView.isVisible()) {
+        if (playerControlView.isVisible()) {
             playerControlView.hide();
         } else {
             playerControlView.show();
@@ -278,16 +278,16 @@ class ReactExoplayerView extends FrameLayout implements
      * Initializing Player control
      */
     private void initializePlayerControl() {
-        if(playerControlView == null) {
+        if (playerControlView == null) {
             playerControlView = new PlayerControlView(getContext());
         }
 
-        //Setting the player for the playerControlView
+        // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
         playerControlView.show();
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
-        //Invoking onClick event for exoplayerView
+        // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -295,7 +295,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         });
 
-        //Invoking onPlayerStateChanged event for Player
+        // Invoking onPlayerStateChanged event for Player
         eventListener = new Player.EventListener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
@@ -320,12 +320,12 @@ class ReactExoplayerView extends FrameLayout implements
 
     /**
      * Update the layout
+     * @param view  view needs to update layout
      *
      * This is a workaround for the open bug in react-native: https://github.com/facebook/react-native/issues/17968
-     * @param view  view needs to update layout
      */
     private void reLayout(View view) {
-        if(view == null) return;
+        if (view == null) return;
         view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
@@ -377,7 +377,7 @@ class ReactExoplayerView extends FrameLayout implements
             loadVideoStarted = true;
         }
 
-        //Initializing the playerControlView
+        // Initializing the playerControlView
         initializePlayerControl();
     }
 
@@ -1141,16 +1141,13 @@ class ReactExoplayerView extends FrameLayout implements
     /**
      * Handling controls prop
      * 
-     * @param controls  value of the controls prop passed from react-native
+     * @param controls  Controls prop, if true enable controls, if false disable them
      */
     public void setControls(boolean controls) {
-         if(controls && (exoPlayerView != null)) {
-             //adding the playerControlView
-             addPlayerControl();
-        } else {
-            if(getChildAt(1) instanceof PlayerControlView && (exoPlayerView != null)){
-                removeViewAt(1);
-            }
+        if (controls && exoPlayerView != null) {
+            addPlayerControl();
+        } else if (getChildAt(1) instanceof PlayerControlView && exoPlayerView != null) {
+            removeViewAt(1);
         }
     }
 }
