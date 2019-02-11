@@ -259,7 +259,6 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
-* [failureRetryCount](#failureRetryCount)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
@@ -270,6 +269,7 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [minLoadRetryCount](#minLoadRetryCount)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -363,18 +363,6 @@ Note on iOS, controls are always shown when in fullscreen mode.
 Controls are not available Android because the system does not provide a stock set of controls. You will need to build your own or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
 Platforms: iOS, react-native-dom
-
-#### failureRetryCount
-Sets the number of times the media play failures to be retried. Useful to recover from transient internet faiures. Recoverable failures are retried before reporting the error to the application.
-
-Default: 3. Retry 3 times.
-
-Example:
-```
-failureRetryCount={5} // retry 5 times
-```
-
-Platforms: Android ExoPlayer
 
 #### filter
 Add video filter
@@ -487,6 +475,18 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### minLoadRetryCount
+Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
+
+Default: 3. Retry 3 times.
+
+Example:
+```
+minLoadRetryCount={5} // retry 5 times
+```
+
+Platforms: Android ExoPlayer
 
 #### muted
 Controls whether the audio is muted
