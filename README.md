@@ -269,6 +269,7 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [minLoadRetryCount](#minLoadRetryCount)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -474,6 +475,18 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### minLoadRetryCount
+Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
+
+Default: 3. Retry 3 times.
+
+Example:
+```
+minLoadRetryCount={5} // retry 5 times
+```
+
+Platforms: Android ExoPlayer
 
 #### muted
 Controls whether the audio is muted
