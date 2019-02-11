@@ -114,7 +114,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isBuffering;
     private float rate = 1f;
     private float audioVolume = 1f;
-    private int failureRetryCount = 3;
+    private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
     private long seekTime = C.TIME_UNSET;
 
@@ -312,16 +312,16 @@ class ReactExoplayerView extends FrameLayout implements
             case C.TYPE_SS:
                 return new SsMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory), 
-                        failureRetryCount, SsMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS, 
+                        minLoadRetryCount, SsMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS, 
                         mainHandler, null);
             case C.TYPE_DASH:
                 return new DashMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory), 
-                        failureRetryCount, DashMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS,
+                        minLoadRetryCount, DashMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS,
                         mainHandler, null);
             case C.TYPE_HLS:
                 return new HlsMediaSource(uri, mediaDataSourceFactory, 
-                        failureRetryCount, mainHandler, null);
+                        minLoadRetryCount, mainHandler, null);
             case C.TYPE_OTHER:
                 return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
                         mainHandler, null);
@@ -1002,8 +1002,8 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setfailureRetryCountModifier(int newFailureRetryCount) {
-        failureRetryCount = newFailureRetryCount;
+    public void setMinLoadRetryCountModifier(int newMinLoadRetryCount) {
+        minLoadRetryCount = newMinLoadRetryCount;
         releasePlayer();
         initializePlayer();
     }
