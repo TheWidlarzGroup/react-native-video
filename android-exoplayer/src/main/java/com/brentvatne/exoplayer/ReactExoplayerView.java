@@ -163,6 +163,45 @@ class ReactExoplayerView extends FrameLayout implements
         }
     };
 
+    private final long cacheMaxSize = 100000000;
+
+    private SimpleCache cache;
+    private ConcatenatingMediaSource source;
+    private boolean prepared = false;
+
+        @Override
+    public void initialize() {
+        if(cacheMaxSize > 0) {
+            File cacheDir = new File(context.getCacheDir(), "ReactNativeVideo");
+            cache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(cacheMaxSize));
+        } else {
+            cache = null;
+        }
+
+        super.initialize();
+    }
+
+    public DataSource.Factory enableCaching(DataSource.Factory ds) {
+        if(cache == null || cacheMaxSize <= 0) return ds;
+
+        return new CacheDataSourceFactory(cache, ds, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR, cacheMaxSize);
+    }
+
+    // @Override
+    // public void destroy() {
+    //     super.destroy();
+
+    //     if(cache != null) {
+    //         try {
+    //             cache.release();
+    //             cache = null;
+    //         } catch(Exception ex) {
+    //             Log.w(Utils.LOG, "Couldn't release the cache properly", ex);
+    //         }
+    //     }
+    // }
+
+
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
@@ -318,7 +357,7 @@ class ReactExoplayerView extends FrameLayout implements
                     true
             );
 
-            // ds = playback.enableCaching(ds);
+        ds = playback.enableCaching(ds);
 
 
         String type = "default";
