@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.brentvatne.react.R;
@@ -107,10 +109,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @SuppressLint("ViewConstructor")
-class ReactExoplayerView extends RelativeLayout implements LifecycleEventListener, ExoPlayer.EventListener,
+class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListener, ExoPlayer.EventListener,
         BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataRenderer.Output {
 
-    private static final String TAG = "ReactExoplayerView";
+    private static final String TAG = "ReactTvExoplayerView";
 
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
@@ -126,14 +128,11 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
     private PreviewSeekBarLayout previewSeekBarLayout;
     private FrameLayout bottomBarWidgetContainer;
-    private View middleCoreControlsContainer;
     private TextView currentTextView;
     private TextView durationTextView;
     private TextView liveTextView;
     private ImageButton playPauseButton;
     private ImageButton bottomRightIconButton;
-    private View rewindContainer;
-    private View forwardContainer;
     private View controls;
     private View bottomBarWidget;
     private GestureDetectorCompat gestureDetector;
@@ -233,8 +232,9 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     //Mux
     private MuxStats muxStats;
     private Map<String, Object> muxData;
+    private PreviewView.OnPreviewChangeListener mPreviewChangeListener;
 
-    public ReactExoplayerView(ThemedReactContext context) {
+    public ReactTVExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
         createViews();
@@ -252,13 +252,14 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                         bottomBarWidget.setTranslationY(newTranslationY);
                         float alpha = 1 - newTranslationY / bottomBarWidget.getHeight();
                         bottomBarWidgetContainer.setAlpha(alpha);
-                        middleCoreControlsContainer.setAlpha(alpha);
+                        playPauseButton.setAlpha(alpha);
                     }
                 }
                 return true;
             }
         };
         gestureDetector = new GestureDetectorCompat(themedReactContext, gestureListener);
+        setPausedModifier(false);
     }
 
 
@@ -318,30 +319,14 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         addView(exoPlayerView, 0, layoutParams);
         setLayoutTransition(new LayoutTransition());
 
-        controls = inflater.inflate(R.layout.controls, null);
+        controls = inflater.inflate(R.layout.controls_tv, null);
         LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         controls.setLayoutParams(controlsParam);
         addView(controls);
 
         bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
 
-        rewindContainer = controls.findViewById(R.id.rewindContainer);
-        forwardContainer = controls.findViewById(R.id.forwardContainer);
-        ImageButton rewindButton = (ImageButton) controls.findViewById(R.id.rewindImageView);
-        rewindButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                seekTo(player.getCurrentPosition() - 30000);
-            }
-        });
-        ImageButton forwardButton = (ImageButton) controls.findViewById(R.id.forwardImageView);
-        forwardButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                seekTo(player.getCurrentPosition() + 30000);
-            }
-        });
-        playPauseButton = (ImageButton) controls.findViewById(R.id.playPauseImageView);
+        playPauseButton = (ImageButton) controls.findViewById(R.id.tvPlayPauseImageView);
         playPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -365,8 +350,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
             }
         });
-        bottomBarWidgetContainer = (FrameLayout) controls.findViewById(R.id.bottomBarWidgetContainer);
-        middleCoreControlsContainer = findViewById(R.id.middleCoreControlsContainer);
+        bottomBarWidgetContainer = (FrameLayout) controls.findViewById(R.id.tvBottomBarWidgetContainer);
     }
 
     @Override
@@ -466,6 +450,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             player.prepare(mediaSource, !haveResumePosition, false);
             playerNeedsSource = false;
 
+            showOverlay();
+
             eventEmitter.loadStart();
             loadVideoStarted = true;
 
@@ -497,15 +483,12 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                                         new DashParser(new DashParser.Callback() {
                                             @Override
                                             public void onManifestParsed(com.google.android.exoplayer2.source.dash.manifest.DashManifest manifest) {
-                                                Log.d("Player", "onManifestParsed() manifest=" + manifest);
 
-                                                final ActionToken actionToken = ReactExoplayerView.this.actionToken;
+                                                final ActionToken actionToken = ReactTVExoplayerView.this.actionToken;
 
                                                 if (manifest instanceof DashManifest && actionToken != null) {
                                                     List kids = ((DashManifest) manifest).getDefaultKIds();
-                                                    Log.d("Player", "onManifestParsed() KIds=" + kids);
                                                     String header = Utils.createXDrmInfoHeader(Utils.getSystem(actionToken.getDrmScheme()), kids);
-                                                    Log.d("Player", "onManifestParsed() XDrmHeader=" + header);
                                                     drmCallback.setKeyRequestProperty("X-DRM-INFO", header);
                                                 }
                                             }
@@ -784,14 +767,10 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                 break;
             case ExoPlayer.STATE_BUFFERING:
                 text += "buffering";
-                // Hide central control buttons when buffering
-                middleCoreControlsContainer.setVisibility(INVISIBLE);
                 onBuffering(true);
                 break;
             case ExoPlayer.STATE_READY:
                 text += "ready";
-                // Show central control buttons when buffering
-                middleCoreControlsContainer.setVisibility(VISIBLE);
                 eventEmitter.ready();
                 onBuffering(false);
                 startProgressHandler();
@@ -816,6 +795,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     private void updateProgressControl(long currentMillis) {
+
         ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
         if (player == null || progressBar == null) {
             return;
@@ -859,26 +839,29 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     private void setupProgressBarSeekListener() {
-        if (previewSeekBarLayout != null && previewSeekBarLayout.getPreviewView() instanceof ProgressBar) {
-            previewSeekBarLayout.getPreviewView().addOnPreviewChangeListener(new PreviewView.OnPreviewChangeListener() {
-                @Override
-                public void onStartPreview(PreviewView previewView) {
-
-                }
-
-                @Override
-                public void onStopPreview(PreviewView previewView) {
-
-                }
-
-                @Override
-                public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
-                    if (fromUser && player != null) {
-                        player.seekTo(progress);
-                        updateProgressControl(progress);
+        if (previewSeekBarLayout != null
+                && previewSeekBarLayout.checkChilds()
+                && previewSeekBarLayout.getPreviewView() instanceof ProgressBar) {
+            if (mPreviewChangeListener == null) {
+                mPreviewChangeListener = new PreviewView.OnPreviewChangeListener() {
+                    @Override
+                    public void onStartPreview(PreviewView previewView) {
                     }
-                }
-            });
+
+                    @Override
+                    public void onStopPreview(PreviewView previewView) {
+                    }
+
+                    @Override
+                    public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
+                        if (fromUser && player != null) {
+                            player.seekTo(progress);
+                            updateProgressControl(progress);
+                        }
+                    }
+                };
+            }
+            previewSeekBarLayout.getPreviewView().addOnPreviewChangeListener(mPreviewChangeListener);
         }
     }
 
@@ -949,6 +932,16 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             eventEmitter.buffering(true);
         } else {
             eventEmitter.buffering(false);
+        }
+
+        if (buffering) {
+            showOverlay();
+        } else {
+            if (!isPaused) {
+                hideOverlay();
+            } else {
+                showOverlay();
+            }
         }
     }
 
@@ -1259,6 +1252,14 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             }
         }
 
+        if (isPaused) {
+            showOverlay();
+        } else {
+            hideOverlay();
+        }
+
+
+        eventEmitter.playbackRateChange(isPaused ? 0.0f : 1.0f);
     }
 
     public void setMutedModifier(boolean muted) {
@@ -1335,7 +1336,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             eventEmitter.fullscreenDidDismiss();
         }
 
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) bottomBarWidgetContainer.getLayoutParams();
+        LayoutParams params = (LayoutParams) bottomBarWidgetContainer.getLayoutParams();
         if (fullscreen) {
             playPauseButton.setScaleX(1f);
             playPauseButton.setScaleY(1f);
@@ -1371,16 +1372,13 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
     public void setLive(final boolean live) {
         this.live = live;
-        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null && durationTextView != null
-                && rewindContainer != null && forwardContainer != null) {
+        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null && durationTextView != null) {
             liveTextView.setVisibility(live ? VISIBLE : GONE);
             @IntegerRes
             int controlsVisibility = live ? INVISIBLE : VISIBLE;
             currentTextView.setVisibility(controlsVisibility);
             previewSeekBarLayout.setVisibility(controlsVisibility);
             durationTextView.setVisibility(controlsVisibility);
-            rewindContainer.setVisibility(controlsVisibility);
-            forwardContainer.setVisibility(controlsVisibility);
         }
     }
 
@@ -1430,23 +1428,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         boolean enabled = getEnabledFromState(state);
         float alpha = getAlphaFromState(state);
 
-        boolean skipButtonsEnabled = !live && enabled;
-        float skipButtonsAlpha = live ? 0.0f : alpha;
-
-        middleCoreControlsContainer.animate().alpha(alpha).start();
         playPauseButton.setAlpha(alpha);
-        rewindContainer.setAlpha(skipButtonsAlpha);
-        forwardContainer.setAlpha(skipButtonsAlpha);
-        playPauseButton.setEnabled(enabled);
-        rewindContainer.setEnabled(skipButtonsEnabled);
-        forwardContainer.setEnabled(skipButtonsEnabled);
-
-        // Change the visibility of the buttons so they don't capture click events when they have alpha 0
-        int controlsVisibility = alpha == 0.0f ? INVISIBLE : VISIBLE;
-        playPauseButton.setVisibility(controlsVisibility);
-        int skipButtonsVisibility = live ? INVISIBLE : controlsVisibility;
-        rewindContainer.setVisibility(skipButtonsVisibility);
-        forwardContainer.setVisibility(skipButtonsVisibility);
+        playPauseButton.setFocusable(false);
     }
 
     public void setStateProgressBar(final String state) {
@@ -1537,7 +1520,136 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         }
     }
 
-    public void setOverlayAutoHideTimeout(Long valueOf) {
-        //ToDo: Implement??
+    private Long keyPressTime;
+    private boolean keyNotHandled;
+
+    private Long controlsAutoHideTimeout;
+    private Runnable hideRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setStateOverlay(ControlState.HIDDEN.toString());
+        }
+    };
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_DPAD_CENTER:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    if (!live) {
+                        setPausedModifier(!isPaused);
+                        if (!isPaused) {
+                            playPauseButton.setVisibility(INVISIBLE);
+                            controls.setBackground(null);
+                        } else {
+                            playPauseButton.setVisibility(VISIBLE);
+                            controls.setBackgroundResource(R.drawable.bg_controls);
+                        }
+                        return true;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+
+                    if (live) {
+                        break;
+                    }
+
+                    if (controls.getAlpha() != 1.0f) {
+                        showOverlay();
+                        return true;
+                    }
+
+                    final long currentTime = System.currentTimeMillis();
+
+                    final int increment;
+                    if (keyPressTime == null) {
+                        keyPressTime = currentTime;
+                        keyNotHandled = true;
+                        return true;
+                    } else if ((currentTime - keyPressTime) / 1000 > 10) {
+                        increment = 40;
+                    } else if ((currentTime - keyPressTime) / 1000 > 6) {
+                        increment = 25;
+                    } else if ((currentTime - keyPressTime) / 1000 > 3) {
+                        increment = 10;
+                    } else {
+                        increment = 1;
+                    }
+
+                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar) {
+                        ((SeekBar) previewSeekBarLayout.getPreviewView()).setKeyProgressIncrement(increment * 1000);
+                    }
+
+                    keyNotHandled = false;
+                    break;
+                default:
+                    showOverlay();
+
+                    break;
+            }
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+
+            if (keyNotHandled) {
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                    case KeyEvent.KEYCODE_MEDIA_REWIND: {
+                        long position = player.getCurrentPosition() - 10000;
+                        player.seekTo(position);
+                        updateProgressControl(position);
+                        break;
+                    }
+                    case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                    case KeyEvent.KEYCODE_DPAD_RIGHT: {
+                        long position = player.getCurrentPosition() + 10000;
+                        player.seekTo(position);
+                        updateProgressControl(position);
+                        break;
+                    }
+                }
+            }
+
+            if (!isPaused) {
+                hideOverlay();
+            }
+
+            keyPressTime = null;
+            keyNotHandled = false;
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+
+    public void showOverlay() {
+
+        if (controlsAutoHideTimeout != null) {
+            removeCallbacks(hideRunnable);
+        }
+        setStateOverlay(ControlState.ACTIVE.toString());
+
+        int state = player.getPlaybackState();
+
+        if (isPaused) {
+            controls.setBackgroundResource(R.drawable.bg_controls);
+            playPauseButton.setVisibility(VISIBLE);
+        } else {
+            controls.setBackground(null);
+            playPauseButton.setVisibility(INVISIBLE);
+        }
+    }
+
+    public void hideOverlay() {
+        if (controlsAutoHideTimeout != null) {
+            postDelayed(hideRunnable, controlsAutoHideTimeout);
+        } else {
+            setStateOverlay(ControlState.HIDDEN.toString());
+        }
+    }
+
+    public void setOverlayAutoHideTimeout(Long hideTimeout) {
+        controlsAutoHideTimeout = hideTimeout;
     }
 }

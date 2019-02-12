@@ -36,7 +36,7 @@
     "dependencies": {
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10",
-        "@imggaming/dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=1.0.6-rc.0"
+        "@imggaming/dice-shield": "ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=1.0.6-rc.1"
     },
     "scripts": {
         "install": "./scripts/install-dependencies",

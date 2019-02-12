@@ -20,7 +20,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
+public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplayerView> {
 
     private static final String REACT_CLASS = "RCTVideo";
 
@@ -72,12 +72,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @Override
-    protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactExoplayerView(themedReactContext);
+    protected ReactTVExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
+        return new ReactTVExoplayerView(themedReactContext);
     }
 
     @Override
-    public void onDropViewInstance(ReactExoplayerView view) {
+    public void onDropViewInstance(ReactTVExoplayerView view) {
         view.cleanUpResources();
     }
 
@@ -103,7 +103,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_SRC)
-    public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
+    public void setSrc(final ReactTVExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
@@ -147,17 +147,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
-    public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
+    public void setResizeMode(final ReactTVExoplayerView videoView, final String resizeModeOrdinalString) {
         videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
-    public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
+    public void setRepeat(final ReactTVExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
     }
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
-    public void setSelectedAudioTrack(final ReactExoplayerView videoView,
+    public void setSelectedAudioTrack(final ReactTVExoplayerView videoView,
                                      @Nullable ReadableMap selectedAudioTrack) {
         String typeString = null;
         Dynamic value = null;
@@ -171,7 +171,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
-    public void setSelectedTextTrack(final ReactExoplayerView videoView,
+    public void setSelectedTextTrack(final ReactTVExoplayerView videoView,
                                      @Nullable ReadableMap selectedTextTrack) {
         String typeString = null;
         Dynamic value = null;
@@ -185,83 +185,83 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_TEXT_TRACKS)
-    public void setPropTextTracks(final ReactExoplayerView videoView,
+    public void setPropTextTracks(final ReactTVExoplayerView videoView,
                                   @Nullable ReadableArray textTracks) {
         videoView.setTextTracks(textTracks);
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
-    public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
+    public void setPaused(final ReactTVExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
-    public void setMuted(final ReactExoplayerView videoView, final boolean muted) {
+    public void setMuted(final ReactTVExoplayerView videoView, final boolean muted) {
         videoView.setMutedModifier(muted);
     }
 
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
-    public void setVolume(final ReactExoplayerView videoView, final float volume) {
+    public void setVolume(final ReactTVExoplayerView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
     }
 
     @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL, defaultFloat = 250.0f)
-    public void setProgressUpdateInterval(final ReactExoplayerView videoView, final float progressUpdateInterval) {
+    public void setProgressUpdateInterval(final ReactTVExoplayerView videoView, final float progressUpdateInterval) {
         videoView.setProgressUpdateInterval(progressUpdateInterval);
     }
 
     @ReactProp(name = PROP_SEEK)
-    public void setSeek(final ReactExoplayerView videoView, final float seek) {
+    public void setSeek(final ReactTVExoplayerView videoView, final float seek) {
         videoView.seekTo(Math.round(seek * 1000f));
     }
 
     @ReactProp(name = PROP_RATE)
-    public void setRate(final ReactExoplayerView videoView, final float rate) {
+    public void setRate(final ReactTVExoplayerView videoView, final float rate) {
         videoView.setRateModifier(rate);
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
-    public void setPlayInBackground(final ReactExoplayerView videoView, final boolean playInBackground) {
+    public void setPlayInBackground(final ReactTVExoplayerView videoView, final boolean playInBackground) {
         videoView.setPlayInBackground(playInBackground);
     }
 
     @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
-    public void setDisableFocus(final ReactExoplayerView videoView, final boolean disableFocus) {
+    public void setDisableFocus(final ReactTVExoplayerView videoView, final boolean disableFocus) {
         videoView.setDisableFocus(disableFocus);
     }
 
     @ReactProp(name = PROP_COLOR_PROGRESS_BAR)
-    public void setColorProgressBar(final ReactExoplayerView videoView, final String color) {
+    public void setColorProgressBar(final ReactTVExoplayerView videoView, final String color) {
         videoView.setColorProgressBar(color);
     }
 
     @ReactProp(name = PROP_ICON_BOTTOM_RIGHT)
-    public void setIconBottomRight(final ReactExoplayerView videoView, final String icon) {
+    public void setIconBottomRight(final ReactTVExoplayerView videoView, final String icon) {
         videoView.setIconBottomRight(icon);
     }
 
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)
-    public void setLive(final ReactExoplayerView videoView, final boolean live) {
+    public void setLive(final ReactTVExoplayerView videoView, final boolean live) {
         videoView.setLive(live);
     }
 
     @ReactProp(name = PROP_CONTROLS_OPACITY)
-    public void setControlsOpacity(final ReactExoplayerView videoView, final float opacity) {
+    public void setControlsOpacity(final ReactTVExoplayerView videoView, final float opacity) {
         videoView.setControlsOpacity(opacity);
     }
 
     @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)
-    public void setFullscreen(final ReactExoplayerView videoView, final boolean fullscreen) {
+    public void setFullscreen(final ReactTVExoplayerView videoView, final boolean fullscreen) {
         videoView.setFullscreen(fullscreen);
     }
 
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
-    public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
+    public void setUseTextureView(final ReactTVExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
-    public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
+    public void setBufferConfig(final ReactTVExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
         int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
         int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
         int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -280,17 +280,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_PROGRESS_BAR_MARGIN_BOTTOM, defaultInt = 0)
-    public void setProgressBarMarginBottom(final ReactExoplayerView videoView, final int margin) {
+    public void setProgressBarMarginBottom(final ReactTVExoplayerView videoView, final int margin) {
         videoView.setProgressBarMarginBottom(margin);
     }
 
     @ReactProp(name = PROP_STATE_OVERLAY)
-    public void setStateOverlay(final ReactExoplayerView videoView, final String state) {
+    public void setStateOverlay(final ReactTVExoplayerView videoView, final String state) {
         videoView.setStateOverlay(state);
     }
 
     @ReactProp(name = PROP_OVERLAY_AUTO_HIDE_TIMEOUT)
-    public void setOverlayAutoHideTimeout(final ReactExoplayerView videoView, final Integer hideTimeout) {
+    public void setOverlayAutoHideTimeout(final ReactTVExoplayerView videoView, final Integer hideTimeout) {
         if (hideTimeout != null) {
             videoView.setOverlayAutoHideTimeout(Long.valueOf(hideTimeout));
         } else {
@@ -299,17 +299,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_STATE_MIDDLE_CORE_CONTROLS)
-    public void setStateMiddleCoreControls(final ReactExoplayerView videoView, final String state) {
+    public void setStateMiddleCoreControls(final ReactTVExoplayerView videoView, final String state) {
         videoView.setStateMiddleCoreControls(state);
     }
 
     @ReactProp(name = PROP_STATE_PROGRESS_BAR)
-    public void setStateProgressBar(final ReactExoplayerView videoView, final String state) {
+    public void setStateProgressBar(final ReactTVExoplayerView videoView, final String state) {
         videoView.setStateProgressBar(state);
     }
 
     @ReactProp(name = PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED)
-    public void setControlsVisibilityGestureDisabled(final ReactExoplayerView videoView, final boolean disabled) {
+    public void setControlsVisibilityGestureDisabled(final ReactTVExoplayerView videoView, final boolean disabled) {
         videoView.setControlsVisibilityGestureDisabled(disabled);
     }
 
