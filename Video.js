@@ -221,16 +221,14 @@ export default class Video extends Component {
           if (result !== undefined) {
             NativeModules.VideoManager.setLicenseResult(result, findNodeHandle(this._root));
           } else {
-            NativeModules.VideoManager.setLicenseError('Empty license result', findNodeHandle(this._root));
+            NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('Empty license result', findNodeHandle(this._root));
           }
         })).catch((error) => {
-          NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
+          NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
         });
       } else {
-        NativeModules.VideoManager.setLicenseError("No spc received", findNodeHandle(this._root));
+        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError("No spc received", findNodeHandle(this._root));
       }
-    } else {
-      NativeModules.VideoManager.setLicenseError("Not enough data for license override", findNodeHandle(this._root));
     }
   }
 
@@ -294,7 +292,7 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
-      onGetLicense: this._onGetLicense,
+      onGetLicense: nativeProps.source && nativeProps.source.drm && nativeProps.source.drm.getLicense && this._onGetLicense,
     });
 
     const posterStyle = {
@@ -368,7 +366,10 @@ Video.propTypes = {
           DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY
         ]),
         licenseServer: PropTypes.string,
-        headers: PropTypes.shape({})
+        headers: PropTypes.shape({}),
+        base64Certificate: PropTypes.bool,
+        certificateUrl: PropTypes.string,
+        getLicense: PropTypes.func,
       })
     }),
     // Opaque type returned by require('./video.mp4')
