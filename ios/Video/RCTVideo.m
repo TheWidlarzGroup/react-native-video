@@ -1591,6 +1591,10 @@ static int const RCTVideoUnset = -1;
             if (certificateStringUrl != nil) {
                 NSURL *certificateURL = [NSURL URLWithString:[certificateStringUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
                 NSData *certificateData = [NSData dataWithContentsOfURL:certificateURL];
+                if ([_drm objectForKey:@"base64Certificate"]) {
+                    certificateData = [[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+                }
+                
                 if (certificateData != nil) {
                     NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
                     AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
