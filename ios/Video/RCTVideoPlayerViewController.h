@@ -12,4 +12,9 @@
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
 @property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
+
+// Optional paramters
+@property (nonatomic, weak) NSString* preferredOrientation;
+@property (nonatomic) BOOL autorotate;
+
 @end

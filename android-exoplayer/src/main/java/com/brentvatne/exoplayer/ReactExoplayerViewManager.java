@@ -45,12 +45,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
+    private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
+    private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
+    private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
+    private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+    private static final String PROP_CONTROLS = "controls";
 
     @Override
     public String getName() {
@@ -136,6 +144,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setRepeatModifier(repeat);
     }
 
+    @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
+    public void setSelectedVideoTrack(final ReactExoplayerView videoView,
+                                     @Nullable ReadableMap selectedVideoTrack) {
+        String typeString = null;
+        Dynamic value = null;
+        if (selectedVideoTrack != null) {
+            typeString = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_TYPE)
+                    ? selectedVideoTrack.getString(PROP_SELECTED_VIDEO_TRACK_TYPE) : null;
+            value = selectedVideoTrack.hasKey(PROP_SELECTED_VIDEO_TRACK_VALUE)
+                    ? selectedVideoTrack.getDynamic(PROP_SELECTED_VIDEO_TRACK_VALUE) : null;
+        }
+        videoView.setSelectedVideoTrack(typeString, value);
+    }
+
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedAudioTrack) {
@@ -190,6 +212,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setProgressUpdateInterval(progressUpdateInterval);
     }
 
+    @ReactProp(name = PROP_REPORT_BANDWIDTH, defaultBoolean = false)
+    public void setReportBandwidth(final ReactExoplayerView videoView, final boolean reportBandwidth) {
+        videoView.setReportBandwidth(reportBandwidth);
+    }
+
     @ReactProp(name = PROP_SEEK)
     public void setSeek(final ReactExoplayerView videoView, final float seek) {
         videoView.seekTo(Math.round(seek * 1000f));
@@ -198,6 +225,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_RATE)
     public void setRate(final ReactExoplayerView videoView, final float rate) {
         videoView.setRateModifier(rate);
+    }
+
+    @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
+    public void setMaxBitRate(final ReactExoplayerView videoView, final int maxBitRate) {
+        videoView.setMaxBitRateModifier(maxBitRate);
+    }
+
+    @ReactProp(name = PROP_MIN_LOAD_RETRY_COUNT)
+    public void minLoadRetryCount(final ReactExoplayerView videoView, final int minLoadRetryCount) {
+        videoView.setMinLoadRetryCountModifier(minLoadRetryCount);
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
@@ -215,9 +252,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setFullscreen(fullscreen);
     }
 
-    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
+    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
+    public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
+        videoView.setHideShutterView(hideShutterView);
+    }
+
+    @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
+    public void setControls(final ReactExoplayerView videoView, final boolean controls) {
+        videoView.setControls(controls);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
