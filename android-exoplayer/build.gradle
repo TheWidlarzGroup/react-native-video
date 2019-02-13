@@ -18,10 +18,10 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile 'com.google.android.exoplayer:exoplayer:2.6.0'
-    compile('com.google.android.exoplayer:extension-okhttp:2.6.0') {
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation 'com.google.android.exoplayer:exoplayer:2.6.0'
+    implementation('com.google.android.exoplayer:extension-okhttp:2.6.0') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    compile 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
 }
