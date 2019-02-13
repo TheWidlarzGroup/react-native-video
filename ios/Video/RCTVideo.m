@@ -26,6 +26,7 @@ static int const RCTVideoUnset = -1;
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
+  NSDictionary *_source;
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
@@ -70,6 +71,7 @@ static int const RCTVideoUnset = -1;
   NSString * _fullscreenOrientation;
   BOOL _fullscreenPlayerPresented;
   NSString *_filterName;
+  BOOL _filterEnabled;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
@@ -328,6 +330,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)setSrc:(NSDictionary *)source
 {
+  _source = source;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
@@ -460,6 +463,7 @@ static int const RCTVideoUnset = -1;
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
 
@@ -480,9 +484,9 @@ static int const RCTVideoUnset = -1;
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-    if (!_textTracks) {
+    if (shouldCache && (!_textTracks || !_textTracks.count)) {
       /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
-       *  to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
+       * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
        * Until this is fixed, we need to bypass caching when text tracks are specified.
        */
       DebugLog(@"Caching is not supported for uri '%@' because text tracks are not compatible with the cache. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
@@ -701,6 +705,26 @@ static int const RCTVideoUnset = -1;
                                            selector:@selector(playbackStalled:)
                                                name:AVPlayerItemPlaybackStalledNotification
                                              object:nil];
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVPlayerItemNewAccessLogEntryNotification
+                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleAVPlayerAccess:)
+                                               name:AVPlayerItemNewAccessLogEntryNotification
+                                             object:nil];
+
+}
+
+- (void)handleAVPlayerAccess:(NSNotification *)notification {
+    AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+    AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+    
+    /* TODO: get this working
+    if (self.onBandwidthUpdate) {
+        self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
+    }
+    */
 }
 
 - (void)playbackStalled:(NSNotification *)notification
@@ -858,7 +882,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)setMaxBitRate:(float) maxBitRate {
   _maxBitRate = maxBitRate;
-  [self applyModifiers];
+  _playerItem.preferredPeakBitRate = maxBitRate;
 }
 
 
@@ -872,8 +896,7 @@ static int const RCTVideoUnset = -1;
     [_player setMuted:NO];
   }
   
-  _playerItem.preferredPeakBitRate = _maxBitRate;
-  
+  [self setMaxBitRate:_maxBitRate];
   [self setSelectedAudioTrack:_selectedAudioTrack];
   [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
@@ -1280,18 +1303,18 @@ static int const RCTVideoUnset = -1;
 
 - (void)setFilter:(NSString *)filterName {
     _filterName = filterName;
-    AVAsset *asset = _playerItem.asset;
-    
-    if (!asset) {
-        return;
-    } else if (!_playerItem.videoComposition && (filterName == nil || [filterName isEqualToString:@""])) {
-        return; // Setting up an empty filter has a cost so avoid whenever possible
-    }
-    // TODO: filters don't work for HLS, check & return
 
+    if (!_filterEnabled) {
+        return;
+    } else if ([[_source objectForKey:@"uri"] rangeOfString:@"m3u8"].location != NSNotFound) {
+        return; // filters don't work for HLS... return
+    } else if (!_playerItem.asset) {
+        return;
+    }
+    
     CIFilter *filter = [CIFilter filterWithName:filterName];
     _playerItem.videoComposition = [AVVideoComposition
-                                    videoCompositionWithAsset:asset
+                                    videoCompositionWithAsset:_playerItem.asset
                                     applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
         if (filter == nil) {
             [request finishWithImage:request.sourceImage context:nil];
@@ -1302,6 +1325,10 @@ static int const RCTVideoUnset = -1;
             [request finishWithImage:output context:nil];
         }
     }];
+}
+
+- (void)setFilterEnabled:(BOOL)filterEnabled {
+  _filterEnabled = filterEnabled;
 }
 
 #pragma mark - React View Management
