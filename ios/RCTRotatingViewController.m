@@ -25,6 +25,11 @@
   self.view.layer.needsDisplayOnBoundsChange = YES;
   
   [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(applicationWillResignActive:)
+                                               name:UIApplicationWillResignActiveNotification
+                                             object:nil];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(applicationDidEnterBackground:)
                                                name:UIApplicationDidEnterBackgroundNotification
                                              object:nil];
@@ -70,6 +75,10 @@
 
 
 - (void) dealloc {
+  [self reset];
+}
+
+- (void)applicationWillResignActive:(NSNotification *)notification {
   [self reset];
 }
 
