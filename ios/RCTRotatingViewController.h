@@ -1,8 +1,8 @@
 //
-//  RCTRotatingView.h
+//  RCTRotatingViewController.h
 //  RCTVideo
 //
-//  Created by June Kim on 2/12/19.
+//  Created by June Kim on 2/14/19.
 //  Copyright © 2019 Facebook. All rights reserved.
 //
 
@@ -10,12 +10,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RCTRotatingView : UIView
+@interface RCTRotatingViewController : UIViewController
 
+@property BOOL frameless;
 @property CGFloat videoWidth;
 @property CGFloat videoHeight;
 
-- (void) startRotating;
+
+- (void) startRotatingIfNeeded;
 - (void) reset;
 
 @end

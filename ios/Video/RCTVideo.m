@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#import "RCTRotatingView.h"
+#import "RCTRotatingViewController.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -75,7 +75,7 @@ static int const RCTVideoUnset = -1;
   
   /// Rotato
   BOOL _frameless;
-  RCTRotatingView *_rotatingView;
+  RCTRotatingViewController *_rotatingVC;
 
 }
 
@@ -104,6 +104,7 @@ static int const RCTVideoUnset = -1;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _videoCache = [RCTVideoCache sharedInstance];
     _frameless = NO;
+    _rotatingVC = [RCTRotatingViewController new];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -198,9 +199,6 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
-  if (_rotatingView) {
-    [_rotatingView reset];
-  }
 }
 
 #pragma mark - App lifecycle handlers
@@ -219,9 +217,6 @@ static int const RCTVideoUnset = -1;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
   }
-  if (_rotatingView) {
-    [_rotatingView reset];
-  }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
@@ -230,7 +225,6 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
-  [self startFramelessIfNeeded];
 }
 
 #pragma mark - Audio events
@@ -1210,20 +1204,14 @@ static int const RCTVideoUnset = -1;
     [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     _playerLayerObserverSet = YES;
 
-    // rotating view holds layer
-    _rotatingView = [[RCTRotatingView alloc] initWithFrame:self.bounds];
-    [self addSubview:_rotatingView];
-    [_rotatingView.layer addSublayer:_playerLayer];
+    _rotatingVC.frameless = _frameless;
+    _rotatingVC.view.frame = self.bounds;
+    _rotatingVC.videoWidth = _playerItem.asset.naturalSize.width;
+    _rotatingVC.videoHeight = _playerItem.asset.naturalSize.height;
+    [_rotatingVC.view.layer addSublayer:_playerLayer];
+    [self addSubview:_rotatingVC.view];
     
-    _rotatingView.layer.needsDisplayOnBoundsChange = YES;
-    _rotatingView.videoWidth = _playerItem.asset.naturalSize.width;
-    _rotatingView.videoHeight = _playerItem.asset.naturalSize.height;
-
-    if (!_frameless) {
-      [_rotatingView reset];
-    } else {
-      [_rotatingView startRotating];
-    }
+    [_rotatingVC startRotatingIfNeeded];
     
   }
 }
@@ -1388,9 +1376,7 @@ static int const RCTVideoUnset = -1;
 #pragma mark - Lifecycle
 
 - (void)removeFromSuperview {
-  if (_rotatingView) {
-    [_rotatingView reset];
-  }
+  [_rotatingVC reset];
   [_player pause];
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
