@@ -73,11 +73,6 @@
   self.view.transform = CGAffineTransformIdentity;
 }
 
-
-- (void) dealloc {
-  [self reset];
-}
-
 - (void)applicationWillResignActive:(NSNotification *)notification {
   [self reset];
 }
@@ -88,6 +83,11 @@
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification {
   [self startRotatingIfNeeded];
+}
+
+- (void) dealloc {
+  [self reset];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
