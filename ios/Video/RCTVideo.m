@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#import "RCTMotionManager.h"
+#import "RCTRotatingView.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -75,8 +75,8 @@ static int const RCTVideoUnset = -1;
   
   /// Rotato
   BOOL _frameless;
-  RCTMotionManager *_motionManager;
-  
+  RCTRotatingView *_rotatingView;
+
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -198,7 +198,9 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
-  [_motionManager stopDeviceMotionUpdates];
+  if (_rotatingView) {
+    [_rotatingView reset];
+  }
 }
 
 #pragma mark - App lifecycle handlers
@@ -217,8 +219,8 @@ static int const RCTVideoUnset = -1;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
   }
-  if (_motionManager) {
-    [_motionManager stopDeviceMotionUpdates];
+  if (_rotatingView) {
+    [_rotatingView reset];
   }
 }
 
@@ -1207,39 +1209,25 @@ static int const RCTVideoUnset = -1;
     [self setResizeMode:_resizeMode];
     [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     _playerLayerObserverSet = YES;
+
+    // rotating view holds layer
+    _rotatingView = [[RCTRotatingView alloc] initWithFrame:self.bounds];
+    [self addSubview:_rotatingView];
+    [_rotatingView.layer addSublayer:_playerLayer];
     
-    [self.layer addSublayer:_playerLayer];
-    self.layer.needsDisplayOnBoundsChange = YES;
+    _rotatingView.layer.needsDisplayOnBoundsChange = YES;
+    _rotatingView.videoWidth = _playerItem.asset.naturalSize.width;
+    _rotatingView.videoHeight = _playerItem.asset.naturalSize.height;
+
+    if (!_frameless) {
+      [_rotatingView reset];
+    } else {
+      [_rotatingView startRotating];
+    }
     
-    [self startFramelessIfNeeded];
   }
 }
 
-- (void) startFramelessIfNeeded {
-  if (!_frameless) {
-    if (_motionManager) {
-      [_motionManager stopDeviceMotionUpdates];
-      _motionManager = nil;
-    }
-    return;
-  }
-  
-  _motionManager = [[RCTMotionManager alloc] init];
-  self.transform = [_motionManager getZeroRotationTransform];
-  if (_playerItem == nil) { return; }
-  if (_playerLayer == nil) { return; }
-  
-  [_motionManager setVideoWidth:_playerItem.asset.naturalSize.width
-                    videoHeight:_playerItem.asset.naturalSize.height
-                      viewWidth:self.bounds.size.width
-                     viewHeight:self.bounds.size.height];
-  __weak RCTVideo *weakSelf = self;
-  [_motionManager startDeviceMotionUpdatesWithHandler:^(CGAffineTransform transform) {
-    if (weakSelf == nil) { return; }
-    weakSelf.transform = transform;
-  }];
-  
-}
 
 - (void)setControls:(BOOL)controls
 {
