@@ -930,13 +930,10 @@ System.out.println("hls");
 
             this.srcUri = uri;
             System.out.println(uri.toString());
-            if (!extension.equals("dash") && !extension.equals("hls")) {
+            String uriStr = uri.toString();
+            if (!extension.equals("dash") && !extension.equals("hls") && !uriStr.startsWith("file")) {
                 this.srcUri = DataSourceUtil.getCacheUri(uri, themedReactContext);
             }
-            // don't cache if it's hls
-            // if (uri.toString().startsWith("https")) {
-            // uri = DataSourceUtil.getCacheUri(uri, themedReactContext);
-            // }
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, BANDWIDTH_METER, this.requestHeaders);
