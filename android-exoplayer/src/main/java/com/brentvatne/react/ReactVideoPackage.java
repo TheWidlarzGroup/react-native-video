@@ -1,6 +1,7 @@
 package com.brentvatne.react;
 
 import com.brentvatne.exoplayer.ReactExoplayerViewManager;
+import com.brentvatne.exoplayer.ReactTVExoplayerViewManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -11,6 +12,21 @@ import java.util.Collections;
 import java.util.List;
 
 public class ReactVideoPackage implements ReactPackage {
+
+    private final PlayerType type;
+
+    public enum PlayerType {
+        MOBILE,
+        TV
+    }
+
+    public ReactVideoPackage() {
+        this.type = PlayerType.MOBILE;
+    }
+
+    public ReactVideoPackage(PlayerType type) {
+        this.type = type;
+    }
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
@@ -24,6 +40,6 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.<ViewManager>singletonList(new ReactExoplayerViewManager());
+        return Collections.<ViewManager>singletonList(type == PlayerType.MOBILE ? new ReactExoplayerViewManager() : new ReactTVExoplayerViewManager());
     }
 }

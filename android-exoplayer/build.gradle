@@ -19,7 +19,7 @@ android {
 dependencies {
     //noinspection GradleDynamicVersion
     provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile('com.google.android.exoplayer:exoplayer:2.8.2') {
+    compile('com.google.android.exoplayer:exoplayer:2.8.4') {
         exclude group: 'com.android.support'
     }
 

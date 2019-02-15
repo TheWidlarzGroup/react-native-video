@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_controls" >
+
+    <ImageButton
+        android:id="@+id/tvPlayPauseImageView"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="34dp"
+        android:layout_marginRight="34dp"
+        android:background="@drawable/circle_dark"
+        android:contentDescription="@string/play_video"
+        android:focusable="false"
+        android:src="@drawable/ic_play" />
+
+    <FrameLayout
+        android:id="@+id/tvBottomBarWidgetContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <include layout="@layout/bottom_bar_tv" />
+    </FrameLayout>
+</RelativeLayout>
