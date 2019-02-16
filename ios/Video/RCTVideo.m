@@ -75,8 +75,9 @@ static int const RCTVideoUnset = -1;
   
   /// Rotato
   BOOL _frameless;
+  NSTimeInterval _unlockTime;
   RCTRotatingViewController *_rotatingVC;
-
+  
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -255,6 +256,9 @@ static int const RCTVideoUnset = -1;
   CMTime currentTime = _player.currentTime;
   const Float64 duration = CMTimeGetSeconds(playerDuration);
   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+  if (currentTimeSecs > _unlockTime) {
+    _rotatingVC.isLocked = NO;
+  }
   
   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
   
@@ -1171,6 +1175,10 @@ static int const RCTVideoUnset = -1;
   _frameless = frameless;
 }
 
+- (void)setUnlockTime:(NSTimeInterval)unlockTime {
+  _unlockTime = unlockTime;
+}
+
 - (void)setFullscreenOrientation:(NSString *)orientation {
   _fullscreenOrientation = orientation;
   if (_fullscreenPlayerPresented) {
@@ -1203,8 +1211,11 @@ static int const RCTVideoUnset = -1;
     [self setResizeMode:_resizeMode];
     [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     _playerLayerObserverSet = YES;
-
+    
     _rotatingVC.frameless = _frameless;
+    if (_unlockTime > 0.0) {
+      _rotatingVC.isLocked = YES;
+    }
     _rotatingVC.view.frame = self.bounds;
     _rotatingVC.videoWidth = _playerItem.asset.naturalSize.width;
     _rotatingVC.videoHeight = _playerItem.asset.naturalSize.height;

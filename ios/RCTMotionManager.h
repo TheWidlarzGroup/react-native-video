@@ -18,6 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) startDeviceMotionUpdatesWithHandler:(void(^)(CGAffineTransform transform)) handler;
 - (CGAffineTransform) getZeroRotationTransform;
 
+- (void)lock;
+- (void)unLock;
+
 @end
 
 NS_ASSUME_NONNULL_END

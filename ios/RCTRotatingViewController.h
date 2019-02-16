@@ -12,10 +12,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RCTRotatingViewController : UIViewController
 
-@property BOOL frameless;
-@property CGFloat videoWidth;
-@property CGFloat videoHeight;
-
+@property (nonatomic, assign) BOOL frameless;
+@property (nonatomic, assign) BOOL isLocked;
+@property (nonatomic, assign) CGFloat videoWidth;
+@property (nonatomic, assign) CGFloat videoHeight;
 
 - (void) startRotatingIfNeeded;
 - (void) reset;

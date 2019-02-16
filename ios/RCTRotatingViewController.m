@@ -38,7 +38,7 @@
                                            selector:@selector(applicationWillEnterForeground:)
                                                name:UIApplicationWillEnterForegroundNotification
                                              object:nil];
-
+  
 }
 
 - (void) startRotatingIfNeeded {
@@ -71,6 +71,17 @@
     _motionManager = nil;
   }
   self.view.transform = CGAffineTransformIdentity;
+}
+
+- (void)setIsLocked:(BOOL)isLocked {
+  if (isLocked) {
+    [_motionManager lock];
+  } else {
+    if (_isLocked) {
+      [_motionManager unLock];
+    }
+  }
+  _isLocked = isLocked;
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
