@@ -10,6 +10,7 @@
 * Add controls support for ExoPlayer [#1414](https://github.com/react-native-community/react-native-video/pull/1414)
 * Fix check for text tracks when iOS caching enabled [#1387](https://github.com/react-native-community/react-native-video/pull/1387)
 * Add support for Picture in Picture on iOS [#1325](https://github.com/react-native-community/react-native-video/pull/1325)
+* Fix UIManager undefined variable [#1488](https://github.com/react-native-community/react-native-video/pull/1488)
 
 ### Version 4.3.0
 * Fix iOS video not displaying after switching source [#1395](https://github.com/react-native-community/react-native-video/pull/1395)
