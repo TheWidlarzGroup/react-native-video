@@ -227,10 +227,10 @@ export default class Video extends Component {
   };
 
   getViewManagerConfig = viewManagerName => {
-    if (!UIManager.getViewManagerConfig) {
-      return UIManager[viewManagerName];
+    if (!NativeModules.UIManager.getViewManagerConfig) {
+      return NativeModules.UIManager[viewManagerName];
     }
-    return UIManager.getViewManagerConfig(viewManagerName);
+    return NativeModules.UIManager.getViewManagerConfig(viewManagerName);
   };
 
   render() {
