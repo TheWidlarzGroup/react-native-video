@@ -10,7 +10,7 @@ Version 3.x requires react-native >= 0.40.0
 ### Version 4.0.0 breaking changes
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
 
-Version 4.0.0 now requires Android SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
+Version 4.0.0 now requires Android target SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using target SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
 
 If you need to support an older React Native version, you should use react-native-video 3.2.1.
 
@@ -269,6 +269,7 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [minLoadRetryCount](#minLoadRetryCount)
 * [muted](#muted)
 * [paused](#paused)
 * [playInBackground](#playinbackground)
@@ -278,9 +279,11 @@ var styles = StyleSheet.create({
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
+* [reportBandwidth](#reportbandwidth)
 * [resizeMode](#resizemode)
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
+* [selectedVideoTrack](#selectedvideotrack)
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -289,6 +292,7 @@ var styles = StyleSheet.create({
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
+* [onBandwidthUpdate](#onbandwidthupdate)
 * [onEnd](#onend)
 * [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
@@ -356,9 +360,9 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
-Controls are not available Android because the system does not provide a stock set of controls. You will need to build your own or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
+For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
-Platforms: iOS, react-native-dom
+Platforms: Android ExoPlayer, iOS, react-native-dom
 
 #### filter
 Add video filter
@@ -417,15 +421,18 @@ Platforms: iOS
 Platforms: iOS
 
 #### headers
-Pass headers to the HTTP client. Can be used for authorization.
+Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
 
 To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```
-headers={{
-  Authorization: 'bearer some-token-value',
-  'X-Custom-Header': 'some value'
+source={{
+  uri: "https://www.example.com/video.mp4",
+  headers: {
+    Authorization: 'bearer some-token-value',
+    'X-Custom-Header': 'some value'
+  }
 }}
 ```
 
@@ -468,6 +475,18 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### minLoadRetryCount
+Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
+
+Default: 3. Retry 3 times.
+
+Example:
+```
+minLoadRetryCount={5} // retry 5 times
+```
+
+Platforms: Android ExoPlayer
 
 #### muted
 Controls whether the audio is muted
@@ -542,6 +561,14 @@ Determine whether to repeat the video when the end is reached
 
 Platforms: all
 
+#### reportBandwidth
+Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
+
+* **false (default)** - Generate onBandwidthUpdate events
+* **true** - Don't generate onBandwidthUpdate events
+
+Platforms: Android ExoPlayer
+
 #### resizeMode
 Determines how to resize the video when the frame doesn't match the raw video dimensions.
 * **"none" (default)** - Don't apply resize
@@ -612,6 +639,35 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
 Platforms: Android ExoPlayer, iOS
+
+#### selectedVideoTrack
+Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
+
+```
+selectedVideoTrack={{
+  type: Type,
+  value: Value
+}}
+```
+
+Example:
+```
+selectedVideoTrack={{
+  type: "resolution",
+  value: 480
+}}
+```
+
+Type | Value | Description
+--- | --- | ---
+"auto" (default) | N/A | Let the player determine which track to play using ABR
+"disabled" | N/A | Turn off video
+"resolution" | number | Play the video track with the height specified, e.g. 480 for the 480p stream
+"index" | number | Play the video track with the index specified as the value, e.g. 0
+
+If a track matching the specified Type (and Value if appropriate) is unavailable, ABR will be used.
+
+Platforms: Android ExoPlayer
 
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
@@ -747,6 +803,26 @@ Callback function that is called when the audio is about to become 'noisy' due t
 Payload: none
 
 Platforms: Android ExoPlayer, iOS
+
+#### onBandwidthUpdate
+Callback function that is called when the available bandwidth changes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+bitrate | number | The estimated bitrate in bits/sec
+
+Example:
+```
+{
+  bitrate: 1000000
+}
+```
+
+Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
+
+Platforms: Android ExoPlayer
 
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
@@ -1074,12 +1150,13 @@ zip -r -n .mp4 *.mp4 player.video.example.com
 <Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        style={styles.backgroundVideo} />
+```
 
 ### Load files with the RN Asset System
 
 The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
 
-```
+```javascript
 <Video
   source={require('../assets/video/turntable.mp4')}
 />
@@ -1110,8 +1187,8 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
 ### Version 4.0.0
 
-#### Gradle 3 and SDK 26 requirement
-In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57. ExoPlayer 
+#### Gradle 3 and target SDK 26 requirement
+In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57.
 
 #### ExoPlayer 2.9.0 Java 1.8 requirement
 ExoPlayer 2.9.0 uses some Java 1.8 features, so you may need to enable support for Java 1.8 in your app/build.gradle file. If you get an error, compiling with ExoPlayer like:
@@ -1146,7 +1223,7 @@ Previously, on Android MediaPlayer if you setup an AppState event when the app w
 
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
-#### Use Android SDK 27 by default
+#### Use Android target SDK 27 by default
 Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
 You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
