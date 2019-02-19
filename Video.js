@@ -227,7 +227,9 @@ export default class Video extends Component {
       uri = `file://${uri}`;
     }
     
-    if (!uri) throw new Error('Trying to load empty source.');
+    if (!uri) {
+      console.warn('Trying to load empty source.');
+    }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
     const isAsset = !!(uri && uri.match(/^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/));
