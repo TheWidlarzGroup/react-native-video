@@ -78,6 +78,10 @@ export default class Video extends Component {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
+  restoreUserInterfaceForPictureInPictureStopCompleted = (restored) => {
+    this.setNativeProps({ restoreUserInterfaceForPIPStopCompletionHandler: restored });
+  };
+
   _assignRoot = (component) => {
     this._root = component;
   };
@@ -198,6 +202,18 @@ export default class Video extends Component {
     }
   };
 
+  _onPictureInPictureStatusChanged = (event) => {
+    if (this.props.onPictureInPictureStatusChanged) {
+      this.props.onPictureInPictureStatusChanged(event.nativeEvent);
+    }
+  };
+
+  _onRestoreUserInterfaceForPictureInPictureStop = (event) => {
+  	if (this.props.onRestoreUserInterfaceForPictureInPictureStop) {
+      this.props.onRestoreUserInterfaceForPictureInPictureStop();
+    }
+  };
+
   _onAudioFocusChanged = (event) => {
     if (this.props.onAudioFocusChanged) {
       this.props.onAudioFocusChanged(event.nativeEvent);
@@ -282,6 +298,8 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
+      onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
     });
 
     const posterStyle = {
@@ -405,6 +423,7 @@ Video.propTypes = {
   }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
+  pictureInPicture: PropTypes.bool,
   playInBackground: PropTypes.bool,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
@@ -436,6 +455,8 @@ Video.propTypes = {
   onPlaybackRateChange: PropTypes.func,
   onAudioFocusChanged: PropTypes.func,
   onAudioBecomingNoisy: PropTypes.func,
+  onPictureInPictureStatusChanged: PropTypes.func,
+  needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
 
   /* Required by react-native */

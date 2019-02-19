@@ -272,6 +272,7 @@ var styles = StyleSheet.create({
 * [minLoadRetryCount](#minLoadRetryCount)
 * [muted](#muted)
 * [paused](#paused)
+* [pictureInPicture](#pictureinpicture)
 * [playInBackground](#playinbackground)
 * [playWhenInactive](#playwheninactive)
 * [poster](#poster)
@@ -301,14 +302,17 @@ var styles = StyleSheet.create({
 * [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
 * [onProgress](#onprogress)
 * [onSeek](#onseek)
+* [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
 * [save](#save)
+* [restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)
 * [seek](#seek)
 
 ### Configurable props
@@ -501,6 +505,13 @@ Controls whether the media is paused
 * **true** - Pause the media
 
 Platforms: all
+
+#### pictureInPicture
+Determine whether the media should played as picture in picture.
+* **false (default)** - Don't not play as picture in picture
+* **true** - Play the media as picture in picture
+
+Platforms: iOS
 
 #### playInBackground
 Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
@@ -942,6 +953,22 @@ Example:
 
 Platforms: all
 
+#### onPictureInPictureStatusChanged
+Callback function that is called when picture in picture becomes active or inactive.
+
+Property | Type | Description
+--- | --- | ---
+isActive | boolean | Boolean indicating whether picture in picture is active
+
+Example:
+```
+{
+isActive: true
+}
+```
+
+Platforms:  iOS
+
 #### onProgress
 Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
 
@@ -984,6 +1011,13 @@ Both the currentTime & seekTime are reported because the video player may not se
 
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### onRestoreUserInterfaceForPictureInPictureStop
+Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
+
+Payload: none
+
+Platforms: iOS
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -1071,6 +1105,18 @@ Future:
  - Will support more formats in the future through options
  - Will support custom directory and file name through options
  
+Platforms: iOS
+
+#### restoreUserInterfaceForPictureInPictureStopCompleted
+`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
+
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
+
+Example:
+```
+this.player.restoreUserInterfaceForPictureInPictureStopCompleted(true);
+```
+
 Platforms: iOS
 
 #### seek()
