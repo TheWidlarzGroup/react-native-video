@@ -1,8 +1,5 @@
 ## Changelog
 
-### Version 4.2.1
-* Fix cache being bypassed when no text tracks are passed.
-
 ### Version 4.2.0
 * Don't initialize filters on iOS unless a filter is set. This was causing a startup performance regression [#1360](https://github.com/react-native-community/react-native-video/pull/1360)
 * Support setting the maxBitRate [#1310](https://github.com/react-native-community/react-native-video/pull/1310)
