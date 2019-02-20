@@ -9,14 +9,19 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+typedef void (^RCTMotionManagerUpdatesHandler)(CGAffineTransform transform);
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface RCTMotionManager : NSObject
 
 - (void) stopDeviceMotionUpdates;
 - (void) setVideoWidth: (double) videoWidth videoHeight: (double) videoHeight viewWidth: (double) viewWidth viewHeight: (double) viewHeight;
-- (void) startDeviceMotionUpdatesWithHandler:(void(^)(CGAffineTransform transform)) handler;
+- (void) startDeviceMotionUpdatesWithHandler:(RCTMotionManagerUpdatesHandler) handler;
 - (CGAffineTransform) getZeroRotationTransform;
+
+- (void)lock;
+- (void)unLock;
 
 @end
 

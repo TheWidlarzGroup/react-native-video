@@ -15,7 +15,7 @@ RCT_EXPORT_MODULE();
 
 - (dispatch_queue_t)methodQueue
 {
-    return self.bridge.uiManager.methodQueue;
+  return self.bridge.uiManager.methodQueue;
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
@@ -38,6 +38,7 @@ RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenAutorotate, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(frameless, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(unlockTime, double);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenOrientation, NSString);
 RCT_EXPORT_VIEW_PROPERTY(filter, NSString);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
@@ -62,34 +63,34 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTBubblingEventBlock);
 RCT_REMAP_METHOD(save,
-        options:(NSDictionary *)options
-        reactTag:(nonnull NSNumber *)reactTag
-        resolver:(RCTPromiseResolveBlock)resolve
-        rejecter:(RCTPromiseRejectBlock)reject)
+                 options:(NSDictionary *)options
+                 reactTag:(nonnull NSNumber *)reactTag
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
-        RCTVideo *view = viewRegistry[reactTag];
-        if (![view isKindOfClass:[RCTVideo class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
-        } else {
-            [view save:options resolve:resolve reject:reject];
-        }
-    }];
+  [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+    RCTVideo *view = viewRegistry[reactTag];
+    if (![view isKindOfClass:[RCTVideo class]]) {
+      RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+    } else {
+      [view save:options resolve:resolve reject:reject];
+    }
+  }];
 }
 
 - (NSDictionary *)constantsToExport
 {
   return @{
-    @"ScaleNone": AVLayerVideoGravityResizeAspect,
-    @"ScaleToFill": AVLayerVideoGravityResize,
-    @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
-    @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
-  };
+           @"ScaleNone": AVLayerVideoGravityResizeAspect,
+           @"ScaleToFill": AVLayerVideoGravityResize,
+           @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
+           @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
+           };
 }
 
 + (BOOL)requiresMainQueueSetup
 {
-    return YES;
+  return YES;
 }
 
 @end

@@ -10,6 +10,7 @@
 		0E25944B21FFC3350033902E /* RCTMotionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E25944A21FFC3350033902E /* RCTMotionManager.m */; };
 		0E759C7321E3F68B00DEC73F /* OvalCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E759C7221E3F68B00DEC73F /* OvalCalculator.m */; };
 		0E759C7421E3F68B00DEC73F /* OvalCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E759C7221E3F68B00DEC73F /* OvalCalculator.m */; };
+		0EF16AA42215F03000E61612 /* RCTRotatingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EF16AA22215F02F00E61612 /* RCTRotatingViewController.m */; };
 		744779142168FC230007D8D3 /* RCTVideoCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 744779122168FC220007D8D3 /* RCTVideoCache.m */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
@@ -47,6 +48,8 @@
 		0E25944A21FFC3350033902E /* RCTMotionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTMotionManager.m; sourceTree = "<group>"; };
 		0E759C7121E3F68B00DEC73F /* OvalCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OvalCalculator.h; sourceTree = "<group>"; };
 		0E759C7221E3F68B00DEC73F /* OvalCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OvalCalculator.m; sourceTree = "<group>"; };
+		0EF16AA22215F02F00E61612 /* RCTRotatingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTRotatingViewController.m; sourceTree = "<group>"; };
+		0EF16AA32215F03000E61612 /* RCTRotatingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTRotatingViewController.h; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		744779122168FC220007D8D3 /* RCTVideoCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideoCache.m; path = VideoCaching/RCTVideoCache.m; sourceTree = "<group>"; };
@@ -106,6 +109,8 @@
 				0E25944A21FFC3350033902E /* RCTMotionManager.m */,
 				0E759C7121E3F68B00DEC73F /* OvalCalculator.h */,
 				0E759C7221E3F68B00DEC73F /* OvalCalculator.m */,
+				0EF16AA32215F03000E61612 /* RCTRotatingViewController.h */,
+				0EF16AA22215F02F00E61612 /* RCTRotatingViewController.m */,
 				D1107C092110259000073188 /* RCTVideoManager.h */,
 				D1107C062110259000073188 /* RCTVideoManager.m */,
 				D1107C012110259000073188 /* RCTVideoPlayerViewController.h */,
@@ -197,6 +202,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0EF16AA42215F03000E61612 /* RCTRotatingViewController.m in Sources */,
 				D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */,
 				D1107C102110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
 				744779142168FC230007D8D3 /* RCTVideoCache.m in Sources */,

@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#import "RCTMotionManager.h"
+#import "RCTRotatingViewController.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -75,7 +75,8 @@ static int const RCTVideoUnset = -1;
   
   /// Rotato
   BOOL _frameless;
-  RCTMotionManager *_motionManager;
+  NSTimeInterval _unlockTime;
+  RCTRotatingViewController *_rotatingVC;
   
 }
 
@@ -104,6 +105,7 @@ static int const RCTVideoUnset = -1;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _videoCache = [RCTVideoCache sharedInstance];
     _frameless = NO;
+    _rotatingVC = [RCTRotatingViewController new];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -198,7 +200,6 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
-  [_motionManager stopDeviceMotionUpdates];
 }
 
 #pragma mark - App lifecycle handlers
@@ -217,9 +218,6 @@ static int const RCTVideoUnset = -1;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
   }
-  if (_motionManager) {
-    [_motionManager stopDeviceMotionUpdates];
-  }
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
@@ -228,7 +226,6 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
   }
-  [self startFramelessIfNeeded];
 }
 
 #pragma mark - Audio events
@@ -259,6 +256,9 @@ static int const RCTVideoUnset = -1;
   CMTime currentTime = _player.currentTime;
   const Float64 duration = CMTimeGetSeconds(playerDuration);
   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+  if (currentTimeSecs > _unlockTime) {
+    _rotatingVC.isLocked = NO;
+  }
   
   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
   
@@ -1175,6 +1175,10 @@ static int const RCTVideoUnset = -1;
   _frameless = frameless;
 }
 
+- (void)setUnlockTime:(NSTimeInterval)unlockTime {
+  _unlockTime = unlockTime;
+}
+
 - (void)setFullscreenOrientation:(NSString *)orientation {
   _fullscreenOrientation = orientation;
   if (_fullscreenPlayerPresented) {
@@ -1208,38 +1212,21 @@ static int const RCTVideoUnset = -1;
     [_playerLayer addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     _playerLayerObserverSet = YES;
     
-    [self.layer addSublayer:_playerLayer];
-    self.layer.needsDisplayOnBoundsChange = YES;
+    _rotatingVC.frameless = _frameless;
+    if (_unlockTime > 0.0) {
+      _rotatingVC.isLocked = YES;
+    }
+    _rotatingVC.view.frame = self.bounds;
+    _rotatingVC.videoWidth = _playerItem.asset.naturalSize.width;
+    _rotatingVC.videoHeight = _playerItem.asset.naturalSize.height;
+    [_rotatingVC.view.layer addSublayer:_playerLayer];
+    [self addSubview:_rotatingVC.view];
     
-    [self startFramelessIfNeeded];
+    [_rotatingVC startRotatingIfNeeded];
+    
   }
 }
 
-- (void) startFramelessIfNeeded {
-  if (!_frameless) {
-    if (_motionManager) {
-      [_motionManager stopDeviceMotionUpdates];
-      _motionManager = nil;
-    }
-    return;
-  }
-  
-  _motionManager = [[RCTMotionManager alloc] init];
-  self.transform = [_motionManager getZeroRotationTransform];
-  if (_playerItem == nil) { return; }
-  if (_playerLayer == nil) { return; }
-  
-  [_motionManager setVideoWidth:_playerItem.asset.naturalSize.width
-                    videoHeight:_playerItem.asset.naturalSize.height
-                      viewWidth:self.bounds.size.width
-                     viewHeight:self.bounds.size.height];
-  __weak RCTVideo *weakSelf = self;
-  [_motionManager startDeviceMotionUpdatesWithHandler:^(CGAffineTransform transform) {
-    if (weakSelf == nil) { return; }
-    weakSelf.transform = transform;
-  }];
-  
-}
 
 - (void)setControls:(BOOL)controls
 {
@@ -1400,7 +1387,7 @@ static int const RCTVideoUnset = -1;
 #pragma mark - Lifecycle
 
 - (void)removeFromSuperview {
-  [_motionManager stopDeviceMotionUpdates];
+  [_rotatingVC reset];
   [_player pause];
   if (_playbackRateObserverRegistered) {
     [_player removeObserver:self forKeyPath:playbackRate context:nil];
