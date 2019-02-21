@@ -41,7 +41,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
-    private static final String PROP_FOCUSED = "focused";
     private static final String PROP_FRAMELESS = "frameless";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
@@ -58,6 +57,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+    private static final String PROP_UNLOCK_TIME = "unlockTime";
+    private static final String PROP_VIDEO_ID = "videoId";
 
     private ArrayList<ReactExoplayerView> view_list = new ArrayList<ReactExoplayerView>();
 
@@ -238,8 +239,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         view_list.add(videoView);
     }
 
-    @ReactProp(name = PROP_FOCUSED, defaultBoolean = false)
-    public void setFocused(final ReactExoplayerView videoView, final boolean focused) {
+    @ReactProp(name = PROP_VIDEO_ID)
+    public void setVideoId(final ReactExoplayerView videoView, final int videoId) {
+        // videoView.somethingWithVideoId(videoId);
+    }
+
+    @ReactProp(name = PROP_UNLOCK_TIME, defaultFloat = 0.0f)
+    public void setUnlockTime(final ReactExoplayerView videoView, final float unlockTime) {
+        // videoView.somethingWithUnlockTime(unlockTime);
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
