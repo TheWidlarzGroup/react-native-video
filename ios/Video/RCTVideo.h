@@ -16,7 +16,11 @@
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate>
 #else
+<<<<<<< HEAD
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVAssetResourceLoaderDelegate>
+=======
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate>
+>>>>>>> rnv-master
 #endif
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
@@ -51,6 +55,8 @@ typedef NS_ENUM(NSInteger, RCTVideoError) {
     RCTVideoErrorNoFairplayDRM,
     RCTVideoErrorNoDRMData
 };
+@property (nonatomic, copy) RCTBubblingEventBlock onPictureInPictureStatusChanged;
+@property (nonatomic, copy) RCTBubblingEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
