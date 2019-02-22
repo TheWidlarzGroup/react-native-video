@@ -13,7 +13,26 @@ import {
   View,
 } from 'react-native';
 
-import Video from 'react-native-video';
+import Video,{FilterType} from 'react-native-video';
+
+const filterTypes = [
+    FilterType.NONE,
+    FilterType.INVERT,
+    FilterType.MONOCHROME,
+    FilterType.POSTERIZE,
+    FilterType.FALSE,
+    FilterType.MAXIMUMCOMPONENT,
+    FilterType.MINIMUMCOMPONENT,
+    FilterType.CHROME,
+    FilterType.FADE,
+    FilterType.INSTANT,
+    FilterType.MONO,
+    FilterType.NOIR,
+    FilterType.PROCESS,
+    FilterType.TONAL,
+    FilterType.TRANSFER,
+    FilterType.SEPIA
+];
 
 class VideoPlayer extends Component {
   constructor(props) {
@@ -34,6 +53,8 @@ class VideoPlayer extends Component {
     skin: 'custom',
     ignoreSilentSwitch: null,
     isBuffering: false,
+    filter: FilterType.NONE,
+    filterEnabled: true
   };
 
   onLoad(data) {
@@ -55,6 +76,20 @@ class VideoPlayer extends Component {
     } else {
       return 0;
     }
+  }
+
+  setFilter(step) {
+    let index = filterTypes.indexOf(this.state.filter) + step;
+
+    if (index === filterTypes.length) {
+      index = 0;
+    } else if (index === -1) {
+      index = filterTypes.length - 1;
+    }
+
+    this.setState({
+      filter: filterTypes[index]
+    })
   }
 
   renderSkinControl(skin) {
@@ -141,6 +176,8 @@ class VideoPlayer extends Component {
             onProgress={this.onProgress}
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
+            filter={this.state.filter}
+            filterEnabled={this.state.filterEnabled}
           />
         </TouchableOpacity>
 
@@ -151,6 +188,21 @@ class VideoPlayer extends Component {
               {this.renderSkinControl('native')}
               {this.renderSkinControl('embed')}
             </View>
+            {
+              (this.state.filterEnabled) ?
+                  <View style={styles.skinControl}>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(-1)
+                    }}>
+                      <Text style={styles.controlOption}>Previous Filter</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(1)
+                    }}>
+                      <Text style={styles.controlOption}>Next Filter</Text>
+                    </TouchableOpacity>
+                  </View> : null
+            }
           </View>
           <View style={styles.generalControls}>
             <View style={styles.rateControl}>
@@ -212,6 +264,8 @@ class VideoPlayer extends Component {
             onEnd={() => { AlertIOS.alert('Done!') }}
             repeat={true}
             controls={this.state.controls}
+            filter={this.state.filter}
+            filterEnabled={this.state.filterEnabled}
           />
         </View>
         <View style={styles.controls}>
@@ -221,6 +275,21 @@ class VideoPlayer extends Component {
               {this.renderSkinControl('native')}
               {this.renderSkinControl('embed')}
             </View>
+            {
+              (this.state.filterEnabled) ?
+                  <View style={styles.skinControl}>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(-1)
+                    }}>
+                      <Text style={styles.controlOption}>Previous Filter</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(1)
+                    }}>
+                      <Text style={styles.controlOption}>Next Filter</Text>
+                    </TouchableOpacity>
+                  </View> : null
+            }
           </View>
           <View style={styles.generalControls}>
             <View style={styles.rateControl}>

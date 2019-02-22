@@ -20,6 +20,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoBufferProgress;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoError;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoProgress;
+@property (nonatomic, copy) RCTBubblingEventBlock onBandwidthUpdate;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoSeek;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoEnd;
 @property (nonatomic, copy) RCTBubblingEventBlock onTimedMetadata;
