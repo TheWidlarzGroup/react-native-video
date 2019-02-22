@@ -15,6 +15,8 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +64,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 	private static final String PROP_VIDEO_ID = "videoId";
 
     private ArrayList<ReactExoplayerView> view_list = new ArrayList<ReactExoplayerView>();
+    private ReactExoplayerViewManager.OnSubmitTrackingListener mListener;
+
+    public void setSubmitTrackingListener(ReactExoplayerViewManager.OnSubmitTrackingListener listener){
+        mListener = listener;
+    }
+
+    public boolean hasSubmitTrackingListener() {
+        return (mListener != null);
+    }
 
     public void set_force_frameless(boolean force_frameless)
     {
@@ -194,6 +205,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     public void on_update_gravity_values(float[] gravityValues) {
         for(ReactExoplayerView view : view_list) {
+            if (!force_frameless && (!view.getIsFrameless() || !view.isTextureView()) || view.isPause())
+                continue;
+
             if (view.framelessModule.on_update_gravity_values(gravityValues, view.getTranslationX()))
                 view.rotateView((float) view.framelessModule.display_rotation_degree, (float) view.framelessModule.display_view_x);
         }
@@ -240,6 +254,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     public void setPaused(final ReactExoplayerView videoView, final boolean paused) {
         videoView.setPausedModifier(paused);
+        if (paused && videoView.getIsFrameless() && videoView.framelessModule.has_stats()) {
+
+            JSONObject jsonObject = videoView.framelessModule.buildTrackingProperties();
+            //Log.v("rotato", "videoId: "+ videoView.framelessModule.framelessTracker.videoId + ": " + jsonObject.toString());
+            if (mListener != null)
+                mListener.OnSubmitTracking(jsonObject);
+        }
+
         //Log.v("RotatoView", "view id = " + videoView.getId() + ", (" + videoView.getWidth() + "x" + videoView.getHeight() + ") video (" +videoView.getVideoWidth() + "x" + videoView.getVideoHeight() + "), paused = " + (paused ? "true" : "false"));
         for(ReactExoplayerView view : view_list)
             if (view.getId() == videoView.getId())
@@ -249,15 +271,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_VIDEO_ID)
     public void setVideoId(final ReactExoplayerView videoView, final int videoId) {
-        Log.v("rotato", "video id: " + videoId);
-        // videoView.somethingWithVideoId(videoId);
+        //Log.v("rotato", "video id: " + videoId);
+        videoView.setVideoId(videoId);
     }
 
     @ReactProp(name = PROP_UNLOCK_TIME, defaultFloat = 0.0f)
     public void setUnlockTime(final ReactExoplayerView videoView, final float unlockTime) {
-        Log.v("rotato", "unlock_time: " + unlockTime);
         videoView.framelessModule.timelock_time = (long)(unlockTime * 1000000);
-        // videoView.somethingWithUnlockTime(unlockTime);
+        //Log.v("rotato", "unlock_time: " + unlockTime + ", " + videoView.framelessModule.timelock_time);
     }
 
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
@@ -367,5 +388,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
 
         return result;
+    }
+
+    public interface OnSubmitTrackingListener {
+        void OnSubmitTracking(JSONObject jsonObject);
     }
 }

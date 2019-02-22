@@ -6,6 +6,8 @@ import android.support.animation.SpringAnimation;
 import android.util.Log;
 import android.view.View;
 
+import org.json.JSONObject;
+
 import static android.view.View.INVISIBLE;
 
 public class FramelessModule {
@@ -37,13 +39,19 @@ public class FramelessModule {
     private double off_rotation_degree;
 
     public boolean is_bending = false;   // true when lock_degree <= device_rotation_degree < bounce_degree
-    private double bend_x_distance = 60;
+    private double bend_x_distance = 72;
 
-    private float bend_spring_stiff = 1000f;
+    private float bend_spring_stiff = 800f;
     private float bend_spring_damp = 0.4f;
 
     private float spring_stiff = 90f;  // default 1500
     private float spring_damp = 0.8f;  // default 0.5
+
+    private long last_playback_time = -1;
+
+    private boolean first_time = true;
+
+    public FramelessTracker framelessTracker = new FramelessTracker();
 
     public FramelessModule(Context context) {
         this.context = context;
@@ -55,6 +63,18 @@ public class FramelessModule {
 
     public void set_init_view_x(float init_view_x) {
         this.init_view_x = init_view_x;
+    }
+
+    public void reset_first_time_flag() {
+        first_time = true;
+    }
+
+    public JSONObject buildTrackingProperties() {
+        return framelessTracker.buildTrackingProperties();
+    }
+
+    public boolean has_stats() {
+        return (framelessTracker.max_degree != 0);
     }
 
     private void validate_virtual_view()
@@ -72,7 +92,7 @@ public class FramelessModule {
 
         device_rotation_degree = Math.atan2(gravityValues[0], gravityValues[1]) / Math.PI * 180.0;
 
-        if (current_playback_time >= timelock_time)  // off-lock
+        if (current_playback_time >= timelock_time || !first_time)  // off-lock
         {
             if (is_locked_last_update) {
                 to_unlock();
@@ -88,7 +108,7 @@ public class FramelessModule {
                 is_locked_last_update = true;
             }
             else if (is_bouncing);
-            else if (is_bending && Math.abs(device_rotation_degree) > bounce_degree)
+            else if (!after_bounce && is_bending && Math.abs(device_rotation_degree) > bounce_degree)
             {
                 if (!is_bending)
                     init_view_x = view_x;
@@ -117,12 +137,19 @@ public class FramelessModule {
                 off_rotation = false;
             }
         }
+
+        framelessTracker.record(display_rotation_degree);
+        if (current_playback_time >= timelock_time || last_playback_time > current_playback_time)
+            first_time = false;
+
+        last_playback_time = current_playback_time;
         return true;
     }
 
     private void to_bounce()
     {
         is_bouncing = true;
+        framelessTracker.to_bounce();
 
         validate_virtual_view();
         virtual_view.setTranslationX((float)display_view_x);

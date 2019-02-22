@@ -62,6 +62,8 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
+import org.json.JSONObject;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -143,7 +145,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public FramelessModule framelessModule;
     public OvalCalculator ovalCalculator = new OvalCalculator();  // rotato
-    private int videoWidth = -1, videoHeight = -1;
+    private int videoWidth = -1, videoHeight = -1, videoId = -1;
 
     public void setFrameless(boolean frameless)
     {
@@ -153,6 +155,20 @@ class ReactExoplayerView extends FrameLayout implements
     public boolean getIsFrameless()
     {
         return this.isFrameless;
+    }
+
+    public boolean isPause()
+    {
+        return isPaused;
+    }
+
+    public void setVideoId(int videoId) {
+        this.videoId = videoId;
+        framelessModule.framelessTracker.videoId = videoId;
+    }
+
+    public int getVideoId() {
+        return videoId;
     }
 
     private final Handler progressHandler = new Handler() {
@@ -169,7 +185,8 @@ class ReactExoplayerView extends FrameLayout implements
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-                        framelessModule.current_playback_time = pos;
+                        framelessModule.current_playback_time = pos * 1000;
+                        //Log.v("rotato", "show progress(" + framelessModule.videoId + "): " + framelessModule.current_playback_time + ", isPaused: " + (isPaused? "true" : "false"));
                     }
                     break;
             }
@@ -624,7 +641,6 @@ class ReactExoplayerView extends FrameLayout implements
 
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), videoWidth, videoHeight,
                     getAudioTrackInfo(), getTextTrackInfo());
-            framelessModule.timelock_time = player.getDuration()/2;  // test purpose, timelock = duration / 2
         }
     }
 
@@ -980,6 +996,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setPausedModifier(boolean paused) {
         isPaused = paused;
+        //Log.v("rotato", "videoId: "+ videoId + ": paused - " + (isPaused ? "true" : "false"));
         if (player != null) {
             if (!paused) {
                 startPlayback();
