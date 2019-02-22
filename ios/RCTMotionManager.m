@@ -15,8 +15,8 @@ static double const kMaxLockAngle = -0.209;  // 12 degree, clockwise
 static double const kMinLockAngle = -6.074;   // 12 degree, counter-clockwise
 
 typedef enum {
-  RCTMotionManagerStateLocked,    // Locked to certain angles
   RCTMotionManagerStateFree,      // Free to track device rotation
+  RCTMotionManagerStateLocked,    // Locked to certain angles
   RCTMotionManagerStateUnlocking  // During an unlock animation
 } RCTMotionManagerState;
 
@@ -28,7 +28,7 @@ typedef enum {
   double _videoHeight;
   double _viewWidth;
   double _viewHeight;
-  
+
   RCTMotionManagerState _lockState;
   CADisplayLink *_animatorSampler;
   CFTimeInterval _animationStartTime;
@@ -77,7 +77,7 @@ typedef enum {
   double minDecay = 0.15;
   __weak RCTMotionManager *weakSelf = self;
   [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
-    
+
     __strong RCTMotionManager *strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     if (strongSelf->_lockState == RCTMotionManagerStateUnlocking) {
@@ -85,21 +85,21 @@ typedef enum {
       return;
     }
     if (motion == nil) { return; }
-    
+
     CMAcceleration gravity = motion.gravity;
     if ([strongSelf isFlatWithGravity:gravity]) { return; }
-    
+
     double decay = minDecay + fabs(gravity.x) * (1 - minDecay);
-    
+
     lastX = gravity.x * decay + lastX * (1 - decay);
     lastY = gravity.y * decay + lastY * (1 - decay);
-    
+
     double rawRotation = atan2(lastX, lastY) - M_PI;
     double rotation = [strongSelf.class rotationWithLockState:_lockState rawRotation:rawRotation];
     _initialRotationWhenUnlocking = rotation;
     _rotationDeltaForUnlocking = rawRotation - rotation;
     //    printf("rawRotation: %.2f, rotation: %.2f\n", rawRotation, rotation);
-    
+
     if (handler) {
       handler([strongSelf transformWithRotation:rotation]);
     }
@@ -134,7 +134,7 @@ typedef enum {
 
 - (void)unLock {
   _lockState = RCTMotionManagerStateUnlocking;
-  
+
   _animationStartTime = CACurrentMediaTime();
   _animatorSampler = [CADisplayLink displayLinkWithTarget:self selector:@selector(sampleAnimator:)];
   [_animatorSampler addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
@@ -149,13 +149,18 @@ typedef enum {
   if (_updatesHandler) {
     _updatesHandler([self transformWithRotation:rotation]);
   }
-  
+
   if (timeElapsed > 1.0) {
     [sampler invalidate];
     _lockState = RCTMotionManagerStateFree;
   }
 }
 
+/*!
+ iOS doesn't provide us an update block from UIView animation,
+ we had to use a spring animation equation from
+ https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
+*/
 - (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
   return -exp2(-6.0*timeElapsed)/2.0 * (-2.0*exp2(6.0*timeElapsed) + sin(12.0*timeElapsed) + 2.0*cos(12.0*timeElapsed));
 }

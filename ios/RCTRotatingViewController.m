@@ -23,22 +23,22 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.view.layer.needsDisplayOnBoundsChange = YES;
-  
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(applicationWillResignActive:)
                                                name:UIApplicationWillResignActiveNotification
                                              object:nil];
-  
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(applicationDidEnterBackground:)
                                                name:UIApplicationDidEnterBackgroundNotification
                                              object:nil];
-  
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(applicationWillEnterForeground:)
                                                name:UIApplicationWillEnterForegroundNotification
                                              object:nil];
-  
+
 }
 
 - (void) startRotatingIfNeeded {
@@ -51,8 +51,11 @@
 
 - (void) startRotating {
   _motionManager = [[RCTMotionManager alloc] init];
+  if (_isLocked) {
+    [_motionManager lock];
+  }
   self.view.transform = [_motionManager getZeroRotationTransform];
-  
+
   [_motionManager setVideoWidth:self.videoWidth
                     videoHeight:self.videoHeight
                       viewWidth:self.view.bounds.size.width
@@ -62,7 +65,7 @@
     if (weakSelf == nil) { return; }
     weakSelf.view.transform = transform;
   }];
-  
+
 }
 
 - (void) reset {
