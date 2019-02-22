@@ -1793,6 +1793,7 @@ static int const RCTVideoUnset = -1;
         return base64Data;
     }
     return nil;
+}
 #pragma mark - Picture in Picture
 
 - (void)pictureInPictureControllerDidStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
