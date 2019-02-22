@@ -77,6 +77,7 @@ class ReactExoplayerView extends FrameLayout implements
         ExoPlayer.EventListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
+        FramelessModule.OnFramelessAnimateListener,
         MetadataRenderer.Output {
 
     private static final String TAG = "ReactExoplayerView";
@@ -140,6 +141,7 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
+    public FramelessModule framelessModule;
     public OvalCalculator ovalCalculator = new OvalCalculator();  // rotato
     private int videoWidth = -1, videoHeight = -1;
 
@@ -167,6 +169,7 @@ class ReactExoplayerView extends FrameLayout implements
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                        framelessModule.current_playback_time = pos;
                     }
                     break;
             }
@@ -183,8 +186,42 @@ class ReactExoplayerView extends FrameLayout implements
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
 
         initializePlayer();
+
+        framelessModule = new FramelessModule(context);
+        framelessModule.setFramelessAnimateListener(this);
     }
 
+    @Override
+    public void OnFramelessAnimate(float degree, float translate_x) {
+        rotateView(degree, translate_x);
+    }
+
+    public void rotateView(float degree, float translate_x) {
+        if (!getIsFrameless() || !isTextureView())
+            return;
+
+        double rad = degree / 180.0 * Math.PI;
+
+        if (ovalCalculator.get_video_width() >= ovalCalculator.get_video_height() && ovalCalculator.get_video_stretch_mode() == 0)
+            ovalCalculator.set_fit();
+        else if (ovalCalculator.get_video_width() < ovalCalculator.get_video_height() && ovalCalculator.get_video_stretch_mode() == 1)
+            ovalCalculator.set_fill();
+
+        float scale = (float)ovalCalculator.get_scale(getWidth(), getHeight(), getVideoWidth(), getVideoHeight(), rad);
+
+        setScaleX(scale);
+        setScaleY(scale);
+        setRotation(degree);
+
+        if (framelessModule.is_bending || framelessModule.is_bouncing)
+            setTranslationX(translate_x);
+
+        /*if (view.ovalCalculator.is_shift_on_landscape())
+        {
+            view.setTranslationX((float) view.ovalCalculator.get_landscape_offset_x(rad));
+            view.setTranslationY((float) view.ovalCalculator.get_landscape_offset_y(rad));
+        }*/
+    }
 
     @Override
     public void setId(int id) {
@@ -587,6 +624,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), videoWidth, videoHeight,
                     getAudioTrackInfo(), getTextTrackInfo());
+            framelessModule.timelock_time = player.getDuration()/2;  // test purpose, timelock = duration / 2
         }
     }
 

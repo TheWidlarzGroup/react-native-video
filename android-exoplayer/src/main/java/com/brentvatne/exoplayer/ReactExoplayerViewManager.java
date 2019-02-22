@@ -41,6 +41,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
+    private static final String PROP_FOCUSED = "focused";
     private static final String PROP_FRAMELESS = "frameless";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
@@ -58,7 +59,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_UNLOCK_TIME = "unlockTime";
-    private static final String PROP_VIDEO_ID = "videoId";
+	private static final String PROP_VIDEO_ID = "videoId";
 
     private ArrayList<ReactExoplayerView> view_list = new ArrayList<ReactExoplayerView>();
 
@@ -191,6 +192,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setTextTracks(textTracks);
     }
 
+    public void on_update_gravity_values(float[] gravityValues) {
+        for(ReactExoplayerView view : view_list) {
+            if (view.framelessModule.on_update_gravity_values(gravityValues, view.getTranslationX()))
+                view.rotateView((float) view.framelessModule.display_rotation_degree, (float) view.framelessModule.display_view_x);
+        }
+    }
+
     public void setRotation(float degree)
     {
         double rad = degree / 180.0 * Math.PI;
@@ -241,11 +249,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_VIDEO_ID)
     public void setVideoId(final ReactExoplayerView videoView, final int videoId) {
+        Log.v("rotato", "video id: " + videoId);
         // videoView.somethingWithVideoId(videoId);
     }
 
     @ReactProp(name = PROP_UNLOCK_TIME, defaultFloat = 0.0f)
     public void setUnlockTime(final ReactExoplayerView videoView, final float unlockTime) {
+        Log.v("rotato", "unlock_time: " + unlockTime);
+        videoView.framelessModule.timelock_time = (long)(unlockTime * 1000000);
         // videoView.somethingWithUnlockTime(unlockTime);
     }
 
