@@ -107,7 +107,6 @@ RCT_REMAP_METHOD(setLicenseResultError,
         }
     }];
 };
-}
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTBubblingEventBlock);
 
