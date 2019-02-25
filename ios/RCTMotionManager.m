@@ -146,7 +146,7 @@ typedef enum {
     _updatesHandler([self transformWithRotation:rotation]);
   }
 
-  if (timeElapsed > 1.0) {
+  if (timeElapsed > 1.4) {
     [sampler invalidate];
     _lockState = RCTMotionManagerStateFree;
   }
@@ -156,9 +156,12 @@ typedef enum {
  iOS doesn't provide us an update block from UIView animation,
  we had to use a spring animation equation from
  https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
+ f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
 */
 - (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
-  return -exp2(-6.0*timeElapsed)/2.0 * (-2.0*exp2(6.0*timeElapsed) + sin(12.0*timeElapsed) + 2.0*cos(12.0*timeElapsed));
+  double const coefficientTime = 6.0 * timeElapsed;
+  double const exponential = exp2(-8.0*timeElapsed);
+  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
 }
 
 @end
