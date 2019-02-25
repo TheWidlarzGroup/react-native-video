@@ -36,22 +36,18 @@ typedef enum {
   double _rotationDeltaForUnlocking;
 }
 
-- (instancetype)init
-{
+- (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
   self = [super init];
   if (self) {
     _motionManager = [CMMotionManager new];
     _motionManager.deviceMotionUpdateInterval = 1/60.0;
     _scaler = [[OvalCalculator alloc] init];
+    _videoWidth = videoWidth;
+    _videoHeight = videoHeight;
+    _viewWidth = viewWidth;
+    _viewHeight = viewHeight;
   }
   return self;
-}
-
--(void)setVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
-  _videoWidth = videoWidth;
-  _videoHeight = videoHeight;
-  _viewWidth = viewWidth;
-  _viewHeight = viewHeight;
 }
 
 - (CGAffineTransform) transformWithRotation: (CGFloat) rotation {

@@ -50,22 +50,22 @@
 }
 
 - (void) startRotating {
-  _motionManager = [[RCTMotionManager alloc] init];
+  _motionManager = [[RCTMotionManager alloc] initWithVideoWidth:self.videoWidth
+                                                    videoHeight:self.videoHeight
+                                                      viewWidth:self.view.bounds.size.width
+                                                     viewHeight:self.view.bounds.size.height];
   if (_isLocked) {
     [_motionManager lock];
   }
+  
   self.view.transform = [_motionManager getZeroRotationTransform];
-
-  [_motionManager setVideoWidth:self.videoWidth
-                    videoHeight:self.videoHeight
-                      viewWidth:self.view.bounds.size.width
-                     viewHeight:self.view.bounds.size.height];
+  
   __weak RCTRotatingViewController *weakSelf = self;
   [_motionManager startDeviceMotionUpdatesWithHandler:^(CGAffineTransform transform) {
     if (weakSelf == nil) { return; }
     weakSelf.view.transform = transform;
   }];
-
+  
 }
 
 - (void) reset {

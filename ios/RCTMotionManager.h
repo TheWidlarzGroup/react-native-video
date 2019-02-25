@@ -15,8 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RCTMotionManager : NSObject
 
+- (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight;
 - (void) stopDeviceMotionUpdates;
-- (void) setVideoWidth: (double) videoWidth videoHeight: (double) videoHeight viewWidth: (double) viewWidth viewHeight: (double) viewHeight;
 - (void) startDeviceMotionUpdatesWithHandler:(RCTMotionManagerUpdatesHandler) handler;
 - (CGAffineTransform) getZeroRotationTransform;
 
