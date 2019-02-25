@@ -249,6 +249,11 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
+        public void onTimelineChanged(Timeline timeline, Object manifest) {
+            // Do nothing
+        }
+
+        @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
             updateForCurrentTrackSelections();
         }
