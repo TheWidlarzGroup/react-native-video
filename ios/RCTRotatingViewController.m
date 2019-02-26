@@ -39,6 +39,11 @@
                                                name:UIApplicationWillEnterForegroundNotification
                                              object:nil];
   
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(applicationDidBecomeActive:)
+                                               name:UIApplicationDidBecomeActiveNotification
+                                             object:nil];
+  
 }
 
 - (void) startRotatingIfNeeded {
@@ -70,10 +75,10 @@
 
 - (void) reset {
   if (_motionManager) {
+    self.view.transform = [_motionManager getZeroRotationTransform];
     [_motionManager stopDeviceMotionUpdates];
     _motionManager = nil;
   }
-  self.view.transform = CGAffineTransformIdentity;
 }
 
 - (void)setIsLocked:(BOOL)isLocked {
@@ -100,6 +105,10 @@
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification {
+  [self startRotatingIfNeeded];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
   [self startRotatingIfNeeded];
 }
 
