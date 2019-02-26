@@ -60,7 +60,6 @@
 - (void) record: (double) display_rotation_degree {
   double toMaxDegree = display_rotation_degree > 180 ? display_rotation_degree - 360 : display_rotation_degree;
   _maxDegree = fmax(_maxDegree, fabs(toMaxDegree));
-  printf("_maxDegree: %d\n", _maxDegree);
   [self checkRotated: display_rotation_degree];
 }
 

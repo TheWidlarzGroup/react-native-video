@@ -157,7 +157,6 @@ typedef enum {
 - (void)sampleAnimator:(CADisplayLink *)sampler {
   CFTimeInterval timeElapsed = CACurrentMediaTime() - _animationStartTime;
   double factor = [self springAnimationFactorWithTimeElapsed:timeElapsed];
-  //  printf("sampleAnimator timeElapsed: %.2f, factor: %.2f\n", timeElapsed, factor);
   double rotation = _initialRotationWhenUnlocking + _rotationDeltaForUnlocking * factor;
   if (_updatesHandler) {
     _updatesHandler([self transformWithRotation:rotation]);
