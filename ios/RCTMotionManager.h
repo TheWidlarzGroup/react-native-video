@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)lock;
 - (void)unLock;
+- (NSDictionary*) framelessProperties;
 
 @end
 

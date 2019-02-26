@@ -10,13 +10,12 @@
 #include <CoreMotion/CoreMotion.h>
 #import <math.h>
 #import "OvalCalculator.h"
-
-static double const kMaxLockAngle = -0.209;  // 12 degree, clockwise
-static double const kMinLockAngle = -6.074;   // 12 degree, counter-clockwise
+#import "RCTFramelessCounter.h"
 
 typedef enum {
   RCTMotionManagerStateFree,      // Free to track device rotation
-  RCTMotionManagerStateLocked,    // Locked to certain angles
+  RCTMotionManagerStateLocked,    // May free move within 15 degrees, and bend within 20 degrees
+  RCTMotionManagerStateBouncing,  // During a bouncing animation
   RCTMotionManagerStateUnlocking  // During an unlock animation
 } RCTMotionManagerState;
 
@@ -30,27 +29,33 @@ typedef enum {
   double _viewHeight;
 
   RCTMotionManagerState _lockState;
-  CADisplayLink *_animatorSampler;
+  BOOL _didBounce;
+  CADisplayLink *_animationTimer;
   CFTimeInterval _animationStartTime;
-  double _initialRotationWhenUnlocking;
-  double _rotationDeltaForUnlocking;
+
+  double _initialRotationForAnimation;
+  double _initialTranslateXForAnimation;
+  double _rotationDeltaForAnimation;
+  RCTFramelessCounter *_framelessCounter;
 }
 
 - (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
   self = [super init];
   if (self) {
     _motionManager = [CMMotionManager new];
-    _motionManager.deviceMotionUpdateInterval = 1/60.0;
+    _motionManager.deviceMotionUpdateInterval = 1/30.0;
     _scaler = [[OvalCalculator alloc] init];
     _videoWidth = videoWidth;
     _videoHeight = videoHeight;
     _viewWidth = viewWidth;
     _viewHeight = viewHeight;
+    _framelessCounter = [[RCTFramelessCounter alloc] init];
   }
   return self;
 }
 
-- (CGAffineTransform) transformWithRotation: (CGFloat) rotation {
+- (CGAffineTransform)transformWithRotation:(CGFloat)rotation
+                                translateX:(CGFloat)translateX {
   [_scaler set_fit];
   double scale =
   [_scaler get_scaleWithDouble:_viewWidth
@@ -59,7 +64,8 @@ typedef enum {
                     withDouble:_videoHeight
                     withDouble:rotation];
   CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
-  return CGAffineTransformRotate(transform, rotation);
+  transform = CGAffineTransformRotate(transform, rotation);
+  return CGAffineTransformTranslate(transform, translateX, 0.0);
 }
 
 - (BOOL) isFlatWithGravity:(CMAcceleration) gravity {
@@ -68,16 +74,18 @@ typedef enum {
 
 - (void)startDeviceMotionUpdatesWithHandler:(RCTMotionManagerUpdatesHandler)handler {
   _updatesHandler = [handler copy];
-  __block double lastX = -1;
-  __block double lastY = -1;
+  static double const kUnInitizedValue = -10;
+  __block double lastX = kUnInitizedValue;
+  __block double lastY = kUnInitizedValue;
   double minDecay = 0.15;
   __weak RCTMotionManager *weakSelf = self;
   [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
 
     __strong RCTMotionManager *strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
-    if (strongSelf->_lockState == RCTMotionManagerStateUnlocking) {
-      // Unlocking animation is going on, don't use sensor's input
+    if (strongSelf->_lockState == RCTMotionManagerStateUnlocking
+        || strongSelf->_lockState == RCTMotionManagerStateBouncing) {
+      // An animation is going on, don't use sensor's input
       return;
     }
     if (motion == nil) { return; }
@@ -86,24 +94,58 @@ typedef enum {
     if ([strongSelf isFlatWithGravity:gravity]) { return; }
 
     double decay = minDecay + fabs(gravity.x) * (1 - minDecay);
+    if (lastX == kUnInitizedValue) {
+      lastX = gravity.x;
+    }
+    if (lastY == kUnInitizedValue) {
+      lastY = gravity.y;
+    }
 
     lastX = gravity.x * decay + lastX * (1 - decay);
     lastY = gravity.y * decay + lastY * (1 - decay);
 
-    double rawRotation = atan2(lastX, lastY) - M_PI;
-    double rotation = [strongSelf.class rotationWithLockState:_lockState rawRotation:rawRotation];
-    _initialRotationWhenUnlocking = rotation;
-    _rotationDeltaForUnlocking = rawRotation - rotation;
-    //    printf("rawRotation: %.2f, rotation: %.2f\n", rawRotation, rotation);
+    double const rawRotation = atan2(lastX, lastY) - M_PI;  // Within (-2*M_PI, 0]
+    double normalizedRotation;
+    if (rawRotation <= -M_PI) {
+      normalizedRotation = rawRotation + 2 * M_PI;  // Within (0, M_PI]
+    } else {
+      normalizedRotation = rawRotation;             // Within (-M_PI, 0]
+    }
+    BOOL shouldBounce = NO;
+    double translateX = 0.0;
+    double displayRotation = [strongSelf.class rotationWithLockState:_lockState
+                                                  normalizedRotation:normalizedRotation
+                                                          translateX:&translateX
+                                                        shouldBounce:&shouldBounce];
+    _initialRotationForAnimation = displayRotation;
+    _rotationDeltaForAnimation = normalizedRotation - displayRotation;
+    _initialTranslateXForAnimation = translateX;
+
+    double normalizedDisplayRotationDegrees;
+    if (displayRotation < 0) {
+      normalizedDisplayRotationDegrees = (displayRotation + 2 * M_PI ) / M_PI * 180.0;
+    } else {
+      normalizedDisplayRotationDegrees = (displayRotation) / M_PI * 180.0;
+    }
+    [strongSelf->_framelessCounter record:normalizedDisplayRotationDegrees];
+
+    if (shouldBounce) {
+      // Bounce only once
+      if (!_didBounce) {
+        [strongSelf bounce];
+      }
+      return;
+    }
 
     if (handler) {
-      handler([strongSelf transformWithRotation:rotation]);
+      handler([strongSelf transformWithRotation:displayRotation
+                                     translateX:translateX]);
     }
   }];
 }
 
 - (CGAffineTransform)getZeroRotationTransform {
-  return [self transformWithRotation:0];
+  return [self transformWithRotation:0 translateX:0.0];
 }
 
 - (void)stopDeviceMotionUpdates {
@@ -112,16 +154,36 @@ typedef enum {
 
 #pragma mark - Time Lock
 
-+ (double)rotationWithLockState:(RCTMotionManagerState)lockState rawRotation:(double)rawRotaton {
-  static double midLockAngle = (kMinLockAngle + kMaxLockAngle) / 2.0;
-  if (lockState == RCTMotionManagerStateLocked) {
-    if (rawRotaton > kMinLockAngle && rawRotaton <= midLockAngle) {
-      return kMinLockAngle;
-    } else if (rawRotaton > midLockAngle && rawRotaton < kMaxLockAngle) {
-      return kMaxLockAngle;
-    }
++ (double)rotationWithLockState:(RCTMotionManagerState)lockState
+             normalizedRotation:(double)normalizedRotation
+                     translateX:(double *)translateX
+                   shouldBounce:(BOOL *)shouldBounce {
+  *shouldBounce = NO;
+  *translateX = 0.0;
+
+  if (lockState == RCTMotionManagerStateFree) {
+    return normalizedRotation;
   }
-  return rawRotaton;
+
+  assert(lockState == RCTMotionManagerStateLocked);
+  double const sign = (normalizedRotation >= 0.0) ? 1.0 : -1.0;
+  normalizedRotation = normalizedRotation * sign;
+
+  static double const kLockAngle = 0.262;       // 15 degrees
+  static double const kBounceAngle = 0.349;  // 20 degrees
+  static double const kMaxTranslateX = 8.0;    // In points
+
+  if (normalizedRotation > kLockAngle && normalizedRotation <= kBounceAngle) {
+    // Bending
+    *translateX = -sign * kMaxTranslateX * (normalizedRotation - kLockAngle) / (kBounceAngle - kLockAngle);
+    normalizedRotation = kLockAngle;
+  } else if (normalizedRotation > kBounceAngle) {
+    // Bouncing
+    *translateX = -sign * kMaxTranslateX;
+    normalizedRotation = kLockAngle;
+    *shouldBounce = YES;
+  }
+  return normalizedRotation * sign;
 }
 
 - (void)lock {
@@ -130,38 +192,83 @@ typedef enum {
 
 - (void)unLock {
   _lockState = RCTMotionManagerStateUnlocking;
-
-  _animationStartTime = CACurrentMediaTime();
-  _animatorSampler = [CADisplayLink displayLinkWithTarget:self selector:@selector(sampleAnimator:)];
-  [_animatorSampler addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-  _animatorSampler.frameInterval = 1;
+  [self startAnimationTimer];
 }
 
-- (void)sampleAnimator:(CADisplayLink *)sampler {
+- (void)bounce {
+  _lockState = RCTMotionManagerStateBouncing;
+  _didBounce = YES;
+  [self startAnimationTimer];
+  [_framelessCounter incrementBounce];
+}
+
+- (void)startAnimationTimer {
+  [_animationTimer invalidate];
+  _animationStartTime = CACurrentMediaTime();
+  _animationTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(timerFired:)];
+  [_animationTimer addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+  _animationTimer.frameInterval = 1;
+}
+
+- (NSDictionary*) framelessProperties {
+  NSDictionary* properties =  [_framelessCounter trackingProperties];
+  [_framelessCounter resetCount];
+  return properties;
+}
+
+- (void)timerFired:(CADisplayLink *)timer {
   CFTimeInterval timeElapsed = CACurrentMediaTime() - _animationStartTime;
-  double factor = [self springAnimationFactorWithTimeElapsed:timeElapsed];
-  //  printf("sampleAnimator timeElapsed: %.2f, factor: %.2f\n", timeElapsed, factor);
-  double rotation = _initialRotationWhenUnlocking + _rotationDeltaForUnlocking * factor;
+  double rotation;
+  double factor = 1.0;
+  if (_lockState == RCTMotionManagerStateUnlocking) {
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:0.7];
+    rotation = _initialRotationForAnimation + _rotationDeltaForAnimation * factor;
+  } else if (_lockState == RCTMotionManagerStateBouncing) {
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:1.2];
+    rotation = _initialRotationForAnimation;
+  }
+  double translateX = _initialTranslateXForAnimation * (1-factor);
   if (_updatesHandler) {
-    _updatesHandler([self transformWithRotation:rotation]);
+    _updatesHandler([self transformWithRotation:rotation translateX:translateX]);
   }
 
-  if (timeElapsed > 1.4) {
-    [sampler invalidate];
-    _lockState = RCTMotionManagerStateFree;
+  if (factor >= 1.0) {
+    [timer invalidate];
+    if (_lockState == RCTMotionManagerStateUnlocking) {
+      _lockState = RCTMotionManagerStateFree;
+    } else if (_lockState == RCTMotionManagerStateBouncing) {
+      _lockState = RCTMotionManagerStateLocked;
+    }
   }
 }
 
 /*!
  iOS doesn't provide us an update block from UIView animation,
- we had to use a spring animation equation from
- https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
- f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
-*/
-- (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
-  double const coefficientTime = 6.0 * timeElapsed;
-  double const exponential = exp2(-8.0*timeElapsed);
-  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
+ we had to use a spring animation equation.
+ */
+- (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed
+                                      duration:(CFTimeInterval)duration {
+  // 2nd order equation
+  // https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
+  // https://www.wolframalpha.com
+  // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
+  //  double const coefficientTime = 6.0 * timeElapsed;
+  //  double const exponential = exp2(-8.0*timeElapsed);
+  //  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
+
+  // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 25f'(t)
+  //  return (exp2(-20.0*timeElapsed) - 4.0*exp2(-5.0*timeElapsed) + 3.0) / 3.0;
+
+  // Sigmoid
+  // https://hackernoon.com/ease-out-the-half-sigmoid-7240df433d98
+  double const steepness = 5.0;
+  double const result = [self sigmoidWithTime:timeElapsed steepness:steepness] / [self sigmoidWithTime:duration steepness:steepness];
+  return MIN(result, 1.0);
+}
+
+// Use Sigmoid function to generate an ease-out animation curve
+- (double)sigmoidWithTime:(double)time steepness:(double)steepness {
+  return 1.0 / (1.0 + exp(-steepness * time)) - 0.5;
 }
 
 @end
