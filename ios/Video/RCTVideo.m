@@ -617,17 +617,26 @@ static int const RCTVideoUnset = -1;
           width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
           height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
           CGAffineTransform preferredTransform = [videoTrack preferredTransform];
-          
-          if ((videoTrack.naturalSize.width == preferredTransform.tx
-               && videoTrack.naturalSize.height == preferredTransform.ty)
-              || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
+
+          // Landscape transform is of the shape:
+          // | 1 0 |
+          // | 0 1 |
+          // Portrait transform is of the shape:
+          // | 0 1 |
+          // |-1 0 |
+          // https://en.wikipedia.org/wiki/Matrix_(mathematics)#Linear_transformations
+          if (preferredTransform.a == 1 && preferredTransform.b == 0 && preferredTransform.c == 0 && preferredTransform.d == 1)
           {
             orientation = @"landscape";
-          } else {
+          }
+          else if (preferredTransform.a == 0 && preferredTransform.b == 1 && preferredTransform.c == -1 && preferredTransform.d == 0) {
+            NSObject *temp = width;
+            width = height;
+            height = temp;
             orientation = @"portrait";
           }
         }
-        
+
         if (self.onVideoLoad && _videoLoadStarted) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
