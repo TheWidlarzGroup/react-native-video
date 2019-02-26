@@ -10,6 +10,7 @@
 #include <CoreMotion/CoreMotion.h>
 #import <math.h>
 #import "OvalCalculator.h"
+#import "RCTFramelessCounter.h"
 
 static double const kMaxLockAngle = -0.209;  // 12 degree, clockwise
 static double const kMinLockAngle = -6.074;   // 12 degree, counter-clockwise
@@ -28,24 +29,27 @@ typedef enum {
   double _videoHeight;
   double _viewWidth;
   double _viewHeight;
-
+  
   RCTMotionManagerState _lockState;
   CADisplayLink *_animatorSampler;
   CFTimeInterval _animationStartTime;
   double _initialRotationWhenUnlocking;
   double _rotationDeltaForUnlocking;
+  
+  RCTFramelessCounter *_framelessCounter;
 }
 
 - (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
   self = [super init];
   if (self) {
     _motionManager = [CMMotionManager new];
-    _motionManager.deviceMotionUpdateInterval = 1/60.0;
+    _motionManager.deviceMotionUpdateInterval = 1/30.0;
     _scaler = [[OvalCalculator alloc] init];
     _videoWidth = videoWidth;
     _videoHeight = videoHeight;
     _viewWidth = viewWidth;
     _viewHeight = viewHeight;
+    _framelessCounter = [[RCTFramelessCounter alloc] init];
   }
   return self;
 }
@@ -73,7 +77,7 @@ typedef enum {
   double minDecay = 0.15;
   __weak RCTMotionManager *weakSelf = self;
   [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
-
+    
     __strong RCTMotionManager *strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     if (strongSelf->_lockState == RCTMotionManagerStateUnlocking) {
@@ -81,23 +85,30 @@ typedef enum {
       return;
     }
     if (motion == nil) { return; }
-
+    
     CMAcceleration gravity = motion.gravity;
     if ([strongSelf isFlatWithGravity:gravity]) { return; }
-
+    
     double decay = minDecay + fabs(gravity.x) * (1 - minDecay);
-
+    
     lastX = gravity.x * decay + lastX * (1 - decay);
     lastY = gravity.y * decay + lastY * (1 - decay);
-
+    
     double rawRotation = atan2(lastX, lastY) - M_PI;
-    double rotation = [strongSelf.class rotationWithLockState:_lockState rawRotation:rawRotation];
-    _initialRotationWhenUnlocking = rotation;
-    _rotationDeltaForUnlocking = rawRotation - rotation;
-    //    printf("rawRotation: %.2f, rotation: %.2f\n", rawRotation, rotation);
-
+    double displayRotation = [strongSelf.class rotationWithLockState:_lockState rawRotation:rawRotation];
+    _initialRotationWhenUnlocking = displayRotation;
+    _rotationDeltaForUnlocking = rawRotation - displayRotation;
+    
+    double normalizedDisplayRotationDegrees;
+    if (displayRotation < 0) {
+      normalizedDisplayRotationDegrees = (displayRotation + 2 * M_PI ) / M_PI * 180.0;
+    } else {
+      normalizedDisplayRotationDegrees = (displayRotation) / M_PI * 180.0;
+    }
+    [strongSelf->_framelessCounter record:normalizedDisplayRotationDegrees];
+    
     if (handler) {
-      handler([strongSelf transformWithRotation:rotation]);
+      handler([strongSelf transformWithRotation:displayRotation]);
     }
   }];
 }
@@ -130,11 +141,17 @@ typedef enum {
 
 - (void)unLock {
   _lockState = RCTMotionManagerStateUnlocking;
-
+  
   _animationStartTime = CACurrentMediaTime();
   _animatorSampler = [CADisplayLink displayLinkWithTarget:self selector:@selector(sampleAnimator:)];
   [_animatorSampler addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
   _animatorSampler.frameInterval = 1;
+}
+
+- (NSDictionary*) framelessProperties {
+  NSDictionary* properties =  [_framelessCounter trackingProperties];
+  [_framelessCounter resetCount];
+  return properties;
 }
 
 - (void)sampleAnimator:(CADisplayLink *)sampler {
@@ -145,7 +162,7 @@ typedef enum {
   if (_updatesHandler) {
     _updatesHandler([self transformWithRotation:rotation]);
   }
-
+  
   if (timeElapsed > 1.0) {
     [sampler invalidate];
     _lockState = RCTMotionManagerStateFree;
@@ -156,7 +173,7 @@ typedef enum {
  iOS doesn't provide us an update block from UIView animation,
  we had to use a spring animation equation from
  https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
-*/
+ */
 - (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
   return -exp2(-6.0*timeElapsed)/2.0 * (-2.0*exp2(6.0*timeElapsed) + sin(12.0*timeElapsed) + 2.0*cos(12.0*timeElapsed));
 }
