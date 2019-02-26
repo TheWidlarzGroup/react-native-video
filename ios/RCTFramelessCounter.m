@@ -13,7 +13,6 @@
 @property int bounceCount;
 @property int rotationCount;
 @property int maxDegree;
-@property int videoId;
 
 @end
 
@@ -36,11 +35,11 @@
   _rotationCount = 0;
   _maxDegree = 0;
   _lastOrientation = 0;
-  _orientationTh = 0;
+  _orientationTh = 15;
 }
 
 - (void) checkRotated: (double) degree {
-  if (-_orientationTh < degree && degree < _orientationTh && _lastOrientation != 0) {
+  if ((360-_orientationTh < degree || degree < _orientationTh) && _lastOrientation != 0) {
     _lastOrientation = 0;
     _rotationCount ++;
   }
@@ -48,18 +47,20 @@
     _lastOrientation = 1;
     _rotationCount ++;
   }
-  else if (180-_orientationTh < degree && degree < -180+_orientationTh && _lastOrientation != 2) {
+  else if (180-_orientationTh < degree && degree < 180+_orientationTh && _lastOrientation != 2) {
     _lastOrientation = 2;
     _rotationCount ++;
   }
-  else if (-90-_orientationTh < degree && degree < -90+_orientationTh && _lastOrientation != 3) {
+  else if (270-_orientationTh < degree && degree < 270+_orientationTh && _lastOrientation != 3) {
     _lastOrientation = 3;
     _rotationCount ++;
   }
 }
 
 - (void) record: (double) display_rotation_degree {
-  _maxDegree = fmax(_maxDegree, fabs(display_rotation_degree));
+  double toMaxDegree = display_rotation_degree > 180 ? display_rotation_degree - 360 : display_rotation_degree;
+  _maxDegree = fmax(_maxDegree, fabs(toMaxDegree));
+  printf("_maxDegree: %d\n", _maxDegree);
   [self checkRotated: display_rotation_degree];
 }
 
@@ -69,12 +70,10 @@
 
 - (NSDictionary*) trackingProperties {
   NSDictionary* properties = @{
-                               @"Video_id" : [NSNumber numberWithInt:_videoId],
-                               @"Maximum Degree" : [NSNumber numberWithInt:_maxDegree],
-                               @"Flipped_Count" : [NSNumber numberWithInt:_rotationCount],
-                               @"Bounced_Count" : [NSNumber numberWithInt:_bounceCount],
+                               @"max_degree" : [NSNumber numberWithInt:_maxDegree],
+                               @"rotation_count" : [NSNumber numberWithInt:_rotationCount],
+                               @"bounce_count" : [NSNumber numberWithInt:_bounceCount],
                                };
-  [self resetCount];
   return properties;
 }
 
