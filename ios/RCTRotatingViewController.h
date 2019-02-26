@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) startRotatingIfNeeded;
 - (void) reset;
+- (NSDictionary*) framelessProperties;
 
 @end
 

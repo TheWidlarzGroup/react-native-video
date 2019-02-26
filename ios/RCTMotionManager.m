@@ -10,6 +10,7 @@
 #include <CoreMotion/CoreMotion.h>
 #import <math.h>
 #import "OvalCalculator.h"
+#import "RCTFramelessCounter.h"
 
 typedef enum {
   RCTMotionManagerStateFree,      // Free to track device rotation
@@ -31,21 +32,24 @@ typedef enum {
   BOOL _didBounce;
   CADisplayLink *_animationTimer;
   CFTimeInterval _animationStartTime;
+
   double _initialRotationForAnimation;
   double _initialTranslateXForAnimation;
   double _rotationDeltaForAnimation;
+  RCTFramelessCounter *_framelessCounter;
 }
 
 - (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
   self = [super init];
   if (self) {
     _motionManager = [CMMotionManager new];
-    _motionManager.deviceMotionUpdateInterval = 1/60.0;
+    _motionManager.deviceMotionUpdateInterval = 1/30.0;
     _scaler = [[OvalCalculator alloc] init];
     _videoWidth = videoWidth;
     _videoHeight = videoHeight;
     _viewWidth = viewWidth;
     _viewHeight = viewHeight;
+    _framelessCounter = [[RCTFramelessCounter alloc] init];
   }
   return self;
 }
@@ -109,13 +113,22 @@ typedef enum {
     }
     BOOL shouldBounce = NO;
     double translateX = 0.0;
-    double rotation = [strongSelf.class rotationWithLockState:_lockState
-                                           normalizedRotation:normalizedRotation
-                                                   translateX:&translateX
-                                                 shouldBounce:&shouldBounce];
-    _initialRotationForAnimation = rotation;
-    _rotationDeltaForAnimation = normalizedRotation - rotation;
+    double displayRotation = [strongSelf.class rotationWithLockState:_lockState
+                                                  normalizedRotation:normalizedRotation
+                                                          translateX:&translateX
+                                                        shouldBounce:&shouldBounce];
+    _initialRotationForAnimation = displayRotation;
+    _rotationDeltaForAnimation = normalizedRotation - displayRotation;
     _initialTranslateXForAnimation = translateX;
+
+    double normalizedDisplayRotationDegrees;
+    if (displayRotation < 0) {
+      normalizedDisplayRotationDegrees = (displayRotation + 2 * M_PI ) / M_PI * 180.0;
+    } else {
+      normalizedDisplayRotationDegrees = (displayRotation) / M_PI * 180.0;
+    }
+    [strongSelf->_framelessCounter record:normalizedDisplayRotationDegrees];
+
     if (shouldBounce) {
       // Bounce only once
       if (!_didBounce) {
@@ -125,7 +138,7 @@ typedef enum {
     }
 
     if (handler) {
-      handler([strongSelf transformWithRotation:rotation
+      handler([strongSelf transformWithRotation:displayRotation
                                      translateX:translateX]);
     }
   }];
@@ -194,6 +207,12 @@ typedef enum {
   _animationTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(timerFired:)];
   [_animationTimer addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
   _animationTimer.frameInterval = 1;
+}
+
+- (NSDictionary*) framelessProperties {
+  NSDictionary* properties =  [_framelessCounter trackingProperties];
+  [_framelessCounter resetCount];
+  return properties;
 }
 
 - (void)timerFired:(CADisplayLink *)timer {
