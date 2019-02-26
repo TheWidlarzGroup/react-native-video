@@ -87,7 +87,6 @@ typedef enum {
 
     CMAcceleration gravity = motion.gravity;
     if ([strongSelf isFlatWithGravity:gravity]) { return; }
-    printf("rawRotation before decay: %.2f\n", atan2(gravity.x, gravity.y) - M_PI);
 
     double decay = minDecay + fabs(gravity.x) * (1 - minDecay);
     if (lastX == kUnInitizedValue) {
@@ -100,29 +99,26 @@ typedef enum {
     lastX = gravity.x * decay + lastX * (1 - decay);
     lastY = gravity.y * decay + lastY * (1 - decay);
 
-    double rawRotation = atan2(lastX, lastY) - M_PI;
-
-//    double rawRotation = atan2(gravity.x, gravity.y) - M_PI;
-
-    printf("rawRotation after decay: %.2f\n", rawRotation);
-    if (rawRotation < -3.142) {
-      rawRotation = rawRotation + 6.283;
+    double const rawRotation = atan2(lastX, lastY) - M_PI;  // Within (-2*M_PI, 0]
+    double normalizedRotation;
+    if (rawRotation <= -M_PI) {
+      normalizedRotation = rawRotation + 2 * M_PI;  // Within (0, M_PI]
+    } else {
+      normalizedRotation = rawRotation;             // Within (-M_PI, 0]
     }
     BOOL shouldBounce = NO;
     double translateX = 0.0;
     double rotation = [strongSelf.class rotationWithLockState:_lockState
-                                                  rawRotation:rawRotation
+                                           normalizedRotation:normalizedRotation
                                                    translateX:&translateX
                                                  shouldBounce:&shouldBounce];
-    printf("processed rotation: %.2f\n", rotation);
     _initialRotationForAnimation = rotation;
-    _rotationDeltaForAnimation = rawRotation - rotation;
+    _rotationDeltaForAnimation = normalizedRotation - rotation;
     _initialTranslateXForAnimation = translateX;
     if (shouldBounce) {
       [strongSelf bounce];
       return;
     }
-    //    printf("rawRotation: %.2f, rotation: %.2f\n", rawRotation, rotation);
 
     if (handler) {
       handler([strongSelf transformWithRotation:rotation
@@ -142,35 +138,35 @@ typedef enum {
 #pragma mark - Time Lock
 
 + (double)rotationWithLockState:(RCTMotionManagerState)lockState
-                    rawRotation:(double)rawRotation
+             normalizedRotation:(double)normalizedRotation
                      translateX:(double *)translateX
                    shouldBounce:(BOOL *)shouldBounce {
   *shouldBounce = NO;
   *translateX = 0.0;
 
   if (lockState == RCTMotionManagerStateFree) {
-    return rawRotation;
+    return normalizedRotation;
   }
 
   assert(lockState == RCTMotionManagerStateLocked);
-  double const sign = (rawRotation >= 0.0) ? 1.0 : -1.0;
-  rawRotation = rawRotation * sign;
+  double const sign = (normalizedRotation >= 0.0) ? 1.0 : -1.0;
+  normalizedRotation = normalizedRotation * sign;
 
   static double const kLockAngle = 0.262;       // 15 degrees
   static double const kBounceAngle = 0.349;  // 20 degrees
   static double const kMaxTranslateX = 8.0;    // In points
 
-  if (rawRotation > kLockAngle && rawRotation <= kBounceAngle) {
+  if (normalizedRotation > kLockAngle && normalizedRotation <= kBounceAngle) {
     // Bending
-    *translateX = -sign * kMaxTranslateX * (rawRotation - kLockAngle) / (kBounceAngle - kLockAngle);
-    rawRotation = kLockAngle;
-  } else if (rawRotation > kBounceAngle) {
+    *translateX = -sign * kMaxTranslateX * (normalizedRotation - kLockAngle) / (kBounceAngle - kLockAngle);
+    normalizedRotation = kLockAngle;
+  } else if (normalizedRotation > kBounceAngle) {
     // Bouncing
     *translateX = -sign * kMaxTranslateX;
-    rawRotation = kLockAngle;
+    normalizedRotation = kLockAngle;
     *shouldBounce = YES;
   }
-  return rawRotation * sign;
+  return normalizedRotation * sign;
 }
 
 - (void)lock {
@@ -197,12 +193,13 @@ typedef enum {
 
 - (void)timerFired:(CADisplayLink *)timer {
   CFTimeInterval timeElapsed = CACurrentMediaTime() - _animationStartTime;
-  double factor = [self springAnimationFactorWithTimeElapsed:timeElapsed];
-  //  printf("timerFired timeElapsed: %.2f, factor: %.2f\n", timeElapsed, factor);
   double rotation;
+  double factor = 1.0;
   if (_lockState == RCTMotionManagerStateUnlocking) {
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:0.7];
     rotation = _initialRotationForAnimation + _rotationDeltaForAnimation * factor;
   } else if (_lockState == RCTMotionManagerStateBouncing) {
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:1.2];
     rotation = _initialRotationForAnimation;
   }
   double translateX = _initialTranslateXForAnimation * (1-factor);
@@ -210,7 +207,7 @@ typedef enum {
     _updatesHandler([self transformWithRotation:rotation translateX:translateX]);
   }
 
-  if (timeElapsed > 1.5) {
+  if (factor >= 1.0) {
     [timer invalidate];
     if (_lockState == RCTMotionManagerStateUnlocking) {
       _lockState = RCTMotionManagerStateFree;
@@ -222,18 +219,31 @@ typedef enum {
 
 /*!
  iOS doesn't provide us an update block from UIView animation,
- we had to use a spring animation equation from
- https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
- https://www.wolframalpha.com
+ we had to use a spring animation equation.
  */
-- (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
+- (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed
+                                      duration:(CFTimeInterval)duration {
+  // 2nd order equation
+  // https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
+  // https://www.wolframalpha.com
   // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
-//  double const coefficientTime = 6.0 * timeElapsed;
-//  double const exponential = exp2(-8.0*timeElapsed);
-//  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
+  //  double const coefficientTime = 6.0 * timeElapsed;
+  //  double const exponential = exp2(-8.0*timeElapsed);
+  //  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
 
   // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 25f'(t)
-  return (exp2(-20.0*timeElapsed) - 4.0*exp2(-5.0*timeElapsed) + 3.0) / 3.0;
+  //  return (exp2(-20.0*timeElapsed) - 4.0*exp2(-5.0*timeElapsed) + 3.0) / 3.0;
+
+  // Sigmoid
+  // https://hackernoon.com/ease-out-the-half-sigmoid-7240df433d98
+  double const steepness = 5.0;
+  double const result = [self sigmoidWithTime:timeElapsed steepness:steepness] / [self sigmoidWithTime:duration steepness:steepness];
+  return MIN(result, 1.0);
+}
+
+// Use Sigmoid function to generate an ease-out animation curve
+- (double)sigmoidWithTime:(double)time steepness:(double)steepness {
+  return 1.0 / (1.0 + exp(-steepness * time)) - 0.5;
 }
 
 @end
