@@ -199,6 +199,7 @@ typedef enum {
   _lockState = RCTMotionManagerStateBouncing;
   _didBounce = YES;
   [self startAnimationTimer];
+  [_framelessCounter incrementBounce];
 }
 
 - (void)startAnimationTimer {
