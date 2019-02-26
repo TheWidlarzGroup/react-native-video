@@ -28,10 +28,11 @@ typedef enum {
   double _viewHeight;
 
   RCTMotionManagerState _lockState;
-  CADisplayLink *_animatorSampler;
+  CADisplayLink *_animationTimer;
   CFTimeInterval _animationStartTime;
-  double _initialRotationWhenUnlocking;
-  double _rotationDeltaForUnlocking;
+  double _initialRotationForAnimation;
+  double _initialTranslateXForAnimation;
+  double _rotationDeltaForAnimation;
 }
 
 - (instancetype)initWithVideoWidth:(double)videoWidth videoHeight:(double)videoHeight viewWidth:(double)viewWidth viewHeight:(double)viewHeight {
@@ -68,8 +69,9 @@ typedef enum {
 
 - (void)startDeviceMotionUpdatesWithHandler:(RCTMotionManagerUpdatesHandler)handler {
   _updatesHandler = [handler copy];
-  __block double lastX = -1;
-  __block double lastY = -1;
+  static double const kUnInitizedValue = -10;
+  __block double lastX = kUnInitizedValue;
+  __block double lastY = kUnInitizedValue;
   double minDecay = 0.15;
   __weak RCTMotionManager *weakSelf = self;
   [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
@@ -85,13 +87,24 @@ typedef enum {
 
     CMAcceleration gravity = motion.gravity;
     if ([strongSelf isFlatWithGravity:gravity]) { return; }
+    printf("rawRotation before decay: %.2f\n", atan2(gravity.x, gravity.y) - M_PI);
 
     double decay = minDecay + fabs(gravity.x) * (1 - minDecay);
+    if (lastX == kUnInitizedValue) {
+      lastX = gravity.x;
+    }
+    if (lastY == kUnInitizedValue) {
+      lastY = gravity.y;
+    }
 
     lastX = gravity.x * decay + lastX * (1 - decay);
     lastY = gravity.y * decay + lastY * (1 - decay);
 
     double rawRotation = atan2(lastX, lastY) - M_PI;
+
+//    double rawRotation = atan2(gravity.x, gravity.y) - M_PI;
+
+    printf("rawRotation after decay: %.2f\n", rawRotation);
     if (rawRotation < -3.142) {
       rawRotation = rawRotation + 6.283;
     }
@@ -101,8 +114,14 @@ typedef enum {
                                                   rawRotation:rawRotation
                                                    translateX:&translateX
                                                  shouldBounce:&shouldBounce];
-    _initialRotationWhenUnlocking = rotation;
-    _rotationDeltaForUnlocking = rawRotation - rotation;
+    printf("processed rotation: %.2f\n", rotation);
+    _initialRotationForAnimation = rotation;
+    _rotationDeltaForAnimation = rawRotation - rotation;
+    _initialTranslateXForAnimation = translateX;
+    if (shouldBounce) {
+      [strongSelf bounce];
+      return;
+    }
     //    printf("rawRotation: %.2f, rotation: %.2f\n", rawRotation, rotation);
 
     if (handler) {
@@ -139,7 +158,7 @@ typedef enum {
 
   static double const kLockAngle = 0.262;       // 15 degrees
   static double const kBounceAngle = 0.349;  // 20 degrees
-  static double const kMaxTranslateX = 24.0;    // In points
+  static double const kMaxTranslateX = 8.0;    // In points
 
   if (rawRotation > kLockAngle && rawRotation <= kBounceAngle) {
     // Bending
@@ -160,25 +179,44 @@ typedef enum {
 
 - (void)unLock {
   _lockState = RCTMotionManagerStateUnlocking;
-
-  _animationStartTime = CACurrentMediaTime();
-  _animatorSampler = [CADisplayLink displayLinkWithTarget:self selector:@selector(sampleAnimator:)];
-  [_animatorSampler addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-  _animatorSampler.frameInterval = 1;
+  [self startAnimationTimer];
 }
 
-- (void)sampleAnimator:(CADisplayLink *)sampler {
+- (void)bounce {
+  _lockState = RCTMotionManagerStateBouncing;
+  [self startAnimationTimer];
+}
+
+- (void)startAnimationTimer {
+  [_animationTimer invalidate];
+  _animationStartTime = CACurrentMediaTime();
+  _animationTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(timerFired:)];
+  [_animationTimer addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+  _animationTimer.frameInterval = 1;
+}
+
+- (void)timerFired:(CADisplayLink *)timer {
   CFTimeInterval timeElapsed = CACurrentMediaTime() - _animationStartTime;
   double factor = [self springAnimationFactorWithTimeElapsed:timeElapsed];
-  //  printf("sampleAnimator timeElapsed: %.2f, factor: %.2f\n", timeElapsed, factor);
-  double rotation = _initialRotationWhenUnlocking + _rotationDeltaForUnlocking * factor;
+  //  printf("timerFired timeElapsed: %.2f, factor: %.2f\n", timeElapsed, factor);
+  double rotation;
+  if (_lockState == RCTMotionManagerStateUnlocking) {
+    rotation = _initialRotationForAnimation + _rotationDeltaForAnimation * factor;
+  } else if (_lockState == RCTMotionManagerStateBouncing) {
+    rotation = _initialRotationForAnimation;
+  }
+  double translateX = _initialTranslateXForAnimation * (1-factor);
   if (_updatesHandler) {
-    _updatesHandler([self transformWithRotation:rotation translateX:0.0]);
+    _updatesHandler([self transformWithRotation:rotation translateX:translateX]);
   }
 
-  if (timeElapsed > 1.4) {
-    [sampler invalidate];
-    _lockState = RCTMotionManagerStateFree;
+  if (timeElapsed > 1.5) {
+    [timer invalidate];
+    if (_lockState == RCTMotionManagerStateUnlocking) {
+      _lockState = RCTMotionManagerStateFree;
+    } else if (_lockState == RCTMotionManagerStateBouncing) {
+      _lockState = RCTMotionManagerStateLocked;
+    }
   }
 }
 
@@ -186,12 +224,16 @@ typedef enum {
  iOS doesn't provide us an update block from UIView animation,
  we had to use a spring animation equation from
  https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
- f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
+ https://www.wolframalpha.com
  */
 - (double)springAnimationFactorWithTimeElapsed:(CFTimeInterval)timeElapsed {
-  double const coefficientTime = 6.0 * timeElapsed;
-  double const exponential = exp2(-8.0*timeElapsed);
-  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
+  // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 16f'(t)
+//  double const coefficientTime = 6.0 * timeElapsed;
+//  double const exponential = exp2(-8.0*timeElapsed);
+//  return -4.0/3.0*exponential*sin(coefficientTime) - exponential*cos(coefficientTime) + 1.0;
+
+  // f(0) = 0; f'(0) = 0; f''(t) = -100(f(t) - 1) - 25f'(t)
+  return (exp2(-20.0*timeElapsed) - 4.0*exp2(-5.0*timeElapsed) + 3.0) / 3.0;
 }
 
 @end
