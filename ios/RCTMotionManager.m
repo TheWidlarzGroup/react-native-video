@@ -28,6 +28,7 @@ typedef enum {
   double _viewHeight;
 
   RCTMotionManagerState _lockState;
+  BOOL _didBounce;
   CADisplayLink *_animationTimer;
   CFTimeInterval _animationStartTime;
   double _initialRotationForAnimation;
@@ -116,7 +117,10 @@ typedef enum {
     _rotationDeltaForAnimation = normalizedRotation - rotation;
     _initialTranslateXForAnimation = translateX;
     if (shouldBounce) {
-      [strongSelf bounce];
+      // Bounce only once
+      if (!_didBounce) {
+        [strongSelf bounce];
+      }
       return;
     }
 
@@ -180,6 +184,7 @@ typedef enum {
 
 - (void)bounce {
   _lockState = RCTMotionManagerStateBouncing;
+  _didBounce = YES;
   [self startAnimationTimer];
 }
 
