@@ -170,17 +170,16 @@ typedef enum {
   normalizedRotation = normalizedRotation * sign;
 
   static double const kLockAngle = 0.262;       // 15 degrees
-  static double const kBounceAngle = 0.349;  // 20 degrees
-  static double const kMaxTranslateX = 8.0;    // In points
+  static double const kBounceAngle = 0.384;     // 22 degrees
+  static double const kMaxTranslateX = 10.0;    // In points
 
   if (normalizedRotation > kLockAngle && normalizedRotation <= kBounceAngle) {
     // Bending
     *translateX = -sign * kMaxTranslateX * (normalizedRotation - kLockAngle) / (kBounceAngle - kLockAngle);
-    normalizedRotation = kLockAngle;
   } else if (normalizedRotation > kBounceAngle) {
     // Bouncing
     *translateX = -sign * kMaxTranslateX;
-    normalizedRotation = kLockAngle;
+    normalizedRotation = kBounceAngle;
     *shouldBounce = YES;
   }
   return normalizedRotation * sign;
@@ -221,10 +220,10 @@ typedef enum {
   double rotation;
   double factor = 1.0;
   if (_lockState == RCTMotionManagerStateUnlocking) {
-    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:0.7];
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:0.5];
     rotation = _initialRotationForAnimation + _rotationDeltaForAnimation * factor;
   } else if (_lockState == RCTMotionManagerStateBouncing) {
-    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:1.2];
+    factor = [self springAnimationFactorWithTimeElapsed:timeElapsed duration:0.8];
     rotation = _initialRotationForAnimation;
   }
   double translateX = _initialTranslateXForAnimation * (1-factor);
