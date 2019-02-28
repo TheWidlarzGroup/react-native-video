@@ -21,7 +21,7 @@ import java.util.Map;
 
 
 public class DataSourceUtil {
-
+    private static SimpleCache mCache = null;
     private DataSourceUtil() {
     }
 
@@ -68,8 +68,9 @@ public class DataSourceUtil {
     }
 
     private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        return new DefaultDataSourceFactory(context, bandwidthMeter,
-                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
+	return  createCacheDataSourceFactory(context, bandwidthMeter,requestHeaders);
+        /*return new DefaultDataSourceFactory(context, bandwidthMeter,
+	  buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));*/
     }
 
     private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
@@ -83,5 +84,45 @@ public class DataSourceUtil {
             okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders);
 
         return okHttpDataSourceFactory;
+    }
+
+    private static DataSource.Factory createCacheDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+
+        if(mCache == null) {
+            File cacheFolder = new File(context.getApplicationContext().getCacheDir(), "media");
+	    
+            // Specify cache size and removing policies
+            LeastRecentlyUsedCacheEvictor cacheEvictor = new LeastRecentlyUsedCacheEvictor(50 * 1024 * 1024);
+            mCache = new SimpleCache(cacheFolder, cacheEvictor);
+        }
+	
+        CacheDataSourceFactory source = new CacheDataSourceFactory(mCache, buildHttpDataSourceFactory(context, bandwidthMeter,requestHeaders), CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR );
+	
+	
+        /*source.addTransferListener(new TransferListener() {
+	  
+	  @Override
+	  public void onTransferInitializing(DataSource source, DataSpec dataSpec, boolean isNetwork) {
+
+            }
+
+            @Override
+            public void onTransferStart(DataSource source, DataSpec dataSpec, boolean isNetwork) {
+
+            }
+
+            @Override
+            public void onBytesTransferred(DataSource source, DataSpec dataSpec, boolean isNetwork, int bytesTransferred) {
+
+            }
+
+            @Override
+            public void onTransferEnd(DataSource source, DataSpec dataSpec, boolean isNetwork) {
+
+            }
+	    });*/
+
+        return source;
+
     }
 }
