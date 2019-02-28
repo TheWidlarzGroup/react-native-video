@@ -170,8 +170,8 @@ typedef enum {
   normalizedRotation = normalizedRotation * sign;
 
   static double const kLockAngle = 0.262;       // 15 degrees
-  static double const kBounceAngle = 0.384;     // 22 degrees
-  static double const kMaxTranslateX = 10.0;    // In points
+  static double const kBounceAngle = 0.436;     // 25 degrees
+  static double const kMaxTranslateX = 5.0;     // In points
 
   if (normalizedRotation > kLockAngle && normalizedRotation <= kBounceAngle) {
     // Bending
