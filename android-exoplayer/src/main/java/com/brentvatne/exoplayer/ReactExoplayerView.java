@@ -86,6 +86,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 
+import timber.log.Timber;
+
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
@@ -358,6 +360,9 @@ class ReactExoplayerView extends FrameLayout implements
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
 
             DrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
+            Timber.d("setting up drm: %s", drmUUID);
+            Timber.d("still setting up DRM: %s", drmLicenseHeader);
+            Timber.d("Guess what? Still setting up DRM: %s", drmLicenseUrl);
             if (this.drmUUID != null) {
                 try {
                     drmSessionManager = buildDrmSessionManager(this.drmUUID, this.drmLicenseUrl,
