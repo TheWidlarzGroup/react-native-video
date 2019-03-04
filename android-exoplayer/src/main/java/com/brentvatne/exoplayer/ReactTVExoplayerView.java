@@ -1424,8 +1424,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void setStateMiddleCoreControls(final String state) {
-
-        boolean enabled = getEnabledFromState(state);
         float alpha = getAlphaFromState(state);
 
         playPauseButton.setAlpha(alpha);
@@ -1558,7 +1556,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                         break;
                     }
 
-                    if (controls.getAlpha() != 1.0f) {
+                    if (controls.getAlpha() == 0.0f) {
                         showOverlay();
                         return true;
                     }
@@ -1569,6 +1567,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     if (keyPressTime == null) {
                         keyPressTime = currentTime;
                         keyNotHandled = true;
+                        showOverlay();
                         return true;
                     } else if ((currentTime - keyPressTime) / 1000 > 10) {
                         increment = 40;
@@ -1629,8 +1628,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             removeCallbacks(hideRunnable);
         }
         setStateOverlay(ControlState.ACTIVE.toString());
-
-        int state = player.getPlaybackState();
 
         if (isPaused) {
             controls.setBackgroundResource(R.drawable.bg_controls);
