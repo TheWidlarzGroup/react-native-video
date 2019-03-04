@@ -32,4 +32,8 @@ Pod::Spec.new do |s|
   s.dependency "React"
 
   s.default_subspec = "Video"
+
+  s.xcconfig = {
+    'OTHER_LDFLAGS': '-ObjC',
+  }
 end

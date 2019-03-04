@@ -1,5 +1,8 @@
 ## Changelog
 
+### next
+* Support DRM for iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
+
 ### Version 4.4.0
 * Fix runtime warning by replacing `UIManager.RCTVideo` with `UIManager.getViewManagerConfig('RCTVideo')` (and ensuring backwards compat) [#1487](https://github.com/react-native-community/react-native-video/pull/1487)
 * Fix loading package resolved videos when using video-caching [#1438](https://github.com/react-native-community/react-native-video/pull/1438)

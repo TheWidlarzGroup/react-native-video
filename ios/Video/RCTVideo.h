@@ -14,9 +14,9 @@
 
 @class RCTEventDispatcher;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate>
 #else
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate>
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate, AVAssetResourceLoaderDelegate>
 #endif
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
@@ -38,6 +38,19 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onGetLicense;
+
+typedef NS_ENUM(NSInteger, RCTVideoError) {
+    RCTVideoErrorFromJSPart,
+    RCTVideoErrorLicenseRequestNotOk,
+    RCTVideoErrorNoDataFromLicenseRequest,
+    RCTVideoErrorNoSPC,
+    RCTVideoErrorNoDataRequest,
+    RCTVideoErrorNoCertificateData,
+    RCTVideoErrorNoCertificateURL,
+    RCTVideoErrorNoFairplayDRM,
+    RCTVideoErrorNoDRMData
+};
 @property (nonatomic, copy) RCTBubblingEventBlock onPictureInPictureStatusChanged;
 @property (nonatomic, copy) RCTBubblingEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 
@@ -46,5 +59,7 @@
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
 
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+- (void)setLicenseResult:(NSString * )license;
+- (BOOL)setLicenseResultError:(NSString * )error;
 
 @end

@@ -3,19 +3,24 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -26,6 +31,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
+    private static final String PROP_SRC_DRM = "drm";
+    private static final String PROP_SRC_DRM_TYPE = "type";
+    private static final String PROP_SRC_DRM_LICENSESERVER = "licenseServer";
+    private static final String PROP_SRC_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -96,10 +105,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
+        Log.d("SetSrc", "Set Source");
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+        ReadableMap drm = src.hasKey(PROP_SRC_DRM) ? src.getMap(PROP_SRC_DRM) : null;
 
 
         if (TextUtils.isEmpty(uriString)) {
@@ -111,6 +122,29 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
             if (srcUri != null) {
                 videoView.setSrc(srcUri, extension, headers);
+                if (drm != null && drm.hasKey(PROP_SRC_DRM_TYPE)) {
+                    String drmType = drm.hasKey(PROP_SRC_DRM_TYPE) ? drm.getString(PROP_SRC_DRM_TYPE) : null;
+                    String drmLicenseServer = drm.hasKey(PROP_SRC_DRM_LICENSESERVER) ? drm.getString(PROP_SRC_DRM_LICENSESERVER) : null;
+                    ReadableMap drmHeaders = drm.hasKey(PROP_SRC_DRM_HEADERS) ? drm.getMap(PROP_SRC_DRM_HEADERS) : null;
+                    if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
+                        Log.d("setDrmType", drmType);
+                        UUID drmUUID = Util.getDrmUuid(drmType);
+                        videoView.setDrmType(drmUUID);
+                        videoView.setDrmLicenseUrl(drmLicenseServer);
+                        if (drmHeaders != null) {
+                            ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
+                            ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
+                            while (itr.hasNextKey()) {
+                                String key = itr.nextKey();
+                                drmKeyRequestPropertiesList.add(key);
+                                drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
+                            }
+                            videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
+                        }
+                        Log.d("setDrm", "Disabling TextureView (needed for DRM)");
+                        videoView.setUseTextureView(false);
+                    }
+                }
             }
         } else {
             int identifier = context.getResources().getIdentifier(
