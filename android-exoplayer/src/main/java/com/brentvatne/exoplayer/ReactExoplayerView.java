@@ -159,6 +159,7 @@ class ReactExoplayerView extends FrameLayout implements
     private UUID drmUUID = null;
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
+    private boolean controls;
     // \ End props
 
     // React
@@ -197,8 +198,6 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-
-        // initializePlayer();
     }
 
 
@@ -414,6 +413,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         // Initializing the playerControlView
         initializePlayerControl();
+        handleControls();
     }
 
 
@@ -1256,10 +1256,19 @@ class ReactExoplayerView extends FrameLayout implements
      * @param controls  Controls prop, if true enable controls, if false disable them
      */
     public void setControls(boolean controls) {
-        if (controls && exoPlayerView != null) {
-            addPlayerControl();
-        } else if (getChildAt(1) instanceof PlayerControlView && exoPlayerView != null) {
-            removeViewAt(1);
+        this.controls = controls;
+        if (playerControlView != null) {
+            this.handleControls();
+        }
+    }
+
+    private void handleControls() {
+        if (exoPlayerView != null) {
+            if (this.controls && !(getChildAt(1) instanceof PlayerControlView)) {
+                addPlayerControl();
+            } else if (!this.controls && getChildAt(1) instanceof PlayerControlView) {
+                removeViewAt(1);
+            }
         }
     }
 }
