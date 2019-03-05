@@ -199,7 +199,7 @@ class ReactExoplayerView extends FrameLayout implements
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
 
-        // initializePlayer();
+         // initializePlayer();
     }
 
 
@@ -348,7 +348,9 @@ class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+
     private void initializePlayer() {
+        //Try restructuring this, everything works if we do DRMSEssionhandleralways.
         if (player == null) {
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -359,11 +361,6 @@ class ReactExoplayerView extends FrameLayout implements
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
 
             DrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
-            //Timber.d("setting up drm: %s", drmUUID);
-            //Timber.d("still setting up DRM: %s", drmLicenseHeader);
-            //Timber.d("Guess what? Still setting up DRM: %s", drmLicenseUrl);
-            Log.d("This is drmuuid", drmUUID.toString());
-            Log.d("setting up DRM: %s", drmLicenseUrl);
             if (this.drmUUID != null) {
                 try {
                     drmSessionManager = buildDrmSessionManager(this.drmUUID, this.drmLicenseUrl,
@@ -419,6 +416,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         // Initializing the playerControlView
+
         initializePlayerControl();
     }
 

@@ -28,7 +28,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String REACT_CLASS = "RCTVideo";
 
-    private static final String PROP_SRC = "src";
+    private static final String PROP_SRC = "source";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
