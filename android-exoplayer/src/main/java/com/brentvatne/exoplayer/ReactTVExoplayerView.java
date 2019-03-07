@@ -1580,6 +1580,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     }
 
                     if (previewSeekBarLayout.getPreviewView() instanceof SeekBar) {
+                        if (!((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
+                            ((SeekBar) previewSeekBarLayout.getPreviewView()).requestFocus();
+                        }
                         ((SeekBar) previewSeekBarLayout.getPreviewView()).setKeyProgressIncrement(increment * 1000);
                     }
 
@@ -1597,6 +1600,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                     case KeyEvent.KEYCODE_MEDIA_REWIND: {
                         long position = player.getCurrentPosition() - 10000;
+                        if (position < 0) {
+                            position = 0;
+                        }
                         player.seekTo(position);
                         updateProgressControl(position);
                         break;
@@ -1604,6 +1610,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                     case KeyEvent.KEYCODE_DPAD_RIGHT: {
                         long position = player.getCurrentPosition() + 10000;
+                        if (position > player.getDuration()) {
+                            position = player.getDuration();
+                        }
                         player.seekTo(position);
                         updateProgressControl(position);
                         break;
