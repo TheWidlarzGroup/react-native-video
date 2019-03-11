@@ -48,7 +48,6 @@ import java.util.List;
 public final class ExoPlayerView extends FrameLayout {
 
     private View surfaceView;
-    private EPlayerView ePlayerView;
     private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
@@ -56,6 +55,7 @@ public final class ExoPlayerView extends FrameLayout {
     private SimpleExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
+    private FilterType filterText;
 
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
@@ -105,34 +105,35 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void setVideoView() {
-        if (surfaceView instanceof TextureView) {
+
+        if (surfaceView instanceof EPlayerView) {
+            ((EPlayerView) surfaceView).setSimpleExoPlayer(this.player);
+            if(this.filterText != null) {
+                this.setFilterHelper(filterText);
+            }
+        } else if (surfaceView instanceof TextureView) {
             player.setVideoTextureView((TextureView) surfaceView);
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
-        } else {
-            ePlayerView.setSimpleExoPlayer(this.player);
-        }     
+        }
     }
 
     private void updateSurfaceView() {
 
         if(filterEnabled) {
-            ePlayerView = new EPlayerView(this.getContext());
-            ePlayerView.setLayoutParams(layoutParams);
-
-            if (layout.getChildAt(0) != null) {
-                layout.removeViewAt(0);
-            }
-            layout.addView(ePlayerView, 0, layoutParams);
+            View view = new EPlayerView(this.getContext());
+            view.setLayoutParams(layoutParams);
+            surfaceView = view;
         } else {
             View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
             view.setLayoutParams(layoutParams);
             surfaceView = view;
-            if (layout.getChildAt(0) != null) {
-                layout.removeViewAt(0);
-            }
-            layout.addView(surfaceView, 0, layoutParams);
         }
+
+        if (layout.getChildAt(0) != null) {
+            layout.removeViewAt(0);
+        }
+        layout.addView(surfaceView, 0, layoutParams);
 
         if (this.player != null) {
             setVideoView();
@@ -193,10 +194,15 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     public void setFilter(FilterType filterText) {
-        if(filterEnabled) {
-            ePlayerView.setGlFilter(FilterType.createGlFilter(filterText));
-        }
+        this.filterText = filterText;
+        setFilterHelper(filterText);
 
+    }
+
+    private void setFilterHelper(FilterType filterText) {
+        if(surfaceView instanceof EPlayerView) {
+            ((EPlayerView) surfaceView).setGlFilter(FilterType.createGlFilter(filterText));
+        }
     }
 
     public void enableFilter(boolean filterEnabled) {

@@ -322,24 +322,7 @@ export default class Video extends Component {
 }
 
 Video.propTypes = {
-  filter: PropTypes.oneOf([
-      FilterType.NONE,
-      FilterType.INVERT,
-      FilterType.MONOCHROME,
-      FilterType.POSTERIZE,
-      FilterType.FALSE,
-      FilterType.MAXIMUMCOMPONENT,
-      FilterType.MINIMUMCOMPONENT,
-      FilterType.CHROME,
-      FilterType.FADE,
-      FilterType.INSTANT,
-      FilterType.MONO,
-      FilterType.NOIR,
-      FilterType.PROCESS,
-      FilterType.TONAL,
-      FilterType.TRANSFER,
-      FilterType.SEPIA
-  ]),
+  filter: PropTypes.string,
   filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,

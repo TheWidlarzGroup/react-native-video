@@ -32,8 +32,6 @@ public enum FilterType {
     DEFAULT,
     BILATERAL_BLUR,
     BOX_BLUR,
-    TONE_CURVE_SAMPLE,
-    LOOK_UP_TABLE_SAMPLE,
     BULGE_DISTORTION,
     CGA_COLORSPACE,
     GAUSSIAN_FILTER,
@@ -45,34 +43,7 @@ public enum FilterType {
     SHARP,
     VIGNETTE,
     FILTER_GROUP_SAMPLE,
-    SPHERE_REFRACTION,
-    BITMAP_OVERLAY_SAMPLE;
-
-
-    public static List<FilterType> createFilterList() {
-        List<FilterType> filters = new ArrayList<>();
-
-        filters.add(DEFAULT);
-        filters.add(SEPIA);
-        filters.add(MONOCHROME);
-        filters.add(TONE_CURVE_SAMPLE);
-        filters.add(LOOK_UP_TABLE_SAMPLE);
-        filters.add(VIGNETTE);
-        filters.add(INVERT);
-        filters.add(HAZE);
-        filters.add(BOX_BLUR);
-        filters.add(BILATERAL_BLUR);
-        filters.add(GRAY_SCALE);
-        filters.add(SPHERE_REFRACTION);
-        filters.add(FILTER_GROUP_SAMPLE);
-        filters.add(GAUSSIAN_FILTER);
-        filters.add(BULGE_DISTORTION);
-        filters.add(CGA_COLORSPACE);
-        filters.add(SHARP);
-        filters.add(BITMAP_OVERLAY_SAMPLE);
-
-        return filters;
-    }
+    SPHERE_REFRACTION;
 
     public static GlFilter createGlFilter(FilterType filterType) {
         switch (filterType) {

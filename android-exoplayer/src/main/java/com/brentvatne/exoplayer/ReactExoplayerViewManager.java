@@ -271,8 +271,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_FILTER)
     public void setFilter(final ReactExoplayerView videoView, final String filterText) {
-        FilterType filterType = FilterType.valueOf(filterText);
-        videoView.setFilter(filterType);
+        try {
+            FilterType filterType = FilterType.valueOf(filterText);
+            videoView.setFilter(filterType);
+        } catch (Error err) {
+            videoView.setFilter(FilterType.DEFAULT);
+        }
     }
 
     @ReactProp(name = PROP_FILTER_ENABLED)
