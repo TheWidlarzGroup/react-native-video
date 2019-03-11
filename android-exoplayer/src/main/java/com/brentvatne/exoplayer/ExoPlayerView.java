@@ -12,6 +12,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.daasuu.epf.EPlayerView;
+import com.daasuu.epf.filter.GlBilateralFilter;
+import com.daasuu.epf.filter.GlBoxBlurFilter;
+import com.daasuu.epf.filter.GlBulgeDistortionFilter;
+import com.daasuu.epf.filter.GlCGAColorspaceFilter;
+import com.daasuu.epf.filter.GlFilter;
+import com.daasuu.epf.filter.GlFilterGroup;
+import com.daasuu.epf.filter.GlGaussianBlurFilter;
+import com.daasuu.epf.filter.GlGrayScaleFilter;
+import com.daasuu.epf.filter.GlHazeFilter;
+import com.daasuu.epf.filter.GlInvertFilter;
+import com.daasuu.epf.filter.GlLookUpTableFilter;
+import com.daasuu.epf.filter.GlMonochromeFilter;
+import com.daasuu.epf.filter.GlSepiaFilter;
+import com.daasuu.epf.filter.GlSharpenFilter;
+import com.daasuu.epf.filter.GlSphereRefractionFilter;
+import com.daasuu.epf.filter.GlToneCurveFilter;
+import com.daasuu.epf.filter.GlVignetteFilter;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -30,6 +48,7 @@ import java.util.List;
 public final class ExoPlayerView extends FrameLayout {
 
     private View surfaceView;
+    private EPlayerView ePlayerView;
     private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
@@ -40,6 +59,7 @@ public final class ExoPlayerView extends FrameLayout {
 
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
+    private boolean filterEnabled = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -89,22 +109,36 @@ public final class ExoPlayerView extends FrameLayout {
             player.setVideoTextureView((TextureView) surfaceView);
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
-        }
+        } else {
+            ePlayerView.setSimpleExoPlayer(this.player);
+        }     
     }
 
     private void updateSurfaceView() {
-        View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
-        view.setLayoutParams(layoutParams);
 
-        surfaceView = view;
-        if (layout.getChildAt(0) != null) {
-            layout.removeViewAt(0);
+        if(filterEnabled) {
+            ePlayerView = new EPlayerView(this.getContext());
+            ePlayerView.setLayoutParams(layoutParams);
+
+            if (layout.getChildAt(0) != null) {
+                layout.removeViewAt(0);
+            }
+            layout.addView(ePlayerView, 0, layoutParams);
+        } else {
+            View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
+            view.setLayoutParams(layoutParams);
+            surfaceView = view;
+            if (layout.getChildAt(0) != null) {
+                layout.removeViewAt(0);
+            }
+            layout.addView(surfaceView, 0, layoutParams);
         }
-        layout.addView(surfaceView, 0, layoutParams);
 
         if (this.player != null) {
             setVideoView();
         }
+
+        
     }
 
     private void updateShutterViewVisibility() {
@@ -151,19 +185,23 @@ public final class ExoPlayerView extends FrameLayout {
 
     }
 
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
+            updateSurfaceView();
+        }
+    }
+
+    public void setFilter(FilterType filterText) {
+        if(filterEnabled) {
+            ePlayerView.setGlFilter(FilterType.createGlFilter(filterText));
+        }
+
+    }
+
+    public void enableFilter(boolean filterEnabled) {
+        if(filterEnabled != this.filterEnabled) {
+            this.filterEnabled = filterEnabled;
             updateSurfaceView();
         }
     }
