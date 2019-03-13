@@ -15,8 +15,10 @@
 @class RCTEventDispatcher;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
-#else
+#elif TARGET_OS_TV
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
+#else
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate>
 #endif
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
@@ -38,6 +40,8 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onPictureInPictureStatusChanged;
+@property (nonatomic, copy) RCTBubblingEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
