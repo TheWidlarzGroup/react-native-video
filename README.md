@@ -482,13 +482,19 @@ maxBitRate={2000000} // 2 megabits
 Platforms: Android ExoPlayer, iOS
 
 #### maxResolution
-Sets the desired limit to resolution, to limit network bandwidth consumption when multiple video streams are available for a playlist.
+Sets the desired limit to resolution, to limit network bandwidth consumption when multiple video streams are available for a playlist. Only supported on iOS 11 and higher.
 
-Default: 0. Don't limit the maxResolution.
+If not set, will not limit the maxResolution.
+
+Property | Type | Description
+--- | --- | ---
+width | number | If 0, allow any width. Otherwise only allow resolutions <= width
+height | number | If 0, allow any height. Otherwise only allow resolutions <= height
+Both width & height must be set to a non-zero value for the resolution limit to be applied.
 
 Example:
 ```
-maxResolution={width:360, height: 180}
+maxResolution={ width: 360, height: 180 }
 ```
 
 Platforms: iOS
