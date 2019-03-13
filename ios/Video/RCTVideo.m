@@ -146,7 +146,6 @@ static int const RCTVideoUnset = -1;
     
     viewController.view.frame = self.bounds;
     viewController.player = player;
-    viewController.view.frame = self.bounds;
     return viewController;
 }
 
@@ -579,6 +578,27 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+  // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
+  if (object == _playerViewController.contentOverlayView) {
+    if ([keyPath isEqualToString:@"frame"]) {
+      
+      CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
+      CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
+      
+      if (!CGRectEqualToRect(oldRect, newRect)) {
+        if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
+          NSLog(@"in fullscreen");
+        } else NSLog(@"not fullscreen");
+        
+        [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+        [self.reactViewController.view setNeedsLayout];
+      }
+      
+      return;
+    } else
+      return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  }
+  
   if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
     if ([keyPath isEqualToString:timedMetadata]) {
@@ -1267,7 +1287,14 @@ static int const RCTVideoUnset = -1;
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
-    [self addSubview:_playerViewController.view];
+    
+    if (_controls) {
+      UIViewController *viewController = [self reactViewController];
+      [viewController addChildViewController:_playerViewController];
+      [self addSubview:_playerViewController.view];
+    }
+    
+    [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
   }
 }
 
@@ -1460,6 +1487,7 @@ static int const RCTVideoUnset = -1;
   
   [self removePlayerLayer];
   
+  [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
   
