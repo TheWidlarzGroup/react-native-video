@@ -27,8 +27,6 @@ static int const RCTVideoUnset = -1;
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
   NSDictionary *_source;
-  AVPictureInPictureController *_pipController;
-  void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
@@ -79,6 +77,10 @@ static int const RCTVideoUnset = -1;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
+#if TARGET_OS_IOS
+  void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
+  AVPictureInPictureController *_pipController;
+#endif
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -103,9 +105,11 @@ static int const RCTVideoUnset = -1;
     _playInBackground = false;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
-	_pictureInPicture = false;
+    _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
-	_restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+#if TARGET_OS_IOS
+    _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+#endif
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -793,6 +797,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)setPictureInPicture:(BOOL)pictureInPicture
 {
+  #if TARGET_OS_IOS
   if (_pictureInPicture == pictureInPicture) {
     return;
   }
@@ -807,8 +812,10 @@ static int const RCTVideoUnset = -1;
       [_pipController stopPictureInPicture];
 	});
   }
+  #endif
 }
 
+#if TARGET_OS_IOS
 - (void)setRestoreUserInterfaceForPIPStopCompletionHandler:(BOOL)restore
 {
   if (_restoreUserInterfaceForPIPStopCompletionHandler != NULL) {
@@ -824,6 +831,7 @@ static int const RCTVideoUnset = -1;
     _pipController.delegate = self;
   }
 }
+#endif
 
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
@@ -1279,8 +1287,9 @@ static int const RCTVideoUnset = -1;
     
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
-
+    #if TARGET_OS_IOS
     [self setupPipController];
+    #endif
   }
 }
 
@@ -1539,19 +1548,20 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - Picture in Picture
 
+#if TARGET_OS_IOS
 - (void)pictureInPictureControllerDidStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
   if (self.onPictureInPictureStatusChanged) {
     self.onPictureInPictureStatusChanged(@{
-										   @"isActive": [NSNumber numberWithBool:false]
-										   });
+      @"isActive": [NSNumber numberWithBool:false]
+    });
   }
 }
 
 - (void)pictureInPictureControllerDidStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
   if (self.onPictureInPictureStatusChanged) {
     self.onPictureInPictureStatusChanged(@{
-										   @"isActive": [NSNumber numberWithBool:true]
-										   });
+      @"isActive": [NSNumber numberWithBool:true]
+    });
   }
 }
 
@@ -1574,5 +1584,6 @@ static int const RCTVideoUnset = -1;
   }
   _restoreUserInterfaceForPIPStopCompletionHandler = completionHandler;
 }
+#endif
 
 @end
