@@ -1156,6 +1156,13 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   [self setPaused:_paused];
   [self setControls:_controls];
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
+  if (_pendingSeek) {
+    NSDictionary *info = @{
+                           @"time": [NSNumber numberWithFloat:_pendingSeekTime],
+                           @"tolerance": [NSNumber numberWithInt:100]
+                           };
+    [self setSeek:info];
+   }
 }
 
 - (void)setRepeat:(BOOL)repeat {
