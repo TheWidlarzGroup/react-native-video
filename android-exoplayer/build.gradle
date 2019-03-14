@@ -7,6 +7,11 @@ def safeExtGet(prop, fallback) {
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 27)
     buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
+ 
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 16)
@@ -19,7 +24,7 @@ android {
 dependencies {
     compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation 'com.daasuu:ExoPlayerFilter:0.2.3'
-    implementation('com.google.android.exoplayer:exoplayer:2.9.1') {
+    implementation('com.google.android.exoplayer:exoplayer:2.9.3') {
         exclude group: 'com.android.support'
     }
 
@@ -28,9 +33,9 @@ dependencies {
     implementation "com.android.support:support-compat:${safeExtGet('supportLibVersion', '+')}"
     implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.9.1') {
+    implementation('com.google.android.exoplayer:extension-okhttp:2.9.3') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
 
 }
