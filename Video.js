@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -27,17 +27,17 @@ export default class Video extends Component {
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
-  
+
   toTypeString(x) {
     switch (typeof x) {
       case "object":
-        return x instanceof Date 
-          ? x.toISOString() 
+        return x instanceof Date
+          ? x.toISOString()
           : JSON.stringify(x); // object, null
       case "undefined":
         return "";
       default: // boolean, number, string
-        return x.toString();      
+        return x.toString();
     }
   }
 
@@ -53,7 +53,7 @@ export default class Video extends Component {
 
   seek = (time, tolerance = 100) => {
     if (isNaN(time)) throw new Error('Specified time is not a number');
-    
+
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
@@ -108,7 +108,7 @@ export default class Video extends Component {
 
   _onSeek = (event) => {
     if (this.state.showPoster && !this.props.audioOnly) {
-      this.setState({showPoster: false});
+      this.setState({ showPoster: false });
     }
 
     if (this.props.onSeek) {
@@ -172,14 +172,14 @@ export default class Video extends Component {
 
   _onPlaybackRateChange = (event) => {
     if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
-      this.setState({showPoster: false});
+      this.setState({ showPoster: false });
     }
 
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
   };
-  
+
   _onExternalPlaybackChange = (event) => {
     if (this.props.onExternalPlaybackChange) {
       this.props.onExternalPlaybackChange(event.nativeEvent);
@@ -282,24 +282,7 @@ export default class Video extends Component {
 }
 
 Video.propTypes = {
-  filter: PropTypes.oneOf([
-      FilterType.NONE,
-      FilterType.INVERT,
-      FilterType.MONOCHROME,
-      FilterType.POSTERIZE,
-      FilterType.FALSE,
-      FilterType.MAXIMUMCOMPONENT,
-      FilterType.MINIMUMCOMPONENT,
-      FilterType.CHROME,
-      FilterType.FADE,
-      FilterType.INSTANT,
-      FilterType.MONO,
-      FilterType.NOIR,
-      FilterType.PROCESS,
-      FilterType.TONAL,
-      FilterType.TRANSFER,
-      FilterType.SEPIA
-  ]),
+  filter: PropTypes.string,
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
@@ -381,7 +364,7 @@ Video.propTypes = {
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
   fullscreenAutorotate: PropTypes.bool,
-  fullscreenOrientation: PropTypes.oneOf(['all','landscape','portrait']),
+  fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,

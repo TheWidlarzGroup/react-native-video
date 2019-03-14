@@ -53,6 +53,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+    private static final String PROP_FILTER = "filter";
+    private static final String PROP_FILTER_ENABLED = "filterEnabled";
+
 
     @Override
     public String getName() {
@@ -231,6 +234,22 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
         videoView.setHideShutterView(hideShutterView);
     }
+
+    @ReactProp(name = PROP_FILTER)
+    public void setFilter(final ReactExoplayerView videoView, final String filterText) {
+        try {
+            FilterType filterType = FilterType.valueOf(filterText);
+            videoView.setFilter(filterType);
+        } catch (Error err) {
+            videoView.setFilter(FilterType.DEFAULT);
+        }
+    }
+
+    @ReactProp(name = PROP_FILTER_ENABLED)
+    public void setFilterEnabled(final ReactExoplayerView videoView, final boolean filterEnabled) {
+        videoView.enableFilter(filterEnabled);
+    }
+
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
