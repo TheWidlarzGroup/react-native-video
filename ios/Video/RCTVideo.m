@@ -64,6 +64,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
+  BOOL _pictureInPicture;
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreen;
@@ -75,6 +76,10 @@ static int const RCTVideoUnset = -1;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
+#endif
+#if TARGET_OS_IOS
+  void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
+  AVPictureInPictureController *_pipController;
 #endif
 }
 
@@ -100,7 +105,11 @@ static int const RCTVideoUnset = -1;
     _playInBackground = false;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
+    _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+#if TARGET_OS_IOS
+    _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+#endif
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -137,7 +146,6 @@ static int const RCTVideoUnset = -1;
     
     viewController.view.frame = self.bounds;
     viewController.player = player;
-    viewController.view.frame = self.bounds;
     return viewController;
 }
 
@@ -197,6 +205,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
+  [_player removeObserver:self forKeyPath:externalPlaybackActive context: nil];
 }
 
 #pragma mark - App lifecycle handlers
@@ -466,6 +475,10 @@ static int const RCTVideoUnset = -1;
   bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  if (!uri || [uri isEqualToString:@""]) {
+    DebugLog(@"Could not find video URL in source '%@'", source);
+    return;
+  }
 
   NSURL *url = isNetwork || isAsset
     ? [NSURL URLWithString:uri]
@@ -565,6 +578,27 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+  // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
+  if (object == _playerViewController.contentOverlayView) {
+    if ([keyPath isEqualToString:@"frame"]) {
+      
+      CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
+      CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
+      
+      if (!CGRectEqualToRect(oldRect, newRect)) {
+        if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
+          NSLog(@"in fullscreen");
+        } else NSLog(@"not fullscreen");
+        
+        [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+        [self.reactViewController.view setNeedsLayout];
+      }
+      
+      return;
+    } else
+      return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  }
+  
   if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
     if ([keyPath isEqualToString:timedMetadata]) {
@@ -780,6 +814,44 @@ static int const RCTVideoUnset = -1;
 {
   _playWhenInactive = playWhenInactive;
 }
+
+- (void)setPictureInPicture:(BOOL)pictureInPicture
+{
+  #if TARGET_OS_IOS
+  if (_pictureInPicture == pictureInPicture) {
+    return;
+  }
+
+  _pictureInPicture = pictureInPicture;
+  if (_pipController && _pictureInPicture && ![_pipController isPictureInPictureActive]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_pipController startPictureInPicture];
+    });
+  } else if (_pipController && !_pictureInPicture && [_pipController isPictureInPictureActive]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_pipController stopPictureInPicture];
+	});
+  }
+  #endif
+}
+
+#if TARGET_OS_IOS
+- (void)setRestoreUserInterfaceForPIPStopCompletionHandler:(BOOL)restore
+{
+  if (_restoreUserInterfaceForPIPStopCompletionHandler != NULL) {
+    _restoreUserInterfaceForPIPStopCompletionHandler(restore);
+    _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+  }
+}
+
+- (void)setupPipController {
+  if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
+    // Create new controller passing reference to the AVPlayerLayer
+    _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
+    _pipController.delegate = self;
+  }
+}
+#endif
 
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
@@ -1215,7 +1287,14 @@ static int const RCTVideoUnset = -1;
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
-    [self addSubview:_playerViewController.view];
+    
+    if (_controls) {
+      UIViewController *viewController = [self reactViewController];
+      [viewController addChildViewController:_playerViewController];
+      [self addSubview:_playerViewController.view];
+    }
+    
+    [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
   }
 }
 
@@ -1235,6 +1314,9 @@ static int const RCTVideoUnset = -1;
     
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
+    #if TARGET_OS_IOS
+    [self setupPipController];
+    #endif
   }
 }
 
@@ -1405,6 +1487,7 @@ static int const RCTVideoUnset = -1;
   
   [self removePlayerLayer];
   
+  [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
   
@@ -1490,5 +1573,45 @@ static int const RCTVideoUnset = -1;
     NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return array[0];
 }
+
+#pragma mark - Picture in Picture
+
+#if TARGET_OS_IOS
+- (void)pictureInPictureControllerDidStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+  if (self.onPictureInPictureStatusChanged) {
+    self.onPictureInPictureStatusChanged(@{
+      @"isActive": [NSNumber numberWithBool:false]
+    });
+  }
+}
+
+- (void)pictureInPictureControllerDidStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+  if (self.onPictureInPictureStatusChanged) {
+    self.onPictureInPictureStatusChanged(@{
+      @"isActive": [NSNumber numberWithBool:true]
+    });
+  }
+}
+
+- (void)pictureInPictureControllerWillStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+
+}
+
+- (void)pictureInPictureControllerWillStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController failedToStartPictureInPictureWithError:(NSError *)error {
+
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler {
+  NSAssert(_restoreUserInterfaceForPIPStopCompletionHandler == NULL, @"restoreUserInterfaceForPIPStopCompletionHandler was not called after picture in picture was exited.");
+  if (self.onRestoreUserInterfaceForPictureInPictureStop) {
+    self.onRestoreUserInterfaceForPictureInPictureStop(@{});
+  }
+  _restoreUserInterfaceForPIPStopCompletionHandler = completionHandler;
+}
+#endif
 
 @end

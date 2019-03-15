@@ -32,6 +32,7 @@ RCT_EXPORT_VIEW_PROPERTY(controls, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(playInBackground, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(playWhenInactive, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(pictureInPicture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(ignoreSilentSwitch, NSString);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
@@ -42,6 +43,7 @@ RCT_EXPORT_VIEW_PROPERTY(fullscreenOrientation, NSString);
 RCT_EXPORT_VIEW_PROPERTY(filter, NSString);
 RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
+RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTBubblingEventBlock);
@@ -77,6 +79,8 @@ RCT_REMAP_METHOD(save,
         }
     }];
 }
+RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTBubblingEventBlock);
 
 - (NSDictionary *)constantsToExport
 {

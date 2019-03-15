@@ -2,7 +2,18 @@
 
 ### next
 * Fix Android videos being able to play with background music/audio from other apps.
+
+### Version 4.4.0
+* Fix runtime warning by replacing `UIManager.RCTVideo` with `UIManager.getViewManagerConfig('RCTVideo')` (and ensuring backwards compat) [#1487](https://github.com/react-native-community/react-native-video/pull/1487)
 * Fix loading package resolved videos when using video-caching [#1438](https://github.com/react-native-community/react-native-video/pull/1438)
+* Fix "message sent to deallocated instance" crash on ios [#1482](https://github.com/react-native-community/react-native-video/pull/1482)
+* Display a warning when source is empty [#1478](https://github.com/react-native-community/react-native-video/pull/1478)
+* Don't crash on iOS for an empty source [#1246](https://github.com/react-native-community/react-native-video/pull/1246)
+* Recover from from transient internet failures when loading on ExoPlayer [#1448](https://github.com/react-native-community/react-native-video/pull/1448)
+* Add controls support for ExoPlayer [#1414](https://github.com/react-native-community/react-native-video/pull/1414)
+* Fix check for text tracks when iOS caching enabled [#1387](https://github.com/react-native-community/react-native-video/pull/1387)
+* Add support for Picture in Picture on iOS [#1325](https://github.com/react-native-community/react-native-video/pull/1325)
+* Fix UIManager undefined variable [#1488](https://github.com/react-native-community/react-native-video/pull/1488)
 
 ### Version 4.3.0
 * Fix iOS video not displaying after switching source [#1395](https://github.com/react-native-community/react-native-video/pull/1395)
@@ -10,6 +21,7 @@
 * Fix text not appearing in release builds of Android apps [#1373](https://github.com/react-native-community/react-native-video/pull/1373)
 * Update to ExoPlayer 2.9.3 [#1406](https://github.com/react-native-community/react-native-video/pull/1406)
 * Add video track selection & onBandwidthUpdate [#1199](https://github.com/react-native-community/react-native-video/pull/1199)
+* Recovery from transient internet failures and props to configure the custom retry count [#1448](https://github.com/react-native-community/react-native-video/pull/1448)
 
 ### Version 4.2.0
 * Don't initialize filters on iOS unless a filter is set. This was causing a startup performance regression [#1360](https://github.com/react-native-community/react-native-video/pull/1360)
