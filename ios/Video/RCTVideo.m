@@ -641,6 +641,13 @@ static int const RCTVideoUnset = -1;
           }
         }
         
+        NSMutableArray *availableTextTracks = [[NSMutableArray alloc] initWithArray:[self getTextTrackInfo]];
+          
+        // Remove the empty subtitle file from the results (since it should be selected using {type: "disabled"})
+        if (availableTextTracks.count > 0 && [[availableTextTracks objectAtIndex:availableTextTracks.count - 1][@"language"] isEqual: @"disabled"]) {
+          [availableTextTracks removeObjectAtIndex:availableTextTracks.count - 1];
+        }
+        
         if (self.onVideoLoad && _videoLoadStarted) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
                              @"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(_playerItem.currentTime)],
@@ -656,7 +663,7 @@ static int const RCTVideoUnset = -1;
                                  @"orientation": orientation
                                  },
                              @"audioTracks": [self getAudioTrackInfo],
-                             @"textTracks": [self getTextTrackInfo],
+                             @"textTracks": availableTextTracks,
                              @"target": self.reactTag});
         }
         _videoLoadStarted = NO;
