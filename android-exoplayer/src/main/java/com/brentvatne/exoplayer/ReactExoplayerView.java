@@ -984,7 +984,9 @@ class ReactExoplayerView extends FrameLayout implements
                     tracks[j] = j;
                 }
             }
-        } else if (groupIndex == C.INDEX_UNSET) {
+        } 
+
+        if (groupIndex == C.INDEX_UNSET) {
             trackSelector.setParameters(disableParameters);
             return;
         }
