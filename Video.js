@@ -75,7 +75,17 @@ export default class Video extends Component {
   };
 
   save = async (options?) => {
-    return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
+    if (Platform.OS === 'android') {
+      const { filterText, inputUrl, outputUrl } = options;
+      return await NativeModules.VideoManager.save(
+        filterText,
+        inputUrl,
+        outputUrl
+      );
+    } else {
+      return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
+    }
+
   }
 
   restoreUserInterfaceForPictureInPictureStopCompleted = (restored) => {
