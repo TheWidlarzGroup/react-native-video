@@ -1159,13 +1159,6 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setFilter(FilterType filterType) {
-        exoPlayerView.setFilter(filterType);
-    }
-
-    public void enableFilter(boolean filterEnabled) {
-        exoPlayerView.enableFilter(filterEnabled);
-    }
 
     /**
      * Handling controls prop
