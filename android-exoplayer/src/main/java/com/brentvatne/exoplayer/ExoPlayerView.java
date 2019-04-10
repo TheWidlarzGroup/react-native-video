@@ -55,11 +55,10 @@ public final class ExoPlayerView extends FrameLayout {
     private SimpleExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
-    private FilterType filterText;
-    private boolean filterEnabled = false;
-
+    private FilterType filterText;    
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
+    private boolean filterEnabled = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -136,6 +135,8 @@ public final class ExoPlayerView extends FrameLayout {
         if (this.player != null) {
             setVideoView();
         }
+
+        
     }
 
     private void updateShutterViewVisibility() {
@@ -180,16 +181,6 @@ public final class ExoPlayerView extends FrameLayout {
             post(measureAndLayout);
         }
 
-    }
-
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
     }
 
     public void setUseTextureView(boolean useTextureView) {
