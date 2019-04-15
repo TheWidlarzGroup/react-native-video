@@ -381,8 +381,6 @@ static int const RCTVideoUnset = -1;
         
       [self addPlayerTimeObserver];
         
-      _drm = [source objectForKey:@"drm"];
-
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
         id uri = [source objectForKey:@"uri"];
@@ -390,14 +388,18 @@ static int const RCTVideoUnset = -1;
         self.onVideoLoadStart(@{@"src": @{
                                         @"uri": uri ? uri : [NSNull null],
                                         @"type": type ? type : [NSNull null],
-                                        @"drm": _drm ? _drm : [NSNull null],
                                         @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                    @"drm": _drm ? _drm : [NSNull null],
                                     @"target": self.reactTag
                                 });
       }
     }];
   });
   _videoLoadStarted = YES;
+}
+
+- (void)setDrm:(NSDictionary *)drm {
+  _drm = drm
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {
