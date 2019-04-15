@@ -347,11 +347,14 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
+}
 
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
+- (void)setDrm:(NSDictionary *)drm {
+  _drm = drm;
+}
 
-    // perform on next run loop, otherwise other passed react-props may not be set
-    [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
+- (void)preparePlayback {
+  [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
       [self addPlayerItemObservers];
       [self setFilter:_filterName];
@@ -394,12 +397,7 @@ static int const RCTVideoUnset = -1;
                                 });
       }
     }];
-  });
   _videoLoadStarted = YES;
-}
-
-- (void)setDrm:(NSDictionary *)drm {
-  _drm = drm
 }
 
 - (NSURL*) urlFilePath:(NSString*) filepath {

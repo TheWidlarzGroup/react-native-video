@@ -25,6 +25,20 @@ export default class Video extends Component {
     };
   }
 
+  componentDidMount() {
+    this.preparePlayback();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.src !== this.props.src || prevProps.drm !== this.props.drm) {
+      this.preparePlayback();
+    }
+  }
+
+  preparePlayback() {
+    NativeModules.VideoManager.preparePlayback(findNodeHandle(this._root));
+  }
+
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
