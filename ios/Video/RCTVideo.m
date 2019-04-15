@@ -354,7 +354,7 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)preparePlayback {
-  [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
+  [self playerItemForSource:_source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
       [self addPlayerItemObservers];
       [self setFilter:_filterName];
@@ -386,12 +386,12 @@ static int const RCTVideoUnset = -1;
         
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
-        id uri = [source objectForKey:@"uri"];
-        id type = [source objectForKey:@"type"];
+        id uri = [_source objectForKey:@"uri"];
+        id type = [_source objectForKey:@"type"];
         self.onVideoLoadStart(@{@"src": @{
                                         @"uri": uri ? uri : [NSNull null],
                                         @"type": type ? type : [NSNull null],
-                                        @"isNetwork": [NSNumber numberWithBool:(bool)[source objectForKey:@"isNetwork"]]},
+                                        @"isNetwork": [NSNumber numberWithBool:(bool)[_source objectForKey:@"isNetwork"]]},
                                     @"drm": _drm ? _drm : [NSNull null],
                                     @"target": self.reactTag
                                 });
