@@ -44,7 +44,7 @@ export default class Video extends Component {
   }
 
   preparePlayback() {
-    NativeModules.VideoManager.preparePlayback(findNodeHandle(this._root));
+    NativeModules.VideoManager && NativeModules.VideoManager.preparePlayback(findNodeHandle(this._root));
   }
 
   setNativeProps(nativeProps) {
