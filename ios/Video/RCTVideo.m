@@ -1617,11 +1617,14 @@ static int const RCTVideoUnset = -1;
                                         @"localizedDescription": [error localizedDescription] == nil ? @"" : [error localizedDescription],
                                         @"localizedFailureReason": [error localizedFailureReason] == nil ? @"" : [error localizedFailureReason],
                                         @"localizedRecoverySuggestion": [error localizedRecoverySuggestion] == nil ? @"" : [error localizedRecoverySuggestion],
-                                        @"domain": _playerItem.error.domain},
+                                        @"domain": _playerItem.error == nil ? @"RCTVideo" : _playerItem.error.domain},
                             @"target": self.reactTag});
       }
   }
   return NO;
+}
+- (void)batchDidComplete {
+    NSLog(@"batchDidComplete");
 }
 
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {

@@ -30,7 +30,11 @@ export default class Video extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.source !== null && (prevProps.source !== this.props.source || prevProps.drm !== this.props.drm)) {
+    if (this.props.source !== null && this.props.source.uri) {
+      if (this.props.source.uri !== prevProps.source.uri) {
+        this.preparePlayback();
+      }
+    } else {
       this.preparePlayback();
     }
   }
