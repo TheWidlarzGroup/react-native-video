@@ -354,49 +354,53 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)preparePlayback {
-  [self playerItemForSource:_source withCallback:^(AVPlayerItem * playerItem) {
-      _playerItem = playerItem;
-      [self addPlayerItemObservers];
-      [self setFilter:_filterName];
-      [self setMaxBitRate:_maxBitRate];
-      
-      [_player pause];
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
+
+    // perform on next run loop, otherwise other passed react-props may not be set
+    [self playerItemForSource:_source withCallback:^(AVPlayerItem * playerItem) {
+        _playerItem = playerItem;
+        [self addPlayerItemObservers];
+        [self setFilter:_filterName];
+        [self setMaxBitRate:_maxBitRate];
         
-      if (_playbackRateObserverRegistered) {
-        [_player removeObserver:self forKeyPath:playbackRate context:nil];
-        _playbackRateObserverRegistered = NO;
-      }
-      if (_isExternalPlaybackActiveObserverRegistered) {
-        [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
-        _isExternalPlaybackActiveObserverRegistered = NO;
-      }
+        [_player pause];
+        [_playerViewController.view removeFromSuperview];
+        _playerViewController = nil;
+          
+        if (_playbackRateObserverRegistered) {
+          [_player removeObserver:self forKeyPath:playbackRate context:nil];
+          _playbackRateObserverRegistered = NO;
+        }
+        if (_isExternalPlaybackActiveObserverRegistered) {
+          [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
+          _isExternalPlaybackActiveObserverRegistered = NO;
+        }
+          
+        _player = [AVPlayer playerWithPlayerItem:_playerItem];
+        _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+          
+        [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+        _playbackRateObserverRegistered = YES;
         
-      _player = [AVPlayer playerWithPlayerItem:_playerItem];
-      _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-        
-      [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-      _playbackRateObserverRegistered = YES;
-      
-      [_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
-      _isExternalPlaybackActiveObserverRegistered = YES;
-        
-      [self addPlayerTimeObserver];
-        
-      //Perform on next run loop, otherwise onVideoLoadStart is nil
-      if (self.onVideoLoadStart) {
-        id uri = [_source objectForKey:@"uri"];
-        id type = [_source objectForKey:@"type"];
-        self.onVideoLoadStart(@{@"src": @{
-                                        @"uri": uri ? uri : [NSNull null],
-                                        @"type": type ? type : [NSNull null],
-                                        @"isNetwork": [NSNumber numberWithBool:(bool)[_source objectForKey:@"isNetwork"]]},
-                                    @"drm": _drm ? _drm : [NSNull null],
-                                    @"target": self.reactTag
-                                });
-      }
-    }];
+        [_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
+        _isExternalPlaybackActiveObserverRegistered = YES;
+          
+        [self addPlayerTimeObserver];
+          
+        //Perform on next run loop, otherwise onVideoLoadStart is nil
+        if (self.onVideoLoadStart) {
+          id uri = [_source objectForKey:@"uri"];
+          id type = [_source objectForKey:@"type"];
+          self.onVideoLoadStart(@{@"src": @{
+                                          @"uri": uri ? uri : [NSNull null],
+                                          @"type": type ? type : [NSNull null],
+                                          @"isNetwork": [NSNumber numberWithBool:(bool)[_source objectForKey:@"isNetwork"]]},
+                                      @"drm": _drm ? _drm : [NSNull null],
+                                      @"target": self.reactTag
+                                  });
+        }
+      }];
+  });
   _videoLoadStarted = YES;
 }
 
