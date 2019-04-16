@@ -1267,7 +1267,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public preparePlayback() {
+    public void preparePlayback() {
         initializePlayer();
     }
 }
