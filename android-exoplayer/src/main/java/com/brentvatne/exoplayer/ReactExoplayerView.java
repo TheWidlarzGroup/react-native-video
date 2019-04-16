@@ -225,12 +225,6 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        initializePlayer();
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         /* We want to be able to continue playing audio when switching tabs.
@@ -1271,5 +1265,9 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(1);
             }
         }
+    }
+
+    public preparePlayback() {
+        initializePlayer();
     }
 }

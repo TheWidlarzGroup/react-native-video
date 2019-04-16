@@ -323,6 +323,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
     }
 
+    @ReactMethod
+    public void preparePlayback(final ReactExoplayerView videoView) {
+        videoView.preparePlayback();
+    }
+
     private boolean startsWithValidScheme(String uriString) {
         return uriString.startsWith("http://")
                 || uriString.startsWith("https://")

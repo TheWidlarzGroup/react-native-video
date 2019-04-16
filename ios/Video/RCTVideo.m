@@ -1623,9 +1623,6 @@ static int const RCTVideoUnset = -1;
   }
   return NO;
 }
-- (void)batchDidComplete {
-    NSLog(@"batchDidComplete");
-}
 
 - (BOOL)ensureDirExistsWithPath:(NSString *)path {
     BOOL isDir = NO;
