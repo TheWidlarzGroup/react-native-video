@@ -33,6 +33,8 @@ static int const RCTVideoUnset = -1;
   BOOL _playerLayerObserverSet;
   RCTVideoPlayerViewController *_playerViewController;
   NSURL *_videoURL;
+  BOOL _requestingCertificate;
+  BOOL _requestingCertificateErrored;
 
   /* DRM */
   NSDictionary *_drm;
@@ -526,6 +528,8 @@ static int const RCTVideoUnset = -1;
   }
   dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
   [asset.resourceLoader setDelegate:self queue:queue];
+  _requestingCertificate = NO;
+  _requestingCertificateErrored = NO;
 
   [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
 }
@@ -1385,6 +1389,8 @@ static int const RCTVideoUnset = -1;
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
     _playerLayerObserverSet = NO;
   }
+  _requestingCertificate = NO;
+  _requestingCertificateErrored = NO;
   _playerLayer = nil;
 }
 
@@ -1661,6 +1667,11 @@ static int const RCTVideoUnset = -1;
 }
 
 - (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
+    if (_requestingCertificate) {
+        return YES;
+    } else if (_requestingCertificateErrored) {
+        return NO;
+    }
     _loadingRequest = loadingRequest;
     NSURL *url = loadingRequest.request.URL;
     NSString *contentId = url.host;
@@ -1674,117 +1685,125 @@ static int const RCTVideoUnset = -1;
             NSString *certificateStringUrl = (NSString *)[_drm objectForKey:@"certificateUrl"];
             if (certificateStringUrl != nil) {
                 NSURL *certificateURL = [NSURL URLWithString:[certificateStringUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-                NSData *certificateData = [NSData dataWithContentsOfURL:certificateURL];
-                if ([_drm objectForKey:@"base64Certificate"]) {
-                    certificateData = [[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters];
-                }
-                
-                if (certificateData != nil) {
-                    NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
-                    AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
-                    if (dataRequest != nil) {
-                        NSError *spcError = nil;
-                        NSData *spcData = [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
-                        // Request CKC to the server
-                        NSString *licenseServer = (NSString *)[_drm objectForKey:@"licenseServer"];
-                        if (spcError != nil) {
-                            return [self finishLoadingWithError:spcError];
-                        }
-                        if (spcData != nil) {
-                            if(self.onGetLicense) {
-                                NSString *spcStr = [[NSString alloc] initWithData:spcData encoding:NSASCIIStringEncoding];
-                                self.onGetLicense(@{@"spc": spcStr,
-                                                    @"target": self.reactTag});
-                                return YES;
-                            } else if(licenseServer != nil) {
-                                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-                                [request setHTTPMethod:@"POST"];
-                                [request setURL:[NSURL URLWithString:licenseServer]];
-                                // HEADERS
-                                NSDictionary *headers = (NSDictionary *)[_drm objectForKey:@"headers"];
-                                if (headers != nil) {
-                                    for (NSString *key in headers) {
-                                        NSString *value = headers[key];
-                                        [request setValue:value forHTTPHeaderField:key];
-                                    }
-                                }                                
-                                //
-
-                                [request setHTTPBody: spcData];
-                                NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-                                NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
-                                NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                                    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
-                                    if (error != nil) {
-                                        NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
-                                       [self finishLoadingWithError:error];
-                                    } else {
-                                        if([httpResponse statusCode] != 200){
-                                            NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
-                                            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                                        code: RCTVideoErrorLicenseRequestNotOk
-                                                                                    userInfo: @{
-                                                                                                NSLocalizedDescriptionKey: @"Error obtaining license.",
-                                                                                                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"License server responded with status code %li", (long)[httpResponse statusCode]],
-                                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Did you send the correct data to the license Server? Is the server ok?"
-                                                                                                }
-                                                                     ];
-                                            [self finishLoadingWithError:licenseError];
-                                        } else if (data != nil) {
-                                            [dataRequest respondWithData:data];
-                                            [loadingRequest finishLoading];
-                                        } else {
-                                            NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                                        code: RCTVideoErrorNoDataFromLicenseRequest
-                                                                                    userInfo: @{
-                                                                                                NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
-                                                                                                NSLocalizedFailureReasonErrorKey: @"No data received from the license server.",
-                                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Is the licenseServer ok?."
-                                                                                                }
-                                                                     ];
-                                            [self finishLoadingWithError:licenseError];
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSData *certificateData = [NSData dataWithContentsOfURL:certificateURL];
+                    if ([_drm objectForKey:@"base64Certificate"]) {
+                        certificateData = [[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+                    }
+                    
+                    if (certificateData != nil) {
+                        NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
+                        AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
+                        if (dataRequest != nil) {
+                            NSError *spcError = nil;
+                            NSData *spcData = [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
+                            // Request CKC to the server
+                            NSString *licenseServer = (NSString *)[self->_drm objectForKey:@"licenseServer"];
+                            if (spcError != nil) {
+                                [self finishLoadingWithError:spcError];
+                                self->_requestingCertificateErrored = YES;
+                            }
+                            if (spcData != nil) {
+                                if(self.onGetLicense) {
+                                    NSString *spcStr = [[NSString alloc] initWithData:spcData encoding:NSASCIIStringEncoding];
+                                    self.onGetLicense(@{@"spc": spcStr,
+                                                        @"target": self.reactTag});
+                                } else if(licenseServer != nil) {
+                                    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+                                    [request setHTTPMethod:@"POST"];
+                                    [request setURL:[NSURL URLWithString:licenseServer]];
+                                    // HEADERS
+                                    NSDictionary *headers = (NSDictionary *)[self->_drm objectForKey:@"headers"];
+                                    if (headers != nil) {
+                                        for (NSString *key in headers) {
+                                            NSString *value = headers[key];
+                                            [request setValue:value forHTTPHeaderField:key];
                                         }
-
                                     }
-                                }];
-                                [postDataTask resume];
-                                return YES;
+                                    //
+                                    
+                                    [request setHTTPBody: spcData];
+                                    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+                                    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
+                                    NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
+                                        if (error != nil) {
+                                            NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                                            [self finishLoadingWithError:error];
+                                            self->_requestingCertificateErrored = YES;
+                                        } else {
+                                            if([httpResponse statusCode] != 200){
+                                                NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                                                NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
+                                                                                            code: RCTVideoErrorLicenseRequestNotOk
+                                                                                        userInfo: @{
+                                                                                                    NSLocalizedDescriptionKey: @"Error obtaining license.",
+                                                                                                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"License server responded with status code %li", (long)[httpResponse statusCode]],
+                                                                                                    NSLocalizedRecoverySuggestionErrorKey: @"Did you send the correct data to the license Server? Is the server ok?"
+                                                                                                    }
+                                                                         ];
+                                                [self finishLoadingWithError:licenseError];
+                                                self->_requestingCertificateErrored = YES;
+                                            } else if (data != nil) {
+                                                [dataRequest respondWithData:data];
+                                                [loadingRequest finishLoading];
+                                            } else {
+                                                NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
+                                                                                            code: RCTVideoErrorNoDataFromLicenseRequest
+                                                                                        userInfo: @{
+                                                                                                    NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                                                    NSLocalizedFailureReasonErrorKey: @"No data received from the license server.",
+                                                                                                    NSLocalizedRecoverySuggestionErrorKey: @"Is the licenseServer ok?."
+                                                                                                    }
+                                                                         ];
+                                                [self finishLoadingWithError:licenseError];
+                                                self->_requestingCertificateErrored = YES;
+                                            }
+                                            
+                                        }
+                                    }];
+                                    [postDataTask resume];
+                                }
+                                
+                            } else {
+                                NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
+                                                                            code: RCTVideoErrorNoSPC
+                                                                        userInfo: @{
+                                                                                    NSLocalizedDescriptionKey: @"Error obtaining license.",
+                                                                                    NSLocalizedFailureReasonErrorKey: @"No spc received.",
+                                                                                    NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM config."
+                                                                                    }
+                                                         ];
+                                [self finishLoadingWithError:licenseError];
+                                self->_requestingCertificateErrored = YES;
                             }
                             
                         } else {
                             NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                        code: RCTVideoErrorNoSPC
+                                                                        code: RCTVideoErrorNoDataRequest
                                                                     userInfo: @{
-                                                                                NSLocalizedDescriptionKey: @"Error obtaining license.",
-                                                                                NSLocalizedFailureReasonErrorKey: @"No spc received.",
-                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM config."
+                                                                                NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
+                                                                                NSLocalizedFailureReasonErrorKey: @"No dataRequest found.",
+                                                                                NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM configuration."
                                                                                 }
                                                      ];
-                            return [self finishLoadingWithError:licenseError];
+                            [self finishLoadingWithError:licenseError];
+                            self->_requestingCertificateErrored = YES;
                         }
-                        
                     } else {
                         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                    code: RCTVideoErrorNoDataRequest
+                                                                    code: RCTVideoErrorNoCertificateData
                                                                 userInfo: @{
                                                                             NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
-                                                                            NSLocalizedFailureReasonErrorKey: @"No dataRequest found.",
-                                                                            NSLocalizedRecoverySuggestionErrorKey: @"Check your DRM configuration."
+                                                                            NSLocalizedFailureReasonErrorKey: @"No certificate data obtained from the specificied url.",
+                                                                            NSLocalizedRecoverySuggestionErrorKey: @"Have you specified a valid 'certificateUrl'?"
                                                                             }
                                                  ];
-                        return [self finishLoadingWithError:licenseError];
+                        [self finishLoadingWithError:licenseError];
+                        self->_requestingCertificateErrored = YES;
                     }
-                } else {
-                    NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
-                                                                code: RCTVideoErrorNoCertificateData
-                                                            userInfo: @{
-                                                                        NSLocalizedDescriptionKey: @"Error obtaining DRM license.",
-                                                                        NSLocalizedFailureReasonErrorKey: @"No certificate data obtained from the specificied url.",
-                                                                        NSLocalizedRecoverySuggestionErrorKey: @"Have you specified a valid 'certificateUrl'?"
-                                                                        }
-                                             ];
-                    return [self finishLoadingWithError:licenseError];
-                }
+                });
+                return YES;
             } else {
                 NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                             code: RCTVideoErrorNoCertificateURL
