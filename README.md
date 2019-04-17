@@ -1080,6 +1080,15 @@ this.player.presentFullscreenPlayer();
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS
 
+#### 
+`stopVideoPlayer()`
+Stop video, in componentWillUnmount for example
+
+Example:
+```
+this.player.stopVideoPlayer();
+```
+
 #### save
 `save(): Promise`
 
