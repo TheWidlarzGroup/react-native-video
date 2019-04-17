@@ -63,6 +63,5 @@ typedef NS_ENUM(NSInteger, RCTVideoError) {
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)setLicenseResult:(NSString * )license;
 - (BOOL)setLicenseResultError:(NSString * )error;
-- (void)preparePlayback;
 
 @end

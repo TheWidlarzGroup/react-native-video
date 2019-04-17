@@ -1233,6 +1233,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onDrmSessionManagerError(Exception e) {
         Log.d("DRM Info", "onDrmSessionManagerError");
+        eventEmitter.error("onDrmSessionManagerError", e);
     }
 
     @Override
@@ -1265,9 +1266,5 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(1);
             }
         }
-    }
-
-    public void preparePlayback() {
-        initializePlayer();
     }
 }

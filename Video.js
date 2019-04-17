@@ -25,28 +25,6 @@ export default class Video extends Component {
     };
   }
 
-  componentDidMount() {
-    if (this._root) {
-      this.preparePlayback();
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this._root) {
-      if (this.props.source !== null && this.props.source.uri) {
-        if (this.props.source.uri !== prevProps.source.uri) {
-          this.preparePlayback();
-        }
-      } else {
-        this.preparePlayback();
-      }
-    }
-  }
-
-  preparePlayback() {
-    NativeModules.VideoManager && NativeModules.VideoManager.preparePlayback(findNodeHandle(this._root));
-  }
-
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
