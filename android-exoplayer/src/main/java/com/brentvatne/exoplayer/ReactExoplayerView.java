@@ -621,6 +621,18 @@ class ReactExoplayerView extends FrameLayout implements
         progressHandler.sendEmptyMessage(SHOW_PROGRESS);
     }
 
+    // add stop video function
+    public void stopVideoPlayer() {
+        if (progressHandler != null)
+            progressHandler.removeCallbacks(null);
+
+        if (player != null) {
+            player.setPlayWhenReady(false);
+            player.stop();
+            player.seekTo(0);
+        }
+    }
+
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;

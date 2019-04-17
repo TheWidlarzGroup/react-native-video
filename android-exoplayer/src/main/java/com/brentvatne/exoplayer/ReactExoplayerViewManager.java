@@ -59,6 +59,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_STOP = "stop";
 
     @Override
     public String getName() {
@@ -284,6 +285,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
+    }
+
+    // add stop video function
+    @ReactProp(name = PROP_STOP, defaultBoolean = false)
+    public void stopVideoPlayer(final ReactExoplayerView videoView, final boolean stop) {
+        videoView.stopVideoPlayer();
     }
 
     private boolean startsWithValidScheme(String uriString) {
