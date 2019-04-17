@@ -4,25 +4,37 @@
 
 You can provide some configuration to allow DRM playback.
 This feature will disable the use of `TextureView` on Android.
-DRM options are `type`, `licenseServer`, `headers`, and for iOS there are additional ones: `base64Certificate`, `getLicense`, `certificateUrl`.
 
-### base64Certificate
+DRM object allows this members:
+
+| Property | Type | Platform | Description |
+| --- | --- | --- | --- |
+| [`type`](#type) | DRMType | iOS/Android | Specifies which type of DRM you are going to use, DRMType is an enum exposed on the JS module ('fairplay', 'playready', ...) |
+| [`licenseServer`](#licenseserver) | string | iOS/Android | Specifies the license server URL |
+| [`headers`](#headers) | Object | iOS/Android | Specifies the headers send to the license server URL on license acquisition |
+| [`contentId`](#contentid) | string | iOS | Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`) |
+| [`certificateUrl`](#certificateurl) | string | iOS | Specifies the url to obtain your ios certificate for fairplay, Url to the .cer file |
+| [`base64Certificate`](#base64certificate) | bool | iOS | Specifies whether or not the certificate returned by the `certificateUrl` is on base64 |
+| [`getLicense`](#getlicense)| function | iOS | Rather than setting the `licenseServer` url to get the license, you can manually get the license on the JS part, and send the result to the native part to configure FairplayDRM for the stream |
+
+### `base64Certificate`
 
 Whether or not the certificate url returns it on base64.
 
 Platforms: iOS
 
-### certificateUrl
+### `certificateUrl`
 
 URL to fetch a valid certificatefor FairPlay.
 
 Platforms: iOS
 
-### getLicense
+### `getLicense`
 
-Overridable method to acquire a license manually. It recieves as argument the `spc` string.
+`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
+  You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
 
-Example:
+With this prop you can override the license acquisition flow, as an example:
 
 ```js
 getLicense: (spcString) => {
@@ -46,7 +58,7 @@ getLicense: (spcString) => {
 
 Platforms: iOS
 
-### headers
+### `headers`
 
 You can customize headers send to the licenseServer.
 
@@ -65,54 +77,11 @@ source={{
 }}
 ```
 
-### licenseServer
+### `licenseServer`
 
 The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
 
-iOS specific fields for `drm`:
-
-* `certificateUrl` - Url to the .cer file.
-* `contentId` (optional) - (overridable, otherwise it will take the value at `loadingRequest.request.URL.host`)
-* `getLicense` - `licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
-  You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
-  With this prop you can override the license acquisition flow, as an example:
-
-```js
-  getLicense: (spcString) => {
-    const base64spc = btoa(spcString);
-    return fetch(YOUR_LICENSE_SERVER, {
-        method: 'POST',
-        // Control the headers
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-        },
-        // Build the data as the server specs it
-        body: JSON.stringify({
-            getFairplayLicense: {
-                releasePid: myPid,
-                spcMessage: base64spc,
-            }
-        })
-    })
-        .then(response => response.json())
-        .then((response) => {
-            // Handle the response as you desire, f.e. when the server does not respond directly with the CKC
-            if (response && response.getFairplayLicenseResponse
-                && response.getFairplayLicenseResponse.ckcResponse) {
-                return response.getFairplayLicenseResponse.ckcResponse;
-            }
-            throw new Error('No correct response');
-        })
-        .catch((error) => {
-            console.error('CKC error', error);
-        });
-}
-```
-
-Platforms: Android, iOS
-
-### type
+### `type`
 
 You can specify the DRM type, either by string or using the exported DRMType enum.
 Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.

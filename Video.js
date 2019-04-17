@@ -228,10 +228,10 @@ export default class Video extends Component {
   };
 
   _onGetLicense = (event) => {
-    if (this.props.source && this.props.source.drm && this.props.source.drm.getLicense instanceof Function) {
+    if (this.props.drm && this.props.drm.getLicense instanceof Function) {
       const data = event.nativeEvent;
       if (data && data.spc) {
-        const getLicenseOverride = this.props.source.drm.getLicense(data.spc, this.props);
+        const getLicenseOverride = this.props.drm.getLicense(data.spc, this.props);
         const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
         getLicensePromise.then((result => {
           if (result !== undefined) {
@@ -297,7 +297,6 @@ export default class Video extends Component {
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
-        drm: source.drm
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
@@ -320,7 +319,7 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
-      onGetLicense: nativeProps.source && nativeProps.source.drm && nativeProps.source.drm.getLicense && this._onGetLicense,
+      onGetLicense: nativeProps.drm && nativeProps.drm.getLicense && this._onGetLicense,
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
     });
