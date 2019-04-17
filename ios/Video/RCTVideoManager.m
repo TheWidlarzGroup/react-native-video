@@ -108,18 +108,6 @@ RCT_REMAP_METHOD(setLicenseResultError,
         }
     }];
 };
-RCT_REMAP_METHOD(preparePlayback,
-                 reactTag:(nonnull NSNumber *)reactTag)
-{
-    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
-        RCTVideo *view = viewRegistry[reactTag];
-        if (![view isKindOfClass:[RCTVideo class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
-        } else {
-            [view preparePlayback];
-        }
-    }];
-};
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTBubblingEventBlock);
 
