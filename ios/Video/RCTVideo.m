@@ -759,7 +759,7 @@ dispatch_queue_t delegateQueue;
       }
   } else {
       // we can try subtitles if it's not a DRM file
-      id subtitleObjects = [source valueForKeyPath:@"config.subtitles"];
+      id subtitleObjects = [source objectForKey:@"subtitles"];
       if ([subtitleObjects isKindOfClass:NSArray.class]) {
           NSArray* subs = subtitleObjects;
           NSArray* subtitleTracks = [SubtitleResourceLoaderDelegate createSubtitleTracksFromArray:subs];

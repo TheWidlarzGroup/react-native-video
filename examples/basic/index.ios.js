@@ -143,13 +143,13 @@ class VideoPlayer extends Component {
             source={{
                 olduri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
                 uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8',
-                type: 'hls',
-                config: {
-                    subtitles : [
+                subtitles : [
                       { "isoCode": "el_GR", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-el-GR-4-1533811840460.vtt" },
                       { "isoCode": "fr_FR", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-fr-FR-5-1533812234086.vtt" },
                       { "isoCode": "en_US", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-en-US-6-1533813449932.vtt"}
                     ],
+                type: 'hls',
+                config: {
                     muxData: {
                         envKey: "4004c26186c29919e27fa9f6c",
                         viewerUserId: "fake_exid",
