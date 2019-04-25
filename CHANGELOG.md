@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 4.4.2
+* Add support pitch algorithm on iOS. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
+
 ### Version 4.4.1
 * Fix tvOS picture-in-picture compilation regression [#1518](https://github.com/react-native-community/react-native-video/pull/1518)
 * fullscreen rotation issues with iOS built-in controls [#1441](https://github.com/react-native-community/react-native-video/pull/1441)
