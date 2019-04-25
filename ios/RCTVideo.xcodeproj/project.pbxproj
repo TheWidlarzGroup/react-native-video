@@ -35,6 +35,30 @@
 		D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C082110259000073188 /* RCTVideoPlayerViewController.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		B2CBB6362270C00600EC2F4B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B2CBB6052270BEA300EC2F4B;
+			remoteInfo = ReactVideoSubtitleSideloader;
+		};
+		B2CBB65E2270C01900EC2F4B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B2CBB6042270BEA300EC2F4B;
+			remoteInfo = ReactVideoSubtitleSideloader;
+		};
+		B2CBB6602270C02100EC2F4B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B2CBB6042270BEA300EC2F4B;
+			remoteInfo = ReactVideoSubtitleSideloader;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -87,6 +111,7 @@
 		B225D4572189C4C50016F315 /* DiceUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceUtils.h; sourceTree = "<group>"; };
 		B24E5C8521677B5A00CF0225 /* dice_shield_ios.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = dice_shield_ios.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B173DF218082D7002AAC20 /* dice_shield_tvos.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = dice_shield_tvos.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactVideoSubtitleSideloader.xcodeproj; path = ReactVideoSubtitleSideloader/ReactVideoSubtitleSideloader.xcodeproj; sourceTree = "<group>"; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
@@ -148,6 +173,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */,
 				B225D4492189C3030016F315 /* Beacon */,
 				D1107C072110259000073188 /* RCTVideo.h */,
 				D1107C052110259000073188 /* RCTVideo.m */,
@@ -188,6 +214,14 @@
 			path = HTTP;
 			sourceTree = "<group>";
 		};
+		B2CBB6332270C00600EC2F4B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B2CBB6372270C00600EC2F4B /* ReactVideoSubtitleSideloader.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -203,6 +237,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B2CBB65F2270C01900EC2F4B /* PBXTargetDependency */,
 			);
 			name = RCTVideo;
 			productName = RCTDataManager;
@@ -220,6 +255,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B2CBB6612270C02100EC2F4B /* PBXTargetDependency */,
 			);
 			name = "RCTVideo-tvOS";
 			productName = "RCTVideo-tvOS";
@@ -249,11 +285,18 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B2CBB6332270C00600EC2F4B /* Products */;
+					ProjectRef = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTVideo */,
@@ -261,6 +304,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B2CBB6372270C00600EC2F4B /* ReactVideoSubtitleSideloader.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ReactVideoSubtitleSideloader.framework;
+			remoteRef = B2CBB6362270C00600EC2F4B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -294,6 +347,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B2CBB65F2270C01900EC2F4B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ReactVideoSubtitleSideloader;
+			targetProxy = B2CBB65E2270C01900EC2F4B /* PBXContainerItemProxy */;
+		};
+		B2CBB6612270C02100EC2F4B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ReactVideoSubtitleSideloader;
+			targetProxy = B2CBB6602270C02100EC2F4B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		58B511ED1A9E6C8500147676 /* Debug */ = {
