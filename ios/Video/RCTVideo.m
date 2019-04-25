@@ -9,6 +9,9 @@
 #include "DiceBeaconRequest.h"
 #include "DiceHTTPRequester.h"
 
+//@import ReactVideoSubtitleSideloader;
+#import <ReactVideoSubtitleSideloader/ReactVideoSubtitleSideloader-Swift.h>
+
 #if TARGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
 @import MuxCore;
@@ -713,6 +716,9 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   handler([AVPlayerItem playerItemWithAsset:mixComposition]);
 }
 
+SubtitleResourceLoaderDelegate* _delegate;
+dispatch_queue_t delegateQueue;
+
 - (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
@@ -725,9 +731,15 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
     
-  id drmObject = [source objectForKey:@"drm"];
   
+  
+  [self setupMuxDataFromSource:source];
+
+  if (isNetwork) {
+    [self setupBeaconFromSource:source];
+  }
     
+  id drmObject = [source objectForKey:@"drm"];
   if (drmObject) {
       ActionToken* ac = nil;
       if ([drmObject isKindOfClass:NSDictionary.class]) {
@@ -745,13 +757,30 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
       } else {
         DebugLog(@"Failed to created action token for playback.");
       }
-
+  } else {
+      // we can try subtitles if it's not a DRM file
+      id subtitleObjects = [source valueForKeyPath:@"config.subtitles"];
+      if ([subtitleObjects isKindOfClass:NSArray.class]) {
+          NSArray* subs = subtitleObjects;
+          NSArray* subtitleTracks = [SubtitleResourceLoaderDelegate createSubtitleTracksFromArray:subs];
+          SubtitleResourceLoaderDelegate* delegate = [[SubtitleResourceLoaderDelegate alloc] initWithM3u8URL:url subtitles:subtitleTracks userAgentString:@"ReactNativeVideoPlayer"];
+          _delegate = delegate;
+          url = delegate.redirectURL;
+          if (!delegateQueue) {
+              delegateQueue = dispatch_queue_create("SubtitleResourceLoaderDelegate", 0);
+          }
+          NSDictionary* headerFields = @{@"User-Agent":delegate.userAgentString};
+          AVURLAsset* asset = [AVURLAsset URLAssetWithURL:url options:@{@"AVURLAssetHTTPHeaderFieldsKey":headerFields}];
+          [asset.resourceLoader setDelegate:delegate queue:delegateQueue];
+          [self playerItemPrepareText:asset assetOptions:[NSDictionary alloc] withCallback:handler];
+          return;
+      }
   }
     
-  [self setupMuxDataFromSource:source];
+//  [self setupMuxDataFromSource:source];
   
   if (isNetwork) {
-    [self setupBeaconFromSource:source];
+//    [self setupBeaconFromSource:source];
     /* Per #1091, this is not a public API.
      * We need to either get approval from Apple to use this  or use a different approach.
      NSDictionary *headers = [source objectForKey:@"requestHeaders"];

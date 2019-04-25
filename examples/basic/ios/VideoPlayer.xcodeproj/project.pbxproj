@@ -31,8 +31,8 @@
 		B2A555D621A2D3C5001C6E2E /* MUXSDKStats.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2A555D521A2D3C5001C6E2E /* MUXSDKStats.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B2A555D821A2D421001C6E2E /* MuxCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2A555D721A2D421001C6E2E /* MuxCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B2A555D921A2D542001C6E2E /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE6A12199A2600079C074 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B2A555DA21A2D548001C6E2E /* XCGLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE69F2199A2600079C074 /* XCGLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B2A555DB21A2D54C001C6E2E /* ObjcExceptionBridging.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2AEE69D2199A25F0079C074 /* ObjcExceptionBridging.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B2CBB6632270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2CBB6622270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework */; };
+		B2CBB6642270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B2CBB6622270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -339,12 +339,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B2A555DB21A2D54C001C6E2E /* ObjcExceptionBridging.framework in Embed Frameworks */,
-				B2A555DA21A2D548001C6E2E /* XCGLogger.framework in Embed Frameworks */,
 				B2A555D921A2D542001C6E2E /* RxSwift.framework in Embed Frameworks */,
 				B2A555D821A2D421001C6E2E /* MuxCore.framework in Embed Frameworks */,
 				B2A555D621A2D3C5001C6E2E /* MUXSDKStats.framework in Embed Frameworks */,
 				B2A555D421A2D3A8001C6E2E /* GoogleInteractiveMediaAds.framework in Embed Frameworks */,
+				B2CBB6642270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework in Embed Frameworks */,
 				B283A7182153DD630069C818 /* dice_shield_ios.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -383,6 +382,7 @@
 		B2AEE69D2199A25F0079C074 /* ObjcExceptionBridging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ObjcExceptionBridging.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/ObjcExceptionBridging.framework"; sourceTree = "<group>"; };
 		B2AEE69F2199A2600079C074 /* XCGLogger.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCGLogger.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/XCGLogger.framework"; sourceTree = "<group>"; };
 		B2AEE6A12199A2600079C074 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = "../../../../../../Library/Developer/Xcode/DerivedData/VideoPlayer-fppcqzkwzanotifuvqdjjtmlbzdf/Build/Products/Debug-iphoneos/RxSwift.framework"; sourceTree = "<group>"; };
+		B2CBB6622270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ReactVideoSubtitleSideloader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -398,6 +398,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2CBB6632270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework in Frameworks */,
 				8C2A0F841E2560A100E31596 /* libRCTVideo.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
@@ -583,6 +584,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				B2CBB6622270CD8400EC2F4B /* ReactVideoSubtitleSideloader.framework */,
 				B2A555D721A2D421001C6E2E /* MuxCore.framework */,
 				B2A555D521A2D3C5001C6E2E /* MUXSDKStats.framework */,
 				B2A555AD21A2D3A7001C6E2E /* GoogleInteractiveMediaAds.framework */,
@@ -686,9 +688,13 @@
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = E8R798XV3B;
+						ProvisioningStyle = Manual;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = E8R798XV3B;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -702,6 +708,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -1137,6 +1144,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = E8R798XV3B;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1145,6 +1154,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoPlayer.app/VideoPlayer";
 			};
 			name = Debug;
@@ -1153,11 +1163,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = E8R798XV3B;
 				INFOPLIST_FILE = VideoPlayerTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoPlayer.app/VideoPlayer";
 			};
 			name = Release;
@@ -1167,8 +1180,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = E8R798XV3B;
 				INFOPLIST_FILE = VideoPlayer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -1177,6 +1192,7 @@
 					"-lc++",
 				);
 				PRODUCT_NAME = VideoPlayer;
+				PROVISIONING_PROFILE_SPECIFIER = "SD Dev Wildcard";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1186,7 +1202,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = E8R798XV3B;
 				INFOPLIST_FILE = VideoPlayer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -1195,6 +1213,7 @@
 					"-lc++",
 				);
 				PRODUCT_NAME = VideoPlayer;
+				PROVISIONING_PROFILE_SPECIFIER = "SD Dev Wildcard";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
