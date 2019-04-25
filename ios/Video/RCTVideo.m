@@ -1244,12 +1244,14 @@ dispatch_queue_t delegateQueue;
 }
 
 - (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {
+    if (!selectedAudioTrack) return;
     _selectedAudioTrack = selectedAudioTrack;
     [self setMediaSelectionTrackForCharacteristic:AVMediaCharacteristicAudible
                                         withCriteria:_selectedAudioTrack];
 }
 
 - (void)setSelectedTextTrack:(NSDictionary *)selectedTextTrack {
+    if (!selectedTextTrack) return;
   _selectedTextTrack = selectedTextTrack;
   if (_textTracks) { // sideloaded text tracks
     [self setSideloadedText];
