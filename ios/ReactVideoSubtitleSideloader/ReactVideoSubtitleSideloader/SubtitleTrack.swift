@@ -21,8 +21,8 @@ import Foundation
     }
     
     @objc public static func from(dict: NSDictionary) -> SubtitleTrack? {
-        guard let iso = dict["isoCode"] as? String,
-            let urlString = dict["url"] as? String, let url = URL(string: urlString) else {
+        guard let iso = dict["language"] as? String,
+            let urlString = dict["uri"] as? String, let url = URL(string: urlString) else {
                 return nil
         }
         let name =
