@@ -51,7 +51,7 @@ Run `react-native link react-native-video` to link the react-native-video librar
 
 ### Using CocoaPods (required to enable caching)
 
-Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
+Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies).
 
 Depending on your requirements you have to choose between the two possible subpodspecs:
 
@@ -75,7 +75,7 @@ end
 
 <details>
   <summary>tvOS</summary>
-  
+
 `react-native link react-native-video` doesn’t work properly with the tvOS target so we need to add the library manually.
 
 First select your project in Xcode.
@@ -279,6 +279,7 @@ var styles = StyleSheet.create({
 * [posterResizeMode](#posterresizemode)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
+* [pitchAlgorithm](#pitchAlgorithm)
 * [repeat](#repeat)
 * [reportBandwidth](#reportbandwidth)
 * [resizeMode](#resizemode)
@@ -389,7 +390,7 @@ Add video filter
 
 For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
 
-Notes: 
+Notes:
 1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
 2. Video filter is currently not supported on HLS playlists.
 3. `filterEnabled` must be set to `true`
@@ -397,7 +398,7 @@ Notes:
 Platforms: iOS
 
 #### filterEnabled
-Enable video filter. 
+Enable video filter.
 
 * **false (default)** - Don't enable filter
 * **true** - Enable filter
@@ -418,7 +419,7 @@ Platforms: iOS
 
 #### fullscreenOrientation
 
-* **all (default)** - 
+* **all (default)** -
 * **landscape**
 * **portrait**
 
@@ -445,7 +446,7 @@ Platforms: Android ExoPlayer
 #### hideShutterView
 Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
 
-* **false (default)** - Show shutter view 
+* **false (default)** - Show shutter view
 * **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
@@ -555,8 +556,8 @@ Default: 250.0
 
 Platforms: all
 
-### rate
-Speed at which the media should play. 
+#### rate
+Speed at which the media should play.
 * **0.0** - Pauses the video
 * **1.0** - Play at normal speed
 * **Other values** - Slow down or speed up playback
@@ -564,6 +565,18 @@ Speed at which the media should play.
 Platforms: all
 
 Note: For Android MediaPlayer, rate is only supported on Android 6.0 and higher devices.
+
+#### pitchAlgorithm
+Pitch algorithm for AVPlayerItem. [Apple documentation](https://developer.apple.com/documentation/avfoundation/avaudiotimepitchalgorithm).
+
+By default on iOS pitch algorithm is **lowQualityZeroLatency** which has limitations in allowed playback speed.
+
+* **lowQualityZeroLatency** - A low quality and very low computationally intensive pitch algorithm. This algorithm is suitable for brief fast-forward and rewind effects as well as low quality voice. The rate is snapped to {0.5, 0.666667, 0.8, 1.0, 1.25, 1.5, 2.0}.
+* **spectral** - The highest quality, most computationally expensive pitch algorithm. This algorithm is suitable for voice. It uses a variable rate from 1/32 to 32.
+* **timeDomain** - A modest quality pitch algorithm that is less computationally intensive than the spectral algorithm. This algorithm is suitable for music. It uses a variable rate from 1/32 to 32.
+* **varispeed** - A high quality, no pitch correction algorithm. The pitch varies with rate and supports variable rates from 1/32 to 32.
+
+Platforms: iOS
 
 #### repeat
 Determine whether to repeat the video when the end is reached
@@ -645,7 +658,7 @@ Type | Value | Description
 "language" | string | Display the text track with the language specified as the Value, e.g. "fr"
 "index" | number | Display the text track with the index specified as the value, e.g. 0
 
-Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it. 
+Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it.
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
@@ -688,7 +701,7 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 ##### Asset loaded via require
 
-Example: 
+Example:
 ```
 const sintel = require('./sintel.mp4');
 
@@ -903,7 +916,7 @@ textTracks | array | An array of text track info objects with the following prop
 
 Example:
 ```
-{ 
+{
   canPlaySlowForward: true,
   canPlayReverse: false,
   canPlaySlowReverse: false,
@@ -1013,7 +1026,7 @@ Both the currentTime & seekTime are reported because the video player may not se
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
 
 #### onRestoreUserInterfaceForPictureInPictureStop
-Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
+Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface.
 
 Payload: none
 
@@ -1094,23 +1107,23 @@ let path = response.uri;
 Notes:
  - Currently only supports highest quality export
  - Currently only supports MP4 export
- - Currently only supports exporting to user's cache directory with a generated UUID filename. 
+ - Currently only supports exporting to user's cache directory with a generated UUID filename.
  - User will need to remove the saved video through their Photos app
  - Works with cached videos as well. (Checkout video-caching example)
  - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
  - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
- 
-Future: 
+
+Future:
  - Will support multiple qualities through options
  - Will support more formats in the future through options
  - Will support custom directory and file name through options
- 
+
 Platforms: iOS
 
 #### restoreUserInterfaceForPictureInPictureStopCompleted
 `restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
 
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
 
 Example:
 ```
