@@ -13,6 +13,10 @@ static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
 static NSString *const externalPlaybackActive = @"externalPlaybackActive";
+static NSString* const pitchAlgorithmLowQualityZeroLatency = @"lowQualityZeroLatency";
+static NSString* const pitchAlgorithmSpectral = @"spectral";
+static NSString* const pitchAlgorithmTimeDomain = @"timeDomain";
+static NSString* const pitchAlgorithmVarispeed = @"varispeed";
 
 static int const RCTVideoUnset = -1;
 
@@ -93,7 +97,7 @@ static int const RCTVideoUnset = -1;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
     _rate = 1.0;
-    _pitchAlgorithm = @"lowQualityZeroLatency"; // lowQualityZeroLatency, spectral, timeDomain, varispeed
+    _pitchAlgorithm = pitchAlgorithmLowQualityZeroLatency;
     _volume = 1.0;
     _resizeMode = @"AVLayerVideoGravityResizeAspectFill";
     _fullscreenAutorotate = YES;
@@ -948,13 +952,13 @@ static int const RCTVideoUnset = -1;
 {
   _pitchAlgorithm = pitchAlgorithm;
 
-  if ([_pitchAlgorithm isEqualToString:@"lowQualityZeroLatency"]) {
+  if ([_pitchAlgorithm isEqualToString:pitchAlgorithmLowQualityZeroLatency]) {
     _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmLowQualityZeroLatency;
-  } else if ([_pitchAlgorithm isEqualToString:@"spectral"]) {
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmSpectral]) {
     _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmSpectral;
-  } else if ([_pitchAlgorithm isEqualToString:@"timeDomain"]) {
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmTimeDomain]) {
     _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain;
-  } else if ([_pitchAlgorithm isEqualToString:@"varispeed"]) {
+  } else if ([_pitchAlgorithm isEqualToString:pitchAlgorithmVarispeed]) {
     _playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmVarispeed;
   }
 
