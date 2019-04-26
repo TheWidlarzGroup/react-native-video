@@ -7,15 +7,15 @@ This feature will disable the use of `TextureView` on Android.
 
 DRM object allows this members:
 
-| Property | Type | Platform | Description |
-| --- | --- | --- | --- |
-| [`type`](#type) | DRMType | iOS/Android | Specifies which type of DRM you are going to use, DRMType is an enum exposed on the JS module ('fairplay', 'playready', ...) |
-| [`licenseServer`](#licenseserver) | string | iOS/Android | Specifies the license server URL |
-| [`headers`](#headers) | Object | iOS/Android | Specifies the headers send to the license server URL on license acquisition |
-| [`contentId`](#contentid) | string | iOS | Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`) |
-| [`certificateUrl`](#certificateurl) | string | iOS | Specifies the url to obtain your ios certificate for fairplay, Url to the .cer file |
-| [`base64Certificate`](#base64certificate) | bool | iOS | Specifies whether or not the certificate returned by the `certificateUrl` is on base64 |
-| [`getLicense`](#getlicense)| function | iOS | Rather than setting the `licenseServer` url to get the license, you can manually get the license on the JS part, and send the result to the native part to configure FairplayDRM for the stream |
+| Property | Type | Default | Platform | Description |
+| --- | --- | --- | --- | --- |
+| [`type`](#type) | DRMType | undefined | iOS/Android | Specifies which type of DRM you are going to use, DRMType is an enum exposed on the JS module ('fairplay', 'playready', ...) |
+| [`licenseServer`](#licenseserver) | string | undefined | iOS/Android | Specifies the license server URL |
+| [`headers`](#headers) | Object | undefined | iOS/Android | Specifies the headers send to the license server URL on license acquisition |
+| [`contentId`](#contentid) | string | undefined | iOS | Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`) |
+| [`certificateUrl`](#certificateurl) | string | undefined | iOS | Specifies the url to obtain your ios certificate for fairplay, Url to the .cer file |
+| [`base64Certificate`](#base64certificate) | bool | false | iOS | Specifies whether or not the certificate returned by the `certificateUrl` is on base64 |
+| [`getLicense`](#getlicense)| function | undefined | iOS | Rather than setting the `licenseServer` url to get the license, you can manually get the license on the JS part, and send the result to the native part to configure FairplayDRM for the stream |
 
 ### `base64Certificate`
 
@@ -44,7 +44,7 @@ getLicense: (spcString) => {
   return fetch(`https://license.pallycon.com/ri/licenseManager.do`, {
       method: 'POST',
       headers: {
-          'pallycon-customdata-v2': 'eyJkcm1fdHlwZSI6IkZhaXJQbGF5Iiwic2l0ZV9pZCI6IkJMMkciLCJ1c2VyX2lkIjoiMTIxMjc5IiwiY2lkIjoiYXNzZXRfMTQ5OTAiLCJ0b2tlbiI6IjBkQVVLSEQ4bm5pTStJeDJ2Y09HVStzSWRWY2wvSEdxSjdEanNZK1laazZKdlhLczRPM3BVNitVVnV3dkNvLzRyc2lIUi9PSnY4RDJncHBBN0cycnRGdy9pVFMvTWNZaVhML2VLOXdMMXFVM05VbXlFL25RdVV3Tm5mOXI2YlArUjUvRDZxOU5vZmZtTGUybmo4VGphQ3UwUUFQZlVqVzRFREE4eDNUYlI5cXZOa0pKVHdmNTA5NE5UYXY5VzJxbFp0MmczcDNMcUV0RkNMK0N5dFBZSWJEN2ZBUmR1ZzkvVTdiMXB1Y3pndTBqRjg3QnlMU0tac0J3TUpYd2xSZkxTTTZJSzRlWHMvNC9RWU4rVXhnR3ozVTgxODl4aHhWS0RJaDdBcGFkQVllVUZUMWJIVVZBSVVRQms0cjRIQ28yczIydWJvVnVLaVNQazdvYmtJckVNQT09IiwidGltZXN0YW1wIjoiMjAxOS0wMi0xMlQwNjoxODo0MloiLCJoYXNoIjoiMThqcDBDVTdOaUJ3WFdYVC8zR2lFN3R0YXVRWlZ5SjVSMUhSK2J2Um9JWT0ifQ==',
+          'pallycon-customdata-v2': 'd2VpcmRiYXNlNjRzdHJpbmcgOlAgRGFuaWVsIE1hcmnxbyB3YXMgaGVyZQ==',
           'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData
@@ -86,3 +86,54 @@ The URL pointing to the licenseServer that will provide the authorization to pla
 You can specify the DRM type, either by string or using the exported DRMType enum.
 Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
 for iOS: DRMType.FAIRPLAY
+
+## Common Usage Scenarios
+
+### Send cookies to license server
+
+You can send Cookies to the license server via `headers` prop. Example:
+
+```js
+drm: {
+    type: 'widevine', //or DRMType.WIDEVINE
+    licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+    headers: {
+        'Cookie': 'PHPSESSID=etcetc; csrftoken=mytoken; _gat=1; foo=bar'
+    },
+}
+```
+
+### Custom License Acquisition (only iOS for now)
+
+```js
+drm: {
+    type: DRMType.FAIRPLAY,
+    getLicense: (spcString) => {
+        const base64spc = Base64.encode(spcString);
+        return fetch('YOUR LICENSE SERVER HERE', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({
+                getFairplayLicense: {
+                    foo: 'bar',
+                    spcMessage: base64spc,
+                }
+            })
+        })
+            .then(response => response.json())
+            .then((response) => {
+                if (response && response.getFairplayLicenseResponse
+                    && response.getFairplayLicenseResponse.ckcResponse) {
+                    return response.getFairplayLicenseResponse.ckcResponse;
+                }
+                throw new Error('No correct response');
+            })
+            .catch((error) => {
+                console.error('CKC error', error);
+            });
+    }
+}
+```
