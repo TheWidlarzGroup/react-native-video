@@ -1389,6 +1389,9 @@ static int const RCTVideoUnset = -1;
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
     _playerLayerObserverSet = NO;
   }
+  if (_loadingRequest != nil) {
+    [_loadingRequest finishLoading];
+  }
   _requestingCertificate = NO;
   _requestingCertificateErrored = NO;
   _playerLayer = nil;
@@ -1675,19 +1678,19 @@ static int const RCTVideoUnset = -1;
     _loadingRequest = loadingRequest;
     NSURL *url = loadingRequest.request.URL;
     NSString *contentId = url.host;
-    if (_drm != nil) {
-        NSString *contentIdOverride = (NSString *)[_drm objectForKey:@"contentId"];
+    if (self->_drm != nil) {
+        NSString *contentIdOverride = (NSString *)[self->_drm objectForKey:@"contentId"];
         if (contentIdOverride != nil) {
             contentId = contentIdOverride;
         }
-        NSString *drmType = (NSString *)[_drm objectForKey:@"type"];
+        NSString *drmType = (NSString *)[self->_drm objectForKey:@"type"];
         if ([drmType isEqualToString:@"fairplay"]) {
-            NSString *certificateStringUrl = (NSString *)[_drm objectForKey:@"certificateUrl"];
+            NSString *certificateStringUrl = (NSString *)[self->_drm objectForKey:@"certificateUrl"];
             if (certificateStringUrl != nil) {
                 NSURL *certificateURL = [NSURL URLWithString:[certificateStringUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     NSData *certificateData = [NSData dataWithContentsOfURL:certificateURL];
-                    if ([_drm objectForKey:@"base64Certificate"]) {
+                    if ([self->_drm objectForKey:@"base64Certificate"]) {
                         certificateData = [[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters];
                     }
                     
