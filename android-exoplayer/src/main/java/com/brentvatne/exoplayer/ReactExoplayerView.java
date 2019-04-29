@@ -606,8 +606,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         for (int i = 0; i < textTracks.size(); ++i) {
             ReadableMap textTrack = textTracks.getMap(i);
             String language = textTrack.getString("language");
-            String title = textTrack.hasKey("title")
-                    ? textTrack.getString("title") : language + " " + i;
+            String languageLabel = language != null ? Locale.forLanguageTag(language.replaceAll("_", "-")).getDisplayName() : "";
+            String title = textTrack.hasKey("title") ? textTrack.getString("title") : languageLabel;
             Uri uri = Uri.parse(textTrack.getString("uri"));
             MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
                     language);
