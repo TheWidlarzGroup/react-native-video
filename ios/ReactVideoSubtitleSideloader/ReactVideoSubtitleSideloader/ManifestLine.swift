@@ -24,7 +24,7 @@ class ManifestLine: NSObject {
             if components.count == 1 {
                 tagName = String(components[0])
                 tagValue = nil
-                tagAttributes = nil
+                self.tagAttributes = nil
                 tagAttributesOrder = nil
                 super.init()
                 return
