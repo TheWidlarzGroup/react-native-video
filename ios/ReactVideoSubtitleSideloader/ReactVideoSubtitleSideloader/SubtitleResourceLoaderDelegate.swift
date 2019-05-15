@@ -22,7 +22,6 @@ import AVFoundation
     
     private var m3u8URL: URL
     @objc public private(set) var redirectURL: URL
-    @objc public let userAgentString: String
     
     private var m3u8String: String? = nil
     
@@ -43,15 +42,13 @@ import AVFoundation
      * - Parameters:
      *      - m3u8URL: URL for the master playlist file
      *      - subtitles: subtitle tracks to be side loaded this nees to be Array of SubtitleTrack
-     *      - userAgentString: User-Agent string that should be used to fetch the files
      *
      * - Attention: Make sure that this delegate and the player itself is using the same
      *           User-Agent string, otherwise tokenized urls will not work causing HTTP/403 errors
      *
      */
-    @objc public init(m3u8URL: URL, subtitles:NSArray, userAgentString: String = "DiceVideoPlayer") {
+    @objc public init(m3u8URL: URL, subtitles:NSArray) {
         self.m3u8URL = m3u8URL
-        self.userAgentString = userAgentString
         self.redirectURL = SubtitleResourceLoaderDelegate.getRedirectURL(m3u8URL: m3u8URL)!
         
         self.subtitles = subtitles.map { $0 as! SubtitleTrack }
@@ -107,7 +104,10 @@ import AVFoundation
         guard let url = loadingRequest.request.url else {
             return false
         }
-        NSLog("Processing: \(url.absoluteString)")
+        guard let userAgentString = loadingRequest.request.allHTTPHeaderFields?["User-Agent"] else {
+            return false
+        }
+        DICELog.d("Processing: \(url.absoluteString)")
         let lpc = url.lastPathComponent
         if !lpc.hasSuffix("m3u8") {
             return false
@@ -131,6 +131,7 @@ import AVFoundation
         let task = URLSession.shared.dataTask(with: r) { [weak self] (data, response, error) in
             guard error == nil,
                 let data = data else {
+                    DICELog.e("finishLoading(with: error) \(String(describing: error))")
                     loadingRequest.finishLoading(with: error)
                     return
             }
@@ -138,6 +139,7 @@ import AVFoundation
             if let resp = response as? HTTPURLResponse, resp.statusCode >= 300 {
                 let e = SubtitleResourceLoaderDelegate.createError(code: .InvalidServerResponse, message: "Non 200 server response")
                 self?.errorLog.append(e)
+                DICELog.e("finishLoading(with: error) \(e)")
                 loadingRequest.finishLoading(with: e)
                 return
             }
@@ -146,6 +148,7 @@ import AVFoundation
                 guard let rURL = r.url, let responseData = self?.processPlaylistWithData(data, rURL) else {
                     let e = SubtitleResourceLoaderDelegate.createError(code: .InvalidServerResponseBody, message: "Unable to process response body")
                     self?.errorLog.append(e)
+                    DICELog.e("finishLoading(with: error) \(e)")
                     loadingRequest.finishLoading(with: e)
                     return
                 }
@@ -155,6 +158,7 @@ import AVFoundation
                 guard let rURL = r.url, let responseData = self?.rewriteURLs(forPlaylistData: data, rURL) else {
                     let e = SubtitleResourceLoaderDelegate.createError(code: .InvalidServerResponseBody, message: "Unable to process response body")
                     loadingRequest.finishLoading(with: e)
+                    DICELog.e("finishLoading(with: error) \(e)")
                     self?.errorLog.append(e)
                     return
                 }
@@ -181,6 +185,7 @@ import AVFoundation
         guard let data = resp.data(using: .utf8) else {
             let e = SubtitleResourceLoaderDelegate.createError(code: .StringToDataConvertionFailure, message: "Unable to create Data from string for subtitle manifest response")
             errorLog.append(e)
+            DICELog.e("finishLoading(with: error) \(e)")
             loadingRequest.finishLoading(with: e)
             return false
         }
