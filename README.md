@@ -290,6 +290,8 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+* [fontSizeTrack](#fontSizeTrack)
+* [paddingBottonTrack](#paddingBottonTrack)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -805,6 +807,19 @@ Adjust the volume.
 
 Platforms: all
 
+#### fontSizeTrack
+Adjust the font size of the subtitles in Android.
+* **Default font size of the device** - The default value for this props
+* **Other values (int)** - Change the font size
+
+Platforms: Android ExoPlayer
+
+#### paddingBottonTrack
+Adjust the padding botton of the subtitles in Android.
+* **0.1 (default)** - Give a padding botton of 0.1
+* **Other values (float)** - Change the padding botton
+
+Platforms: Android ExoPlayer
 
 ### Event props
 

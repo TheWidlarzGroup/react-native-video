@@ -269,7 +269,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setControls(controls);
     }
 
-    @ReactProp(name = PROP_FRONT_SIZE_TRACK, defaultInt = 30)
+    @ReactProp(name = PROP_FRONT_SIZE_TRACK)
     public void setFontSizeTrack(final ReactExoplayerView videoView, final int fontSizeTrack) {
         videoView.setFontSizeTrack(fontSizeTrack);
     }
