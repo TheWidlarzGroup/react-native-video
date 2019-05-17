@@ -1162,4 +1162,12 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(1);
         }
     }
+
+    public void setFontSizeTrack(int fontSizeTrack) {
+        exoPlayerView.setFontSizeTrack(fontSizeTrack);
+    }
+
+    public void setPaddingBottonTrack(float paddingBottonTrack) {
+        exoPlayerView.setPaddingBottonTrack(paddingBottonTrack);
+    }
 }
