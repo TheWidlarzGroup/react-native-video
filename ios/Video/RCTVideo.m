@@ -390,7 +390,7 @@ static int const RCTVideoUnset = -1;
                                     @"uri": uri ? uri : [NSNull null],
                                     @"type": type ? type : [NSNull null],
                                     @"isNetwork": [NSNumber numberWithBool:(bool)[self->_source objectForKey:@"isNetwork"]]},
-                                @"drm": self->_drm ? _drm : [NSNull null],
+                                @"drm": self->_drm ? self->_drm : [NSNull null],
                                 @"target": self.reactTag
                                 });
       }
@@ -525,10 +525,17 @@ static int const RCTVideoUnset = -1;
   } else {
     asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   }
-  dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
-  [asset.resourceLoader setDelegate:self queue:queue];
+  // Reset
+  if (_loadingRequest != nil) {
+    [_loadingRequest finishLoading];
+  }
   _requestingCertificate = NO;
   _requestingCertificateErrored = NO;
+  /////////
+  if (self->_drm != nil) {
+    dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
+    [asset.resourceLoader setDelegate:self queue:queue];
+  }
   
   [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
 }
@@ -1669,9 +1676,9 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
 }
 
 - (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
-  if (_requestingCertificate) {
+  if (self->_requestingCertificate) {
     return YES;
-  } else if (_requestingCertificateErrored) {
+  } else if (self->_requestingCertificateErrored) {
     return NO;
   }
   _loadingRequest = loadingRequest;
@@ -1708,6 +1715,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
               if (spcData != nil) {
                 if(self.onGetLicense) {
                   NSString *spcStr = [[NSString alloc] initWithData:spcData encoding:NSASCIIStringEncoding];
+                  self->_requestingCertificate = YES;
                   self.onGetLicense(@{@"spc": spcStr,
                                       @"target": self.reactTag});
                 } else if(licenseServer != nil) {
