@@ -4,24 +4,194 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_controls" >
 
-    <ImageButton
-        android:id="@+id/tvPlayPauseImageView"
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        android:layout_centerInParent="true"
-        android:layout_marginLeft="34dp"
-        android:layout_marginRight="34dp"
-        android:background="@drawable/circle_dark"
-        android:contentDescription="@string/play_video"
-        android:focusable="false"
-        android:src="@drawable/ic_play" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp">
+    </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/tvBottomBarWidgetContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignParentBottom="true">
 
-        <include layout="@layout/bottom_bar_tv" />
-    </FrameLayout>
+        <com.previewseekbar.PreviewSeekBarLayout
+            android:id="@+id/previewSeekBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- TODO: Enable the following when adding the thumbnails -->
+            <!-- set width to @dimen/video_preview_width -->
+            <!-- set height to @dimen/video_preview_height -->
+            <FrameLayout
+                android:id="@+id/previewFrameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#a00"
+                    android:contentDescription="@string/preview_image" />
+
+            </FrameLayout>
+
+            <com.previewseekbar.PreviewSeekbarTV
+                android:id="@+id/previewSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_below="@id/previewFrameLayout"
+                android:maxHeight="@dimen/previewseekbar_progress_height"
+                android:minHeight="@dimen/previewseekbar_progress_height"
+                android:minWidth="@dimen/previewseekbar_progress_width"
+                android:maxWidth="@dimen/previewseekbar_progress_width"
+                android:focusableInTouchMode="false"
+                android:focusable="true"
+                android:nextFocusRight="@+id/tvPlayPauseImageView"
+                android:nextFocusDown="@+id/tvPlayPauseImageView"
+                android:progressDrawable="@drawable/previewseekbar_progress_drawable">
+            </com.previewseekbar.PreviewSeekbarTV>
+
+        </com.previewseekbar.PreviewSeekBarLayout>
+
+        <LinearLayout
+            android:id="@+id/bottomBarWidget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="8dp"
+            android:background="@drawable/bg_bottom_bar">
+
+            <ImageButton
+                android:id="@+id/tvPlayPauseImageView"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:scaleType="fitXY"
+                android:layout_marginRight="8dp"
+                android:contentDescription="@string/play_video"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusRight="@+id/tvAudioSubtitlesBtn"
+                android:nextFocusDown="@+id/tvAudioSubtitlesBtn"
+                android:src="@drawable/tv_play_btn_selector"
+                android:background="@drawable/tv_btn_bg_selector">
+                <requestFocus/>
+            </ImageButton>
+
+            <ImageButton
+                android:id="@+id/tvAudioSubtitlesBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:scaleType="fitXY"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusLeft="@+id/tvPlayPauseImageView"
+                android:nextFocusUp="@+id/tvPlayPauseImageView"
+                android:src="@drawable/tv_audio_subtitles_selector"
+                android:background="@drawable/tv_btn_bg_selector" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/currentTimeTextView"
+                android:layout_width="55dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="1dp"
+                android:gravity="center"
+                android:paddingBottom="1dp"
+                android:text="@string/default_time"
+                android:textAlignment="center"
+                android:textColor="#ffffff"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/timeDividerTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:textSize="12sp"
+                android:text="/"/>
+
+            <TextView
+                android:id="@+id/durationTextView"
+                android:focusableInTouchMode="false"
+                android:focusable="false"
+                android:layout_width="55dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="1dp"
+                android:gravity="center"
+                android:paddingBottom="1dp"
+                android:text="@string/default_time"
+                android:textAlignment="center"
+                android:textColor="#ffffff"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/liveTextView"
+                android:focusableInTouchMode="false"
+                android:focusable="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="0dp"
+                android:layout_marginStart="0dp"
+                android:background="@drawable/bg_live"
+                android:gravity="center"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/live"
+                android:textAlignment="center"
+                android:textColor="#ffffff"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+
+            <ImageButton
+                android:id="@+id/bottomRightIconButton"
+                android:focusableInTouchMode="false"
+                android:focusable="false"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:background="#00000000"
+                android:contentDescription="@string/fullscreen"
+                android:gravity="center"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:src="@drawable/ic_fullscreen_off"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 </RelativeLayout>
