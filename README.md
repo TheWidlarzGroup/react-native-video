@@ -975,12 +975,12 @@ Callback function that is called when the rate of playback changes - either paus
 
 Property | Type | Description
 --- | --- | ---
-playbackRate | number | 1 if playback is ongoing and 0 otherwise
+playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up
 
 Example:
 ```
 {
-  playbackRate: 0,
+  playbackRate: 0, // indicates paused
 }
 ```
 
