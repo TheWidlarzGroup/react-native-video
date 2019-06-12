@@ -303,6 +303,7 @@ var styles = StyleSheet.create({
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
 * [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
+* [onPlaybackRateChange](#onplaybackratechange)
 * [onProgress](#onprogress)
 * [onSeek](#onseek)
 * [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
@@ -968,6 +969,23 @@ isActive: true
 ```
 
 Platforms:  iOS
+
+#### onPlaybackRateChange
+Callback function that is called when the rate of playback changes - either paused or starts/resumes.
+
+Property | Type | Description
+--- | --- | ---
+playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up
+
+Example:
+```
+{
+  playbackRate: 0, // indicates paused
+}
+```
+
+Platforms: all
+
 
 #### onProgress
 Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
