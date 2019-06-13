@@ -1,7 +1,8 @@
 ## Changelog
 
 ### next
-* Support DRM for iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
+* Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
+* Added `onPlaybackRateChange` to README [#1578](https://github.com/react-native-community/react-native-video/pull/1578)
 
 ### Version 4.4.1
 * Fix tvOS picture-in-picture compilation regression [#1518](https://github.com/react-native-community/react-native-video/pull/1518)
