@@ -832,13 +832,20 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private void setupSubtitlesButton() {
         Log.d(TAG, "setupSubtitlesButton() " + player.getPlaybackState());
         if (player != null && player.getPlaybackState() == ExoPlayer.STATE_READY) {
-            Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-            //audioSubtitlesButton.setVisibility(View.VISIBLE);
-            audioSubtitlesButton.setEnabled(true);
+
+
+            DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
+
+            if (model.areSubtitlesAvailable() && model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1) {
+                Log.d(TAG, "setupSubtitlesButton() VISIBLE");
+                audioSubtitlesButton.setVisibility(View.VISIBLE);
+            } else {
+                Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
+                audioSubtitlesButton.setVisibility(View.INVISIBLE);
+            }
         } else {
-            Log.d(TAG, "setupSubtitlesButton() GONE");
-            audioSubtitlesButton.setEnabled(false);
-            //audioSubtitlesButton.setVisibility(View.INVISIBLE);
+            Log.d(TAG, "setupSubtitlesButton() media not ready");
+            audioSubtitlesButton.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -1598,6 +1605,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
+                case KeyEvent.KEYCODE_ENTER:
                     if (controls.getAlpha() == 0.0f) {
                         showOverlay();
                         return true;

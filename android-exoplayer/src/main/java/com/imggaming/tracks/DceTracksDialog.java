@@ -61,10 +61,14 @@ public class DceTracksDialog extends AlertDialog {
         final List<DcePlayerModel.DceTrack> audio = model.getAudioTracks();
 
         final ArrayList<Object> data = new ArrayList<>();
-        data.add(new DceHeader(R.string.dce_tracks_dialog_subtitles));
-        data.addAll(subtitles);
-        data.add(new DceHeader(R.string.dce_tracks_dialog_audio));
-        data.addAll(audio);
+        if (model.areSubtitlesAvailable()) {
+            data.add(new DceHeader(R.string.dce_tracks_dialog_subtitles));
+            data.addAll(subtitles);
+        }
+        if (audio.size() > 1) {
+            data.add(new DceHeader(R.string.dce_tracks_dialog_audio));
+            data.addAll(audio);
+        }
 
         final TracksAdapter adapter = new TracksAdapter(getContext(), data);
         adapter.setAccentColor(accentColor);
