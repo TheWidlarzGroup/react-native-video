@@ -19,6 +19,7 @@ import java.util.List;
 
 public class DceTracksDialog extends AlertDialog {
     private DcePlayerModel model;
+    private int accentColor;
 
     public DceTracksDialog(@NonNull Context context) {
         super(context);
@@ -66,6 +67,7 @@ public class DceTracksDialog extends AlertDialog {
         data.addAll(audio);
 
         final TracksAdapter adapter = new TracksAdapter(getContext(), data);
+        adapter.setAccentColor(accentColor);
 
         final ListView list = findViewById(R.id.dce_tracks_list);
         list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -108,5 +110,9 @@ public class DceTracksDialog extends AlertDialog {
 
     public void setModel(DcePlayerModel model) {
         this.model = model;
+    }
+
+    public void setAccentColor(int accentColor) {
+        this.accentColor = accentColor;
     }
 }

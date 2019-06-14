@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.brentvatne.react.R;
 import com.imggaming.tracks.DcePlayerModel.DceTrack;
+import com.imggaming.utils.DrawableUtils;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ class TracksAdapter extends BaseAdapter {
 
     private final List<Object> tracks;
     private final Context context;
+    private int accentColor;
 
     public TracksAdapter(Context context, List<Object> tracks) {
         this.context = context;
@@ -41,6 +43,7 @@ class TracksAdapter extends BaseAdapter {
 
             DceHeader header = (DceHeader) data;
             textView.setText(header.getResId());
+            textView.setTextColor(accentColor);
 
 
 
@@ -54,6 +57,8 @@ class TracksAdapter extends BaseAdapter {
             DceTrack track = (DceTrack) data;
             textView.setText(track.getName());
             textView.setChecked(track.isSelected());
+
+            DrawableUtils.setTint(textView.getCheckMarkDrawable(), accentColor);
         }
 
         return convertView;
@@ -110,5 +115,9 @@ class TracksAdapter extends BaseAdapter {
 
     public List<Object> getTracks() {
         return tracks;
+    }
+
+    public void setAccentColor(int accentColor) {
+        this.accentColor = accentColor;
     }
 }

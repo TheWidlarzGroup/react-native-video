@@ -4,7 +4,6 @@ import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -95,6 +94,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
+import com.imggaming.utils.DrawableUtils;
 import com.imggaming.utils.DensityPixels;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
@@ -181,6 +181,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
+    private int accentColor;
     // \ End props
 
     // React
@@ -375,6 +376,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
                 dialog = new DceTracksDialog(getContext(), R.style.DiceTracksDialog);
                 dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
+                dialog.setAccentColor(accentColor);
 
                 dialog.show();
             }
@@ -1415,7 +1417,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setColorProgressBar(String color) {
         try {
-            previewSeekBarLayout.setTintColor(Color.parseColor(color));
+            accentColor = Color.parseColor(color);
+            previewSeekBarLayout.setTintColor(accentColor);
+
+            DrawableUtils.setTint(playPauseButton.getBackground(), accentColor);
+            DrawableUtils.setTint(audioSubtitlesButton.getBackground(), accentColor);
+
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
