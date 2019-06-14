@@ -836,7 +836,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
 
-            if (model.areSubtitlesAvailable() && model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1) {
+            if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
                 Log.d(TAG, "setupSubtitlesButton() VISIBLE");
                 audioSubtitlesButton.setVisibility(View.VISIBLE);
             } else {
