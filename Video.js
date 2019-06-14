@@ -223,6 +223,7 @@ export default class Video extends Component {
       resizeMode: nativeResizeMode,
       src: {
         uri,
+        subtitles: source.subtitles,
         isNetwork,
         isAsset,
         type: source.type || '',

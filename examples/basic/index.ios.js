@@ -141,7 +141,13 @@ class VideoPlayer extends Component {
             // }}
 
             source={{
-                uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+                olduri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+                uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8',
+                subtitles : [
+                      { "isoCode": "el_GR", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-el-GR-4-1533811840460.vtt" },
+                      { "isoCode": "fr_FR", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-fr-FR-5-1533812234086.vtt" },
+                      { "isoCode": "en_US", "url": "https://dve-subtitles.imggaming.com/12904/50839/vtt/subtitle-en-US-6-1533813449932.vtt"}
+                    ],
                 type: 'hls',
                 config: {
                     muxData: {
@@ -157,7 +163,7 @@ class VideoPlayer extends Component {
                         videoStreamType: "on-demand",
                         videoCdn: "standard"
                     },
-                    beacon: {
+                    disable_beacon: {
                         url: 'http://localhost:8000/testBeaconResponse.json',
                         headers: {
                             'X-Custom-Header': 'Custom header contents',
@@ -282,43 +288,43 @@ class VideoPlayer extends Component {
             onPlaybackRateChange={(args)=>console.log("onPlaybackRateChange", args)}
           />
         </View>
-        <View style={styles.controls}>
-          <View style={styles.generalControls}>
-            <View style={styles.skinControl}>
-              {this.renderSkinControl('custom')}
-              {this.renderSkinControl('native')}
-              {this.renderSkinControl('embed')}
-            </View>
-          </View>
-          <View style={styles.generalControls}>
-            <View style={styles.rateControl}>
-              {this.renderRateControl(0.5)}
-              {this.renderRateControl(1.0)}
-              {this.renderRateControl(2.0)}
-            </View>
+        {/*<View style={styles.controls}>*/}
+          {/*<View style={styles.generalControls}>*/}
+            {/*<View style={styles.skinControl}>*/}
+              {/*{this.renderSkinControl('custom')}*/}
+              {/*{this.renderSkinControl('native')}*/}
+              {/*{this.renderSkinControl('embed')}*/}
+            {/*</View>*/}
+          {/*</View>*/}
+          {/*<View style={styles.generalControls}>*/}
+            {/*<View style={styles.rateControl}>*/}
+              {/*{this.renderRateControl(0.5)}*/}
+              {/*{this.renderRateControl(1.0)}*/}
+              {/*{this.renderRateControl(2.0)}*/}
+            {/*</View>*/}
 
-            <View style={styles.volumeControl}>
-              {this.renderVolumeControl(0.5)}
-              {this.renderVolumeControl(1)}
-              {this.renderVolumeControl(1.5)}
-            </View>
+            {/*<View style={styles.volumeControl}>*/}
+              {/*{this.renderVolumeControl(0.5)}*/}
+              {/*{this.renderVolumeControl(1)}*/}
+              {/*{this.renderVolumeControl(1.5)}*/}
+            {/*</View>*/}
 
-            <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl('cover')}
-              {this.renderResizeModeControl('contain')}
-              {this.renderResizeModeControl('stretch')}
-            </View>
-          </View>
-          <View style={styles.generalControls}>
-            {
-              (Platform.OS === 'ios') ?
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
-                </View> : null
-            }
-          </View>
-        </View>
+            {/*<View style={styles.resizeModeControl}>*/}
+              {/*{this.renderResizeModeControl('cover')}*/}
+              {/*{this.renderResizeModeControl('contain')}*/}
+              {/*{this.renderResizeModeControl('stretch')}*/}
+            {/*</View>*/}
+          {/*</View>*/}
+          {/*<View style={styles.generalControls}>*/}
+            {/*{*/}
+              {/*(Platform.OS === 'ios') ?*/}
+                {/*<View style={styles.ignoreSilentSwitchControl}>*/}
+                  {/*{this.renderIgnoreSilentSwitchControl('ignore')}*/}
+                  {/*{this.renderIgnoreSilentSwitchControl('obey')}*/}
+                {/*</View> : null*/}
+            {/*}*/}
+          {/*</View>*/}
+        {/*</View>*/}
 
       </View>
     );
