@@ -1,7 +1,14 @@
 <resources>
 
-    <style name="DiceTracksDialog" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="DceTVPlayerTheme" parent="Theme.AppCompat">
+        <item name="colorAccent">@color/dce_player_main_accent_color</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAppearance">@style/TextAppearance.PlayerText</item>
+        <item name="alertDialogTheme">@style/DiceTracksDialogTheme</item>
+        <item name="alertDialogStyle">@style/AlertDialog.AppCompat</item>
+    </style>
 
+    <style name="DiceTracksDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="colorAccent">@color/dce_player_main_accent_color</item>
         <item name="android:backgroundDimEnabled">false</item>
 
@@ -19,7 +26,6 @@
         <item name="android:windowMinWidthMinor">50%</item>
 
         <item name="android:windowCloseOnTouchOutside">true</item>
-
     </style>
 
     <style name="DiceTracksDialogAnimation">
@@ -27,8 +33,21 @@
         <item name="android:windowExitAnimation">@anim/slide_out_right</item>
     </style>
 
-    <style name="TextAppearance.TracksHeader" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">?attr/colorAccent</item>
+    <style name="TextAppearance.PlayerText" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@string/dce_player_primary_font</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.TracksHeader" parent="TextAppearance.PlayerText">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+    </style>
+
+    <style name="TextAppearance.OverlayText" parent="TextAppearance.PlayerText">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.LiveText" parent="TextAppearance.PlayerText">
+        <item name="android:textSize">10sp</item>
     </style>
 
 </resources>

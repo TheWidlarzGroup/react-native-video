@@ -40,6 +40,6 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.<ViewManager>singletonList(type == PlayerType.MOBILE ? new ReactExoplayerViewManager() : new ReactTVExoplayerViewManager());
+        return Collections.<ViewManager>singletonList(type == PlayerType.MOBILE ? new ReactExoplayerViewManager() : new ReactTVExoplayerViewManager(reactContext));
     }
 }

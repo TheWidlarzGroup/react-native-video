@@ -112,48 +112,46 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"/>
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/currentTimeTextView"
-                android:layout_width="55dp"
+                android:textAppearance="@style/TextAppearance.OverlayText"
+                android:layout_width="70dp"
                 android:layout_height="40dp"
                 android:layout_marginBottom="1dp"
                 android:gravity="center"
                 android:paddingBottom="1dp"
                 android:text="@string/default_time"
                 android:textAlignment="center"
-                android:textColor="#ffffff"
                 android:ellipsize="end"
-                android:maxLines="1"
-                android:textSize="12sp" />
+                android:maxLines="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/timeDividerTextView"
+                android:textAppearance="@style/TextAppearance.OverlayText"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:textAlignment="center"
                 android:gravity="center"
-                android:textColor="#ffffff"
-                android:textSize="12sp"
                 android:text="/"/>
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/durationTextView"
+                android:textAppearance="@style/TextAppearance.OverlayText"
                 android:focusableInTouchMode="false"
                 android:focusable="false"
-                android:layout_width="55dp"
+                android:layout_width="70dp"
                 android:layout_height="40dp"
                 android:layout_marginBottom="1dp"
                 android:gravity="center"
                 android:paddingBottom="1dp"
                 android:text="@string/default_time"
                 android:textAlignment="center"
-                android:textColor="#ffffff"
                 android:ellipsize="end"
-                android:maxLines="1"
-                android:textSize="12sp" />
+                android:maxLines="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/liveTextView"
+                android:textAppearance="@style/TextAppearance.LiveText"
                 android:focusableInTouchMode="false"
                 android:focusable="false"
                 android:layout_width="wrap_content"
@@ -168,11 +166,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:text="@string/live"
-                android:textAlignment="center"
-                android:textColor="#ffffff"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
+                android:textAlignment="center" />
 
             <ImageButton
                 android:id="@+id/bottomRightIconButton"
