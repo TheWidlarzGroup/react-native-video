@@ -1,6 +1,7 @@
 ## Changelog
 
 ### next
+* Replaced RCTBubblingEventBlock events by RCTDirectEventBlock to avoid event name collisions [#1625](https://github.com/react-native-community/react-native-video/pull/1625)
 * Added `onPlaybackRateChange` to README [#1578](https://github.com/react-native-community/react-native-video/pull/1578)
 
 ### Version 4.4.1
