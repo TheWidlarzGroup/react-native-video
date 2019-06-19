@@ -308,15 +308,16 @@ export default class Video extends Component {
     };
 
     return (
-      <React.Fragment>
-        <RCTVideo ref={this._assignRoot} {...nativeProps} />
-        {this.props.poster &&
-          this.state.showPoster && (
-            <View style={nativeProps.style}>
-              <Image style={posterStyle} source={{ uri: this.props.poster }} />
-            </View>
-          )}
-      </React.Fragment>
+      <View style={nativeProps.style}>
+        <RCTVideo
+          ref={this._assignRoot}
+          {...nativeProps}
+          style={StyleSheet.absoluteFill}
+        />
+        {this.props.poster && this.state.showPoster && (
+          <Image style={posterStyle} source={{ uri: this.props.poster }} />
+        )}
+      </View>
     );
   }
 }
