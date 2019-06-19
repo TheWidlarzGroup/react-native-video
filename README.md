@@ -127,6 +127,14 @@ dependencies {
    compile project(':react-native-video')
 }
 ```
+**android/settings.gradle**
+
+Migrating to AndroidX:
+
+```gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+```
 
 **MainApplication.java**
 
