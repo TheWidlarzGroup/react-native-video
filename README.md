@@ -962,8 +962,9 @@ Payload: none
 
 * iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
 * Android: [MEDIA_INFO_VIDEO_RENDERING_START](https://developer.android.com/reference/android/media/MediaPlayer#MEDIA_INFO_VIDEO_RENDERING_START)
+* Android ExoPlayer [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
 
-Platforms: all
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Web
 
 #### onPictureInPictureStatusChanged
 Callback function that is called when picture in picture becomes active or inactive.
