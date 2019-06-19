@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle,Animated} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -20,7 +20,8 @@ export default class Video extends Component {
     super(props);
 
     this.state = {
-      showPoster: true,
+      showPoster: !!props.poster,
+      posterFadeAnim: new Animated.Value(1),
     };
   }
 
@@ -86,6 +87,18 @@ export default class Video extends Component {
     this._root = component;
   };
 
+  _hidePoster = () => {
+    Animated.timing(
+      this.state.posterFadeAnim,
+      {
+        toValue: 0,
+        delay: 200, // Not ideal but need to wait for the first frame to be rendered
+        duration: 100,
+        useNativeDriver: true
+      }
+    ).start(() => this.setState({showPoster: false}));
+  }
+
   _onLoadStart = (event) => {
     if (this.props.onLoadStart) {
       this.props.onLoadStart(event.nativeEvent);
@@ -93,6 +106,9 @@ export default class Video extends Component {
   };
 
   _onLoad = (event) => {
+    if (this.state.showPoster) {
+      this._hidePoster();
+    }
     if (this.props.onLoad) {
       this.props.onLoad(event.nativeEvent);
     }
@@ -117,10 +133,6 @@ export default class Video extends Component {
   };  
 
   _onSeek = (event) => {
-    if (this.state.showPoster && !this.props.audioOnly) {
-      this.setState({showPoster: false});
-    }
-
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
     }
@@ -181,10 +193,6 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
-      this.setState({showPoster: false});
-    }
-
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
@@ -314,8 +322,8 @@ export default class Video extends Component {
           {...nativeProps}
           style={StyleSheet.absoluteFill}
         />
-        {this.props.poster && this.state.showPoster && (
-          <Image style={posterStyle} source={{ uri: this.props.poster }} />
+        {this.state.showPoster && (
+          <Animated.Image style={[posterStyle, {opacity: this.state.posterFadeAnim}]} source={{ uri: this.props.poster }} />
         )}
       </View>
     );
