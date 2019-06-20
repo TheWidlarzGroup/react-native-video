@@ -87,7 +87,9 @@ export default class Video extends Component {
   };
 
   _hidePoster = () => {
-    this.setState({showPoster: false});
+    if (this.state.showPoster) {
+      this.setState({showPoster: false});
+    }
   }
 
   _onLoadStart = (event) => {
@@ -97,6 +99,10 @@ export default class Video extends Component {
   };
 
   _onLoad = (event) => {
+    // Need to hide poster here for windows as onReadyForDisplay is not implemented
+    if (Platform.OS === 'windows') {
+      this._hidePoster();
+    }
     if (this.props.onLoad) {
       this.props.onLoad(event.nativeEvent);
     }
@@ -163,9 +169,7 @@ export default class Video extends Component {
   };
 
   _onReadyForDisplay = (event) => {
-    if (this.state.showPoster) {
-      this._hidePoster();
-    }
+    this._hidePoster();
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }
