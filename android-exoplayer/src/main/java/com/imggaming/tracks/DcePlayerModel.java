@@ -1,6 +1,7 @@
 package com.imggaming.tracks;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.brentvatne.react.R;
@@ -48,8 +49,9 @@ public class DcePlayerModel {
 
         for (int i = 0; i < mappedTrackInfo.getRendererCount(); i++) {
             TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
-            if (trackGroups.length != 0) {
-                if (player.getRendererType(i) == type) {
+            if (trackGroups
+                    .length != 0) {
+                if (player.getRendererType(i) == type && hasLabel(trackGroups)) {
                     return i;
                 }
             }
@@ -179,7 +181,7 @@ public class DcePlayerModel {
 
                 for (int i = 0; i < tracks.length; i++) {
                     TrackGroup group = tracks.get(i);
-                    if (!filtered.contains(group)) {
+                    if (!filtered.contains(group) && !TextUtils.isEmpty(getLabel(group))) {
                         filtered.add(group);
                         indexes.add(i);
                     }
@@ -192,12 +194,9 @@ public class DcePlayerModel {
 
                     boolean isSelected = selected != null && tracks.indexOf(selected.getTrackGroup()) == indexes.get(i);
 
-                    Format format = group.getFormat(0);
+                    String languageLabel = getLabel(group);
 
-                    String language = format != null ? format.language : context.getString(R.string.dce_tracks_unknown);
-                    String languageLabel = language != null ? new Locale(language.replaceAll("_", "-")).getDisplayName() : "";
-
-                    Log.d(DcePlayerModel.class.getName(), " group =  " + languageLabel + " selected = " + isSelected + " format = " + format.toString());
+                    Log.d(DcePlayerModel.class.getName(), " group =  " + languageLabel + " selected = " + isSelected);
 
                     ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
                 }
@@ -205,6 +204,21 @@ public class DcePlayerModel {
         }
 
         return ret;
+    }
+
+    private String getLabel(TrackGroup group) {
+        Format format = group.length > 0 ? group.getFormat(0) : null;
+        String language = format != null ? format.language : null;
+        return language != null ? new Locale(language.replaceAll("_", "-")).getDisplayName() : null;
+    }
+
+    private boolean hasLabel(TrackGroupArray trackGroups) {
+        for (int i = 0; i < trackGroups.length; i++) {
+            if (!TextUtils.isEmpty(getLabel(trackGroups.get(i)))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void selectTracks(int trackType, List<DceTrack> tracks) {

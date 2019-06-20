@@ -24,6 +24,5 @@
     <string name="dce_tracks_dialog_audio">Audio</string>
     <string name="dce_tracks_dialog_subtitles">Subtitles</string>
     <string name="dce_tracks_off">Off</string>
-    <string name="dce_tracks_unknown">Unknown</string>
 
 </resources>
