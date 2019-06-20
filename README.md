@@ -127,7 +127,7 @@ dependencies {
    compile project(':react-native-video')
 }
 ```
-**android/settings.gradle**
+**android/gradle.properties**
 
 Migrating to AndroidX:
 
