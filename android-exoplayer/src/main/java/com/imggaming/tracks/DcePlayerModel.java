@@ -190,7 +190,7 @@ public class DcePlayerModel {
                 for (int i = 0; i < filtered.size(); i++) {
                     TrackGroup group = filtered.get(i);
 
-                    boolean isSelected = selected != null && tracks.indexOf(selected.getTrackGroup()) == i;
+                    boolean isSelected = selected != null && tracks.indexOf(selected.getTrackGroup()) == indexes.get(i);
 
                     Format format = group.getFormat(0);
 
