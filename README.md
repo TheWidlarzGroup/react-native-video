@@ -130,8 +130,8 @@ From version >= 5.0.0, you have to apply this changes:
 dependencies {
    ...
     compile project(':react-native-video')
-+    implementation "androidx.appcompat:appcompat:1.0.0"
--     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
 
 }
 ```
