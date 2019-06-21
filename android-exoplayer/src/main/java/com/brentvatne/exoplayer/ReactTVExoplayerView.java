@@ -847,6 +847,26 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             Log.d(TAG, "setupSubtitlesButton() media not ready");
             audioSubtitlesButton.setVisibility(View.INVISIBLE);
         }
+
+        changeFocusedView();
+    }
+
+    private void changeFocusedView() {
+        if (live) {
+            if (audioSubtitlesButton.getVisibility() != View.VISIBLE) {
+                controls.setFocusable(true);
+                controls.setFocusableInTouchMode(false);
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        controls.requestFocus();
+                    }
+                });
+            } else {
+                controls.setFocusable(false);
+                controls.setFocusableInTouchMode(false);
+            }
+        }
     }
 
     private void startProgressHandler() {
@@ -1447,6 +1467,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             dividerTextView.setVisibility(controlsVisibility);
             playPauseButton.setVisibility(controlsVisibility);
         }
+
+        changeFocusedView();
     }
 
     public void setControlsOpacity(final float opacity) {
