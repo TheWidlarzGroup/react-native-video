@@ -302,6 +302,7 @@ var styles = StyleSheet.create({
 * [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onReadyForDisplay](#onreadyfordisplay)
 * [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
 * [onPlaybackRateChange](#onplaybackratechange)
 * [onProgress](#onprogress)
@@ -953,6 +954,17 @@ Example:
 ```
 
 Platforms: all
+
+#### onReadyForDisplay
+Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
+
+Payload: none
+
+* iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
+* Android: [MEDIA_INFO_VIDEO_RENDERING_START](https://developer.android.com/reference/android/media/MediaPlayer#MEDIA_INFO_VIDEO_RENDERING_START)
+* Android ExoPlayer [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Web
 
 #### onPictureInPictureStatusChanged
 Callback function that is called when picture in picture becomes active or inactive.

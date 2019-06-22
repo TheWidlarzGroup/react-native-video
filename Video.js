@@ -20,7 +20,7 @@ export default class Video extends Component {
     super(props);
 
     this.state = {
-      showPoster: true,
+      showPoster: !!props.poster
     };
   }
 
@@ -86,6 +86,12 @@ export default class Video extends Component {
     this._root = component;
   };
 
+  _hidePoster = () => {
+    if (this.state.showPoster) {
+      this.setState({showPoster: false});
+    }
+  }
+
   _onLoadStart = (event) => {
     if (this.props.onLoadStart) {
       this.props.onLoadStart(event.nativeEvent);
@@ -93,6 +99,10 @@ export default class Video extends Component {
   };
 
   _onLoad = (event) => {
+    // Need to hide poster here for windows as onReadyForDisplay is not implemented
+    if (Platform.OS === 'windows') {
+      this._hidePoster();
+    }
     if (this.props.onLoad) {
       this.props.onLoad(event.nativeEvent);
     }
@@ -117,10 +127,6 @@ export default class Video extends Component {
   };  
 
   _onSeek = (event) => {
-    if (this.state.showPoster && !this.props.audioOnly) {
-      this.setState({showPoster: false});
-    }
-
     if (this.props.onSeek) {
       this.props.onSeek(event.nativeEvent);
     }
@@ -163,6 +169,7 @@ export default class Video extends Component {
   };
 
   _onReadyForDisplay = (event) => {
+    this._hidePoster();
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }
@@ -181,10 +188,6 @@ export default class Video extends Component {
   };
 
   _onPlaybackRateChange = (event) => {
-    if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
-      this.setState({showPoster: false});
-    }
-
     if (this.props.onPlaybackRateChange) {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
@@ -308,15 +311,16 @@ export default class Video extends Component {
     };
 
     return (
-      <React.Fragment>
-        <RCTVideo ref={this._assignRoot} {...nativeProps} />
-        {this.props.poster &&
-          this.state.showPoster && (
-            <View style={nativeProps.style}>
-              <Image style={posterStyle} source={{ uri: this.props.poster }} />
-            </View>
-          )}
-      </React.Fragment>
+      <View style={nativeProps.style}>
+        <RCTVideo
+          ref={this._assignRoot}
+          {...nativeProps}
+          style={StyleSheet.absoluteFill}
+        />
+        {this.state.showPoster && (
+          <Image style={posterStyle} source={{ uri: this.props.poster }} />
+        )}
+      </View>
     );
   }
 }

@@ -356,8 +356,6 @@ static int const RCTVideoUnset = -1;
       [self setMaxBitRate:_maxBitRate];
       
       [_player pause];
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
         
       if (_playbackRateObserverRegistered) {
         [_player removeObserver:self forKeyPath:playbackRate context:nil];
@@ -600,7 +598,10 @@ static int const RCTVideoUnset = -1;
     } else
       return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
-  
+  if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
+    self.onReadyForDisplay(@{@"target": self.reactTag});
+    return;
+  }
   if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
     if ([keyPath isEqualToString:timedMetadata]) {
@@ -691,12 +692,6 @@ static int const RCTVideoUnset = -1;
       }
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
-    }
-  } else if (object == _playerLayer) {
-    if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
-      if([change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
-        self.onReadyForDisplay(@{@"target": self.reactTag});
-      }
     }
   } else if (object == _player) {
     if([keyPath isEqualToString:playbackRate]) {
@@ -1285,7 +1280,9 @@ static int const RCTVideoUnset = -1;
 {
   if( _player )
   {
-    _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    if (!_playerViewController) {
+      _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    }
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
@@ -1295,6 +1292,8 @@ static int const RCTVideoUnset = -1;
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
     }
+      
+    [_playerViewController addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     
     [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
   }
@@ -1490,6 +1489,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   
   [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+  [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
   
