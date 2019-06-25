@@ -3,9 +3,12 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 
+import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
 import com.facebook.react.bridge.Dynamic;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -66,6 +69,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED = "controlsVisibilityGestureDisabled";
 
+    private final ReactApplicationContext reactApplicationContext;
+
+    public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
+        this.reactApplicationContext = reactApplicationContext;
+    }
+
     @Override
     public String getName() {
         return REACT_CLASS;
@@ -73,7 +82,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @Override
     protected ReactTVExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactTVExoplayerView(themedReactContext);
+
+        ThemedReactContext context = new ThemedReactContext(reactApplicationContext, new ContextThemeWrapper(themedReactContext, R.style.DceTVPlayerTheme));
+
+        return new ReactTVExoplayerView(context);
     }
 
     @Override

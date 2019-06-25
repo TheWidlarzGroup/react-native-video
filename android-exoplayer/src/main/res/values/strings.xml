@@ -21,4 +21,12 @@
     <string name="preview_image">Preview image</string>
     <string name="live">LIVE</string>
 
+    <string name="dce_tracks_dialog_audio">Audio</string>
+    <string name="dce_tracks_dialog_subtitles">Subtitles</string>
+    <string name="dce_tracks_off">Off</string>
+
+    <!-- Player fonts -->
+    <string name="dce_player_primary_font" translatable="false">@null</string>
+    <string name="dce_player_secondary_font" translatable="false">@null</string>
+    <string name="dce_player_tertiary_font" translatable="false">@null</string>
 </resources>
