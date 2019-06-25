@@ -7,6 +7,4 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 //project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../android')
 //project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../android-exoplayer')
 
-// project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../android')
-// project(':react-native-video-exoplayer').projectDir = new File(rootProject.projectDir, '../../android-exoplayer')
 include ':app'
