@@ -374,7 +374,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     dialog = null;
                 }
 
-                dialog = new DceTracksDialog(getContext(), R.style.DiceTracksDialog);
+                dialog = new DceTracksDialog(getContext(), 0);
                 dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
                 dialog.setAccentColor(accentColor);
 
