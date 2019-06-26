@@ -36,6 +36,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		6193CE8622C3AD34002F303B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 61EFA1FD22C38706003B84A2;
+			remoteInfo = "ReactVideoSubtitleSideloader-tvOS";
+		};
+		6193CE8822C3AD37002F303B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 61EFA1FC22C38706003B84A2;
+			remoteInfo = "ReactVideoSubtitleSideloader-tvOS";
+		};
 		B2CBB6362270C00600EC2F4B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
@@ -44,13 +58,6 @@
 			remoteInfo = ReactVideoSubtitleSideloader;
 		};
 		B2CBB65E2270C01900EC2F4B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = B2CBB6042270BEA300EC2F4B;
-			remoteInfo = ReactVideoSubtitleSideloader;
-		};
-		B2CBB6602270C02100EC2F4B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B2CBB6322270C00600EC2F4B /* ReactVideoSubtitleSideloader.xcodeproj */;
 			proxyType = 1;
@@ -218,6 +225,7 @@
 			isa = PBXGroup;
 			children = (
 				B2CBB6372270C00600EC2F4B /* ReactVideoSubtitleSideloader.framework */,
+				6193CE8722C3AD34002F303B /* ReactVideoSubtitleSideloader_tvOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -255,7 +263,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				B2CBB6612270C02100EC2F4B /* PBXTargetDependency */,
+				6193CE8922C3AD37002F303B /* PBXTargetDependency */,
 			);
 			name = "RCTVideo-tvOS";
 			productName = "RCTVideo-tvOS";
@@ -306,6 +314,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		6193CE8722C3AD34002F303B /* ReactVideoSubtitleSideloader_tvOS.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ReactVideoSubtitleSideloader_tvOS.framework;
+			remoteRef = 6193CE8622C3AD34002F303B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		B2CBB6372270C00600EC2F4B /* ReactVideoSubtitleSideloader.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -349,15 +364,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6193CE8922C3AD37002F303B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "ReactVideoSubtitleSideloader-tvOS";
+			targetProxy = 6193CE8822C3AD37002F303B /* PBXContainerItemProxy */;
+		};
 		B2CBB65F2270C01900EC2F4B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = ReactVideoSubtitleSideloader;
 			targetProxy = B2CBB65E2270C01900EC2F4B /* PBXContainerItemProxy */;
-		};
-		B2CBB6612270C02100EC2F4B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ReactVideoSubtitleSideloader;
-			targetProxy = B2CBB6602270C02100EC2F4B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
