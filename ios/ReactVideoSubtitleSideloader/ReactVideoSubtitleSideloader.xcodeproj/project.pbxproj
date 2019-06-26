@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61EFA20D22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 61EFA1FF22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		61EFA21422C3874A003B84A2 /* DICELog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61A2270BF6E00EC2F4B /* DICELog.swift */; };
+		61EFA21522C3874A003B84A2 /* ManifestLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB6192270BF6E00EC2F4B /* ManifestLine.swift */; };
+		61EFA21622C3874A003B84A2 /* String+Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61B2270BF6E00EC2F4B /* String+Extentions.swift */; };
+		61EFA21722C3874A003B84A2 /* SubtitleResourceLoaderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61C2270BF6E00EC2F4B /* SubtitleResourceLoaderDelegate.swift */; };
+		61EFA21822C3874A003B84A2 /* SubtitleTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61D2270BF6E00EC2F4B /* SubtitleTrack.swift */; };
 		B2CBB61E2270BF6E00EC2F4B /* ManifestLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB6192270BF6E00EC2F4B /* ManifestLine.swift */; };
 		B2CBB61F2270BF6E00EC2F4B /* DICELog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61A2270BF6E00EC2F4B /* DICELog.swift */; };
 		B2CBB6202270BF6E00EC2F4B /* String+Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBB61B2270BF6E00EC2F4B /* String+Extentions.swift */; };
@@ -15,6 +21,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		61EFA1FD22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReactVideoSubtitleSideloader_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		61EFA1FF22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReactVideoSubtitleSideloader_tvOS.h; sourceTree = "<group>"; };
+		61EFA20022C38706003B84A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2CBB6052270BEA300EC2F4B /* ReactVideoSubtitleSideloader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReactVideoSubtitleSideloader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2CBB6092270BEA300EC2F4B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2CBB6192270BF6E00EC2F4B /* ManifestLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManifestLine.swift; sourceTree = "<group>"; };
@@ -25,6 +34,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		61EFA1FA22C38706003B84A2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2CBB6022270BEA300EC2F4B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -35,10 +51,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61EFA1FE22C38706003B84A2 /* ReactVideoSubtitleSideloader-tvOS */ = {
+			isa = PBXGroup;
+			children = (
+				61EFA1FF22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.h */,
+				61EFA20022C38706003B84A2 /* Info.plist */,
+			);
+			path = "ReactVideoSubtitleSideloader-tvOS";
+			sourceTree = "<group>";
+		};
 		B2CBB5FB2270BEA300EC2F4B = {
 			isa = PBXGroup;
 			children = (
 				B2CBB6072270BEA300EC2F4B /* ReactVideoSubtitleSideloader */,
+				61EFA1FE22C38706003B84A2 /* ReactVideoSubtitleSideloader-tvOS */,
 				B2CBB6062270BEA300EC2F4B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -47,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				B2CBB6052270BEA300EC2F4B /* ReactVideoSubtitleSideloader.framework */,
+				61EFA1FD22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,6 +94,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		61EFA1F822C38706003B84A2 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61EFA20D22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2CBB6002270BEA300EC2F4B /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -77,6 +112,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		61EFA1FC22C38706003B84A2 /* ReactVideoSubtitleSideloader-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61EFA21222C38706003B84A2 /* Build configuration list for PBXNativeTarget "ReactVideoSubtitleSideloader-tvOS" */;
+			buildPhases = (
+				61EFA1F822C38706003B84A2 /* Headers */,
+				61EFA1F922C38706003B84A2 /* Sources */,
+				61EFA1FA22C38706003B84A2 /* Frameworks */,
+				61EFA1FB22C38706003B84A2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ReactVideoSubtitleSideloader-tvOS";
+			productName = "ReactVideoSubtitleSideloader-tvOS";
+			productReference = 61EFA1FD22C38706003B84A2 /* ReactVideoSubtitleSideloader_tvOS.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		B2CBB6042270BEA300EC2F4B /* ReactVideoSubtitleSideloader */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B2CBB60D2270BEA300EC2F4B /* Build configuration list for PBXNativeTarget "ReactVideoSubtitleSideloader" */;
@@ -101,9 +154,13 @@
 		B2CBB5FC2270BEA300EC2F4B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "Endeavour Streming";
 				TargetAttributes = {
+					61EFA1FC22C38706003B84A2 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
 					B2CBB6042270BEA300EC2F4B = {
 						CreatedOnToolsVersion = 10.2.1;
 						LastSwiftMigration = 1020;
@@ -123,11 +180,19 @@
 			projectRoot = "";
 			targets = (
 				B2CBB6042270BEA300EC2F4B /* ReactVideoSubtitleSideloader */,
+				61EFA1FC22C38706003B84A2 /* ReactVideoSubtitleSideloader-tvOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		61EFA1FB22C38706003B84A2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2CBB6032270BEA300EC2F4B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -138,6 +203,18 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		61EFA1F922C38706003B84A2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61EFA21522C3874A003B84A2 /* ManifestLine.swift in Sources */,
+				61EFA21822C3874A003B84A2 /* SubtitleTrack.swift in Sources */,
+				61EFA21722C3874A003B84A2 /* SubtitleResourceLoaderDelegate.swift in Sources */,
+				61EFA21622C3874A003B84A2 /* String+Extentions.swift in Sources */,
+				61EFA21422C3874A003B84A2 /* DICELog.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2CBB6012270BEA300EC2F4B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -153,6 +230,58 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		61EFA20E22C38706003B84A2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "ReactVideoSubtitleSideloader-tvOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dice.ReactVideoSubtitleSideloader.ReactVideoSubtitleSideloader-tvOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 12.2;
+			};
+			name = Debug;
+		};
+		61EFA20F22C38706003B84A2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "ReactVideoSubtitleSideloader-tvOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dice.ReactVideoSubtitleSideloader.ReactVideoSubtitleSideloader-tvOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 12.2;
+			};
+			name = Release;
+		};
 		B2CBB60B2270BEA300EC2F4B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -329,6 +458,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		61EFA21222C38706003B84A2 /* Build configuration list for PBXNativeTarget "ReactVideoSubtitleSideloader-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61EFA20E22C38706003B84A2 /* Debug */,
+				61EFA20F22C38706003B84A2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		B2CBB5FF2270BEA300EC2F4B /* Build configuration list for PBXProject "ReactVideoSubtitleSideloader" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
