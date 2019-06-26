@@ -10,7 +10,11 @@
 #include "DiceHTTPRequester.h"
 
 //@import ReactVideoSubtitleSideloader;
+#if TARGET_OS_IOS
 #import <ReactVideoSubtitleSideloader/ReactVideoSubtitleSideloader-Swift.h>
+#elif TARGET_OS_TV
+#import <ReactVideoSubtitleSideloader_tvOS/ReactVideoSubtitleSideloader_tvOS-Swift.h>
+#endif
 
 #if TARGET_OS_IOS
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
