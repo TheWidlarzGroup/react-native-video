@@ -25,7 +25,7 @@ Platforms: iOS
 
 ### `certificateUrl`
 
-URL to fetch a valid certificatefor FairPlay.
+URL to fetch a valid certificate for FairPlay.
 
 Platforms: iOS
 
