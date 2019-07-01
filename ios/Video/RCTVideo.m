@@ -595,8 +595,7 @@ static int const RCTVideoUnset = -1;
       }
       
       return;
-    } else
-      return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
   }
   if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
     self.onReadyForDisplay(@{@"target": self.reactTag});
@@ -713,8 +712,6 @@ static int const RCTVideoUnset = -1;
                                           @"target": self.reactTag});
         }
     }
-  } else {
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
 
