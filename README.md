@@ -740,6 +740,7 @@ Platforms: iOS
 ##### Explicit mimetype for the stream
 
 Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object.
+Sometimes is needed when URL extension does not match with the mimetype that you are expecting, as seen on the next example. (Extension is .ism -smooth streaming- but file served is on format mpd -mpeg dash-)
 
 Example:
 ```
