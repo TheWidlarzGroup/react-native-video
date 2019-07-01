@@ -95,7 +95,7 @@ You can send Cookies to the license server via `headers` prop. Example:
 
 ```js
 drm: {
-    type: 'widevine', //or DRMType.WIDEVINE
+    type: DRMType.WIDEVINE
     licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
     headers: {
         'Cookie': 'PHPSESSID=etcetc; csrftoken=mytoken; _gat=1; foo=bar'
