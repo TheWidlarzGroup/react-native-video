@@ -390,20 +390,20 @@ Video.propTypes = {
   source: PropTypes.oneOfType([
     PropTypes.shape({
       uri: PropTypes.string,
-      drm: PropTypes.shape({
-        type: PropTypes.oneOf([
-          DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY
-        ]),
-        licenseServer: PropTypes.string,
-        headers: PropTypes.shape({}),
-        base64Certificate: PropTypes.bool,
-        certificateUrl: PropTypes.string,
-        getLicense: PropTypes.func,
-      })
     }),
     // Opaque type returned by require('./video.mp4')
     PropTypes.number
   ]),
+  drm: PropTypes.shape({
+    type: PropTypes.oneOf([
+      DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY
+    ]),
+    licenseServer: PropTypes.string,
+    headers: PropTypes.shape({}),
+    base64Certificate: PropTypes.bool,
+    certificateUrl: PropTypes.string,
+    getLicense: PropTypes.func,
+  }),
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
   resizeMode: PropTypes.string,
