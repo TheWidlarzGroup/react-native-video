@@ -544,8 +544,12 @@ public class GLTextureView
 
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         onResume();
-        surfaceCreated(surface);
-        surfaceChanged(surface, 0, width, height);
+        if(newSurfaceTextureListener != null) {
+            newSurfaceTextureListener.onSurfaceTextureAvailable(surface, width, height);
+        } else {
+            surfaceCreated(surface);
+            surfaceChanged(surface, 0, width, height);
+        }
     }
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
         if(newSurfaceTextureListener != null) {
@@ -553,6 +557,8 @@ public class GLTextureView
                 surface =  alphaTexture;
             }
             newSurfaceTextureListener.onSurfaceTextureSizeChanged(surface, width, height);
+        } else {
+            //surfaceChanged(surface, 0, width, height);
         }
         surfaceChanged(surface, 0, width, height);
 
