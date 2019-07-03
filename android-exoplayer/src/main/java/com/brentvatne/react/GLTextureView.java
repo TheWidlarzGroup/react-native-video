@@ -555,6 +555,7 @@ public class GLTextureView
             newSurfaceTextureListener.onSurfaceTextureSizeChanged(surface, width, height);
         }
         surfaceChanged(surface, 0, width, height);
+
     }
 
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {

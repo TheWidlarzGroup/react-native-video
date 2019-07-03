@@ -48,9 +48,11 @@ public final class ExoPlayerView extends FrameLayout {
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
     private FileChangeListener fileChangeListener;
-    private boolean useTextureView = true;
     private boolean useGreenScreen = false;
     private boolean hideShutterView = false;
+    private int transparentColor = Color.GREEN;
+    private boolean useTextureView = false;
+    private boolean useCustomTextureView = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -177,7 +179,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
         this.player = player;
         shutterView.setVisibility(VISIBLE);
-        if (player != null) {
+        if (player != null && !useGreenScreen) {
             setVideoView();
             player.addVideoListener(componentListener);
             player.addListener(componentListener);
@@ -218,6 +220,13 @@ public final class ExoPlayerView extends FrameLayout {
     public void setHideShutterView(boolean hideShutterView) {
         this.hideShutterView = hideShutterView;
         updateShutterViewVisibility();
+    }
+
+    public void setUseGreenScreen(boolean useGreenScreen) {
+        this.useGreenScreen = useGreenScreen;
+        if (useGreenScreen) {
+            updateSurfaceView();
+        }
     }
 
     public void setUseGreenScreen(boolean useGreenScreen) {
