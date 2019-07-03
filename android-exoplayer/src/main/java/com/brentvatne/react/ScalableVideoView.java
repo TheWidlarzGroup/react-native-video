@@ -8,9 +8,15 @@ import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
+<<<<<<< HEAD
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
+=======
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.TextureView;

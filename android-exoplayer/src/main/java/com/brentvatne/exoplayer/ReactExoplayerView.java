@@ -190,6 +190,7 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
     private boolean useGreenScreen;
+    private int transparentColor;
     private final Handler progressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -1477,6 +1478,10 @@ class ReactExoplayerView extends FrameLayout implements
             setBackgroundColor(Color.TRANSPARENT);
             exoPlayerView.setBackgroundColor(Color.TRANSPARENT);
 
+    public void setCustomTextureTransparentColor(int color) {
+        this.transparentColor = color;
+        if (exoPlayerView != null) {
+            exoPlayerView.setUseCustomTextureView(transparentColor);
         }
     }
 

@@ -2,11 +2,16 @@ xspackage com.brentvatne.exoplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+<<<<<<< HEAD
 
+=======
+import android.graphics.Color;
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
 import androidx.core.content.ContextCompat;
 
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
@@ -14,6 +19,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.brentvatne.react.GLTextureView;
+<<<<<<< HEAD
+=======
+import com.brentvatne.react.VideoRenderer;
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -48,10 +57,16 @@ public final class ExoPlayerView extends FrameLayout {
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
     private FileChangeListener fileChangeListener;
+<<<<<<< HEAD
     private boolean useGreenScreen = false;
     private boolean hideShutterView = false;
     private int transparentColor = Color.GREEN;
     private boolean useTextureView = false;
+=======
+    private int transparentColor = Color.GREEN;
+    private boolean useTextureView = true;
+    private boolean hideShutterView = false;
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
     private boolean useCustomTextureView = false;
 
     public ExoPlayerView(Context context) {
@@ -119,7 +134,11 @@ public final class ExoPlayerView extends FrameLayout {
 
     private void updateSurfaceView() {
         View view;
+<<<<<<< HEAD
         if (useGreenScreen) {
+=======
+        if (useCustomTextureView) {
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
             view = new GLTextureView(context);
         } else {
             view = useTextureView ? new TextureView(context) : new SurfaceView(context);
@@ -133,15 +152,25 @@ public final class ExoPlayerView extends FrameLayout {
         layout.addView(surfaceView, 0, layoutParams);
         if (view instanceof GLTextureView) {
             GLTextureView glTextureView = (GLTextureView) view;
+<<<<<<< HEAD
             glTextureView.setOpaque(false);
+=======
+            glTextureView.setAlphaColorForRenderer(transparentColor);
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
             glTextureView.setOnSurfaceCreatedCallBack(new OnSurfaceCreatedCallBack() {
                 @Override
                 public void onSurfaceCreated() {
                     if (ExoPlayerView.this.player != null) {
                         setVideoView();
+<<<<<<< HEAD
                         player.addVideoListener(componentListener);
                         player.addListener(componentListener);
                         player.addTextOutput(componentListener);
+=======
+                        player.setVideoListener(componentListener);
+                        player.addListener(componentListener);
+                        player.setTextOutput(componentListener);
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
                     }
                 }
             });
@@ -179,7 +208,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
         this.player = player;
         shutterView.setVisibility(VISIBLE);
-        if (player != null && !useGreenScreen) {
+        if (player != null && !useCustomTextureView) {
             setVideoView();
             player.addVideoListener(componentListener);
             player.addListener(componentListener);
@@ -222,18 +251,16 @@ public final class ExoPlayerView extends FrameLayout {
         updateShutterViewVisibility();
     }
 
-    public void setUseGreenScreen(boolean useGreenScreen) {
-        this.useGreenScreen = useGreenScreen;
-        if (useGreenScreen) {
-            updateSurfaceView();
-        }
+    public void setUseCustomTextureView(int color) {
+        this.useCustomTextureView = true;
+        this.transparentColor = color;
+        updateSurfaceView();
     }
 
-    public void setUseGreenScreen(boolean useGreenScreen) {
-        this.useGreenScreen = useGreenScreen;
-        if (useGreenScreen) {
-            updateSurfaceView();
-        }
+    public void setUseCustomTextureView(int color) {
+        this.useCustomTextureView = true;
+        this.transparentColor = color;
+        updateSurfaceView();
     }
 
     private final Runnable measureAndLayout = new Runnable() {

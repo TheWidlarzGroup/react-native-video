@@ -61,12 +61,13 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
                     "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
                     "}\n";
 
-    private final String alphaShader =  "#extension GL_OES_EGL_image_external : require\n"
+    private final String alphaShader = "#extension GL_OES_EGL_image_external : require\n"
             + "precision mediump float;\n"
             + "varying vec2 vTextureCoord;\n"
             + "uniform samplerExternalOES sTexture;\n"
             + "varying mediump float text_alpha_out;\n"
             + "void main() {\n"
+<<<<<<< HEAD
 <<<<<<< HEAD
             +" float pixelSat, secondaryComponents, secondaryComponents1;\n"
 =======
@@ -138,6 +139,19 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
 >>>>>>> 275d7335 (changed the alpha shader)
 
 
+=======
+            + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
+            + "  float red = %f;\n"
+            + "  float green = %f;\n"
+            + "  float blue = %f;\n"
+            + "  float accuracy = %f;\n"
+            + "  if (abs(color.r - red) <= accuracy && abs(color.g - green) <= accuracy && abs(color.b - blue) <= accuracy) {\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, 0.0);\n"
+            + "  } else {\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, 1.0);\n"
+            + "  }\n"
+            + "}\n";
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
 
     private double accuracy = 0.8;
 
@@ -360,7 +374,12 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
     }
 
     private String resolveShader() {
+<<<<<<< HEAD
         return isCustom ? shader : alphaShader;
+=======
+        return isCustom ? shader : String.format(Locale.ENGLISH, alphaShader,
+                redParam, greenParam, blueParam, 1 - accuracy);
+>>>>>>> f0fc240e (added gltexture view to android exoplayer)
     }
 
     private void checkGlError(String op) {

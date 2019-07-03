@@ -79,6 +79,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_MUX_CONFIG_USER_ID = "muxConfigUserId";
     private static final String PROP_MUX_CONFIG_VIDEO_TITLE = "muxConfigVideoTitle";
     private static final String PROP_FORCE_RELOAD = "forceReload";
+    private static final String PROP_SET_TRANSPARENT_COLOR = "customTextureAlphaColor";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
@@ -347,6 +348,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
       }
       videoView.setIvParam(ivParams);
+    @ReactProp(name = PROP_SET_TRANSPARENT_COLOR)
+    public void setCustomTextureAlphaColor(final ReactExoplayerView videoView, @Nullable String color) {
+        if (color != null) {
+            videoView.setCustomTextureTransparentColor(Color.parseColor(color));
+        }
     }
 
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)

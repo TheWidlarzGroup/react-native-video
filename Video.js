@@ -512,6 +512,7 @@ Video.propTypes = {
   useGreenScreen: PropTypes.bool,
   encryptionSecretKey: PropTypes.string,
   encryptionParams: PropTypes.string,
+  customTextureAlphaColor: PropTypes.string,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,
