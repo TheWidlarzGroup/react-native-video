@@ -229,6 +229,7 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
+    [_playerViewController setPlayer:nil];
   }
 }
 
@@ -237,6 +238,7 @@ static int const RCTVideoUnset = -1;
   [self applyModifiers];
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
+    [_playerViewController setPlayer:_player];
   }
 }
 
@@ -358,13 +360,11 @@ static int const RCTVideoUnset = -1;
       [self setFilter:self->_filterName];
       [self setMaxBitRate:self->_maxBitRate];
       
-      [self->_player pause];
-      [self->_playerViewController.view removeFromSuperview];
-      self->_playerViewController = nil;
-      
-      if (self->_playbackRateObserverRegistered) {
-        [self->_player removeObserver:self forKeyPath:playbackRate context:nil];
-        self->_playbackRateObserverRegistered = NO;
+      [_player pause];
+        
+      if (_playbackRateObserverRegistered) {
+        [_player removeObserver:self forKeyPath:playbackRate context:nil];
+        _playbackRateObserverRegistered = NO;
       }
       if (self->_isExternalPlaybackActiveObserverRegistered) {
         [self->_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
@@ -617,7 +617,10 @@ static int const RCTVideoUnset = -1;
     } else
       return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
-  
+  if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
+    self.onReadyForDisplay(@{@"target": self.reactTag});
+    return;
+  }
   if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
     if ([keyPath isEqualToString:timedMetadata]) {
@@ -711,12 +714,6 @@ static int const RCTVideoUnset = -1;
       }
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
-    }
-  } else if (object == _playerLayer) {
-    if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
-      if([change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
-        self.onReadyForDisplay(@{@"target": self.reactTag});
-      }
     }
   } else if (object == _player) {
     if([keyPath isEqualToString:playbackRate]) {
@@ -1322,7 +1319,9 @@ static int const RCTVideoUnset = -1;
 {
   if( _player )
   {
-    _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    if (!_playerViewController) {
+      _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    }
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
@@ -1332,6 +1331,8 @@ static int const RCTVideoUnset = -1;
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
     }
+      
+    [_playerViewController addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     
     [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
   }
@@ -1532,6 +1533,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   
   [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+  [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
   [_playerViewController.view removeFromSuperview];
   _playerViewController = nil;
   

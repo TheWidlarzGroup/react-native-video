@@ -21,26 +21,28 @@
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate, AVAssetResourceLoaderDelegate>
 #endif
 
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoBuffer;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoError;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoProgress;
-@property (nonatomic, copy) RCTBubblingEventBlock onBandwidthUpdate;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoSeek;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoEnd;
-@property (nonatomic, copy) RCTBubblingEventBlock onTimedMetadata;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoAudioBecomingNoisy;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillPresent;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidPresent;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerWillDismiss;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoFullscreenPlayerDidDismiss;
-@property (nonatomic, copy) RCTBubblingEventBlock onReadyForDisplay;
-@property (nonatomic, copy) RCTBubblingEventBlock onPlaybackStalled;
-@property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
-@property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
-@property (nonatomic, copy) RCTBubblingEventBlock onVideoExternalPlaybackChange;
-@property (nonatomic, copy) RCTBubblingEventBlock onGetLicense;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoLoadStart;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoLoad;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoBuffer;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoError;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoProgress;
+@property (nonatomic, copy) RCTDirectEventBlock onBandwidthUpdate;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoSeek;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoEnd;
+@property (nonatomic, copy) RCTDirectEventBlock onTimedMetadata;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoAudioBecomingNoisy;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoFullscreenPlayerWillPresent;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoFullscreenPlayerDidPresent;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoFullscreenPlayerWillDismiss;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoFullscreenPlayerDidDismiss;
+@property (nonatomic, copy) RCTDirectEventBlock onReadyForDisplay;
+@property (nonatomic, copy) RCTDirectEventBlock onPlaybackStalled;
+@property (nonatomic, copy) RCTDirectEventBlock onPlaybackResume;
+@property (nonatomic, copy) RCTDirectEventBlock onPlaybackRateChange;
+@property (nonatomic, copy) RCTDirectEventBlock onVideoExternalPlaybackChange;
+@property (nonatomic, copy) RCTDirectEventBlock onPictureInPictureStatusChanged;
+@property (nonatomic, copy) RCTDirectEventBlock onRestoreUserInterfaceForPictureInPictureStop;
+@property (nonatomic, copy) RCTDirectEventBlock onGetLicense;
 
 typedef NS_ENUM(NSInteger, RCTVideoError) {
     RCTVideoErrorFromJSPart,
@@ -53,8 +55,6 @@ typedef NS_ENUM(NSInteger, RCTVideoError) {
     RCTVideoErrorNoFairplayDRM,
     RCTVideoErrorNoDRMData
 };
-@property (nonatomic, copy) RCTBubblingEventBlock onPictureInPictureStatusChanged;
-@property (nonatomic, copy) RCTBubblingEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
