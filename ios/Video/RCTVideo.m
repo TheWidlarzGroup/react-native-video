@@ -280,6 +280,11 @@ static int const RCTVideoUnset = -1;
   const Float64 duration = CMTimeGetSeconds(playerDuration);
   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
   
+  if (_repeat && currentTimeSecs >= duration) {
+    [_playerItem seekToTime:kCMTimeZero];
+    [self applyModifiers];
+  }
+  
   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
   
   if( currentTimeSecs >= 0 && self.onVideoProgress) {
