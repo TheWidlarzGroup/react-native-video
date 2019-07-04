@@ -67,12 +67,17 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
             + "uniform samplerExternalOES sTexture;\n"
             + "varying mediump float text_alpha_out;\n"
             + "void main() {\n"
+<<<<<<< HEAD
             +" float pixelSat, secondaryComponents, secondaryComponents1;\n"
+=======
+            +"  float pixelSat, secondaryComponents;\n"
+>>>>>>> 275d7335 (changed the alpha shader)
             + " vec4 sourcePixel = texture2D(sTexture, vTextureCoord);\n"
             +"  float fmin = min(min(sourcePixel.r, sourcePixel.g), sourcePixel.b);\n"
             +"  float fmax = max(max(sourcePixel.r, sourcePixel.g), sourcePixel.b);\n"
             +"  vec4 screen = vec4(0.0,1.0,0.0,1.0);\n"
             +"	float fmax1 = max(max(screen.r, screen.g), screen.b);\n"
+<<<<<<< HEAD
             +"	float fmin1 = min(min(screen.r, screen.g), screen.b);\n"
             +"  vec3 screenPrimary = step(fmax1, screen.rgb);\n"
             +"  vec3 pixelPrimary = step(fmax, sourcePixel.rgb);\n"
@@ -80,20 +85,31 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
             +"  secondaryComponents1 = dot(1.0 - screenPrimary, screen.rgb);\n"
             +"  float screenSat = fmax - mix(secondaryComponents - fmin, secondaryComponents / 2.0, 1.0);\n"
             +"  float isSolidSet = 0.0;\n"
+=======
+            +"  vec3 screenPrimary = step(fmax1, screen.rgb);\n"
+            +"  vec3 pixelPrimary = step(fmax, sourcePixel.rgb);\n"
+            +"  secondaryComponents = dot(1.0 - pixelPrimary, sourcePixel.rgb);\n"
+            +"  float screenSat = fmax - mix(secondaryComponents - fmin, secondaryComponents / 2.0, 1.0);\n"
+>>>>>>> 275d7335 (changed the alpha shader)
             +"  pixelSat = fmax - mix(secondaryComponents - fmin, secondaryComponents / 2.0, 1.0);\n"
             +"  float diffPrimary = dot(abs(pixelPrimary - screenPrimary), vec3(1.0));\n"
             +"  float solid = step(1.0, step(pixelSat, 0.1) + step(fmax, 0.1) + diffPrimary);\n"
             +"  float alpha = max(0.0, 1.0 - pixelSat / screenSat);\n"
             +"  alpha = smoothstep(0.0, 1.0, alpha);\n"
             +"  vec4 semiTransparentPixel = vec4((sourcePixel.rgb - (1.0 - alpha) * screen.rgb * 1.0) / max(0.00001, alpha), alpha);\n"
+<<<<<<< HEAD
             +"  vec4 pixel = mix(semiTransparentPixel, sourcePixel, solid);\n"
             +"  if (pixel.a < 0.1) { \n"
             +"      pixel = vec4(1.0,1.0,1.0, 0.0); \n"
             +"  }\n"
+=======
+            +"  vec4 pixel = vec4(sourcePixel.r, sourcePixel.g, sourcePixel.b, solid);\n"
+>>>>>>> 275d7335 (changed the alpha shader)
             +"   gl_FragColor = vec4(sourcePixel.r, sourcePixel.g, sourcePixel.b,1.0);\n"
             +"if(solid == 0.0)\n"
             +"{\n"
             +"gl_FragColor=vec4(sourcePixel.r, sourcePixel.g, sourcePixel.b, 0.0);\n"
+<<<<<<< HEAD
             +"isSolidSet=1.0;\n"
             +"}\n"
             +"if(isSolidSet == 0.0)\n"
@@ -114,6 +130,12 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
             +"}\n"
             +"}\n";
 
+
+
+=======
+            +"}\n"
+            + "}\n";
+>>>>>>> 275d7335 (changed the alpha shader)
 
 
 
