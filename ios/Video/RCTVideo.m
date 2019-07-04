@@ -578,26 +578,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
-  if (object == _playerViewController.contentOverlayView) {
-    if ([keyPath isEqualToString:@"frame"]) {
-      
-      CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
-      CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
-      
-      if (!CGRectEqualToRect(oldRect, newRect)) {
-        if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
-          NSLog(@"in fullscreen");
-        } else NSLog(@"not fullscreen");
-        
-        [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
-        [self.reactViewController.view setNeedsLayout];
-      }
-      
-      return;
-    } else
-      return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-  }
+
   if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
     self.onReadyForDisplay(@{@"target": self.reactTag});
     return;
@@ -713,7 +694,25 @@ static int const RCTVideoUnset = -1;
                                           @"target": self.reactTag});
         }
     }
-  } else {
+  } else if (object == _playerViewController.contentOverlayView) {
+      // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
+      if ([keyPath isEqualToString:@"frame"]) {
+
+        CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
+        CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
+
+        if (!CGRectEqualToRect(oldRect, newRect)) {
+          if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
+            NSLog(@"in fullscreen");
+          } else NSLog(@"not fullscreen");
+
+          [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+          [self.reactViewController.view setNeedsLayout];
+        }
+
+        return;
+      }
+  } else if ([super respondsToSelector:@selector(observeValueForKeyPath:ofObject:change:context:)]) {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
