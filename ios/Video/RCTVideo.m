@@ -36,10 +36,15 @@ static int const RCTVideoUnset = -1;
   AVPlayerLayer *_playerLayer;
   BOOL _playerLayerObserverSet;
   RCTVideoPlayerViewController *_playerViewController;
+<<<<<<< HEAD
   ChromaImageFilter *chromaFilter;NSURL *_videoURL;
   BOOL _useGreenScreen;
   BOOL _shouldDrawImage;
   int _frameRate;
+=======
+  NSURL *_videoURL;
+  BOOL _useGreenScreen;
+>>>>>>> 7cc779c7 (Alpha view done for ios)
   BOOL _requestingCertificate;
   BOOL _requestingCertificateErrored;
 
@@ -481,6 +486,18 @@ static int const RCTVideoUnset = -1;
 
 }
 
+- (AVVideoComposition *) customVideoComposition: (AVPlayerItem *)playerItem {
+    AVVideoComposition * composition = [AVVideoComposition videoCompositionWithAsset:playerItem.asset applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest * _Nonnull request) {
+        
+        ChromaImageFilter *chromaFilter = [[ChromaImageFilter alloc] init];
+        
+        [chromaFilter setValue:request.sourceImage forKey:kCIInputImageKey];
+        return [request finishWithImage:chromaFilter.outputImage context:nil];
+    }];
+    
+    return composition;
+}
+
 #pragma mark - Player and source
 
 - (void)setSrc:(NSDictionary *)source
@@ -497,10 +514,18 @@ static int const RCTVideoUnset = -1;
     [self playerItemForSource:self->_source withCallback:^(AVPlayerItem * playerItem) {
             self->_playerItem = playerItem;
       _playerItem = playerItem;
+<<<<<<< HEAD
 
             [self setUpPlayerOutput];
 
             [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
+=======
+      if (_useGreenScreen) {
+         _playerItem.videoComposition = [self customVideoComposition:_playerItem];
+      }
+     
+      [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
+>>>>>>> 7cc779c7 (Alpha view done for ios)
       [self addPlayerItemObservers];
       [self setFilter:self->_filterName];
             [self setMaxBitRate:self->_maxBitRate];
@@ -982,6 +1007,7 @@ static int const RCTVideoUnset = -1;
 #pragma mark - Prop setters
 
 - (void)setUseGreenScreen:(BOOL)useGreenScreen {
+<<<<<<< HEAD
         if (_useGreenScreen != useGreenScreen) {
             _useGreenScreen = useGreenScreen;
         }
@@ -989,6 +1015,14 @@ static int const RCTVideoUnset = -1;
 
 - (void)setFrameRate:(int)frameRate {
     _frameRate = frameRate;
+=======
+    if (_useGreenScreen != useGreenScreen) {
+        _useGreenScreen = useGreenScreen;
+        if (_useGreenScreen && _playerItem) {
+            _playerItem.videoComposition = [self customVideoComposition:_playerItem];
+        }
+    }
+>>>>>>> 7cc779c7 (Alpha view done for ios)
 }
 
 - (void)setResizeMode:(NSString*)mode
@@ -1590,8 +1624,13 @@ static int const RCTVideoUnset = -1;
       NSMutableDictionary *dict = [NSMutableDictionary dictionary];
       [dict setObject:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA] forKey:(NSString *)kCVPixelBufferPixelFormatTypeKey];
       _playerLayer.pixelBufferAttributes = dict;
+<<<<<<< HEAD
 
 
+=======
+      
+    
+>>>>>>> 7cc779c7 (Alpha view done for ios)
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before layer is added
     [self setResizeMode:_resizeMode];
