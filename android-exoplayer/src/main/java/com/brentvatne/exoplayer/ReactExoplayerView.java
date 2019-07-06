@@ -27,6 +27,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
@@ -345,7 +346,10 @@ class ReactExoplayerView extends FrameLayout implements
             defaultLoadControlBuilder.setTargetBufferBytes(-1);
             defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
             DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
+            // TODO: Add drmSessionManager from: https://github.com/react-native-community/react-native-video/pull/1445
+            DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(getContext(),
+                    null, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+            player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory, trackSelector, defaultLoadControl);
             player.addListener(this);
             player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player);
