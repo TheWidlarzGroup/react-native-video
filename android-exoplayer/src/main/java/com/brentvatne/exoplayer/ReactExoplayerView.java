@@ -339,7 +339,12 @@ class ReactExoplayerView extends FrameLayout implements
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
             DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-            DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
+            DefaultLoadControl.Builder defaultLoadControlBuilder = new DefaultLoadControl.Builder();
+            defaultLoadControlBuilder.setAllocator(allocator);
+            defaultLoadControlBuilder.setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+            defaultLoadControlBuilder.setTargetBufferBytes(-1);
+            defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
+            DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
             player.addListener(this);
             player.addMetadataOutput(this);
