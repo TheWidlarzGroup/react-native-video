@@ -342,7 +342,7 @@ class ReactExoplayerView extends FrameLayout implements
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
             player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
             player.addListener(this);
-            player.setMetadataOutput(this);
+            player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             BANDWIDTH_METER.addEventListener(new Handler(), this);
