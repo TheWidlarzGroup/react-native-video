@@ -1,6 +1,7 @@
 ## Changelog
 
 ### Version 4.4.3
+* Fix Android videos being able to play with background music/audio from other apps.
 * Fixed memory leak on iOS when using `controls` [#1647](https://github.com/react-native-community/react-native-video/pull/1647)
 * (Android) Update gradle and target SDK [#1629](https://github.com/react-native-community/react-native-video/pull/1629)
 * Fix iOS stressed mount/unmount crash [#1646](https://github.com/react-native-community/react-native-video/pull/1646)
