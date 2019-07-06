@@ -958,7 +958,9 @@ static int const RCTVideoUnset = -1;
 - (void)applyModifiers
 {
   if (_muted) {
-    [_player setVolume:0];
+    if (!_controls) {
+      [_player setVolume:0];
+    }
     [_player setMuted:YES];
   } else {
     [_player setVolume:_volume];
