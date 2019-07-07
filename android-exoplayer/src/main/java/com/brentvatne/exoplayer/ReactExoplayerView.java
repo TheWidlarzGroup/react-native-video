@@ -144,6 +144,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
+    private boolean controls;
     // \ End props
 
     // React
@@ -267,6 +268,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Toggling the visibility of the player control view 
      */
     private void togglePlayerControlVisibility() {
+        if(player == null) return;
         reLayout(playerControlView);
         if (playerControlView.isVisible()) {
             playerControlView.hide();
@@ -312,10 +314,15 @@ class ReactExoplayerView extends FrameLayout implements
      * Adding Player control to the frame layout
      */
     private void addPlayerControl() {
+        if(player == null) return;
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
         playerControlView.setLayoutParams(layoutParams);
+        int indexOfPC = indexOfChild(playerControlView);
+        if (indexOfPC != -1) {
+            removeViewAt(indexOfPC);
+        }
         addView(playerControlView, 1, layoutParams);
     }
 
@@ -385,6 +392,7 @@ class ReactExoplayerView extends FrameLayout implements
 
                 // Initializing the playerControlView
                 initializePlayerControl();
+                setControls(controls);
             }
         }, 1);
     }
@@ -1165,10 +1173,15 @@ class ReactExoplayerView extends FrameLayout implements
      * @param controls  Controls prop, if true enable controls, if false disable them
      */
     public void setControls(boolean controls) {
-        if (controls && exoPlayerView != null) {
+        this.controls = controls;
+        if (player == null || exoPlayerView == null) return;
+        if (controls) {
             addPlayerControl();
-        } else if (getChildAt(1) instanceof PlayerControlView && exoPlayerView != null) {
-            removeViewAt(1);
+        } else {
+            int indexOfPC = indexOfChild(playerControlView);
+            if (indexOfPC != -1) {
+                removeViewAt(indexOfPC);
+            }
         }
     }
 }
