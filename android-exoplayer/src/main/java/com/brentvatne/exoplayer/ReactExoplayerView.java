@@ -333,53 +333,60 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayer() {
-        if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
-            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            trackSelector.setParameters(trackSelector.buildUponParameters()
+        ReactExoplayerView self = this;
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (player == null) {
+                    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+                    trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+                    trackSelector.setParameters(trackSelector.buildUponParameters()
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
-            DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-            DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
-            player.addListener(this);
-            player.setMetadataOutput(this);
-            exoPlayerView.setPlayer(player);
-            audioBecomingNoisyReceiver.setListener(this);
-            BANDWIDTH_METER.addEventListener(new Handler(), this);
-            setPlayWhenReady(!isPaused);
-            playerNeedsSource = true;
+                    DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+                    DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
+                    player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
+                    player.addListener(self);
+                    player.setMetadataOutput(self);
+                    exoPlayerView.setPlayer(player);
+                    audioBecomingNoisyReceiver.setListener(self);
+                    BANDWIDTH_METER.addEventListener(new Handler(), self);
+                    setPlayWhenReady(!isPaused);
+                    playerNeedsSource = true;
 
-            PlaybackParameters params = new PlaybackParameters(rate, 1f);
-            player.setPlaybackParameters(params);
-        }
-        if (playerNeedsSource && srcUri != null) {
-            ArrayList<MediaSource> mediaSourceList = buildTextSources();
-            MediaSource videoSource = buildMediaSource(srcUri, extension);
-            MediaSource mediaSource;
-            if (mediaSourceList.size() == 0) {
-                mediaSource = videoSource;
-            } else {
-                mediaSourceList.add(0, videoSource);
-                MediaSource[] textSourceArray = mediaSourceList.toArray(
-                        new MediaSource[mediaSourceList.size()]
-                );
-                mediaSource = new MergingMediaSource(textSourceArray);
+                    PlaybackParameters params = new PlaybackParameters(rate, 1f);
+                    player.setPlaybackParameters(params);
+                }
+                if (playerNeedsSource && srcUri != null) {
+                    ArrayList<MediaSource> mediaSourceList = buildTextSources();
+                    MediaSource videoSource = buildMediaSource(srcUri, extension);
+                    MediaSource mediaSource;
+                    if (mediaSourceList.size() == 0) {
+                        mediaSource = videoSource;
+                    } else {
+                        mediaSourceList.add(0, videoSource);
+                        MediaSource[] textSourceArray = mediaSourceList.toArray(
+                                new MediaSource[mediaSourceList.size()]
+                        );
+                        mediaSource = new MergingMediaSource(textSourceArray);
+                    }
+
+                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+                    if (haveResumePosition) {
+                        player.seekTo(resumeWindow, resumePosition);
+                    }
+                    player.prepare(mediaSource, !haveResumePosition, false);
+                    playerNeedsSource = false;
+
+                    eventEmitter.loadStart();
+                    loadVideoStarted = true;
+                }
+
+                // Initializing the playerControlView
+                initializePlayerControl();
             }
-
-            boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-            if (haveResumePosition) {
-                player.seekTo(resumeWindow, resumePosition);
-            }
-            player.prepare(mediaSource, !haveResumePosition, false);
-            playerNeedsSource = false;
-
-            eventEmitter.loadStart();
-            loadVideoStarted = true;
-        }
-
-        // Initializing the playerControlView
-        initializePlayerControl();
+        }, 1);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
@@ -439,8 +446,9 @@ class ReactExoplayerView extends FrameLayout implements
             updateResumePosition();
             player.release();
             player.setMetadataOutput(null);
-            player = null;
             trackSelector = null;
+            player = null;
+
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -906,6 +914,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSelectedTrack(int trackType, String type, Dynamic value) {
+        if (player == null) return;
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
