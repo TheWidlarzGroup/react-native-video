@@ -393,6 +393,7 @@ class ReactExoplayerView extends FrameLayout implements
                 // Initializing the playerControlView
                 initializePlayerControl();
                 setControls(controls);
+                applyModifiers();
             }
         }, 1);
     }
@@ -908,6 +909,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
         exoPlayerView.setResizeMode(resizeMode);
+    }
+
+    private void applyModifiers() {
+        setRepeatModifier(repeat);
     }
 
     public void setRepeatModifier(boolean repeat) {
