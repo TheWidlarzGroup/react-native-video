@@ -1,6 +1,7 @@
 ## Changelog
 
 ### Version 4.4.3
+* Fix mute/unmute when controls are present (iOS) [#1654](https://github.com/react-native-community/react-native-video/pull/1654)
 * Fix Android videos being able to play with background music/audio from other apps.
 * Fixed memory leak on iOS when using `controls` [#1647](https://github.com/react-native-community/react-native-video/pull/1647)
 * (Android) Update gradle and target SDK [#1629](https://github.com/react-native-community/react-native-video/pull/1629)
