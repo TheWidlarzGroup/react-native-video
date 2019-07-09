@@ -124,7 +124,9 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 ```gradle
 dependencies {
    ...
-   compile project(':react-native-video')
+    compile project(':react-native-video')
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
 }
 ```
 
@@ -369,6 +371,13 @@ Note on iOS, controls are always shown when in fullscreen mode.
 For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
 Platforms: Android ExoPlayer, iOS, react-native-dom
+
+#### disableFocus
+Determines whether video audio should override background music/audio in Android devices.
+* ** false (default)** - Override background audio/music
+* **true** - Let background audio/music from other apps play
+
+Platforms: Android Exoplayer
 
 #### filter
 Add video filter
