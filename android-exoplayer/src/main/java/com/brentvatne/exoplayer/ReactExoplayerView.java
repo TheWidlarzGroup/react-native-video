@@ -334,7 +334,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             trackSelector.setParameters(trackSelector.buildUponParameters()
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
@@ -346,10 +346,9 @@ class ReactExoplayerView extends FrameLayout implements
             defaultLoadControlBuilder.setTargetBufferBytes(-1);
             defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
             DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
-            // TODO: Add drmSessionManager from: https://github.com/react-native-community/react-native-video/pull/1445
-            DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(getContext(),
-                    null, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-            player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory, trackSelector, defaultLoadControl);
+            DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(getContext(), DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+            // TODO: Add drmSessionManager to 5th param from: https://github.com/react-native-community/react-native-video/pull/1445
+            player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory, trackSelector, defaultLoadControl, null, BANDWIDTH_METER);
             player.addListener(this);
             player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player);
@@ -449,7 +448,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
         Format textFormat = Format.createTextSampleFormat(title, mimeType, Format.NO_VALUE, language);
-        return new SingleSampleMediaSource(uri, mediaDataSourceFactory, textFormat, C.TIME_UNSET);
+        return new SingleSampleMediaSource.Factory(mediaDataSourceFactory)
+                .createMediaSource(uri, textFormat, C.TIME_UNSET);
     }
 
     private void releasePlayer() {
