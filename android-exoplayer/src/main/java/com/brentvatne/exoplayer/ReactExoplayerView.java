@@ -341,7 +341,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         ReactExoplayerView self = this;
-
+        // This ensures all props have been setted, to avoid async racing conditions.
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
