@@ -457,7 +457,6 @@ class ReactExoplayerView extends FrameLayout implements
             player.setMetadataOutput(null);
             trackSelector = null;
             player = null;
-
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
