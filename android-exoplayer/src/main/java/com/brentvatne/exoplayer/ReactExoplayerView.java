@@ -254,7 +254,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
         if (mReportBandwidth) {
             if (player == null) {
-                eventEmitter.bandwidthReport(bitrate, 0, 0, -1);
+                eventEmitter.bandwidthReport(bitrate, 0, 0, "-1");
             } else {
                 Format videoFormat = player.getVideoFormat();
                 int width = videoFormat != null ? videoFormat.width : 0;
