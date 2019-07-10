@@ -109,6 +109,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
+    private static final String EVENT_PROP_TRACK_ID = "trackId";
     private static final String EVENT_PROP_WIDTH = "width";
     private static final String EVENT_PROP_HEIGHT = "height";
     private static final String EVENT_PROP_ORIENTATION = "orientation";
@@ -137,7 +138,7 @@ class VideoEventEmitter {
     }
 
     void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks) {
+              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, int trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -151,7 +152,7 @@ class VideoEventEmitter {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
-
+        event.putInt(EVENT_PROP_TRACK_ID, trackId);
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
         event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
         event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
