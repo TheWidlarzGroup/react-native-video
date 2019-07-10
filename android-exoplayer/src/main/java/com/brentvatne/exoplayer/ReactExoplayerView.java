@@ -253,7 +253,15 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
         if (mReportBandwidth) {
-            eventEmitter.bandwidthReport(bitrate);
+            if (player === null) {
+                eventEmitter.bandwidthReport(bitrate, 0, 0, -1);
+            } else {
+                Format videoFormat = player.getVideoFormat();
+                int width = videoFormat != null ? videoFormat.width : 0;
+                int height = videoFormat != null ? videoFormat.height : 0;
+                String trackId = videoFormat != null ? videoFormat.id : "-1";
+                eventEmitter.bandwidthReport(bitrate, height, width, trackId);
+            }
         }
     }
 
@@ -549,7 +557,7 @@ class ReactExoplayerView extends FrameLayout implements
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
-            int trackId = videoFormat != null ? videoFormat.id : -1;
+            String trackId = videoFormat != null ? videoFormat.id : "-1";
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo(), getVideoTrackInfo(), trackId);
         }
