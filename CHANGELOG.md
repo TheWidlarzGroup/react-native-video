@@ -1,6 +1,6 @@
 ## Changelog
 
-### next
+### Version 4.4.4
 * Handle racing conditions when props are setted on exoplayer
 
 ### Version 4.4.3
