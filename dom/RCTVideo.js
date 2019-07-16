@@ -37,6 +37,7 @@ class RCTVideo extends RCTView {
     this.videoElement = this.initializeVideoElement();
     this.videoElement.addEventListener("ended", this.onEnd);
     this.videoElement.addEventListener("loadeddata", this.onLoad);
+    this.videoElement.addEventListener("canplay", this.onReadyForDisplay);
     this.videoElement.addEventListener("loadstart", this.onLoadStart);
     this.videoElement.addEventListener("pause", this.onPause);
     this.videoElement.addEventListener("play", this.onPlay);
@@ -51,6 +52,7 @@ class RCTVideo extends RCTView {
   detachFromView(view: UIView) {
     this.videoElement.removeEventListener("ended", this.onEnd);
     this.videoElement.removeEventListener("loadeddata", this.onLoad);
+    this.videoElement.removeEventListener("canplay", this.onReadyForDisplay);
     this.videoElement.removeEventListener("loadstart", this.onLoadStart);
     this.videoElement.removeEventListener("pause", this.onPause);
     this.videoElement.removeEventListener("play", this.onPlay);
@@ -201,6 +203,10 @@ class RCTVideo extends RCTView {
       }
     };
     this.sendEvent("topVideoLoad", payload);
+  }
+
+  onReadyForDisplay = () => {
+    this.sendEvent("onReadyForDisplay");
   }
 
   onLoadStart = () => {

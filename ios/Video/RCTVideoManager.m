@@ -45,25 +45,25 @@ RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
-RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoBuffer, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onBandwidthUpdate, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoAudioBecomingNoisy, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillPresent, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidPresent, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillDismiss, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidDismiss, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoBuffer, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBandwidthUpdate, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoAudioBecomingNoisy, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillPresent, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidPresent, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerWillDismiss, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoFullscreenPlayerDidDismiss, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
 RCT_REMAP_METHOD(save,
         options:(NSDictionary *)options
         reactTag:(nonnull NSNumber *)reactTag
@@ -79,8 +79,8 @@ RCT_REMAP_METHOD(save,
         }
     }];
 }
-RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 
 - (NSDictionary *)constantsToExport
 {
