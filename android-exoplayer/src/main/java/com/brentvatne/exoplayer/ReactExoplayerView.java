@@ -1180,6 +1180,7 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
+
     /**
      * Handling controls prop
      * 

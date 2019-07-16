@@ -55,8 +55,7 @@ public final class ExoPlayerView extends FrameLayout {
     private SimpleExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
-    private FilterType filterText;
-
+    private FilterType filterText;    
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
     private boolean filterEnabled = false;
@@ -105,7 +104,6 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void setVideoView() {
-
         if (surfaceView instanceof EPlayerView) {
             ((EPlayerView) surfaceView).setSimpleExoPlayer(this.player);
             if(this.filterText != null) {
@@ -119,7 +117,6 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void updateSurfaceView() {
-
         if(filterEnabled) {
             View view = new EPlayerView(this.getContext());
             view.setLayoutParams(layoutParams);
@@ -193,7 +190,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
     }
 
-    public void setFilter(FilterType filterText) {
+     public void setFilter(FilterType filterText) {
         this.filterText = filterText;
         setFilterHelper(filterText);
 
