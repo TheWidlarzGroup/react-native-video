@@ -380,7 +380,7 @@ Determines whether video audio should override background music/audio in Android
 Platforms: Android Exoplayer
 
 #### filter
-Add video filter
+Add ios video filter
 * **FilterType.NONE (default)** - No Filter
 * **FilterType.INVERT** - CIColorInvert
 * **FilterType.MONOCHROME** - CIColorMonochrome
@@ -398,14 +398,35 @@ Add video filter
 * **FilterType.TRANSFER** - CIPhotoEffectTransfer
 * **FilterType.SEPIA** - CISepiaTone
 
+
 For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
+
+
+Add Android Video Filter
+* **AndroidFilterType.NONE (default)** - No Filter
+* **AndroidFilterType.GRAY_SCALE** - GRAY_SCALE
+* **AndroidFilterType.INVERT** - INVERT
+* **AndroidFilterType.SEPIA** - SEPIA
+* **AndroidFilterType.HAZE** - HAZE
+* **AndroidFilterType.MONOCHROME** - MONOCHROME
+* **AndroidFilterType.BILATERAL_BLUR** - BILATERAL_BLUR
+* **AndroidFilterType.SPHERE_REFRACTION** - SPHERE_REFRACTION
+* **AndroidFilterType.VIGNETTE** - VIGNETTE
+* **AndroidFilterType.FILTER_GROUP_SAMPLE** - FILTER_GROUP_SAMPLE
+* **AndroidFilterType.GAUSSIAN_FILTER** - GAUSSIAN_FILTER
+* **AndroidFilterType.BULGE_DISTORTION** - BULGE_DISTORTION
+* **AndroidFilterType.BOX_BLUR** - BOX_BLUR
+* **AndroidFilterType.CGA_COLORSPACE** - CGA_COLORSPACE
+
+For more details on these filters refer to the [MasayukiSuda's docs](https://github.com/MasayukiSuda/ExoPlayerFilter).
+
 
 Notes: 
 1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
 2. Video filter is currently not supported on HLS playlists.
 3. `filterEnabled` must be set to `true`
 
-Platforms: iOS
+Platforms: iOS, Android
 
 #### filterEnabled
 Enable video filter. 
@@ -1145,6 +1166,11 @@ Future:
  - Will support custom directory and file name through options
  
 Platforms: iOS
+
+`save(options: { filterText: AndroidFilterType, inputUrl, outputUrl }): Promise`
+
+
+Platforms: Android
 
 #### restoreUserInterfaceForPictureInPictureStopCompleted
 `restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
