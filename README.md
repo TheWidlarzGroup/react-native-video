@@ -124,7 +124,9 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 ```gradle
 dependencies {
    ...
-   compile project(':react-native-video')
+    compile project(':react-native-video')
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
 }
 ```
 
@@ -272,6 +274,7 @@ var styles = StyleSheet.create({
 * [minLoadRetryCount](#minLoadRetryCount)
 * [muted](#muted)
 * [paused](#paused)
+* [pictureInPicture](#pictureinpicture)
 * [playInBackground](#playinbackground)
 * [playWhenInactive](#playwheninactive)
 * [poster](#poster)
@@ -301,14 +304,19 @@ var styles = StyleSheet.create({
 * [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onReadyForDisplay](#onreadyfordisplay)
+* [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
+* [onPlaybackRateChange](#onplaybackratechange)
 * [onProgress](#onprogress)
 * [onSeek](#onseek)
+* [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
 * [onTimedMetadata](#ontimedmetadata)
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
 * [presentFullscreenPlayer](#presentfullscreenplayer)
 * [save](#save)
+* [restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)
 * [seek](#seek)
 
 ### Configurable props
@@ -360,9 +368,16 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
-Controls are not available Android because the system does not provide a stock set of controls. You will need to build your own or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
+For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
-Platforms: iOS, react-native-dom
+Platforms: Android ExoPlayer, iOS, react-native-dom
+
+#### disableFocus
+Determines whether video audio should override background music/audio in Android devices.
+* ** false (default)** - Override background audio/music
+* **true** - Let background audio/music from other apps play
+
+Platforms: Android Exoplayer
 
 #### filter
 Add video filter
@@ -501,6 +516,13 @@ Controls whether the media is paused
 * **true** - Pause the media
 
 Platforms: all
+
+#### pictureInPicture
+Determine whether the media should played as picture in picture.
+* **false (default)** - Don't not play as picture in picture
+* **true** - Play the media as picture in picture
+
+Platforms: iOS
 
 #### playInBackground
 Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
@@ -942,6 +964,50 @@ Example:
 
 Platforms: all
 
+#### onReadyForDisplay
+Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
+
+Payload: none
+
+* iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
+* Android: [MEDIA_INFO_VIDEO_RENDERING_START](https://developer.android.com/reference/android/media/MediaPlayer#MEDIA_INFO_VIDEO_RENDERING_START)
+* Android ExoPlayer [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+
+Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Web
+
+#### onPictureInPictureStatusChanged
+Callback function that is called when picture in picture becomes active or inactive.
+
+Property | Type | Description
+--- | --- | ---
+isActive | boolean | Boolean indicating whether picture in picture is active
+
+Example:
+```
+{
+isActive: true
+}
+```
+
+Platforms:  iOS
+
+#### onPlaybackRateChange
+Callback function that is called when the rate of playback changes - either paused or starts/resumes.
+
+Property | Type | Description
+--- | --- | ---
+playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up
+
+Example:
+```
+{
+  playbackRate: 0, // indicates paused
+}
+```
+
+Platforms: all
+
+
 #### onProgress
 Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
 
@@ -984,6 +1050,13 @@ Both the currentTime & seekTime are reported because the video player may not se
 
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### onRestoreUserInterfaceForPictureInPictureStop
+Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
+
+Payload: none
+
+Platforms: iOS
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -1073,6 +1146,18 @@ Future:
  
 Platforms: iOS
 
+#### restoreUserInterfaceForPictureInPictureStopCompleted
+`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
+
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
+
+Example:
+```
+this.player.restoreUserInterfaceForPictureInPictureStopCompleted(true);
+```
+
+Platforms: iOS
+
 #### seek()
 `seek(seconds)`
 
@@ -1150,12 +1235,13 @@ zip -r -n .mp4 *.mp4 player.video.example.com
 <Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
        resizeMode="cover"           // Fill the whole screen at aspect ratio.
        style={styles.backgroundVideo} />
+```
 
 ### Load files with the RN Asset System
 
 The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
 
-```
+```javascript
 <Video
   source={require('../assets/video/turntable.mp4')}
 />

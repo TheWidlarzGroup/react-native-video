@@ -64,6 +64,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playbackStalled;
   BOOL _playInBackground;
   BOOL _playWhenInactive;
+  BOOL _pictureInPicture;
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
   BOOL _fullscreen;
@@ -75,6 +76,10 @@ static int const RCTVideoUnset = -1;
   UIViewController * _presentingViewController;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
+#endif
+#if TARGET_OS_IOS
+  void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
+  AVPictureInPictureController *_pipController;
 #endif
 }
 
@@ -100,7 +105,11 @@ static int const RCTVideoUnset = -1;
     _playInBackground = false;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
+    _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+#if TARGET_OS_IOS
+    _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+#endif
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -137,7 +146,6 @@ static int const RCTVideoUnset = -1;
     
     viewController.view.frame = self.bounds;
     viewController.player = player;
-    viewController.view.frame = self.bounds;
     return viewController;
 }
 
@@ -197,6 +205,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
+  [_player removeObserver:self forKeyPath:externalPlaybackActive context: nil];
 }
 
 #pragma mark - App lifecycle handlers
@@ -214,6 +223,7 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
+    [_playerViewController setPlayer:nil];
   }
 }
 
@@ -222,6 +232,7 @@ static int const RCTVideoUnset = -1;
   [self applyModifiers];
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
+    [_playerViewController setPlayer:_player];
   }
 }
 
@@ -345,8 +356,6 @@ static int const RCTVideoUnset = -1;
       [self setMaxBitRate:_maxBitRate];
       
       [_player pause];
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
         
       if (_playbackRateObserverRegistered) {
         [_player removeObserver:self forKeyPath:playbackRate context:nil];
@@ -463,8 +472,13 @@ static int const RCTVideoUnset = -1;
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
+  bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
+  if (!uri || [uri isEqualToString:@""]) {
+    DebugLog(@"Could not find video URL in source '%@'", source);
+    return;
+  }
 
   NSURL *url = isNetwork || isAsset
     ? [NSURL URLWithString:uri]
@@ -483,9 +497,9 @@ static int const RCTVideoUnset = -1;
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-    if (!_textTracks) {
+    if (shouldCache && (!_textTracks || !_textTracks.count)) {
       /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
-       *  to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
+       * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
        * Until this is fixed, we need to bypass caching when text tracks are specified.
        */
       DebugLog(@"Caching is not supported for uri '%@' because text tracks are not compatible with the cache. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
@@ -564,6 +578,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+
+  if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
+    self.onReadyForDisplay(@{@"target": self.reactTag});
+    return;
+  }
   if (object == _playerItem) {
     // When timeMetadata is read the event onTimedMetadata is triggered
     if ([keyPath isEqualToString:timedMetadata]) {
@@ -655,12 +674,6 @@ static int const RCTVideoUnset = -1;
       _playerBufferEmpty = NO;
       self.onVideoBuffer(@{@"isBuffering": @(NO), @"target": self.reactTag});
     }
-  } else if (object == _playerLayer) {
-    if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey]) {
-      if([change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
-        self.onReadyForDisplay(@{@"target": self.reactTag});
-      }
-    }
   } else if (object == _player) {
     if([keyPath isEqualToString:playbackRate]) {
       if(self.onPlaybackRateChange) {
@@ -681,7 +694,25 @@ static int const RCTVideoUnset = -1;
                                           @"target": self.reactTag});
         }
     }
-  } else {
+  } else if (object == _playerViewController.contentOverlayView) {
+      // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
+      if ([keyPath isEqualToString:@"frame"]) {
+
+        CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
+        CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
+
+        if (!CGRectEqualToRect(oldRect, newRect)) {
+          if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
+            NSLog(@"in fullscreen");
+          } else NSLog(@"not fullscreen");
+
+          [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+          [self.reactViewController.view setNeedsLayout];
+        }
+
+        return;
+      }
+  } else if ([super respondsToSelector:@selector(observeValueForKeyPath:ofObject:change:context:)]) {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
@@ -779,6 +810,44 @@ static int const RCTVideoUnset = -1;
 {
   _playWhenInactive = playWhenInactive;
 }
+
+- (void)setPictureInPicture:(BOOL)pictureInPicture
+{
+  #if TARGET_OS_IOS
+  if (_pictureInPicture == pictureInPicture) {
+    return;
+  }
+
+  _pictureInPicture = pictureInPicture;
+  if (_pipController && _pictureInPicture && ![_pipController isPictureInPictureActive]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_pipController startPictureInPicture];
+    });
+  } else if (_pipController && !_pictureInPicture && [_pipController isPictureInPictureActive]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_pipController stopPictureInPicture];
+	});
+  }
+  #endif
+}
+
+#if TARGET_OS_IOS
+- (void)setRestoreUserInterfaceForPIPStopCompletionHandler:(BOOL)restore
+{
+  if (_restoreUserInterfaceForPIPStopCompletionHandler != NULL) {
+    _restoreUserInterfaceForPIPStopCompletionHandler(restore);
+    _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
+  }
+}
+
+- (void)setupPipController {
+  if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
+    // Create new controller passing reference to the AVPlayerLayer
+    _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
+    _pipController.delegate = self;
+  }
+}
+#endif
 
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
@@ -888,7 +957,9 @@ static int const RCTVideoUnset = -1;
 - (void)applyModifiers
 {
   if (_muted) {
-    [_player setVolume:0];
+    if (!_controls) {
+      [_player setVolume:0];
+    }
     [_player setMuted:YES];
   } else {
     [_player setVolume:_volume];
@@ -1210,11 +1281,22 @@ static int const RCTVideoUnset = -1;
 {
   if( _player )
   {
-    _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    if (!_playerViewController) {
+      _playerViewController = [self createPlayerViewController:_player withPlayerItem:_playerItem];
+    }
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
     [self setResizeMode:_resizeMode];
-    [self addSubview:_playerViewController.view];
+    
+    if (_controls) {
+      UIViewController *viewController = [self reactViewController];
+      [viewController addChildViewController:_playerViewController];
+      [self addSubview:_playerViewController.view];
+    }
+      
+    [_playerViewController addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
+    
+    [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
   }
 }
 
@@ -1234,6 +1316,9 @@ static int const RCTVideoUnset = -1;
     
     [self.layer addSublayer:_playerLayer];
     self.layer.needsDisplayOnBoundsChange = YES;
+    #if TARGET_OS_IOS
+    [self setupPipController];
+    #endif
   }
 }
 
@@ -1404,7 +1489,11 @@ static int const RCTVideoUnset = -1;
   
   [self removePlayerLayer];
   
+  [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+  [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
   [_playerViewController.view removeFromSuperview];
+  _playerViewController.rctDelegate = nil;
+  _playerViewController.player = nil;
   _playerViewController = nil;
   
   [self removePlayerTimeObserver];
@@ -1489,5 +1578,45 @@ static int const RCTVideoUnset = -1;
     NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return array[0];
 }
+
+#pragma mark - Picture in Picture
+
+#if TARGET_OS_IOS
+- (void)pictureInPictureControllerDidStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+  if (self.onPictureInPictureStatusChanged) {
+    self.onPictureInPictureStatusChanged(@{
+      @"isActive": [NSNumber numberWithBool:false]
+    });
+  }
+}
+
+- (void)pictureInPictureControllerDidStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+  if (self.onPictureInPictureStatusChanged) {
+    self.onPictureInPictureStatusChanged(@{
+      @"isActive": [NSNumber numberWithBool:true]
+    });
+  }
+}
+
+- (void)pictureInPictureControllerWillStopPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+
+}
+
+- (void)pictureInPictureControllerWillStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
+
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController failedToStartPictureInPictureWithError:(NSError *)error {
+
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler {
+  NSAssert(_restoreUserInterfaceForPIPStopCompletionHandler == NULL, @"restoreUserInterfaceForPIPStopCompletionHandler was not called after picture in picture was exited.");
+  if (self.onRestoreUserInterfaceForPictureInPictureStop) {
+    self.onRestoreUserInterfaceForPictureInPictureStop(@{});
+  }
+  _restoreUserInterfaceForPIPStopCompletionHandler = completionHandler;
+}
+#endif
 
 @end
