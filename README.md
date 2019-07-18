@@ -1190,7 +1190,7 @@ Platforms: iOS
 
 - inputUrl and outputUrl should be local filesystem url like (`/data/user/0/com.rnvideo/files`).  
 
-Platforms: Android
+Platforms: Android ExoPlayer
 
 #### restoreUserInterfaceForPictureInPictureStopCompleted
 `restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
