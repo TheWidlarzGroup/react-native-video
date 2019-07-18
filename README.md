@@ -445,7 +445,7 @@ Notes:
 2. Video filter is currently not supported on HLS playlists.
 3. `filterEnabled` must be set to `true`
 
-Platforms: iOS, Android
+Platforms: iOS, Android ExoPlayer
 
 #### filterEnabled
 Enable video filter. 
