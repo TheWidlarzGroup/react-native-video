@@ -1,6 +1,6 @@
 export default {
-    NONE: ''
-    GRAY_SCALE: 'GRAY_SCALE'
+    NONE: '',
+    GRAY_SCALE: 'GRAY_SCALE',
     SEPIA: 'SEPIA',
     INVERT: 'INVERT',
     HAZE: 'HAZE',

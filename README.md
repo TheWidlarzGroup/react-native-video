@@ -113,9 +113,28 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 
 If you need to use the old Android MediaPlayer based player, use the following instead:
 
+
+
+**android/build.gradle**
+
+Make Sure your app has minSDKVersion as 21 and maven dependencies as follow
+
 ```gradle
-include ':react-native-video'
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+buildscript {
+    ext {
+        ...
+        minSdkVersion = 21        
+    }
+    ...
+}
+...
+
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
 ```
 
 
@@ -1169,6 +1188,7 @@ Platforms: iOS
 
 `save(options: { filterText: AndroidFilterType, inputUrl, outputUrl }): Promise`
 
+- inputUrl and outputUrl should be local filesystem url like (`/data/user/0/com.rnvideo/files`).  
 
 Platforms: Android
 
