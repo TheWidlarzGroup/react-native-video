@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_controls" >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -51,7 +50,7 @@
             <com.previewseekbar.PreviewSeekbarTV
                 android:id="@+id/previewSeekBar"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="35dp"
                 android:layout_below="@id/previewFrameLayout"
                 android:maxHeight="@dimen/previewseekbar_progress_height"
                 android:minHeight="@dimen/previewseekbar_progress_height"

@@ -1622,25 +1622,38 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
 
             switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    showOverlay();
+                    break;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
                     if (controls.getAlpha() == 0.0f) {
                         showOverlay();
                         return true;
                     } else {
                         showOverlay();
                     }
+
             }
 
             switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    playPauseButton.requestFocus();
+                    break;
+
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
+                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && !((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
+                        ((SeekBar) previewSeekBarLayout.getPreviewView()).requestFocus();
+                    }
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
 
                     if (live) {
                         break;
@@ -1698,6 +1711,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 }
             }
 
+            if (playPauseButton.isFocused()) {
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                        setPausedModifier(!isPaused);
+                        return true;
+                }
+            }
+
             if (!isPaused) {
                 hideOverlay();
             }
@@ -1715,12 +1736,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             removeCallbacks(hideRunnable);
         }
         setStateOverlay(ControlState.ACTIVE.toString());
-
-        if (isPaused) {
-            controls.setBackgroundResource(R.drawable.bg_controls);
-        } else {
-            controls.setBackground(null);
-        }
     }
 
     public void hideOverlay() {
