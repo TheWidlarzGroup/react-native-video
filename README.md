@@ -135,14 +135,6 @@ dependencies {
 
 }
 ```
-**android/gradle.properties**
-
-Migrating to AndroidX:
-
-```gradle.properties
-android.useAndroidX=true
-android.enableJetifier=true
-```
 
 #### **android/gradle.properties**
 
