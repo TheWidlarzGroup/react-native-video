@@ -20,6 +20,11 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
 ## Table of Contents
 
 * [Installation](#installation)
+  * [iOS](#ios-installation)
+  * [tvOS](#tvos-installation)
+  * [Android](#android-installation)
+  * [Windows](#windows-installation)
+  * [react-native-dom](#react-native-dom-installation)
 * [Usage](#usage)
 * [iOS App Transport Security](#ios-app-transport-security)
 * [Audio Mixing](#audio-mixing)
@@ -42,7 +47,7 @@ yarn add react-native-video
 
 Then follow the instructions for your platform to link react-native-video into your project:
 
-### iOS
+### iOS installation
 <details>
   <summary>iOS details</summary>
 
@@ -74,7 +79,7 @@ end
 
 </details>
 
-### tvOS
+### tvOS installation
   <details>
   <summary>tvOS details</summary>
   
@@ -97,7 +102,7 @@ Select RCTVideo-tvOS
 <img src="./docs/tvOS-step-4.jpg" width="40%">
 </details>
 
-### Android
+### Android installation
 <details>
   <summary>Android details</summary>
 
@@ -120,7 +125,6 @@ If you need to use the old Android MediaPlayer based player, use the following i
 include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
-
 
 #### **android/app/build.gradle**
 
@@ -166,7 +170,7 @@ protected List<ReactPackage> getPackages() {
 ```
 </details>
 
-### Windows
+### Windows installation
 <details>
   <summary>Windows details</summary>
 
@@ -216,7 +220,7 @@ using System.Collections.Generic;
 ```
 </details>
 
-### react-native-dom
+### react-native-dom installation
 <details>
   <summary>react-native-dom details</summary>
 
