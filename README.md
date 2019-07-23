@@ -76,7 +76,7 @@ end
 
 ### tvOS
   <details>
-  <summary>tvOS Detiails</summary>
+  <summary>tvOS details</summary>
   
 `react-native link react-native-video` doesn’t work properly with the tvOS target so we need to add the library manually.
 
