@@ -124,7 +124,9 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 
 #### **android/app/build.gradle**
 
-```gradle
+From version >= 5.0.0, you have to apply this changes:
+
+```diff
 dependencies {
    ...
     compile project(':react-native-video')
@@ -135,7 +137,7 @@ dependencies {
 ```
 #### **android/gradle.properties**
 
-Migrating to AndroidX:
+Migrating to AndroidX (needs version >= 5.0.0):
 
 ```gradle.properties
 android.useAndroidX=true
