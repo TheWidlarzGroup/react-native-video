@@ -559,14 +559,10 @@ public class GLTextureView
 
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         onPause();
-        try {
-            if(newSurfaceTextureListener != null) {
-                newSurfaceTextureListener.onSurfaceTextureDestroyed(surface);
-            }
-            surfaceDestroyed(surface);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(newSurfaceTextureListener != null) {
+            newSurfaceTextureListener.onSurfaceTextureDestroyed(surface);
         }
+        surfaceDestroyed(surface);
         return true;
     }
 
