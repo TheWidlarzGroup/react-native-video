@@ -45,11 +45,6 @@
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
     },
-    "rnpm": {
-        "android": {
-            "sourceDir": "./android-exoplayer"
-        }
-    },
     "files": [
         "android-exoplayer",
         "android",
