@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 5.0.0
+* AndroidX Support
+
 ### Version 4.4.4
 * Handle racing conditions when props are setted on exoplayer
 
