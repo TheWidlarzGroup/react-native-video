@@ -3,9 +3,15 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
+Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
+
 Version 4.x requires react-native >= 0.57.0
 
 Version 3.x requires react-native >= 0.40.0
+
+### Version 5.0.0 breaking changes
+
+Version 5 introduces breaking changes on Android, please check carefully the steps described there: [Android Installation](#Android-installation)
 
 ### Version 4.0.0 breaking changes
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
@@ -1290,6 +1296,38 @@ To enable audio to play in background on iOS the audio session needs to be set t
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
 ## Updating
+
+### Version 5.0.0
+
+Probably you want to update your gradle version:
+#### gradle-wrapper.properties
+```diff
+- distributionUrl=https\://services.gradle.org/distributions/gradle-3.3-all.zip
++ distributionUrl=https\://services.gradle.org/distributions/gradle-5.1.1-all.zip
+```
+
+#### **android/app/build.gradle**
+
+From version >= 5.0.0, you have to apply this changes:
+
+```diff
+dependencies {
+   ...
+    compile project(':react-native-video')
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
+}
+```
+
+#### **android/gradle.properties**
+
+Migrating to AndroidX (needs version >= 5.0.0):
+
+```gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+```
 
 ### Version 4.0.0
 
