@@ -850,6 +850,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 setupProgressBarSeekListener();
                 videoLoaded();
                 setupSubtitlesButton();
+                isPaused = !playWhenReady;
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
