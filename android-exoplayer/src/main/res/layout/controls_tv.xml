@@ -23,8 +23,8 @@
             android:id="@+id/previewSeekBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -51,6 +51,8 @@
                 android:id="@+id/previewSeekBar"
                 android:paddingTop="17dp"
                 android:paddingBottom="17dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/previewFrameLayout"
@@ -58,12 +60,15 @@
                 android:minHeight="5dp"
                 android:minWidth="5dp"
                 android:maxWidth="5dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:splitTrack="false"
                 android:focusableInTouchMode="false"
                 android:focusable="true"
                 android:nextFocusRight="@+id/tvPlayPauseImageView"
                 android:nextFocusDown="@+id/tvPlayPauseImageView"
                 android:progressDrawable="@drawable/previewseekbar_progress_drawable">
+                <requestFocus/>
             </com.previewseekbar.PreviewSeekbarTV>
 
         </com.previewseekbar.PreviewSeekBarLayout>
@@ -93,7 +98,6 @@
                 android:nextFocusDown="@+id/tvAudioSubtitlesBtn"
                 android:src="@drawable/tv_play_btn_selector"
                 android:background="@drawable/tv_btn_bg_selector">
-                <requestFocus/>
             </ImageButton>
 
             <ImageButton
