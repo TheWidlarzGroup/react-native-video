@@ -1056,7 +1056,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     public int getTrackRendererIndex(int trackType) {
-        int rendererCount = player.getRendererCount();
+        int rendererCount = player != null ? player.getRendererCount() : 0;
         for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
             if (player.getRendererType(rendererIndex) == trackType) {
                 return rendererIndex;
