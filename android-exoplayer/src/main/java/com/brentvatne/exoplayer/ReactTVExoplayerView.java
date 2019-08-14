@@ -12,6 +12,7 @@ import android.os.Message;
 import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -63,6 +64,7 @@ import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -140,6 +142,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private View controls;
     private View bottomBarWidget;
     private ImageButton audioSubtitlesButton;
+    private ImageButton scheduleButton;
     private GestureDetectorCompat gestureDetector;
     private long startTouchActionDownTime;
     private float eventDownX;
@@ -177,6 +180,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean live = false;
+    private boolean hasEpg;
     private boolean controlsVisibilityGestureDisabled = false;
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
@@ -241,6 +245,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private Map<String, Object> muxData;
     private PreviewView.OnPreviewChangeListener mPreviewChangeListener;
 
+    //MediaSession
+    private MediaSessionCompat mediaSession;
+    private MediaSessionConnector mediaSessionConnector;
+
     public ReactTVExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
@@ -267,6 +275,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         };
         gestureDetector = new GestureDetectorCompat(themedReactContext, gestureListener);
         setPausedModifier(false);
+
+        mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
+        mediaSessionConnector = new MediaSessionConnector(mediaSession);
     }
 
 
@@ -381,6 +392,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 dialog.show();
             }
         });
+
+        scheduleButton = findViewById(R.id.tvScheduleBtn);
+
+        scheduleButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                eventEmitter.epgIconClick();
+            }
+        });
+
+        setEpg(false); // default value
     }
 
     @Override
@@ -458,6 +480,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
             player.setPlaybackParameters(params);
+
+            activateMediaSession();
         }
         if (playerNeedsSource && srcUri != null) {
             ArrayList<MediaSource> mediaSourceList = buildTextSources();
@@ -496,6 +520,24 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         }
     }
+
+    // MediaSession related functions.
+    private void activateMediaSession() {
+        Log.d(TAG, "activateMediaSession()");
+        mediaSessionConnector.setPlayer(player, null);
+        mediaSession.setActive(true);
+    }
+
+    private void deactivateMediaSession() {
+        Log.d(TAG, "deactivateMediaSession()");
+        mediaSessionConnector.setPlayer(null, null);
+        mediaSession.setActive(false);
+    }
+
+    private void releaseMediaSession() {
+        mediaSession.release();
+    }
+
 
     @SuppressWarnings("unchecked")
     private MediaSource buildMediaSource(Uri uri, @Nullable String overrideExtension) {
@@ -642,7 +684,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             muxStats.release();
             muxStats = null;
         }
+
+        deactivateMediaSession();
+        releaseMediaSession();
+
         dismissTracksDialog();
+
         if (player != null) {
             updateResumePosition();
             player.release();
@@ -816,6 +863,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 setupProgressBarSeekListener();
                 videoLoaded();
                 setupSubtitlesButton();
+                isPaused = !playWhenReady;
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
@@ -826,7 +874,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 text += "unknown";
                 break;
         }
+        updateControlsState();
         Log.d(TAG, text);
+    }
+
+    private boolean isPlaying() {
+        return player != null
+                && player.getPlaybackState() != Player.STATE_ENDED
+                && player.getPlaybackState() != Player.STATE_IDLE
+                && player.getPlayWhenReady();
     }
 
     private void setupSubtitlesButton() {
@@ -838,14 +894,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
                 Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.VISIBLE);
+                audioSubtitlesButton.setVisibility(View.GONE);
             } else {
                 Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
-                audioSubtitlesButton.setVisibility(View.INVISIBLE);
+                audioSubtitlesButton.setVisibility(View.GONE);
             }
         } else {
             Log.d(TAG, "setupSubtitlesButton() media not ready");
-            audioSubtitlesButton.setVisibility(View.INVISIBLE);
+            audioSubtitlesButton.setVisibility(View.GONE);
         }
 
         changeFocusedView();
@@ -1012,16 +1068,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             eventEmitter.buffering(true);
         } else {
             eventEmitter.buffering(false);
-        }
-
-        if (buffering) {
-            showOverlay();
-        } else {
-            if (!isPaused) {
-                hideOverlay();
-            } else {
-                showOverlay();
-            }
         }
     }
 
@@ -1324,6 +1370,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 pausePlayback();
             }
         }
+
+        eventEmitter.playbackRateChange(isPaused ? 0.0f : 1.0f);
+    }
+
+    private void updateControlsState() {
+        boolean isPaused = !isPlaying();
+
         if (playPauseButton != null) {
             if (isPaused) {
                 playPauseButton.setImageResource(R.drawable.tv_play_btn_selector);
@@ -1332,14 +1385,11 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         }
 
-        if (isPaused) {
+        if (isPaused || isBuffering) {
             showOverlay();
         } else {
             hideOverlay();
         }
-
-
-        eventEmitter.playbackRateChange(isPaused ? 0.0f : 1.0f);
     }
 
     public void setMutedModifier(boolean muted) {
@@ -1449,6 +1499,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             DrawableUtils.setTint(playPauseButton.getBackground(), accentColor);
             DrawableUtils.setTint(audioSubtitlesButton.getBackground(), accentColor);
+            DrawableUtils.setTint(scheduleButton.getBackground(), accentColor);
 
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
@@ -1469,6 +1520,11 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
 
         changeFocusedView();
+    }
+
+    public void setEpg(boolean hasEpg) {
+        this.hasEpg = hasEpg;
+        scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
     }
 
     public void setControlsOpacity(final float opacity) {
@@ -1622,25 +1678,38 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
 
             switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    showOverlay();
+                    break;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
                     if (controls.getAlpha() == 0.0f) {
                         showOverlay();
                         return true;
                     } else {
                         showOverlay();
                     }
+
             }
 
             switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    playPauseButton.requestFocus();
+                    break;
+
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
+                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && !((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
+                        ((SeekBar) previewSeekBarLayout.getPreviewView()).requestFocus();
+                    }
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
 
                     if (live) {
                         break;
@@ -1698,6 +1767,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 }
             }
 
+            if (playPauseButton.isFocused()) {
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                        setPausedModifier(!isPaused);
+                        return true;
+                }
+            }
+
             if (!isPaused) {
                 hideOverlay();
             }
@@ -1715,12 +1792,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             removeCallbacks(hideRunnable);
         }
         setStateOverlay(ControlState.ACTIVE.toString());
-
-        if (isPaused) {
-            controls.setBackgroundResource(R.drawable.bg_controls);
-        } else {
-            controls.setBackground(null);
-        }
     }
 
     public void hideOverlay() {

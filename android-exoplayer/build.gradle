@@ -23,6 +23,8 @@ dependencies {
         exclude group: 'com.android.support'
     }
 
+    implementation "com.google.android.exoplayer:extension-mediasession:2.8.4"
+
     // All support libs must use the same version
     compile "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
     compile "com.android.support:appcompat-v7:${safeExtGet('supportLibVersion', '+')}"
