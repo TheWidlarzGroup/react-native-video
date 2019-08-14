@@ -108,9 +108,25 @@
                 android:scaleType="fitXY"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
+                android:layout_marginRight="8dp"
                 android:nextFocusLeft="@+id/tvPlayPauseImageView"
                 android:nextFocusUp="@+id/tvPlayPauseImageView"
+                android:nextFocusRight="@+id/tvScheduleBtn"
+                android:nextFocusDown="@+id/tvScheduleBtn"
                 android:src="@drawable/tv_audio_subtitles_selector"
+                android:background="@drawable/tv_btn_bg_selector" />
+
+            <ImageButton
+                android:id="@+id/tvScheduleBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:scaleType="fitXY"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusLeft="@+id/tvAudioSubtitlesBtn"
+                android:nextFocusUp="@+id/tvAudioSubtitlesBtn"
+                android:src="@drawable/ic_tv_schedule"
                 android:background="@drawable/tv_btn_bg_selector" />
 
             <View

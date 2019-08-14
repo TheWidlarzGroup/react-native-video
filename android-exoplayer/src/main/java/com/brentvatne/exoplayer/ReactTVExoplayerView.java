@@ -142,6 +142,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private View controls;
     private View bottomBarWidget;
     private ImageButton audioSubtitlesButton;
+    private ImageButton scheduleButton;
     private GestureDetectorCompat gestureDetector;
     private long startTouchActionDownTime;
     private float eventDownX;
@@ -179,6 +180,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean live = false;
+    private boolean hasEpg;
     private boolean controlsVisibilityGestureDisabled = false;
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
@@ -390,6 +392,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 dialog.show();
             }
         });
+
+        scheduleButton = findViewById(R.id.tvScheduleBtn);
+
+        scheduleButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                eventEmitter.epgIconClick();
+            }
+        });
+
+        setEpg(false); // default value
     }
 
     @Override
@@ -881,14 +894,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
                 Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.VISIBLE);
+                audioSubtitlesButton.setVisibility(View.GONE);
             } else {
                 Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
-                audioSubtitlesButton.setVisibility(View.INVISIBLE);
+                audioSubtitlesButton.setVisibility(View.GONE);
             }
         } else {
             Log.d(TAG, "setupSubtitlesButton() media not ready");
-            audioSubtitlesButton.setVisibility(View.INVISIBLE);
+            audioSubtitlesButton.setVisibility(View.GONE);
         }
 
         changeFocusedView();
@@ -1486,6 +1499,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             DrawableUtils.setTint(playPauseButton.getBackground(), accentColor);
             DrawableUtils.setTint(audioSubtitlesButton.getBackground(), accentColor);
+            DrawableUtils.setTint(scheduleButton.getBackground(), accentColor);
 
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
@@ -1506,6 +1520,11 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
 
         changeFocusedView();
+    }
+
+    public void setEpg(boolean hasEpg) {
+        this.hasEpg = hasEpg;
+        scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
     }
 
     public void setControlsOpacity(final float opacity) {
