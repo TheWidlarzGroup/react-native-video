@@ -261,6 +261,12 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             }
         };
         gestureDetector = new GestureDetectorCompat(themedReactContext, gestureListener);
+
+        String[] languages = Locale.getISOLanguages();
+        for (String language : languages) {
+            Locale locale = new Locale(language);
+            this.localeMap.put(locale.getISO3Language(), locale);
+        }
     }
 
 
