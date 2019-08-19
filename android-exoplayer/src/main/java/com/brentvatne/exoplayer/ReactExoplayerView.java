@@ -160,6 +160,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
+    private HashMap<String, Locale> localeMap = new HashMap<String, Locale>();
+
     // Props from React
     private Uri srcUri;
     private String extension;
@@ -259,6 +261,12 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             }
         };
         gestureDetector = new GestureDetectorCompat(themedReactContext, gestureListener);
+
+        String[] languages = Locale.getISOLanguages();
+        for (String language : languages) {
+            Locale locale = new Locale(language);
+            localeMap.put(locale.getISO3Language(), locale);
+        }
     }
 
 
@@ -907,14 +915,24 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
+            String language = format.language != null ? format.language : "";
+            String languageCode = getISO2(language);
+
             WritableMap audioTrack = Arguments.createMap();
             audioTrack.putInt("index", i);
             audioTrack.putString("title", format.id != null ? format.id : "");
             audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
+            audioTrack.putString("language", languageCode);
             audioTracks.pushMap(audioTrack);
         }
         return audioTracks;
+    }
+
+    private String getISO2(String iso3) {
+        if (localeMap.containsKey(iso3)) {
+            return localeMap.get(iso3).getLanguage();
+        }
+        return "";
     }
 
     private WritableArray getTextTrackInfo() {
