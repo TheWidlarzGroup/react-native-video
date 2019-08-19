@@ -1397,7 +1397,7 @@ dispatch_queue_t delegateQueue;
         if (values.count > 0) {
             title = [values objectAtIndex:0];
         }
-        NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+        NSString *language = [currentOption.locale languageCode] ? [currentOption.locale languageCode] : @"";
         NSDictionary *audioTrack = @{
                                     @"index": [NSNumber numberWithInt:i],
                                     @"title": title,
