@@ -916,7 +916,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
             String language = format.language != null ? format.language : "";
-            String languageCode = this.getIso2(language);
+            String languageCode = this.getISO2(language);
 
             WritableMap audioTrack = Arguments.createMap();
             audioTrack.putInt("index", i);
@@ -928,7 +928,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         return audioTracks;
     }
 
-    private String getIso2(String iso3) {
+    private String getISO2(String iso3) {
         if (this.localeMap.containsKey(iso3)) {
             return this.localeMap.get(iso3).toString();
         }
