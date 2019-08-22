@@ -351,6 +351,9 @@ Indicates whether the player should only play the audio track and instead of dis
 
 For this to work, the poster prop must be set.
 
+#### automaticallyWaitsToMinimizeStalling
+A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
+
 Platforms: all
 
 #### bufferConfig
