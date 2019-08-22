@@ -89,6 +89,7 @@ static int const RCTVideoUnset = -1;
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
     
+	_automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -869,7 +870,7 @@ static int const RCTVideoUnset = -1;
       [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
     
-	if (@available(iOS 10.0, *) && _automaticallyWaitsToMinimizeStalling) {
+	if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
 		[_player playImmediatelyAtRate:1.0];
 	} else {
 		[_player play];
