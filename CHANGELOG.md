@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 5.0.1
+* Added support for automaticallyWaitsToMinimizeStalling property (iOS) [#1723](https://github.com/react-native-community/react-native-video/pull/1723)
+
 ### Version 5.0.0
 * AndroidX Support
 
