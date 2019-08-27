@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -298,6 +300,17 @@ class ReactExoplayerView extends FrameLayout implements
             }
         });
 
+        //Handling the fullScreenButton click event
+        FrameLayout fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen_button);
+        fullScreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Play the video whenever the user clicks minimize or maximise button. In order to enable the controls
+                player.setPlayWhenReady(true);
+                updateFullScreenIcon(isFullscreen);
+            }
+        });
+
         // Invoking onPlayerStateChanged event for Player
         eventListener = new Player.EventListener() {
             @Override
@@ -324,6 +337,32 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+    }
+
+    /**
+     * Update fullscreen icon
+     */
+    private void updateFullScreenIcon(Boolean fullScreen) {
+        if(playerControlView != null) {
+            ImageView fullScreenIcon = playerControlView.findViewById(R.id.exo_fullscreen_icon);
+            if (isFullscreen) {
+                fullScreenIcon.setImageResource(R.drawable.fullscreen_expand);
+            } else {
+                fullScreenIcon.setImageResource(R.drawable.fullscreen_shrink);
+            }
+            setFullscreen(!isFullscreen);
+        }
+    }
+
+    /**
+     * Enable or Disable fullscreen button
+     */
+    private void enableFullScreenButton(Boolean enable) {
+        if(playerControlView != null) {
+            FrameLayout fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen_button);
+            fullScreenButton.setAlpha(enable ? 1.0f : 0.5f);
+            fullScreenButton.setEnabled(enable);
+        }
     }
 
     /**
@@ -530,10 +569,13 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void onStopPlayback() {
         if (isFullscreen) {
-            setFullscreen(false);
+            //When the video stopPlayback.
+            //If the video is in fullscreen, then we will update the video to normal mode.
+            updateFullScreenIcon(isFullscreen);
         }
         setKeepScreenOn(false);
         audioManager.abandonAudioFocus(this);
+        enableFullScreenButton(false);
     }
 
     private void updateResumePosition() {
@@ -620,6 +662,7 @@ class ReactExoplayerView extends FrameLayout implements
                 if(playerControlView != null) {
                     playerControlView.show();
                 }
+                enableFullScreenButton(true);
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
@@ -1143,11 +1186,13 @@ class ReactExoplayerView extends FrameLayout implements
                 uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             eventEmitter.fullscreenWillPresent();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidPresent();
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             eventEmitter.fullscreenWillDismiss();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();
