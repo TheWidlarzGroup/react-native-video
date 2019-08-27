@@ -279,7 +279,11 @@ export default class Video extends Component {
       height: Math.round(Dimensions.get('window').height),
       backgroundColor: 'transparent',
       justifyContent: "center",
-      zIndex: 99999
+      zIndex: 99999,
+      marginLeft: 0,  //margin: 0 - is not working properly. So, updated all the margin individually with 0.
+      marginRight: 0,
+      marginTop: 0,
+      marginBottom: 0
     } : {}
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style, videoStyle],
