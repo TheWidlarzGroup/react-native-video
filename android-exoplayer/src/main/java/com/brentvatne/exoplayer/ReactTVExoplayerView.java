@@ -18,6 +18,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -407,6 +408,25 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         setupButton(playPauseButton);
         setupButton(audioSubtitlesButton);
         setupButton(scheduleButton);
+
+        // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
+        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                manuallyLayoutChildren();
+                getViewTreeObserver().dispatchOnGlobalLayout();
+                Choreographer.getInstance().postFrameCallback(this);
+            }
+        });
+    }
+
+    private void manuallyLayoutChildren() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        }
     }
 
     @Override
@@ -898,7 +918,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
                 Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.GONE);
+                audioSubtitlesButton.setVisibility(View.VISIBLE);
             } else {
                 Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
                 audioSubtitlesButton.setVisibility(View.GONE);
