@@ -23,6 +23,21 @@ export default class Video extends Component {
       showPoster: !!props.poster,
       androidFullScreen: false
     };
+    this.getDimension();
+  }
+
+  /**
+   * @description this is will set the width and height needs to be considered for full screen
+   */
+  getDimension() {
+    if (Dimensions.get('window').width < Dimensions.get('window').height) {
+      this.width = Math.round(Dimensions.get('window').height);
+      this.height = Math.round(Dimensions.get('window').width);
+    }
+    else {
+      this.width = Math.round(Dimensions.get('window').width);
+      this.height = Math.round(Dimensions.get('window').height);
+    }
   }
 
   setNativeProps(nativeProps) {
@@ -318,8 +333,8 @@ export default class Video extends Component {
       position: 'absolute',
       top: 0,
       left: 0,
-      width: Math.round(Dimensions.get('window').width),
-      height: Math.round(Dimensions.get('window').height),
+      width: this.width,
+      height: this.height,
       backgroundColor: '#ffffff',
       justifyContent: "center",
       zIndex: 99999,
