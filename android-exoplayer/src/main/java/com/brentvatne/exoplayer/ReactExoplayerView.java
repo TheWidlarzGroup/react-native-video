@@ -305,11 +305,10 @@ class ReactExoplayerView extends FrameLayout implements
         fullScreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Play the video whenever the user clicks minimize or maximise button. In order to enable the controls
-                player.setPlayWhenReady(true);
-                updateFullScreenIcon(isFullscreen);
+                setFullscreen(!isFullscreen);
             }
         });
+        updateFullScreenIcon(isFullscreen);
 
         // Invoking onPlayerStateChanged event for Player
         eventListener = new Player.EventListener() {
@@ -343,14 +342,15 @@ class ReactExoplayerView extends FrameLayout implements
      * Update fullscreen icon
      */
     private void updateFullScreenIcon(Boolean fullScreen) {
-        if(playerControlView != null) {
+        if(playerControlView != null && player != null) {
+            //Play the video whenever the user clicks minimize or maximise button. In order to enable the controls
+            player.setPlayWhenReady(true);
             ImageView fullScreenIcon = playerControlView.findViewById(R.id.exo_fullscreen_icon);
-            if (isFullscreen) {
-                fullScreenIcon.setImageResource(R.drawable.fullscreen_expand);
-            } else {
+            if (fullScreen) {
                 fullScreenIcon.setImageResource(R.drawable.fullscreen_shrink);
+            } else {
+                fullScreenIcon.setImageResource(R.drawable.fullscreen_expand);
             }
-            setFullscreen(!isFullscreen);
         }
     }
 
@@ -571,7 +571,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (isFullscreen) {
             //When the video stopPlayback.
             //If the video is in fullscreen, then we will update the video to normal mode.
-            updateFullScreenIcon(isFullscreen);
+            setFullscreen(!isFullscreen);
         }
         setKeepScreenOn(false);
         audioManager.abandonAudioFocus(this);
@@ -1168,6 +1168,8 @@ class ReactExoplayerView extends FrameLayout implements
         if (fullscreen == isFullscreen) {
             return; // Avoid generating events when nothing is changing
         }
+
+        updateFullScreenIcon(fullscreen);
         isFullscreen = fullscreen;
 
         Activity activity = themedReactContext.getCurrentActivity();
