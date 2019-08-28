@@ -270,23 +270,8 @@ export default class Video extends Component {
     }
 
     const nativeProps = Object.assign({}, this.props);
-    //androidFullScreen property will only impact on android. It will be always false for iOS.
-    const videoStyle = this.state.androidFullScreen ? {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: Math.round(Dimensions.get('window').width),
-      height: Math.round(Dimensions.get('window').height),
-      backgroundColor: 'transparent',
-      justifyContent: "center",
-      zIndex: 99999,
-      marginLeft: 0,  //margin: 0 - is not working properly. So, updated all the margin individually with 0.
-      marginRight: 0,
-      marginTop: 0,
-      marginBottom: 0
-    } : {}
     Object.assign(nativeProps, {
-      style: [styles.base, nativeProps.style, videoStyle],
+      style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
       src: {
         uri,
@@ -328,8 +313,24 @@ export default class Video extends Component {
       resizeMode: this.props.posterResizeMode || 'contain',
     };
 
+    //androidFullScreen property will only impact on android. It will be always false for iOS.
+    const videoStyle = this.state.androidFullScreen ? {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: Math.round(Dimensions.get('window').width),
+      height: Math.round(Dimensions.get('window').height),
+      backgroundColor: '#ffffff',
+      justifyContent: "center",
+      zIndex: 99999,
+      marginLeft: 0,  //margin: 0 - is not working properly. So, updated all the margin individually with 0.
+      marginRight: 0,
+      marginTop: 0,
+      marginBottom: 0
+    } : {}
+
     return (
-      <View style={nativeProps.style}>
+      <View style={[nativeProps.style, videoStyle]}>
         <RCTVideo
           ref={this._assignRoot}
           {...nativeProps}
