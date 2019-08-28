@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -96,7 +97,6 @@ import com.google.android.exoplayer2.util.Util;
 import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
-import com.imggaming.utils.DrawableUtils;
 import com.imggaming.utils.DensityPixels;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
@@ -403,6 +403,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         });
 
         setEpg(false); // default value
+
+        setupButton(playPauseButton);
+        setupButton(audioSubtitlesButton);
+        setupButton(scheduleButton);
     }
 
     @Override
@@ -1496,11 +1500,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         try {
             accentColor = Color.parseColor(color);
             previewSeekBarLayout.setTintColor(accentColor);
-
-            DrawableUtils.setTint(playPauseButton.getBackground(), accentColor);
-            DrawableUtils.setTint(audioSubtitlesButton.getBackground(), accentColor);
-            DrawableUtils.setTint(scheduleButton.getBackground(), accentColor);
-
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
@@ -1804,5 +1803,35 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setOverlayAutoHideTimeout(Long hideTimeout) {
         controlsAutoHideTimeout = hideTimeout;
+    }
+
+    private void setupButton(final ImageButton btn) {
+        btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                setButtonState(btn);
+            }
+        });
+        setButtonState(btn);
+    }
+
+    private void setButtonState(ImageButton button) {
+        if (button.hasFocus()) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1.1f);
+            anim.setDuration(100);
+            anim.start();
+
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1.1f);
+            anim2.setDuration(100);
+            anim2.start();
+        } else {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1f);
+            anim.setDuration(100);
+            anim.start();
+
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1f);
+            anim2.setDuration(100);
+            anim2.start();
+        }
     }
 }
