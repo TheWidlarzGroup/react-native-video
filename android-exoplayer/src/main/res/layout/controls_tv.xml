@@ -30,13 +30,10 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- TODO: Enable the following when adding the thumbnails -->
-            <!-- set width to @dimen/video_preview_width -->
-            <!-- set height to @dimen/video_preview_height -->
             <FrameLayout
                 android:id="@+id/previewFrameLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/video_preview_width"
+                android:layout_height="@dimen/video_preview_height"
                 android:visibility="gone">
 
                 <ImageView
@@ -94,8 +91,6 @@
                 android:contentDescription="@string/play_video"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
-                android:nextFocusRight="@+id/tvAudioSubtitlesBtn"
-                android:nextFocusDown="@+id/tvAudioSubtitlesBtn"
                 android:background="@null"
                 android:src="@drawable/tv_play_btn_selector">
             </ImageButton>
@@ -109,10 +104,6 @@
                 android:focusable="true"
                 android:focusableInTouchMode="false"
                 android:layout_marginRight="8dp"
-                android:nextFocusLeft="@+id/tvPlayPauseImageView"
-                android:nextFocusUp="@+id/tvPlayPauseImageView"
-                android:nextFocusRight="@+id/tvScheduleBtn"
-                android:nextFocusDown="@+id/tvScheduleBtn"
                 android:background="@null"
                 android:src="@drawable/tv_audio_subtitles_selector" />
 
@@ -124,8 +115,6 @@
                 android:scaleType="centerInside"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
-                android:nextFocusLeft="@+id/tvAudioSubtitlesBtn"
-                android:nextFocusUp="@+id/tvAudioSubtitlesBtn"
                 android:background="@null"
                 android:src="@drawable/tv_epg_selector" />
 

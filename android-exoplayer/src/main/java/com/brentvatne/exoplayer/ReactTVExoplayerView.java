@@ -913,7 +913,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     private void changeFocusedView() {
         if (live) {
-            if (audioSubtitlesButton.getVisibility() != View.VISIBLE) {
+            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE) {
                 controls.setFocusable(true);
                 controls.setFocusableInTouchMode(false);
                 post(new Runnable() {
