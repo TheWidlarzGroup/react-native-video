@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:background="#50ff0000"
+    tools:showIn="@layout/controls_tv">
+
+    <ImageView
+        android:id="@+id/seekIndicatorImageRewind"
+        android:src="@drawable/ic_seek_rewind"
+        android:layout_gravity="center_vertical"
+        android:scaleType="centerInside"
+        android:layout_width="14dp"
+        android:layout_height="9dp"
+        android:layout_marginRight="8dp"/>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/seekIndicatorLabel"
+        android:textAppearance="@style/TextAppearance.SeekIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="00:00:00 / 00:00:00" />
+
+    <ImageView
+        android:id="@+id/seekIndicatorImageForward"
+        android:src="@drawable/ic_seek_forward"
+        android:layout_gravity="center_vertical"
+        android:scaleType="centerInside"
+        android:layout_width="14dp"
+        android:layout_height="9dp"
+        android:visibility="gone"
+        android:layout_marginLeft="8dp"/>
+
+</LinearLayout>

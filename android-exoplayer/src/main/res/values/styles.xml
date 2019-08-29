@@ -50,4 +50,8 @@
         <item name="android:textSize">10sp</item>
     </style>
 
+    <style name="TextAppearance.SeekIndicator" parent="TextAppearance.PlayerText">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>
