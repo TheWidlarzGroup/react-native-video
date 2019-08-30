@@ -356,6 +356,8 @@ Platforms: all
 
 #### automaticallyWaitsToMinimizeStalling
 A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
+* **false** - Immediately starts playback
+* **true (default)** - Delays playback in order to minimize stalling
 
 Platforms: iOS
 
