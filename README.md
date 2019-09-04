@@ -571,7 +571,7 @@ Pitch algorithm for AVPlayerItem. [Apple documentation](https://developer.apple.
 
 By default on iOS pitch algorithm is **lowQualityZeroLatency** which has limitations in allowed playback speed.
 
-* **lowQualityZeroLatency** - A low quality and very low computationally intensive pitch algorithm. This algorithm is suitable for brief fast-forward and rewind effects as well as low quality voice. The rate is snapped to {0.5, 0.666667, 0.8, 1.0, 1.25, 1.5, 2.0}.
+* **lowQualityZeroLatency (default)** - A low quality and very low computationally intensive pitch algorithm. This algorithm is suitable for brief fast-forward and rewind effects as well as low quality voice. The rate is snapped to {0.5, 0.666667, 0.8, 1.0, 1.25, 1.5, 2.0}.
 * **spectral** - The highest quality, most computationally expensive pitch algorithm. This algorithm is suitable for voice. It uses a variable rate from 1/32 to 32.
 * **timeDomain** - A modest quality pitch algorithm that is less computationally intensive than the spectral algorithm. This algorithm is suitable for music. It uses a variable rate from 1/32 to 32.
 * **varispeed** - A high quality, no pitch correction algorithm. The pitch varies with rate and supports variable rates from 1/32 to 32.
