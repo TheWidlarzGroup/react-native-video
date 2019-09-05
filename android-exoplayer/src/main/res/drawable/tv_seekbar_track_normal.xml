@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset android:insetTop="1dp"
+    android:insetBottom="1dp"
+    android:drawable="@drawable/tv_seekbar_track"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

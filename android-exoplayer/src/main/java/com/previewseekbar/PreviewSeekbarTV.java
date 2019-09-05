@@ -74,18 +74,10 @@ public class PreviewSeekbarTV extends PreviewSeekBar {
     }
 
     private void handleThumbFocus(int color, boolean hasFocus) {
-        ColorStateList focused = ColorStateList.valueOf(color);
-        ColorStateList unfocused = ColorStateList.valueOf(Color.WHITE);
+        ColorStateList accent = ColorStateList.valueOf(color);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if (hasFocus) {
-                getThumb().setTintList(focused);
-                setProgressTintList(focused);
-            } else {
-                getThumb().setTintList(unfocused);
-                setProgressTintList(unfocused);
-            }
-            setProgressBackgroundTintMode(PorterDuff.Mode.SRC);
-            setProgressBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.dce_tv_player_seek_bar_bg)));
+            getThumb().setTintList(accent);
+            setProgressTintList(accent);
         } else {
             getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             Drawable progressDrawable = getProgressDrawable().mutate();

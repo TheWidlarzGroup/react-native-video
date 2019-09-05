@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/progressshape">
+        <clip>
+            <shape android:shape="rectangle">
+                <!--<size android:height="@dimen/previewseekbar_progress_height" />-->
+                <corners android:radius="@dimen/previewseekbar_progress_corner_radius" />
+                <solid android:color="#5353c9" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>

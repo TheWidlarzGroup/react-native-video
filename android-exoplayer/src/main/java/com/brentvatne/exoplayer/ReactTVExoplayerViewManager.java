@@ -17,6 +17,7 @@ import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_MIDDLE_CORE_CONTROLS = "stateMiddleCoreControls";
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED = "controlsVisibilityGestureDisabled";
+    private static final String PROP_TRANSLATIONS = "translations";
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -329,6 +331,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED)
     public void setControlsVisibilityGestureDisabled(final ReactTVExoplayerView videoView, final boolean disabled) {
         videoView.setControlsVisibilityGestureDisabled(disabled);
+    }
+
+    @ReactProp(name = PROP_TRANSLATIONS)
+    public void setTranslations(final ReactTVExoplayerView videoView, @Nullable ReadableMap translations) {
+        DiceLocalizedStrings.getInstance().updateTranslations(toStringMap(translations));
+        videoView.applyTranslations();
     }
 
     private boolean startsWithValidScheme(String uriString) {

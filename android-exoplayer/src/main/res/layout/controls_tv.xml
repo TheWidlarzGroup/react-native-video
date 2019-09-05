@@ -3,16 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#1a000000">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="8dp">
-    </LinearLayout>
+    android:background="#33000000">
 
     <LinearLayout
         android:id="@+id/tvBottomBarWidgetContainer"
@@ -25,8 +16,8 @@
             android:id="@+id/previewSeekBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -35,13 +26,14 @@
                 android:id="@+id/previewFrameLayout"
                 android:layout_width="@dimen/video_preview_width"
                 android:layout_height="@dimen/video_preview_height"
-                android:visibility="gone">
+                tools:background="#50ff0000"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#a00"
                     android:contentDescription="@string/preview_image" />
 
             </FrameLayout>
@@ -55,6 +47,7 @@
                 android:layout_below="@id/previewFrameLayout" />
 
             <com.previewseekbar.PreviewSeekbarTV
+                style="@style/TVSeekBar"
                 android:id="@+id/previewSeekBar"
                 android:paddingTop="8dp"
                 android:paddingBottom="17dp"
@@ -63,16 +56,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/seekIndicator"
-                android:maxHeight="5dp"
-                android:minHeight="5dp"
-                android:minWidth="5dp"
-                android:maxWidth="5dp"
-                android:splitTrack="false"
                 android:focusableInTouchMode="false"
                 android:focusable="true"
                 android:nextFocusRight="@+id/tvPlayPauseImageView"
-                android:nextFocusDown="@+id/tvPlayPauseImageView"
-                android:progressDrawable="@drawable/previewseekbar_progress_drawable">
+                android:nextFocusDown="@+id/tvPlayPauseImageView">
                 <requestFocus/>
             </com.previewseekbar.PreviewSeekbarTV>
 
@@ -83,9 +70,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="16dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:paddingLeft="32dp"
+            android:paddingRight="32dp"
             android:paddingTop="8dp">
 
             <ImageButton
@@ -112,6 +98,7 @@
                 android:focusableInTouchMode="false"
                 android:layout_marginRight="8dp"
                 android:background="@null"
+                android:contentDescription="Audio and subtitles"
                 android:src="@drawable/tv_audio_subtitles_selector" />
 
             <ImageButton
@@ -179,6 +166,21 @@
                 android:src="@drawable/ic_fullscreen_off"
                 android:visibility="gone"/>
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tvLabelContainerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="24dp">
+            <TextView
+                android:id="@+id/tvLabelView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                tools:text="Audio &amp; Subtitles" />
         </LinearLayout>
 
     </LinearLayout>

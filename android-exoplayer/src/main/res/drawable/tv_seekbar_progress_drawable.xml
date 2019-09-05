@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@android:id/background">
+
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <!--<item android:state_focused="true" android:drawable="@drawable/tv_seekbar_track_focused"/>-->
+            <item android:drawable="@drawable/tv_seekbar_track"/>
+        </selector>
+
+    </item>
+
+    <item
+        android:id="@android:id/progress">
+        <selector>
+            <item android:drawable="@drawable/previewseekbar_progress"/>
+        </selector>
+    </item>
+</layer-list>
