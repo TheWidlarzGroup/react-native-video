@@ -3,9 +3,15 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
+Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
+
 Version 4.x requires react-native >= 0.57.0
 
 Version 3.x requires react-native >= 0.40.0
+
+### Version 5.0.0 breaking changes
+
+Version 5 introduces breaking changes on Android, please check carefully the steps described there: [Android Installation](#Android-installation)
 
 ### Version 4.0.0 breaking changes
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
@@ -20,6 +26,11 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
 ## Table of Contents
 
 * [Installation](#installation)
+  * [iOS](#ios-installation)
+  * [tvOS](#tvos-installation)
+  * [Android](#android-installation)
+  * [Windows](#windows-installation)
+  * [react-native-dom](#react-native-dom-installation)
 * [Usage](#usage)
 * [iOS App Transport Security](#ios-app-transport-security)
 * [Audio Mixing](#audio-mixing)
@@ -42,7 +53,7 @@ yarn add react-native-video
 
 Then follow the instructions for your platform to link react-native-video into your project:
 
-### iOS
+### iOS installation
 <details>
   <summary>iOS details</summary>
 
@@ -74,7 +85,7 @@ end
 
 </details>
 
-### tvOS
+### tvOS installation
   <details>
   <summary>tvOS details</summary>
   
@@ -97,7 +108,7 @@ Select RCTVideo-tvOS
 <img src="./docs/tvOS-step-4.jpg" width="40%">
 </details>
 
-### Android
+### Android installation
 <details>
   <summary>Android details</summary>
 
@@ -121,7 +132,6 @@ include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
-
 #### **android/app/build.gradle**
 
 From version >= 5.0.0, you have to apply this changes:
@@ -130,7 +140,8 @@ From version >= 5.0.0, you have to apply this changes:
 dependencies {
    ...
     compile project(':react-native-video')
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
 
 }
 ```
@@ -165,7 +176,7 @@ protected List<ReactPackage> getPackages() {
 ```
 </details>
 
-### Windows
+### Windows installation
 <details>
   <summary>Windows details</summary>
 
@@ -215,7 +226,7 @@ using System.Collections.Generic;
 ```
 </details>
 
-### react-native-dom
+### react-native-dom installation
 <details>
   <summary>react-native-dom details</summary>
 
@@ -1285,6 +1296,38 @@ To enable audio to play in background on iOS the audio session needs to be set t
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
 ## Updating
+
+### Version 5.0.0
+
+Probably you want to update your gradle version:
+#### gradle-wrapper.properties
+```diff
+- distributionUrl=https\://services.gradle.org/distributions/gradle-3.3-all.zip
++ distributionUrl=https\://services.gradle.org/distributions/gradle-5.1.1-all.zip
+```
+
+#### **android/app/build.gradle**
+
+From version >= 5.0.0, you have to apply this changes:
+
+```diff
+dependencies {
+   ...
+    compile project(':react-native-video')
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
+}
+```
+
+#### **android/gradle.properties**
+
+Migrating to AndroidX (needs version >= 5.0.0):
+
+```gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+```
 
 ### Version 4.0.0
 

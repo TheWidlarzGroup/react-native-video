@@ -1,6 +1,9 @@
 ## Changelog
 
-### Version 5.0.0
+### Version 5.0.1
+* Fix AndroidX Support bad merge
+
+### Version 5.0.0 [Deprecated]
 * AndroidX Support
 
 ### Version 4.4.4
