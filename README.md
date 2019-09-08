@@ -59,6 +59,12 @@ Then follow the instructions for your platform to link react-native-video into y
 
 #### Standard Method
 
+**React Native 0.60 and above**
+
+Run `pod install` in the `ios` directory. Linking is not required in React Native 0.60 and above.
+
+**React Native 0.59 and below**
+
 Run `react-native link react-native-video` to link the react-native-video library.
 
 #### Using CocoaPods (required to enable caching)
