@@ -77,7 +77,7 @@ Video only:
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
++  `pod 'react-native-video', :podspec => '../node_modules/react-native-video/react-native-video.podspec'`
 end
 ```
 
@@ -85,7 +85,7 @@ Video with caching ([more info](docs/caching.md)):
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
++  `pod 'react-native-video/VideoCaching', :podspec => '../node_modules/react-native-video/react-native-video.podspec'`
 end
 ```
 
