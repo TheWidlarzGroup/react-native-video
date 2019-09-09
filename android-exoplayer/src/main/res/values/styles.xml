@@ -29,8 +29,7 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
-    <style name="TVSeekBar" parent="Widget.AppCompat.SeekBar">
-        <item name="android:theme">@style/TVSeekBarTheme</item>
+    <style name="TVBaseSeekBar" parent="Widget.AppCompat.SeekBar">
         <item name="android:progressDrawable">@drawable/tv_seekbar_progress_drawable</item>
         <item name="android:thumb">@drawable/tv_seekbar_thumb</item>
         <item name="android:thumbOffset">2dp</item>
@@ -38,11 +37,9 @@
         <item name="android:minHeight">5dp</item>
         <item name="android:minWidth">5dp</item>
         <item name="android:maxWidth">5dp</item>
-        <item name="android:splitTrack">false</item>
     </style>
 
-    <style name="TVSeekBarTheme" parent="DceTVPlayerTheme">
-        <item name="colorControlHighlight">#efffffff</item>
+    <style name="TVSeekBar" parent="TVBaseSeekBar">
     </style>
 
     <style name="DiceTracksDialogAnimation">

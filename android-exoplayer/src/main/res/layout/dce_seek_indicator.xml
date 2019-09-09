@@ -11,15 +11,17 @@
         android:src="@drawable/ic_seek_rewind"
         android:layout_gravity="center_vertical"
         android:scaleType="centerInside"
-        android:layout_width="14dp"
-        android:layout_height="9dp"
-        android:layout_marginRight="8dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"/>
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/seekIndicatorLabel"
         android:textAppearance="@style/TextAppearance.SeekIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:lines="1"
         android:layout_gravity="center_vertical"
         android:text="00:00:00 / 00:00:00" />
 
@@ -28,9 +30,10 @@
         android:src="@drawable/ic_seek_forward"
         android:layout_gravity="center_vertical"
         android:scaleType="centerInside"
-        android:layout_width="14dp"
-        android:layout_height="9dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:visibility="gone"
-        android:layout_marginLeft="8dp"/>
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
 </LinearLayout>

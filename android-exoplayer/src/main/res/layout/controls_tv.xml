@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#33000000">
+    android:background="#72000000">
 
     <LinearLayout
         android:id="@+id/tvBottomBarWidgetContainer"
@@ -20,8 +20,8 @@
             android:id="@+id/previewSeekBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -54,9 +54,9 @@
                 style="@style/TVSeekBar"
                 android:id="@+id/previewSeekBar"
                 android:paddingTop="8dp"
-                android:paddingBottom="17dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginRight="0dp"
+                android:paddingBottom="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/seekIndicator"
@@ -128,7 +128,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:paddingBottom="1dp"
+                android:paddingRight="8dp"
                 android:text="00:00:00 / 00:00:00"
                 android:textAlignment="center"
                 android:ellipsize="end"
@@ -152,23 +152,6 @@
                 android:paddingRight="10dp"
                 android:text="@string/live"
                 android:textAlignment="center" />
-
-            <ImageButton
-                android:id="@+id/bottomRightIconButton"
-                android:focusableInTouchMode="false"
-                android:focusable="false"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:background="#00000000"
-                android:contentDescription="@string/fullscreen"
-                android:gravity="center"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:src="@drawable/ic_fullscreen_off"
-                android:visibility="gone"/>
 
         </LinearLayout>
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TVSeekBar" parent="TVBaseSeekBar">
+        <item name="android:splitTrack">false</item>
+        <item name="android:background">@drawable/tv_seekbar_background</item>
+    </style>
+</resources>

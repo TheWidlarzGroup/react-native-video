@@ -60,4 +60,13 @@ public class DceSeekIndicator extends LinearLayout {
     public void setLabel(String label) {
         labelTextView.setText(label);
     }
+
+    public int getRewImageWidth() {
+        return rewImageView.getWidth();
+    }
+
+    public int getForwardImageWidth() {
+        return forwardImageView.getWidth();
+    }
+
 }
