@@ -30,6 +30,8 @@ dependencies {
     compile "com.android.support:appcompat-v7:${safeExtGet('supportLibVersion', '+')}"
     compile "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
 
+    compile 'com.android.support.constraint:constraint-layout:1.1.3'
+
     compile('com.google.android.exoplayer:extension-okhttp:2.8.2') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
