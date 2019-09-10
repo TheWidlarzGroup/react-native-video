@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -96,7 +98,6 @@ import com.google.android.exoplayer2.util.Util;
 import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
-import com.imggaming.utils.DrawableUtils;
 import com.imggaming.utils.DensityPixels;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
@@ -403,6 +404,29 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         });
 
         setEpg(false); // default value
+
+        setupButton(playPauseButton);
+        setupButton(audioSubtitlesButton);
+        setupButton(scheduleButton);
+
+        // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
+        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                manuallyLayoutChildren();
+                getViewTreeObserver().dispatchOnGlobalLayout();
+                Choreographer.getInstance().postFrameCallback(this);
+            }
+        });
+    }
+
+    private void manuallyLayoutChildren() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        }
     }
 
     @Override
@@ -894,7 +918,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
                 Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.GONE);
+                audioSubtitlesButton.setVisibility(View.VISIBLE);
             } else {
                 Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
                 audioSubtitlesButton.setVisibility(View.GONE);
@@ -909,7 +933,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     private void changeFocusedView() {
         if (live) {
-            if (audioSubtitlesButton.getVisibility() != View.VISIBLE) {
+            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE) {
                 controls.setFocusable(true);
                 controls.setFocusableInTouchMode(false);
                 post(new Runnable() {
@@ -1496,11 +1520,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         try {
             accentColor = Color.parseColor(color);
             previewSeekBarLayout.setTintColor(accentColor);
-
-            DrawableUtils.setTint(playPauseButton.getBackground(), accentColor);
-            DrawableUtils.setTint(audioSubtitlesButton.getBackground(), accentColor);
-            DrawableUtils.setTint(scheduleButton.getBackground(), accentColor);
-
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
@@ -1804,5 +1823,35 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setOverlayAutoHideTimeout(Long hideTimeout) {
         controlsAutoHideTimeout = hideTimeout;
+    }
+
+    private void setupButton(final ImageButton btn) {
+        btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                setButtonState(btn);
+            }
+        });
+        setButtonState(btn);
+    }
+
+    private void setButtonState(ImageButton button) {
+        if (button.hasFocus()) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1.1f);
+            anim.setDuration(100);
+            anim.start();
+
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1.1f);
+            anim2.setDuration(100);
+            anim2.start();
+        } else {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1f);
+            anim.setDuration(100);
+            anim.start();
+
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1f);
+            anim2.setDuration(100);
+            anim2.start();
+        }
     }
 }

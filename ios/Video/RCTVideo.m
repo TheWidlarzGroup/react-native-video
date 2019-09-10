@@ -1522,20 +1522,13 @@ dispatch_queue_t delegateQueue;
 
 - (void)setControls:(BOOL)controls
 {
-  if( _controls != controls || (!_playerLayer && !_playerViewController) )
+  if( _controls != controls || !_playerViewController )
   {
-    _controls = controls;
-    if( _controls )
-    {
-      [self removePlayerLayer];
+    if(!_playerViewController) {
       [self usePlayerViewController];
     }
-    else
-    {
-      [_playerViewController.view removeFromSuperview];
-      _playerViewController = nil;
-      [self usePlayerLayer];
-    }
+    _controls = controls;
+    _playerViewController.showsPlaybackControls = _controls;
   }
 }
 

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#1a000000">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -29,13 +30,10 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- TODO: Enable the following when adding the thumbnails -->
-            <!-- set width to @dimen/video_preview_width -->
-            <!-- set height to @dimen/video_preview_height -->
             <FrameLayout
                 android:id="@+id/previewFrameLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/video_preview_width"
+                android:layout_height="@dimen/video_preview_height"
                 android:visibility="gone">
 
                 <ImageView
@@ -81,23 +79,20 @@
             android:paddingBottom="16dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:paddingTop="8dp"
-            android:background="@drawable/bg_bottom_bar">
+            android:paddingTop="8dp">
 
             <ImageButton
                 android:id="@+id/tvPlayPauseImageView"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="5dp"
-                android:scaleType="fitXY"
+                android:scaleType="centerInside"
                 android:layout_marginRight="8dp"
                 android:contentDescription="@string/play_video"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
-                android:nextFocusRight="@+id/tvAudioSubtitlesBtn"
-                android:nextFocusDown="@+id/tvAudioSubtitlesBtn"
-                android:src="@drawable/tv_play_btn_selector"
-                android:background="@drawable/tv_btn_bg_selector">
+                android:background="@null"
+                android:src="@drawable/tv_play_btn_selector">
             </ImageButton>
 
             <ImageButton
@@ -105,29 +100,23 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="5dp"
-                android:scaleType="fitXY"
+                android:scaleType="centerInside"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
                 android:layout_marginRight="8dp"
-                android:nextFocusLeft="@+id/tvPlayPauseImageView"
-                android:nextFocusUp="@+id/tvPlayPauseImageView"
-                android:nextFocusRight="@+id/tvScheduleBtn"
-                android:nextFocusDown="@+id/tvScheduleBtn"
-                android:src="@drawable/tv_audio_subtitles_selector"
-                android:background="@drawable/tv_btn_bg_selector" />
+                android:background="@null"
+                android:src="@drawable/tv_audio_subtitles_selector" />
 
             <ImageButton
                 android:id="@+id/tvScheduleBtn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="5dp"
-                android:scaleType="fitXY"
+                android:scaleType="centerInside"
                 android:focusable="true"
                 android:focusableInTouchMode="false"
-                android:nextFocusLeft="@+id/tvAudioSubtitlesBtn"
-                android:nextFocusUp="@+id/tvAudioSubtitlesBtn"
-                android:src="@drawable/ic_tv_schedule"
-                android:background="@drawable/tv_btn_bg_selector" />
+                android:background="@null"
+                android:src="@drawable/tv_epg_selector" />
 
             <View
                 android:layout_width="0dp"
