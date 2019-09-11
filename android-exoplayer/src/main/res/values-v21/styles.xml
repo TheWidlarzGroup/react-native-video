@@ -2,6 +2,6 @@
 <resources>
     <style name="TVSeekBar" parent="TVBaseSeekBar">
         <item name="android:splitTrack">false</item>
-        <item name="android:background">@drawable/tv_seekbar_background</item>
+        <item name="android:background">@null</item>
     </style>
 </resources>
