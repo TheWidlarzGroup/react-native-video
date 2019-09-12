@@ -76,10 +76,8 @@ public class PreviewSeekbarTV extends PreviewSeekBar {
     private void handleThumbFocus(int color, boolean hasFocus) {
         ColorStateList accent = ColorStateList.valueOf(color);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            getThumb().setTintList(accent);
             setProgressTintList(accent);
         } else {
-            getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             Drawable progressDrawable = getProgressDrawable().mutate();
             progressDrawable.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
             setProgressDrawable(progressDrawable);
