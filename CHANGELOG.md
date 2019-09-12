@@ -1,5 +1,7 @@
 ## Changelog
 
+* Get onBandwidthUpdate working on iOS (iOS) [#1720](https://github.com/react-native-community/react-native-video/pull/1745)
+
 ### Version 5.0.2
 * Fix crash when RCTVideo's superclass doesn't observe the keyPath 'frame' (iOS) [#1720](https://github.com/react-native-community/react-native-video/pull/1720)
 
