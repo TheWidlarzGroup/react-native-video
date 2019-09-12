@@ -17,6 +17,7 @@ import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,17 +59,15 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_COLOR_PROGRESS_BAR = "colorProgressBar";
-    private static final String PROP_ICON_BOTTOM_RIGHT = "iconBottomRight";
     private static final String PROP_LIVE = "live";
     private static final String PROP_EPG = "hasEpg";
     private static final String PROP_CONTROLS_OPACITY = "controlsOpacity";
-    private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_PROGRESS_BAR_MARGIN_BOTTOM = "progressBarMarginBottom";
     private static final String PROP_STATE_OVERLAY = "stateOverlay";
     private static final String PROP_OVERLAY_AUTO_HIDE_TIMEOUT = "overlayAutoHideTimeout";
     private static final String PROP_STATE_MIDDLE_CORE_CONTROLS = "stateMiddleCoreControls";
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
-    private static final String PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED = "controlsVisibilityGestureDisabled";
+    private static final String PROP_TRANSLATIONS = "translations";
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -248,11 +247,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         videoView.setColorProgressBar(color);
     }
 
-    @ReactProp(name = PROP_ICON_BOTTOM_RIGHT)
-    public void setIconBottomRight(final ReactTVExoplayerView videoView, final String icon) {
-        videoView.setIconBottomRight(icon);
-    }
-
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)
     public void setLive(final ReactTVExoplayerView videoView, final boolean live) {
         videoView.setLive(live);
@@ -266,11 +260,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_CONTROLS_OPACITY)
     public void setControlsOpacity(final ReactTVExoplayerView videoView, final float opacity) {
         videoView.setControlsOpacity(opacity);
-    }
-
-    @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)
-    public void setFullscreen(final ReactTVExoplayerView videoView, final boolean fullscreen) {
-        videoView.setFullscreen(fullscreen);
     }
 
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = false)
@@ -326,9 +315,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         videoView.setStateProgressBar(state);
     }
 
-    @ReactProp(name = PROP_CONTROLS_VISIBILITY_GESTURE_DISABLED)
-    public void setControlsVisibilityGestureDisabled(final ReactTVExoplayerView videoView, final boolean disabled) {
-        videoView.setControlsVisibilityGestureDisabled(disabled);
+    @ReactProp(name = PROP_TRANSLATIONS)
+    public void setTranslations(final ReactTVExoplayerView videoView, @Nullable ReadableMap translations) {
+        DiceLocalizedStrings.getInstance().updateTranslations(toStringMap(translations));
+        videoView.applyTranslations();
     }
 
     private boolean startsWithValidScheme(String uriString) {

@@ -6,6 +6,7 @@
         <item name="android:textAppearance">@style/TextAppearance.PlayerText</item>
         <item name="alertDialogTheme">@style/DiceTracksDialogTheme</item>
         <item name="alertDialogStyle">@style/AlertDialog.AppCompat</item>
+        <item name="seekBarStyle">@style/TVSeekBar</item>
     </style>
 
     <style name="DiceTracksDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -28,6 +29,19 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <style name="TVBaseSeekBar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:progressDrawable">@drawable/tv_seekbar_progress_drawable</item>
+        <item name="android:thumb">@drawable/tv_seekbar_thumb</item>
+        <item name="android:thumbOffset">8dp</item>
+        <item name="android:maxHeight">5dp</item>
+        <item name="android:minHeight">5dp</item>
+        <item name="android:minWidth">5dp</item>
+        <item name="android:maxWidth">5dp</item>
+    </style>
+
+    <style name="TVSeekBar" parent="TVBaseSeekBar">
+    </style>
+
     <style name="DiceTracksDialogAnimation">
         <item name="android:windowEnterAnimation">@anim/slide_in_right</item>
         <item name="android:windowExitAnimation">@anim/slide_out_right</item>
@@ -48,6 +62,10 @@
 
     <style name="TextAppearance.LiveText" parent="TextAppearance.PlayerText">
         <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="TextAppearance.SeekIndicator" parent="TextAppearance.PlayerText">
+        <item name="android:textSize">14sp</item>
     </style>
 
 </resources>

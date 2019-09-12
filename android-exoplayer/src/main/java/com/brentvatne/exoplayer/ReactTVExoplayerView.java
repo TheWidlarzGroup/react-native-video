@@ -1,11 +1,13 @@
 package com.brentvatne.exoplayer;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -14,17 +16,14 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.view.GestureDetectorCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.CaptioningManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -98,7 +97,10 @@ import com.google.android.exoplayer2.util.Util;
 import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
+import com.imggaming.translations.DiceLocalizedStrings;
+import com.imggaming.translations.DiceLocalizedStrings.StringId;
 import com.imggaming.utils.DensityPixels;
+import com.imggaming.widgets.DceSeekIndicator;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
 import com.previewseekbar.base.PreviewView;
@@ -135,19 +137,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private PreviewSeekBarLayout previewSeekBarLayout;
     private LinearLayout bottomBarWidgetContainer;
     private TextView currentTextView;
-    private TextView durationTextView;
-    private TextView dividerTextView;
     private TextView liveTextView;
     private ImageButton playPauseButton;
-    private ImageButton bottomRightIconButton;
     private View controls;
-    private View bottomBarWidget;
+    private LinearLayout bottomBarWidget;
+    private TextView labelTextView;
+    private View labelTextContainer;
+    private DceSeekIndicator seekIndicator;
     private ImageButton audioSubtitlesButton;
     private ImageButton scheduleButton;
-    private GestureDetectorCompat gestureDetector;
-    private long startTouchActionDownTime;
-    private float eventDownX;
-    private float eventDownY;
 
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
@@ -159,7 +157,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
-    private boolean isFullscreen;
     private boolean isInBackground;
     private boolean isPaused;
     private boolean isBuffering;
@@ -182,7 +179,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean disableFocus;
     private boolean live = false;
     private boolean hasEpg;
-    private boolean controlsVisibilityGestureDisabled = false;
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
@@ -234,6 +230,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         }
     };
+
+    private Runnable seekIndicatorRunnable = new Runnable() {
+        @Override
+        public void run() {
+            animateHideView(seekIndicator, 400);
+            animateShowView(currentTextView, 400);
+        }
+    };
+
     private boolean playInBackground = false;
 
     //Drm
@@ -258,23 +263,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-        GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (!controlsVisibilityGestureDisabled) {
-                    eventEmitter.touchActionMove(distanceX, distanceY);
-                    float newTranslationY = bottomBarWidget.getTranslationY() + distanceY;
-                    if (newTranslationY > 0 && newTranslationY < bottomBarWidget.getHeight()) {
-                        bottomBarWidget.setTranslationY(newTranslationY);
-                        float alpha = 1 - newTranslationY / bottomBarWidget.getHeight();
-                        bottomBarWidgetContainer.setAlpha(alpha);
-                        playPauseButton.setAlpha(alpha);
-                    }
-                }
-                return true;
-            }
-        };
-        gestureDetector = new GestureDetectorCompat(themedReactContext, gestureListener);
+
         setPausedModifier(false);
 
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
@@ -291,23 +280,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN: {
-                startTouchActionDownTime = System.currentTimeMillis();
-                eventDownX = event.getX();
-                eventDownY = event.getY();
-                break;
-            }
-            case MotionEvent.ACTION_UP: {
-                eventEmitter.touchActionUp();
-            }
-        }
-        return true;
     }
 
     private void createViews() {
@@ -352,16 +324,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 setPausedModifier(!isPaused);
             }
         });
-        bottomRightIconButton = (ImageButton) findViewById(R.id.bottomRightIconButton);
-        bottomRightIconButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                eventEmitter.bottomRightIconClick();
-            }
-        });
-        durationTextView = (TextView) controls.findViewById(R.id.durationTextView);
         currentTextView = (TextView) controls.findViewById(R.id.currentTimeTextView);
-        dividerTextView = controls.findViewById(R.id.timeDividerTextView);
         liveTextView = (TextView) controls.findViewById(R.id.liveTextView);
         previewSeekBarLayout = (PreviewSeekBarLayout) controls.findViewById(R.id.previewSeekBarLayout);
         previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
@@ -403,6 +366,18 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         });
 
+        labelTextContainer = findViewById(R.id.tvLabelContainerView);
+        labelTextView = findViewById(R.id.tvLabelView);
+
+        bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
+            @Override
+            public void onGlobalFocusChanged(View oldFocus, View newFocus) {
+                Log.d(TAG, "onGlobalFocusChanged()");
+
+                updateLabelView(newFocus);
+            }
+        });
+
         setEpg(false); // default value
 
         setupButton(playPauseButton);
@@ -418,6 +393,20 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 Choreographer.getInstance().postFrameCallback(this);
             }
         });
+
+        seekIndicator = findViewById(R.id.seekIndicator);
+    }
+
+    private void updateLabelView(View newFocus) {
+        if (newFocus == playPauseButton) {
+            moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
+        } else if (newFocus == audioSubtitlesButton) {
+            moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
+        } else if (newFocus == scheduleButton) {
+            moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
+        } else {
+            labelTextView.setVisibility(INVISIBLE);
+        }
     }
 
     private void manuallyLayoutChildren() {
@@ -550,6 +539,21 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         Log.d(TAG, "activateMediaSession()");
         mediaSessionConnector.setPlayer(player, null);
         mediaSession.setActive(true);
+        mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public void onPlay() {
+                super.onPlay();
+                Log.d(TAG, "MediaSession onPlay()");
+                setPausedModifier(false);
+            }
+
+            @Override
+            public void onPause() {
+                super.onPause();
+                Log.d(TAG, "MediaSession onPause()");
+                setPausedModifier(true);
+            }
+        });
     }
 
     private void deactivateMediaSession() {
@@ -798,10 +802,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void onStopPlayback() {
-        if (isFullscreen) {
-            setFullscreen(false);
-        }
         setKeepScreenOn(false);
+        keyPressTime = null;
         audioManager.abandonAudioFocus(this);
     }
 
@@ -887,7 +889,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 setupProgressBarSeekListener();
                 videoLoaded();
                 setupSubtitlesButton();
-                isPaused = !playWhenReady;
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
@@ -928,6 +929,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             audioSubtitlesButton.setVisibility(View.GONE);
         }
 
+        post(new Runnable() {
+            @Override
+            public void run() {
+                updateLabelView(bottomBarWidget.getFocusedChild());
+            }
+        });
+
         changeFocusedView();
     }
 
@@ -962,22 +970,31 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
         long duration = player.getDuration();
 
-        if (duration != C.TIME_UNSET && durationTextView != null) {
+        progressBar.setProgress((int) currentMillis);
+        progressBar.setMax((int) duration);
+
+        String positionString = getSeekBarPositionString(currentMillis, duration);
+
+        currentTextView.setText(positionString);
+        seekIndicator.setLabel(positionString);
+    }
+
+    private String getSeekBarPositionString(long currentMillis, long duration) {
+        String durationString = null;
+
+        if (duration != C.TIME_UNSET) {
             int secs = (int) (duration / 1000) % 60;
             int mins = (int) ((duration / (1000 * 60)) % 60);
             int hours = (int) ((duration / (1000 * 60 * 60)) % 24);
-            String durationString = "";
+
             if (hours > 0) {
                 durationString = String.format(Locale.UK, "%02d:%02d:%02d", hours, mins, secs);
             } else {
                 durationString = String.format(Locale.UK, "%02d:%02d", mins, secs);
             }
-
-            durationTextView.setText(durationString);
-            progressBar.setMax((int) duration);
         }
 
-        if (currentMillis != C.TIME_UNSET && currentTextView != null) {
+        if (currentMillis != C.TIME_UNSET && durationString != null) {
             int secs = (int) (currentMillis / 1000) % 60;
             int mins = (int) ((currentMillis / (1000 * 60)) % 60);
             int hours = (int) ((currentMillis / (1000 * 60 * 60)) % 24);
@@ -985,17 +1002,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             if (duration != C.TIME_UNSET) {
                 showHours = ((int) ((duration / (1000 * 60 * 60)) % 24)) > 0;
             }
-
-            String currentString = "";
+            String currentString;
             if (hours > 0 || showHours) {
                 currentString = String.format(Locale.UK, "%02d:%02d:%02d", hours, mins, secs);
             } else {
                 currentString = String.format(Locale.UK, "%02d:%02d", mins, secs);
             }
-            currentTextView.setText(currentString);
-            progressBar.setProgress((int) currentMillis);
+
+            return String.format(Locale.UK, "%s / %s", currentString, durationString);
         }
 
+        return null;
     }
 
     private void setupProgressBarSeekListener() {
@@ -1030,6 +1047,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             loadVideoStarted = false;
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
+            seekIndicator.setLabelMaxText(getSeekBarPositionString(0, player.getDuration()));
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -1407,6 +1425,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             } else {
                 playPauseButton.setImageResource(R.drawable.tv_pause_btn_selector);
             }
+            updateLabelView(bottomBarWidget.findFocus());
         }
 
         if (isPaused || isBuffering) {
@@ -1458,51 +1477,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         this.disableFocus = disableFocus;
     }
 
-    public void setFullscreen(boolean fullscreen) {
-        if (fullscreen == isFullscreen) {
-            return; // Avoid generating events when nothing is changing
-        }
-        isFullscreen = fullscreen;
-
-        Activity activity = themedReactContext.getCurrentActivity();
-        if (activity == null) {
-            return;
-        }
-        Window window = activity.getWindow();
-        View decorView = window.getDecorView();
-        int uiOptions;
-        if (isFullscreen) {
-            if (Util.SDK_INT >= 19) { // 4.4+
-                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | SYSTEM_UI_FLAG_FULLSCREEN;
-            } else {
-                uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | SYSTEM_UI_FLAG_FULLSCREEN;
-            }
-            eventEmitter.fullscreenWillPresent();
-            decorView.setSystemUiVisibility(uiOptions);
-            eventEmitter.fullscreenDidPresent();
-        } else {
-            uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
-            eventEmitter.fullscreenWillDismiss();
-            decorView.setSystemUiVisibility(uiOptions);
-            eventEmitter.fullscreenDidDismiss();
-        }
-
-        LayoutParams params = (LayoutParams) bottomBarWidgetContainer.getLayoutParams();
-        if (fullscreen) {
-            playPauseButton.setScaleX(1f);
-            playPauseButton.setScaleY(1f);
-            params.setMargins(DensityPixels.dpToPx(16), 0, DensityPixels.dpToPx(16), 0);
-        } else {
-            playPauseButton.setScaleX(0.8f);
-            playPauseButton.setScaleY(0.8f);
-            params.setMargins(0, 0, 0, 0);
-        }
-        bottomBarWidgetContainer.setLayoutParams(params);
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         exoPlayerView.setUseTextureView(useTextureView);
     }
@@ -1527,15 +1501,20 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setLive(final boolean live) {
         this.live = live;
-        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null && durationTextView != null) {
+        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null) {
             liveTextView.setVisibility(live ? VISIBLE : GONE);
             @IntegerRes
             int controlsVisibility = live ? GONE : VISIBLE;
             currentTextView.setVisibility(controlsVisibility);
             previewSeekBarLayout.setVisibility(controlsVisibility);
-            durationTextView.setVisibility(controlsVisibility);
-            dividerTextView.setVisibility(controlsVisibility);
             playPauseButton.setVisibility(controlsVisibility);
+
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    updateLabelView(bottomBarWidget.getFocusedChild());
+                }
+            });
         }
 
         changeFocusedView();
@@ -1544,6 +1523,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     public void setEpg(boolean hasEpg) {
         this.hasEpg = hasEpg;
         scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
+        post(new Runnable() {
+            @Override
+            public void run() {
+                updateLabelView(bottomBarWidget.findFocus());
+            }
+        });
     }
 
     public void setControlsOpacity(final float opacity) {
@@ -1555,27 +1540,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
         bottomBarWidget.setTranslationY(newTranslationY);
         controls.setAlpha(opacity);
-    }
-
-    public void setIconBottomRight(@Nullable String icon) {
-        if (icon != null) {
-            switch (icon) {
-                case "fullscreenOn":
-                    bottomRightIconButton.setImageResource(R.drawable.ic_fullscreen_on);
-                    break;
-                case "fullscreenOff":
-                    bottomRightIconButton.setImageResource(R.drawable.ic_fullscreen_off);
-                    break;
-                case "zoomCompress":
-                    bottomRightIconButton.setImageResource(R.drawable.ic_zoom_compress);
-                    break;
-                case "zoomExpand":
-                    bottomRightIconButton.setImageResource(R.drawable.ic_zoom_expand);
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
     public void setProgressBarMarginBottom(int marginBottom) {
@@ -1605,26 +1569,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
         bottomBarWidget.setTranslationY(newTranslationY);
 
-
         bottomBarWidgetContainer.animate().alpha(alpha).start();
         bottomBarWidgetContainer.setEnabled(enabled);
         bottomBarWidget.setAlpha(alpha);
         currentTextView.setEnabled(enabled);
         currentTextView.setAlpha(alpha);
-        durationTextView.setEnabled(enabled);
-        durationTextView.setAlpha(alpha);
         previewSeekBarLayout.setEnabled(enabled);
         previewSeekBarLayout.setAlpha(alpha);
-        bottomRightIconButton.setEnabled(enabled);
-        bottomRightIconButton.setAlpha(alpha);
         ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
         if (progressBar != null) {
             progressBar.setEnabled(enabled);
         }
-    }
-
-    public void setControlsVisibilityGestureDisabled(final boolean disabled) {
-        controlsVisibilityGestureDisabled = disabled;
     }
 
     private void animateControls(final float opacity, final long duration) {
@@ -1720,6 +1675,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                     playPauseButton.requestFocus();
+                    // Media session will pause the player
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
@@ -1753,7 +1709,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                             increment = 1;
                         }
 
-                        ((SeekBar) previewSeekBarLayout.getPreviewView()).setKeyProgressIncrement(increment * 1000);
+                        SeekBar seekbar = ((SeekBar) previewSeekBarLayout.getPreviewView());
+
+                        seekbar.setKeyProgressIncrement(increment * 1000);
+
+                        boolean isRew = event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_REWIND || event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT;
+                        seekIndicator.show(isRew, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 500, seekIndicatorRunnable);
+                        moveSeekBarIndicator(seekbar, isRew);
+
+                        animateHideView(currentTextView, 200);
                     }
 
                     keyNotHandled = false;
@@ -1770,7 +1734,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                             position = 0;
                         }
                         player.seekTo(position);
-                        updateProgressControl(position);
+                        //updateProgressControl(position);
+                        seekIndicator.show(true, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
+                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), true);
+                        animateHideView(currentTextView, 200);
                         break;
                     }
                     case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
@@ -1780,17 +1747,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                             position = player.getDuration();
                         }
                         player.seekTo(position);
-                        updateProgressControl(position);
+                        //updateProgressControl(position);
+                        seekIndicator.show(false, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
+                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), false);
+                        animateHideView(currentTextView, 200);
                         break;
                     }
-                }
-            }
-
-            if (playPauseButton.isFocused()) {
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        setPausedModifier(!isPaused);
-                        return true;
                 }
             }
 
@@ -1803,6 +1765,38 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
 
         return super.dispatchKeyEvent(event);
+    }
+
+    private void moveSeekBarIndicator(SeekBar seekbar, boolean isRew) {
+        int paddingLeft = previewSeekBarLayout.getPaddingLeft();
+        int indicatorWidth = seekIndicator.getMeasuredWidth();
+        Rect bounds = seekbar.getThumb().getBounds();
+        int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getPaddingLeft();
+
+        //int indicatorX = thumbPos - (indicatorWidth / 2);
+        int indicatorX = !isRew ?
+                    thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
+                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
+
+        if (indicatorX < paddingLeft) {
+            indicatorX = paddingLeft;
+        } else if (indicatorX + indicatorWidth > previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight()) {
+            indicatorX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
+        }
+
+        int thumbRectLeft = bounds.left;
+        int thumbRecCentre = bounds.centerX();
+        int thumbOffset = seekbar.getThumbOffset();
+        Log.d(TAG, "moveSeekBarIndicator()" +
+                " thumbRectLeft = " + thumbRectLeft +
+                " thumbRecCentre = " + thumbRecCentre +
+                " thumbOffset = " + thumbOffset +
+                " thumbPos=" + thumbPos +
+                " indicatorWidth=" + indicatorWidth +
+                " indicatorX=" + indicatorX);
+
+        seekIndicator.setX(indicatorX);
+        animateShowView(seekIndicator, 0);
     }
 
     public void showOverlay() {
@@ -1835,7 +1829,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         setButtonState(btn);
     }
 
-    private void setButtonState(ImageButton button) {
+    private void setButtonState(final ImageButton button) {
         if (button.hasFocus()) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1.1f);
             anim.setDuration(100);
@@ -1853,5 +1847,55 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             anim2.setDuration(100);
             anim2.start();
         }
+    }
+
+    private void moveLabelView(ImageButton button, String label) {
+        int paddingLeft = labelTextContainer.getPaddingLeft();
+        int buttonCentre = (int) (button.getX() + (button.getWidth() / 2));
+        int labelWidth = (int) labelTextView.getPaint().measureText(label);
+
+        int labelX = buttonCentre - (labelWidth / 2);
+        if (labelX < paddingLeft) {
+            labelX = paddingLeft;
+        } else if (labelX + labelWidth > labelTextContainer.getWidth()) {
+            labelX = labelTextContainer.getMeasuredWidth() - labelWidth;
+        }
+        //Log.d(TAG, "moveLabelView() start = " + button.getX() + " buttonCentre=" + buttonCentre + " labelWidth=" + labelWidth + " labelX=" + labelX);
+
+        labelTextView.setWidth(labelWidth);
+        labelTextView.setX(labelX);
+        labelTextView.setText(label);
+        labelTextView.setAlpha(0.0f);
+        animateShowView(labelTextView, 100);
+    }
+
+    public void animateHideView(final View view, int duration) {
+        view.animate()
+                .alpha(0.0f)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        view.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    public void animateShowView(final View view, int duration) {
+        view.animate()
+                .alpha(1.0f)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        view.setVisibility(View.VISIBLE);
+                    }
+                });
+    }
+
+    public void applyTranslations() {
+        updateLabelView(bottomBarWidget.getFocusedChild());
     }
 }
