@@ -50,7 +50,7 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoBuffer, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTDirectEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onBandwidthUpdate, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoBandwidthUpdate, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTDirectEventBlock);
