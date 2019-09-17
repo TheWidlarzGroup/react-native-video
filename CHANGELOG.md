@@ -1,6 +1,15 @@
 ## Changelog
 
-### next
+### Version 5.0.2
+* Fix crash when RCTVideo's superclass doesn't observe the keyPath 'frame' (iOS) [#1720](https://github.com/react-native-community/react-native-video/pull/1720)
+
+### Version 5.0.1
+* Fix AndroidX Support bad merge
+
+### Version 5.0.0 [Deprecated]
+* AndroidX Support
+
+### Version 4.4.4
 * Handle racing conditions when props are setted on exoplayer
 * Add support pitch algorithm on iOS. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
 

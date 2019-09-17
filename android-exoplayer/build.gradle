@@ -28,9 +28,9 @@ dependencies {
     }
 
     // All support libs must use the same version
-    implementation "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '28.0.0')}"
-    implementation "com.android.support:support-compat:${safeExtGet('supportLibVersion', '28.0.0')}"
-    implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '28.0.0')}"
+    implementation "androidx.annotation:annotation:1.0.0"
+    implementation "androidx.core:core:1.0.0"
+    implementation "androidx.media:media:1.0.0"
 
     implementation('com.google.android.exoplayer:extension-okhttp:2.9.3') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
