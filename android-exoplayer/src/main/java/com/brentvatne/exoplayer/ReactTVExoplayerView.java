@@ -1785,17 +1785,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             indicatorX = paddingRightX;
         }
 
-//        int thumbRectLeft = bounds.left;
-//        int thumbRecCentre = bounds.centerX();
-//        int thumbOffset = seekbar.getThumbOffset();
-//        Log.d(TAG, "moveSeekBarIndicator()" +
-//                " thumbRectLeft = " + thumbRectLeft +
-//                " thumbRecCentre = " + thumbRecCentre +
-//                " thumbOffset = " + thumbOffset +
-//                " thumbPos=" + thumbPos +
-//                " indicatorWidth=" + indicatorWidth +
-//                " indicatorX=" + indicatorX);
-
         seekIndicator.setX(indicatorX);
         animateShowView(seekIndicator, 0);
     }
