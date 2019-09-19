@@ -1768,32 +1768,22 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void moveSeekBarIndicator(SeekBar seekbar, boolean isRew) {
-        int paddingLeft = previewSeekBarLayout.getPaddingLeft();
+        int paddingLeftX = previewSeekBarLayout.getPaddingLeft();
         int indicatorWidth = seekIndicator.getMeasuredWidth();
         Rect bounds = seekbar.getThumb().getBounds();
-        int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getPaddingLeft();
+        int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
 
-        //int indicatorX = thumbPos - (indicatorWidth / 2);
         int indicatorX = !isRew ?
                     thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
                 : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
 
-        if (indicatorX < paddingLeft) {
-            indicatorX = paddingLeft;
-        } else if (indicatorX + indicatorWidth > previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight()) {
-            indicatorX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
-        }
+        int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
 
-        int thumbRectLeft = bounds.left;
-        int thumbRecCentre = bounds.centerX();
-        int thumbOffset = seekbar.getThumbOffset();
-        Log.d(TAG, "moveSeekBarIndicator()" +
-                " thumbRectLeft = " + thumbRectLeft +
-                " thumbRecCentre = " + thumbRecCentre +
-                " thumbOffset = " + thumbOffset +
-                " thumbPos=" + thumbPos +
-                " indicatorWidth=" + indicatorWidth +
-                " indicatorX=" + indicatorX);
+        if (indicatorX < paddingLeftX) {
+            indicatorX = paddingLeftX;
+        } else if (indicatorX > paddingRightX) {
+            indicatorX = paddingRightX;
+        }
 
         seekIndicator.setX(indicatorX);
         animateShowView(seekIndicator, 0);
