@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle, Dimensions } from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, UIManager, findNodeHandle, Dimensions } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -21,7 +21,9 @@ export default class Video extends Component {
 
     this.state = {
       showPoster: !!props.poster,
-      androidFullScreen: false
+      androidFullScreen: false,
+      videoContainerLayout_x: 0,
+      videoContainerLayout_y: 0
     };
     this.getDimension();
   }
@@ -38,6 +40,15 @@ export default class Video extends Component {
       this.width = Math.round(Dimensions.get('window').width);
       this.height = Math.round(Dimensions.get('window').height);
     }
+  }
+
+  componentDidMount() {
+    UIManager.measure(findNodeHandle(this._videoContainer), (x, y) => {
+      this.setState({
+        videoContainerLayout_x: x,
+        videoContainerLayout_y: y
+      })
+    })
   }
 
   setNativeProps(nativeProps) {
@@ -338,14 +349,12 @@ export default class Video extends Component {
       backgroundColor: '#ffffff',
       justifyContent: "center",
       zIndex: 99999,
-      marginLeft: 0,  //margin: 0 - is not working properly. So, updated all the margin individually with 0.
-      marginRight: 0,
-      marginTop: 0,
-      marginBottom: 0
+      marginTop: -1 * (this.state.videoContainerLayout_y ? parseFloat(this.state.videoContainerLayout_y) : 0), //margin: 0 - is not working properly. So, updated all the margin individually with 0.
+      marginLeft: -1 * (this.state.videoContainerLayout_x ? parseFloat(this.state.videoContainerLayout_x) : 0)
     } : {}
 
     return (
-      <View style={[nativeProps.style, videoStyle]}>
+      <View ref={(videoContainer) => this._videoContainer = videoContainer} style={[nativeProps.style, videoStyle]}>
         <RCTVideo
           ref={this._assignRoot}
           {...nativeProps}
