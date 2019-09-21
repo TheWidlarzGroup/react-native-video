@@ -1,6 +1,7 @@
 ## Changelog
 
 ### next
+* Fixed Exoplayer doesn't work with mute=true [#1696](https://github.com/react-native-community/react-native-video/pull/1696)
 * Added support for automaticallyWaitsToMinimizeStalling property (iOS) [#1723](https://github.com/react-native-community/react-native-video/pull/1723)
 
 ### Version 5.0.2
