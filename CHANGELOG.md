@@ -1,9 +1,15 @@
 ## Changelog
 
-### Version 5.0.1
+### next
 * Added support for automaticallyWaitsToMinimizeStalling property (iOS) [#1723](https://github.com/react-native-community/react-native-video/pull/1723)
 
-### Version 5.0.0
+### Version 5.0.2
+* Fix crash when RCTVideo's superclass doesn't observe the keyPath 'frame' (iOS) [#1720](https://github.com/react-native-community/react-native-video/pull/1720)
+
+### Version 5.0.1
+* Fix AndroidX Support bad merge
+
+### Version 5.0.0 [Deprecated]
 * AndroidX Support
 
 ### Version 4.4.4
