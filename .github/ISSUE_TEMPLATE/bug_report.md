@@ -61,3 +61,6 @@ Library version: x.x.x
 <!--
  Please add to your issue a repro, a fresh codebase with the minimal changes so that the bug can be tested in isolation
 -->
+
+## Video sample
+If possible, include a link to the video that has the problem that can be streamed or downloaded from.
