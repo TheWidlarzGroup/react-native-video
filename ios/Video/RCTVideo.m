@@ -869,12 +869,12 @@ static int const RCTVideoUnset = -1;
       [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
     
-	if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
-		[_player playImmediatelyAtRate:1.0];
-	} else {
-		[_player play];
-		[_player setRate:_rate];
-	}
+    if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
+      [_player playImmediatelyAtRate:_rate];
+    } else {
+      [_player play];
+      [_player setRate:_rate];
+    }
     [_player setRate:_rate];
   }
   
