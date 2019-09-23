@@ -1,3 +1,4 @@
+#import <React/RCTView.h>
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
 #import "UIView+FindUIViewController.h"
@@ -42,11 +43,17 @@
 @property (nonatomic, copy) RCTDirectEventBlock onVideoExternalPlaybackChange;
 @property (nonatomic, copy) RCTDirectEventBlock onPictureInPictureStatusChanged;
 @property (nonatomic, copy) RCTDirectEventBlock onRestoreUserInterfaceForPictureInPictureStop;
+@property (nonatomic, copy) RCTBubblingEventBlock onAdsLoaded;
+@property (nonatomic, copy) RCTBubblingEventBlock onAdStarted;
+@property (nonatomic, copy) RCTBubblingEventBlock onAdsComplete;
+@property (nonatomic, copy) RCTBubblingEventBlock onAdError;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
 
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+- (void)requestAds:(NSString *)adTagUrl;
+- (void)startAds;
 
 @end

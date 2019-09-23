@@ -3,8 +3,13 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/UIView+React.h>
+@import GoogleInteractiveMediaAds;
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+
+@interface RCTVideo () <IMAAdsLoaderDelegate, IMAAdsManagerDelegate>
+
+@end
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -75,6 +80,12 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   BOOL _filterEnabled;
   UIViewController * _presentingViewController;
+
+  /* Ads Loader */
+  IMAAdsLoader * _adsLoader;
+  IMAAVPlayerContentPlayhead * _contentPlayhead;
+  IMAAdsManager * _adsManager;
+
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -138,6 +149,43 @@ static int const RCTVideoUnset = -1;
   return self;
 }
 
+- (void)requestAds:(NSString *) adTagUrl {
+    _adsLoader = [[IMAAdsLoader alloc] initWithSettings:nil];
+    _adsLoader.delegate = self;
+    // Create an ad display container for ad rendering.
+    IMAAdDisplayContainer *adDisplayContainer =
+    [[IMAAdDisplayContainer alloc] initWithAdContainer:self companionSlots:nil];
+    // Create an ad request with our ad tag, display container, and optional user context.
+    IMAAdsRequest *request = [[IMAAdsRequest alloc] initWithAdTagUrl:adTagUrl
+                                                  adDisplayContainer:adDisplayContainer
+                                                     contentPlayhead:_contentPlayhead
+                                                         userContext:nil];
+    [_adsLoader requestAdsWithRequest:request];
+}
+
+- (void)adsLoader:(IMAAdsLoader *)loader adsLoadedWithData:(IMAAdsLoadedData *)adsLoadedData {
+    // Grab the instance of the IMAAdsManager and set ourselves as the delegate.
+    _adsManager = adsLoadedData.adsManager;
+    
+    _adsManager.delegate = self;
+    
+    // Create ads rendering settings and tell the SDK to use the in-app browser.
+    IMAAdsRenderingSettings *adsRenderingSettings = [[IMAAdsRenderingSettings alloc] init];
+    adsRenderingSettings.webOpenerPresentingController = self;
+    
+    // Initialize the ads manager.
+    [_adsManager initializeWithAdsRenderingSettings:adsRenderingSettings];
+}
+
+- (void)adsLoader:(IMAAdsLoader *)loader failedWithErrorData:(IMAAdLoadingErrorData *)adErrorData {
+    // Something went wrong loading ads. Log the error and play the content.
+    NSLog(@"Error loading ads: %@", adErrorData.adError.message);
+    if (self.onAdError) {
+        self.onAdError(@{@"target": self.reactTag});
+    }
+    [_player play];
+}
+
 - (RCTVideoPlayerViewController*)createPlayerViewController:(AVPlayer*)player
                                              withPlayerItem:(AVPlayerItem*)playerItem {
     RCTVideoPlayerViewController* viewController = [[RCTVideoPlayerViewController alloc] init];
@@ -148,6 +196,42 @@ static int const RCTVideoUnset = -1;
     viewController.view.frame = self.bounds;
     viewController.player = player;
     return viewController;
+}
+
+- (void)adsManager:(IMAAdsManager *)adsManager didReceiveAdEvent:(IMAAdEvent *)event {
+    if (event.type == kIMAAdEvent_LOADED && self.onAdsLoaded) {
+        self.onAdsLoaded(@{@"target": self.reactTag});
+    } else if (event.type == kIMAAdEvent_AD_BREAK_STARTED && self.onAdStarted) {
+        self.onAdStarted(@{@"target": self.reactTag});
+    } else if (event.type == kIMAAdEvent_ALL_ADS_COMPLETED && self.onAdsComplete) {
+        if (_adsManager) {
+            [_adsManager destroy];
+            _adsManager = nil;
+        }
+        self.onAdsComplete(@{@"target": self.reactTag});
+    }
+}
+
+- (void)startAds
+{
+    [_adsManager start];
+}
+
+- (void)adsManager:(IMAAdsManager *)adsManager didReceiveAdError:(IMAAdError *)error {
+    // Something went wrong with the ads manager after ads were loaded. Log the error and play the
+    // content.
+    NSLog(@"AdsManager error: %@", error.message);
+    [_player play];
+}
+
+- (void)adsManagerDidRequestContentPause:(IMAAdsManager *)adsManager {
+    // The SDK is going to play ads, so pause the content.
+    [_player pause];
+}
+
+- (void)adsManagerDidRequestContentResume:(IMAAdsManager *)adsManager {
+    // The SDK is done playing ads (at least for now), so resume the content.
+    [_player play];
 }
 
 /* ---------------------------------------------------------
@@ -234,6 +318,10 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
     [_playerViewController setPlayer:_player];
+  }
+
+  if(_adsManager) {
+    [_adsManager resume];
   }
 }
 
@@ -1500,6 +1588,10 @@ static int const RCTVideoUnset = -1;
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
   _player = nil;
+  if (_adsManager) {
+    [_adsManager destroy];
+    _adsManager = nil;
+  }
   
   [self removePlayerLayer];
   
