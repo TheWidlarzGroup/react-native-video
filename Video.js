@@ -308,6 +308,7 @@ export default class Video extends Component {
     const posterStyle = {
       ...StyleSheet.absoluteFillObject,
       resizeMode: this.props.posterResizeMode || 'contain',
+      backgroundColor: 'red'
     };
 
     return (
