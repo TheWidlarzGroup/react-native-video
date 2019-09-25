@@ -6,11 +6,11 @@
 //  Copyright © 2019 Endeavor Streaming. All rights reserved.
 //
 
-//#if DEBUG && !DICELOG_DISABLED
+#if DEBUG && !DICELOG_DISABLED
 let DICELOG_IS_ACTIVE = true
-//#else
-//let DICELOG_IS_ACTIVE = false
-//#endif
+#else
+let DICELOG_IS_ACTIVE = false
+#endif
 
 import UIKit
 

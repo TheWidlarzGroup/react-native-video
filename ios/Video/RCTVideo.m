@@ -767,14 +767,13 @@ dispatch_queue_t delegateQueue;
       if ([subtitleObjects isKindOfClass:NSArray.class]) {
           NSArray* subs = subtitleObjects;
           NSArray* subtitleTracks = [SubtitleResourceLoaderDelegate createSubtitleTracksFromArray:subs];
-          SubtitleResourceLoaderDelegate* delegate = [[SubtitleResourceLoaderDelegate alloc] initWithM3u8URL:url subtitles:subtitleTracks userAgentString:@"ReactNativeVideoPlayer"];
+          SubtitleResourceLoaderDelegate* delegate = [[SubtitleResourceLoaderDelegate alloc] initWithM3u8URL:url subtitles:subtitleTracks];
           _delegate = delegate;
           url = delegate.redirectURL;
           if (!delegateQueue) {
               delegateQueue = dispatch_queue_create("SubtitleResourceLoaderDelegate", 0);
           }
-          NSDictionary* headerFields = @{@"User-Agent":delegate.userAgentString};
-          AVURLAsset* asset = [AVURLAsset URLAssetWithURL:url options:@{@"AVURLAssetHTTPHeaderFieldsKey":headerFields}];
+          AVURLAsset* asset = [AVURLAsset URLAssetWithURL:url options:nil];
           [asset.resourceLoader setDelegate:delegate queue:delegateQueue];
           [self playerItemPrepareText:asset assetOptions:[NSDictionary alloc] withCallback:handler];
           return;
