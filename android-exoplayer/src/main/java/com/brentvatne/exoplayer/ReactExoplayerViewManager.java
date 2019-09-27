@@ -59,6 +59,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_PICTURE_IN_PICTURE = "pictureInPicture";
 
     @Override
     public String getName() {
@@ -284,6 +285,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
+    }
+
+    @ReactProp(name = PROP_PICTURE_IN_PICTURE, defaultBoolean = false)
+    public void setPictureInPicture(final ReactExoplayerView videoView, final boolean pictureInPicture) {
+        videoView.setPictureInPicture(pictureInPicture);
     }
 
     private boolean startsWithValidScheme(String uriString) {
