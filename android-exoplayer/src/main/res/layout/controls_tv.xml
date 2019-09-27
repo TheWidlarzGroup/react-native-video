@@ -116,6 +116,17 @@
                 android:background="@null"
                 android:src="@drawable/tv_epg_selector" />
 
+            <ImageButton
+                android:id="@+id/tvStatsBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:background="@null"
+                android:src="@drawable/tv_stats_selector" />
+
             <View
                 android:layout_width="0dp"
                 android:layout_height="40dp"

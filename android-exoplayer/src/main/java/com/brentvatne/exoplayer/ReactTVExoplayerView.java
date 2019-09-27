@@ -146,6 +146,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private DceSeekIndicator seekIndicator;
     private ImageButton audioSubtitlesButton;
     private ImageButton scheduleButton;
+    private ImageButton statsButton;
 
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
@@ -179,6 +180,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean disableFocus;
     private boolean live = false;
     private boolean hasEpg;
+    private boolean hasStats;
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
@@ -366,6 +368,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         });
 
+        statsButton = findViewById(R.id.tvStatsBtn);
+
+        statsButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                eventEmitter.statsIconClick();
+            }
+        });
+
         labelTextContainer = findViewById(R.id.tvLabelContainerView);
         labelTextView = findViewById(R.id.tvLabelView);
 
@@ -379,10 +390,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         });
 
         setEpg(false); // default value
+        setStats(false);
 
         setupButton(playPauseButton);
         setupButton(audioSubtitlesButton);
         setupButton(scheduleButton);
+        setupButton(statsButton);
 
         // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
         Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -404,6 +417,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
         } else if (newFocus == scheduleButton) {
             moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
+        } else if (newFocus == statsButton) {
+            moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
         } else {
             labelTextView.setVisibility(INVISIBLE);
         }
@@ -1523,6 +1538,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     public void setEpg(boolean hasEpg) {
         this.hasEpg = hasEpg;
         scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
+        post(new Runnable() {
+            @Override
+            public void run() {
+                updateLabelView(bottomBarWidget.findFocus());
+            }
+        });
+    }
+
+    public void setStats(boolean hasStats) {
+        this.hasStats = hasStats;
+        scheduleButton.setVisibility(hasStats ? View.VISIBLE : View.GONE);
         post(new Runnable() {
             @Override
             public void run() {

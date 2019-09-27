@@ -50,6 +50,7 @@ class VideoEventEmitter {
     private static final String EVENT_TOUCH_ACTION_MOVE = "onTouchActionMove";
     private static final String EVENT_TOUCH_ACTION_UP = "onTouchActionUp";
     private static final String EVENT_EPG_ICON_CLICK = "onEpgIconClick";
+    private static final String EVENT_STATS_ICON_CLICK = "onStatsIconClick";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -76,6 +77,7 @@ class VideoEventEmitter {
             EVENT_TOUCH_ACTION_MOVE,
             EVENT_TOUCH_ACTION_UP,
             EVENT_EPG_ICON_CLICK,
+            EVENT_STATS_ICON_CLICK
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -103,7 +105,8 @@ class VideoEventEmitter {
             EVENT_CONTROLS_VISIBILITY_CHANGE,
             EVENT_TOUCH_ACTION_MOVE,
             EVENT_TOUCH_ACTION_UP,
-            EVENT_EPG_ICON_CLICK
+            EVENT_EPG_ICON_CLICK,
+            EVENT_STATS_ICON_CLICK
     })
     @interface VideoEvents {
     }
@@ -249,6 +252,10 @@ class VideoEventEmitter {
 
     void epgIconClick() {
         receiveEvent(EVENT_EPG_ICON_CLICK, null);
+    }
+
+    public void statsIconClick() {
+        receiveEvent(EVENT_STATS_ICON_CLICK, null);
     }
 
     void controlsVisibilityChange(boolean visible) {
