@@ -1521,14 +1521,32 @@ dispatch_queue_t delegateQueue;
 
 - (void)setControls:(BOOL)controls
 {
-  if( _controls != controls || !_playerViewController )
-  {
-    if(!_playerViewController) {
-      [self usePlayerViewController];
+  #if TARGET_OS_IOS
+    if( _controls != controls || (!_playerLayer && !_playerViewController) )
+    {
+      _controls = controls;
+      if( _controls )
+      {
+        [self removePlayerLayer];
+        [self usePlayerViewController];
+      }
+      else
+      {
+        [_playerViewController.view removeFromSuperview];
+        _playerViewController = nil;
+        [self usePlayerLayer];
+      }
     }
-    _controls = controls;
-    _playerViewController.showsPlaybackControls = _controls;
-  }
+  #elif TARGET_OS_TV
+    if( _controls != controls || !_playerViewController )
+    {
+      if(!_playerViewController) {
+        [self usePlayerViewController];
+      }
+      _controls = controls;
+      _playerViewController.showsPlaybackControls = _controls;
+    }
+  #endif
 }
 
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval
