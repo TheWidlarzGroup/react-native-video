@@ -3,9 +3,15 @@
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
+Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
+
 Version 4.x requires react-native >= 0.57.0
 
 Version 3.x requires react-native >= 0.40.0
+
+### Version 5.0.0 breaking changes
+
+Version 5 introduces breaking changes on Android, please check carefully the steps described there: [Android Installation](#Android-installation)
 
 ### Version 4.0.0 breaking changes
 Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
@@ -20,6 +26,11 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
 ## Table of Contents
 
 * [Installation](#installation)
+  * [iOS](#ios-installation)
+  * [tvOS](#tvos-installation)
+  * [Android](#android-installation)
+  * [Windows](#windows-installation)
+  * [react-native-dom](#react-native-dom-installation)
 * [Usage](#usage)
 * [iOS App Transport Security](#ios-app-transport-security)
 * [Audio Mixing](#audio-mixing)
@@ -42,14 +53,21 @@ yarn add react-native-video
 
 Then follow the instructions for your platform to link react-native-video into your project:
 
+### iOS installation
 <details>
-  <summary>iOS</summary>
+  <summary>iOS details</summary>
 
-### Standard Method
+#### Standard Method
+
+**React Native 0.60 and above**
+
+Run `pod install` in the `ios` directory. Linking is not required in React Native 0.60 and above.
+
+**React Native 0.59 and below**
 
 Run `react-native link react-native-video` to link the react-native-video library.
 
-### Using CocoaPods (required to enable caching)
+#### Using CocoaPods (required to enable caching)
 
 Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
 
@@ -73,8 +91,9 @@ end
 
 </details>
 
-<details>
-  <summary>tvOS</summary>
+### tvOS installation
+  <details>
+  <summary>tvOS details</summary>
   
 `react-native link react-native-video` doesn’t work properly with the tvOS target so we need to add the library manually.
 
@@ -95,14 +114,15 @@ Select RCTVideo-tvOS
 <img src="./docs/tvOS-step-4.jpg" width="40%">
 </details>
 
+### Android installation
 <details>
-  <summary>Android</summary>
+  <summary>Android details</summary>
 
 Run `react-native link react-native-video` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
-**android/settings.gradle**
+#### **android/settings.gradle**
 
 The newer ExoPlayer library will work for most people.
 
@@ -118,17 +138,30 @@ include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
+#### **android/app/build.gradle**
 
-**android/app/build.gradle**
+From version >= 5.0.0, you have to apply this changes:
 
-```gradle
+```diff
 dependencies {
    ...
-   compile project(':react-native-video')
+    compile project(':react-native-video')
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
 }
 ```
 
-**MainApplication.java**
+#### **android/gradle.properties**
+
+Migrating to AndroidX (needs version >= 5.0.0):
+
+```gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+```
+
+#### **MainApplication.java**
 
 On top, where imports are:
 
@@ -149,12 +182,13 @@ protected List<ReactPackage> getPackages() {
 ```
 </details>
 
+### Windows installation
 <details>
-  <summary>Windows</summary>
+  <summary>Windows details</summary>
 
 Make the following additions to the given files manually:
 
-**windows/myapp.sln**
+#### **windows/myapp.sln**
 
 Add the `ReactNativeVideo` project to your solution.
 
@@ -163,7 +197,7 @@ Add the `ReactNativeVideo` project to your solution.
   * UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
   * WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
 
-**windows/myapp/myapp.csproj**
+#### **windows/myapp/myapp.csproj**
 
 Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
 
@@ -171,7 +205,7 @@ Add a reference to `ReactNativeVideo` to your main application project. From Vis
   * UWP: Check `ReactNativeVideo` from Solution Projects.
   * WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
 
-**MainPage.cs**
+#### **MainPage.cs**
 
 Add the `ReactVideoPackage` class to your list of exported packages.
 ```cs
@@ -198,12 +232,13 @@ using System.Collections.Generic;
 ```
 </details>
 
+### react-native-dom installation
 <details>
-  <summary>react-native-dom</summary>
+  <summary>react-native-dom details</summary>
 
 Make the following additions to the given files manually:
 
-**dom/bootstrap.js**
+#### **dom/bootstrap.js**
 
 Import RCTVideoManager and add it to the list of nativeModules:
 
@@ -257,8 +292,10 @@ var styles = StyleSheet.create({
 ### Configurable props
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
+* [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [disableFocus](#disableFocus)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
@@ -335,6 +372,13 @@ For this to work, the poster prop must be set.
 
 Platforms: all
 
+#### automaticallyWaitsToMinimizeStalling
+A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
+* **false** - Immediately starts playback
+* **true (default)** - Delays playback in order to minimize stalling
+
+Platforms: iOS
+
 #### bufferConfig
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
@@ -370,9 +414,17 @@ For Android MediaPlayer, you will need to build your own controls or use a packa
 
 Platforms: Android ExoPlayer, iOS, react-native-dom
 
-### DRM
+#### disableFocus
+Determines whether video audio should override background music/audio in Android devices.
+* ** false (default)** - Override background audio/music
+* **true** - Let background audio/music from other apps play
 
+Platforms: Android Exoplayer
+
+### DRM
 To setup DRM please follow [this guide](./DRM.md)
+
+Platforms: Android Exoplayer, iOS
 
 #### filter
 Add video filter
@@ -1275,6 +1327,38 @@ To enable audio to play in background on iOS the audio session needs to be set t
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
 ## Updating
+
+### Version 5.0.0
+
+Probably you want to update your gradle version:
+#### gradle-wrapper.properties
+```diff
+- distributionUrl=https\://services.gradle.org/distributions/gradle-3.3-all.zip
++ distributionUrl=https\://services.gradle.org/distributions/gradle-5.1.1-all.zip
+```
+
+#### **android/app/build.gradle**
+
+From version >= 5.0.0, you have to apply this changes:
+
+```diff
+dependencies {
+   ...
+    compile project(':react-native-video')
++   implementation "androidx.appcompat:appcompat:1.0.0"
+-   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+
+}
+```
+
+#### **android/gradle.properties**
+
+Migrating to AndroidX (needs version >= 5.0.0):
+
+```gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+```
 
 ### Version 4.0.0
 

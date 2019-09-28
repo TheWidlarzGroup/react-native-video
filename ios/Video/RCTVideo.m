@@ -59,7 +59,8 @@ static int const RCTVideoUnset = -1;
   float _volume;
   float _rate;
   float _maxBitRate;
-  
+
+  BOOL _automaticallyWaitsToMinimizeStalling;
   BOOL _muted;
   BOOL _paused;
   BOOL _repeat;
@@ -93,7 +94,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-    
+	  _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -381,7 +382,10 @@ static int const RCTVideoUnset = -1;
       self->_isExternalPlaybackActiveObserverRegistered = YES;
       
       [self addPlayerTimeObserver];
-      
+      if (@available(iOS 10.0, *)) {
+        [self setAutomaticallyWaitsToMinimizeStalling:_automaticallyWaitsToMinimizeStalling];
+      }
+
       //Perform on next run loop, otherwise onVideoLoadStart is nil
       if (self.onVideoLoadStart) {
         id uri = [self->_source objectForKey:@"uri"];
@@ -597,26 +601,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
-  if (object == _playerViewController.contentOverlayView) {
-    if ([keyPath isEqualToString:@"frame"]) {
-      
-      CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
-      CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
-      
-      if (!CGRectEqualToRect(oldRect, newRect)) {
-        if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
-          NSLog(@"in fullscreen");
-        } else NSLog(@"not fullscreen");
-        
-        [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
-        [self.reactViewController.view setNeedsLayout];
-      }
-      
-      return;
-    } else
-      return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-  }
+
   if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
     self.onReadyForDisplay(@{@"target": self.reactTag});
     return;
@@ -735,8 +720,24 @@ static int const RCTVideoUnset = -1;
                                              @"target": self.reactTag});
       }
     }
-  } else {
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  } else if (object == _playerViewController.contentOverlayView) {
+      // when controls==true, this is a hack to reset the rootview when rotation happens in fullscreen
+      if ([keyPath isEqualToString:@"frame"]) {
+
+        CGRect oldRect = [change[NSKeyValueChangeOldKey] CGRectValue];
+        CGRect newRect = [change[NSKeyValueChangeNewKey] CGRectValue];
+
+        if (!CGRectEqualToRect(oldRect, newRect)) {
+          if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
+            NSLog(@"in fullscreen");
+          } else NSLog(@"not fullscreen");
+
+          [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+          [self.reactViewController.view setNeedsLayout];
+        }
+
+        return;
+      }
   }
 }
 
@@ -906,7 +907,13 @@ static int const RCTVideoUnset = -1;
     } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
       [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
-    [_player play];
+    
+    if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
+      [_player playImmediatelyAtRate:_rate];
+    } else {
+      [_player play];
+      [_player setRate:_rate];
+    }
     [_player setRate:_rate];
   }
   
@@ -993,11 +1000,19 @@ static int const RCTVideoUnset = -1;
   _playerItem.preferredPeakBitRate = maxBitRate;
 }
 
+- (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
+{
+	_automaticallyWaitsToMinimizeStalling = waits;
+	_player.automaticallyWaitsToMinimizeStalling = waits;
+}
+
 
 - (void)applyModifiers
 {
   if (_muted) {
-    [_player setVolume:0];
+    if (!_controls) {
+      [_player setVolume:0];
+    }
     [_player setMuted:YES];
   } else {
     [_player setVolume:_volume];
@@ -1535,6 +1550,8 @@ static int const RCTVideoUnset = -1;
   [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
   [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
   [_playerViewController.view removeFromSuperview];
+  _playerViewController.rctDelegate = nil;
+  _playerViewController.player = nil;
   _playerViewController = nil;
   
   [self removePlayerTimeObserver];

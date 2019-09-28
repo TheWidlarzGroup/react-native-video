@@ -70,6 +70,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
 
+    private ReactExoplayerConfig config;
+
+    public ReactExoplayerViewManager(ReactExoplayerConfig config) {
+        this.config = config;
+    }
+
     @Override
     public String getName() {
         return REACT_CLASS;
@@ -77,7 +83,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @Override
     protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactExoplayerView(themedReactContext);
+        return new ReactExoplayerView(themedReactContext, config);
     }
 
     @Override
