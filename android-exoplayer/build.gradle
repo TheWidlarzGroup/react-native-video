@@ -32,6 +32,9 @@ dependencies {
     implementation "androidx.core:core:1.0.0"
     implementation "androidx.media:media:1.0.0"
 
+    // MediaSession extension for PIP controls.
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.8.1'
+
     implementation('com.google.android.exoplayer:extension-okhttp:2.9.3') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
