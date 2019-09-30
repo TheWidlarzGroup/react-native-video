@@ -698,7 +698,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onPlayerError(ExoPlaybackException e) {
-        String errorString = null;
+        String errorString = "ExoPlaybackException type : " + e.type;
         Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
@@ -723,12 +723,9 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
-            ex = e.getSourceException();
             errorString = getResources().getString(R.string.unrecognized_media_format);
         }
-        if (errorString != null) {
-            eventEmitter.error(errorString, ex);
-        }
+        eventEmitter.error(errorString, ex);
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
