@@ -1548,7 +1548,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setStats(boolean hasStats) {
         this.hasStats = hasStats;
-        scheduleButton.setVisibility(hasStats ? View.VISIBLE : View.GONE);
+        statsButton.setVisibility(hasStats ? View.VISIBLE : View.GONE);
         post(new Runnable() {
             @Override
             public void run() {
