@@ -1,7 +1,7 @@
 ## Changelog
 
 ### next
-* Added PictureInPicture support for AndroidExoplayer API >= 28.
+* Added PictureInPicture support for AndroidExoplayer API >= 28. [#1776](https://github.com/react-native-community/react-native-video/pull/1776)
 
 ### Version 5.1.0-alpha1
 * Fixed Exoplayer doesn't work with mute=true (Android). [#1696](https://github.com/react-native-community/react-native-video/pull/1696)
