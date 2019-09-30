@@ -1053,7 +1053,7 @@ isActive: true
 }
 ```
 
-Platforms:  iOS
+Platforms:  iOS, Android ExoPlayer (when following [this](#pictureinpicture) )
 
 #### onPlaybackRateChange
 Callback function that is called when the rate of playback changes - either paused or starts/resumes.
