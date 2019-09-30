@@ -191,7 +191,9 @@ class ReactExoplayerView extends FrameLayout implements
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
 
-        BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        ReactExoplayerView self = this;
+
+        BroadcastReceiver pipReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 boolean isInPictureInPictureMode = intent.getBooleanExtra("isInPictureInPictureMode", false);
@@ -199,8 +201,19 @@ class ReactExoplayerView extends FrameLayout implements
             }
         };
 
+        BroadcastReceiver leaveReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                self.setPictureInPicture(true);
+
+                // Manually call onHostResume to keep video playing.
+                self.onHostResume();
+            }
+        };
+
         Activity activity = themedReactContext.getCurrentActivity();
-        activity.registerReceiver(mReceiver, new IntentFilter("onPictureInPictureModeChanged"));
+        activity.registerReceiver(pipReceiver, new IntentFilter("onPictureInPictureModeChanged"));
+        activity.registerReceiver(leaveReceiver, new IntentFilter("onUserLeaveHint"));
 
         initializePlayer();
     }
