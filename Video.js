@@ -229,6 +229,12 @@ export default class Video extends Component {
     }
   };
 
+  _onExternalPauseTriggered = (event) => {
+    if (this.props.onExternalPauseTriggered) {
+      this.props.onExternalPauseTriggered(event.nativeEvent)
+    }
+  }
+
   getViewManagerConfig = viewManagerName => {
     if (!NativeModules.UIManager.getViewManagerConfig) {
       return NativeModules.UIManager[viewManagerName];
@@ -303,6 +309,7 @@ export default class Video extends Component {
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
+      onExternalPauseTriggered: this._onExternalPauseTriggered
     });
 
     const posterStyle = {
@@ -462,6 +469,7 @@ Video.propTypes = {
   onPictureInPictureStatusChanged: PropTypes.func,
   needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
+  onExternalPauseTriggered: PropTypes.func,
 
   /* Required by react-native */
   scaleX: PropTypes.number,

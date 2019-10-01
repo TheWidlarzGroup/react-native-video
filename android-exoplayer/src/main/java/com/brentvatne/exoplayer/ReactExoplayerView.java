@@ -620,6 +620,14 @@ class ReactExoplayerView extends FrameLayout implements
                 if(playerControlView != null) {
                     playerControlView.show();
                 }
+
+                /*
+                 * If play is in playing state, but PAUSED prop is TRUE, report
+                 * external play/pause state change.
+                 */
+                if (playWhenReady == isPaused) {
+                   eventEmitter.externalPauseTriggered(playWhenReady);
+                }
                 break;
             case ExoPlayer.STATE_ENDED:
                 text += "ended";
