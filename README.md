@@ -323,6 +323,7 @@ var styles = StyleSheet.create({
 * [selectedTextTrack](#selectedtexttrack)
 * [selectedVideoTrack](#selectedvideotrack)
 * [source](#source)
+* [alternativeAudioSource](#alternativeAudioSource)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
 * [useTextureView](#usetextureview)
@@ -738,6 +739,10 @@ Sets the media source. You can pass an asset loaded via require or an object wit
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
+#### alternativeAudioSource
+Sets the audio to be played with the video, as an alternative. Use this if you have trouble selecting another audio track on iOS. You can pass an asset loaded via require or an object with a uri, as in `source`.
+
+Platforms: iOS
 
 ##### Asset loaded via require
 

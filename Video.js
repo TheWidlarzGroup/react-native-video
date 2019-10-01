@@ -239,8 +239,10 @@ export default class Video extends Component {
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
+    const alternativeAudioSource = resolveAssetSource(this.props.alternativeAudioSource) || {};
     const shouldCache = !Boolean(source.__packager_asset)
 
+    let alternativeAudioURI = alternativeAudioSource.uri || '';
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
@@ -271,6 +273,7 @@ export default class Video extends Component {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
       src: {
+        alternativeAudioURI,
         uri,
         isNetwork,
         isAsset,

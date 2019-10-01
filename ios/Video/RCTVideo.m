@@ -420,11 +420,6 @@ static int const RCTVideoUnset = -1;
 
 - (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
 {
-  if (!_textTracks || _textTracks.count==0) {
-    handler([AVPlayerItem playerItemWithAsset:asset]);
-    return;
-  }
-  
   // AVPlayer can't airplay AVMutableCompositions
   _allowsExternalPlayback = NO;
 
@@ -438,13 +433,28 @@ static int const RCTVideoUnset = -1;
                            atTime:kCMTimeZero
                             error:nil];
   
-  AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
-  AVMutableCompositionTrack *audioCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-  [audioCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
-                          ofTrack:audioAsset
-                           atTime:kCMTimeZero
-                            error:nil];
-  
+  // load alternative audio source, if provided
+  if (audio != nil) {
+    AVAssetTrack *audioAsset2 = [audio tracksWithMediaType:AVMediaTypeAudio].firstObject;
+    AVMutableCompositionTrack *audioCompTrack2 = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+    [audioCompTrack2 insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+                            ofTrack:audioAsset2
+                             atTime:kCMTimeZero
+                              error:nil];
+  } else {
+    AVAssetTrack *audioAsset = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
+    AVMutableCompositionTrack *audioCompTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+    [audioCompTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration)
+                            ofTrack:audioAsset
+                             atTime:kCMTimeZero
+                              error:nil];
+  }
+
+  if (!_textTracks || _textTracks.count==0) {
+    handler([AVPlayerItem playerItemWithAsset:asset]);
+    return;
+  }
+
   NSMutableArray* validTextTracks = [NSMutableArray array];
   for (int i = 0; i < _textTracks.count; ++i) {
     AVURLAsset *textURLAsset;
@@ -478,6 +488,7 @@ static int const RCTVideoUnset = -1;
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
   NSString *uri = [source objectForKey:@"uri"];
+  NSString *alternativeAudioURI = [source objectForKey:@"alternativeAudioURI"];
   NSString *type = [source objectForKey:@"type"];
   if (!uri || [uri isEqualToString:@""]) {
     DebugLog(@"Could not find video URL in source '%@'", source);
@@ -489,6 +500,20 @@ static int const RCTVideoUnset = -1;
     : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
+  NSURL *alternativeAudioURL = nil;
+  
+  if (![@"" isEqualToString:alternativeAudioURI] && alternativeAudioURI != [NSNull null]) {
+    alternativeAudioURL = isNetwork || isAsset
+    ? [NSURL URLWithString:alternativeAudioURI]
+    : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:alternativeAudioURI ofType:type]];
+  }
+
+  AVURLAsset *alternativeAudioAsset = nil;
+  
+  if (alternativeAudioURL != nil) {
+    alternativeAudioAsset = [AVURLAsset URLAssetWithURL:alternativeAudioURL options:assetOptions];
+  }
+
   if (isNetwork) {
     /* Per #1091, this is not a public API.
      * We need to either get approval from Apple to use this  or use a different approach.
@@ -513,16 +538,16 @@ static int const RCTVideoUnset = -1;
 #endif
 
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
-    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler withAudio:alternativeAudioAsset];
     return;
   } else if (isAsset) {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler withAudio:alternativeAudioAsset];
     return;
   }
 
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
-  [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+  [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler withAudio:alternativeAudioAsset];
 }
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
