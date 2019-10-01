@@ -446,6 +446,7 @@ Video.propTypes = {
   fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
   ciFilter: PropTypes.oneOf([...validCIFilterNames, '', null]),
+  rotationAngle: PropTypes.number,
   useTextureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
   onLoadStart: PropTypes.func,
