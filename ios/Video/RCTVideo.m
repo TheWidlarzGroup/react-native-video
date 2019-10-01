@@ -52,6 +52,9 @@ static int const RCTVideoUnset = -1;
   /* Name of the Core Image filter to apply to video playback */
   NSString *_ciFilter;
 
+  /* Rotation angle for affine transform */
+  float _rotationAngle;
+
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
   float _rate;
@@ -114,6 +117,7 @@ static int const RCTVideoUnset = -1;
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
 #endif
+    _rotationAngle = 0;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
@@ -818,6 +822,9 @@ static int const RCTVideoUnset = -1;
   else
   {
     _playerLayer.videoGravity = mode;
+    if (_rotationAngle != 0) {
+      [_playerLayer setAffineTransform:CGAffineTransformMakeRotation(_rotationAngle)];
+    }
   }
   _resizeMode = mode;
 }
@@ -1394,6 +1401,14 @@ static int const RCTVideoUnset = -1;
 {
   _ciFilter = ciFilter;
   [self setCIFilterVideoComposition];
+}
+
+- (void)setRotationAngle:(float)rotationAngle
+{
+  _rotationAngle = rotationAngle;
+  if (_playerLayer) {
+    [_playerLayer setAffineTransform:CGAffineTransformMakeRotation(rotationAngle)];
+  }
 }
 
 - (void)removePlayerLayer
