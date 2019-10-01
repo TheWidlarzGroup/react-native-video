@@ -346,6 +346,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     setPausedModifier(true);
                 }
 
+                setStateOverlay(ControlState.HIDDEN.toString());
+
                 if (dialog != null) {
                     dialog.dismiss();
                     dialog = null;
@@ -365,6 +367,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             @Override
             public void onClick(View v) {
                 eventEmitter.epgIconClick();
+                setStateOverlay(ControlState.HIDDEN.toString());
             }
         });
 
@@ -374,6 +377,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             @Override
             public void onClick(View v) {
                 eventEmitter.statsIconClick();
+                setStateOverlay(ControlState.HIDDEN.toString());
             }
         });
 
