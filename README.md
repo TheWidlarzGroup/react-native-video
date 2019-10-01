@@ -322,6 +322,7 @@ var styles = StyleSheet.create({
 * [selectedAudioTrack](#selectedaudiotrack)
 * [selectedTextTrack](#selectedtexttrack)
 * [selectedVideoTrack](#selectedvideotrack)
+* [showPictureInPictureOnLeave](#showpictureinpictureonleave)
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
@@ -763,6 +764,13 @@ Type | Value | Description
 If a track matching the specified Type (and Value if appropriate) is unavailable, ABR will be used.
 
 Platforms: Android ExoPlayer
+
+#### showPictureInPictureOnLeave
+Determine whether player should enter picture in picture mode while pressing Back or Recent hardware button.
+* **false (default)** - Don't not enter picture in picture on leave
+* **true** - Enter picture in picture on leave
+
+Platforms: Android ExoPlayer (when following [this](#pictureinpicture))
 
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.

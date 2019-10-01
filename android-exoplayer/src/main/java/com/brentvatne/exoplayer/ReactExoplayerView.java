@@ -98,6 +98,8 @@ class ReactExoplayerView extends FrameLayout implements
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
+    private final BroadcastReceiver pipReceiver;
+    private final BroadcastReceiver leaveReceiver;
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
@@ -149,6 +151,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
     private boolean controls;
+    private boolean showPictureInPictureOnLeave;
     // \ End props
 
     // React
@@ -191,7 +194,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         ReactExoplayerView self = this;
 
-        BroadcastReceiver pipReceiver = new BroadcastReceiver() {
+        pipReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 boolean isInPictureInPictureMode = intent.getBooleanExtra("isInPictureInPictureMode", false);
@@ -199,13 +202,15 @@ class ReactExoplayerView extends FrameLayout implements
             }
         };
 
-        BroadcastReceiver leaveReceiver = new BroadcastReceiver() {
+        leaveReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                self.setPictureInPicture(true);
+                if (showPictureInPictureOnLeave) {
+                    self.setPictureInPicture(true);
 
-                // Manually call onHostResume to keep video playing.
-                self.onHostResume();
+                    // Manually call onHostResume to keep video playing.
+                    self.onHostResume();
+                }
             }
         };
 
@@ -276,6 +281,15 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostDestroy() {
         stopPlayback();
+
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) return;
+        try {
+            activity.unregisterReceiver(pipReceiver);
+            activity.unregisterReceiver(leaveReceiver);
+        } catch (Exception ignore) {
+            // ignore if already unregistered
+        }
     }
 
     public void cleanUpResources() {
@@ -1251,6 +1265,15 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
+    }
+
+    /**
+     * Handling showPictureInPictureOnLeave prop.
+     *
+     * @param showPictureInPictureOnLeaveProp If true, enter pip mode when pressing home or recent HW button.
+     */
+    public void setShowPictureInPictureOnLeave(boolean showPictureInPictureOnLeaveProp) {
+        showPictureInPictureOnLeave = showPictureInPictureOnLeaveProp;
     }
 
     /**
