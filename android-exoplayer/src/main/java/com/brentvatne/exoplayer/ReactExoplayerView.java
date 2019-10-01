@@ -207,9 +207,6 @@ class ReactExoplayerView extends FrameLayout implements
             public void onReceive(Context context, Intent intent) {
                 if (showPictureInPictureOnLeave) {
                     self.setPictureInPicture(true);
-
-                    // Manually call onHostResume to keep video playing.
-                    self.onHostResume();
                 }
             }
         };
@@ -263,7 +260,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
-        if (!playInBackground || !isInBackground || !isInPictureInPictureMode) {
+        if (!playInBackground || !isInBackground) {
             setPlayWhenReady(!isPaused);
         }
         isInBackground = false;
@@ -272,7 +269,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (playInBackground || isInPictureInPictureMode) {
+        if (playInBackground || showPictureInPictureOnLeave) {
             return;
         }
         setPlayWhenReady(false);
