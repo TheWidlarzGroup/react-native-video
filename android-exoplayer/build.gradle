@@ -37,7 +37,4 @@ dependencies {
     }
     implementation 'com.squareup.okhttp3:okhttp:3.14.3'
 
-    // MediaSession extension for PIP controls.
-    implementation 'com.google.android.exoplayer:extension-mediasession:2.8.1'
-
 }
