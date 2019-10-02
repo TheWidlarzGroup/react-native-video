@@ -1,7 +1,7 @@
 ## Changelog
 
 #### next
-* Added media session for Android ExoPlayer allowing user to pause/play playback with headset HW buttons, or for example display player controls in PIP window.
+* Added media session for Android ExoPlayer allowing user to pause/play playback with headset HW buttons, or for example display player controls in PIP window. [#1780](https://github.com/react-native-community/react-native-video/pull/1780)
 
 ### Version 5.0.2
 * Fix crash when RCTVideo's superclass doesn't observe the keyPath 'frame' (iOS) [#1720](https://github.com/react-native-community/react-native-video/pull/1720)
