@@ -330,6 +330,7 @@ var styles = StyleSheet.create({
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
 * [onBandwidthUpdate](#onbandwidthupdate)
 * [onEnd](#onend)
+* [onExternalPauseToggled](#onexternalpausetoggled)
 * [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
 * [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
@@ -885,6 +886,24 @@ Callback function that is called when the player reaches the end of the media.
 Payload: none
 
 Platforms: all
+
+#### onExternalPauseToggled
+Callback function that is called when external playback pause/play mode is toggled. This can happen when using headset HW buttons for example. Or PIP window buttons. Can be used to toggle paused state to change play/pause button for example.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+isPlaying | boolean | Boolean indicating whether player is playing.
+
+Example:
+```
+{
+  isPlaying: true
+}
+```
+
+Platforms: Android ExoPlayer
 
 #### onExternalPlaybackChange
 Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
