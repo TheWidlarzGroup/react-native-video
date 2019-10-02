@@ -46,7 +46,7 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
-    private static final String EVENT_EXTERNAL_PAUSE_TRIGGERED = "onExternalPauseTriggered";
+    private static final String EVENT_EXTERNAL_PAUSE_TOGGLED = "onExternalPauseToggled";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -69,7 +69,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
-            EVENT_EXTERNAL_PAUSE_TRIGGERED
+            EVENT_EXTERNAL_PAUSE_TOGGLED
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -94,7 +94,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
-            EVENT_EXTERNAL_PAUSE_TRIGGERED
+            EVENT_EXTERNAL_PAUSE_TOGGLED
     })
     @interface VideoEvents {
     }
@@ -200,7 +200,7 @@ class VideoEventEmitter {
     void externalPauseTriggered(boolean isPlaying) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
-        receiveEvent(EVENT_EXTERNAL_PAUSE_TRIGGERED, map);
+        receiveEvent(EVENT_EXTERNAL_PAUSE_TOGGLED, map);
     }
 
     void buffering(boolean isBuffering) {
