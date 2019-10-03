@@ -63,7 +63,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 
 import java.net.CookieHandler;
@@ -658,7 +657,7 @@ class ReactExoplayerView extends FrameLayout implements
                  * external play/pause state change.
                  */
                 if (playWhenReady == isPaused) {
-                   eventEmitter.externalPauseTriggered(playWhenReady);
+                   eventEmitter.externalPauseToggled(playWhenReady);
                 }
                 break;
             case Player.STATE_ENDED:

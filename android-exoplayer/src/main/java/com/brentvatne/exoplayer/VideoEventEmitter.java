@@ -197,7 +197,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_READY, null);
     }
 
-    void externalPauseTriggered(boolean isPlaying) {
+    void externalPauseToggled(boolean isPlaying) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
         receiveEvent(EVENT_EXTERNAL_PAUSE_TOGGLED, map);
