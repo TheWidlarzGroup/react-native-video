@@ -1,7 +1,7 @@
 ## Changelog
 
 ### next
-* Fix AVPlayer release
+* Fix - Release AVPlayer instance[#1787](https://github.com/react-native-community/react-native-video/pull/1787)
 
 ### Version 5.1.0-alpha1
 * Fixed Exoplayer doesn't work with mute=true (Android). [#1696](https://github.com/react-native-community/react-native-video/pull/1696)
