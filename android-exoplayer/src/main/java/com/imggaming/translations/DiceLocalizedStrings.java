@@ -10,6 +10,7 @@ public class DiceLocalizedStrings {
         put(StringId.player_pause_button.name(), "Pause");
         put(StringId.player_audio_and_subtitles_button.name(), "Audio & Subtitles");
         put(StringId.player_epg_button.name(), "Schedule");
+        put(StringId.player_stats_button.name(), "Stats");
     }};
 
     private static DiceLocalizedStrings sInstance;
@@ -51,7 +52,8 @@ public class DiceLocalizedStrings {
         player_play_button,
         player_pause_button,
         player_audio_and_subtitles_button,
-        player_epg_button
+        player_epg_button,
+        player_stats_button
     }
 
 }

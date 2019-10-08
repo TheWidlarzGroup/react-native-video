@@ -58,6 +58,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_ICON_BOTTOM_RIGHT = "iconBottomRight";
     private static final String PROP_LIVE = "live";
     private static final String PROP_EPG = "hasEpg";
+    private static final String PROP_STATS = "hasStats";
     private static final String PROP_CONTROLS_OPACITY = "controlsOpacity";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_PROGRESS_BAR_MARGIN_BOTTOM = "progressBarMarginBottom";
@@ -248,6 +249,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_EPG, defaultBoolean = false)
     public void setEpg(final ReactExoplayerView videoView, final boolean hasEpg) {
+        // ToDo: Implement
+    }
+
+    @ReactProp(name = PROP_STATS, defaultBoolean = false)
+    public void setStats(final ReactExoplayerView videoView, final boolean hasStats) {
         // ToDo: Implement
     }
 
