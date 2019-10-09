@@ -181,7 +181,6 @@ class ReactExoplayerView extends FrameLayout implements
         createViews();
         
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
 
         initializePlayer();
@@ -340,6 +339,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayer() {
+        themedReactContext.addLifecycleEventListener(this);
         ReactExoplayerView self = this;
         // This ensures all props have been setted, to avoid async racing conditions.
         new Handler().postDelayed(new Runnable() {
