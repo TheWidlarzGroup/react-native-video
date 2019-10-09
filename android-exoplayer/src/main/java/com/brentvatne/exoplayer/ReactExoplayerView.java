@@ -99,6 +99,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Player.EventListener eventListener;
 
     private ExoPlayerView exoPlayerView;
+    private int initialOrientation;
 
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
@@ -171,6 +172,7 @@ class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
+        this.initialOrientation = getResources().getConfiguration().orientation;
         this.eventEmitter = new VideoEventEmitter(context);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
@@ -1229,7 +1231,11 @@ class ReactExoplayerView extends FrameLayout implements
             eventEmitter.fullscreenDidPresent();
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            //orientation, 1 is for Portrait and 2 for Landscape.
+            if(this.initialOrientation == 1)
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            else
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             eventEmitter.fullscreenWillDismiss();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();
