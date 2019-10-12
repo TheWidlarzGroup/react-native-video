@@ -418,7 +418,7 @@ static int const RCTVideoUnset = -1;
   return nil;
 }
 
-- (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler
+- (void)playerItemPrepareText:(AVAsset *)asset assetOptions:(NSDictionary * __nullable)assetOptions withCallback:(void(^)(AVPlayerItem *))handler withAudio:(AVAsset *)audio
 {
   // AVPlayer can't airplay AVMutableCompositions
   _allowsExternalPlayback = NO;
