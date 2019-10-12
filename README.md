@@ -412,6 +412,8 @@ Note on iOS, controls are always shown when in fullscreen mode.
 
 For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
+Note on Android ExoPlayer, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
+
 Platforms: Android ExoPlayer, iOS, react-native-dom
 
 #### disableFocus
@@ -462,7 +464,7 @@ Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS
+Platforms: iOS, Android Exoplayer
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -474,6 +476,8 @@ Platforms: iOS
 * **all (default)** - 
 * **landscape**
 * **portrait**
+
+Note on Android ExoPlayer, the full-screen mode by default goes into landscape mode. Exiting from the full-screen mode will display the video in Initial orientation.
 
 Platforms: iOS
 
