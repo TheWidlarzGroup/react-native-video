@@ -7,7 +7,7 @@ def safeExtGet(prop, fallback) {
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 27)
     buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
- 
+
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -34,7 +34,7 @@ dependencies {
 
     // All support libs must use the same version
     implementation "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
-    implementation "com.android.support:support-compat:${safeExtGet('supportLibVersion', '+')}"
+    implementation "androidx.appcompat:appcompat:1.1.0"
     implementation "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
 
     implementation('com.google.android.exoplayer:extension-okhttp:2.9.3') {
