@@ -178,6 +178,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private Map<String, String> requestHeaders;
+    private boolean canSeekToDefault = false;
     // \ End props
 
     // React
@@ -785,19 +786,22 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
+
         switch (playbackState) {
-            case ExoPlayer.STATE_IDLE:
+            case Player.STATE_IDLE:
                 text += "idle";
                 eventEmitter.idle();
                 break;
-            case ExoPlayer.STATE_BUFFERING:
+            case Player.STATE_BUFFERING:
                 text += "buffering";
                 // Hide central control buttons when buffering
                 middleCoreControlsContainer.setVisibility(INVISIBLE);
                 onBuffering(true);
                 break;
-            case ExoPlayer.STATE_READY:
+            case Player.STATE_READY: {
                 text += "ready";
+                // seek to edge of live window for live events
+                seekToDefaultPosition();
                 // Show central control buttons when buffering
                 middleCoreControlsContainer.setVisibility(VISIBLE);
                 eventEmitter.ready();
@@ -806,7 +810,9 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                 setupProgressBarSeekListener();
                 videoLoaded();
                 break;
-            case ExoPlayer.STATE_ENDED:
+            }
+
+            case Player.STATE_ENDED:
                 text += "ended";
                 eventEmitter.end();
                 onStopPlayback();
@@ -821,6 +827,12 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     private void startProgressHandler() {
         progressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
         nativeProgressHandler.sendEmptyMessage(SHOW_NATIVE_PROGRESS);
+    }
+
+    private void seekToDefaultPosition() {
+        if (player != null && canSeekToDefault && live) {
+            player.seekToDefaultPosition();
+        }
     }
 
     private void updateProgressControl(long currentMillis) {
@@ -946,13 +958,13 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id != null ? format.id : "");
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language != null ? format.language : "");
-             textTracks.pushMap(textTrack);
+            Format format = groups.get(i).getFormat(0);
+            WritableMap textTrack = Arguments.createMap();
+            textTrack.putInt("index", i);
+            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("type", format.sampleMimeType);
+            textTrack.putString("language", format.language != null ? format.language : "");
+            textTracks.pushMap(textTrack);
         }
         return textTracks;
     }
@@ -988,7 +1000,9 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-        // Do nothing.
+        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED) {
+            canSeekToDefault = true;
+        }
     }
 
     @Override
@@ -1377,7 +1391,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
         initializePlayer();
-	}
+    }
 
     public void setColorProgressBar(String color) {
         try {
