@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer;
 
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 import android.view.View;
 
 import com.facebook.react.bridge.Arguments;

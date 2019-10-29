@@ -48,7 +48,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
-    private static final String PROP_FAILURE_RETRY_COUNT = "failureRetryCount";
+    private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
@@ -58,6 +58,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+    private static final String PROP_CONTROLS = "controls";
+
+    private ReactExoplayerConfig config;
+
+    public ReactExoplayerViewManager(ReactExoplayerConfig config) {
+        this.config = config;
+    }
 
     @Override
     public String getName() {
@@ -66,7 +73,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @Override
     protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactExoplayerView(themedReactContext);
+        return new ReactExoplayerView(themedReactContext, config);
     }
 
     @Override
@@ -231,9 +238,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setMaxBitRateModifier(maxBitRate);
     }
 
-    @ReactProp(name = PROP_FAILURE_RETRY_COUNT)
-    public void failureRetryCount(final ReactExoplayerView videoView, final int failureRetryCount) {
-        videoView.setfailureRetryCountModifier(failureRetryCount);
+    @ReactProp(name = PROP_MIN_LOAD_RETRY_COUNT)
+    public void minLoadRetryCount(final ReactExoplayerView videoView, final int minLoadRetryCount) {
+        videoView.setMinLoadRetryCountModifier(minLoadRetryCount);
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
@@ -259,6 +266,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
     public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
         videoView.setHideShutterView(hideShutterView);
+    }
+
+    @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
+    public void setControls(final ReactExoplayerView videoView, final boolean controls) {
+        videoView.setControls(controls);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
