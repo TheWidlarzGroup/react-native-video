@@ -237,6 +237,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     private MuxStats muxStats;
     private Map<String, Object> muxData;
 
+    private Runnable initRunnable;
+
     public ReactExoplayerView(ThemedReactContext context) {
         super(context);
         this.themedReactContext = context;
@@ -381,7 +383,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        initializePlayer();
+        initializePlayer(false);
     }
 
     @Override
@@ -419,9 +421,27 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
 
+    private void initializePlayer(final boolean force) {
+        if (initRunnable != null) {
+            removeCallbacks(initRunnable);
+        }
+        initRunnable = new Runnable() {
+            @Override
+            public void run() {
+                doInitializePlayer(force);
+            }
+        };
+        post(initRunnable);
+    }
+
     // Internal methods
-    private void initializePlayer() {
-        Log.d("initialisePlayer", "--");
+    private void doInitializePlayer(boolean force) {
+        Log.d(TAG, "initialisePlayer()");
+
+        if (force) {
+            releasePlayer();
+        }
+
         if (player == null)  {
             DefaultDrmSessionManager drmMgr = null;
             if (actionToken != null) {
@@ -441,7 +461,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             if (drmMgr != null) {
                 player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext(), drmMgr), trackSelector, defaultLoadControl, drmMgr);
             } else {
-                player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, defaultLoadControl);
+                player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext()), trackSelector, defaultLoadControl);
             }
 
             player.addListener(this);
@@ -453,6 +473,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
             player.setPlaybackParameters(params);
+
+            Log.d(TAG, "initialisePlayer() new instance");
         }
         if (playerNeedsSource && srcUri != null) {
             ArrayList<MediaSource> mediaSourceList = buildTextSources();
@@ -472,12 +494,6 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             if (haveResumePosition) {
                 player.seekTo(resumeWindow, resumePosition);
             }
-            player.prepare(mediaSource, !haveResumePosition, false);
-            playerNeedsSource = false;
-
-            eventEmitter.loadStart();
-            loadVideoStarted = true;
-
             if (muxData != null) {
                 if (muxStats == null) {
                     muxStats = new MuxStats(getContext(), player, muxData);
@@ -485,7 +501,16 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
                     muxStats.setVideoData(muxData);
                 }
                 muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
+            } else {
+                releaseMux();
             }
+
+            Log.d(TAG, "initialisePlayer() prepare");
+            player.prepare(mediaSource, !haveResumePosition, true);
+            playerNeedsSource = false;
+
+            eventEmitter.loadStart();
+            loadVideoStarted = true;
         }
     }
 
@@ -633,10 +658,6 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
     }
 
     private void releasePlayer() {
-        if (muxStats != null) {
-            muxStats.release();
-            muxStats = null;
-        }
         if (player != null) {
             updateResumePosition();
             player.release();
@@ -644,11 +665,19 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             player = null;
             trackSelector = null;
         }
+        releaseMux();
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
         releaseMediaDrm();
+    }
+
+    private void releaseMux() {
+        if (muxStats != null) {
+            muxStats.release();
+            muxStats = null;
+        }
     }
 
     private boolean requestAudioFocus() {
@@ -679,7 +708,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             switch (player.getPlaybackState()) {
                 case ExoPlayer.STATE_IDLE:
                 case ExoPlayer.STATE_ENDED:
-                    initializePlayer();
+                    initializePlayer(false);
                     break;
                 case ExoPlayer.STATE_BUFFERING:
                 case ExoPlayer.STATE_READY:
@@ -692,7 +721,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             }
 
         } else {
-            initializePlayer();
+            initializePlayer(false);
         }
         if (!disableFocus) {
             setKeepScreenOn(true);
@@ -1117,11 +1146,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             this.mediaDataSourceFactory = buildDataSourceFactory(true);
             this.muxData = muxData;
 
-            initializePlayer();
-
-            if (!isOriginalSourceNull && !isSourceEqual) {
-                reloadSource();
-            }
+            initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
 
@@ -1142,22 +1167,13 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             this.extension = extension;
             this.mediaDataSourceFactory = buildDataSourceFactory(false);
 
-            initializePlayer();
-
-            if (!isOriginalSourceNull && !isSourceEqual) {
-                reloadSource();
-            }
+            initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
 
     public void setTextTracks(ReadableArray textTracks) {
         this.textTracks = textTracks;
-        reloadSource();
-    }
-
-    private void reloadSource() {
-        playerNeedsSource = true;
-        initializePlayer();
+        initializePlayer(true);
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
@@ -1390,7 +1406,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         bufferForPlaybackMs = newBufferForPlaybackMs;
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
-        initializePlayer();
+        initializePlayer(false);
     }
 
     public void setColorProgressBar(String color) {
