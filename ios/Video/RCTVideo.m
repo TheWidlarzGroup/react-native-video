@@ -1544,7 +1544,7 @@ dispatch_queue_t delegateQueue;
         [self usePlayerViewController];
       }
       _controls = controls;
-      _playerViewController.showsPlaybackControls = _controls;
+      _playerViewController.view.userInteractionEnabled = _controls;
     }
   #endif
 }
