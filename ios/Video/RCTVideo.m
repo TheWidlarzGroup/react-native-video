@@ -918,7 +918,7 @@ static int const RCTVideoUnset = -1;
         if (!_timeObserver) {
           [self addPlayerTimeObserver];
         }
-        if (!wasPaused) {
+        if (!wasPaused && _paused) {
           [self setPaused:false];
         }
         if(self.onVideoSeek) {
