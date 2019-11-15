@@ -250,7 +250,7 @@ export default class Video extends Component {
       console.warn('Trying to load empty source.');
     }
 
-    const isNetwork = !!(uri && uri.match(/^https?:/));
+    const isNetwork = !!(uri && uri.match(/^(https?|data):/));
     const isAsset = !!(uri && uri.match(/^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/));
 
     let nativeResizeMode;
