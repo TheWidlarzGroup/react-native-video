@@ -1381,6 +1381,8 @@ static int const RCTVideoUnset = -1;
 {
   if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
   {
+    [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+    [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
     self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
   }
 }
