@@ -29,7 +29,17 @@ Pod::Spec.new do |s|
     s.static_framework = true
   end
 
-  s.dependency "React"
+  s.subspec "Beacon" do |ss|
+    ss.dependency "react-native-video/Video"
+    ss.source_files = "ios/Beacon/*.{h,m}"
+    s.static_framework = true
+  end
+
+  s.subspec "Beacon-HTTP" do |ss|
+    ss.dependency "react-native-video/Video"
+    ss.source_files = "ios/Beacon/HTTP/*.{h,m}"
+    s.static_framework = true
+  end
 
   s.default_subspec = "Video"
 end
