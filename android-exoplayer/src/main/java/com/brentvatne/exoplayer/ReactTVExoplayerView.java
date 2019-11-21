@@ -166,6 +166,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+    private boolean isRtl = = getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
 
     // Props from React
     private Uri srcUri;
@@ -415,7 +416,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == playPauseButton) {
+        if (newFocus == playPauseButton && !isRtl) {
             moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
         } else if (newFocus == audioSubtitlesButton) {
             moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
