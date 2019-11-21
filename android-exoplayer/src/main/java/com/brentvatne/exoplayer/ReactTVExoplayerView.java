@@ -415,17 +415,18 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == playPauseButton) {
-            moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
-        } else if (newFocus == audioSubtitlesButton) {
-            moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
-        } else if (newFocus == scheduleButton) {
-            moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
-        } else if (newFocus == statsButton) {
-            moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
-        } else {
-            labelTextView.setVisibility(INVISIBLE);
-        }
+        // if (newFocus == playPauseButton && !isRtl) {
+        //     moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
+        // } else if (newFocus == audioSubtitlesButton) {
+        //     moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
+        // } else if (newFocus == scheduleButton) {
+        //     moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
+        // } else if (newFocus == statsButton) {
+        //     moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
+        // } else {
+        //     labelTextView.setVisibility(INVISIBLE);
+        // }
+        labelTextView.setVisibility(INVISIBLE);
     }
 
     private void manuallyLayoutChildren() {
