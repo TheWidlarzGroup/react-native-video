@@ -5,12 +5,12 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 27)
-    buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
+    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 27)
+        targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
         ndk {
@@ -21,6 +21,6 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation 'com.yqritc:android-scalablevideoview:1.0.4'
 }
