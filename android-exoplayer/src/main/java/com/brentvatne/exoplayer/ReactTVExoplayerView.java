@@ -462,10 +462,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (playInBackground) {
-            return;
-        }
+        setPlayInBackground(false);
         setPlayWhenReady(false);
+        stopPlayback();
     }
 
     @Override
