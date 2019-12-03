@@ -760,6 +760,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         resumePosition = C.TIME_UNSET;
     }
 
+
     /**
      * Returns a new DataSource factory.
      *
@@ -1064,8 +1065,8 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         String errorString = null;
         Exception ex = e;
         if (isBehindLiveWindow(e)) {
-            errorString = getResources().getString(R.string.error_behind_live_window);
-            ex = new Exception("BehindLiveWindowException");
+            initializePlayer();
+            clearResumePosition();
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
