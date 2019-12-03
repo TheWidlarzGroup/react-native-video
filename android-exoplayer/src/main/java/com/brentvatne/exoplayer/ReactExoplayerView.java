@@ -1065,7 +1065,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         String errorString = null;
         Exception ex = e;
         if (isBehindLiveWindow(e)) {
-            initializePlayer();
+            initializePlayer(false);
             clearResumePosition();
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
