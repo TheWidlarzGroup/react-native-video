@@ -1225,7 +1225,7 @@ class ReactExoplayerView extends FrameLayout implements
                 uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
             eventEmitter.fullscreenWillPresent();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidPresent();
