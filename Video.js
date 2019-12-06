@@ -198,7 +198,10 @@ export default class Video extends Component {
   };
 
   _onReadyForDisplay = (event) => {
-    this._hidePoster();
+    if (!this.props.audioOnly) {
+      this._hidePoster();
+    }
+    
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }

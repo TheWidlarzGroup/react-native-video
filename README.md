@@ -632,8 +632,8 @@ Platforms: all
 #### reportBandwidth
 Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
 
-* **false (default)** - Generate onBandwidthUpdate events
-* **true** - Don't generate onBandwidthUpdate events
+* **false (default)** - Don't generate onBandwidthUpdate events
+* **true** - Generate onBandwidthUpdate events
 
 Platforms: Android ExoPlayer
 
