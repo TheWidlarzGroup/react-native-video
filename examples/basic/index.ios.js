@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 
 import {
-  AlertIOS,
+  Alert,
   AppRegistry,
   Platform,
   StyleSheet,
@@ -179,7 +179,7 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             filter={this.state.filter}
             filterEnabled={this.state.filterEnabled}
@@ -266,7 +266,7 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             controls={this.state.controls}
             filter={this.state.filter}
