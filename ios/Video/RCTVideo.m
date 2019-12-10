@@ -274,7 +274,7 @@ static int const RCTVideoUnset = -1;
   [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTVideo_progress" object:nil userInfo:@{@"progress": [NSNumber numberWithDouble: currentTimeSecs / duration]}];
     
   if( currentTimeSecs >= 0 && self.onVideoProgress) {
-    if(!_isRequestAds) {
+    if(!_isRequestAds && currentTimeSecs >= 0.0001) {
       [self requestAds];
       _isRequestAds = true;
     }
