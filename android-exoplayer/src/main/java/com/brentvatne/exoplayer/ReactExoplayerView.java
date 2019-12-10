@@ -63,9 +63,13 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
+import com.google.android.exoplayer2.source.ads.AdsMediaSource;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -77,7 +81,8 @@ class ReactExoplayerView extends FrameLayout implements
         BandwidthMeter.EventListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
-        MetadataOutput {
+        MetadataOutput,
+        AdsMediaSource.MediaSourceFactory {
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -97,6 +102,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Player.EventListener eventListener;
 
     private ExoPlayerView exoPlayerView;
+    private ImaAdsLoader adsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
@@ -139,6 +145,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
     private boolean controls;
+    private Uri adTagUrl;
     // \ End props
 
     // React
@@ -155,6 +162,9 @@ class ReactExoplayerView extends FrameLayout implements
                             && player.getPlaybackState() == Player.STATE_READY
                             && player.getPlayWhenReady()
                             ) {
+                        if (isPlayingAd()) {
+                            playerControlView.hide();
+                        }
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
@@ -173,6 +183,8 @@ class ReactExoplayerView extends FrameLayout implements
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
+        adsLoader = new ImaAdsLoader(this.themedReactContext, Uri.EMPTY);
+
         createViews();
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -181,6 +193,10 @@ class ReactExoplayerView extends FrameLayout implements
 
         initializePlayer();
     }
+
+    private boolean isPlayingAd() {
+        return player != null && player.isPlayingAd() && player.getPlayWhenReady();
+      }
 
 
     @Override
@@ -288,7 +304,9 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                togglePlayerControlVisibility();
+                if (!isPlayingAd()) {
+                    togglePlayerControlVisibility();
+                }
             }
         });
 
@@ -360,6 +378,7 @@ class ReactExoplayerView extends FrameLayout implements
                             trackSelector, defaultLoadControl, null, bandwidthMeter);
                     player.addListener(self);
                     player.addMetadataOutput(self);
+                    adsLoader.setPlayer(player);
                     exoPlayerView.setPlayer(player);
                     audioBecomingNoisyReceiver.setListener(self);
                     bandwidthMeter.addEventListener(new Handler(), self);
@@ -372,11 +391,12 @@ class ReactExoplayerView extends FrameLayout implements
                 if (playerNeedsSource && srcUri != null) {
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
                     MediaSource videoSource = buildMediaSource(srcUri, extension);
+                    MediaSource mediaSourceWithAds = new AdsMediaSource(videoSource, mediaDataSourceFactory, adsLoader, exoPlayerView);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
-                        mediaSource = videoSource;
+                        mediaSource = mediaSourceWithAds;
                     } else {
-                        mediaSourceList.add(0, videoSource);
+                        mediaSourceList.add(0, mediaSourceWithAds);
                         MediaSource[] textSourceArray = mediaSourceList.toArray(
                                 new MediaSource[mediaSourceList.size()]
                         );
@@ -400,6 +420,19 @@ class ReactExoplayerView extends FrameLayout implements
                 applyModifiers();
             }
         }, 1);
+    }
+
+    // AdsMediaSource.MediaSourceFactory implementation.
+
+    @Override
+    public MediaSource createMediaSource(Uri uri) {
+      return buildMediaSource(uri, extension);
+    }
+
+    @Override
+    public int[] getSupportedTypes() {
+      // IMA does not support Smooth Streaming ads.
+      return new int[] {C.TYPE_DASH, C.TYPE_HLS, C.TYPE_OTHER};
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
@@ -473,6 +506,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
         }
+        adsLoader.release();
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
@@ -912,6 +946,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
+    }
+
+    public void setAdTagUrl(final Uri uri) {
+        adTagUrl = uri;
+        adsLoader = new ImaAdsLoader(this.themedReactContext, adTagUrl);
     }
 
     public void setRawSrc(final Uri uri, final String extension) {

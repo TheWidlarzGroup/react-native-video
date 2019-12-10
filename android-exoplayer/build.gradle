@@ -26,6 +26,7 @@ dependencies {
     implementation('com.google.android.exoplayer:exoplayer:2.10.5') {
         exclude group: 'com.android.support'
     }
+    implementation 'com.google.android.exoplayer:extension-ima:2.10.5'
 
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"
