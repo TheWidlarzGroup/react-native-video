@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 5.1.0-alpha2
+* Add support for data-uri https://github.com/react-native-community/react-native-video/pull/1842
+
 ### Version 5.1.0-alpha1
 * Fixed Exoplayer doesn't work with mute=true (Android). [#1696](https://github.com/react-native-community/react-native-video/pull/1696)
 * Added support for automaticallyWaitsToMinimizeStalling property (iOS) [#1723](https://github.com/react-native-community/react-native-video/pull/1723)
