@@ -761,6 +761,16 @@ source={{uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_1
 
 Platforms: all
 
+###### Data URI (data:/)
+
+Example:
+```
+# For a base-64 encoded hls (m3u8) stream
+source={{ uri: 'data:/data:application/vnd.apple.mpegURL;base64,... }}
+```
+
+Platforms: all
+
 ###### File path (file://)
 
 Example:
