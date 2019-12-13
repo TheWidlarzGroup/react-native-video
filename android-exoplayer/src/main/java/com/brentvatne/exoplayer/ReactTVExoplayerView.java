@@ -766,7 +766,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        if (player == null) {
+        PowerManager powerManager = Assertions.assertNotNull((PowerManager) getContext().getSystemService(POWER_SERVICE));
+
+        if (player == null || isInBackground || !powerManager.isInteractive()) {
             return;
         }
 
@@ -781,6 +783,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
+        PowerManager powerManager = Assertions.assertNotNull((PowerManager) getContext().getSystemService(POWER_SERVICE));
+
+        if (!powerManager.isInteractive()) {
+            return;
+        }
+
         if (player != null) {
             switch (player.getPlaybackState()) {
                 case ExoPlayer.STATE_IDLE:
@@ -789,7 +797,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     break;
                 case ExoPlayer.STATE_BUFFERING:
                 case ExoPlayer.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
+                    if (!player.getPlayWhenReady() && !isInBackground) {
                         setPlayWhenReady(true);
                     }
                     break;
