@@ -63,6 +63,7 @@ static int const RCTVideoUnset = -1;
   NSDictionary * _selectedAudioTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
+  float _preferredForwardBufferDuration;
   BOOL _playWhenInactive;
   NSString * _ignoreSilentSwitch;
   NSString * _resizeMode;
@@ -98,6 +99,7 @@ static int const RCTVideoUnset = -1;
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
+    _preferredForwardBufferDuration = 0.0f;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
@@ -340,6 +342,7 @@ static int const RCTVideoUnset = -1;
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
       _playerItem = playerItem;
+      [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
       [self addPlayerItemObservers];
       [self setFilter:_filterName];
       [self setMaxBitRate:_maxBitRate];
@@ -884,6 +887,11 @@ static int const RCTVideoUnset = -1;
   _playerItem.preferredPeakBitRate = maxBitRate;
 }
 
+- (void)setPreferredForwardBufferDuration:(float) preferredForwardBufferDuration
+{
+  _preferredForwardBufferDuration = preferredForwardBufferDuration;
+  _playerItem.preferredForwardBufferDuration = preferredForwardBufferDuration;
+}
 
 - (void)applyModifiers
 {
