@@ -10,9 +10,9 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -767,7 +767,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        PowerManager powerManager = getContext().getSystemService(PowerManager.class);
+        PowerManager powerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
 
         if (player == null || isInBackground || !powerManager.isInteractive()) {
             return;
@@ -784,7 +784,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
-        PowerManager powerManager = getContext().getSystemService(PowerManager.class);
+        PowerManager powerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
 
         if (!powerManager.isInteractive()) {
             return;
