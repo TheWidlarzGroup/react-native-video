@@ -174,7 +174,7 @@ class VideoEventEmitter {
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
-        event.putDouble(EVENT_PROP_CURRENT_TIME+"2", currentPosition2 / 1000D);
+        event.putDouble(EVENT_PROP_CURRENT_TIME+"2", currentPosition2);
         receiveEvent(EVENT_PROGRESS, event);
     }
 
