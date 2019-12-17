@@ -168,7 +168,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
     };
 
-    public getPositionInFirstPeriodMsForCurrentWindow() {
+    public double getPositionInFirstPeriodMsForCurrentWindow() {
         Timeline.Window window = new Timeline.Window();
         if(!Timeline.isEmpty) {    
             player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
