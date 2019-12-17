@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.IntegerRes;
@@ -187,6 +188,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private int accentColor;
     // \ End props
 
+    // Custom
+    private PowerManager powerManager;
+
     // React
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
@@ -262,6 +266,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         this.themedReactContext = context;
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
+        powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -766,7 +771,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        if (player == null) {
+        if (player == null || isInBackground || !powerManager.isInteractive()) {
             return;
         }
 
@@ -781,6 +786,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
+        if (!powerManager.isInteractive()) {
+            return;
+        }
+
         if (player != null) {
             switch (player.getPlaybackState()) {
                 case ExoPlayer.STATE_IDLE:
@@ -789,7 +798,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     break;
                 case ExoPlayer.STATE_BUFFERING:
                 case ExoPlayer.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
+                    if (!player.getPlayWhenReady() && !isInBackground) {
                         setPlayWhenReady(true);
                     }
                     break;
