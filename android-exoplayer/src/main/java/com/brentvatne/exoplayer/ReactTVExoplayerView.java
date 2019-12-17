@@ -188,6 +188,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private int accentColor;
     // \ End props
 
+    // Custom
+    private PowerManager powerManager;
+
     // React
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
@@ -263,6 +266,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         this.themedReactContext = context;
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
+        powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -767,8 +771,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        PowerManager powerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-
         if (player == null || isInBackground || !powerManager.isInteractive()) {
             return;
         }
@@ -784,8 +786,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
-        PowerManager powerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-
         if (!powerManager.isInteractive()) {
             return;
         }
