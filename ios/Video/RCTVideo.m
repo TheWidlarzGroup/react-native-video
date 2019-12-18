@@ -253,7 +253,7 @@ static int const RCTVideoUnset = -1;
   }
   
   CMTime currentTime = _player.currentTime;
-  CMTime currentTime2 = _player.currentDate;
+  NSDate *currentTime2 = _player.currentItem.currentDate;
   const Float64 duration = CMTimeGetSeconds(playerDuration);
   const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
   
@@ -265,7 +265,7 @@ static int const RCTVideoUnset = -1;
                            @"playableDuration": [self calculatePlayableDuration],
                            @"atValue": [NSNumber numberWithLongLong:currentTime.value],
                            @"atTimescale": [NSNumber numberWithInt:currentTime.timescale],
-                           @"currentTime2": [NSNumber numberWithDouble:currentTime2.timeIntervalBetween1970AndReferenceDate()],
+                           @"currentTime2": [NSNumber numberWithLongLong:[@(floor([currentTime2 timeIntervalSince1970] * 1000)) longLongValue]],
                            @"target": self.reactTag,
                            @"seekableDuration": [self calculateSeekableDuration],
                            });
