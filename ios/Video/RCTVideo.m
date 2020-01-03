@@ -715,8 +715,10 @@ static int const RCTVideoUnset = -1;
             _isInFullScreen = NO;
           }
 
-          [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
-          [self.reactViewController.view setNeedsLayout];
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+            [self.reactViewController.view setNeedsLayout];
+          });
         }
 
         return;
@@ -1288,13 +1290,6 @@ static int const RCTVideoUnset = -1;
       [self videoPlayerViewControllerDidDismiss:_playerViewController];
     }];
   }
-  else if ( !fullscreen && _isInFullScreen)
-  {
-    [self videoPlayerViewControllerWillDismiss:_playerViewController];
-    [_playerViewController.parentViewController dismissViewControllerAnimated:false completion:^{
-      [self videoPlayerViewControllerDidDismiss:_playerViewController];
-    }];
-  }
 }
 
 - (void)setFullscreenAutorotate:(BOOL)autorotate {
@@ -1401,11 +1396,6 @@ static int const RCTVideoUnset = -1;
 {
   if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
   {
-    @try{
-      [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
-      [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
-    }@catch(id anException){
-    }
     self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
   }
 }
@@ -1417,11 +1407,14 @@ static int const RCTVideoUnset = -1;
     _fullscreenPlayerPresented = false;
     _presentingViewController = nil;
     
-    if (_controls) {
+    if (_controls && [_fullscreenOrientation isEqualToString:@"all"]) {
       UIViewController *viewController = [self reactViewController];
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
     } else {
+      // #1827 Fix playerviewcontroller keypath leak of observers
+      [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+      [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
       _playerViewController = nil;
     }
     
