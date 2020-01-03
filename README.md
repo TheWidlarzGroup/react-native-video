@@ -301,6 +301,7 @@ var styles = StyleSheet.create({
 * [fullscreen](#fullscreen)
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
+* [requestOrientationInFullscreen](#requestOrientationInFullscreen)
 * [headers](#headers)
 * [hideShutterView](#hideshutterview)
 * [id](#id)
@@ -641,6 +642,14 @@ Determines how to resize the video when the frame doesn't match the raw video di
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
+
+#### requestOrientationInFullscreen
+Determines whether the activity should request landscape orientation or not when the fullscreen property is set to true.
+* **false (default)** - Don't change the activity orientation automatically
+* **true** - Change the activity orientation automatically when the fullscreen is set to true
+
+Platforms: Android
+
 
 #### selectedAudioTrack
 Configure which audio track, if any, is played.
