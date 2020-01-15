@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.upstream.cache.Cache;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.upstream.cache.CacheUtil;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
+import com.google.android.exoplayer2.upstream.cache.CacheKeyFactory;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceInputStream;
@@ -51,17 +52,14 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                 final Uri uri = Uri.parse(url);
                 final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null); // TODO won't work for video's over 100 MB
                 final SimpleCache downloadCache = ExoPlayerCache.getInstance(getReactApplicationContext());
-                CacheUtil.CachingCounters counters = new CacheUtil.CachingCounters();
+                CacheKeyFactory cacheKeyFactory = new CacheKeyFactory();
                 
                 try {
                     CacheUtil.getCached(
                         dataSpec, 
                         downloadCache,
-                        counters
+                        cacheKeyFactory
                     );
-
-                    // TODO check counters for when download is not complete // Download can complete during writing
-                    Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (start)");
 
                     DataSourceInputStream inputStream = new DataSourceInputStream(createDataSource(downloadCache), dataSpec);
 
@@ -83,11 +81,8 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                     CacheUtil.getCached(
                         dataSpec, 
                         downloadCache,
-                        counters
+                        cacheKeyFactory
                     );
-
-                    // TODO are we sure the complete video is downloaded?
-                    Log.d(getName(), "Cached " + counters.totalCachedBytes() + " bytes (end)");
 
                     Log.d(getName(), "Export succeeded");
                     Log.d(getName(), targetFile.getPath());
