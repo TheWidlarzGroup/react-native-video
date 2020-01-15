@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class ExoPlayerCache extends ReactContextBaseJavaModule {
 
     private static SimpleCache instance = null;
-    
+    private static final String CACHE_KEY_PREFIX = "exoPlayerCacheKeyPrefix";
 
     public ExoPlayerCache(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -52,7 +52,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                 final Uri uri = Uri.parse(url);
                 final DataSpec dataSpec = new DataSpec(uri, 0, 100 * 1024 * 1024, null); // TODO won't work for video's over 100 MB
                 final SimpleCache downloadCache = ExoPlayerCache.getInstance(getReactApplicationContext());
-                CacheKeyFactory cacheKeyFactory = new CacheKeyFactory();
+                CacheKeyFactory cacheKeyFactory = ds -> CACHE_KEY_PREFIX + "." + CacheUtil.generateKey(ds.uri);;
                 
                 try {
                     CacheUtil.getCached(
