@@ -766,7 +766,7 @@ Platforms: all
 Example:
 ```
 # For a base-64 encoded hls (m3u8) stream
-source={{ uri: 'data:/data:application/vnd.apple.mpegURL;base64,... }}
+source={{ uri: 'data:application/vnd.apple.mpegURL;base64,... }}
 ```
 
 Platforms: all
