@@ -160,6 +160,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private long resumePosition;
     private boolean loadVideoStarted;
     private boolean isInBackground;
+    private boolean fromBackground;
     private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
@@ -458,9 +459,11 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onHostResume() {
+        Log.d(TAG, "onHostResume()");
         if (!playInBackground || !isInBackground) {
             setPlayWhenReady(!isPaused);
         }
+        fromBackground = true;
         isInBackground = false;
     }
 
@@ -800,6 +803,18 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 case ExoPlayer.STATE_READY:
                     if (!player.getPlayWhenReady() && !isInBackground) {
                         setPlayWhenReady(true);
+                    }
+
+                    /**
+                     * Focus on play/pause button and update progress if coming from background
+                     * state
+                     */
+                    if (fromBackground && isPaused) {
+                        playPauseButton.requestFocus();
+                        if (player != null) {
+                            updateProgressControl(player.getCurrentPosition());
+                        }
+                        fromBackground = false;
                     }
                     break;
                 default:
