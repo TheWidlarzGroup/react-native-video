@@ -159,7 +159,7 @@ class ReactExoplayerView extends FrameLayout implements
                             ) {
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow());
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(currentPosition));
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -168,12 +168,12 @@ class ReactExoplayerView extends FrameLayout implements
         }
     };
     
-    public double getPositionInFirstPeriodMsForCurrentWindow() {
+    public double getPositionInFirstPeriodMsForCurrentWindow(currentPosition) {
         Timeline.Window window = new Timeline.Window();
         if(!player.getCurrentTimeline().isEmpty()) {    
             player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
         }
-        return window.windowStartTimeMs;
+        return window.windowStartTimeMs + currentPosition;
     }
 
     public ReactExoplayerView(ThemedReactContext context) {
