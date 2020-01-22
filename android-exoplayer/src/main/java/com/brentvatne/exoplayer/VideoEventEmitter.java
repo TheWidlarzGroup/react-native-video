@@ -107,6 +107,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
+    private static final String EVENT_PROP_CURRENT_PLAYBACK_TIME = "currentPlaybackTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
     private static final String EVENT_PROP_TRACK_ID = "trackId";
@@ -169,12 +170,12 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPosition2) {
+    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
-        event.putDouble(EVENT_PROP_CURRENT_TIME+"2", currentPosition2);
+        event.putDouble(EVENT_PROP_CURRENT_PLAYBACK_TIME, currentPlaybackTime);
         receiveEvent(EVENT_PROGRESS, event);
     }
 
