@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.IntegerRes;
@@ -159,6 +160,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private long resumePosition;
     private boolean loadVideoStarted;
     private boolean isInBackground;
+    private boolean fromBackground;
     private boolean isPaused;
     private boolean isBuffering;
     private float rate = 1f;
@@ -186,6 +188,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
+
+    // Custom
+    private PowerManager powerManager;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -262,6 +267,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         this.themedReactContext = context;
         createViews();
         this.eventEmitter = new VideoEventEmitter(context);
+        powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
@@ -453,19 +459,20 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onHostResume() {
+        Log.d(TAG, "onHostResume()");
         if (!playInBackground || !isInBackground) {
             setPlayWhenReady(!isPaused);
         }
+        fromBackground = true;
         isInBackground = false;
     }
 
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (playInBackground) {
-            return;
-        }
+        setPlayInBackground(false);
         setPlayWhenReady(false);
+        stopPlayback();
     }
 
     @Override
@@ -767,7 +774,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
-        if (player == null) {
+        if (player == null || isInBackground || !powerManager.isInteractive()) {
             return;
         }
 
@@ -782,6 +789,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
+        if (!powerManager.isInteractive()) {
+            return;
+        }
+
         if (player != null) {
             switch (player.getPlaybackState()) {
                 case ExoPlayer.STATE_IDLE:
@@ -790,8 +801,20 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     break;
                 case ExoPlayer.STATE_BUFFERING:
                 case ExoPlayer.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
+                    if (!player.getPlayWhenReady() && !isInBackground) {
                         setPlayWhenReady(true);
+                    }
+
+                    /**
+                     * Focus on play/pause button and update progress if coming from background
+                     * state
+                     */
+                    if (fromBackground && isPaused) {
+                        playPauseButton.requestFocus();
+                        if (player != null) {
+                            updateProgressControl(player.getCurrentPosition());
+                        }
+                        fromBackground = false;
                     }
                     break;
                 default:
@@ -960,7 +983,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     private void changeFocusedView() {
         if (live) {
-            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE) {
+            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE && statsButton.getVisibility() != View.VISIBLE) {
                 controls.setFocusable(true);
                 controls.setFocusableInTouchMode(false);
                 post(new Runnable() {

@@ -11,25 +11,18 @@ Pod::Spec.new do |s|
   s.author         = package['author']
   s.homepage       = 'https://github.com/brentvatne/react-native-video'
   s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
+  s.swift_version = "4.2"
 
   s.ios.deployment_target = "8.0"
   s.tvos.deployment_target = "9.0"
 
-  s.subspec "Video" do |ss|
-    ss.source_files  = "ios/Video/*.{h,m}"
-    s.static_framework = true
-  end
+  s.static_framework = true
 
-  s.subspec "VideoCaching" do |ss|
-    ss.dependency "react-native-video/Video"
-    ss.dependency "SPTPersistentCache", "~> 1.1.0"
-    ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
+  s.source_files = "ios/Beacon/HTTP/*.{h,m}", "ios/Video/*.{h,m}", "ios/Beacon/*.{h,m}"
+  
+  s.vendored_frameworks = 'native_dependency/stats-sdk-objc/Frameworks/tvOS/fat/MuxCoreTv.framework', 'native_dependency/mux-stats-sdk-avplayer/Frameworks/tvOS/fat/MUXSDKStatsTv.framework'
 
-    ss.source_files = "ios/VideoCaching/**/*.{h,m}"
-    s.static_framework = true
-  end
-
-  s.dependency "React"
-
-  s.default_subspec = "Video"
+  s.dependency 'dice-shield-ios'
+  s.dependency 'ReactVideoSubtitleSideloader_tvOS'
+  s.dependency 'React'
 end

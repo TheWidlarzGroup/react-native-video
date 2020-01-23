@@ -21,7 +21,8 @@
 @import MuxCore;
 @import MUXSDKStats;
 #elif TARGET_OS_TV
-#import <dice_shield_tvos/dice_shield_tvos-Swift.h>
+#import <dice_shield_ios/dice_shield_ios-Swift.h>
+//#import <dice_shield_tvos/dice_shield_tvos-Swift.h>
 @import MuxCoreTv;
 @import MUXSDKStatsTv;
 #endif
