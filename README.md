@@ -325,6 +325,7 @@ var styles = StyleSheet.create({
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
+* [textureViewOpaque](#textureViewOpaque)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
 
@@ -835,6 +836,16 @@ textTracks={[
 
 
 Platforms: Android ExoPlayer, iOS
+
+#### textureViewOpaque
+Controls whether the content of the TextureView is opaque or not.
+
+Setting this to false is useful if you are performing any opacity style changes to the video component.
+
+* **true (default)** - TextureView content is opaque
+* **false** TextureView content is not opaque
+
+Platforms: Android ExoPlayer
 
 #### useTextureView
 Controls whether to output to a TextureView or SurfaceView.
