@@ -10,13 +10,15 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.view.MarginLayoutParamsCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -141,9 +143,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private TextView liveTextView;
     private ImageButton playPauseButton;
     private View controls;
-    private LinearLayout bottomBarWidget;
+    private ConstraintLayout bottomBarWidget;
     private TextView labelTextView;
-    private View labelTextContainer;
     private DceSeekIndicator seekIndicator;
     private ImageButton audioSubtitlesButton;
     private ImageButton scheduleButton;
@@ -387,7 +388,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
         });
 
-        labelTextContainer = findViewById(R.id.tvLabelContainerView);
         labelTextView = findViewById(R.id.tvLabelView);
 
         bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
@@ -1893,20 +1893,29 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void moveLabelView(ImageButton button, String label) {
-        int paddingLeft = labelTextContainer.getPaddingLeft();
         int buttonCentre = (int) (button.getX() + (button.getWidth() / 2));
         int labelWidth = (int) labelTextView.getPaint().measureText(label);
 
-        int labelX = buttonCentre - (labelWidth / 2);
-        if (labelX < paddingLeft) {
-            labelX = paddingLeft;
-        } else if (labelX + labelWidth > labelTextContainer.getWidth()) {
-            labelX = labelTextContainer.getMeasuredWidth() - labelWidth;
-        }
-        //Log.d(TAG, "moveLabelView() start = " + button.getX() + " buttonCentre=" + buttonCentre + " labelWidth=" + labelWidth + " labelX=" + labelX);
+        MarginLayoutParams pl = (MarginLayoutParams) labelTextView.getLayoutParams();
+        final int marginStart = MarginLayoutParamsCompat.getMarginStart(pl);
+        final int marginEnd = MarginLayoutParamsCompat.getMarginEnd(pl);
+
+        float leftSpace = buttonCentre - marginStart - marginEnd;
+        float rightSpace = bottomBarWidget.getWidth() - buttonCentre - marginStart - marginEnd;
+        float space = Math.min(leftSpace, rightSpace) * 2;
+        float bias = labelWidth > 0 ? (space / labelWidth) / 2 : 0.5f;
+
+        final int labelId = labelTextView.getId();
+        final int buttonId = button.getId();
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(bottomBarWidget);
+        constraintSet.connect(labelId, ConstraintSet.START, buttonId, ConstraintSet.START, marginStart);
+        constraintSet.connect(labelId, ConstraintSet.END, buttonId, ConstraintSet.END, marginEnd);
+        constraintSet.setHorizontalBias(labelId, Math.min(bias, 0.5f));
+        constraintSet.applyTo(bottomBarWidget);
 
         labelTextView.setWidth(labelWidth);
-        labelTextView.setX(labelX);
         labelTextView.setText(label);
         labelTextView.setAlpha(0.0f);
         animateShowView(labelTextView, 100);
