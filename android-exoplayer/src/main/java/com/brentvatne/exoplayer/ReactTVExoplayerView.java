@@ -1903,6 +1903,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         float leftSpace = buttonCentre - marginStart - marginEnd;
         float rightSpace = bottomBarWidget.getWidth() - buttonCentre - marginStart - marginEnd;
         float space = Math.min(leftSpace, rightSpace) * 2;
+        float bias = labelWidth > 0 ? (space / labelWidth) / 2 : 0.5f;
 
         final int labelId = labelTextView.getId();
         final int buttonId = button.getId();
@@ -1911,7 +1912,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         constraintSet.clone(bottomBarWidget);
         constraintSet.connect(labelId, ConstraintSet.START, buttonId, ConstraintSet.START, marginStart);
         constraintSet.connect(labelId, ConstraintSet.END, buttonId, ConstraintSet.END, marginEnd);
-        constraintSet.setHorizontalBias(labelId, Math.min((space / labelWidth) / 2, 0.5f));
+        constraintSet.setHorizontalBias(labelId, Math.min(bias, 0.5f));
         constraintSet.applyTo(bottomBarWidget);
 
         labelTextView.setWidth(labelWidth);
