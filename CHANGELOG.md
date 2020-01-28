@@ -1,6 +1,6 @@
 ## Changelog
 
-### Version 5.1.1
+### Version 5.1.0-alpha2
 * Added support for full-screen functionality in Android Exoplayer [#1730](https://github.com/react-native-community/react-native-video/pull/1730)
 
 ### Version 5.1.0-alpha1
