@@ -140,7 +140,7 @@ project(':react-native-video').projectDir = new File(rootProject.projectDir, '..
 
 #### **android/app/build.gradle**
 
-From version >= 5.0.0, you have to apply this changes:
+From version >= 5.0.0, you have to apply these changes:
 
 ```diff
 dependencies {
