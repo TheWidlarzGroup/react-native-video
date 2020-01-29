@@ -954,13 +954,23 @@ static int const RCTVideoUnset = -1;
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
     } else {
-      [_player play];
+      if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
+        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+      } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
+        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
+      }
+
+      if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
+        [_player playImmediatelyAtRate:_rate];
+      } else {
+        [_player play];
+        [_player setRate:_rate];
+      }
       [_player setRate:_rate];
     }
-    [_player setRate:_rate];
+      
+    _paused = paused;
   }
-  
-  _paused = paused;
 }
 
 - (float)getCurrentTime
@@ -1022,6 +1032,15 @@ static int const RCTVideoUnset = -1;
 - (void)setRate:(float)rate
 {
   _rate = rate;
+
+  // Fix video sometimes freezes when adjusting speed
+  dispatch_async(dispatch_get_main_queue(), ^(void){
+    AVPlayerItem *item = _player.currentItem;
+    [_player replaceCurrentItemWithPlayerItem:nil];
+    [_player replaceCurrentItemWithPlayerItem:item];
+    _player.rate = rate;
+  });
+
   [self applyModifiers];
 }
 
