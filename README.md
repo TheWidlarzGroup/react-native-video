@@ -231,6 +231,36 @@ using System.Collections.Generic;
 ...
 ```
 </details>
+<details>
+  <summary>Windows RNW C++/WinRT details</summary>
+
+Make the following additions to the given files manually:
+
+#### **windows/myapp.sln**
+
+Add the `ReactNativeVideoCPP` project to your solution.
+
+1. Open the solution in Visual Studio 2019
+2. Right-click Solution icon in Solution Explorer > Add > Existing Project
+   Select `node_modules\react-native-video\windows\vNext\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
+
+#### **windows/myapp/myapp.vcxproj**
+
+Add a reference to `ReactNativeVideoCpp` to your main application project. From Visual Studio 2019:
+
+1. Right-click main application project > Add > Reference...
+  Check `ReactNativeVideoCpp` from Solution Projects.
+
+2. Modify files below to add the video package providers to your main application project
+#### **pch.h**
+
+Add `#include "winrt/ReactNativeVideoCPP.h"`.
+
+#### **app.cpp**
+
+Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());` before `InitializeComponent();`.
+
+</details>
 
 ### react-native-dom installation
 <details>
