@@ -165,6 +165,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean fromBackground;
     private boolean isPaused;
     private boolean isBuffering;
+    private boolean isMediaKeysEnabled = true;
     private float rate = 1f;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -632,6 +633,18 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
+    }
+
+    public void setMediaKeysListener(boolean visible) {
+        if (!visible) {
+            deactivateMediaSession();
+        }
+
+        if (visible && !isMediaKeysEnabled) {
+            activateMediaSession();
+        }
+
+        isMediaKeysEnabled = visible;
     }
 
     private DefaultDrmSessionManager createDrmSessionManager(@NonNull ActionToken drmParam) throws UnsupportedDrmException {

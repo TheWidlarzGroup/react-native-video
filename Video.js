@@ -25,17 +25,17 @@ export default class Video extends Component {
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
-  
+
   toTypeString(x) {
     switch (typeof x) {
       case "object":
-        return x instanceof Date 
-          ? x.toISOString() 
+        return x instanceof Date
+          ? x.toISOString()
           : JSON.stringify(x); // object, null
       case "undefined":
         return "";
       default: // boolean, number, string
-        return x.toString();      
+        return x.toString();
     }
   }
 
@@ -221,6 +221,7 @@ export default class Video extends Component {
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
+      mediaKeys: this.props.mediaKeys,
       src: {
         uri,
         subtitles: source.subtitles,
@@ -373,6 +374,7 @@ Video.propTypes = {
   colorProgressBar: PropTypes.string,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
+  mediaKeys: PropTypes.bool,
   currentTime: PropTypes.number,
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,

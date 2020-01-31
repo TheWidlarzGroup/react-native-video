@@ -46,6 +46,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
+    private static final String PROP_MEDIA_KEYS = "mediaKeys";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
     private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs";
@@ -211,6 +212,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
     public void setMuted(final ReactTVExoplayerView videoView, final boolean muted) {
         videoView.setMutedModifier(muted);
+    }
+
+    @ReactProp(name = PROP_MEDIA_KEYS, defaultBoolean = true)
+    public void setMediaKeys(final ReactTVExoplayerView videoView, final boolean visible) {
+        videoView.setMediaKeysListener(visible);
     }
 
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
