@@ -1085,7 +1085,6 @@ class ReactExoplayerView extends FrameLayout implements
         //when seek is called, also note that the above error only happens only for webm formats not for mp4
         if (e.type == ExoPlaybackException.TYPE_UNEXPECTED
                 && e.getCause() != null
-                && e.getCause().getMessage() != null
                 && e.getCause().getMessage().equals("Error 0xffffff92")) {
             initializePlayer();
         }
