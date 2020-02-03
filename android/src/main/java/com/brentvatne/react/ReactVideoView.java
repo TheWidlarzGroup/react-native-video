@@ -162,6 +162,7 @@ public class ReactVideoView extends ScalableVideoView implements
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     event.putDouble(EVENT_PROP_SEEKABLE_DURATION, mVideoDuration / 1000.0);
+                    event.putDouble(EVENT_PROP_CURRENT_TIME+"2", mMediaPlayer.getPositionInFirstPeriodMs())
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
