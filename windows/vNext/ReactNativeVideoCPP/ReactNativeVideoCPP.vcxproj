@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.props')" />
   <PropertyGroup Label="Globals">
     <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <MinimalCoreWin>true</MinimalCoreWin>
-    <ProjectGuid>{47eec7f3-40d3-49ba-82c1-eaf103b54215}</ProjectGuid>
+    <ProjectGuid>{765365e4-9553-4900-9f69-e26d4309c8da}</ProjectGuid>
     <ProjectName>ReactNativeVideoCPP</ProjectName>
     <RootNamespace>ReactNativeVideoCPP</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -137,9 +136,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
-    <Text Include="readme.txt">
-      <DeploymentContent>false</DeploymentContent>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\react-native-windows\Microsoft.ReactNative\Microsoft.ReactNative.vcxproj">
@@ -150,7 +146,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.targets')" />
-    <Import Project="..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -158,7 +153,5 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.190730.2\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.props'))" />
-    <Error Condition="!Exists('..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\windows\packages\Microsoft.Windows.CppWinRT.2.0.190529.9\build\native\Microsoft.Windows.CppWinRT.targets'))" />
   </Target>
 </Project>

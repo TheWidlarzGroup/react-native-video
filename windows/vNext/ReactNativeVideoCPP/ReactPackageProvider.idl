@@ -1,8 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
 namespace ReactNativeVideoCPP {
-[webhosthidden][default_interface] runtimeclass ReactPackageProvider : Microsoft.ReactNative.IReactPackageProvider {
+[webhosthidden]
+[default_interface] 
+runtimeclass ReactPackageProvider : Microsoft.ReactNative.IReactPackageProvider {
   ReactPackageProvider();
 };
 } // namespace ReactNativeVideoCPP
