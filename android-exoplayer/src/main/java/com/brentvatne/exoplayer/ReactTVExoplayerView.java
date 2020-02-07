@@ -295,18 +295,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void createViews() {
-        addOnLayoutChangeListener(new OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
-                                       int oldRight, int oldBottom) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        controls.requestLayout();
-                    }
-                }, 200);
-            }
-        });
         clearResumePosition();
         mediaDataSourceFactory = buildDataSourceFactory(true);
         mainHandler = new Handler();
@@ -314,113 +302,127 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
         addView(exoPlayerView, 0, layoutParams);
         setLayoutTransition(new LayoutTransition());
 
-        controls = inflater.inflate(R.layout.controls_tv, null);
-        LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        controls.setLayoutParams(controlsParam);
-        addView(controls);
-
-        bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
-
-        playPauseButton = (ImageButton) controls.findViewById(R.id.tvPlayPauseImageView);
-        playPauseButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setPausedModifier(!isPaused);
-            }
-        });
-        currentTextView = (TextView) controls.findViewById(R.id.currentTimeTextView);
-        liveTextView = (TextView) controls.findViewById(R.id.liveTextView);
-        previewSeekBarLayout = (PreviewSeekBarLayout) controls.findViewById(R.id.previewSeekBarLayout);
-        previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
-            @Override
-            public void loadPreview(long currentPosition, long max) {
-
-            }
-        });
-        bottomBarWidgetContainer = (LinearLayout) controls.findViewById(R.id.tvBottomBarWidgetContainer);
-
-        audioSubtitlesButton = findViewById(R.id.tvAudioSubtitlesBtn);
-        audioSubtitlesButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (!live) {
-                    setPausedModifier(true);
+        if (isControlsVisible) {
+            addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
+                                           int oldRight, int oldBottom) {
+                    postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            controls.requestLayout();
+                        }
+                    }, 200);
                 }
+            });
 
-                setStateOverlay(ControlState.HIDDEN.toString());
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            controls = inflater.inflate(R.layout.controls_tv, null);
+            LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            controls.setLayoutParams(controlsParam);
+            addView(controls);
 
-                if (dialog != null) {
-                    dialog.dismiss();
-                    dialog = null;
+            bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
+
+            playPauseButton = (ImageButton) controls.findViewById(R.id.tvPlayPauseImageView);
+            playPauseButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setPausedModifier(!isPaused);
                 }
+            });
+            currentTextView = (TextView) controls.findViewById(R.id.currentTimeTextView);
+            liveTextView = (TextView) controls.findViewById(R.id.liveTextView);
+            previewSeekBarLayout = (PreviewSeekBarLayout) controls.findViewById(R.id.previewSeekBarLayout);
+            previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
+                @Override
+                public void loadPreview(long currentPosition, long max) {
 
-                dialog = new DceTracksDialog(getContext(), 0);
-                dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
-                dialog.setAccentColor(accentColor);
+                }
+            });
+            bottomBarWidgetContainer = (LinearLayout) controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
-                dialog.show();
-            }
-        });
+            audioSubtitlesButton = findViewById(R.id.tvAudioSubtitlesBtn);
+            audioSubtitlesButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        scheduleButton = findViewById(R.id.tvScheduleBtn);
+                    if (!live) {
+                        setPausedModifier(true);
+                    }
 
-        scheduleButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                eventEmitter.epgIconClick();
-                setStateOverlay(ControlState.HIDDEN.toString());
-            }
-        });
+                    setStateOverlay(ControlState.HIDDEN.toString());
 
-        statsButton = findViewById(R.id.tvStatsBtn);
+                    if (dialog != null) {
+                        dialog.dismiss();
+                        dialog = null;
+                    }
 
-        statsButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                eventEmitter.statsIconClick();
-                setStateOverlay(ControlState.HIDDEN.toString());
-            }
-        });
+                    dialog = new DceTracksDialog(getContext(), 0);
+                    dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
+                    dialog.setAccentColor(accentColor);
 
-        labelTextView = findViewById(R.id.tvLabelView);
+                    dialog.show();
+                }
+            });
 
-        bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
-            @Override
-            public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-                Log.d(TAG, "onGlobalFocusChanged()");
+            scheduleButton = findViewById(R.id.tvScheduleBtn);
 
-                updateLabelView(newFocus);
-            }
-        });
+            scheduleButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    eventEmitter.epgIconClick();
+                    setStateOverlay(ControlState.HIDDEN.toString());
+                }
+            });
 
-        setEpg(false); // default value
-        setStats(false);
+            statsButton = findViewById(R.id.tvStatsBtn);
 
-        setupButton(playPauseButton);
-        setupButton(audioSubtitlesButton);
-        setupButton(scheduleButton);
-        setupButton(statsButton);
+            statsButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    eventEmitter.statsIconClick();
+                    setStateOverlay(ControlState.HIDDEN.toString());
+                }
+            });
 
-        // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
-        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                manuallyLayoutChildren();
-                getViewTreeObserver().dispatchOnGlobalLayout();
-                Choreographer.getInstance().postFrameCallback(this);
-            }
-        });
+            labelTextView = findViewById(R.id.tvLabelView);
 
-        seekIndicator = findViewById(R.id.seekIndicator);
+            bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
+                @Override
+                public void onGlobalFocusChanged(View oldFocus, View newFocus) {
+                    Log.d(TAG, "onGlobalFocusChanged()");
+
+                    updateLabelView(newFocus);
+                }
+            });
+
+            setEpg(false); // default value
+            setStats(false);
+
+            setupButton(playPauseButton);
+            setupButton(audioSubtitlesButton);
+            setupButton(scheduleButton);
+            setupButton(statsButton);
+
+            // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
+            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    manuallyLayoutChildren();
+                    getViewTreeObserver().dispatchOnGlobalLayout();
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            });
+
+            seekIndicator = findViewById(R.id.seekIndicator);
+        }
     }
 
     private void updateLabelView(View newFocus) {
@@ -1610,11 +1612,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void setControls(final boolean visible) {
-        if (visible) {
-            setControlsOpacity(1);
-        } else {
-            setControlsOpacity(0);
-        }
+        controls.setVisibility(visible ? VISIBLE : GONE);
+        isControlsVisible = visible;
     }
 
     public void setControlsOpacity(final float opacity) {
