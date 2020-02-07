@@ -166,6 +166,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean isPaused;
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
+    private boolean isControlsVisible = true;
     private float rate = 1f;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -950,12 +951,22 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 text += "ended";
                 eventEmitter.end();
                 onStopPlayback();
+                if (
+                    player.getRepeatMode() == Player.REPEAT_MODE_ONE
+                    || player.getRepeatMode() == Player.REPEAT_MODE_ALL
+                    || this.repeat
+                ) {
+                    this.seekTo(0);
+                }
+
                 break;
             default:
                 text += "unknown";
                 break;
         }
-        updateControlsState();
+        if (isControlsVisible) {
+            updateControlsState();
+        }
         Log.d(TAG, text);
     }
 
@@ -1598,6 +1609,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         });
     }
 
+    public void setControls(final boolean visible) {
+        if (visible) {
+            setControlsOpacity(1);
+        } else {
+            setControlsOpacity(0);
+        }
+    }
+
     public void setControlsOpacity(final float opacity) {
         float newTranslationY = ((1 - opacity) * bottomBarWidget.getHeight() * 0.5f);
         if (newTranslationY < 0) {
@@ -1857,6 +1876,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void showOverlay() {
+        if (this.repeat || !isControlsVisible) {
+            return;
+        }
 
         if (controlsAutoHideTimeout != null) {
             removeCallbacks(hideRunnable);

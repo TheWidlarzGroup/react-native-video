@@ -221,7 +221,6 @@ export default class Video extends Component {
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style],
       resizeMode: nativeResizeMode,
-      mediaKeys: this.props.mediaKeys,
       src: {
         uri,
         subtitles: source.subtitles,

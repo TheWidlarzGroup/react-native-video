@@ -63,6 +63,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_LIVE = "live";
     private static final String PROP_EPG = "hasEpg";
     private static final String PROP_STATS = "hasStats";
+    private static final String PROP_CONTROLS = "controls";
     private static final String PROP_CONTROLS_OPACITY = "controlsOpacity";
     private static final String PROP_PROGRESS_BAR_MARGIN_BOTTOM = "progressBarMarginBottom";
     private static final String PROP_STATE_OVERLAY = "stateOverlay";
@@ -267,6 +268,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_STATS, defaultBoolean = false)
     public void setStats(final ReactTVExoplayerView videoView, final boolean hasStats) {
         videoView.setStats(hasStats);
+    }
+
+    @ReactProp(name = PROP_CONTROLS)
+    public void setControls(final ReactTVExoplayerView videoView, final boolean visible) {
+        videoView.setControls(visible);
     }
 
     @ReactProp(name = PROP_CONTROLS_OPACITY)
