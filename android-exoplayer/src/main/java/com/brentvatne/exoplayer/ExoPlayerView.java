@@ -136,11 +136,8 @@ public final class ExoPlayerView extends FrameLayout implements AdsLoader.AdView
     public View[] getAdOverlayViews() {
         ArrayList<View> overlayViews = new ArrayList<>();
         if (adOverlayFrameLayout != null) {
-        overlayViews.add(adOverlayFrameLayout);
+            overlayViews.add(adOverlayFrameLayout);
         }
-        // if (controller != null) {
-        // overlayViews.add(controller);
-        // }
         return overlayViews.toArray(new View[0]);
     }
 
