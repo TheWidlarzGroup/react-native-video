@@ -370,7 +370,7 @@ const adTagUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124
 adTagUrl={adTagUrl}
 ```
 
-Platforms: all
+Platforms: Android ExoPlayer, iOS
 
 #### allowsExternalPlayback
 Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
