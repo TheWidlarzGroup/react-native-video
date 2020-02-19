@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.brentvatne.react.R;
@@ -296,6 +297,27 @@ class ReactExoplayerView extends FrameLayout implements
             }
         });
 
+        //Handling the playButton click event
+        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
+                    player.seekTo(0);
+                }
+                setPausedModifier(false);
+            }
+        });
+
+        //Handling the pauseButton click event
+        ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setPausedModifier(true);
+            }
+        });
+
         //Handling the fullScreenButton click event
         FrameLayout fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen_button);
         fullScreenButton.setOnClickListener(new View.OnClickListener() {
@@ -340,7 +362,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void updateFullScreenIcon(Boolean fullScreen) {
         if(playerControlView != null && player != null) {
             //Play the video whenever the user clicks minimize or maximise button. In order to enable the controls
-            player.setPlayWhenReady(true);
+            player.setPlayWhenReady(!isPaused);
             ImageView fullScreenIcon = playerControlView.findViewById(R.id.exo_fullscreen_icon);
             if (fullScreen) {
                 fullScreenIcon.setImageResource(R.drawable.fullscreen_shrink);
