@@ -10,6 +10,7 @@ namespace ReactNativeVideoCPP {
   void Set_Position(Double position);
   void Set_Controls(Boolean useControls);
   void Set_FullScreen(Boolean fullScreen);
-  void Set_progressUpdateInterval(Int64 interval);
+  void Set_ProgressUpdateInterval(Int64 interval);
+  void Set_AutoPlay(Boolean autoPlay);
 };
 } // namespace ReactNativeVideoCPP

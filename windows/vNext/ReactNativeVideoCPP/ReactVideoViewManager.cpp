@@ -62,50 +62,34 @@ void ReactVideoViewManager::UpdateProperties(
     for (auto const &pair : propertyMap) {
       auto const &propertyName = pair.first;
       auto const &propertyValue = pair.second;
-      if (propertyName == "src") {
-        if (!propertyValue.IsNull()) {
-          auto const &srcMap = propertyValue.Object();
-          auto const &uri = srcMap.at("uri");
-          reactVideoView.Set_UriString(to_hstring(uri.String()));
-        }
-      } else if (propertyName == "resizeMode") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Stretch(static_cast<Stretch>(std::stoul(propertyValue.String())));
-        }
-      } else if (propertyName == "repeat") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_IsLoopingEnabled(propertyValue.Boolean());
-        }
-      } else if (propertyName == "paused") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_Paused(propertyValue.Boolean());
-        }
-      } else if (propertyName == "muted") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_Muted(propertyValue.Boolean());
-        }
-      } else if (propertyName == "volume") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_Volume(propertyValue.Double());
-        }
-      } else if (propertyName == "seek") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_Position(propertyValue.Double());
-        }
-      } else if (propertyName == "controls") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_Controls(propertyValue.Boolean());
-        }
-      } else if (propertyName == "fullscreen") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_FullScreen(propertyValue.Boolean());
-        }
-      } else if (propertyName == "progressUpdateInterval") {
-        if (!propertyValue.IsNull()) {
-          reactVideoView.Set_progressUpdateInterval(propertyValue.Int64());
+      if (!propertyValue.IsNull()) {
+        if (propertyName == "src") {
+            auto const &srcMap = propertyValue.Object();
+            auto const &uri = srcMap.at("uri");
+            reactVideoView.Set_UriString(to_hstring(uri.String()));
+        } else if (propertyName == "resizeMode") {
+            reactVideoView.Stretch(static_cast<Stretch>(std::stoul(propertyValue.String())));
+        } else if (propertyName == "repeat") {
+            reactVideoView.Set_IsLoopingEnabled(propertyValue.Boolean());
+        } else if (propertyName == "paused") {
+            m_paused = propertyValue.Boolean();
+            reactVideoView.Set_Paused(m_paused);
+        } else if (propertyName == "muted") {
+            reactVideoView.Set_Muted(propertyValue.Boolean());
+        } else if (propertyName == "volume") {
+            reactVideoView.Set_Volume(propertyValue.Double());
+        } else if (propertyName == "seek") {
+            reactVideoView.Set_Position(propertyValue.Double());
+        } else if (propertyName == "controls") {
+            reactVideoView.Set_Controls(propertyValue.Boolean());
+        } else if (propertyName == "fullscreen") {
+            reactVideoView.Set_FullScreen(propertyValue.Boolean());
+        } else if (propertyName == "progressUpdateInterval") {
+            reactVideoView.Set_ProgressUpdateInterval(propertyValue.Int64());
         }
       }
     }
+    reactVideoView.Set_AutoPlay(!m_paused); // auto play on pause false or not set.
   }
 }
 

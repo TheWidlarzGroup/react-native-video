@@ -16,7 +16,8 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   void Set_Position(double position);
   void Set_Controls(bool useControls);
   void Set_FullScreen(bool fullScreen);
-  void Set_progressUpdateInterval(int64_t interval);
+  void Set_ProgressUpdateInterval(int64_t interval);
+  void Set_AutoPlay(bool autoPlay);
 
  private:
   hstring m_uriString;
@@ -28,9 +29,16 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   double m_volume = 0;
   double m_position = 0;
   Windows::UI::Xaml::DispatcherTimer m_timer;
-  winrt::Windows::Media::Playback::MediaPlayer m_player = nullptr;
-  winrt::Windows::UI::Core::CoreDispatcher m_uiDispatcher = nullptr;
-  winrt::Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
+  Windows::Media::Playback::MediaPlayer m_player = nullptr;
+  Windows::UI::Core::CoreDispatcher m_uiDispatcher = nullptr;
+  Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
+
+  Windows::Media::Playback::MediaPlayer::MediaOpened_revoker m_mediaOpenedToken{};
+  Windows::Media::Playback::MediaPlayer::MediaFailed_revoker m_mediaFailedToken{};
+  Windows::Media::Playback::MediaPlayer::MediaEnded_revoker m_mediaEndedToken{};
+  Windows::Media::Playback::MediaPlaybackSession::BufferingStarted_revoker m_bufferingStartedToken{};
+  Windows::Media::Playback::MediaPlaybackSession::BufferingEnded_revoker m_bufferingEndedToken{};
+  Windows::Media::Playback::MediaPlaybackSession::SeekCompleted_revoker m_seekCompletedToken{};
 
   bool IsPlaying(Windows::Media::Playback::MediaPlaybackState currentState);
   void OnMediaOpened(IInspectable const &sender, IInspectable const &args);

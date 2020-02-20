@@ -246,10 +246,10 @@ Add the `ReactNativeVideoCPP` project to your solution.
 
 #### **windows/myapp/myapp.vcxproj**
 
-Add a reference to `ReactNativeVideoCpp` to your main application project. From Visual Studio 2019:
+Add a reference to `ReactNativeVideoCPP` to your main application project. From Visual Studio 2019:
 
 1. Right-click main application project > Add > Reference...
-  Check `ReactNativeVideoCpp` from Solution Projects.
+  Check `ReactNativeVideoCPP` from Solution Projects.
 
 2. Modify files below to add the video package providers to your main application project
 #### **pch.h**
