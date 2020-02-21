@@ -27,7 +27,7 @@ void ReactVideoViewManager::ReactContext(IReactContext reactContext) noexcept {
 }
 
 // IViewManagerWithExportedViewConstants
-winrt::Microsoft::ReactNative::ConstantProvider ReactVideoViewManager::ExportedViewConstants() noexcept {
+winrt::Microsoft::ReactNative::ConstantProviderDelegate ReactVideoViewManager::ExportedViewConstants() noexcept {
   return [](winrt::Microsoft::ReactNative::IJSValueWriter const &constantWriter) {
     WriteProperty(constantWriter, L"ScaleNone", to_hstring(std::to_string((int)Stretch::None)));
     WriteProperty(constantWriter, L"ScaleToFill", to_hstring(std::to_string((int)Stretch::UniformToFill)));
@@ -94,11 +94,11 @@ void ReactVideoViewManager::UpdateProperties(
 }
 
 // IViewManagerWithExportedEventTypeConstants
-ConstantProvider ReactVideoViewManager::ExportedCustomBubblingEventTypeConstants() noexcept {
+ConstantProviderDelegate ReactVideoViewManager::ExportedCustomBubblingEventTypeConstants() noexcept {
   return nullptr;
 }
 
-ConstantProvider ReactVideoViewManager::ExportedCustomDirectEventTypeConstants() noexcept {
+ConstantProviderDelegate ReactVideoViewManager::ExportedCustomDirectEventTypeConstants() noexcept {
   return [](winrt::Microsoft::ReactNative::IJSValueWriter const &constantWriter) {
     WriteCustomDirectEventTypeConstant(constantWriter, "Load");
     WriteCustomDirectEventTypeConstant(constantWriter, "End");

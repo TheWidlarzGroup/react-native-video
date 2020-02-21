@@ -40,12 +40,12 @@ struct ReactVideoViewManager : winrt::implements<
       winrt::Microsoft::ReactNative::IJSValueReader const &propertyMapReader) noexcept;
 
   // IViewManagerWithExportedViewConstants
-  winrt::Microsoft::ReactNative::ConstantProvider ExportedViewConstants() noexcept;
+  winrt::Microsoft::ReactNative::ConstantProviderDelegate ExportedViewConstants() noexcept;
 
   // IViewManagerWithExportedEventTypeConstants
-  winrt::Microsoft::ReactNative::ConstantProvider ExportedCustomBubblingEventTypeConstants() noexcept;
+  winrt::Microsoft::ReactNative::ConstantProviderDelegate ExportedCustomBubblingEventTypeConstants() noexcept;
 
-  winrt::Microsoft::ReactNative::ConstantProvider ExportedCustomDirectEventTypeConstants() noexcept;
+  winrt::Microsoft::ReactNative::ConstantProviderDelegate ExportedCustomDirectEventTypeConstants() noexcept;
 
  private:
   winrt::Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
