@@ -1133,7 +1133,7 @@ Methods operate on a ref to the Video element. You can create a ref using code l
 ```
 return (
   <Video source={...}
-    ref => (this.player = ref) />
+    ref={ref => (this.player = ref)} />
 );
 ```
 
