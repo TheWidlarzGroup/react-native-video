@@ -1247,6 +1247,7 @@ static int const RCTVideoUnset = -1;
     }
     
     if (_controls) {
+      [_playerViewController willMoveToParentViewController:nil];
       [_playerViewController.view removeFromSuperview];
       [_playerViewController removeFromParentViewController];
     }
@@ -1286,7 +1287,7 @@ static int const RCTVideoUnset = -1;
   else if ( !fullscreen && _fullscreenPlayerPresented )
   {
     [self videoPlayerViewControllerWillDismiss:_playerViewController];
-    [_presentingViewController dismissViewControllerAnimated:false completion:^{
+    [_playerViewController dismissViewControllerAnimated:NO completion:^{
       [self videoPlayerViewControllerDidDismiss:_playerViewController];
     }];
   }
@@ -1321,6 +1322,7 @@ static int const RCTVideoUnset = -1;
       UIViewController *viewController = [self reactViewController];
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
+      [_playerViewController didMoveToParentViewController:viewController];
     }
       
     [_playerViewController addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
@@ -1411,6 +1413,7 @@ static int const RCTVideoUnset = -1;
       UIViewController *viewController = [self reactViewController];
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
+      [_playerViewController didMoveToParentViewController:viewController];
     } else {
       // #1827 Fix playerviewcontroller keypath leak of observers
       [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
@@ -1419,6 +1422,7 @@ static int const RCTVideoUnset = -1;
     }
     
     [self applyModifiers];
+    _isInFullScreen = NO;
     if(self.onVideoFullscreenPlayerDidDismiss) {
       self.onVideoFullscreenPlayerDidDismiss(@{@"target": self.reactTag});
     }
