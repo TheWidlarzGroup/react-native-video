@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, UIManager, findNodeHandle, Dimensions } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -20,24 +20,51 @@ export default class Video extends Component {
     super(props);
 
     this.state = {
-      showPoster: !!props.poster
+      showPoster: !!props.poster,
+      androidFullScreen: false,
+      videoContainerLayout_x: 0,
+      videoContainerLayout_y: 0,
     };
+    this.getDimension();
+  }
+
+  /**
+   * @description this is will set the width and height needs to be considered for full screen
+   */
+  getDimension() {
+    if (Dimensions.get('window').width < Dimensions.get('window').height) {
+      this.width = Math.round(Dimensions.get('window').height);
+      this.height = Math.round(Dimensions.get('window').width);
+    }
+    else {
+      this.width = Math.round(Dimensions.get('window').width);
+      this.height = Math.round(Dimensions.get('window').height);
+    }
+  }
+
+  componentDidMount() {
+    UIManager.measure(findNodeHandle(this._videoContainer), (x, y) => {
+      this.setState({
+        videoContainerLayout_x: x,
+        videoContainerLayout_y: y,
+      });
+    });
   }
 
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
-  
+
   toTypeString(x) {
     switch (typeof x) {
-      case "object":
-        return x instanceof Date 
-          ? x.toISOString() 
+      case 'object':
+        return x instanceof Date
+          ? x.toISOString()
           : JSON.stringify(x); // object, null
-      case "undefined":
-        return "";
+      case 'undefined':
+        return '';
       default: // boolean, number, string
-        return x.toString();      
+        return x.toString();
     }
   }
 
@@ -52,14 +79,14 @@ export default class Video extends Component {
   }
 
   seek = (time, tolerance = 100) => {
-    if (isNaN(time)) throw new Error('Specified time is not a number');
-    
+    if (isNaN(time)) {throw new Error('Specified time is not a number');}
+
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
           time,
-          tolerance
-        }
+          tolerance,
+        },
       });
     } else {
       this.setNativeProps({ seek: time });
@@ -88,7 +115,7 @@ export default class Video extends Component {
 
   _hidePoster = () => {
     if (this.state.showPoster) {
-      this.setState({showPoster: false});
+      this.setState({ showPoster: false });
     }
   }
 
@@ -124,7 +151,7 @@ export default class Video extends Component {
     if (this.props.onBandwidthUpdate) {
       this.props.onBandwidthUpdate(event.nativeEvent);
     }
-  };  
+  };
 
   _onSeek = (event) => {
     if (this.props.onSeek) {
@@ -145,6 +172,7 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillPresent = (event) => {
+    Platform.OS === 'android' && this.setState({ androidFullScreen: true });
     if (this.props.onFullscreenPlayerWillPresent) {
       this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
     }
@@ -157,6 +185,7 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillDismiss = (event) => {
+    Platform.OS === 'android' && this.setState({ androidFullScreen: false });
     if (this.props.onFullscreenPlayerWillDismiss) {
       this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
     }
@@ -172,7 +201,7 @@ export default class Video extends Component {
     if (!this.props.audioOnly) {
       this._hidePoster();
     }
-    
+
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }
@@ -195,7 +224,7 @@ export default class Video extends Component {
       this.props.onPlaybackRateChange(event.nativeEvent);
     }
   };
-  
+
   _onExternalPlaybackChange = (event) => {
     if (this.props.onExternalPlaybackChange) {
       this.props.onExternalPlaybackChange(event.nativeEvent);
@@ -215,7 +244,7 @@ export default class Video extends Component {
   };
 
   _onRestoreUserInterfaceForPictureInPictureStop = (event) => {
-  	if (this.props.onRestoreUserInterfaceForPictureInPictureStop) {
+    if (this.props.onRestoreUserInterfaceForPictureInPictureStop) {
       this.props.onRestoreUserInterfaceForPictureInPictureStop();
     }
   };
@@ -242,13 +271,13 @@ export default class Video extends Component {
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
-    const shouldCache = !Boolean(source.__packager_asset)
+    const shouldCache = !source.__packager_asset;
 
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
     }
-    
+
     if (!uri) {
       console.warn('Trying to load empty source.');
     }
@@ -281,7 +310,7 @@ export default class Video extends Component {
         type: source.type || '',
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
-        requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {}
+        requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
@@ -313,8 +342,25 @@ export default class Video extends Component {
       resizeMode: this.props.posterResizeMode || 'contain',
     };
 
+    //androidFullScreen property will only impact on android. It will be always false for iOS.
+    const videoStyle = this.state.androidFullScreen ? {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: this.width,
+      height: this.height,
+      backgroundColor: '#ffffff',
+      justifyContent: 'center',
+      zIndex: 99999,
+      marginTop: -1 * (this.state.videoContainerLayout_y ? parseFloat(this.state.videoContainerLayout_y) : 0), //margin: 0 - is not working properly. So, updated all the margin individually with 0.
+      marginLeft: -1 * (this.state.videoContainerLayout_x ? parseFloat(this.state.videoContainerLayout_x) : 0),
+    } : {};
+
     return (
-      <View style={nativeProps.style}>
+      <View ref={(videoContainer) => {
+        this._videoContainer = videoContainer;
+        return videoContainer;
+        }} style={[nativeProps.style, videoStyle]}>
         <RCTVideo
           ref={this._assignRoot}
           {...nativeProps}
@@ -330,29 +376,29 @@ export default class Video extends Component {
 
 Video.propTypes = {
   filter: PropTypes.oneOf([
-      FilterType.NONE,
-      FilterType.INVERT,
-      FilterType.MONOCHROME,
-      FilterType.POSTERIZE,
-      FilterType.FALSE,
-      FilterType.MAXIMUMCOMPONENT,
-      FilterType.MINIMUMCOMPONENT,
-      FilterType.CHROME,
-      FilterType.FADE,
-      FilterType.INSTANT,
-      FilterType.MONO,
-      FilterType.NOIR,
-      FilterType.PROCESS,
-      FilterType.TONAL,
-      FilterType.TRANSFER,
-      FilterType.SEPIA
+    FilterType.NONE,
+    FilterType.INVERT,
+    FilterType.MONOCHROME,
+    FilterType.POSTERIZE,
+    FilterType.FALSE,
+    FilterType.MAXIMUMCOMPONENT,
+    FilterType.MINIMUMCOMPONENT,
+    FilterType.CHROME,
+    FilterType.FADE,
+    FilterType.INSTANT,
+    FilterType.MONO,
+    FilterType.NOIR,
+    FilterType.PROCESS,
+    FilterType.TONAL,
+    FilterType.TRANSFER,
+    FilterType.SEPIA,
   ]),
   filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
     PropTypes.number,
-    PropTypes.object
+    PropTypes.object,
   ]),
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
@@ -374,10 +420,10 @@ Video.propTypes = {
   /* Wrapper component */
   source: PropTypes.oneOfType([
     PropTypes.shape({
-      uri: PropTypes.string
+      uri: PropTypes.string,
     }),
     // Opaque type returned by require('./video.mp4')
-    PropTypes.number
+    PropTypes.number,
   ]),
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
@@ -391,22 +437,22 @@ Video.propTypes = {
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
+      PropTypes.number,
+    ]),
   }),
   selectedVideoTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
-  }),  
+      PropTypes.number,
+    ]),
+  }),
   selectedTextTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
+      PropTypes.number,
+    ]),
   }),
   textTracks: PropTypes.arrayOf(
     PropTypes.shape({
@@ -417,7 +463,7 @@ Video.propTypes = {
         TextTrackType.TTML,
         TextTrackType.VTT,
       ]),
-      language: PropTypes.string.isRequired
+      language: PropTypes.string.isRequired,
     })
   ),
   paused: PropTypes.bool,
@@ -441,7 +487,7 @@ Video.propTypes = {
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
   fullscreenAutorotate: PropTypes.bool,
-  fullscreenOrientation: PropTypes.oneOf(['all','landscape','portrait']),
+  fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,

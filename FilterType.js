@@ -14,5 +14,5 @@ export default {
     PROCESS: 'CIPhotoEffectProcess',
     TONAL: 'CIPhotoEffectTonal',
     TRANSFER: 'CIPhotoEffectTransfer',
-    SEPIA: 'CISepiaTone'
+    SEPIA: 'CISepiaTone',
 };
