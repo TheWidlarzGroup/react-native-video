@@ -67,6 +67,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.offline.FilteringManifestParser;
+import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -75,7 +76,6 @@ import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.google.android.exoplayer2.source.dash.manifest.RepresentationKey;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
@@ -459,7 +459,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, -1, true);
 
             if (drmMgr != null) {
-                player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext(), drmMgr), trackSelector, defaultLoadControl, drmMgr);
+                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext(), drmMgr), trackSelector, defaultLoadControl, drmMgr);
             } else {
                 player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext()), trackSelector, defaultLoadControl);
             }
@@ -626,7 +626,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
         drmCallback = null;
     }
 
-    private List<RepresentationKey> getOfflineStreamKeys(@NonNull Uri uri) {
+    private List<StreamKey> getOfflineStreamKeys(@NonNull Uri uri) {
         //ToDo: implement this method when download quality selection is added to download flow. For now using all streams.
         return Collections.emptyList();
     }
