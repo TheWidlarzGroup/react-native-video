@@ -166,7 +166,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean isPaused;
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
-    private boolean isControlsVisible = true;
+    private boolean areControlsVisible = true;
     private float rate = 1f;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -308,7 +308,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         addView(exoPlayerView, 0, layoutParams);
         setLayoutTransition(new LayoutTransition());
 
-        if (isControlsVisible) {
+        if (areControlsVisible) {
             addOnLayoutChangeListener(new OnLayoutChangeListener() {
                 @Override
                 public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
@@ -966,7 +966,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 text += "unknown";
                 break;
         }
-        if (isControlsVisible) {
+        if (areControlsVisible) {
             updateControlsState();
         }
         Log.d(TAG, text);
@@ -1613,7 +1613,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     public void setControls(final boolean visible) {
         controls.setVisibility(visible ? VISIBLE : GONE);
-        isControlsVisible = visible;
+        areControlsVisible = visible;
     }
 
     public void setControlsOpacity(final float opacity) {
@@ -1875,7 +1875,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void showOverlay() {
-        if (this.repeat || !isControlsVisible) {
+        if (this.repeat || !areControlsVisible) {
             return;
         }
 
