@@ -184,52 +184,34 @@ protected List<ReactPackage> getPackages() {
 
 ### Windows installation
 <details>
-  <summary>Windows details</summary>
+  <summary>Windows RNW C++/WinRT details</summary>
 
 Make the following additions to the given files manually:
 
 #### **windows/myapp.sln**
 
-Add the `ReactNativeVideo` project to your solution.
+Add the `ReactNativeVideoCPP` project to your solution.
 
-1. Open the solution in Visual Studio 2015
+1. Open the solution in Visual Studio 2019
 2. Right-click Solution icon in Solution Explorer > Add > Existing Project
-  * UWP: Select `node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj`
-  * WPF: Select `node_modules\react-native-video\windows\ReactNativeVideo.Net46\ReactNativeVideo.Net46.csproj`
+   Select `node_modules\react-native-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
 
-#### **windows/myapp/myapp.csproj**
+#### **windows/myapp/myapp.vcxproj**
 
-Add a reference to `ReactNativeVideo` to your main application project. From Visual Studio 2015:
+Add a reference to `ReactNativeVideoCPP` to your main application project. From Visual Studio 2019:
 
 1. Right-click main application project > Add > Reference...
-  * UWP: Check `ReactNativeVideo` from Solution Projects.
-  * WPF: Check `ReactNativeVideo.Net46` from Solution Projects.
+  Check `ReactNativeVideoCPP` from Solution Projects.
 
-#### **MainPage.cs**
+2. Modify files below to add the video package providers to your main application project
+#### **pch.h**
 
-Add the `ReactVideoPackage` class to your list of exported packages.
-```cs
-using ReactNative;
-using ReactNative.Modules.Core;
-using ReactNative.Shell;
-using ReactNativeVideo; // <-- Add this
-using System.Collections.Generic;
-...
+Add `#include "winrt/ReactNativeVideoCPP.h"`.
 
-        public override List<IReactPackage> Packages
-        {
-            get
-            {
-                return new List<IReactPackage>
-                {
-                    new MainReactPackage(),
-                    new ReactVideoPackage(), // <-- Add this
-                };
-            }
-        }
+#### **app.cpp**
 
-...
-```
+Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());` before `InitializeComponent();`.
+
 </details>
 
 ### react-native-dom installation
