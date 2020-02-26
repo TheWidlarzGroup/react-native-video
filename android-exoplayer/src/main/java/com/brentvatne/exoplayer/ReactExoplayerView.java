@@ -62,6 +62,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.ui.PlayerControlView;
@@ -88,6 +90,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
+    private SimpleCache cache;
     private static final int SHOW_PROGRESS = 1;
     private static final int REPORT_BANDWIDTH = 1;
 
@@ -104,11 +107,11 @@ class ReactExoplayerView extends FrameLayout implements
     private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
 
+
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
-
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -129,6 +132,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     // Props from React
     private Uri srcUri;
+
     private String extension;
     private boolean repeat;
     private String audioTrackType;
@@ -403,21 +407,29 @@ class ReactExoplayerView extends FrameLayout implements
                 : uri.getLastPathSegment());
         switch (type) {
             case C.TYPE_SS:
+                Log.d("TYPE_OTHER","TYPE_SS");
                 return new SsMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory), 
                         minLoadRetryCount, SsMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS, 
                         mainHandler, null);
             case C.TYPE_DASH:
+                Log.d("TYPE_OTHER","TYPE_DASH");
                 return new DashMediaSource(uri, buildDataSourceFactory(false),
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory), 
                         minLoadRetryCount, DashMediaSource.DEFAULT_LIVE_PRESENTATION_DELAY_MS,
                         mainHandler, null);
             case C.TYPE_HLS:
+                Log.d("TYPE_OTHER","TYPE_HLS");
                 return new HlsMediaSource(uri, mediaDataSourceFactory, 
                         minLoadRetryCount, mainHandler, null);
             case C.TYPE_OTHER:
-                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
-                        mainHandler, null);
+                Log.d("TYPE_OTHER",uri.toString());
+                Log.d("TYPE_OTHER2",mediaDataSourceFactory.toString());
+                Log.d("TYPE_OTHER3",  new AndroidCacheDataSourceFactory(themedReactContext, 100 * 1024 * 1024, 5 * 1024 * 1024).toString());
+                return new ExtractorMediaSource(uri,
+                        new AndroidCacheDataSourceFactory(themedReactContext, 100 * 1024 * 1024, 5 * 1024 * 1024), new DefaultExtractorsFactory(), mainHandler, null);
+              //  return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
+                //        mainHandler, null);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
@@ -453,6 +465,15 @@ class ReactExoplayerView extends FrameLayout implements
     private void releasePlayer() {
         if (player != null) {
             updateResumePosition();
+            if(cache != null) {
+                try {
+                    cache.release();
+                    cache = null;
+                } catch(Exception ex) {
+                    // Couldn't write the cache
+                    // We'll just ignore it for now
+                }
+            }
             player.release();
             player.setMetadataOutput(null);
             trackSelector = null;
@@ -1189,3 +1210,4 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 }
+
