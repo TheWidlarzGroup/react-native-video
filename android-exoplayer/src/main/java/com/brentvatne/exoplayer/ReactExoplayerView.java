@@ -426,6 +426,7 @@ class ReactExoplayerView extends FrameLayout implements
                 Log.d("TYPE_OTHER",uri.toString());
                 Log.d("TYPE_OTHER2",mediaDataSourceFactory.toString());
                 Log.d("TYPE_OTHER3",  new AndroidCacheDataSourceFactory(themedReactContext, 300 * 1024 * 1024, 5 * 1024 * 1024).toString());
+                //300 is cache size you can define it as you want
                 return new ExtractorMediaSource(uri,
                         new AndroidCacheDataSourceFactory(themedReactContext, 300 * 1024 * 1024, 5 * 1024 * 1024), new DefaultExtractorsFactory(), mainHandler, null);
               //  return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
