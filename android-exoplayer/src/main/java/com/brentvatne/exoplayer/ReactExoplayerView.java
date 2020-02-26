@@ -425,9 +425,9 @@ class ReactExoplayerView extends FrameLayout implements
             case C.TYPE_OTHER:
                 Log.d("TYPE_OTHER",uri.toString());
                 Log.d("TYPE_OTHER2",mediaDataSourceFactory.toString());
-                Log.d("TYPE_OTHER3",  new AndroidCacheDataSourceFactory(themedReactContext, 100 * 1024 * 1024, 5 * 1024 * 1024).toString());
+                Log.d("TYPE_OTHER3",  new AndroidCacheDataSourceFactory(themedReactContext, 300 * 1024 * 1024, 5 * 1024 * 1024).toString());
                 return new ExtractorMediaSource(uri,
-                        new AndroidCacheDataSourceFactory(themedReactContext, 100 * 1024 * 1024, 5 * 1024 * 1024), new DefaultExtractorsFactory(), mainHandler, null);
+                        new AndroidCacheDataSourceFactory(themedReactContext, 300 * 1024 * 1024, 5 * 1024 * 1024), new DefaultExtractorsFactory(), mainHandler, null);
               //  return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
                 //        mainHandler, null);
             default: {
