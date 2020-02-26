@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "5.1.0-alpha4",
+    "version": "5.1.0-alpha5",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -28,9 +28,9 @@
         "url": "git@github.com:react-native-community/react-native-video.git"
     },
     "devDependencies": {
+        "@react-native-community/eslint-config": "0.0.7",
         "babel-eslint": "10.0.3",
         "eslint": "6.8.0",
-        "@react-native-community/eslint-config": "0.0.7",
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
         "react-hot-loader": "^4.12.19",
