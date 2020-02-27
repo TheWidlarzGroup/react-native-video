@@ -10,6 +10,7 @@ static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
+static NSString *const vcOverlayFrameKeyPath = @"frame";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
 static NSString *const externalPlaybackActive = @"externalPlaybackActive";
@@ -1382,7 +1383,7 @@ static int const RCTVideoUnset = -1;
   if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
   {
     @try{
-      [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+      [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
       [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
     }@catch(id anException){
     }
@@ -1396,6 +1397,8 @@ static int const RCTVideoUnset = -1;
   {
     _fullscreenPlayerPresented = false;
     _presentingViewController = nil;
+    [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
+    [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
     _playerViewController = nil;
     [self applyModifiers];
     if(self.onVideoFullscreenPlayerDidDismiss) {
@@ -1508,7 +1511,7 @@ static int const RCTVideoUnset = -1;
   
   [self removePlayerLayer];
   
-  [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+  [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
   [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
   [_playerViewController.view removeFromSuperview];
   _playerViewController.rctDelegate = nil;
