@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 5.1.0-alpha6
+
+- Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
+
 ### Version 5.1.0-alpha5
 
 - Add support for react-native Windows Cpp/WinRT [#1893]((https://github.com/react-native-community/react-native-video/pull/1893))
