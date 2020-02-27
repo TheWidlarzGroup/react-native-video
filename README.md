@@ -18,7 +18,7 @@ Basically react-native-video-cache creates a local proxy server to play videos u
 
 ### [react-native-fs](https://github.com/itinance/react-native-fs) and [react-native-fetch-blob](https://github.com/wkh237/react-native-fetch-blob)
 
-Both library usage file systems to download and store data. But if you have multiple number videos to download at a time or just say when you wait for a video to download and then play video which is frustrating also not correct to make user wait.
+Both library uses file systems to download and store data. But if you have multiple number videos to download at a time or just say when you wait for a video to download and then play video which is frustrating also not correct to make user wait.
 
 
 ## Solution
