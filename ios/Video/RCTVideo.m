@@ -531,7 +531,6 @@ static int const RCTVideoUnset = -1;
 - (void)playerItemForSourceUsingCache:(NSString *)uri assetOptions:(NSDictionary *)options withCallback:(void(^)(AVPlayerItem *))handler {
     NSURL *url = [NSURL URLWithString:uri];
     [_videoCache getItemForUri:uri withCallback:^(RCTVideoCacheStatus videoCacheStatus, AVAsset * _Nullable cachedAsset) {
-        switch (videoCacheStatus) {
             case RCTVideoCacheStatusMissingFileExtension: {
                 DebugLog(@"Could not generate cache key for uri '%@'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
                 AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:options];
@@ -1382,11 +1381,6 @@ static int const RCTVideoUnset = -1;
 {
   if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
   {
-    @try{
-      [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
-      [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
-    }@catch(id anException){
-    }
     self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
   }
 }
@@ -1397,8 +1391,12 @@ static int const RCTVideoUnset = -1;
   {
     _fullscreenPlayerPresented = false;
     _presentingViewController = nil;
-    [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
-    [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    @try{
+      [_playerViewController.contentOverlayView removeObserver:self forKeyPath: vcOverlayFrameKeyPath];
+      [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    } @catch(id anException) {
+	NSLog(@"Failed to remove _playerViewController KVOs: %@", anException);
+    }
     _playerViewController = nil;
     [self applyModifiers];
     if(self.onVideoFullscreenPlayerDidDismiss) {
