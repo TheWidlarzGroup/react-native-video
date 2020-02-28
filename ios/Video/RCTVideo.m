@@ -638,6 +638,10 @@ static int const RCTVideoUnset = -1;
           } else {
             orientation = @"portrait";
           }
+        } else {
+          // As HLS items would not have video track, we need another way to get the video size
+          width = [NSNumber numberWithFloat:_playerItem.presentationSize.width];
+          height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
         }
         
         if (self.onVideoLoad && _videoLoadStarted) {
