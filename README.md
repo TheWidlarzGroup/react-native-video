@@ -35,7 +35,7 @@ I came up with this solution through a [stackOverFlow](https://stackoverflow.com
 ## Installation and Usage
 
 ### Step 1
-Npm install --save git+https://git@github.com/paddy57/react-native-video-android-cache.git
+npm install --save git+https://git@github.com/paddy57/react-native-video-android-cache.git
 
 ### Step 2
 You may need to link react-native-video to your project. Follow this link (https://github.com/react-native-community/react-native-video#android-installation) 
