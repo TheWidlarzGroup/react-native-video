@@ -1,6 +1,6 @@
 {
-    "name": "@curefit/react-native-video",
-    "version": "5.1.4",
+    "name": "react-native-video",
+    "version": "5.1.0-alpha1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -25,7 +25,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/curefit/react-native-video.git"
+        "url": "git@github.com:react-native-community/react-native-video.git"
     },
     "devDependencies": {
         "babel-eslint": "5.0.0-beta8",
