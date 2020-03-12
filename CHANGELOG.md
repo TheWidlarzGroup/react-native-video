@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 4.4.5
+* Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#1941](https://github.com/react-native-community/react-native-video/pull/1941)
+
 ### Version 4.4.4
 * Handle racing conditions when props are setted on exoplayer
 
