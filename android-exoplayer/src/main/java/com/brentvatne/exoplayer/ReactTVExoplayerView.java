@@ -675,21 +675,26 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         isMediaKeysEnabled = visible;
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     private DefaultDrmSessionManager createDrmSessionManager(@NonNull ActionToken drmParam) throws UnsupportedDrmException {
         DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
         final String drmLicenseUrl = drmParam.getLicensingServerUrl();
         final HashMap<String, String> keyRequestProperties = Utils.getParams(drmParam);
 
-        UUID drmSchemeUuid = Util.getDrmUuid(drmParam.getDrmScheme());
-        if (drmSchemeUuid == null) {
-            throw new UnsupportedDrmException(UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME);
+        if (Util.SDK_INT < 18) {
+            throw new UnsupportedDrmException(UnsupportedDrmException.REASON_INSTANTIATION_ERROR);
         } else {
-            drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, drmLicenseUrl, keyRequestProperties, false);
+            UUID drmSchemeUuid = Util.getDrmUuid(drmParam.getDrmScheme());
+            if (drmSchemeUuid == null) {
+                throw new UnsupportedDrmException(UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME);
+            } else {
+                drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, drmLicenseUrl, keyRequestProperties, false);
 
-            final String offline = drmParam.getOfflineLicense();
+                final String offline = drmParam.getOfflineLicense();
 
-            if (offline != null) {
-                drmSessionManager.setMode(DefaultDrmSessionManager.MODE_QUERY, Base64.decode(offline, Base64.NO_WRAP));
+                if (offline != null) {
+                    drmSessionManager.setMode(DefaultDrmSessionManager.MODE_QUERY, Base64.decode(offline, Base64.NO_WRAP));
+                }
             }
         }
         return drmSessionManager;
