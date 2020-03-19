@@ -13,13 +13,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.support.annotation.IntegerRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
+import androidx.annotation.IntegerRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.view.MarginLayoutParamsCompat;
+import androidx.core.view.MarginLayoutParamsCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -161,8 +161,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
-    private boolean isInBackground;
-    private boolean fromBackground;
+    private boolean isInBackground = false;
+    private boolean fromBackground = false;
     private boolean isPaused;
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
@@ -189,7 +189,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean hasStats;
     private float mProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
-    private boolean canSeekToDefault = false;
+    private boolean canSeekToLiveEdge = false;
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
@@ -461,18 +461,22 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     @Override
     public void onHostResume() {
         Log.d(TAG, "onHostResume()");
-        if (!playInBackground || !isInBackground) {
-            setPlayWhenReady(!isPaused);
+        if (isInBackground) {
+            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
+            isInBackground = false; // reset to false first
+            if (live) canSeekToLiveEdge = true;
+            setPlayWhenReady(isPaused);
+            fromBackground = true;
         }
-        fromBackground = true;
-        isInBackground = false;
     }
 
     @Override
     public void onHostPause() {
+        Log.d(TAG, "onHostPause()");
         setPlayInBackground(false);
         setPlayWhenReady(false);
         onStopPlayback();
+        isPaused = true;
         isInBackground = true;
     }
 
@@ -487,6 +491,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
 
     private void initializePlayer(final boolean force) {
+        Log.d(TAG, "initialisePlayer - - - - - - - - ");
         if (initRunnable != null) {
             removeCallbacks(initRunnable);
         }
@@ -895,6 +900,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void updateResumePosition() {
+        Log.d(TAG, "updateResumePosition()");
         resumeWindow = player.getCurrentWindowIndex();
         resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition()) : C.TIME_UNSET;
     }
@@ -1001,8 +1007,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void seekToDefaultPosition() {
-        if (player != null && canSeekToDefault && live) {
+        Log.d(TAG, "seekToDefaultPosition() live: " + live + " canSeekToLiveEdge: " + canSeekToLiveEdge);
+        if (player != null && canSeekToLiveEdge && live) {
             player.seekToDefaultPosition();
+            canSeekToLiveEdge = false; // reset needed otherwise falls into a loop when coming back from background
         }
     }
 
@@ -1234,8 +1242,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED) {
-            canSeekToDefault = true;
+        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && live) {
+            canSeekToLiveEdge = true;
         }
     }
 
@@ -1268,9 +1276,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
         Exception ex = e;
+        Log.d(TAG, "onPlayerError() " + e);
         if (isBehindLiveWindow(e)) {
-            initializePlayer(false);
             clearResumePosition();
+            initializePlayer(false);
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
