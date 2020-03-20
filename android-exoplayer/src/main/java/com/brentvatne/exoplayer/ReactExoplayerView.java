@@ -461,7 +461,7 @@ class ReactExoplayerView extends RelativeLayout implements LifecycleEventListene
             if (drmMgr != null) {
                 player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext(), drmMgr), trackSelector, defaultLoadControl, drmMgr);
             } else {
-                player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext()), trackSelector, defaultLoadControl);
+                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext()), trackSelector, defaultLoadControl);
             }
 
             player.addListener(this);
