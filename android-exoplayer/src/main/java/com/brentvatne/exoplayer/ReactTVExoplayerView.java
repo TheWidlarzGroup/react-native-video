@@ -13,13 +13,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import androidx.annotation.IntegerRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
+import android.support.annotation.IntegerRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.media.session.MediaSessionCompat;
-import androidx.core.view.MarginLayoutParamsCompat;
+import android.support.v4.view.MarginLayoutParamsCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -491,7 +491,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
 
     private void initializePlayer(final boolean force) {
-        Log.d(TAG, "initialisePlayer - - - - - - - - ");
         if (initRunnable != null) {
             removeCallbacks(initRunnable);
         }
@@ -1276,7 +1275,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = null;
         Exception ex = e;
-        Log.d(TAG, "onPlayerError() " + e);
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer(false);
