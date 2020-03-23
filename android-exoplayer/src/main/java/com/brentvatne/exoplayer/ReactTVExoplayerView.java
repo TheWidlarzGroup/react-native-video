@@ -167,6 +167,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
     private boolean areControlsVisible = true;
+    private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -511,7 +512,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     // Internal methods
     private void doInitializePlayer(boolean force) {
-        Log.d("initialisePlayer", "--");
         if (force) {
             releasePlayer();
         }
@@ -571,8 +571,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
 
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-            if (haveResumePosition) {
+            boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
+            if (haveResumePosition && !force) {
                 player.seekTo(resumeWindow, resumePosition);
+            }
+
+            if (shouldSeekOnInit) {
+                this.seekTo(shouldSeekTo);
             }
 
             setupSubtitlesButton();
@@ -589,8 +594,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 releaseMux();
             }
 
-            Log.d(TAG, "initialisePlayer() prepare");
-            player.prepare(mediaSource, !haveResumePosition, true);
+            player.prepare(mediaSource, !haveResumePosition && !shouldSeekOnInit, true);
             playerNeedsSource = false;
 
             eventEmitter.loadStart();
@@ -797,6 +801,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             player.setMetadataOutput(null);
             player = null;
             trackSelector = null;
+            shouldSeekTo = C.TIME_UNSET;
         }
         releaseMux();
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
@@ -1509,6 +1514,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         textTrackType = type;
         textTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
+    }
+
+    public void setShouldSeekTo(long seekToMs) {
+        shouldSeekTo = seekToMs;
     }
 
     public void setPausedModifier(boolean paused) {
