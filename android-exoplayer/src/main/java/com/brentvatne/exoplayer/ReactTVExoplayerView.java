@@ -460,12 +460,19 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onHostResume() {
-        Log.d(TAG, "onHostResume()");
+        Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
         if (isInBackground) {
-            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
             isInBackground = false; // reset to false first
-            if (live) canSeekToLiveEdge = true;
-            setPlayWhenReady(isPaused);
+            if (live) {
+                // always seek to live edge when returning from background to a live event
+                canSeekToLiveEdge = true;
+                setPausedModifier(false);
+                setPlayWhenReady(true);
+            } else {
+                // otherwise whatever abide by what the previous user action was
+                setPausedModifier(isPaused);
+                setPlayWhenReady(!isPaused);
+            }
             fromBackground = true;
         }
     }
@@ -476,7 +483,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         setPlayInBackground(false);
         setPlayWhenReady(false);
         onStopPlayback();
-        isPaused = true;
         isInBackground = true;
     }
 
@@ -835,6 +841,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         } else {
             player.setPlayWhenReady(false);
         }
+
+        updateControlsState();
     }
 
     private void startPlayback() {
@@ -1517,8 +1525,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void updateControlsState() {
-        boolean isPaused = !isPlaying();
-
         if (playPauseButton != null) {
             if (isPaused) {
                 playPauseButton.setImageResource(R.drawable.tv_play_btn_selector);
@@ -1555,7 +1561,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void setRateModifier(float newRate) {
-
         if (newRate == 0.0) {
             setPausedModifier(true);
         } else {
