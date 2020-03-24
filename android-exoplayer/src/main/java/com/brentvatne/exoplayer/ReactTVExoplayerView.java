@@ -1341,10 +1341,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public int getTrackRendererIndex(int trackType) {
-        int rendererCount = player.getRendererCount();
-        for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
-            if (player.getRendererType(rendererIndex) == trackType) {
-                return rendererIndex;
+        if (player != null) {
+            int rendererCount = player.getRendererCount();
+            for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
+                if (player.getRendererType(rendererIndex) == trackType) {
+                    return rendererIndex;
+                }
             }
         }
         return C.INDEX_UNSET;
