@@ -407,6 +407,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             setupButton(audioSubtitlesButton);
             setupButton(scheduleButton);
             setupButton(statsButton);
+            setupSubtitlesButton();
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -580,7 +581,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 this.seekTo(shouldSeekTo);
             }
 
-            setupSubtitlesButton();
             showOverlay();
 
             if (muxData != null) {
@@ -1034,9 +1034,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setupSubtitlesButton() {
-        Log.d(TAG, "setupSubtitlesButton() " + player.getPlaybackState());
+        Log.d(TAG, "setupSubtitlesButton()");
         if (player != null && player.getPlaybackState() == Player.STATE_READY) {
-
 
             DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
 
@@ -1048,7 +1047,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 audioSubtitlesButton.setVisibility(View.GONE);
             }
         } else {
-            Log.d(TAG, "setupSubtitlesButton() media not ready");
+            Log.d(TAG, "setupSubtitlesButton() player or media not ready");
             audioSubtitlesButton.setVisibility(View.GONE);
         }
 
