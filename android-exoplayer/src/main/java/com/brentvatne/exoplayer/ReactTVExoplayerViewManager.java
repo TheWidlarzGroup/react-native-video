@@ -232,7 +232,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_SEEK)
     public void setSeek(final ReactTVExoplayerView videoView, final float seek) {
-        videoView.seekTo(Math.round(seek * 1000f));
+        videoView.setShouldSeekTo(Math.round(seek * 1000f));
     }
 
     @ReactProp(name = PROP_RATE)

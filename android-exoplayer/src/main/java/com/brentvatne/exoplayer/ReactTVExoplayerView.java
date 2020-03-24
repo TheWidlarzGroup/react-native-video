@@ -167,6 +167,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
     private boolean areControlsVisible = true;
+    private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -406,6 +407,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             setupButton(audioSubtitlesButton);
             setupButton(scheduleButton);
             setupButton(statsButton);
+            setupSubtitlesButton();
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -460,12 +462,19 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onHostResume() {
-        Log.d(TAG, "onHostResume()");
+        Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
         if (isInBackground) {
-            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
             isInBackground = false; // reset to false first
-            if (live) canSeekToLiveEdge = true;
-            setPlayWhenReady(isPaused);
+            if (live) {
+                // always seek to live edge when returning from background to a live event
+                canSeekToLiveEdge = true;
+                setPausedModifier(false);
+                setPlayWhenReady(true);
+            } else {
+                // otherwise whatever abide by what the previous user action was
+                setPausedModifier(isPaused);
+                setPlayWhenReady(!isPaused);
+            }
             fromBackground = true;
         }
     }
@@ -476,7 +485,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         setPlayInBackground(false);
         setPlayWhenReady(false);
         onStopPlayback();
-        isPaused = true;
         isInBackground = true;
     }
 
@@ -505,7 +513,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     // Internal methods
     private void doInitializePlayer(boolean force) {
-        Log.d("initialisePlayer", "--");
         if (force) {
             releasePlayer();
         }
@@ -565,11 +572,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             }
 
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-            if (haveResumePosition) {
+            boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
+            if (haveResumePosition && !force) {
                 player.seekTo(resumeWindow, resumePosition);
             }
 
-            setupSubtitlesButton();
+            if (shouldSeekOnInit) {
+                this.seekTo(shouldSeekTo);
+            }
+
             showOverlay();
 
             if (muxData != null) {
@@ -583,8 +594,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 releaseMux();
             }
 
-            Log.d(TAG, "initialisePlayer() prepare");
-            player.prepare(mediaSource, !haveResumePosition, true);
+            player.prepare(mediaSource, !haveResumePosition && !shouldSeekOnInit, true);
             playerNeedsSource = false;
 
             eventEmitter.loadStart();
@@ -791,6 +801,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             player.setMetadataOutput(null);
             player = null;
             trackSelector = null;
+            shouldSeekTo = C.TIME_UNSET;
         }
         releaseMux();
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
@@ -835,6 +846,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         } else {
             player.setPlayWhenReady(false);
         }
+
+        updateControlsState();
     }
 
     private void startPlayback() {
@@ -1021,9 +1034,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void setupSubtitlesButton() {
-        Log.d(TAG, "setupSubtitlesButton() " + player.getPlaybackState());
+        Log.d(TAG, "setupSubtitlesButton()");
         if (player != null && player.getPlaybackState() == Player.STATE_READY) {
-
 
             DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
 
@@ -1035,7 +1047,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 audioSubtitlesButton.setVisibility(View.GONE);
             }
         } else {
-            Log.d(TAG, "setupSubtitlesButton() media not ready");
+            Log.d(TAG, "setupSubtitlesButton() player or media not ready");
             audioSubtitlesButton.setVisibility(View.GONE);
         }
 
@@ -1503,6 +1515,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
     }
 
+    public void setShouldSeekTo(long seekToMs) {
+        shouldSeekTo = seekToMs;
+    }
+
     public void setPausedModifier(boolean paused) {
         isPaused = paused;
         if (player != null) {
@@ -1517,8 +1533,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void updateControlsState() {
-        boolean isPaused = !isPlaying();
-
         if (playPauseButton != null) {
             if (isPaused) {
                 playPauseButton.setImageResource(R.drawable.tv_play_btn_selector);
@@ -1555,7 +1569,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void setRateModifier(float newRate) {
-
         if (newRate == 0.0) {
             setPausedModifier(true);
         } else {

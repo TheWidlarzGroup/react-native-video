@@ -37,7 +37,8 @@ dependencies {
     }
     compile 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    compile 'com.mux:com.mux.stats.sdk-r2.8.0:0.4.3'
+    compile 'com.mux:com.mux.stats.muxcore:2.3.2'
+    compile 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
 
     compile project(path: ':dice-shield-android')
 }
