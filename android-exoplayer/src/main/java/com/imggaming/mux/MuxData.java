@@ -25,6 +25,7 @@ public class MuxData {
     private static final String KEY_VIDEO_IS_LIVE = "videoIsLive";
     private static final String KEY_VIDEO_STREAM_TYPE = "videoStreamType";
     private static final String KEY_VIDEO_CDN = "videoCdn";
+    public static final String KEY_PLAYER_STARTUP_TIME = "playerStartupTime";
 
     private final Map<String, Object> playbackData;
 
@@ -86,6 +87,7 @@ public class MuxData {
                 customerPlayerData.setPlayerVersion(ExoPlayerLibraryInfo.VERSION_SLASHY);
                 customerPlayerData.setSubPropertyId(castToString(playbackData.get(KEY_SUB_PROPERTY_ID)));
                 customerPlayerData.setExperimentName(castToString(playbackData.get(KEY_EXPERIMENT_NAME)));
+                customerPlayerData.setPlayerInitTime(castToLong(playbackData.get(KEY_PLAYER_STARTUP_TIME)));
                 return customerPlayerData;
             }
         }
