@@ -50,6 +50,12 @@ public class MuxStats {
         }
     }
 
+    public void setStreamType(int type) {
+        if (muxStatsExoPlayer != null) {
+            muxStatsExoPlayer.setStreamType(type);
+        }
+    }
+
     private void setMuxStatsScreenSize() {
         if (muxStatsExoPlayer != null) {
             final Activity activity = getActivity();

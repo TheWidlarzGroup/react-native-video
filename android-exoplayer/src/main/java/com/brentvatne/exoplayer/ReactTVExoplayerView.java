@@ -58,7 +58,6 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -98,6 +97,7 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.imggaming.mux.MuxData;
 import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
@@ -114,6 +114,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -197,6 +198,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     // Custom
     private PowerManager powerManager;
+    private long playerViewCreationTime;
+    private long playerInitTime;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -289,6 +292,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        playerViewCreationTime = new Date().getTime();
+        return super.onCreateDrawableState(extraSpace);
     }
 
     private void createViews() {
@@ -583,7 +592,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             showOverlay();
 
+            playerInitTime = new Date().getTime();
+
             if (muxData != null) {
+                muxData.put(MuxData.KEY_PLAYER_STARTUP_TIME, getPlayerStartupTime());
                 if (muxStats == null) {
                     muxStats = new MuxStats(getContext(), player, muxData);
                 } else {
@@ -600,6 +612,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
+    }
+
+    private long getPlayerStartupTime() {
+        return playerInitTime - playerViewCreationTime;
     }
 
     // MediaSession related functions.
@@ -639,6 +655,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private MediaSource buildMediaSource(Uri uri, @Nullable String overrideExtension) {
         int type = Util.inferContentType(
                 !TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension : uri.getLastPathSegment());
+        if (muxStats != null) {
+            muxStats.setStreamType(type);
+        }
         switch (type) {
             case C.TYPE_SS:
                 return new SsMediaSource(uri, buildDataSourceFactory(false),
@@ -1744,6 +1763,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
+
 
         if (muxStats != null) {
             muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
