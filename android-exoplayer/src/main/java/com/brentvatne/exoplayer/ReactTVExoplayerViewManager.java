@@ -258,8 +258,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_LABEL_FONT_NAME)
     public void setLabelFont(final ReactTVExoplayerView videoView, final String fontName) {
-        // fontName must be in lowercase and underscores for this to work due to Java Resource restrictions
-        videoView.setLabelFont(fontName.toLowerCase().replaceAll("-", "_"));
+        videoView.setLabelFont(fontName);
     }
 
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)

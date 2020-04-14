@@ -1636,8 +1636,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     public void setLabelFont(final String fontName) {
-        Typeface typeface = Typeface.createFromAsset(Resources.getSystem().getAssets(), "fonts/" + fontName + ".ttf");
+        Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
         labelTextView.setTypeface(typeface);
+        currentTextView.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
