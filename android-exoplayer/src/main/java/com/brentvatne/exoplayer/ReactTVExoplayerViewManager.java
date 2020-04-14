@@ -71,6 +71,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_MIDDLE_CORE_CONTROLS = "stateMiddleCoreControls";
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_TRANSLATIONS = "translations";
+    private static final String PROP_LABEL_FONT_NAME = "labelFontName";
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -173,7 +174,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactTVExoplayerView videoView,
-                                     @Nullable ReadableMap selectedAudioTrack) {
+                                      @Nullable ReadableMap selectedAudioTrack) {
         String typeString = null;
         Dynamic value = null;
         if (selectedAudioTrack != null) {
@@ -253,6 +254,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_COLOR_PROGRESS_BAR)
     public void setColorProgressBar(final ReactTVExoplayerView videoView, final String color) {
         videoView.setColorProgressBar(color);
+    }
+
+    @ReactProp(name = PROP_LABEL_FONT_NAME)
+    public void setLabelFont(final ReactTVExoplayerView videoView, final String fontName) {
+        // fontName must be in lowercase and underscores for this to work due to Java Resource restrictions
+        videoView.setLabelFont(fontName.toLowerCase().replaceAll("-", "_"));
     }
 
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)
