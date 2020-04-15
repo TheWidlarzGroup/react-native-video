@@ -6,8 +6,10 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -1631,6 +1633,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
+    }
+
+    public void setLabelFont(final String fontName) {
+        Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
+        labelTextView.setTypeface(typeface);
+        currentTextView.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
