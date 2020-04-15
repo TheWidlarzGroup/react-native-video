@@ -83,18 +83,19 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "com.videoplayer"
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion 19
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+        multiDexEnabled true
     }
     splits {
         abi {
@@ -135,8 +136,10 @@ android {
 }
 
 dependencies {
-    compile "com.android.support:appcompat-v7:27.0.1"
-    compile "com.facebook.react:react-native:+"  // From node_modules
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation "com.facebook.react:react-native:+"  // From node_modules
+
     //compile project(':react-native-video')
 
     compile (project(':react-native-video-exoplayer')) {
