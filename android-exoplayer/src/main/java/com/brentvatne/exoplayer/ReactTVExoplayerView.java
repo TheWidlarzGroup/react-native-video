@@ -202,6 +202,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private PowerManager powerManager;
     private long playerViewCreationTime;
     private long playerInitTime;
+    private TextView seekIndicatorLabel;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -431,6 +432,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             });
 
             seekIndicator = findViewById(R.id.seekIndicator);
+            seekIndicatorLabel = findViewById(R.id.seekIndicatorLabel);
         }
     }
 
@@ -1639,6 +1641,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
         labelTextView.setTypeface(typeface);
         currentTextView.setTypeface(typeface);
+        seekIndicatorLabel.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
