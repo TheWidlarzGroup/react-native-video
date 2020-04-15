@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -33,9 +34,10 @@ import android.widget.TextView;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.dice.shield.downloads.dash.DashManifest;
-import com.dice.shield.downloads.dash.DashParser;
+import com.dice.shield.downloads.DownloadProviderImpl;
+import com.dice.shield.downloads.dash.DrmDashManifestParser;
 import com.dice.shield.downloads.manager.DlmWrapper;
+import com.dice.shield.downloads.source.DefaultMediaSource;
 import com.dice.shield.drm.entity.ActionToken;
 import com.dice.shield.drm.utils.Utils;
 import com.facebook.react.bridge.Arguments;
@@ -63,7 +65,6 @@ import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -71,15 +72,14 @@ import com.google.android.exoplayer2.metadata.MetadataOutput;
 import com.google.android.exoplayer2.offline.FilteringManifestParser;
 import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
+import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -89,7 +89,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.mux.MuxData;
 import com.imggaming.mux.MuxStats;
@@ -153,7 +152,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private ImageButton scheduleButton;
     private ImageButton statsButton;
 
-    private Handler mainHandler;
     private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
     private DataSource.Factory mediaDataSourceFactory;
@@ -304,7 +302,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private void createViews() {
         clearResumePosition();
         mediaDataSourceFactory = buildDataSourceFactory(true);
-        mainHandler = new Handler();
+
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
@@ -661,36 +659,30 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
         switch (type) {
             case C.TYPE_SS:
-                return new SsMediaSource(uri, buildDataSourceFactory(false),
-                        new DefaultSsChunkSource.Factory(mediaDataSourceFactory), mainHandler, null);
-            case C.TYPE_DASH:
+                return new SsMediaSource.Factory(mediaDataSourceFactory)
+                        .createMediaSource(uri);
+
+            case C.TYPE_DASH: {
+                HttpMediaDrmCallback callback = drmCallback;
+                UUID drmSchemeUuid = actionToken != null ? Util.getDrmUuid(actionToken.getDrmScheme()) : null;
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false))
                         .setManifestParser(
                                 new FilteringManifestParser<>(
-                                        new DashParser(new DashParser.Callback() {
-                                            @Override
-                                            public void onManifestParsed(com.google.android.exoplayer2.source.dash.manifest.DashManifest manifest) {
-
-                                                final ActionToken actionToken = ReactTVExoplayerView.this.actionToken;
-
-                                                if (manifest instanceof DashManifest && actionToken != null) {
-                                                    List kids = ((DashManifest) manifest).getDefaultKIds();
-                                                    String header = Utils.createXDrmInfoHeader(Utils.getSystem(actionToken.getDrmScheme()), kids);
-                                                    if (header != null) {
-                                                        drmCallback.setKeyRequestProperty("X-DRM-INFO", header);
-                                                    }
-                                                }
-                                            }
-                                        }), getOfflineStreamKeys(uri)))
+                                        (drmSchemeUuid != null && callback != null)
+                                                ? new DrmDashManifestParser(drmSchemeUuid, callback)
+                                                : new DashManifestParser(),
+                                        getOfflineStreamKeys(uri)))
                         .createMediaSource(uri);
+            }
 
             case C.TYPE_HLS:
-                return new HlsMediaSource(uri, mediaDataSourceFactory, mainHandler, null);
+                return new HlsMediaSource.Factory(mediaDataSourceFactory)
+                        .createMediaSource(uri);
             case C.TYPE_OTHER:
-                return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(), mainHandler,
-                        null);
+                return new DefaultMediaSource.Factory(mediaDataSourceFactory)
+                        .createMediaSource(uri);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
@@ -738,13 +730,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         final int errorStringId;
         switch (exception.reason) {
             case 0:
-                errorStringId = com.dice.shield.downloads.R.string.error_drm_not_supported;
+                errorStringId = R.string.error_drm_not_supported;
                 break;
             case UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME:
-                errorStringId = com.dice.shield.downloads.R.string.error_drm_unsupported_scheme;
+                errorStringId = R.string.error_drm_unsupported_scheme;
                 break;
             default:
-                errorStringId = com.dice.shield.downloads.R.string.error_drm_unknown;
+                errorStringId = R.string.error_drm_unknown;
                 break;
         }
 
@@ -755,19 +747,17 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private DefaultDrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(
             @NonNull UUID uuid, @NonNull String licenseUrl, @Nullable Map<String, String> requestProperties, boolean multiSession)
             throws UnsupportedDrmException {
-        HttpDataSource.Factory licenseDataSourceFactory =
-                (DlmWrapper.getInstance(getContext().getApplicationContext())).buildHttpDataSourceFactory(/* listener= */ null);
-        HttpMediaDrmCallback drmCallback =
-                new HttpMediaDrmCallback(licenseUrl, licenseDataSourceFactory);
+        HttpMediaDrmCallback callback = DownloadProviderImpl.getInstance(getContext().getApplicationContext())
+                .createHttpMediaDrmCallback(licenseUrl, null);
         if (requestProperties != null) {
             for (String key : requestProperties.keySet()) {
-                drmCallback.setKeyRequestProperty(key, requestProperties.get(key));
+                callback.setKeyRequestProperty(key, requestProperties.get(key));
             }
         }
         releaseMediaDrm();
         mediaDrm = FrameworkMediaDrm.newInstance(uuid);
-        this.drmCallback = drmCallback;
-        return new DefaultDrmSessionManager<>(uuid, mediaDrm, drmCallback, null, multiSession);
+        this.drmCallback = callback;
+        return new DefaultDrmSessionManager<>(uuid, mediaDrm, callback, null, multiSession);
     }
 
     private void releaseMediaDrm() {
@@ -853,8 +843,16 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
+    private boolean isInteractive() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            return powerManager.isInteractive();
+        } else {
+            return powerManager.isScreenOn();
+        }
+    }
+
     private void setPlayWhenReady(boolean playWhenReady) {
-        if (player == null || isInBackground || !powerManager.isInteractive()) {
+        if (player == null || isInBackground || !isInteractive()) {
             return;
         }
 
@@ -871,7 +869,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void startPlayback() {
-        if (!powerManager.isInteractive()) {
+        if (!isInteractive()) {
             return;
         }
 
@@ -1331,7 +1329,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
-                errorString = getResources().getString(com.dice.shield.downloads.R.string.error_drm_unknown);
+                errorString = getResources().getString(R.string.error_drm_unknown);
             }
         } else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
             ex = e.getSourceException();
