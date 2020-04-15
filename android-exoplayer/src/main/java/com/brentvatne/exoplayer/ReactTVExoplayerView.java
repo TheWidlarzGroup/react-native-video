@@ -13,13 +13,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.support.annotation.IntegerRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.view.MarginLayoutParamsCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -120,6 +114,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import androidx.annotation.IntegerRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListener, Player.EventListener,

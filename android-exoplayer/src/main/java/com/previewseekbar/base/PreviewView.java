@@ -1,7 +1,7 @@
 package com.previewseekbar.base;
 
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 public interface PreviewView {
 

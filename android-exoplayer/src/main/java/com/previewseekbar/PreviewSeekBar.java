@@ -5,10 +5,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 
@@ -16,6 +12,11 @@ import com.previewseekbar.base.PreviewView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.core.content.ContextCompat;
 
 /**
  * A SeekBar that should be used inside PreviewSeekBarLayout
