@@ -96,6 +96,8 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
         multiDexEnabled true
+
+        missingDimensionStrategy 'shield-ep-api', rootProject.ext.shield_ep_api
     }
     splits {
         abi {

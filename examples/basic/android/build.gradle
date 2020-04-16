@@ -44,4 +44,8 @@ ext {
     minSdkVersion = 19
     compileSdkVersion = 28
     targetSdkVersion = 28
+    // exoplayer_version - used in react-native-video and dice-shield-android
+    exoplayerVersion = '2.9.6'
+    // shield_ep_api - used in react-native-video, dice-shield-android
+    shield_ep_api = "ep${exoplayerVersion.replaceAll(/\./, "_")}"
 }
