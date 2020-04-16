@@ -18,7 +18,7 @@
         android:paddingTop="2dp"
         android:paddingBottom="2dp"/>
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/seekIndicatorLabel"
         android:textAppearance="@style/TextAppearance.SeekIndicator"
         android:layout_width="wrap_content"

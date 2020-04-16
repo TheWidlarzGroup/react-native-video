@@ -9,7 +9,7 @@ android {
     buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
+        minSdkVersion safeExtGet('minSdkVersion', 19)
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
@@ -21,6 +21,6 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile 'com.yqritc:android-scalablevideoview:1.0.4'
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation 'com.yqritc:android-scalablevideoview:1.0.4'
 }

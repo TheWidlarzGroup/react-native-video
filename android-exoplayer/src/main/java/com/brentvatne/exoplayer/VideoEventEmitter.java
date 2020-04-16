@@ -1,6 +1,5 @@
 package com.brentvatne.exoplayer;
 
-import android.support.annotation.StringDef;
 import android.view.View;
 
 import com.facebook.react.bridge.Arguments;
@@ -14,6 +13,8 @@ import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.StringDef;
 
 class VideoEventEmitter {
 

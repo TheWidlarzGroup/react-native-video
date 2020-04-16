@@ -18,27 +18,27 @@ android {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile('com.google.android.exoplayer:exoplayer:2.9.6') {
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation('com.google.android.exoplayer:exoplayer:2.9.6') {
         exclude group: 'com.android.support'
     }
 
     implementation "com.google.android.exoplayer:extension-mediasession:2.9.6"
 
     // All support libs must use the same version
-    compile "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
-    compile "com.android.support:appcompat-v7:${safeExtGet('supportLibVersion', '+')}"
-    compile "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
+    implementation "androidx.annotation:annotation:1.0.0"
+    implementation "androidx.appcompat:appcompat:1.0.0"
+    implementation "androidx.media:media:1.0.0"
 
-    compile 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
-    compile('com.google.android.exoplayer:extension-okhttp:2.9.6') {
+    implementation('com.google.android.exoplayer:extension-okhttp:2.9.6') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    compile 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    compile 'com.mux:com.mux.stats.muxcore:2.3.2'
-    compile 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
+    implementation 'com.mux:com.mux.stats.muxcore:2.3.2'
+    implementation 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
 
-    compile project(path: ':dice-shield-android')
+    implementation project(path: ':dice-shield-android')
 }

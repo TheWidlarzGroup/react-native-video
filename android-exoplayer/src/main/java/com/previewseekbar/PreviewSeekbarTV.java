@@ -3,15 +3,14 @@ package com.previewseekbar;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
 import com.brentvatne.react.R;
+
+import androidx.annotation.ColorInt;
 
 public class PreviewSeekbarTV extends PreviewSeekBar {
 

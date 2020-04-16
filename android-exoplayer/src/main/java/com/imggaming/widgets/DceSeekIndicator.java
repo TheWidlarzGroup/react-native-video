@@ -1,7 +1,6 @@
 package com.imggaming.widgets;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -11,6 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.brentvatne.react.R;
+
+import androidx.annotation.Nullable;
 
 public class DceSeekIndicator extends LinearLayout {
 

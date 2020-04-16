@@ -1,13 +1,13 @@
 package com.imggaming.mux;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
 import com.mux.stats.sdk.core.model.CustomerPlayerData;
 import com.mux.stats.sdk.core.model.CustomerVideoData;
 
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class MuxData {
 
