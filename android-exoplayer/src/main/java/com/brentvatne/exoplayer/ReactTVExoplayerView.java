@@ -6,8 +6,10 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -199,6 +201,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private PowerManager powerManager;
     private long playerViewCreationTime;
     private long playerInitTime;
+    private TextView seekIndicatorLabel;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -428,6 +431,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             });
 
             seekIndicator = findViewById(R.id.seekIndicator);
+            seekIndicatorLabel = findViewById(R.id.seekIndicatorLabel);
         }
     }
 
@@ -1630,6 +1634,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
+    }
+
+    public void setLabelFont(final String fontName) {
+        Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
+        labelTextView.setTypeface(typeface);
+        currentTextView.setTypeface(typeface);
+        seekIndicatorLabel.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
