@@ -1831,7 +1831,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
 
-                    if (live) {
+                    if (live || player == null) {
                         break;
                     }
 
@@ -1874,6 +1874,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                     case KeyEvent.KEYCODE_MEDIA_REWIND: {
+                        if (player == null) {
+                            break;
+                        }
+
                         long position = player.getCurrentPosition() - 10000;
                         if (position < 0) {
                             position = 0;
@@ -1887,6 +1891,10 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                     }
                     case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                     case KeyEvent.KEYCODE_DPAD_RIGHT: {
+                        if (player == null) {
+                            break;
+                        }
+
                         long position = player.getCurrentPosition() + 10000;
                         if (position > player.getDuration()) {
                             position = player.getDuration();
