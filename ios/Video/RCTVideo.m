@@ -1414,8 +1414,6 @@ static int const RCTVideoUnset = -1;
       [viewController addChildViewController:_playerViewController];
       [self addSubview:_playerViewController.view];
       [_playerViewController didMoveToParentViewController:viewController];
-      // Keep mute status from control
-      _muted = [_player isMuted];
     } else {
       // #1827 Fix playerviewcontroller keypath leak of observers
       [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
@@ -1423,6 +1421,8 @@ static int const RCTVideoUnset = -1;
       _playerViewController = nil;
     }
     
+    // Keep mute status from control
+    _muted = [_player isMuted];
     [self applyModifiers];
     _isInFullScreen = NO;
     if(self.onVideoFullscreenPlayerDidDismiss) {
