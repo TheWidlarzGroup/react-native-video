@@ -640,6 +640,10 @@ static int const RCTVideoUnset = -1;
           } else {
             orientation = @"portrait";
           }
+        } else if (_playerItem.presentationSize.height) {
+          width = [NSNumber numberWithFloat:_playerItem.presentationSize.width];
+          height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
+          orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? @"landscape" : @"portrait";
         }
         
         if (self.onVideoLoad && _videoLoadStarted) {
@@ -710,10 +714,10 @@ static int const RCTVideoUnset = -1;
         if (!CGRectEqualToRect(oldRect, newRect)) {
           if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
             NSLog(@"in fullscreen");
-          } else NSLog(@"not fullscreen");
 
-          [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
-          [self.reactViewController.view setNeedsLayout];
+            [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
+            [self.reactViewController.view setNeedsLayout];
+          } else NSLog(@"not fullscreen");
         }
 
         return;
@@ -1383,6 +1387,11 @@ static int const RCTVideoUnset = -1;
 {
   if (_playerViewController == playerViewController && _fullscreenPlayerPresented && self.onVideoFullscreenPlayerWillDismiss)
   {
+    @try{
+      [_playerViewController.contentOverlayView removeObserver:self forKeyPath:@"frame"];
+      [_playerViewController removeObserver:self forKeyPath:readyForDisplayKeyPath];
+    }@catch(id anException){
+    }
     self.onVideoFullscreenPlayerWillDismiss(@{@"target": self.reactTag});
   }
 }
