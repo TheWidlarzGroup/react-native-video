@@ -641,7 +641,7 @@ static int const RCTVideoUnset = -1;
         } else if (_playerItem.presentationSize.height) {
           width = [NSNumber numberWithFloat:_playerItem.presentationSize.width];
           height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
-          orientation = width > height ? @"landscape" : @"portrait";
+          orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? @"landscape" : @"portrait";
         }
         
         if (self.onVideoLoad && _videoLoadStarted) {
