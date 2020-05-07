@@ -289,6 +289,7 @@ var styles = StyleSheet.create({
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
 * [minLoadRetryCount](#minLoadRetryCount)
+* [mixWithOthers](#mixWithOthers)
 * [muted](#muted)
 * [paused](#paused)
 * [pictureInPicture](#pictureinpicture)
@@ -530,6 +531,14 @@ minLoadRetryCount={5} // retry 5 times
 ```
 
 Platforms: Android ExoPlayer
+
+#### mixWithOthers
+Controls how Audio mix with other apps.
+* **"inherit" (default)** - Use the default AVPlayer behavior
+* **"mix"** - Audio from this video mixes with audio from other apps.
+* **"duck"** - Reduces the volume of other apps while audio from this video plays.
+
+Platforms: iOS
 
 #### muted
 Controls whether the audio is muted

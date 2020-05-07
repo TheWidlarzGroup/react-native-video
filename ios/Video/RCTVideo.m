@@ -67,6 +67,7 @@ static int const RCTVideoUnset = -1;
   BOOL _playWhenInactive;
   BOOL _pictureInPicture;
   NSString * _ignoreSilentSwitch;
+  NSString * _mixWithOthers;
   NSString * _resizeMode;
   BOOL _fullscreen;
   BOOL _fullscreenAutorotate;
@@ -108,6 +109,7 @@ static int const RCTVideoUnset = -1;
     _playWhenInactive = false;
     _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _mixWithOthers = @"inherit"; // inherit, mix, duck
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
 #endif
@@ -861,18 +863,42 @@ static int const RCTVideoUnset = -1;
   [self applyModifiers];
 }
 
+- (void)setMixWithOthers:(NSString *)mixWithOthers
+{
+  _mixWithOthers = mixWithOthers;
+  [self applyModifiers];
+}
+
 - (void)setPaused:(BOOL)paused
 {
   if (paused) {
     [_player pause];
     [_player setRate:0.0];
   } else {
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    AVAudioSessionCategory category = nil;
+    AVAudioSessionCategoryOptions options = nil;
+
     if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
-      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+      category = AVAudioSessionCategoryPlayback;
     } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
-      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
+      category = AVAudioSessionCategoryAmbient;
     }
-    
+
+    if([_mixWithOthers isEqualToString:@"mix"]) {
+      options = AVAudioSessionCategoryOptionMixWithOthers;
+    } else if([_mixWithOthers isEqualToString:@"duck"]) {
+      options = AVAudioSessionCategoryOptionDuckOthers;
+    }
+
+    if (category != nil && options != nil) {
+      [session setCategory:category withOptions:options error:nil];
+    } else if (category != nil && options == nil) {
+      [session setCategory:category error:nil];
+    } else if (category == nil && options != nil) {
+      [session setCategory:session.category withOptions:options error:nil];
+    }
+
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
     } else {
