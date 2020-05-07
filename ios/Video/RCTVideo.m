@@ -645,6 +645,11 @@ static int const RCTVideoUnset = -1;
           height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
           orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? @"landscape" : @"portrait";
         }
+
+        if (_pendingSeek) {
+          [self setCurrentTime:_pendingSeekTime];
+          _pendingSeek = false;
+        }
         
         if (self.onVideoLoad && _videoLoadStarted) {
           self.onVideoLoad(@{@"duration": [NSNumber numberWithFloat:duration],
@@ -962,7 +967,6 @@ static int const RCTVideoUnset = -1;
     }
     
   } else {
-    // TODO: See if this makes sense and if so, actually implement it
     _pendingSeek = true;
     _pendingSeekTime = [seekTime floatValue];
   }
