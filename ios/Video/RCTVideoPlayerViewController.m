@@ -28,8 +28,7 @@
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
   if ([self.preferredOrientation.lowercaseString isEqualToString:@"landscape"]) {
-    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
-    return currentOrientation == UIDeviceOrientationLandscapeRight ? UIInterfaceOrientationLandscapeLeft : UIInterfaceOrientationLandscapeRight;
+    return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
   }
   else if ([self.preferredOrientation.lowercaseString isEqualToString:@"portrait"]) {
     return UIInterfaceOrientationPortrait;
