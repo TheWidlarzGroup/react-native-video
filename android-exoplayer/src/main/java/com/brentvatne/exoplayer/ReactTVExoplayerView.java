@@ -474,8 +474,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     @Override
     public void onHostResume() {
-        Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
         if (isInBackground) {
+            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
             isInBackground = false; // reset to false first
             if (live) {
                 // always seek to live edge when returning from background to a live event
@@ -565,7 +565,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
             player.setPlaybackParameters(params);
-            Log.d(TAG, "initialisePlayer() new instance");
+            Log.d(TAG, "initialisePlayer() new instance: " + force);
 
             activateMediaSession();
         }
@@ -804,6 +804,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     }
 
     private void releasePlayer() {
+        Log.d(TAG, "releasePlayer()");
         deactivateMediaSession();
         releaseMediaSession();
 
@@ -1382,7 +1383,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     // ReactExoplayerViewManager public api
 
     public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken,
-                       @Nullable final Map<String, String> headers,  @Nullable final Map<String, Object> muxData) {
+                       @Nullable final Map<String, String> headers,  @Nullable final Map<String, Object> muxData, final ReadableArray textTracks) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
@@ -1393,13 +1394,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             this.requestHeaders = headers;
             this.mediaDataSourceFactory = buildDataSourceFactory(true);
             this.muxData = muxData;
+            this.textTracks = textTracks;
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
 
     public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final Map<String, String> headers) {
-        setSrc(uri, extension, null, headers, null);
+        setSrc(uri, extension, null, headers, null, null);
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
@@ -1417,11 +1419,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
-    }
-
-    public void setTextTracks(ReadableArray textTracks) {
-        this.textTracks = textTracks;
-        initializePlayer(true);
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {

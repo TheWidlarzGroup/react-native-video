@@ -43,7 +43,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
     private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
-    private static final String PROP_TEXT_TRACKS = "textTracks";
+    private static final String PROP_SUBTITLES = "subtitles";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_MEDIA_KEYS = "mediaKeys";
@@ -126,6 +126,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String drm = src.hasKey(PROP_SRC_DRM) ? src.getString(PROP_SRC_DRM) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
+        ReadableArray textTracks = src.hasKey(PROP_SUBTITLES) ? src.getArray(PROP_SUBTITLES) : null;
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
 
@@ -138,7 +139,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             ActionToken actionToken = ActionToken.fromJson(drm);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, extension, actionToken, headers, muxData != null ? muxData.toHashMap() : null);
+                videoView.setSrc(srcUri, extension, actionToken, headers, muxData != null ? muxData.toHashMap() : null, textTracks);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -198,12 +199,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
         }
         videoView.setSelectedTextTrack(typeString, value);
-    }
-
-    @ReactProp(name = PROP_TEXT_TRACKS)
-    public void setPropTextTracks(final ReactTVExoplayerView videoView,
-                                  @Nullable ReadableArray textTracks) {
-        videoView.setTextTracks(textTracks);
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
