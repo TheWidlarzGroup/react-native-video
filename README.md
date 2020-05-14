@@ -61,7 +61,7 @@ Then follow the instructions for your platform to link react-native-video into y
 
 **React Native 0.60 and above**
 
-Run `pod install` in the `ios` directory. Linking is not required in React Native 0.60 and above.
+Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 
 **React Native 0.59 and below**
 
