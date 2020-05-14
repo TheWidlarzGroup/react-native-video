@@ -23,7 +23,7 @@ export default class Video extends Component {
       showPoster: !!props.poster,
       androidFullScreen: false,
       videoContainerLayout_x: 0,
-      videoContainerLayout_y: 0
+      videoContainerLayout_y: 0,
     };
     this.getDimension();
   }
@@ -46,9 +46,9 @@ export default class Video extends Component {
     UIManager.measure(findNodeHandle(this._videoContainer), (x, y) => {
       this.setState({
         videoContainerLayout_x: x,
-        videoContainerLayout_y: y
-      })
-    })
+        videoContainerLayout_y: y,
+      });
+    });
   }
 
   setNativeProps(nativeProps) {
@@ -57,12 +57,12 @@ export default class Video extends Component {
 
   toTypeString(x) {
     switch (typeof x) {
-      case "object":
+      case 'object':
         return x instanceof Date
           ? x.toISOString()
           : JSON.stringify(x); // object, null
-      case "undefined":
-        return "";
+      case 'undefined':
+        return '';
       default: // boolean, number, string
         return x.toString();
     }
@@ -79,14 +79,14 @@ export default class Video extends Component {
   }
 
   seek = (time, tolerance = 100) => {
-    if (isNaN(time)) throw new Error('Specified time is not a number');
+    if (isNaN(time)) {throw new Error('Specified time is not a number');}
 
     if (Platform.OS === 'ios') {
       this.setNativeProps({
         seek: {
           time,
-          tolerance
-        }
+          tolerance,
+        },
       });
     } else {
       this.setNativeProps({ seek: time });
@@ -172,7 +172,7 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillPresent = (event) => {
-    Platform.OS === 'android' && this.setState({ androidFullScreen: true })
+    Platform.OS === 'android' && this.setState({ androidFullScreen: true });
     if (this.props.onFullscreenPlayerWillPresent) {
       this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
     }
@@ -185,7 +185,7 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillDismiss = (event) => {
-    Platform.OS === 'android' && this.setState({ androidFullScreen: false })
+    Platform.OS === 'android' && this.setState({ androidFullScreen: false });
     if (this.props.onFullscreenPlayerWillDismiss) {
       this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
     }
@@ -201,7 +201,7 @@ export default class Video extends Component {
     if (!this.props.audioOnly) {
       this._hidePoster();
     }
-    
+
     if (this.props.onReadyForDisplay) {
       this.props.onReadyForDisplay(event.nativeEvent);
     }
@@ -271,7 +271,7 @@ export default class Video extends Component {
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
-    const shouldCache = !Boolean(source.__packager_asset)
+    const shouldCache = !source.__packager_asset;
 
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
@@ -310,7 +310,7 @@ export default class Video extends Component {
         type: source.type || '',
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
-        requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {}
+        requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
@@ -350,14 +350,17 @@ export default class Video extends Component {
       width: this.width,
       height: this.height,
       backgroundColor: '#ffffff',
-      justifyContent: "center",
+      justifyContent: 'center',
       zIndex: 99999,
       marginTop: -1 * (this.state.videoContainerLayout_y ? parseFloat(this.state.videoContainerLayout_y) : 0), //margin: 0 - is not working properly. So, updated all the margin individually with 0.
-      marginLeft: -1 * (this.state.videoContainerLayout_x ? parseFloat(this.state.videoContainerLayout_x) : 0)
-    } : {}
+      marginLeft: -1 * (this.state.videoContainerLayout_x ? parseFloat(this.state.videoContainerLayout_x) : 0),
+    } : {};
 
     return (
-      <View ref={(videoContainer) => this._videoContainer = videoContainer} style={[nativeProps.style, videoStyle]}>
+      <View ref={(videoContainer) => {
+        this._videoContainer = videoContainer;
+        return videoContainer;
+        }} style={[nativeProps.style, videoStyle]}>
         <RCTVideo
           ref={this._assignRoot}
           {...nativeProps}
@@ -388,14 +391,14 @@ Video.propTypes = {
     FilterType.PROCESS,
     FilterType.TONAL,
     FilterType.TRANSFER,
-    FilterType.SEPIA
+    FilterType.SEPIA,
   ]),
   filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,
   seek: PropTypes.oneOfType([
     PropTypes.number,
-    PropTypes.object
+    PropTypes.object,
   ]),
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
@@ -417,10 +420,10 @@ Video.propTypes = {
   /* Wrapper component */
   source: PropTypes.oneOfType([
     PropTypes.shape({
-      uri: PropTypes.string
+      uri: PropTypes.string,
     }),
     // Opaque type returned by require('./video.mp4')
-    PropTypes.number
+    PropTypes.number,
   ]),
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
@@ -434,22 +437,22 @@ Video.propTypes = {
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
+      PropTypes.number,
+    ]),
   }),
   selectedVideoTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
+      PropTypes.number,
+    ]),
   }),
   selectedTextTrack: PropTypes.shape({
     type: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.number
-    ])
+      PropTypes.number,
+    ]),
   }),
   textTracks: PropTypes.arrayOf(
     PropTypes.shape({
@@ -460,7 +463,7 @@ Video.propTypes = {
         TextTrackType.TTML,
         TextTrackType.VTT,
       ]),
-      language: PropTypes.string.isRequired
+      language: PropTypes.string.isRequired,
     })
   ),
   paused: PropTypes.bool,
