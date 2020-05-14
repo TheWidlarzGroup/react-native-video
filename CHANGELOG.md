@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 5.0.3
+* New property: `preferredForwardBufferDuration` on iOS - the duration the player should buffer media from the network ahead of the playhead to guard against playback disruption.
+* New property: `currentPlaybackTime` on Android ExoPlayer and iOS - when playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
+* New property: `trackId` on Android ExoPlayer - Configure an identifier for the video stream to link the playback context to the events emitted.
+
 ### Version 5.1.0-alpha1
 * Fixed Exoplayer doesn't work with mute=true (Android). [#1696](https://github.com/react-native-community/react-native-video/pull/1696)
 * Added support for automaticallyWaitsToMinimizeStalling property (iOS) [#1723](https://github.com/react-native-community/react-native-video/pull/1723)
