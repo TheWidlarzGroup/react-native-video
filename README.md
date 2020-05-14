@@ -295,6 +295,7 @@ var styles = StyleSheet.create({
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
@@ -403,6 +404,11 @@ bufferConfig={{
 ```
 
 Platforms: Android ExoPlayer
+
+#### currentPlaybackTime
+When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
+
+Platforms: Android ExoPlayer, iOS
 
 #### controls
 Determines whether to show player controls.
