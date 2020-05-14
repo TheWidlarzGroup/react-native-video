@@ -854,7 +854,7 @@ Platforms: Android ExoPlayer, iOS
 #### trackId
 Configure an identifier for the video stream to link the playback context to the events emitted.
 
-Platforms: Android ExoPlayer, iOS
+Platforms: Android ExoPlayer
 
 #### useTextureView
 Controls whether to output to a TextureView or SurfaceView.
