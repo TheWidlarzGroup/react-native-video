@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -13,6 +14,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -98,6 +101,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Player.EventListener eventListener;
 
     private ExoPlayerView exoPlayerView;
+    private int initialOrientation;
 
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
@@ -178,6 +182,7 @@ class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
+        this.initialOrientation = getResources().getConfiguration().orientation;
         this.eventEmitter = new VideoEventEmitter(context);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
@@ -309,6 +314,37 @@ class ReactExoplayerView extends FrameLayout implements
             }
         });
 
+        //Handling the playButton click event
+        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
+                    player.seekTo(0);
+                }
+                setPausedModifier(false);
+            }
+        });
+
+        //Handling the pauseButton click event
+        ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setPausedModifier(true);
+            }
+        });
+
+        //Handling the fullScreenButton click event
+        FrameLayout fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen_button);
+        fullScreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setFullscreen(!isFullscreen);
+            }
+        });
+        updateFullScreenIcon(isFullscreen);
+
         // Invoking onPlayerStateChanged event for Player
         eventListener = new Player.EventListener() {
             @Override
@@ -335,6 +371,33 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+    }
+
+    /**
+     * Update fullscreen icon
+     */
+    private void updateFullScreenIcon(Boolean fullScreen) {
+        if(playerControlView != null && player != null) {
+            //Play the video whenever the user clicks minimize or maximise button. In order to enable the controls
+            player.setPlayWhenReady(!isPaused);
+            ImageView fullScreenIcon = playerControlView.findViewById(R.id.exo_fullscreen_icon);
+            if (fullScreen) {
+                fullScreenIcon.setImageResource(R.drawable.fullscreen_shrink);
+            } else {
+                fullScreenIcon.setImageResource(R.drawable.fullscreen_expand);
+            }
+        }
+    }
+
+    /**
+     * Enable or Disable fullscreen button
+     */
+    private void enableFullScreenButton(Boolean enable) {
+        if(playerControlView != null) {
+            FrameLayout fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen_button);
+            fullScreenButton.setAlpha(enable ? 1.0f : 0.5f);
+            fullScreenButton.setEnabled(enable);
+        }
     }
 
     /**
@@ -562,10 +625,13 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void onStopPlayback() {
         if (isFullscreen) {
-            setFullscreen(false);
+            //When the video stopPlayback.
+            //If the video is in fullscreen, then we will update the video to normal mode.
+            setFullscreen(!isFullscreen);
         }
         setKeepScreenOn(false);
         audioManager.abandonAudioFocus(this);
+        enableFullScreenButton(false);
     }
 
     private void updateResumePosition() {
@@ -597,6 +663,11 @@ class ReactExoplayerView extends FrameLayout implements
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
+                eventEmitter.audioFocusChanged(false);
+                pausePlayback();
+                audioManager.abandonAudioFocus(this);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 eventEmitter.audioFocusChanged(false);
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:
@@ -659,6 +730,7 @@ class ReactExoplayerView extends FrameLayout implements
                 if (playerControlView != null) {
                     playerControlView.show();
                 }
+                enableFullScreenButton(true);
                 break;
             case Player.STATE_ENDED:
                 text += "ended";
@@ -1177,6 +1249,8 @@ class ReactExoplayerView extends FrameLayout implements
         if (fullscreen == isFullscreen) {
             return; // Avoid generating events when nothing is changing
         }
+
+        updateFullScreenIcon(fullscreen);
         isFullscreen = fullscreen;
 
         Activity activity = themedReactContext.getCurrentActivity();
@@ -1195,11 +1269,17 @@ class ReactExoplayerView extends FrameLayout implements
                 uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
             eventEmitter.fullscreenWillPresent();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidPresent();
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+            //orientation, 1 is for Portrait and 2 for Landscape.
+            if(this.initialOrientation == 1)
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            else
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             eventEmitter.fullscreenWillDismiss();
             decorView.setSystemUiVisibility(uiOptions);
             eventEmitter.fullscreenDidDismiss();

@@ -1,0 +1,7 @@
+namespace ReactNativeVideoCPP {
+[webhosthidden]
+[default_interface] 
+runtimeclass ReactPackageProvider : Microsoft.ReactNative.IReactPackageProvider {
+  ReactPackageProvider();
+};
+} // namespace ReactNativeVideoCPP

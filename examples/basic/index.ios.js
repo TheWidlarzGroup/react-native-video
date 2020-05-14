@@ -52,6 +52,7 @@ class VideoPlayer extends Component {
     paused: true,
     skin: 'custom',
     ignoreSilentSwitch: null,
+    mixWithOthers: null,
     isBuffering: false,
     filter: FilterType.NONE,
     filterEnabled: true
@@ -155,6 +156,18 @@ class VideoPlayer extends Component {
     )
   }
 
+  renderMixWithOthersControl(mixWithOthers) {
+    const isSelected = (this.state.mixWithOthers == mixWithOthers);
+
+    return (
+      <TouchableOpacity onPress={() => { this.setState({mixWithOthers: mixWithOthers}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+          {mixWithOthers}
+        </Text>
+      </TouchableOpacity>
+    )
+  }
+
   renderCustomSkin() {
     const flexCompleted = this.getCurrentTimePercentage() * 100;
     const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
@@ -170,6 +183,7 @@ class VideoPlayer extends Component {
             volume={this.state.volume}
             muted={this.state.muted}
             ignoreSilentSwitch={this.state.ignoreSilentSwitch}
+            mixWithOthers={this.state.mixWithOthers}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
@@ -226,10 +240,16 @@ class VideoPlayer extends Component {
           <View style={styles.generalControls}>
             {
               (Platform.OS === 'ios') ?
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
-                </View> : null
+                <>
+                  <View style={styles.ignoreSilentSwitchControl}>
+                    {this.renderIgnoreSilentSwitchControl('ignore')}
+                    {this.renderIgnoreSilentSwitchControl('obey')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderMixWithOthersControl('mix')}
+                    {this.renderMixWithOthersControl('duck')}
+                  </View>
+                </> : null
             }
           </View>
 
@@ -257,6 +277,7 @@ class VideoPlayer extends Component {
             volume={this.state.volume}
             muted={this.state.muted}
             ignoreSilentSwitch={this.state.ignoreSilentSwitch}
+            mixWithOthers={this.state.mixWithOthers}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
@@ -313,10 +334,16 @@ class VideoPlayer extends Component {
           <View style={styles.generalControls}>
             {
               (Platform.OS === 'ios') ?
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
-                </View> : null
+                <>
+                  <View style={styles.ignoreSilentSwitchControl}>
+                    {this.renderIgnoreSilentSwitchControl('ignore')}
+                    {this.renderIgnoreSilentSwitchControl('obey')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderMixWithOthersControl('mix')}
+                    {this.renderMixWithOthersControl('duck')}
+                  </View>
+                </> : null
             }
           </View>
         </View>
@@ -394,6 +421,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   ignoreSilentSwitchControl: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  mixWithOthersControl: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
