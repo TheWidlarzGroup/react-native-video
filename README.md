@@ -314,6 +314,7 @@ var styles = StyleSheet.create({
 * [playWhenInactive](#playwheninactive)
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
+* [preferredForwardBufferDuration](#preferredForwardBufferDuration)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
@@ -600,6 +601,13 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: all
+
+#### preferredForwardBufferDuration
+The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the [preferredForwardBufferDuration](https://developer.apple.com/documentation/avfoundation/avplayeritem/1643630-preferredforwardbufferduration) instance property on AVPlayerItem.
+
+Default: 0
+
+Platforms: iOS
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
