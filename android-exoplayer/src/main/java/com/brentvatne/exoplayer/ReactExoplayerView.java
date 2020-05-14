@@ -873,7 +873,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private static boolean isBehindLiveWindow(ExoPlaybackException e) {
-        com.google.android.exoplayer2.util.Log.e("ExoPlayer Exception", e.toString());
+        Log.e("ExoPlayer Exception", e.toString());
         if (e.type != ExoPlaybackException.TYPE_SOURCE) {
             return false;
         }
