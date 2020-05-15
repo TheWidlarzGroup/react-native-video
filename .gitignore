@@ -59,3 +59,8 @@ lib/
 .settings/
 msbuild.binlog
 example/msbuild.binlog
+settings.json
+android-exoplayer/gradlew
+android-exoplayer/gradlew.bat
+android-exoplayer/gradle/wrapper/gradle-wrapper.jar
+android-exoplayer/gradle/wrapper/gradle-wrapper.properties
