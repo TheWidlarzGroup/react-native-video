@@ -27,22 +27,32 @@
         "type": "git",
         "url": "git@github.com:react-native-community/react-native-video.git"
     },
-    "devDependencies": {
-        "@react-native-community/eslint-config": "0.0.7",
-        "babel-eslint": "10.0.3",
-        "eslint": "6.8.0",
-        "react": "^16.12.0",
-        "react-dom": "^16.12.0",
-        "react-hot-loader": "^4.12.19",
-        "react-native": "^0.61.5"
-    },
+    "peerDependencies": {
+        "react": "^16.9",
+        "react-native": ">=0.60"
+      },
     "dependencies": {
         "keymirror": "^0.1.1",
         "prop-types": "^15.7.2",
         "shaka-player": "^2.5.9"
     },
+    "devDependencies": {
+        "react": "16.11.0",
+        "react-native": "0.62.2",
+        "@babel/core": "^7.6.2",
+        "@babel/runtime": "^7.6.2",
+        "@react-native-community/eslint-config": "^0.0.5",
+        "babel-jest": "^24.9.0",
+        "eslint": "^6.5.1",
+        "jest": "^24.9.0",
+        "metro-react-native-babel-preset": "^0.58.0",
+        "react-test-renderer": "16.11.0"
+    },
     "scripts": {
-        "lint": "yarn eslint *.js"
+        "lint": "yarn eslint *.js",
+        "start": "node node_modules/react-native/local-cli/cli.js start",
+        "start:android": "react-native run-android --root example/",
+        "start:ios": "react-native run-ios --project-path example/ios --scheme example"
     },
     "files": [
         "android-exoplayer",

@@ -21,28 +21,41 @@ DerivedData
 *.ipa
 *.xcuserstate
 project.xcworkspace
+Pods/
 
 # Android/IJ
 #
-*.iml
 .idea
+*.iml
 .gradle
 local.properties
-*.hprof
+lib/android/src/main/gen
 
 # node.js
 #
 node_modules/
-*.log
+npm-debug.log
+yarn-error.log
+package-lock.json
 
-# yarn
-yarn.lock
+# Rubygem bundles
+#
+bundles/
 
-# editor workspace settings
-.vscode
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# BUCK
-buck-out/
-\.buckd/
-android/app/libs
-android/keystores/debug.keystore
+android/gradle
+android/gradlew
+android/gradlew.bat
+
+lib/
+.classpath
+.project
+.settings/
+msbuild.binlog
+example/msbuild.binlog
