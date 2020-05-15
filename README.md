@@ -712,6 +712,37 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
+If the track is not showing(especially on Android) the following might help:
+
+Add onLoad callback and dump the info: 
+
+```
+<Video
+    onLoad={(event) => {
+      console.log('video loaded', event);
+    }}
+    ...
+/>
+```
+
+You will see some something like this in the log:
+```
+textTracks:
+       [ { language: 'en',
+           type: 'text/vtt',
+           title: 'sub1:English',
+           index: 0 } ]
+```           
+Then add the following to the <Video> tag: 
+ 
+```
+selectedTextTrack={{
+      type: "title",
+      value: "sub1:English",
+    }}
+```
+Pay attention to the value maching the title from the received textTracks.
+
 Platforms: Android ExoPlayer, iOS
 
 #### selectedVideoTrack
