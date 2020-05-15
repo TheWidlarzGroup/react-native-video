@@ -725,7 +725,7 @@ Add onLoad callback and dump the info:
 />
 ```
 
-You will see some something like this in the log:
+You will see something like this in the log:
 ```
 textTracks:
        [ { language: 'en',
@@ -741,7 +741,7 @@ selectedTextTrack={{
       value: "sub1:English",
     }}
 ```
-Pay attention to the value maching the title from the received textTracks.
+Pay attention to the value matching the title from the received textTracks.
 
 Platforms: Android ExoPlayer, iOS
 
