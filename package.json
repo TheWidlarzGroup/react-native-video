@@ -28,7 +28,7 @@
         "url": "git@github.com:react-native-community/react-native-video.git"
     },
     "peerDependencies": {
-        "react": "^16.9",
+        "react": "*",
         "react-native": ">=0.60"
       },
     "dependencies": {
