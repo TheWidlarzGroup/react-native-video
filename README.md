@@ -1318,22 +1318,13 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 
 To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
 
-## Examples
+## Example
 
-- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
-- Try the included [VideoPlayer example][2] yourself:
+1. Install required pods in example/ios by running pods install
+2. Run yarn start to start Metro Bundler
+3. Run yarn start:ios or yarn start:android
 
-   ```sh
-   git clone git@github.com:react-native-community/react-native-video.git
-   cd react-native-video/example
-   npm install
-   open ios/VideoPlayer.xcodeproj
-
-   ```
-
-   Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
-
-- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
+Note. We recently simplified the example to easier maintain it. To see old examples just check [git history.](https://github.com/react-native-community/react-native-video/tree/052f49e472ac3fc567a6a882967d6444570e8d99/examples)
 
 ## Updating
 
