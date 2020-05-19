@@ -11,11 +11,18 @@ import {
 
 import Video from 'react-native-video';
 
-const localSource = require('./Big_Buck_Bunny_1080_10s_2MB.mp4');
-const remoteSource = {
-  uri:
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+const SOURCES = {
+  local: require('./Big_Buck_Bunny_1080_10s_2MB.mp4'),
+  remote: {
+    uri:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  },
+  hls: {
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  },
 };
+
+const SOURCE_KEYS = Object.keys(SOURCES);
 
 class VideoPlayer extends Component {
   state = {
@@ -37,6 +44,7 @@ class VideoPlayer extends Component {
     const isSelected = this.state.source === source;
     return (
       <TouchableOpacity
+        key={source}
         onPress={() => {
           this.setState({
             source,
@@ -153,8 +161,8 @@ class VideoPlayer extends Component {
     return (
       <View style={styles.container}>
         <Video
-          key={source} // Changing source with controls=true seems to be broken
-          source={source === 'local' ? localSource : remoteSource}
+          // key={source} // Changing source with controls=true seems to be broken
+          source={SOURCES[source]}
           poster={
             'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'
           }
@@ -171,13 +179,12 @@ class VideoPlayer extends Component {
             Alert.alert('Done!');
           }}
           onError={error => console.warn(error)}
-          controls
+          controls={true}
         />
         <View style={styles.controls}>
           <View style={styles.generalControls}>
             <View style={styles.sourceControl}>
-              {this.renderSourceControl('local')}
-              {this.renderSourceControl('remote')}
+              {SOURCE_KEYS.map(k => this.renderSourceControl(k))}
             </View>
           </View>
 
@@ -239,7 +246,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     overflow: 'hidden',
-    paddingBottom: 10,
+    paddingBottom: 4,
   },
   sourceControl: {
     flex: 1,
@@ -278,8 +285,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 11,
     color: 'white',
-    paddingLeft: 2,
-    paddingRight: 2,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     lineHeight: 12,
   },
   nativeVideoControls: {
