@@ -78,9 +78,6 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   BOOL _filterEnabled;
   UIViewController * _presentingViewController;
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-  RCTVideoCache * _videoCache;
-#endif
 #if TARGET_OS_IOS
   void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
   AVPictureInPictureController *_pipController;
@@ -116,9 +113,6 @@ static int const RCTVideoUnset = -1;
     _mixWithOthers = @"inherit"; // inherit, mix, duck
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
-#endif
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-    _videoCache = [RCTVideoCache sharedInstance];
 #endif
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -485,7 +479,6 @@ static int const RCTVideoUnset = -1;
 {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
-  bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
   if (!uri || [uri isEqualToString:@""]) {
@@ -506,17 +499,6 @@ static int const RCTVideoUnset = -1;
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
     [assetOptions setObject:cookies forKey:AVURLAssetHTTPCookiesKey];
 
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-    if (shouldCache && (!_textTracks || !_textTracks.count)) {
-      /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
-       * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
-       * Until this is fixed, we need to bypass caching when text tracks are specified.
-       */
-      DebugLog(@"Caching is not supported for uri '%@' because text tracks are not compatible with the cache. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
-      [self playerItemForSourceUsingCache:uri assetOptions:assetOptions withCallback:handler];
-      return;
-    }
-#endif
 
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
     [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
@@ -530,61 +512,6 @@ static int const RCTVideoUnset = -1;
   AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
   [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
 }
-
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-
-- (void)playerItemForSourceUsingCache:(NSString *)uri assetOptions:(NSDictionary *)options withCallback:(void(^)(AVPlayerItem *))handler {
-    NSURL *url = [NSURL URLWithString:uri];
-    [_videoCache getItemForUri:uri withCallback:^(RCTVideoCacheStatus videoCacheStatus, AVAsset * _Nullable cachedAsset) {
-        switch (videoCacheStatus) {
-            case RCTVideoCacheStatusMissingFileExtension: {
-                DebugLog(@"Could not generate cache key for uri '%@'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
-                AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:options];
-                [self playerItemPrepareText:asset assetOptions:options withCallback:handler];
-                return;
-            }
-            case RCTVideoCacheStatusUnsupportedFileExtension: {
-                DebugLog(@"Could not generate cache key for uri '%@'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md", uri);
-                AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:options];
-                [self playerItemPrepareText:asset assetOptions:options withCallback:handler];
-                return;
-            }
-            default:
-                if (cachedAsset) {
-                    DebugLog(@"Playing back uri '%@' from cache", uri);
-                    // See note in playerItemForSource about not being able to support text tracks & caching
-                    handler([AVPlayerItem playerItemWithAsset:cachedAsset]);
-                    return;
-                }
-        }
-
-        DVURLAsset *asset = [[DVURLAsset alloc] initWithURL:url options:options networkTimeout:10000];
-        asset.loaderDelegate = self;
-        
-        /* More granular code to have control over the DVURLAsset
-        DVAssetLoaderDelegate *resourceLoaderDelegate = [[DVAssetLoaderDelegate alloc] initWithURL:url];
-        resourceLoaderDelegate.delegate = self;
-        NSURLComponents *components = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
-        components.scheme = [DVAssetLoaderDelegate scheme];
-        AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:[components URL] options:options];
-        [asset.resourceLoader setDelegate:resourceLoaderDelegate queue:dispatch_get_main_queue()];
-        */
-
-        handler([AVPlayerItem playerItemWithAsset:asset]);
-    }];
-}
-
-#pragma mark - DVAssetLoaderDelegate
-
-- (void)dvAssetLoaderDelegate:(DVAssetLoaderDelegate *)loaderDelegate
-                  didLoadData:(NSData *)data
-                       forURL:(NSURL *)url {
-    [_videoCache storeItem:data forUri:[url absoluteString] withCallback:^(BOOL success) {
-        DebugLog(@"Cache data stored successfully 🎉");
-    }];
-}
-
-#endif
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
@@ -1593,7 +1520,6 @@ static int const RCTVideoUnset = -1;
 
         if (exportSession != nil) {
             NSString *path = nil;
-            NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
             path = [self generatePathInDirectory:[[self cacheDirectoryPath] stringByAppendingPathComponent:@"Videos"]
                                    withExtension:@".mp4"];
             NSURL *url = [NSURL fileURLWithPath:path];

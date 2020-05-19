@@ -67,25 +67,14 @@ Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 
 Run `react-native link react-native-video` to link the react-native-video library.
 
-#### Using CocoaPods (required to enable caching)
+#### Manual install
 
 Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
 
-Depending on your requirements you have to choose between the two possible subpodspecs:
-
-Video only:
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 +  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
-end
-```
-
-Video with caching ([more info](docs/caching.md)):
-
-```diff
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
 end
 ```
 
@@ -1202,7 +1191,6 @@ Notes:
  - Currently only supports MP4 export
  - Currently only supports exporting to user's cache directory with a generated UUID filename. 
  - User will need to remove the saved video through their Photos app
- - Works with cached videos as well. (Checkout video-caching example)
  - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
  - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
 
@@ -1320,7 +1308,7 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
 ## Example
 
-1. Install required pods in example/ios by running pods install
+1. Install required pods in example/ios by running `npx pod-install`
 2. Run yarn start to start Metro Bundler
 3. Run yarn start:ios or yarn start:android
 
