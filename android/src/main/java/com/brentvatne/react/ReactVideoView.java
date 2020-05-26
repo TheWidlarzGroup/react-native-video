@@ -410,7 +410,7 @@ public class ReactVideoView extends ScalableVideoView implements
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
-        setKeepScreenOn(!mPaused);
+        setKeepScreenOn(!mPaused && mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     // reduces the volume based on stereoPan
@@ -429,6 +429,7 @@ public class ReactVideoView extends ScalableVideoView implements
         }
 
         mMediaPlayer.setScreenOnWhilePlaying(mPreventsDisplaySleepDuringVideoPlayback);
+        setKeepScreenOn(mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     public void setMutedModifier(final boolean muted) {
@@ -723,7 +724,7 @@ public class ReactVideoView extends ScalableVideoView implements
         else {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders);
         }
-        setKeepScreenOn(true);
+        setKeepScreenOn(mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     @Override
