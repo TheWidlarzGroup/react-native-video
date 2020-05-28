@@ -105,6 +105,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         }
     }
 
+    @ReactProp(name = PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK)
+    public void setPropPreventsDisplaySleepDuringVideoPlayback(final ReactVideoView videoView, final boolean doPreventSleep) {
+        videoView.setPreventsDisplaySleepDuringVideoPlaybackModifier(doPreventSleep);
+    }
+
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactVideoView videoView, final String resizeModeOrdinalString) {
         videoView.setResizeModeModifier(ScalableType.values()[Integer.parseInt(resizeModeOrdinalString)]);
