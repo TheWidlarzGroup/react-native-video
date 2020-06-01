@@ -15,6 +15,6 @@ class RawResourceDataSourceFactory implements DataSource.Factory {
 
     @Override
     public DataSource createDataSource() {
-        return new RawResourceDataSource(context, null);
+        return new RawResourceDataSource(context);
     }
 }
