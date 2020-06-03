@@ -139,6 +139,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Dynamic textTrackValue;
     private ReadableArray textTracks;
     private boolean disableFocus;
+    private boolean preventsDisplaySleepDuringVideoPlayback;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
@@ -605,7 +606,7 @@ class ReactExoplayerView extends FrameLayout implements
             initializePlayer();
         }
         if (!disableFocus) {
-            setKeepScreenOn(true);
+            setKeepScreenOn(true && preventsDisplaySleepDuringVideoPlayback);
         }
     }
 
@@ -629,7 +630,6 @@ class ReactExoplayerView extends FrameLayout implements
             //If the video is in fullscreen, then we will update the video to normal mode.
             setFullscreen(!isFullscreen);
         }
-        setKeepScreenOn(false);
         audioManager.abandonAudioFocus(this);
         enableFullScreenButton(false);
     }
@@ -714,11 +714,15 @@ class ReactExoplayerView extends FrameLayout implements
                 text += "idle";
                 eventEmitter.idle();
                 clearProgressMessageHandler();
+                if (!playWhenReady) {
+                    setKeepScreenOn(false);
+                }
                 break;
             case Player.STATE_BUFFERING:
                 text += "buffering";
                 onBuffering(true);
                 clearProgressMessageHandler();
+                setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                 break;
             case Player.STATE_READY:
                 text += "ready";
@@ -731,11 +735,13 @@ class ReactExoplayerView extends FrameLayout implements
                     playerControlView.show();
                 }
                 enableFullScreenButton(true);
+                setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                 break;
             case Player.STATE_ENDED:
                 text += "ended";
                 eventEmitter.end();
                 onStopPlayback();
+                setKeepScreenOn(false);
                 break;
             default:
                 text += "unknown";
@@ -1046,6 +1052,10 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         this.repeat = repeat;
+    }
+
+    public void setPreventsDisplaySleepDuringVideoPlayback(boolean preventsDisplaySleepDuringVideoPlayback) {
+        this.preventsDisplaySleepDuringVideoPlayback = preventsDisplaySleepDuringVideoPlayback;
     }
 
     public void setSelectedTrack(int trackType, String type, Dynamic value) {
