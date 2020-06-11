@@ -33,8 +33,7 @@
       },
     "dependencies": {
         "keymirror": "^0.1.1",
-        "prop-types": "^15.7.2",
-        "shaka-player": "^2.5.9"
+        "prop-types": "^15.7.2"
     },
     "devDependencies": {
         "react": "16.11.0",
@@ -57,7 +56,6 @@
     "files": [
         "android-exoplayer",
         "android",
-        "dom",
         "ios",
         "windows",
         "FilterType.js",

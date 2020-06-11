@@ -30,7 +30,6 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
   * [tvOS](#tvos-installation)
   * [Android](#android-installation)
   * [Windows](#windows-installation)
-  * [react-native-dom](#react-native-dom-installation)
 * [Usage](#usage)
 * [iOS App Transport Security](#ios-app-transport-security)
 * [Audio Mixing](#audio-mixing)
@@ -203,32 +202,6 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 
 </details>
 
-### react-native-dom installation
-<details>
-  <summary>react-native-dom details</summary>
-
-Make the following additions to the given files manually:
-
-#### **dom/bootstrap.js**
-
-Import RCTVideoManager and add it to the list of nativeModules:
-
-```javascript
-import { RNDomInstance } from "react-native-dom";
-import { name as appName } from "../app.json";
-import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
-
-// Path to RN Bundle Entrypoint ================================================
-const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
-
-// React Native DOM Runtime Options =============================================
-const ReactNativeDomOptions = {
-  enableHotReload: false,
-  nativeModules: [RCTVideoManager] // Add this
-};
-```
-</details>
-
 ## Usage
 
 ```javascript
@@ -395,7 +368,7 @@ For Android MediaPlayer, you will need to build your own controls or use a packa
 
 Note on Android ExoPlayer, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
 
-Platforms: Android ExoPlayer, iOS, react-native-dom
+Platforms: Android ExoPlayer, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
@@ -483,16 +456,6 @@ Controls whether the ExoPlayer shutter view (black screen while loading) is enab
 * **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
-
-#### id
-Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
-
-Example:
-```
-id="video"
-```
-
-Platforms: react-native-dom
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
