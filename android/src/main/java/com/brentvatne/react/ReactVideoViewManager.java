@@ -30,6 +30,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_REPEAT = "repeat";
     public static final String PROP_PAUSED = "paused";
     public static final String PROP_MUTED = "muted";
+    public static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
     public static final String PROP_VOLUME = "volume";
     public static final String PROP_STEREO_PAN = "stereoPan";
     public static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
@@ -102,6 +103,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
                     src.getMap(PROP_SRC_HEADERS)
                     );
         }
+    }
+
+    @ReactProp(name = PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK)
+    public void setPropPreventsDisplaySleepDuringVideoPlayback(final ReactVideoView videoView, final boolean doPreventSleep) {
+        videoView.setPreventsDisplaySleepDuringVideoPlaybackModifier(doPreventSleep);
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)

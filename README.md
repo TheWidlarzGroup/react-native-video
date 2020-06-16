@@ -299,6 +299,7 @@ var styles = StyleSheet.create({
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
 * [preferredForwardBufferDuration](#preferredForwardBufferDuration)
+* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
@@ -606,6 +607,13 @@ The duration the player should buffer media from the network ahead of the playhe
 Default: 0
 
 Platforms: iOS
+
+#### preventsDisplaySleepDuringVideoPlayback
+Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
+
+Default: true
+
+Platforms: iOS, Android
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.

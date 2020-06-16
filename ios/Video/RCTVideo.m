@@ -64,6 +64,7 @@ static int const RCTVideoUnset = -1;
   NSDictionary * _selectedAudioTrack;
   BOOL _playbackStalled;
   BOOL _playInBackground;
+  BOOL _preventsDisplaySleepDuringVideoPlayback;
   float _preferredForwardBufferDuration;
   BOOL _playWhenInactive;
   BOOL _pictureInPicture;
@@ -106,6 +107,7 @@ static int const RCTVideoUnset = -1;
     _controls = NO;
     _playerBufferEmpty = YES;
     _playInBackground = false;
+    _preventsDisplaySleepDuringVideoPlayback = true;
     _preferredForwardBufferDuration = 0.0f;
     _allowsExternalPlayback = YES;
     _playWhenInactive = false;
@@ -815,6 +817,12 @@ static int const RCTVideoUnset = -1;
   _playInBackground = playInBackground;
 }
 
+- (void)setPreventsDisplaySleepDuringVideoPlayback:(BOOL)preventsDisplaySleepDuringVideoPlayback
+{
+    _preventsDisplaySleepDuringVideoPlayback = preventsDisplaySleepDuringVideoPlayback;
+    [self applyModifiers];
+}
+
 - (void)setAllowsExternalPlayback:(BOOL)allowsExternalPlayback
 {
     _allowsExternalPlayback = allowsExternalPlayback;
@@ -1020,6 +1028,12 @@ static int const RCTVideoUnset = -1;
   } else {
     [_player setVolume:_volume];
     [_player setMuted:NO];
+  }
+
+  if (@available(iOS 12.0, *)) {
+      self->_player.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback;
+  } else {
+      // Fallback on earlier versions
   }
   
   [self setMaxBitRate:_maxBitRate];
