@@ -456,7 +456,7 @@ Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS, Android Exoplayer
+Platforms: iOS
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -469,14 +469,10 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Note on Android ExoPlayer, the full-screen mode by default goes into landscape mode. Exiting from the full-screen mode will display the video in Initial orientation.
-
 Platforms: iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
-
-To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```

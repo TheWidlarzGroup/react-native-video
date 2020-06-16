@@ -23,7 +23,7 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation('com.google.android.exoplayer:exoplayer:2.10.5') {
+    implementation('com.google.android.exoplayer:exoplayer:2.11.4') {
         exclude group: 'com.android.support'
     }
 
@@ -32,7 +32,7 @@ dependencies {
     implementation "androidx.core:core:1.1.0"
     implementation "androidx.media:media:1.1.0"
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.10.5') {
+    implementation('com.google.android.exoplayer:extension-okhttp:2.11.4') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation 'com.squareup.okhttp3:okhttp:3.14.3'
