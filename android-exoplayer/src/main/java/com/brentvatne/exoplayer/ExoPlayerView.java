@@ -200,6 +200,11 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setVisibility(VISIBLE);
     }
 
+    public void invalidateAspectRatio() {
+        // Resetting aspect ratio will force layout refresh on next video size changed
+        layout.invalidateAspectRatio();
+    }
+
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,
             TextOutput, ExoPlayer.EventListener {
 

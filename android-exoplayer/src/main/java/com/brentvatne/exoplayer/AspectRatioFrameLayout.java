@@ -67,6 +67,10 @@ public final class AspectRatioFrameLayout extends FrameLayout {
         return videoAspectRatio;
     }
 
+    public void invalidateAspectRatio() {
+        videoAspectRatio = 0;
+    }
+
     /**
      * Sets the resize mode which can be of value {@link ResizeMode.Mode}
      *
