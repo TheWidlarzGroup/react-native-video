@@ -291,7 +291,7 @@ var styles = StyleSheet.create({
 * [useTextureView](#usetextureview)
 * [volume](#volume)
 * [fontSizeTrack](#fontSizeTrack)
-* [paddingBottonTrack](#paddingBottonTrack)
+* [paddingBottomTrack](#paddingBottomTrack)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -814,10 +814,10 @@ Adjust the font size of the subtitles in Android.
 
 Platforms: Android ExoPlayer
 
-#### paddingBottonTrack
-Adjust the padding botton of the subtitles in Android.
-* **0.1 (default)** - Give a padding botton of 0.1
-* **Other values (float)** - Change the padding botton
+#### paddigBottomTrack
+Adjust the padding bottom of the subtitles in Android.
+* **0.1 (default)** - Give a padding bottom of 0.1
+* **Other values (float)** - Change the padding bottom
 
 Platforms: Android ExoPlayer
 
