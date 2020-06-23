@@ -1041,9 +1041,10 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector.setParameters(disableParameters);
             return;
         } else if (type.equals("language")) {
+            String normalizedLanguage = Util.normalizeLanguageCode(value.asString());
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.language != null && format.language.equals(value.asString())) {
+                if (format.language != null && format.language.equals(normalizedLanguage)) {
                     groupIndex = i;
                     break;
                 }
