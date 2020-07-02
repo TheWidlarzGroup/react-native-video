@@ -60,7 +60,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_FONT_SIZE_TRACK = "fontSizeTrack";
-    private static final String PROP_PADDIND_BOTTOM_TRACK = "paddingBottomTrack";
+    private static final String PROP_PADDING_BOTTOM_TRACK = "paddingBottomTrack";
 
     @Override
     public String getName() {
@@ -274,7 +274,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setFontSizeTrack(fontSizeTrack);
     }
 
-    @ReactProp(name = PROP_PADDIND_BOTTOM_TRACK, defaultFloat = 0.1f)
+    @ReactProp(name = PROP_PADDING_BOTTOM_TRACK, defaultFloat = 0.1f)
     public void setPaddingBottomTrack(final ReactExoplayerView videoView, final float paddingBottomTrack) {
         videoView.setPaddingBottomTrack(paddingBottomTrack);
     }
