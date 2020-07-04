@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
@@ -71,6 +72,22 @@
             android:paddingRight="4dp"
             android:includeFontPadding="false"
             android:textColor="#FFBEBEBE"/>
-    </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/exo_fullscreen_button"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right">
+
+            <ImageView
+                android:id="@+id/exo_fullscreen_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/exo_controls_fullscreen_enter" />
+
+        </FrameLayout>
+    </LinearLayout>
 </LinearLayout>
