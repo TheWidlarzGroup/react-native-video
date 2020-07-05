@@ -239,9 +239,13 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostResume() {
-        exoPlayerView.setPlayer(player);
         if (!playInBackground || !isInBackground) {
-            setPlayWhenReady(!isPaused);
+            if (player != null) {
+                exoPlayerView.setPlayer(player);
+                boolean temp = this.disableFocus;
+                player.setPlayWhenReady(!isPaused);
+                this.disableFocus = temp;
+            }
         }
         isInBackground = false;
     }
@@ -296,6 +300,10 @@ class ReactExoplayerView extends FrameLayout implements
         this.fullScreenDelegate = delegate;
     }
 
+    public void removeViewInstance() {
+        instances.remove(uid);
+    }
+
     // Internal methods
 
     /**
@@ -315,8 +323,6 @@ class ReactExoplayerView extends FrameLayout implements
         instances.put(uid, this);
         Intent intent = new Intent(getContext(), ExoPlayerFullscreenVideoActivity.class);
         intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_ID, this.uid);
-        boolean isPlaying = player.getPlayWhenReady() && player.getPlaybackState() == Player.STATE_READY;
-        intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_IS_PLAYING, isPlaying);
         getContext().startActivity(intent);
     }
 
@@ -332,7 +338,7 @@ class ReactExoplayerView extends FrameLayout implements
         playerControlView.setPlayer(player);
         playerControlView.show();
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
-        playerControlView.findViewById(R.id.exo_fullscreen_button).setOnClickListener(v -> showFullscreen());
+        playerControlView.findViewById(R.id.exo_fullscreen_button).setOnClickListener(v -> setFullscreen(true));
 
         // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {

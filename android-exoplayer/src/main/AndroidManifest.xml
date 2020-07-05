@@ -3,6 +3,7 @@
     <application>
         <activity
             android:name="com.brentvatne.exoplayer.ExoPlayerFullscreenVideoActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTop" />
     </application>
 </manifest>

@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -13,7 +14,6 @@ import com.google.android.exoplayer2.ui.PlayerControlView;
 
 public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implements ReactExoplayerView.FullScreenDelegate {
     public static final String EXTRA_ID = "extra_id";
-    public static final String EXTRA_IS_PLAYING = "extra_is_playing";
 
     private int id;
     private PlayerControlView playerControlView;
@@ -36,24 +36,38 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
         ImageView fullscreenIcon = playerControlView.findViewById(R.id.exo_fullscreen_icon);
         fullscreenIcon.setImageResource(R.drawable.exo_controls_fullscreen_exit);
         playerControlView.findViewById(R.id.exo_fullscreen_button)
-                .setOnClickListener(v -> finish());
+                .setOnClickListener(v -> ReactExoplayerView.getViewInstance(id).setFullscreen(false));
+        //Handling the playButton click event
+        playerControlView.findViewById(R.id.exo_play).setOnClickListener(v -> {
+            if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
+                player.seekTo(0);
+            }
+            ReactExoplayerView.getViewInstance(id).setPausedModifier(false);
+        });
+
+        //Handling the pauseButton click event
+        playerControlView.findViewById(R.id.exo_pause).setOnClickListener(v -> ReactExoplayerView.getViewInstance(id).setPausedModifier(true));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        boolean isPlaying = getIntent().getBooleanExtra(EXTRA_IS_PLAYING, false);
-        player.setPlayWhenReady(isPlaying);
+        boolean isPaused = ReactExoplayerView.getViewInstance(id).isPaused();
+        player.setPlayWhenReady(!isPaused);
         ReactExoplayerView.getViewInstance(id).registerFullScreenDelegate(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        boolean isPlaying = player.getPlayWhenReady() && player.getPlaybackState() == Player.STATE_READY;
-        ReactExoplayerView.getViewInstance(id).setPausedModifier(!isPlaying);
         player.setPlayWhenReady(false);
         ReactExoplayerView.getViewInstance(id).registerFullScreenDelegate(null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ReactExoplayerView.getViewInstance(id).removeViewInstance();
     }
 
     @Override
@@ -62,6 +76,15 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
         if (hasFocus) {
             hideSystemUI();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            ReactExoplayerView.getViewInstance(id).setFullscreen(false);
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void togglePlayerControlVisibility() {
