@@ -117,8 +117,9 @@ Select RCTVideo-tvOS
 ### Android installation
 <details>
   <summary>Android details</summary>
-
-Run `react-native link react-native-video` to link the react-native-video library.
+ 
+Linking is not required in React Native 0.60 and above.
+If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
