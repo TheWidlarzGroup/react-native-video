@@ -18,8 +18,8 @@ import android.view.Window;
 import android.webkit.CookieManager;
 import android.widget.MediaController;
 
-import com.android.vending.expansion.zipfile.APKExpansionSupport;
-import com.android.vending.expansion.zipfile.ZipResourceFile;
+import com.android.vending.expansion.zipfile1.APKExpansionSupport;
+import com.android.vending.expansion.zipfile1.ZipResourceFile;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;

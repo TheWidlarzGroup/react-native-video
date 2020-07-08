@@ -1,4 +1,4 @@
-package com.android.vending.expansion.zipfile;
+package com.android.vending.expansion.zipfile1;
 /*
  * Copyright (C) 2012 The Android Open Source Project
  *
