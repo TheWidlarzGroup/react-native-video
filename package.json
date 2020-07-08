@@ -1,5 +1,5 @@
 {
-    "name": "react-native-video",
+    "name": "@feihuoliuxing1/react-native-video",
     "version": "4.4.5",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
@@ -25,7 +25,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git@github.com:react-native-community/react-native-video.git"
+        "url": "git@github.com:@feihuoliuxing1/react-native-video.git"
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "0.0.7",
@@ -54,5 +54,6 @@
         "TextTrackType.js",
         "VideoResizeMode.js",
         "react-native-video.podspec"
-    ]
+    ],
+    "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }
