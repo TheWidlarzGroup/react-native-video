@@ -25,7 +25,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git@github.com:@feihuoliuxing1/react-native-video.git"
+        "url": "git@github.com:feihuoliuxing1/react-native-video.git"
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "0.0.7",
