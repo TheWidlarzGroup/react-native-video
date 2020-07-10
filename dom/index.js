@@ -1,3 +1,3 @@
 // @flow
 
-module.exports = require("./RCTVideoManager");
+module.exports = require('./RCTVideoManager');
