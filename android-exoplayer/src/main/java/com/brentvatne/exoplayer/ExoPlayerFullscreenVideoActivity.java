@@ -60,9 +60,8 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
     @Override
     public void onResume() {
         super.onResume();
-        boolean isPaused = ReactExoplayerView.getViewInstance(id).isPaused();
-        player.setPlayWhenReady(!isPaused);
         if (ReactExoplayerView.getViewInstance(id) != null) {
+            ReactExoplayerView.getViewInstance(id).syncPlayerState();
             ReactExoplayerView.getViewInstance(id).registerFullScreenDelegate(this);
         }
     }

@@ -116,6 +116,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isFullscreen;
     private String fullScreenOrientation;
     private boolean isInBackground;
+    private boolean isInFullscreen;
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
@@ -241,11 +242,14 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostResume() {
         if (!playInBackground || !isInBackground) {
-            if (player != null) {
-                exoPlayerView.setPlayer(player);
-                boolean temp = this.disableFocus;
-                player.setPlayWhenReady(!isPaused);
-                this.disableFocus = temp;
+            if (isInFullscreen) {
+                if (player != null) {
+                    exoPlayerView.setPlayer(player);
+                    syncPlayerState();
+                }
+                isInFullscreen = false;
+            } else {
+                setPlayWhenReady(!isPaused);
             }
         }
         isInBackground = false;
@@ -294,8 +298,15 @@ class ReactExoplayerView extends FrameLayout implements
         return player;
     }
 
-    public boolean isPaused() {
-        return isPaused;
+    public void syncPlayerState() {
+        if (player == null) return;
+        if (player.getPlaybackState() == Player.STATE_ENDED) {
+            // Try to get last frame displayed
+            player.seekTo(player.getDuration() - 200);
+            player.setPlayWhenReady(true);
+        } else {
+            player.setPlayWhenReady(!isPaused);
+        }
     }
 
     public void registerFullScreenDelegate(FullScreenDelegate delegate) {
@@ -323,6 +334,7 @@ class ReactExoplayerView extends FrameLayout implements
         intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_ID, this.uid);
         intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_ORIENTATION, this.fullScreenOrientation);
         getContext().startActivity(intent);
+        isInFullscreen = true;
     }
 
     /**
@@ -623,9 +635,6 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void onStopPlayback() {
-        if (isFullscreen) {
-            setFullscreen(false);
-        }
         audioManager.abandonAudioFocus(this);
     }
 
