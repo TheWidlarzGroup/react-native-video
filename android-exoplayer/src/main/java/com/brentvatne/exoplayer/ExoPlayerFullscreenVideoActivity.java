@@ -79,7 +79,7 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            hideSystemUI();
+            playerControlView.postDelayed(this::hideSystemUI, 200);
         }
     }
 
