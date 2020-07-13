@@ -87,7 +87,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
-        DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
     private final VideoEventEmitter eventEmitter;
@@ -139,6 +138,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
+    private String mCookiePolicy = "original";
     private boolean controls;
     // \ End props
 
@@ -202,6 +202,7 @@ class ReactExoplayerView extends FrameLayout implements
         clearResumePosition();
         mediaDataSourceFactory = buildDataSourceFactory(true);
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
+            DEFAULT_COOKIE_MANAGER.setCookiePolicy(this.getCookiePolicy());
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
@@ -417,6 +418,18 @@ class ReactExoplayerView extends FrameLayout implements
                 applyModifiers();
             }
         }, 1);
+    }
+
+    private CookiePolicy getCookiePolicy() {
+        switch (mCookiePolicy) {
+            case "all":
+                return CookiePolicy.ACCEPT_ALL;
+            case "none":
+                return CookiePolicy.ACCEPT_NONE;
+            case "original":
+            default:
+                return CookiePolicy.ACCEPT_ORIGINAL_SERVER;
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
@@ -929,6 +942,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
+    }
+
+    public void setCookiePolicy(String cookiePolicy) {
+        mCookiePolicy = cookiePolicy;
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
