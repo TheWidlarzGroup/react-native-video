@@ -138,7 +138,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
-    private String mCookiePolicy = "original";
+    private String mCookiePolicy = "all";
     private boolean controls;
     // \ End props
 
@@ -946,6 +946,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setCookiePolicy(String cookiePolicy) {
         mCookiePolicy = cookiePolicy;
+        DEFAULT_COOKIE_MANAGER.setCookiePolicy(this.getCookiePolicy());
+        CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
