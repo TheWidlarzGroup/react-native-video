@@ -46,6 +46,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
+    private static final String PROP_COOKIE_POLICY = "cookiePolicy";
     private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
@@ -221,6 +222,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPORT_BANDWIDTH, defaultBoolean = false)
     public void setReportBandwidth(final ReactExoplayerView videoView, final boolean reportBandwidth) {
         videoView.setReportBandwidth(reportBandwidth);
+    }
+
+    @ReactProp(name = PROP_COOKIE_POLICY)
+    public void setCookiePolicy(final ReactExoplayerView videoView, final String cookiePolicy) {
+        videoView.setCookiePolicy(cookiePolicy);
     }
 
     @ReactProp(name = PROP_SEEK)
