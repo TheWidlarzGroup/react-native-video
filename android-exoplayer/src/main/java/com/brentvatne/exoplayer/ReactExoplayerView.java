@@ -88,6 +88,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
+        DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
     private final VideoEventEmitter eventEmitter;
