@@ -123,6 +123,7 @@ public class ReactVideoView extends ScalableVideoView implements
     private boolean mRepeat = false;
     private boolean mPaused = false;
     private boolean mMuted = false;
+    private boolean mPreventsDisplaySleepDuringVideoPlayback = true;
     private float mVolume = 1.0f;
     private float mStereoPan = 0.0f;
     private float mProgressUpdateInterval = 250.0f;
@@ -211,7 +212,6 @@ public class ReactVideoView extends ScalableVideoView implements
         if (mMediaPlayer == null) {
             mMediaPlayerValid = false;
             mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.setOnVideoSizeChangedListener(this);
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnPreparedListener(this);
@@ -411,7 +411,7 @@ public class ReactVideoView extends ScalableVideoView implements
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
-        setKeepScreenOn(!mPaused);
+        setKeepScreenOn(!mPaused && mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     // reduces the volume based on stereoPan
@@ -420,6 +420,17 @@ public class ReactVideoView extends ScalableVideoView implements
         // only one decimal allowed
         BigDecimal roundRelativeVolume = new BigDecimal(relativeVolume).setScale(1, BigDecimal.ROUND_HALF_UP);
         return roundRelativeVolume.floatValue();
+    }
+
+    public void setPreventsDisplaySleepDuringVideoPlaybackModifier(final boolean preventsDisplaySleepDuringVideoPlayback) {
+        mPreventsDisplaySleepDuringVideoPlayback = preventsDisplaySleepDuringVideoPlayback;
+
+        if (!mMediaPlayerValid) {
+            return;
+        }
+
+        mMediaPlayer.setScreenOnWhilePlaying(mPreventsDisplaySleepDuringVideoPlayback);
+        setKeepScreenOn(mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     public void setMutedModifier(final boolean muted) {
@@ -518,6 +529,7 @@ public class ReactVideoView extends ScalableVideoView implements
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
         setMutedModifier(mMuted);
+        setPreventsDisplaySleepDuringVideoPlaybackModifier(mPreventsDisplaySleepDuringVideoPlayback);
         setProgressUpdateInterval(mProgressUpdateInterval);
         setRateModifier(mRate);
     }
@@ -713,7 +725,7 @@ public class ReactVideoView extends ScalableVideoView implements
         else {
             setSrc(mSrcUriString, mSrcType, mSrcIsNetwork, mSrcIsAsset, mRequestHeaders);
         }
-        setKeepScreenOn(true);
+        setKeepScreenOn(mPreventsDisplaySleepDuringVideoPlayback);
     }
 
     @Override
