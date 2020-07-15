@@ -141,7 +141,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
-    private String mCookiePolicy = "all";
+    private String mCookiePolicy = "original";
     private boolean controls;
     // \ End props
 
