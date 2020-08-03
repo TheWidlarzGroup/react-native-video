@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D7FF44FA35EBDF607F22EE8 /* Pods_RCTVideo_tvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C243CD89F88C6AAA4F5FDF7 /* Pods_RCTVideo_tvOS.framework */; };
+		6083890AA9C3EA8216A75072 /* Pods_RCTVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3DAAE70610E83C704FAB94F /* Pods_RCTVideo.framework */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
@@ -40,7 +42,10 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		5EB0BF92A83BFFF640E6B3DC /* Pods-RCTVideo-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTVideo-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-RCTVideo-tvOS/Pods-RCTVideo-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C243CD89F88C6AAA4F5FDF7 /* Pods_RCTVideo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCTVideo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		96E4E95045F0AC86072A0643 /* Pods-RCTVideo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTVideo.debug.xcconfig"; path = "Target Support Files/Pods-RCTVideo/Pods-RCTVideo.debug.xcconfig"; sourceTree = "<group>"; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
@@ -50,6 +55,9 @@
 		D1107C072110259000073188 /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideo.h; path = Video/RCTVideo.h; sourceTree = "<group>"; };
 		D1107C082110259000073188 /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideoPlayerViewController.m; path = Video/RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
 		D1107C092110259000073188 /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoManager.h; path = Video/RCTVideoManager.h; sourceTree = "<group>"; };
+		D720BC6A01A881936837EBBF /* Pods-RCTVideo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTVideo-tvOS.release.xcconfig"; path = "Target Support Files/Pods-RCTVideo-tvOS/Pods-RCTVideo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		E3DAAE70610E83C704FAB94F /* Pods_RCTVideo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCTVideo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA65B80A74794F8BB8AB88AF /* Pods-RCTVideo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTVideo.release.xcconfig"; path = "Target Support Files/Pods-RCTVideo/Pods-RCTVideo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6083890AA9C3EA8216A75072 /* Pods_RCTVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,12 +73,25 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D7FF44FA35EBDF607F22EE8 /* Pods_RCTVideo_tvOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0800F44F40BF2CAC2DA75ABE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				96E4E95045F0AC86072A0643 /* Pods-RCTVideo.debug.xcconfig */,
+				FA65B80A74794F8BB8AB88AF /* Pods-RCTVideo.release.xcconfig */,
+				5EB0BF92A83BFFF640E6B3DC /* Pods-RCTVideo-tvOS.debug.xcconfig */,
+				D720BC6A01A881936837EBBF /* Pods-RCTVideo-tvOS.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -81,6 +103,8 @@
 		49E995712048B4CE00EA7890 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E3DAAE70610E83C704FAB94F /* Pods_RCTVideo.framework */,
+				7C243CD89F88C6AAA4F5FDF7 /* Pods_RCTVideo_tvOS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -100,6 +124,7 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 				641E28441F0EEC8500443AF6 /* libRCTVideo.a */,
 				49E995712048B4CE00EA7890 /* Frameworks */,
+				0800F44F40BF2CAC2DA75ABE /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -110,6 +135,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTVideo" */;
 			buildPhases = (
+				B33CB45B0F5B9679D3B3F340 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -127,6 +153,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 641E284C1F0EEC8500443AF6 /* Build configuration list for PBXNativeTarget "RCTVideo-tvOS" */;
 			buildPhases = (
+				E48A8D016D7DCCD78269F990 /* [CP] Check Pods Manifest.lock */,
 				641E28401F0EEC8500443AF6 /* Sources */,
 				641E28411F0EEC8500443AF6 /* Frameworks */,
 				641E28421F0EEC8500443AF6 /* CopyFiles */,
@@ -175,6 +202,53 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B33CB45B0F5B9679D3B3F340 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RCTVideo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E48A8D016D7DCCD78269F990 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RCTVideo-tvOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -279,6 +353,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 96E4E95045F0AC86072A0643 /* Pods-RCTVideo.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -294,6 +369,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA65B80A74794F8BB8AB88AF /* Pods-RCTVideo.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -309,6 +385,7 @@
 		};
 		641E284A1F0EEC8500443AF6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5EB0BF92A83BFFF640E6B3DC /* Pods-RCTVideo-tvOS.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -327,6 +404,7 @@
 		};
 		641E284B1F0EEC8500443AF6 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D720BC6A01A881936837EBBF /* Pods-RCTVideo-tvOS.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;

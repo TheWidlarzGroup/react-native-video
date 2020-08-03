@@ -1,0 +1,16 @@
+PODS:
+  - Mux-Stats-Core (2.2.2)
+
+DEPENDENCIES:
+  - Mux-Stats-Core (~> 2.0)
+
+SPEC REPOS:
+  trunk:
+    - Mux-Stats-Core
+
+SPEC CHECKSUMS:
+  Mux-Stats-Core: 16b58f39b40a5277ab0742f2efaf544cee98792d
+
+PODFILE CHECKSUM: 11151c8de4f694d14d6cffe4ef71bf70e05c6e11
+
+COCOAPODS: 1.9.3

@@ -1,0 +1,18 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '10.0'
+
+target 'RCTVideo' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for RCTVideo
+  pod "Mux-Stats-Core", "~> 2.0"
+end
+
+target 'RCTVideo-tvOS' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for RCTVideo-tvOS
+  pod "Mux-Stats-Core", "~> 2.0"
+end
