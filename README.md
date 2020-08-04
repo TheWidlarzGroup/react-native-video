@@ -61,7 +61,7 @@ Then follow the instructions for your platform to link react-native-video into y
 
 **React Native 0.60 and above**
 
-Run `pod install` in the `ios` directory. Linking is not required in React Native 0.60 and above.
+Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 
 **React Native 0.59 and below**
 
@@ -277,6 +277,7 @@ var styles = StyleSheet.create({
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
@@ -297,6 +298,8 @@ var styles = StyleSheet.create({
 * [playWhenInactive](#playwheninactive)
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
+* [preferredForwardBufferDuration](#preferredForwardBufferDuration)
+* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
@@ -308,6 +311,7 @@ var styles = StyleSheet.create({
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
+* [trackId](#trackId)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
 
@@ -386,6 +390,11 @@ bufferConfig={{
 
 Platforms: Android ExoPlayer
 
+#### currentPlaybackTime
+When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
+
+Platforms: Android ExoPlayer, iOS
+
 #### controls
 Determines whether to show player controls.
 * ** false (default)** - Don't show player controls
@@ -447,7 +456,7 @@ Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS, Android Exoplayer
+Platforms: iOS
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -460,14 +469,10 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Note on Android ExoPlayer, the full-screen mode by default goes into landscape mode. Exiting from the full-screen mode will display the video in Initial orientation.
-
 Platforms: iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
-
-To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```
@@ -595,6 +600,20 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: all
+
+#### preferredForwardBufferDuration
+The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the [preferredForwardBufferDuration](https://developer.apple.com/documentation/avfoundation/avplayeritem/1643630-preferredforwardbufferduration) instance property on AVPlayerItem.
+
+Default: 0
+
+Platforms: iOS
+
+#### preventsDisplaySleepDuringVideoPlayback
+Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
+
+Default: true
+
+Platforms: iOS, Android
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
@@ -830,6 +849,11 @@ textTracks={[
 
 
 Platforms: Android ExoPlayer, iOS
+
+#### trackId
+Configure an identifier for the video stream to link the playback context to the events emitted.
+
+Platforms: Android ExoPlayer
 
 #### useTextureView
 Controls whether to output to a TextureView or SurfaceView.
