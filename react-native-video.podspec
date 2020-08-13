@@ -9,8 +9,8 @@ Pod::Spec.new do |s|
   s.description    = package['description']
   s.license        = package['license']
   s.author         = package['author']
-  s.homepage       = 'https://github.com/brentvatne/react-native-video'
-  s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
+  s.homepage       = 'https://github.com/react-native-community/react-native-video'
+  s.source       = { :git => "https://github.com/react-native-community/react-native-video.git", :tag => "#{s.version}" }
 
   s.ios.deployment_target = "8.0"
   s.tvos.deployment_target = "9.0"
