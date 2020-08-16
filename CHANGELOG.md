@@ -1,7 +1,7 @@
 ## Changelog
 
 ### next
-- Basic support for DRM on iOS and Android [#](https://github.com/react-native-community/react-native-video/pull/)
+- Basic support for DRM on iOS and Android [#2115](https://github.com/react-native-community/react-native-video/pull/2115)
 
 ### Version 5.1.0-alpha6 [WIP]
 
