@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 5.1.0-alpha8
+
+- Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#2116](https://github.com/react-native-community/react-native-video/pull/2116)
+
 ### Version 5.1.0-alpha7
 
 - Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
