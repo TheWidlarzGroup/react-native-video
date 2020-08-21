@@ -1169,6 +1169,10 @@ class ReactExoplayerView extends FrameLayout implements
         trackSelector.setParameters(selectionParameters);
     }
 
+     public void setFontSizeTrack(int fontSizeTrack) {
+        exoPlayerView.setFontSizeTrack(fontSizeTrack);
+    }
+
     private int getGroupIndexForDefaultLocale(TrackGroupArray groups) {
         if (groups.length == 0){
             return C.INDEX_UNSET;

@@ -70,7 +70,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
-
+    private static final String PROP_FRONT_SIZE_TRACK = "fontSizeTrack";
+    
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -271,6 +272,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_RATE)
     public void setRate(final ReactExoplayerView videoView, final float rate) {
         videoView.setRateModifier(rate);
+    }
+    
+    @ReactProp(name = PROP_FRONT_SIZE_TRACK, defaultInt = 30)
+    public void setFontSizeTrack(final ReactExoplayerView videoView, final int fontSizeTrack) {
+        videoView.setFontSizeTrack(fontSizeTrack);
     }
 
     @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
