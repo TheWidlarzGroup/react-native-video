@@ -86,7 +86,7 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     public void setFontSizeTrack(int fontSizeTrack) {
-        subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, fontSizeTrack );
+        subtitleLayout.setFixedTextSize(2, fontSizeTrack );
     }
 
     private void setVideoView() {
