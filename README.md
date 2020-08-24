@@ -284,6 +284,7 @@ var styles = StyleSheet.create({
 * [fullscreen](#fullscreen)
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
+* [fontSizeTrack](#fontSizeTrack)
 * [headers](#headers)
 * [hideShutterView](#hideshutterview)
 * [id](#id)
@@ -475,6 +476,11 @@ Platforms: iOS
 * **portrait**
 
 Platforms: iOS
+
+#### fontSizeTrack
+prop for setting fontSize of textTracks in Android 
+
+Platforms: Android
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
