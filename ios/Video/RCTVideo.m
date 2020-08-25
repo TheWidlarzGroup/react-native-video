@@ -1764,7 +1764,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
   }
   _loadingRequest = loadingRequest;
   NSURL *url = loadingRequest.request.URL;
-  NSString *contentId = url.host;
+  NSString *contentId = [url.absoluteString stringByReplacingOccurrencesOfString:@"skd://" withString:@""];
   if (self->_drm != nil) {
     NSString *contentIdOverride = (NSString *)[self->_drm objectForKey:@"contentId"];
     if (contentIdOverride != nil) {
@@ -1782,7 +1782,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
           }
           
           if (certificateData != nil) {
-            NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *contentIdData = [NSData dataWithBytes: [contentId cStringUsingEncoding:NSUTF8StringEncoding] length:[contentId lengthOfBytesUsingEncoding:NSUTF8StringEncoding]];
             AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
             if (dataRequest != nil) {
               NSError *spcError = nil;
