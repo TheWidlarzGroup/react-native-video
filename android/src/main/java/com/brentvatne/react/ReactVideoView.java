@@ -568,6 +568,7 @@ public class ReactVideoView extends ScalableVideoView implements
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
         event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
+        event.putDouble(EVENT_PROP_TARGET, getId());
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         applyModifiers();
