@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 5.1.0-alpha9
+
+- Fixed Android not returning `target` prop from onLoad [#2126](https://github.com/react-native-community/react-native-video/pull/2126)
+
 ### Version 5.1.0-alpha8
 
 - Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#2116](https://github.com/react-native-community/react-native-video/pull/2116)
