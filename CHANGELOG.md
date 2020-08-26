@@ -2,6 +2,7 @@
 
 ### Version 4.4.4
 * Handle racing conditions when props are setted on exoplayer
+* Fix UWP ReactVideoView cleanup on dispose [#2045](https://github.com/react-native-community/react-native-video/issues/2045)
 
 ### Version 4.4.3
 * Fix mute/unmute when controls are present (iOS) [#1654](https://github.com/react-native-community/react-native-video/pull/1654)
