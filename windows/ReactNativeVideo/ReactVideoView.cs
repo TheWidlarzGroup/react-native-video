@@ -171,6 +171,7 @@ namespace ReactNativeVideo
                 mediaPlayer.PlaybackSession.BufferingStarted -= OnBufferingStarted;
                 mediaPlayer.PlaybackSession.BufferingEnded -= OnBufferingEnded;
                 MediaPlayer.PlaybackSession.SeekCompleted -= OnSeekCompleted;
+                mediaPlayer.Dispose();
             }
 
             _timer.Stop();
