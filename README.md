@@ -299,6 +299,7 @@ var styles = StyleSheet.create({
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
 * [preferredForwardBufferDuration](#preferredForwardBufferDuration)
+* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [pitchAlgorithm](#pitchAlgorithm)
@@ -415,6 +416,11 @@ Determines whether video audio should override background music/audio in Android
 
 Platforms: Android Exoplayer
 
+### DRM
+To setup DRM please follow [this guide](./DRM.md)
+
+Platforms: Android Exoplayer, iOS
+
 #### filter
 Add video filter
 * **FilterType.NONE (default)** - No Filter
@@ -456,7 +462,7 @@ Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS, Android Exoplayer
+Platforms: iOS
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -469,14 +475,10 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Note on Android ExoPlayer, the full-screen mode by default goes into landscape mode. Exiting from the full-screen mode will display the video in Initial orientation.
-
 Platforms: iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
-
-To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```
@@ -611,6 +613,13 @@ The duration the player should buffer media from the network ahead of the playhe
 Default: 0
 
 Platforms: iOS
+
+#### preventsDisplaySleepDuringVideoPlayback
+Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
+
+Default: true
+
+Platforms: iOS, Android
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
@@ -807,6 +816,17 @@ source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
 
 Platforms: iOS
+
+##### Explicit mimetype for the stream
+
+Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object.
+Sometimes is needed when URL extension does not match with the mimetype that you are expecting, as seen on the next example. (Extension is .ism -smooth streaming- but file served is on format mpd -mpeg dash-)
+
+Example:
+```
+source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
+type: 'mpd' }}
+```
 
 ###### Other protocols
 

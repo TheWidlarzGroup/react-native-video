@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, UIManager, findNodeHandle, Dimensions } from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
+import DRMType from './DRMType';
 import VideoResizeMode from './VideoResizeMode.js';
 
 const styles = StyleSheet.create({
@@ -12,7 +13,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType, FilterType };
+export { TextTrackType, FilterType, DRMType };
 
 export default class Video extends Component {
 
@@ -21,34 +22,7 @@ export default class Video extends Component {
 
     this.state = {
       showPoster: !!props.poster,
-      androidFullScreen: false,
-      videoContainerLayout_x: 0,
-      videoContainerLayout_y: 0,
     };
-    this.getDimension();
-  }
-
-  /**
-   * @description this is will set the width and height needs to be considered for full screen
-   */
-  getDimension() {
-    if (Dimensions.get('window').width < Dimensions.get('window').height) {
-      this.width = Math.round(Dimensions.get('window').height);
-      this.height = Math.round(Dimensions.get('window').width);
-    }
-    else {
-      this.width = Math.round(Dimensions.get('window').width);
-      this.height = Math.round(Dimensions.get('window').height);
-    }
-  }
-
-  componentDidMount() {
-    UIManager.measure(findNodeHandle(this._videoContainer), (x, y) => {
-      this.setState({
-        videoContainerLayout_x: x,
-        videoContainerLayout_y: y,
-      });
-    });
   }
 
   setNativeProps(nativeProps) {
@@ -172,7 +146,6 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillPresent = (event) => {
-    Platform.OS === 'android' && this.setState({ androidFullScreen: true });
     if (this.props.onFullscreenPlayerWillPresent) {
       this.props.onFullscreenPlayerWillPresent(event.nativeEvent);
     }
@@ -185,7 +158,6 @@ export default class Video extends Component {
   };
 
   _onFullscreenPlayerWillDismiss = (event) => {
-    Platform.OS === 'android' && this.setState({ androidFullScreen: false });
     if (this.props.onFullscreenPlayerWillDismiss) {
       this.props.onFullscreenPlayerWillDismiss(event.nativeEvent);
     }
@@ -261,6 +233,26 @@ export default class Video extends Component {
     }
   };
 
+  _onGetLicense = (event) => {
+    if (this.props.drm && this.props.drm.getLicense instanceof Function) {
+      const data = event.nativeEvent;
+      if (data && data.spc) {
+        const getLicenseOverride = this.props.drm.getLicense(data.spc, data.contentId, data.spcBase64, this.props);
+        const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
+        getLicensePromise.then((result => {
+          if (result !== undefined) {
+            NativeModules.VideoManager.setLicenseResult(result, findNodeHandle(this._root));
+          } else {
+            NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('Empty license result', findNodeHandle(this._root));
+          }
+        })).catch((error) => {
+          NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
+        });
+      } else {
+        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError("No spc received", findNodeHandle(this._root));
+      }
+    }
+  }
   getViewManagerConfig = viewManagerName => {
     if (!NativeModules.UIManager.getViewManagerConfig) {
       return NativeModules.UIManager[viewManagerName];
@@ -333,6 +325,7 @@ export default class Video extends Component {
       onPlaybackRateChange: this._onPlaybackRateChange,
       onAudioFocusChanged: this._onAudioFocusChanged,
       onAudioBecomingNoisy: this._onAudioBecomingNoisy,
+      onGetLicense: nativeProps.drm && nativeProps.drm.getLicense && this._onGetLicense,
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
     });
@@ -342,25 +335,8 @@ export default class Video extends Component {
       resizeMode: this.props.posterResizeMode || 'contain',
     };
 
-    //androidFullScreen property will only impact on android. It will be always false for iOS.
-    const videoStyle = this.state.androidFullScreen ? {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: this.width,
-      height: this.height,
-      backgroundColor: '#ffffff',
-      justifyContent: 'center',
-      zIndex: 99999,
-      marginTop: -1 * (this.state.videoContainerLayout_y ? parseFloat(this.state.videoContainerLayout_y) : 0), //margin: 0 - is not working properly. So, updated all the margin individually with 0.
-      marginLeft: -1 * (this.state.videoContainerLayout_x ? parseFloat(this.state.videoContainerLayout_x) : 0),
-    } : {};
-
     return (
-      <View ref={(videoContainer) => {
-        this._videoContainer = videoContainer;
-        return videoContainer;
-        }} style={[nativeProps.style, videoStyle]}>
+      <View style={nativeProps.style}>
         <RCTVideo
           ref={this._assignRoot}
           {...nativeProps}
@@ -425,6 +401,16 @@ Video.propTypes = {
     // Opaque type returned by require('./video.mp4')
     PropTypes.number,
   ]),
+  drm: PropTypes.shape({
+    type: PropTypes.oneOf([
+      DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY
+    ]),
+    licenseServer: PropTypes.string,
+    headers: PropTypes.shape({}),
+    base64Certificate: PropTypes.bool,
+    certificateUrl: PropTypes.string,
+    getLicense: PropTypes.func,
+  }),
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
   resizeMode: PropTypes.string,
