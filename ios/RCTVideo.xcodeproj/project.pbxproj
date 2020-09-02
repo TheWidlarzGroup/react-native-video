@@ -9,20 +9,20 @@
 /* Begin PBXBuildFile section */
 		C8697758250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */; };
 		C8697759250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */; };
+		C8697762250015720004C5DB /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775D250015720004C5DB /* libstdc++.tbd */; };
+		C8697763250015720004C5DB /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775D250015720004C5DB /* libstdc++.tbd */; };
+		C8697764250015720004C5DB /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775E250015720004C5DB /* libiconv.tbd */; };
+		C8697765250015720004C5DB /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775E250015720004C5DB /* libiconv.tbd */; };
+		C8697766250015720004C5DB /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775F250015720004C5DB /* libc++.tbd */; };
+		C8697767250015720004C5DB /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C869775F250015720004C5DB /* libc++.tbd */; };
+		C8697768250015720004C5DB /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697760250015720004C5DB /* libbz2.tbd */; };
+		C8697769250015720004C5DB /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697760250015720004C5DB /* libbz2.tbd */; };
+		C869776A250015720004C5DB /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697761250015720004C5DB /* libz.tbd */; };
+		C869776B250015720004C5DB /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697761250015720004C5DB /* libz.tbd */; };
 		C87F2E3424FFAEBC0096197E /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3324FFAEBC0096197E /* libcrypto.a */; };
 		C87F2E3A24FFAF140096197E /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3524FFAF130096197E /* libssl.a */; };
 		C87F2E3B24FFAF140096197E /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3524FFAF130096197E /* libssl.a */; };
-		C87F2E3C24FFAF140096197E /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3624FFAF130096197E /* libc++.tbd */; };
-		C87F2E3D24FFAF140096197E /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3624FFAF130096197E /* libc++.tbd */; };
-		C87F2E3E24FFAF140096197E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3724FFAF140096197E /* libz.tbd */; };
-		C87F2E3F24FFAF140096197E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3724FFAF140096197E /* libz.tbd */; };
-		C87F2E4024FFAF140096197E /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3824FFAF140096197E /* libstdc++.tbd */; };
-		C87F2E4124FFAF140096197E /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3824FFAF140096197E /* libstdc++.tbd */; };
-		C87F2E4224FFAF140096197E /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3924FFAF140096197E /* libiconv.tbd */; };
-		C87F2E4324FFAF140096197E /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3924FFAF140096197E /* libiconv.tbd */; };
-		C87F2E4424FFAF1B0096197E /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3224FFAEAD0096197E /* libbz2.tbd */; };
 		C87F2E4524FFAF1B0096197E /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3324FFAEBC0096197E /* libcrypto.a */; };
-		C87F2E4624FFAF1D0096197E /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3224FFAEAD0096197E /* libbz2.tbd */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
@@ -67,13 +67,13 @@
 		C86977552500146D0004C5DB /* FFAVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFAVParser.h; sourceTree = "<group>"; };
 		C86977562500146D0004C5DB /* OneAudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OneAudioPlayer.h; sourceTree = "<group>"; };
 		C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = tvOSAVPlayerTouch.framework; sourceTree = "<group>"; };
-		C87F2E3224FFAEAD0096197E /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
+		C869775D250015720004C5DB /* libstdc++.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
+		C869775E250015720004C5DB /* libiconv.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		C869775F250015720004C5DB /* libc++.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		C8697760250015720004C5DB /* libbz2.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
+		C8697761250015720004C5DB /* libz.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		C87F2E3324FFAEBC0096197E /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		C87F2E3524FFAF130096197E /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
-		C87F2E3624FFAF130096197E /* libc++.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
-		C87F2E3724FFAF140096197E /* libz.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		C87F2E3824FFAF140096197E /* libstdc++.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
-		C87F2E3924FFAF140096197E /* libiconv.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 		D1107C032110259000073188 /* UIView+FindUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+FindUIViewController.m"; path = "Video/UIView+FindUIViewController.m"; sourceTree = "<group>"; };
@@ -90,14 +90,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C87F2E4224FFAF140096197E /* libiconv.tbd in Frameworks */,
-				C87F2E4624FFAF1D0096197E /* libbz2.tbd in Frameworks */,
+				C8697766250015720004C5DB /* libc++.tbd in Frameworks */,
+				C869776A250015720004C5DB /* libz.tbd in Frameworks */,
+				C8697768250015720004C5DB /* libbz2.tbd in Frameworks */,
+				C8697762250015720004C5DB /* libstdc++.tbd in Frameworks */,
 				C8697758250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */,
-				C87F2E3C24FFAF140096197E /* libc++.tbd in Frameworks */,
-				C87F2E3E24FFAF140096197E /* libz.tbd in Frameworks */,
-				C87F2E4024FFAF140096197E /* libstdc++.tbd in Frameworks */,
 				C87F2E3A24FFAF140096197E /* libssl.a in Frameworks */,
 				C87F2E3424FFAEBC0096197E /* libcrypto.a in Frameworks */,
+				C8697764250015720004C5DB /* libiconv.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,14 +105,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C87F2E4124FFAF140096197E /* libstdc++.tbd in Frameworks */,
-				C87F2E3D24FFAF140096197E /* libc++.tbd in Frameworks */,
+				C8697767250015720004C5DB /* libc++.tbd in Frameworks */,
+				C869776B250015720004C5DB /* libz.tbd in Frameworks */,
+				C8697769250015720004C5DB /* libbz2.tbd in Frameworks */,
+				C8697763250015720004C5DB /* libstdc++.tbd in Frameworks */,
 				C8697759250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */,
-				C87F2E3F24FFAF140096197E /* libz.tbd in Frameworks */,
-				C87F2E4424FFAF1B0096197E /* libbz2.tbd in Frameworks */,
 				C87F2E3B24FFAF140096197E /* libssl.a in Frameworks */,
-				C87F2E4324FFAF140096197E /* libiconv.tbd in Frameworks */,
 				C87F2E4524FFAF1B0096197E /* libcrypto.a in Frameworks */,
+				C8697765250015720004C5DB /* libiconv.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,13 +174,13 @@
 			children = (
 				C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */,
 				C869774D2500146D0004C5DB /* AVPlayerTouch */,
-				C87F2E3224FFAEAD0096197E /* libbz2.tbd */,
 				C87F2E3324FFAEBC0096197E /* libcrypto.a */,
-				C87F2E3624FFAF130096197E /* libc++.tbd */,
-				C87F2E3924FFAF140096197E /* libiconv.tbd */,
 				C87F2E3524FFAF130096197E /* libssl.a */,
-				C87F2E3824FFAF140096197E /* libstdc++.tbd */,
-				C87F2E3724FFAF140096197E /* libz.tbd */,
+				C8697760250015720004C5DB /* libbz2.tbd */,
+				C869775F250015720004C5DB /* libc++.tbd */,
+				C869775E250015720004C5DB /* libiconv.tbd */,
+				C869775D250015720004C5DB /* libstdc++.tbd */,
+				C8697761250015720004C5DB /* libz.tbd */,
 			);
 			path = "ffmpeg-avplayer";
 			sourceTree = "<group>";
