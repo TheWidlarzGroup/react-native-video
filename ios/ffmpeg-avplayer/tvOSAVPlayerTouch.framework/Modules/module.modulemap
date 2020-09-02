@@ -1,0 +1,6 @@
+framework module tvOSAVPlayerTouch {
+  umbrella header "tvOSAVPlayerTouch.h"
+
+  export *
+  module * { export * }
+}

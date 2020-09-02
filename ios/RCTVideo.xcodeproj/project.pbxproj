@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C8697758250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */; };
+		C8697759250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */; };
 		C87F2E3424FFAEBC0096197E /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3324FFAEBC0096197E /* libcrypto.a */; };
 		C87F2E3A24FFAF140096197E /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3524FFAF130096197E /* libssl.a */; };
 		C87F2E3B24FFAF140096197E /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C87F2E3524FFAF130096197E /* libssl.a */; };
@@ -55,6 +57,16 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C869774E2500146D0004C5DB /* AVPLicense.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVPLicense.h; sourceTree = "<group>"; };
+		C869774F2500146D0004C5DB /* CustomizedAVSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomizedAVSource.h; sourceTree = "<group>"; };
+		C86977502500146D0004C5DB /* NativeAVPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeAVPlayerController.h; sourceTree = "<group>"; };
+		C86977512500146D0004C5DB /* AVPlayerTouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVPlayerTouch.h; sourceTree = "<group>"; };
+		C86977522500146D0004C5DB /* AVOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVOptions.h; sourceTree = "<group>"; };
+		C86977532500146D0004C5DB /* AVPErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVPErrors.h; sourceTree = "<group>"; };
+		C86977542500146D0004C5DB /* FFAVPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFAVPlayerController.h; sourceTree = "<group>"; };
+		C86977552500146D0004C5DB /* FFAVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFAVParser.h; sourceTree = "<group>"; };
+		C86977562500146D0004C5DB /* OneAudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OneAudioPlayer.h; sourceTree = "<group>"; };
+		C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = tvOSAVPlayerTouch.framework; sourceTree = "<group>"; };
 		C87F2E3224FFAEAD0096197E /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		C87F2E3324FFAEBC0096197E /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		C87F2E3524FFAF130096197E /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
@@ -80,6 +92,7 @@
 			files = (
 				C87F2E4224FFAF140096197E /* libiconv.tbd in Frameworks */,
 				C87F2E4624FFAF1D0096197E /* libbz2.tbd in Frameworks */,
+				C8697758250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */,
 				C87F2E3C24FFAF140096197E /* libc++.tbd in Frameworks */,
 				C87F2E3E24FFAF140096197E /* libz.tbd in Frameworks */,
 				C87F2E4024FFAF140096197E /* libstdc++.tbd in Frameworks */,
@@ -94,6 +107,7 @@
 			files = (
 				C87F2E4124FFAF140096197E /* libstdc++.tbd in Frameworks */,
 				C87F2E3D24FFAF140096197E /* libc++.tbd in Frameworks */,
+				C8697759250014AE0004C5DB /* tvOSAVPlayerTouch.framework in Frameworks */,
 				C87F2E3F24FFAF140096197E /* libz.tbd in Frameworks */,
 				C87F2E4424FFAF1B0096197E /* libbz2.tbd in Frameworks */,
 				C87F2E3B24FFAF140096197E /* libssl.a in Frameworks */,
@@ -139,9 +153,27 @@
 			);
 			sourceTree = "<group>";
 		};
+		C869774D2500146D0004C5DB /* AVPlayerTouch */ = {
+			isa = PBXGroup;
+			children = (
+				C869774E2500146D0004C5DB /* AVPLicense.h */,
+				C869774F2500146D0004C5DB /* CustomizedAVSource.h */,
+				C86977502500146D0004C5DB /* NativeAVPlayerController.h */,
+				C86977512500146D0004C5DB /* AVPlayerTouch.h */,
+				C86977522500146D0004C5DB /* AVOptions.h */,
+				C86977532500146D0004C5DB /* AVPErrors.h */,
+				C86977542500146D0004C5DB /* FFAVPlayerController.h */,
+				C86977552500146D0004C5DB /* FFAVParser.h */,
+				C86977562500146D0004C5DB /* OneAudioPlayer.h */,
+			);
+			path = AVPlayerTouch;
+			sourceTree = "<group>";
+		};
 		C87F2E3124FFAE850096197E /* ffmpeg-avplayer */ = {
 			isa = PBXGroup;
 			children = (
+				C8697757250014AE0004C5DB /* tvOSAVPlayerTouch.framework */,
+				C869774D2500146D0004C5DB /* AVPlayerTouch */,
 				C87F2E3224FFAEAD0096197E /* libbz2.tbd */,
 				C87F2E3324FFAEBC0096197E /* libcrypto.a */,
 				C87F2E3624FFAF130096197E /* libc++.tbd */,
@@ -331,6 +363,10 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ffmpeg-avplayer",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -349,6 +385,10 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ffmpeg-avplayer",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -373,6 +413,10 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ffmpeg-avplayer",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -396,6 +440,10 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/ffmpeg-avplayer",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
