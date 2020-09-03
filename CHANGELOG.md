@@ -2,7 +2,7 @@
 
 ### Version 5.1.0-alpha9
 
-- Add arm64 support [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
+- Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
 
 ### Version 5.1.0-alpha8
 
