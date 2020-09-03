@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 5.1.0-alpha9
+
+- Add arm64 support (TODO: update after PR is created)
+
 ### Version 5.1.0-alpha8
 
 - Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#2116](https://github.com/react-native-community/react-native-video/pull/2116)
