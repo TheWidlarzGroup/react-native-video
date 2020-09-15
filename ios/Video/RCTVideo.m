@@ -364,53 +364,62 @@ static int const RCTVideoUnset = -1;
     
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:self->_source withCallback:^(AVPlayerItem * playerItem) {
-      self->_playerItem = playerItem;
-      _playerItem = playerItem;
-      [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
-      [self addPlayerItemObservers];
-      [self setFilter:self->_filterName];
-      [self setMaxBitRate:self->_maxBitRate];
-      
-      [_player pause];
-        
-      if (_playbackRateObserverRegistered) {
-        [_player removeObserver:self forKeyPath:playbackRate context:nil];
-        _playbackRateObserverRegistered = NO;
-      }
-      if (self->_isExternalPlaybackActiveObserverRegistered) {
-        [self->_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
-        self->_isExternalPlaybackActiveObserverRegistered = NO;
-      }
-      
-      self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
-      self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-      
-      [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-      self->_playbackRateObserverRegistered = YES;
-      
-      [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
-      self->_isExternalPlaybackActiveObserverRegistered = YES;
-      
-      [self addPlayerTimeObserver];
-      if (@available(iOS 10.0, *)) {
-        [self setAutomaticallyWaitsToMinimizeStalling:_automaticallyWaitsToMinimizeStalling];
-      }
-
-      //Perform on next run loop, otherwise onVideoLoadStart is nil
-      if (self.onVideoLoadStart) {
-        id uri = [self->_source objectForKey:@"uri"];
-        id type = [self->_source objectForKey:@"type"];
-        self.onVideoLoadStart(@{@"src": @{
-                                    @"uri": uri ? uri : [NSNull null],
-                                    @"type": type ? type : [NSNull null],
-                                    @"isNetwork": [NSNumber numberWithBool:(bool)[self->_source objectForKey:@"isNetwork"]]},
-                                @"drm": self->_drm ? self->_drm : [NSNull null],
-                                @"target": self.reactTag
-                                });
-      }
+      [self setupPlayerItem:playerItem forSource:source withPlayer:nil];
     }];
   });
   _videoLoadStarted = YES;
+}
+
+-(void) setupPlayerItem:(AVPlayerItem *) playerItem forSource:(NSDictionary *) source withPlayer:(AVPlayer *) player {
+  self->_playerItem = playerItem;
+  _playerItem = playerItem;
+  [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
+  [self addPlayerItemObservers];
+  [self setFilter:self->_filterName];
+  [self setMaxBitRate:self->_maxBitRate];
+  
+  [_player pause];
+    
+  if (_playbackRateObserverRegistered) {
+    [_player removeObserver:self forKeyPath:playbackRate context:nil];
+    _playbackRateObserverRegistered = NO;
+  }
+  if (self->_isExternalPlaybackActiveObserverRegistered) {
+    [self->_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
+    self->_isExternalPlaybackActiveObserverRegistered = NO;
+  }
+  
+  if (player == nil) {
+    self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
+  } else {
+    self->_player = player;
+  }
+
+  self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  
+  [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+  self->_playbackRateObserverRegistered = YES;
+  
+  [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
+  self->_isExternalPlaybackActiveObserverRegistered = YES;
+  
+  [self addPlayerTimeObserver];
+  if (@available(iOS 10.0, *)) {
+    [self setAutomaticallyWaitsToMinimizeStalling:_automaticallyWaitsToMinimizeStalling];
+  }
+
+  //Perform on next run loop, otherwise onVideoLoadStart is nil
+  if (self.onVideoLoadStart) {
+    id uri = [self->_source objectForKey:@"uri"];
+    id type = [self->_source objectForKey:@"type"];
+    self.onVideoLoadStart(@{@"src": @{
+                                @"uri": uri ? uri : [NSNull null],
+                                @"type": type ? type : [NSNull null],
+                                @"isNetwork": [NSNumber numberWithBool:(bool)[self->_source objectForKey:@"isNetwork"]]},
+                            @"drm": self->_drm ? self->_drm : [NSNull null],
+                            @"target": self.reactTag
+                            });
+  }
 }
 
 - (void)setDrm:(NSDictionary *)drm {
