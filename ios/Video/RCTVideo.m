@@ -932,9 +932,6 @@ static int const RCTVideoUnset = -1;
    
     AVAudioSession *session = [AVAudioSession sharedInstance];
     [session setActive:FALSE error:nil];
-    // // [session setActive:NO]
-    // [session setActive:NO];
-    // // [session setActive:false]
   } else {
     AVAudioSession *session = [AVAudioSession sharedInstance];
     AVAudioSessionCategory category = nil;
