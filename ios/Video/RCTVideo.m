@@ -963,7 +963,6 @@ static int const RCTVideoUnset = -1;
       [_player play];
       [_player setRate:_rate];
     }
-    [session setActive:TRUE error:nil];
     [_player setRate:_rate];
   }
 
