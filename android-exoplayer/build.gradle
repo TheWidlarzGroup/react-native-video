@@ -22,12 +22,19 @@ def exoplayerVersion = rootProject.ext.exoplayerVersion
 
 dependencies {
     //noinspection GradleDynamicVersion
-    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation("com.google.android.exoplayer:exoplayer:$exoplayerVersion") {
-        exclude group: 'com.android.support'
-    }
+    implementation project(':ReactAndroid')
+//    implementation("com.google.android.exoplayer:exoplayer:$exoplayerVersion") {
+//        exclude group: 'com.android.support'
+//    }
 
-    implementation "com.google.android.exoplayer:extension-mediasession:$exoplayerVersion"
+    implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
+        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    }
+    implementation "com.github.DiceTechnology.doris-android:extension-ima:$exodoris_version"
+
+    implementation("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion") {
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
+    }
 
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.0.0"
@@ -37,12 +44,13 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     implementation("com.google.android.exoplayer:extension-okhttp:$exoplayerVersion") {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+        exclude group: "com.squareup.okhttp3", module: "okhttp"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
     }
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    implementation 'com.mux:com.mux.stats.muxcore:2.3.2'
-    implementation 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
+//    implementation 'com.mux:com.mux.stats.muxcore:2.3.2'
+//    implementation 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
 
-    implementation project(path: ':dice-shield-android')
+    implementation project(':dice-shield-android')
 }
