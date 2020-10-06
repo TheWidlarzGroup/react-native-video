@@ -1,6 +1,5 @@
 package com.brentvatne.react;
 
-import com.brentvatne.exoplayer.ReactExoplayerViewManager;
 import com.brentvatne.exoplayer.ReactTVExoplayerViewManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -40,6 +39,6 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.<ViewManager>singletonList(type == PlayerType.MOBILE ? new ReactExoplayerViewManager() : new ReactTVExoplayerViewManager(reactContext));
+        return Collections.<ViewManager>singletonList(new ReactTVExoplayerViewManager(reactContext));
     }
 }
