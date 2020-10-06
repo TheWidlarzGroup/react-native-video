@@ -1,4 +1,4 @@
-package com.brentvatne.exoplayer;
+xspackage com.brentvatne.exoplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.source.hls.playlist.HlsMediaPlaylist;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.TextOutput;
 import com.google.common.collect.ImmutableList;
+import com.google.android.exoplayer2.text.TextRenderer;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 
