@@ -23,9 +23,6 @@ def exoplayerVersion = rootProject.ext.exoplayerVersion
 dependencies {
     //noinspection GradleDynamicVersion
     implementation project(':ReactAndroid')
-//    implementation("com.google.android.exoplayer:exoplayer:$exoplayerVersion") {
-//        exclude group: 'com.android.support'
-//    }
 
     implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
@@ -48,9 +45,6 @@ dependencies {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
     }
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
-
-//    implementation 'com.mux:com.mux.stats.muxcore:2.3.2'
-//    implementation 'com.mux:com.mux.stats.sdk-r2.9.6:2.3.4'
 
     implementation project(':dice-shield-android')
 }
