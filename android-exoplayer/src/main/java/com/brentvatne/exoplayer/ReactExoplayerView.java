@@ -567,9 +567,15 @@ class ReactExoplayerView extends FrameLayout implements
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
+<<<<<<< HEAD
                         .setLoadErrorHandlingPolicy(
                                 config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                         ).createMediaSource(MediaItem.fromUri(uri));
+=======
+                 .setLoadErrorHandlingPolicy(
+                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                ).createMediaSource(MediaItem.fromUri(uri));
+>>>>>>> f1715d0b ([Sagar] fixed crash)
             case C.TYPE_OTHER:
 
               if(key != null && ivParam != null){
