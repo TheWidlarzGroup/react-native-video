@@ -1,5 +1,8 @@
 ## Changelog
 
+
+- Fixed KVO crash on iOS when dismissing PlayerViewController [#1932](https://github.com/react-native-video/react-native-video/pull/1932)
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
