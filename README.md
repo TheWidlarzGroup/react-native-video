@@ -61,7 +61,7 @@ Then follow the instructions for your platform to link react-native-video into y
 
 **React Native 0.60 and above**
 
-Run `pod install` in the `ios` directory. Linking is not required in React Native 0.60 and above.
+Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 
 **React Native 0.59 and below**
 
@@ -117,8 +117,9 @@ Select RCTVideo-tvOS
 ### Android installation
 <details>
   <summary>Android details</summary>
-
-Run `react-native link react-native-video` to link the react-native-video library.
+ 
+Linking is not required in React Native 0.60 and above.
+If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
@@ -277,6 +278,7 @@ var styles = StyleSheet.create({
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
+* [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
@@ -289,6 +291,7 @@ var styles = StyleSheet.create({
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
 * [minLoadRetryCount](#minLoadRetryCount)
+* [mixWithOthers](#mixWithOthers)
 * [muted](#muted)
 * [paused](#paused)
 * [pictureInPicture](#pictureinpicture)
@@ -296,6 +299,8 @@ var styles = StyleSheet.create({
 * [playWhenInactive](#playwheninactive)
 * [poster](#poster)
 * [posterResizeMode](#posterresizemode)
+* [preferredForwardBufferDuration](#preferredForwardBufferDuration)
+* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
 * [progressUpdateInterval](#progressupdateinterval)
 * [rate](#rate)
 * [repeat](#repeat)
@@ -307,6 +312,7 @@ var styles = StyleSheet.create({
 * [source](#source)
 * [stereoPan](#stereopan)
 * [textTracks](#texttracks)
+* [trackId](#trackId)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
 
@@ -385,6 +391,11 @@ bufferConfig={{
 
 Platforms: Android ExoPlayer
 
+#### currentPlaybackTime
+When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
+
+Platforms: Android ExoPlayer, iOS
+
 #### controls
 Determines whether to show player controls.
 * ** false (default)** - Don't show player controls
@@ -404,6 +415,11 @@ Determines whether video audio should override background music/audio in Android
 * **true** - Let background audio/music from other apps play
 
 Platforms: Android Exoplayer
+
+### DRM
+To setup DRM please follow [this guide](./DRM.md)
+
+Platforms: Android Exoplayer, iOS
 
 #### filter
 Add video filter
@@ -446,7 +462,7 @@ Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS, Android Exoplayer
+Platforms: iOS
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -459,14 +475,10 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Note on Android ExoPlayer, the full-screen mode by default goes into landscape mode. Exiting from the full-screen mode will display the video in Initial orientation.
-
 Platforms: iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
-
-To enable this on iOS, you will need to manually edit RCTVideo.m and uncomment the header code in the playerItemForSource function. This is because the code used a private API and may cause your app to be rejected by the App Store. Use at your own risk.
 
 Example:
 ```
@@ -531,6 +543,14 @@ minLoadRetryCount={5} // retry 5 times
 
 Platforms: Android ExoPlayer
 
+#### mixWithOthers
+Controls how Audio mix with other apps.
+* **"inherit" (default)** - Use the default AVPlayer behavior
+* **"mix"** - Audio from this video mixes with audio from other apps.
+* **"duck"** - Reduces the volume of other apps while audio from this video plays.
+
+Platforms: iOS
+
 #### muted
 Controls whether the audio is muted
 * **false (default)** - Don't mute audio
@@ -586,6 +606,20 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: all
+
+#### preferredForwardBufferDuration
+The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the [preferredForwardBufferDuration](https://developer.apple.com/documentation/avfoundation/avplayeritem/1643630-preferredforwardbufferduration) instance property on AVPlayerItem.
+
+Default: 0
+
+Platforms: iOS
+
+#### preventsDisplaySleepDuringVideoPlayback
+Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
+
+Default: true
+
+Platforms: iOS, Android
 
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
@@ -771,6 +805,17 @@ Note: Using this feature adding an entry for NSAppleMusicUsageDescription to you
 
 Platforms: iOS
 
+##### Explicit mimetype for the stream
+
+Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object.
+Sometimes is needed when URL extension does not match with the mimetype that you are expecting, as seen on the next example. (Extension is .ism -smooth streaming- but file served is on format mpd -mpeg dash-)
+
+Example:
+```
+source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
+type: 'mpd' }}
+```
+
 ###### Other protocols
 
 The following other types are supported on some platforms, but aren't fully documented yet:
@@ -821,6 +866,11 @@ textTracks={[
 
 
 Platforms: Android ExoPlayer, iOS
+
+#### trackId
+Configure an identifier for the video stream to link the playback context to the events emitted.
+
+Platforms: Android ExoPlayer
 
 #### useTextureView
 Controls whether to output to a TextureView or SurfaceView.
@@ -939,6 +989,7 @@ duration | number | Length of the media in seconds
 naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
 audioTracks | array | An array of audio track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
 textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+videoTracks | array | An array of video track info objects with the following properties:<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video
 
 Example:
 ```
@@ -964,6 +1015,11 @@ Example:
     { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
     { title: '#2 English CC', language: 'en', index: 1, type: 'text/vtt' },
     { title: '#3 English Director Commentary', language: 'en', index: 2, type: 'text/vtt' }
+  ],
+  videoTracks: [
+    { bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
+    { bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
+    { bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
   ]
 }
 ```
