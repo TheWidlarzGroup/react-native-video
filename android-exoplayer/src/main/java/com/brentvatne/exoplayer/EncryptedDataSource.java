@@ -35,6 +35,7 @@ public final class EncryptedDataSource implements DataSource {
   private Cipher mCipher;
   private SecretKeySpec mSecretKeySpec;
   private IvParameterSpec mIvParameterSpec;
+  private DataSpec dataSpec;
 
 
   public EncryptedDataSource(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec ivParameterSpec) {
@@ -53,6 +54,8 @@ public final class EncryptedDataSource implements DataSource {
     if (mOpened) {
       return mBytesRemaining;
     }
+    if(this.dataSpec == null)
+        this.dataSpec = dataSpec;
     mUri = dataSpec.uri;
     try {
       setupInputStream();
@@ -118,7 +121,7 @@ public final class EncryptedDataSource implements DataSource {
     }
     // notify
     if (mTransferListener != null) {
-      mTransferListener.onBytesTransferred(this,null,  false, bytesRead);
+      mTransferListener.onBytesTransferred(this,dataSpec,false, bytesRead);
     }
     // report
     return bytesRead;
@@ -150,7 +153,7 @@ public final class EncryptedDataSource implements DataSource {
       if (mOpened) {
         mOpened = false;
         if (mTransferListener != null) {
-          mTransferListener.onTransferEnd(this, null, false);
+          mTransferListener.onTransferEnd(this,dataSpec,false);
         }
       }
     }
