@@ -99,9 +99,9 @@ public class DataSourceUtil {
     }
 
     public static DataSource.Factory getEncryptedDataSourceFactory(SecretKeySpec mSecretKeySpec, IvParameterSpec mIvParameterSpec,
-                                                                   boolean forceInitialisation){
+                                                                   TransferListener<? super DataSource> listener,boolean forceInitialisation){
       if(encryptedDataSourceFactory == null || forceInitialisation) {
-        encryptedDataSourceFactory = new EncryptedDataSourceFactory(mSecretKeySpec,mIvParameterSpec);
+        encryptedDataSourceFactory = new EncryptedDataSourceFactory(mSecretKeySpec,mIvParameterSpec,listener);
       }
       return encryptedDataSourceFactory;
     }

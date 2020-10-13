@@ -100,7 +100,9 @@ class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        DrmSessionEventListener
+        DrmSessionEventListener,
+        KeyGeneratedListener
+{
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -234,6 +236,7 @@ class ReactExoplayerView extends FrameLayout implements
     private SecretKeySpec key;
     private IvParameterSpec ivParam;
 
+    private GenerateCipherKeys keyGenerator;
     public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
@@ -570,10 +573,8 @@ class ReactExoplayerView extends FrameLayout implements
             case C.TYPE_OTHER:
 
               if(key != null && ivParam != null){
-                this.mediaDataSourceFactory = DataSourceUtil.getEncryptedDataSourceFactory(key,ivParam,!areKeysInitialised);
+                this.mediaDataSourceFactory = DataSourceUtil.getEncryptedDataSourceFactory(key,ivParam,BANDWIDTH_METER,!areKeysInitialised);
                 areKeysInitialised = true;
-              } else if(isEncrypted){
-                  this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
               }
               return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
@@ -1138,6 +1139,7 @@ class ReactExoplayerView extends FrameLayout implements
             if (!isSourceEqual) {
                 reloadSource();
             }
+            startKeyGenerator();
         }
     }
 
@@ -1171,7 +1173,16 @@ class ReactExoplayerView extends FrameLayout implements
             if (!isSourceEqual) {
                 reloadSource();
             }
+          startKeyGenerator();
         }
+    }
+
+    private void startKeyGenerator(){
+      String parentDir = null;
+      if(srcUri.toString().startsWith("file"))
+        parentDir = new File(srcUri.getPath()).getParent();
+      keyGenerator = new GenerateCipherKeys(parentDir,this);
+      keyGenerator.start();
     }
 
     public void setTextTracks(ReadableArray textTracks) {

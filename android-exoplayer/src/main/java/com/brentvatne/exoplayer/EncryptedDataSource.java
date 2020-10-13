@@ -21,13 +21,10 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * Created by michaeldunn on 3/13/17.
- */
 
 public final class EncryptedDataSource implements DataSource {
 
-  private TransferListener mTransferListener;
+  private final TransferListener<? super EncryptedDataSource> mTransferListener;
   private StreamingCipherInputStream mInputStream;
   private Uri mUri;
   private long mBytesRemaining;
@@ -35,18 +32,12 @@ public final class EncryptedDataSource implements DataSource {
   private Cipher mCipher;
   private SecretKeySpec mSecretKeySpec;
   private IvParameterSpec mIvParameterSpec;
-  private DataSpec dataSpec;
 
-
-  public EncryptedDataSource(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec ivParameterSpec) {
+  public EncryptedDataSource(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec ivParameterSpec, TransferListener<? super EncryptedDataSource> listener) {
     mCipher = cipher;
     mSecretKeySpec = secretKeySpec;
     mIvParameterSpec = ivParameterSpec;
-  }
-
-  @Override
-  public void addTransferListener(TransferListener transferListener) {
-    this.mTransferListener = transferListener;
+    mTransferListener = listener;
   }
 
   @Override
@@ -66,7 +57,7 @@ public final class EncryptedDataSource implements DataSource {
     }
     mOpened = true;
     if (mTransferListener != null) {
-      mTransferListener.onTransferStart(this, dataSpec,false);
+      mTransferListener.onTransferStart(this, dataSpec);
     }
     return mBytesRemaining;
   }
@@ -115,15 +106,12 @@ public final class EncryptedDataSource implements DataSource {
       }
       return C.RESULT_END_OF_INPUT;
     }
-    // we can't decrement bytes remaining if it's just a flag representation (as opposed to a mutable numeric quantity)
     if (mBytesRemaining != C.LENGTH_UNSET) {
       mBytesRemaining -= bytesRead;
     }
-    // notify
     if (mTransferListener != null) {
-      mTransferListener.onBytesTransferred(this,dataSpec,false, bytesRead);
+      mTransferListener.onBytesTransferred(this, bytesRead);
     }
-    // report
     return bytesRead;
   }
 
@@ -153,7 +141,7 @@ public final class EncryptedDataSource implements DataSource {
       if (mOpened) {
         mOpened = false;
         if (mTransferListener != null) {
-          mTransferListener.onTransferEnd(this,dataSpec,false);
+          mTransferListener.onTransferEnd(this);
         }
       }
     }

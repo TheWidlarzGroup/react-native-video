@@ -19,17 +19,19 @@ public class EncryptedDataSourceFactory implements DataSource.Factory {
   private Cipher mCipher;
   private SecretKeySpec mSecretKeySpec;
   private IvParameterSpec mIvParameterSpec;
+  private TransferListener<? super DataSource> mTransferListener;
 
-  public EncryptedDataSourceFactory(SecretKeySpec mSecretKeySpec,IvParameterSpec mIvParameterSpec) {
+  public EncryptedDataSourceFactory(SecretKeySpec mSecretKeySpec,IvParameterSpec mIvParameterSpec, TransferListener<? super DataSource> listener) {
     this.mSecretKeySpec = mSecretKeySpec;
     this.mIvParameterSpec = mIvParameterSpec;
     mCipher =  getCipher();
+    mTransferListener = listener;
   }
 
   private Cipher getCipher(){
     try {
       Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-      cipher.init(Cipher.DECRYPT_MODE, mSecretKeySpec, mIvParameterSpec);
+      cipher.init(Cipher.ENCRYPT_MODE, mSecretKeySpec, mIvParameterSpec);
       return cipher;
     }catch (Exception e){
       e.printStackTrace();
@@ -41,6 +43,6 @@ public class EncryptedDataSourceFactory implements DataSource.Factory {
 
   @Override
   public EncryptedDataSource createDataSource() {
-    return new EncryptedDataSource(mCipher, mSecretKeySpec, mIvParameterSpec);
+    return new EncryptedDataSource(mCipher, mSecretKeySpec, mIvParameterSpec, mTransferListener);
   }
 }
