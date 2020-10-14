@@ -114,8 +114,11 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
-class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListener, Player.EventListener,
-                                                             BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
+class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListener,
+                                                             Player.EventListener,
+                                                             BecomingNoisyListener,
+                                                             AudioManager.OnAudioFocusChangeListener,
+                                                             MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -249,7 +252,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private ActionToken actionToken;
 
     //Mux
-//    private MuxStats muxStats;
     private Map<String, Object> muxData;
     private Runnable initRunnable;
     private PreviewView.OnPreviewChangeListener mPreviewChangeListener;
