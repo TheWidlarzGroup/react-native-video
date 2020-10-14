@@ -521,29 +521,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             releasePlayer();
         }
         if (player == null)  {
-            DefaultDrmSessionManager drmMgr = null;
-            if (actionToken != null) {
-                try {
-                    drmMgr = createDrmSessionManager(actionToken);
-                } catch (UnsupportedDrmException e) {
-                    handleDrmError(e);
-                    return; //?
-                }
-            }
-
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                    .setAllocator(allocator)
-                    .setBufferDurationsMs(
-                            minBufferMs,
-                            maxBufferMs,
-                            bufferForPlaybackMs,
-                            bufferForPlaybackAfterRebufferMs
-                    ).createDefaultLoadControl();
-
             player = new ExoDorisBuilder(getContext()).build();
+            trackSelector = player.getTrackSelector();
 
             player.addListener(this);
             player.addMetadataOutput(this);
@@ -577,26 +556,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             String title =  (String) muxData.get("videoTitle");
             Boolean isLive =  (Boolean) muxData.get("videoIsLive");
 
-            SourceBuilder sourceBuilder = new SourceBuilder(srcUri, id)
+            Source source = new SourceBuilder(srcUri, id)
                     .setExtension(extension)
                     .setTitle(title)
                     .setIsLive(isLive)
-                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView());
-
-            if (textTracks != null && textTracks.size() > 0) {
-                TextTrack[] dorisTextTracks = new TextTrack[textTracks.size()];
-                for (int i = 0; i < textTracks.size(); i++) {
-                    ReadableMap textTrack = textTracks.getMap(i);
-                    String uri = textTrack.getString("uri");
-                    String name = textTrack.getString("type");
-                    String isoCode = textTrack.getString("language");
-
-                    dorisTextTracks[i] = new TextTrack(Uri.parse(uri), name, isoCode);;
-                }
-                sourceBuilder.setTextTracks(dorisTextTracks);
-            }
-
-            Source source = sourceBuilder.build();
+                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView())
+                    .setTextTracks(getTextTracks())
+                    .build();
 
             if (actionToken != null) {
                 try {
