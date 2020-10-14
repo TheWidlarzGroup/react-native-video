@@ -552,9 +552,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             playerInitTime = new Date().getTime();
 
-            String id =  (String) muxData.get("videoId");
-            String title =  (String) muxData.get("videoTitle");
-            Boolean isLive =  (Boolean) muxData.get("videoIsLive");
+            String id = (String) muxData.get("videoId");
+            String title = (String) muxData.get("videoTitle");
+            Boolean isLive = (Boolean) muxData.get("videoIsLive");
 
             Source source = new SourceBuilder(srcUri, id)
                     .setExtension(extension)
