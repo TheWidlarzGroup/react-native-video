@@ -646,37 +646,6 @@ class ReactTVExoplayerView extends RelativeLayout
         eventEmitter.error(errorString, exception);
     }
 
-    private List<StreamKey> getOfflineStreamKeys(@NonNull Uri uri) {
-        //ToDo: implement this method when download quality selection is added to download flow. For now using all streams.
-        return Collections.emptyList();
-    }
-
-    private ArrayList<MediaSource> buildTextSources() {
-        ArrayList<MediaSource> textSources = new ArrayList<>();
-        if (textTracks == null) {
-            return textSources;
-        }
-
-        for (int i = 0; i < textTracks.size(); ++i) {
-            ReadableMap textTrack = textTracks.getMap(i);
-            String language = textTrack.getString("language");
-            String title = textTrack.hasKey("title")
-                    ? textTrack.getString("title") : language + " " + i;
-            Uri uri = Uri.parse(textTrack.getString("uri"));
-            MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
-                    language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
-        }
-        return textSources;
-    }
-
-    private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
-        Format textFormat = Format.createTextSampleFormat(title, mimeType, Format.NO_VALUE, language);
-        return new SingleSampleMediaSource(uri, mediaDataSourceFactory, textFormat, C.TIME_UNSET);
-    }
-
     private void releasePlayer() {
         Log.d(TAG, "releasePlayer()");
         deactivateMediaSession();
