@@ -45,5 +45,10 @@ dependencies {
     }
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    implementation project(':dice-shield-android')
+    implementation(project(':dice-shield-android')) {
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-dash"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-hls"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-ui"
+    }
 }
