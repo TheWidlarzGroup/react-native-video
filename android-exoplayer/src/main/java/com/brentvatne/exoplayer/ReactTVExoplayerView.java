@@ -543,12 +543,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                             bufferForPlaybackAfterRebufferMs
                     ).createDefaultLoadControl();
 
-//            if (drmMgr != null) {
-//                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext()), trackSelector, loadControl, drmMgr, BANDWIDTH_METER);
-//            } else {
-//                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext()), trackSelector, loadControl, null, BANDWIDTH_METER);
-//            }
-
             player = new ExoDorisBuilder(getContext()).build();
 
             player.addListener(this);
@@ -565,19 +559,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             activateMediaSession();
         }
         if (playerNeedsSource && srcUri != null) {
-//            ArrayList<MediaSource> mediaSourceList = buildTextSources();
-//            MediaSource videoSource = buildMediaSource(srcUri, extension);
-//            MediaSource mediaSource;
-//            if (mediaSourceList.size() == 0) {
-//                mediaSource = videoSource;
-//            } else {
-//                mediaSourceList.add(0, videoSource);
-//                MediaSource[] textSourceArray = mediaSourceList.toArray(
-//                        new MediaSource[mediaSourceList.size()]
-//                );
-//                mediaSource = new MergingMediaSource(textSourceArray);
-//            }
-
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
@@ -591,18 +572,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             showOverlay();
 
             playerInitTime = new Date().getTime();
-
-//            if (muxData != null) {
-//                muxData.put(MuxData.KEY_PLAYER_STARTUP_TIME, getPlayerStartupTime());
-//                if (muxStats == null) {
-//                    muxStats = new MuxStats(getContext(), player, muxData);
-//                } else {
-//                    muxStats.setVideoData(muxData);
-//                }
-//                muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
-//            } else {
-//                releaseMux();
-//            }
 
             String id =  (String) muxData.get("videoId");
             String title =  (String) muxData.get("videoTitle");
@@ -639,9 +608,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
                 player.load(source, !haveResumePosition, force);
             }
 
-//            player.prepare(mediaSource, !haveResumePosition && !shouldSeekOnInit, true);
             playerNeedsSource = false;
-
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
