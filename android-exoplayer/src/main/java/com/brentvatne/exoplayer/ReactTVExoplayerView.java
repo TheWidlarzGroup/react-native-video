@@ -1366,10 +1366,10 @@ class ReactTVExoplayerView extends RelativeLayout
         TrackGroupArray groups = info.getTrackGroups(rendererIndex);
         int trackIndex = C.INDEX_UNSET;
 
-        if (TextUtils.isEmpty(type)) {
-            type = "default";
-        } else if (groups.isEmpty()) {
+        if (groups.isEmpty()) {
             type = "disabled";
+        } else if (TextUtils.isEmpty(type)) {
+            type = "default";
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
