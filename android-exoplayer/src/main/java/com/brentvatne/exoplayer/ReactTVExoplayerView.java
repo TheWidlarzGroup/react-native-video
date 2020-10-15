@@ -533,12 +533,13 @@ class ReactTVExoplayerView extends RelativeLayout
                         exoDorisImaPlayer,
                         exoPlayerView.getAdViewGroup(),
                         ImaLanguage.SPANISH_UNITED_STATES);
-                player = exoDorisImaPlayer.getPlayer();
+                player = exoDorisImaPlayer.getExoDoris();
+                trackSelector = exoDorisImaPlayer.getTrackSelector();
             } else {
                 player = new ExoDorisBuilder(getContext()).build();
+                trackSelector = player.getTrackSelector();
             }
 
-            trackSelector = player.getTrackSelector();
             player.addListener(this);
             player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player.getSimpleExoPlayer(), false);
@@ -1299,9 +1300,9 @@ class ReactTVExoplayerView extends RelativeLayout
 //                    videoId = uri.toString().substring(indexOfVidEnd, indexOfMaster);
 //                    authToken = uri.toString().substring(indexOfAuthToken).replaceAll("%3D", "=").replaceAll("%7E", "~");
 
-                    contentSourceId = "2528370";
-                    videoId = "tears-of-steel";
-                    authToken = "cmsid=2535044~exp=1602414839~vid=229698~hmac=6994dda8d3d5f706311efca4621725d548ce4fc2dd3d31d5c588633659e6005f";
+                    contentSourceId = "2535044";
+                    videoId = "229698";
+                    authToken = "cmsid=2535044~exp=1602944305~vid=229698~hmac=8a04fea4fd06cbf89e32dbfecd6abe95b111199fe03633a625e64cd45a4935fa";
 
                     iu += "vod/androidtv/comediaspicantes";
                     custParams = row + customParams;
@@ -1367,6 +1368,8 @@ class ReactTVExoplayerView extends RelativeLayout
 
         if (TextUtils.isEmpty(type)) {
             type = "default";
+        } else if (groups.isEmpty()) {
+            type = "disabled";
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
