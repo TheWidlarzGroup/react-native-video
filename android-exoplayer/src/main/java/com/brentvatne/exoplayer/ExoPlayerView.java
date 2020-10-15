@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 @TargetApi(16)
-public final class ExoPlayerView extends FrameLayout implements DorisPlayerView {
+public final class ExoPlayerView extends FrameLayout {
 
     private View surfaceView;
     private final View shutterView;
@@ -206,46 +206,14 @@ public final class ExoPlayerView extends FrameLayout implements DorisPlayerView 
         shutterView.setVisibility(VISIBLE);
     }
 
-    @Override
-    public void setControlDispatcher(ControlDispatcher controlDispatcher) {
-
-    }
-
-    @Override
-    public void showController() {
-
-    }
-
-    @Override
-    public void hideController() {
-
-    }
-
-    @Override
-    public int getControllerShowTimeoutMs() {
-        return 0;
-    }
-
-    @Override
-    public void setControllerShowTimeoutMs(int i) {
-
-    }
-
     /**
      * Get the transparent overlay {@link ViewGroup} that can be used to display ads.
      *
      * @return The transparent overlay {@link ViewGroup} that can be used to display ads.
      */
-    @Override
     public ViewGroup getAdViewGroup() {
         return Assertions.checkStateNotNull(
                 adOverlayFrameLayout, "exo_ad_overlay must be present for ad playback");
-    }
-
-    @Override
-    public void setExtraAdGroupMarkers(
-            @Nullable long[] longs, @Nullable boolean[] booleans) {
-
     }
 
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,

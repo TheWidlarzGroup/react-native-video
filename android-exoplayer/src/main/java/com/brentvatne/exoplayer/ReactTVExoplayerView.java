@@ -22,6 +22,7 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.CaptioningManager;
 import android.widget.ImageButton;
@@ -47,6 +48,7 @@ import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
+import com.diceplatform.doris.ui.DorisPlayerView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -56,6 +58,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
@@ -102,7 +105,7 @@ import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout
-        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
+        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput, DorisPlayerView {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -526,8 +529,7 @@ class ReactTVExoplayerView extends RelativeLayout
         }
         if (player == null) {
             if (isImaStream) {
-                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), exoPlayerView);
-                exoDorisImaPlayer.enableControls(false);
+                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), this);
                 exoDorisImaWrapper = new ExoDorisImaWrapper(
                         getContext(),
                         exoDorisImaPlayer,
@@ -599,10 +601,9 @@ class ReactTVExoplayerView extends RelativeLayout
                         .setAdTagParameters(adTagParameters)
                         .build();
 
-                if (imaSource.isVod()) {
-                    exoDorisImaPlayer.enableControls(true);
-                    exoDorisImaPlayer.setCanSeek(true);
-                }
+                exoDorisImaPlayer.enableControls(true);
+                exoDorisImaPlayer.setCanSeek(true);
+
                 exoDorisImaWrapper.setFallbackUrl(source.getUri().getPath());
                 exoDorisImaWrapper.requestAndPlayAds(imaSource);
             } else if (actionToken != null) {
@@ -1965,5 +1966,40 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void applyTranslations() {
         updateLabelView(bottomBarWidget.getFocusedChild());
+    }
+
+    @Override
+    public void setControlDispatcher(ControlDispatcher controlDispatcher) {
+
+    }
+
+    @Override
+    public void showController() {
+        setControls(true);
+    }
+
+    @Override
+    public void hideController() {
+        setControls(false);
+    }
+
+    @Override
+    public int getControllerShowTimeoutMs() {
+        return 0;
+    }
+
+    @Override
+    public void setControllerShowTimeoutMs(int i) {
+
+    }
+
+    @Override
+    public ViewGroup getAdViewGroup() {
+        return null;
+    }
+
+    @Override
+    public void setExtraAdGroupMarkers(@Nullable long[] longs, @Nullable boolean[] booleans) {
+
     }
 }
