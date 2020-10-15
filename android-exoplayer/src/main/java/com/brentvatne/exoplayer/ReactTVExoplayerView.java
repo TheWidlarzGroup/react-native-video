@@ -1976,6 +1976,7 @@ class ReactTVExoplayerView extends RelativeLayout
     @Override
     public void showController() {
         setControls(true);
+        hideOverlay();
     }
 
     @Override
