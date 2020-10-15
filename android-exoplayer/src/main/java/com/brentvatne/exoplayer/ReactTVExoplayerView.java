@@ -59,6 +59,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ControlDispatcher;
+import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
@@ -78,6 +79,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
@@ -140,6 +142,7 @@ class ReactTVExoplayerView extends RelativeLayout
     private ExoDorisImaPlayer exoDorisImaPlayer;
     private ExoDorisImaWrapper exoDorisImaWrapper;
     private DefaultTrackSelector trackSelector;
+    private ControlDispatcher controlDispatcher;
     private boolean playerNeedsSource;
     private int resumeWindow;
     private long resumePosition;
@@ -277,6 +280,7 @@ class ReactTVExoplayerView extends RelativeLayout
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+        controlDispatcher = new DefaultControlDispatcher();
 
         setPausedModifier(false);
 
@@ -559,7 +563,7 @@ class ReactTVExoplayerView extends RelativeLayout
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
-                player.seekTo(resumeWindow, resumePosition);
+                controlDispatcher.dispatchSeekTo(player, resumeWindow, resumePosition);
             }
 
             if (shouldSeekOnInit) {
@@ -765,10 +769,10 @@ class ReactTVExoplayerView extends RelativeLayout
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                player.setPlayWhenReady(true);
+                controlDispatcher.dispatchSetPlayWhenReady(player, true);
             }
         } else {
-            player.setPlayWhenReady(false);
+            controlDispatcher.dispatchSetPlayWhenReady(player, false);
         }
 
         updateControlsState();
@@ -1066,7 +1070,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     @Override
                     public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
                         if (fromUser && player != null) {
-                            player.seekTo(progress);
+                            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), progress);
                             updateProgressControl(progress);
                         }
                     }
@@ -1504,7 +1508,7 @@ class ReactTVExoplayerView extends RelativeLayout
     public void seekTo(long positionMs) {
         if (player != null) {
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
-            player.seekTo(positionMs);
+            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), positionMs);
         }
     }
 
@@ -1796,7 +1800,7 @@ class ReactTVExoplayerView extends RelativeLayout
                         if (position < 0) {
                             position = 0;
                         }
-                        player.seekTo(position);
+                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
                         //updateProgressControl(position);
                         seekIndicator.show(true, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
                         moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), true);
@@ -1813,7 +1817,7 @@ class ReactTVExoplayerView extends RelativeLayout
                         if (position > player.getDuration()) {
                             position = player.getDuration();
                         }
-                        player.seekTo(position);
+                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
                         //updateProgressControl(position);
                         seekIndicator.show(false, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
                         moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), false);
@@ -1968,9 +1972,16 @@ class ReactTVExoplayerView extends RelativeLayout
         updateLabelView(bottomBarWidget.getFocusedChild());
     }
 
+    /**
+     * Sets the {@link ControlDispatcher}.
+     *
+     * @param controlDispatcher The {@link ControlDispatcher}, or null
+     *     to use {@link DefaultControlDispatcher}.
+     */
     @Override
     public void setControlDispatcher(ControlDispatcher controlDispatcher) {
-
+        this.controlDispatcher =
+                controlDispatcher == null ? new DefaultControlDispatcher() : controlDispatcher;
     }
 
     @Override
