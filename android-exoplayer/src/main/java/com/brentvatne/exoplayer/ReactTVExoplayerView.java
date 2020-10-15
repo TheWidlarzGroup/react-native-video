@@ -34,13 +34,19 @@ import android.widget.TextView;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.dice.shield.downloads.manager.DlmWrapper;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
+import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
+import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
+import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
+import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
+import com.diceplatform.doris.ext.ima.entity.ImaSource;
+import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -68,7 +74,6 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.tracks.DcePlayerModel;
@@ -128,8 +133,9 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
-    private DataSource.Factory mediaDataSourceFactory;
     private ExoDoris player;
+    private ExoDorisImaPlayer exoDorisImaPlayer;
+    private ExoDorisImaWrapper exoDorisImaWrapper;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
     private int resumeWindow;
@@ -168,6 +174,28 @@ class ReactTVExoplayerView extends RelativeLayout
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
+
+    // IMA Props
+    private boolean isImaStream = true;
+    private String assetKey;
+    private String contentSourceId;
+    private String videoId;
+    private String authToken;
+    private AdTagParameters adTagParameters;
+
+    // IMA Ad Tag Parameters
+    private String iu = "/7009/prendetv/";
+    private String custParams;
+    private String output;
+    private String pp = "DAI_TVApps";
+    private String vpa;
+    private String msid = "2098810";
+    private String an = "prendetv";
+
+    // IMA Custom Ad Tag Parameters
+    private String neighborhood = "neighborhood=drama&";
+    private String row = "row=indienovelas&";
+    private String customParams = "mcp_id=3751768&rating=pg&rating_qualifier=violence&content_source=univision&video_type=movie&subscriber=true&category=novelas,romance,drama&first_category=novelas&vertical=noticias&program_title=amaramuerte&season=1&episode=23&tags=kate%20de%20castillo,capitulo,amor&cast=selma%20hayek,jorge%20ramos&ph=1080&pw=1920&app_bundle=prendetv.android";
 
     // Custom
     private PowerManager powerManager;
@@ -273,7 +301,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private void createViews() {
         clearResumePosition();
-        mediaDataSourceFactory = buildDataSourceFactory(true);
 
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
@@ -498,9 +525,20 @@ class ReactTVExoplayerView extends RelativeLayout
             releasePlayer();
         }
         if (player == null) {
-            player = new ExoDorisBuilder(getContext()).build();
-            trackSelector = player.getTrackSelector();
+            if (isImaStream) {
+                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), exoPlayerView);
+                exoDorisImaPlayer.enableControls(false);
+                exoDorisImaWrapper = new ExoDorisImaWrapper(
+                        getContext(),
+                        exoDorisImaPlayer,
+                        exoPlayerView.getAdViewGroup(),
+                        ImaLanguage.SPANISH_UNITED_STATES);
+                player = exoDorisImaPlayer.getPlayer();
+            } else {
+                player = new ExoDorisBuilder(getContext()).build();
+            }
 
+            trackSelector = player.getTrackSelector();
             player.addListener(this);
             player.addMetadataOutput(this);
             exoPlayerView.setPlayer(player.getSimpleExoPlayer(), false);
@@ -541,7 +579,32 @@ class ReactTVExoplayerView extends RelativeLayout
                     .setTextTracks(getTextTracks())
                     .build();
 
-            if (actionToken != null) {
+            if (isImaStream) {
+                AdTagParameters adTagParameters = new AdTagParametersBuilder()
+                        .setIu(iu)
+                        .setCustParams(custParams)
+                        .setOutput(output)
+                        .setPp(pp)
+                        .setVpa(vpa)
+                        .setMsid(msid)
+                        .setAn(an)
+                        .build();
+
+                ImaSource imaSource = new ImaSourceBuilder(source)
+                        .setAssetKey(assetKey)
+                        .setContentSourceId(contentSourceId)
+                        .setVideoId(videoId)
+                        .setAuthToken(authToken)
+                        .setAdTagParameters(adTagParameters)
+                        .build();
+
+                if (imaSource.isVod()) {
+                    exoDorisImaPlayer.enableControls(true);
+                    exoDorisImaPlayer.setCanSeek(true);
+                }
+                exoDorisImaWrapper.setFallbackUrl(source.getUri().getPath());
+                exoDorisImaWrapper.requestAndPlayAds(imaSource);
+            } else if (actionToken != null) {
                 try {
                     player.load(source, !haveResumePosition, force, actionToken);
                 } catch (UnsupportedDrmException e) {
@@ -649,12 +712,20 @@ class ReactTVExoplayerView extends RelativeLayout
 
         if (player != null) {
             updateResumePosition();
-            player.release();
+            player.removeListener(this);
             player.removeMetadataOutput(this);
+            player.release();
             player = null;
             trackSelector = null;
             shouldSeekTo = C.TIME_UNSET;
         }
+
+        if (exoDorisImaWrapper != null) {
+            exoDorisImaWrapper.release();
+            exoDorisImaWrapper = null;
+            exoDorisImaPlayer = null;
+        }
+
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -771,18 +842,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private void clearResumePosition() {
         resumeWindow = C.INDEX_UNSET;
         resumePosition = C.TIME_UNSET;
-    }
-
-    /**
-     * Returns a new DataSource factory.
-     *
-     * @param useBandwidthMeter Whether to set {@link #BANDWIDTH_METER} as a listener to the new
-     *                          DataSource factory.
-     * @return A new DataSource factory.
-     */
-    private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DlmWrapper.getInstance(getContext().getApplicationContext())
-                .buildDataSourceFactory(useBandwidthMeter ? BANDWIDTH_METER : null);
     }
 
     // AudioManager.OnAudioFocusChangeListener implementation
@@ -1215,9 +1274,43 @@ class ReactTVExoplayerView extends RelativeLayout
             this.extension = extension;
             this.actionToken = actionToken;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = buildDataSourceFactory(true);
             this.muxData = muxData;
             this.textTracks = textTracks;
+
+            if (true) {
+                this.isImaStream = true;
+                if (uri.toString().contains("event")) {
+                    int indexOfEvent = uri.getPath().indexOf("event") + 6;
+                    int indexOfMaster = uri.getPath().indexOf("/master");
+
+                    assetKey = uri.getPath().substring(indexOfEvent, indexOfMaster);
+                    iu += "live/androidtv/comediaspicantes";
+                    custParams = neighborhood + customParams;
+                    output = "xml_vast4";
+                    vpa = "2";
+                } else {
+                    int indexOfContent = uri.toString().indexOf("content") + 8;
+                    int indexOfVidStart = uri.toString().indexOf("/vid");
+                    int indexOfVidEnd = indexOfVidStart + 5;
+                    int indexOfMaster = uri.toString().indexOf("/master");
+                    int indexOfAuthToken = uri.toString().indexOf("auth-token") + 11;
+
+//                    contentSourceId = uri.toString().substring(indexOfContent, indexOfVidStart);
+//                    videoId = uri.toString().substring(indexOfVidEnd, indexOfMaster);
+//                    authToken = uri.toString().substring(indexOfAuthToken).replaceAll("%3D", "=").replaceAll("%7E", "~");
+
+                    contentSourceId = "2528370";
+                    videoId = "tears-of-steel";
+                    authToken = "cmsid=2535044~exp=1602414839~vid=229698~hmac=6994dda8d3d5f706311efca4621725d548ce4fc2dd3d31d5c588633659e6005f";
+
+                    iu += "vod/androidtv/comediaspicantes";
+                    custParams = row + customParams;
+                    output = "xml_vmap4";
+                    vpa = "1";
+                }
+            } else {
+                this.isImaStream = false;
+            }
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
@@ -1238,7 +1331,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = buildDataSourceFactory(false);
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
