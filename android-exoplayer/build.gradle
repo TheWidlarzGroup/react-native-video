@@ -27,6 +27,7 @@ dependencies {
     implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
+    implementation "com.github.DiceTechnology.doris-android:extension-ima:$exodoris_version"
 
     implementation("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion") {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
