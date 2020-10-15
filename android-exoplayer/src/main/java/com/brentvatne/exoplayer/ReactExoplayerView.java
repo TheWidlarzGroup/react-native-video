@@ -1134,7 +1134,7 @@ class ReactExoplayerView extends FrameLayout implements
                     }
                 }
             }
-        } else if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
+        } else if (trackType == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
             // Use system settings if possible
             CaptioningManager captioningManager
                     = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
