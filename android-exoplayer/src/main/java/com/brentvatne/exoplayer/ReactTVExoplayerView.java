@@ -1288,7 +1288,7 @@ class ReactTVExoplayerView extends RelativeLayout
             this.muxData = muxData;
             this.textTracks = textTracks;
 
-            if (true) {
+            if (uri.toString().contains("https://dai.google.com")) {
                 this.isImaStream = true;
                 if (uri.toString().contains("event")) {
                     int indexOfEvent = uri.getPath().indexOf("event") + 6;
@@ -1306,13 +1306,13 @@ class ReactTVExoplayerView extends RelativeLayout
                     int indexOfMaster = uri.toString().indexOf("/master");
                     int indexOfAuthToken = uri.toString().indexOf("auth-token") + 11;
 
-//                    contentSourceId = uri.toString().substring(indexOfContent, indexOfVidStart);
-//                    videoId = uri.toString().substring(indexOfVidEnd, indexOfMaster);
-//                    authToken = uri.toString().substring(indexOfAuthToken).replaceAll("%3D", "=").replaceAll("%7E", "~");
+                    contentSourceId = uri.toString().substring(indexOfContent, indexOfVidStart);
+                    videoId = uri.toString().substring(indexOfVidEnd, indexOfMaster);
+                    authToken = uri.toString().substring(indexOfAuthToken).replaceAll("%3D", "=").replaceAll("%7E", "~");
 
-                    contentSourceId = "2535044";
-                    videoId = "229698";
-                    authToken = "cmsid=2535044~exp=1602944305~vid=229698~hmac=8a04fea4fd06cbf89e32dbfecd6abe95b111199fe03633a625e64cd45a4935fa";
+//                    contentSourceId = "2535044";
+//                    videoId = "229698";
+//                    authToken = "cmsid=2535044~exp=1602944305~vid=229698~hmac=8a04fea4fd06cbf89e32dbfecd6abe95b111199fe03633a625e64cd45a4935fa";
 
                     iu += "vod/androidtv/comediaspicantes";
                     custParams = row + customParams;
