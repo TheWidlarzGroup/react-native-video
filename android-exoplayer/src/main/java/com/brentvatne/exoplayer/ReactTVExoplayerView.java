@@ -902,6 +902,11 @@ class ReactTVExoplayerView extends RelativeLayout
                 break;
             case Player.STATE_READY:
                 text += "ready";
+
+                if (isImaStream) {
+                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
+                }
+
                 // seek to edge of live window for live events
                 seekToDefaultPosition();
                 eventEmitter.ready();
