@@ -22,7 +22,7 @@ def exoplayerVersion = rootProject.ext.exoplayerVersion
 
 dependencies {
     //noinspection GradleDynamicVersion
-    implementation project(':ReactAndroid')
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
 
     implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
