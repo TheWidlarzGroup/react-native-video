@@ -101,11 +101,11 @@ First select your project in Xcode.
 
 <img src="./docs/tvOS-step-1.jpg" width="40%">
 
-After that, select the tvOS target of your application and select « General » tab
+After that, select the tvOS target of your application and select « General » tab
 
 <img src="./docs/tvOS-step-2.jpg" width="40%">
 
-Scroll to « Linked Frameworks and Libraries » and tap on the + button
+Scroll to « Linked Frameworks and Libraries » and tap on the + button
 
 <img src="./docs/tvOS-step-3.jpg" width="40%">
 
@@ -273,48 +273,51 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-* [allowsExternalPlayback](#allowsexternalplayback)
-* [audioOnly](#audioonly)
-* [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
-* [bufferConfig](#bufferconfig)
-* [controls](#controls)
-* [currentPlaybackTime](#currentPlaybackTime)
-* [disableFocus](#disableFocus)
-* [filter](#filter)
-* [filterEnabled](#filterEnabled)
-* [fullscreen](#fullscreen)
-* [fullscreenAutorotate](#fullscreenautorotate)
-* [fullscreenOrientation](#fullscreenorientation)
-* [headers](#headers)
-* [hideShutterView](#hideshutterview)
-* [id](#id)
-* [ignoreSilentSwitch](#ignoresilentswitch)
-* [maxBitRate](#maxbitrate)
-* [minLoadRetryCount](#minLoadRetryCount)
-* [mixWithOthers](#mixWithOthers)
-* [muted](#muted)
-* [paused](#paused)
-* [pictureInPicture](#pictureinpicture)
-* [playInBackground](#playinbackground)
-* [playWhenInactive](#playwheninactive)
-* [poster](#poster)
-* [posterResizeMode](#posterresizemode)
-* [preferredForwardBufferDuration](#preferredForwardBufferDuration)
-* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
-* [progressUpdateInterval](#progressupdateinterval)
-* [rate](#rate)
-* [repeat](#repeat)
-* [reportBandwidth](#reportbandwidth)
-* [resizeMode](#resizemode)
-* [selectedAudioTrack](#selectedaudiotrack)
-* [selectedTextTrack](#selectedtexttrack)
-* [selectedVideoTrack](#selectedvideotrack)
-* [source](#source)
-* [stereoPan](#stereopan)
-* [textTracks](#texttracks)
-* [trackId](#trackId)
-* [useTextureView](#usetextureview)
-* [volume](#volume)
+| Prop Name |Plateforms Support  | 
+|--|--|
+|[allowsExternalPlayback](#allowsexternalplayback) |iOS |
+|[audioOnly](#audioonly)|All |
+|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|
+|[bufferConfig](#bufferconfig)|Android ExoPlayer|
+|[controls](#controls)|Android ExoPlayer, iOS, react-native-dom|
+|[currentPlaybackTime](#currentPlaybackTime)|Android Exoplayer|
+|[disableFocus](#disableFocus)|Android Exoplayer, iOS|
+|[filter](#filter)|iOS|
+|[filterEnabled](#filterEnabled)|iOS|
+|[fullscreen](#fullscreen)|iOS|
+|[fullscreenAutorotate](#fullscreenautorotate)|iOS|
+|[fullscreenOrientation](#fullscreenorientation)|iOS|
+|[headers](#headers)|Android ExoPlayer|
+|[hideShutterView](#hideshutterview)|Android ExoPlayer|
+|[id](#id)|react-native-dom|
+|[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
+|[maxBitRate](#maxbitrate)|Android ExoPlayer, iOS|
+|[minLoadRetryCount](#minLoadRetryCount)|Android ExoPlayer|
+|[mixWithOthers](#mixWithOthers)|iOS|
+|[muted](#muted)|All|
+|[paused](#paused)|All|
+|[pictureInPicture](#pictureinpicture)|iOS|
+|[playInBackground](#playinbackground)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[playWhenInactive](#playwheninactive)|iOS|
+|[poster](#poster)|All|
+|[posterResizeMode](#posterresizemode)|All|
+|[preferredForwardBufferDuration](#preferredForwardBufferDuration)|iOS|
+| [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
+|[progressUpdateInterval](#progressupdateinterval)|All|
+|[rate](#rate)|All|
+|[repeat](#repeat)|All|
+|[reportBandwidth](#reportbandwidth)|Android ExoPlayer|
+|[resizeMode](#resizemode)|Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP|
+|[selectedAudioTrack](#selectedaudiotrack)|Android ExoPlayer, iOS|
+|[selectedTextTrack](#selectedtexttrack)|Android ExoPlayer, iOS|
+|[selectedVideoTrack](#selectedvideotrack)|Android ExoPlayer|
+|[source](#source)|All|
+|[stereoPan](#stereopan)|Android MediaPlayer|
+|[textTracks](#texttracks)|Android ExoPlayer, iOS|
+|[trackId](#trackId)|Android ExoPlayer|
+|[useTextureView](#usetextureview)|Android ExoPlayer|
+|[volume](#volume)|All|
+
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
