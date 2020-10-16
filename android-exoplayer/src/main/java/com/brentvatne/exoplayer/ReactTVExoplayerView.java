@@ -1792,7 +1792,7 @@ class ReactTVExoplayerView extends RelativeLayout
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                     case KeyEvent.KEYCODE_MEDIA_REWIND: {
-                        if (player == null) {
+                        if (player == null || !areControlsVisible) {
                             break;
                         }
 
@@ -1809,7 +1809,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     }
                     case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                     case KeyEvent.KEYCODE_DPAD_RIGHT: {
-                        if (player == null) {
+                        if (player == null || !areControlsVisible) {
                             break;
                         }
 
