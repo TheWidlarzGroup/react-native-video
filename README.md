@@ -320,23 +320,26 @@ var styles = StyleSheet.create({
 
 
 ### Event props
-* [onAudioBecomingNoisy](#onaudiobecomingnoisy)
-* [onBandwidthUpdate](#onbandwidthupdate)
-* [onEnd](#onend)
-* [onExternalPlaybackChange](#onexternalplaybackchange)
-* [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
-* [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
-* [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
-* [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
-* [onLoad](#onload)
-* [onLoadStart](#onloadstart)
-* [onReadyForDisplay](#onreadyfordisplay)
-* [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
-* [onPlaybackRateChange](#onplaybackratechange)
-* [onProgress](#onprogress)
-* [onSeek](#onseek)
-* [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
-* [onTimedMetadata](#ontimedmetadata)
+| Prop Name |Plateforms Support  | 
+|--|--|
+|[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android ExoPlayer, iOS|
+|[onBandwidthUpdate](#onbandwidthupdate)|Android ExoPlayer|
+|[onEnd](#onend)|All|
+|[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
+|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onLoad](#onload)|All|
+|[onLoadStart](#onloadstart)|All|
+|[onReadyForDisplay](#onreadyfordisplay)|Android ExoPlayer, Android MediaPlayer, iOS, Web|
+|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)|iOS|
+|[onPlaybackRateChange](#onplaybackratechange)|All|
+|[onProgress](#onprogress)|All|
+|[onSeek](#onseek)|Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP|
+|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)|iOS|
+|[onTimedMetadata](#ontimedmetadata)|Android ExoPlayer, Android MediaPlayer, iOS|
+
 
 ### Methods
 * [dismissFullscreenPlayer](#dismissfullscreenplayer)
