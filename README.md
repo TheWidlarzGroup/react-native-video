@@ -273,7 +273,7 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-| Prop Name |Plateforms Support  | 
+| Name |Plateforms Support  | 
 |--|--|
 |[allowsExternalPlayback](#allowsexternalplayback) |iOS |
 |[audioOnly](#audioonly)|All |
@@ -320,7 +320,7 @@ var styles = StyleSheet.create({
 
 
 ### Event props
-| Prop Name |Plateforms Support  | 
+| Name |Plateforms Support  | 
 |--|--|
 |[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android ExoPlayer, iOS|
 |[onBandwidthUpdate](#onbandwidthupdate)|Android ExoPlayer|
@@ -342,7 +342,7 @@ var styles = StyleSheet.create({
 
 
 ### Methods
-| Method Name |Plateforms Support  | 
+| Name |Plateforms Support  | 
 |--|--|
 |[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
 |[presentFullscreenPlayer](#presentfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
