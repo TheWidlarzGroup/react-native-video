@@ -342,11 +342,14 @@ var styles = StyleSheet.create({
 
 
 ### Methods
-* [dismissFullscreenPlayer](#dismissfullscreenplayer)
-* [presentFullscreenPlayer](#presentfullscreenplayer)
-* [save](#save)
-* [restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)
-* [seek](#seek)
+| Method Name |Plateforms Support  | 
+|--|--|
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[presentFullscreenPlayer](#presentfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[save](#save)|iOS|
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
+|[seek](#seek)|All|
+
 
 ### Configurable props
 
