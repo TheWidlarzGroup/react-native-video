@@ -6,7 +6,6 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -18,7 +17,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.KeyEvent;
@@ -36,12 +34,13 @@ import android.widget.TextView;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.dice.shield.downloads.DownloadProviderImpl;
-import com.dice.shield.downloads.dash.DrmDashManifestParser;
 import com.dice.shield.downloads.manager.DlmWrapper;
-import com.dice.shield.downloads.source.DefaultMediaSource;
 import com.dice.shield.drm.entity.ActionToken;
-import com.dice.shield.drm.utils.Utils;
+import com.diceplatform.doris.ExoDoris;
+import com.diceplatform.doris.ExoDorisBuilder;
+import com.diceplatform.doris.entity.Source;
+import com.diceplatform.doris.entity.SourceBuilder;
+import com.diceplatform.doris.entity.TextTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -52,48 +51,29 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSession;
-import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
-import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
-import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataOutput;
-import com.google.android.exoplayer2.offline.FilteringManifestParser;
 import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
-import com.imggaming.mux.MuxData;
-import com.imggaming.mux.MuxStats;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
 import com.imggaming.translations.DiceLocalizedStrings;
@@ -110,11 +90,9 @@ import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
@@ -124,8 +102,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
-class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListener, Player.EventListener,
-        BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
+class ReactTVExoplayerView extends RelativeLayout
+        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -157,7 +135,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
     private DataSource.Factory mediaDataSourceFactory;
-    private SimpleExoPlayer player;
+    private ExoDoris player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
     private int resumeWindow;
@@ -254,12 +232,9 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     private boolean playInBackground = false;
 
     //Drm
-    private FrameworkMediaDrm mediaDrm;
-    private HttpMediaDrmCallback drmCallback;
     private ActionToken actionToken;
 
     //Mux
-    private MuxStats muxStats;
     private Map<String, Object> muxData;
     private Runnable initRunnable;
     private PreviewView.OnPreviewChangeListener mPreviewChangeListener;
@@ -528,37 +503,13 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         if (force) {
             releasePlayer();
         }
-        if (player == null)  {
-            DefaultDrmSessionManager drmMgr = null;
-            if (actionToken != null) {
-                try {
-                    drmMgr = createDrmSessionManager(actionToken);
-                } catch (UnsupportedDrmException e) {
-                    handleDrmError(e);
-                    return; //?
-                }
-            }
-
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-            DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                    .setAllocator(allocator)
-                    .setBufferDurationsMs(
-                            minBufferMs,
-                            maxBufferMs,
-                            bufferForPlaybackMs,
-                            bufferForPlaybackAfterRebufferMs
-                    ).createDefaultLoadControl();
-            if (drmMgr != null) {
-                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext()), trackSelector, loadControl, drmMgr, BANDWIDTH_METER);
-            } else {
-                player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultRenderersFactory(getContext()), trackSelector, loadControl, null, BANDWIDTH_METER);
-            }
+        if (player == null) {
+            player = new ExoDorisBuilder(getContext()).build();
+            trackSelector = player.getTrackSelector();
 
             player.addListener(this);
-            player.setMetadataOutput(this);
-            exoPlayerView.setPlayer(player, false);
+            player.addMetadataOutput(this);
+            exoPlayerView.setPlayer(player.getSimpleExoPlayer(), false);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -570,19 +521,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             activateMediaSession();
         }
         if (playerNeedsSource && srcUri != null) {
-            ArrayList<MediaSource> mediaSourceList = buildTextSources();
-            MediaSource videoSource = buildMediaSource(srcUri, extension);
-            MediaSource mediaSource;
-            if (mediaSourceList.size() == 0) {
-                mediaSource = videoSource;
-            } else {
-                mediaSourceList.add(0, videoSource);
-                MediaSource[] textSourceArray = mediaSourceList.toArray(
-                        new MediaSource[mediaSourceList.size()]
-                );
-                mediaSource = new MergingMediaSource(textSourceArray);
-            }
-
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
@@ -597,24 +535,49 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
             playerInitTime = new Date().getTime();
 
-            if (muxData != null) {
-                muxData.put(MuxData.KEY_PLAYER_STARTUP_TIME, getPlayerStartupTime());
-                if (muxStats == null) {
-                    muxStats = new MuxStats(getContext(), player, muxData);
-                } else {
-                    muxStats.setVideoData(muxData);
+            String id = (String) muxData.get("videoId");
+            String title = (String) muxData.get("videoTitle");
+            Boolean isLive = (Boolean) muxData.get("videoIsLive");
+
+            Source source = new SourceBuilder(srcUri, id)
+                    .setExtension(extension)
+                    .setTitle(title)
+                    .setIsLive(isLive)
+                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView())
+                    .setTextTracks(getTextTracks())
+                    .build();
+
+            if (actionToken != null) {
+                try {
+                    player.load(source, !haveResumePosition, force, actionToken);
+                } catch (UnsupportedDrmException e) {
+                    handleDrmError(e);
                 }
-                muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
             } else {
-                releaseMux();
+                player.load(source, !haveResumePosition, force);
             }
 
-            player.prepare(mediaSource, !haveResumePosition && !shouldSeekOnInit, true);
             playerNeedsSource = false;
-
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
+    }
+
+    @Nullable
+    private TextTrack[] getTextTracks() {
+        if (textTracks != null && textTracks.size() > 0) {
+            TextTrack[] dorisTextTracks = new TextTrack[textTracks.size()];
+            for (int i = 0; i < textTracks.size(); ++i) {
+                ReadableMap textTrack = textTracks.getMap(i);
+                String uri = textTrack.getString("uri");
+                String name = textTrack.getString("type");
+                String isoCode = textTrack.getString("language");
+
+                dorisTextTracks[i] = new TextTrack(Uri.parse(uri), name, isoCode);
+            }
+            return dorisTextTracks;
+        }
+        return null;
     }
 
     private long getPlayerStartupTime() {
@@ -624,7 +587,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     // MediaSession related functions.
     private void activateMediaSession() {
         Log.d(TAG, "activateMediaSession()");
-        mediaSessionConnector.setPlayer(player, null);
+        mediaSessionConnector.setPlayer(player);
         mediaSession.setActive(true);
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
@@ -645,52 +608,12 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     private void deactivateMediaSession() {
         Log.d(TAG, "deactivateMediaSession()");
-        mediaSessionConnector.setPlayer(null, null);
+        mediaSessionConnector.setPlayer(null);
         mediaSession.setActive(false);
     }
 
     private void releaseMediaSession() {
         mediaSession.release();
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private MediaSource buildMediaSource(Uri uri, @Nullable String overrideExtension) {
-        int type = Util.inferContentType(
-                !TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension : uri.getLastPathSegment());
-        if (muxStats != null) {
-            muxStats.setStreamType(type);
-        }
-        switch (type) {
-            case C.TYPE_SS:
-                return new SsMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(uri);
-
-            case C.TYPE_DASH: {
-                HttpMediaDrmCallback callback = drmCallback;
-                UUID drmSchemeUuid = actionToken != null ? Util.getDrmUuid(actionToken.getDrmScheme()) : null;
-                return new DashMediaSource.Factory(
-                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory(false))
-                        .setManifestParser(
-                                new FilteringManifestParser<>(
-                                        (drmSchemeUuid != null && callback != null)
-                                                ? new DrmDashManifestParser(drmSchemeUuid, callback)
-                                                : new DashManifestParser(),
-                                        getOfflineStreamKeys(uri)))
-                        .createMediaSource(uri);
-            }
-
-            case C.TYPE_HLS:
-                return new HlsMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(uri);
-            case C.TYPE_OTHER:
-                return new DefaultMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(uri);
-            default: {
-                throw new IllegalStateException("Unsupported type: " + type);
-            }
-        }
     }
 
     public void setMediaKeysListener(boolean visible) {
@@ -703,31 +626,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         }
 
         isMediaKeysEnabled = visible;
-    }
-
-    @SuppressLint("ObsoleteSdkInt")
-    private DefaultDrmSessionManager createDrmSessionManager(@NonNull ActionToken drmParam) throws UnsupportedDrmException {
-        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
-        final String drmLicenseUrl = drmParam.getLicensingServerUrl();
-        final HashMap<String, String> keyRequestProperties = Utils.getParams(drmParam);
-
-        if (Util.SDK_INT < 18) {
-            throw new UnsupportedDrmException(UnsupportedDrmException.REASON_INSTANTIATION_ERROR);
-        } else {
-            UUID drmSchemeUuid = Util.getDrmUuid(drmParam.getDrmScheme());
-            if (drmSchemeUuid == null) {
-                throw new UnsupportedDrmException(UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME);
-            } else {
-                drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, drmLicenseUrl, keyRequestProperties, false);
-
-                final String offline = drmParam.getOfflineLicense();
-
-                if (offline != null) {
-                    drmSessionManager.setMode(DefaultDrmSessionManager.MODE_QUERY, Base64.decode(offline, Base64.NO_WRAP));
-                }
-            }
-        }
-        return drmSessionManager;
     }
 
     private void handleDrmError(UnsupportedDrmException exception) {
@@ -748,61 +646,6 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         eventEmitter.error(errorString, exception);
     }
 
-    private DefaultDrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(
-            @NonNull UUID uuid, @NonNull String licenseUrl, @Nullable Map<String, String> requestProperties, boolean multiSession)
-            throws UnsupportedDrmException {
-        HttpMediaDrmCallback callback = DownloadProviderImpl.getInstance(getContext().getApplicationContext())
-                .createHttpMediaDrmCallback(licenseUrl, null);
-        if (requestProperties != null) {
-            for (String key : requestProperties.keySet()) {
-                callback.setKeyRequestProperty(key, requestProperties.get(key));
-            }
-        }
-        releaseMediaDrm();
-        mediaDrm = FrameworkMediaDrm.newInstance(uuid);
-        this.drmCallback = callback;
-        return new DefaultDrmSessionManager<>(uuid, mediaDrm, callback, null, multiSession);
-    }
-
-    private void releaseMediaDrm() {
-        if (mediaDrm != null) {
-            mediaDrm.release();
-            mediaDrm = null;
-        }
-        drmCallback = null;
-    }
-
-    private List<StreamKey> getOfflineStreamKeys(@NonNull Uri uri) {
-        //ToDo: implement this method when download quality selection is added to download flow. For now using all streams.
-        return Collections.emptyList();
-    }
-
-    private ArrayList<MediaSource> buildTextSources() {
-        ArrayList<MediaSource> textSources = new ArrayList<>();
-        if (textTracks == null) {
-            return textSources;
-        }
-
-        for (int i = 0; i < textTracks.size(); ++i) {
-            ReadableMap textTrack = textTracks.getMap(i);
-            String language = textTrack.getString("language");
-            String title = textTrack.hasKey("title")
-                    ? textTrack.getString("title") : language + " " + i;
-            Uri uri = Uri.parse(textTrack.getString("uri"));
-            MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
-                    language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
-        }
-        return textSources;
-    }
-
-    private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
-        Format textFormat = Format.createTextSampleFormat(title, mimeType, Format.NO_VALUE, language);
-        return new SingleSampleMediaSource(uri, mediaDataSourceFactory, textFormat, C.TIME_UNSET);
-    }
-
     private void releasePlayer() {
         Log.d(TAG, "releasePlayer()");
         deactivateMediaSession();
@@ -813,24 +656,15 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
         if (player != null) {
             updateResumePosition();
             player.release();
-            player.setMetadataOutput(null);
+            player.removeMetadataOutput(this);
             player = null;
             trackSelector = null;
             shouldSeekTo = C.TIME_UNSET;
         }
-        releaseMux();
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
-        releaseMediaDrm();
-    }
-
-    private void releaseMux() {
-        if (muxStats != null) {
-            muxStats.release();
-            muxStats = null;
-        }
     }
 
     private void dismissTracksDialog() {
@@ -1318,19 +1152,14 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
                 // Special case for decoder initialization failures.
                 MediaCodecRenderer.DecoderInitializationException decoderInitializationException = (MediaCodecRenderer.DecoderInitializationException) cause;
-                if (decoderInitializationException.decoderName == null) {
-                    if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
-                        errorString = getResources().getString(R.string.error_querying_decoders);
-                    } else if (decoderInitializationException.secureDecoderRequired) {
-                        errorString = getResources().getString(R.string.error_no_secure_decoder,
-                                decoderInitializationException.mimeType);
-                    } else {
-                        errorString = getResources().getString(R.string.error_no_decoder,
-                                decoderInitializationException.mimeType);
-                    }
+                if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
+                    errorString = getResources().getString(R.string.error_querying_decoders);
+                } else if (decoderInitializationException.secureDecoderRequired) {
+                    errorString = getResources().getString(R.string.error_no_secure_decoder,
+                            decoderInitializationException.mimeType);
                 } else {
-                    errorString = getResources().getString(R.string.error_instantiating_decoder,
-                            decoderInitializationException.decoderName);
+                    errorString = getResources().getString(R.string.error_no_decoder,
+                            decoderInitializationException.mimeType);
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
@@ -1383,7 +1212,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     // ReactExoplayerViewManager public api
 
     public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken,
-                       @Nullable final Map<String, String> headers,  @Nullable final Map<String, Object> muxData, final ReadableArray textTracks) {
+                       @Nullable final Map<String, String> headers, @Nullable final Map<String, Object> muxData, final ReadableArray textTracks) {
         if (uri != null) {
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
@@ -1486,7 +1315,7 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
             if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18 && groups.length > 0) {
                 // Use system settings if possible
                 CaptioningManager captioningManager
-                        = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
+                        = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
                 if (captioningManager != null && captioningManager.isEnabled()) {
                     trackIndex = getTrackIndexForDefaultLocale(groups);
                 }
@@ -1771,10 +1600,8 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
 
-
-
-        if (muxStats != null) {
-            muxStats.setVideoView(exoPlayerView.getVideoSurfaceView());
+        if (player != null) {
+            player.setVideoSurfaceView(exoPlayerView.getVideoSurfaceView());
         }
     }
 
@@ -1974,19 +1801,19 @@ class ReactTVExoplayerView extends RelativeLayout implements LifecycleEventListe
 
     private void setButtonState(final ImageButton button) {
         if (button.hasFocus()) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1.1f);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button, "scaleX", 1.1f);
             anim.setDuration(100);
             anim.start();
 
-            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1.1f);
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button, "scaleY", 1.1f);
             anim2.setDuration(100);
             anim2.start();
         } else {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(button,"scaleX",1f);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(button, "scaleX", 1f);
             anim.setDuration(100);
             anim.start();
 
-            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button,"scaleY",1f);
+            ObjectAnimator anim2 = ObjectAnimator.ofFloat(button, "scaleY", 1f);
             anim2.setDuration(100);
             anim2.start();
         }
