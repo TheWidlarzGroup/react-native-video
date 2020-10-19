@@ -1009,7 +1009,7 @@ static int const RCTVideoUnset = -1;
     AVMediaSelectionGroup *group = [_player.currentItem.asset
                                     mediaSelectionGroupForMediaCharacteristic:characteristic];
     AVMediaSelectionOption *mediaOption;
-    bool isDisabled = NO;
+    BOOL isDisabled = NO;
     if ([type isEqualToString:@"disabled"]) {
       // Do nothing. We want to ensure option is nil
       isDisabled = YES;
