@@ -1009,10 +1009,9 @@ static int const RCTVideoUnset = -1;
     AVMediaSelectionGroup *group = [_player.currentItem.asset
                                     mediaSelectionGroupForMediaCharacteristic:characteristic];
     AVMediaSelectionOption *mediaOption;
-    BOOL isDisabled = NO;
+
     if ([type isEqualToString:@"disabled"]) {
       // Do nothing. We want to ensure option is nil
-      isDisabled = YES;
     } else if ([type isEqualToString:@"language"] || [type isEqualToString:@"title"]) {
         NSString *value = criteria[@"value"];
         for (int i = 0; i < group.options.count; ++i) {
@@ -1043,11 +1042,6 @@ static int const RCTVideoUnset = -1;
       [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
       return;
     }
-    
-    // Make sure that the empty VTT track is enabled when it received: type = disabled
-  if (isDisabled) {
-    [_player.currentItem.tracks[_player.currentItem.tracks.count - 1] setEnabled:YES];
-  }
   
     // If a match isn't found, option will be nil and text tracks will be disabled
     [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
@@ -1082,9 +1076,10 @@ static int const RCTVideoUnset = -1;
   }
   
   int selectedTrackIndex = RCTVideoUnset;
-  
+  BOOL isDisabled = NO;
   if ([type isEqualToString:@"disabled"]) {
     // Do nothing. We want to ensure option is nil
+    isDisabled = YES;
   } else if ([type isEqualToString:@"language"]) {
     NSString *selectedValue = _selectedTextTrack[@"value"];
     for (int i = 0; i < textTracks.count; ++i) {
@@ -1137,6 +1132,10 @@ static int const RCTVideoUnset = -1;
     [_player.currentItem.tracks[i] setEnabled:isEnabled];
   }
 
+    // Make sure that the empty VTT track is enabled when it received: type = disabled
+  if (isDisabled) {
+    [_player.currentItem.tracks[_player.currentItem.tracks.count - 1] setEnabled:YES];
+  }
 }
 
 -(void) setStreamingText {
