@@ -15,5 +15,7 @@
 @interface RCTVideoPlayerViewController : AVPlayerViewController <AVDorisDelegate, AVPlayerViewControllerDelegate>
 @property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
 @property (nonatomic, strong) UIView *adView;
+@property (nonatomic, strong) UILabel *adCountdownLabel;
+@property (nonatomic, strong) UIView *adCountdownView;
 @property(nonatomic, getter=isAdBreakActive) BOOL adBreakActive;
 @end

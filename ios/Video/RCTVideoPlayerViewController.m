@@ -13,6 +13,7 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
 - (void)viewDidLoad {
   [super viewDidLoad];
   [self setupAdView];
+  [self setupAdCountdownView];
   _conditionLock = [[NSConditionLock alloc] initWithCondition:kConditionLockWaitingPlayerItem];
 }
 
@@ -27,15 +28,43 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
   self.adView.frame = self.view.frame;
 }
 
--(void)setupAdView {
+- (void)setupAdView {
   self.adView = [UIView new];
   self.adView.backgroundColor = [UIColor clearColor];
-  self.adView.hidden = YES;
+  self.adView.hidden = NO;
   self.delegate = self;
-  [self.adView setTranslatesAutoresizingMaskIntoConstraints:NO];
   
   [self.view addSubview:self.adView];
 }
+
+- (void)setupAdCountdownView {
+  self.adCountdownLabel = [UILabel new];
+  self.adCountdownLabel.font = [UIFont boldSystemFontOfSize:36];
+  self.adCountdownLabel.textColor = UIColor.whiteColor;
+  self.adCountdownLabel.translatesAutoresizingMaskIntoConstraints = NO;
+  
+  self.adCountdownView = [UIView new];
+  self.adCountdownView.backgroundColor = [UIColor.grayColor colorWithAlphaComponent:0.5];
+  self.adCountdownView.layer.cornerRadius = 5;
+  self.adCountdownView.clipsToBounds = YES;
+  self.adCountdownView.translatesAutoresizingMaskIntoConstraints = NO;
+  
+  [self.adCountdownView addSubview:self.adCountdownLabel];
+  [self.adView addSubview:self.adCountdownView];
+  
+  NSLayoutConstraint *left1 = [NSLayoutConstraint constraintWithItem:self.adCountdownLabel attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.adCountdownView attribute:NSLayoutAttributeLeft multiplier:1 constant:20];
+  NSLayoutConstraint *bottom1 = [NSLayoutConstraint constraintWithItem:self.adCountdownLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.adCountdownView attribute:NSLayoutAttributeBottom multiplier:1 constant:-20];
+  NSLayoutConstraint *right1 = [NSLayoutConstraint constraintWithItem:self.adCountdownLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.adCountdownView attribute:NSLayoutAttributeRight multiplier:1 constant:-20];
+  NSLayoutConstraint *top1 = [NSLayoutConstraint constraintWithItem:self.adCountdownLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.adCountdownView attribute:NSLayoutAttributeTop multiplier:1 constant:20];
+  
+  [self.adCountdownView addConstraints:@[left1, bottom1, right1, top1]];
+  
+  NSLayoutConstraint *left = [NSLayoutConstraint constraintWithItem:self.adCountdownView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.adView attribute:NSLayoutAttributeLeft multiplier:1 constant:40];
+  NSLayoutConstraint *bottom = [NSLayoutConstraint constraintWithItem:self.adCountdownView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.adView attribute:NSLayoutAttributeBottom multiplier:1 constant:-40];
+  
+  [self.adView addConstraints:@[left, bottom]];
+}
+
 
 - (void)avdoris:(AVDoris *)avdoris didReceive:(enum AVDorisEvent)event payload:(id)payload {
     switch (event) {
@@ -76,15 +105,22 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
             }
             break;
         case AVDorisEventREQUIRE_AD_TAG_PARAMETERS:
-            NSLog(@"Hello");
+            if ([payload isKindOfClass:[RequireAdTagParametersData class]]) {
+              RequireAdTagParametersData *data = payload;
+              [self.rctDelegate didRequestAdTagParametersUpdate:data.date.timeIntervalSince1970];
+            }
             break;
+        case AVDorisEventAD_PROGRESS_CHANGED:
+            if ([payload isKindOfClass:[AdProgressChangedData class]]) {
+                AdProgressChangedData *data = payload;
+              self.adCountdownLabel.text = [self countDownLabelTextFormatted:data];
+            }
         default:
             break;
     }
 }
 
 #pragma mark - UIFocusEnvironment
-
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
     if (self.isAdBreakActive) {
         // Send focus to the ad display container during an ad break.
@@ -98,6 +134,22 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
         // Send focus to the content player otherwise.
         return @[ self ];
     }
+}
+
+- (void)playerViewController:(AVPlayerViewController *)playerViewController willTransitionToVisibilityOfTransportBar:(BOOL)visible withAnimationCoordinator:(id<AVPlayerViewControllerAnimationCoordinator>)coordinator {
+  if (@available(tvOS 11.0, *)) {
+    [coordinator addCoordinatedAnimations:^{
+      if (visible) {
+        [self.adCountdownView setAlpha:0];
+      } else {
+        [self.adCountdownView setAlpha:1];
+      }
+    } completion:^(BOOL finished) {
+      [self.adCountdownView setHidden:visible];
+    }];
+  } else {
+    [self.adCountdownView setHidden:visible];
+  }
 }
 
 - (void)playerViewController:(AVPlayerViewController *)playerViewController
@@ -116,6 +168,26 @@ willResumePlaybackAfterUserNavigatedFromTime:(CMTime)oldTime
     }
   } else {
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  }
+}
+
+- (NSString *)countDownLabelTextFormatted:(AdProgressChangedData *)data {
+  int totalSeconds = (int)data.adDuration % 60;
+  int totalMinutes = (int)(data.adDuration / 60) % 60;
+  int totalHours = (int)data.adDuration / 3600;
+  
+  int currentSeconds = (int)data.time % 60;
+  int currentMinutes = (int)(data.time / 60) % 60;
+  int currentHours = (int)data.time / 3600;
+  
+  int resultSeconds = totalSeconds - currentSeconds;
+  int resultMinutes = totalMinutes - currentMinutes;
+  int resultHours = totalHours - currentHours;
+  
+  if (resultHours == 0) {
+    return [NSString stringWithFormat:@"Ad %d of %d : (%02d:%02d)", (int)data.adPosition, (int)data.totalAds, resultMinutes, resultSeconds];
+  } else {
+    return [NSString stringWithFormat:@"Ad %d of %d : (%02d:%02d:%02d)", (int)data.adPosition, (int)data.totalAds, resultHours, resultMinutes, resultSeconds];
   }
 }
 
