@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.Cache;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
