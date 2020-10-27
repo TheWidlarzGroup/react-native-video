@@ -1249,6 +1249,8 @@ Seek to the specified position represented by seconds. seconds is a float value.
 
 `seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
+Calling `seek(seconds)` will not result in an [onSeek](#onseek) event if the video's current time was already equal to `seconds`. This may have surprising results if you are keeping track of the video's seek state: not every call to `seek()` will result in an `onSeek` event.
+
 Example:
 ```
 this.player.seek(200); // Seek to 3 minutes, 20 seconds
