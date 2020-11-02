@@ -49,6 +49,7 @@ import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
 import com.diceplatform.doris.ui.DorisPlayerView;
+import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -136,6 +137,7 @@ class ReactTVExoplayerView extends RelativeLayout
     private ImageButton scheduleButton;
     private ImageButton statsButton;
 
+    private ExoDorisPlayerView exoDorisPlayerView;
     private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
     private ExoDoris player;
@@ -316,7 +318,12 @@ class ReactTVExoplayerView extends RelativeLayout
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
-        addView(exoPlayerView, 0, layoutParams);
+//        addView(exoPlayerView, 0, layoutParams);
+//        setLayoutTransition(new LayoutTransition());
+
+        exoDorisPlayerView = new ExoDorisPlayerView(getContext());
+        exoDorisPlayerView.setLayoutParams(layoutParams);
+        addView(exoDorisPlayerView, 0, layoutParams);
         setLayoutTransition(new LayoutTransition());
 
         if (areControlsVisible) {
@@ -537,7 +544,7 @@ class ReactTVExoplayerView extends RelativeLayout
                 exoDorisImaWrapper = new ExoDorisImaWrapper(
                         getContext(),
                         exoDorisImaPlayer,
-                        exoPlayerView.getAdViewGroup(),
+                        exoDorisPlayerView.getAdViewGroup(),
                         ImaLanguage.SPANISH_UNITED_STATES);
                 player = exoDorisImaPlayer.getExoDoris();
                 trackSelector = exoDorisImaPlayer.getTrackSelector();
@@ -548,7 +555,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             player.addListener(this);
             player.addMetadataOutput(this);
-            exoPlayerView.setPlayer(player.getSimpleExoPlayer(), false);
+            exoDorisPlayerView.setPlayer(player.getSimpleExoPlayer());
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -582,7 +589,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     .setExtension(extension)
                     .setTitle(title)
                     .setIsLive(isLive)
-                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView())
+                    .setMuxData(muxData, exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(getTextTracks())
                     .build();
 
@@ -1348,7 +1355,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
-        exoPlayerView.setResizeMode(resizeMode);
+        exoDorisPlayerView.setResizeMode(resizeMode);
     }
 
     public void setRepeatModifier(boolean repeat) {
@@ -1700,7 +1707,7 @@ class ReactTVExoplayerView extends RelativeLayout
         super.onLayout(changed, l, t, r, b);
 
         if (player != null) {
-            player.setVideoSurfaceView(exoPlayerView.getVideoSurfaceView());
+            player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
         }
     }
 
