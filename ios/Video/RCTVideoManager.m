@@ -59,6 +59,31 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
 
+RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            NSDateFormatter* dateFormatter = [NSDateFormatter new];
+            dateFormatter.locale = [NSLocale currentLocale];
+            dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+            
+            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
+                NSTimeInterval timeIntervalFromLive = [[dateFormatter dateFromString:isoDate] timeIntervalSinceDate:[NSDate new]];
+                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
+                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
+                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
+                CGFloat livePosition = seekableStart + seekableDuration;
+                
+                NSDictionary *info = @{
+                    @"time": [NSNumber numberWithFloat:livePosition - timeIntervalFromLive],
+                    @"tolerance": [NSNumber numberWithInt:100]
+                };
+                [view setSeek:info];
+            }
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(seekToNow:(nonnull NSNumber *)node) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         RCTVideo *view = (RCTVideo *)viewRegistry[node];
