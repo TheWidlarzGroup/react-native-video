@@ -41,5 +41,6 @@
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player;
+- (void)setSeek:(NSDictionary *)info;
 
 @end
