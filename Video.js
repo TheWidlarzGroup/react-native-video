@@ -211,7 +211,7 @@ export default class Video extends Component {
     }
 
     if (this.refPlayer?.current) {
-      NtiveModules.UIManager.dispatchViewManagerCommand(
+      NativeModules.UIManager.dispatchViewManagerCommand(
         findNodeHandle(this.refPlayer.current),
         NativeModules.UIManager.RCTVideo.Commands[command],
         args
