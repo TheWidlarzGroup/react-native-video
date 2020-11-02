@@ -4,6 +4,7 @@ import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, 
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import VideoResizeMode from './VideoResizeMode.js';
+import VideoPlayerSeekToCommand from './VideoPlayerSeekToCommand';
 
 const styles = StyleSheet.create({
   base: {
@@ -187,6 +188,34 @@ export default class Video extends Component {
   _onBuffer = (event) => {
     if (this.props.onBuffer) {
       this.props.onBuffer(event.nativeEvent);
+    }
+  };
+
+  /**
+   * seekTo jumps to a certain position for vod and live content
+   * time parameter can be the following:
+   * string: unix timestamp (used for live annotation)
+   * number: seconds elapsed (used for vod annotation)
+   * now: for DVR content to jump back to current live time
+   */
+  seekTo = (time) => {
+    let command = VideoPlayerSeekToCommand.SEEK_TO_NOW;
+    let args = [];
+
+    if (time !== 'now') {
+      command =
+        typeof time === 'string'
+          ? VideoPlayerSeekToCommand.SEEK_TO_TIMESTAMP
+          : VideoPlayerSeekToCommand.SEEK_TO_POSITION;
+      args.push(time);
+    }
+
+    if (this.refPlayer?.current) {
+      NtiveModules.UIManager.dispatchViewManagerCommand(
+        findNodeHandle(this.refPlayer.current),
+        NativeModules.UIManager.RCTVideo.Commands[command],
+        args
+      );
     }
   };
 
