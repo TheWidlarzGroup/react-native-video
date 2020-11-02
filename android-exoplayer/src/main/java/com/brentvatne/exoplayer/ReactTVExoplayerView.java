@@ -73,6 +73,7 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
@@ -89,10 +90,13 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
@@ -1415,6 +1419,51 @@ class ReactTVExoplayerView extends RelativeLayout
         if (player != null) {
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
             player.seekTo(positionMs);
+        }
+    }
+
+    public void seekTo(String timestamp) {
+        Locale currentLocale = getCurrentLocale();
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, currentLocale);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        try {
+            Date seekPosition = simpleDateFormat.parse(timestamp);
+            long dateTimeSeekPositionMs = seekPosition.getTime();
+
+            Timeline timeline = player.getCurrentTimeline();
+
+            if (!timeline.isEmpty()) {
+                long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
+                if (windowStartTimeMs != C.TIME_UNSET) {
+                    long seekPositionInWindowMs = dateTimeSeekPositionMs - windowStartTimeMs;
+                    long duration = player.getDuration();
+
+                    if (seekPositionInWindowMs > 0 && seekPositionInWindowMs <= duration) {
+                        seekTo(seekPositionInWindowMs);
+                    } else {
+                        Log.e(TAG, "The provided timestamp, " + timestamp + ", is either " +
+                                "before the start of the stream or the difference between the " +
+                                "current time and the provided timestamp is greater than the " +
+                                "duration of the content.");
+                    }
+                } else {
+                    Log.e(TAG, "HLS playlist doesn't have an EXT-X-PROGRAM-DATE-TIME tag.");
+                }
+            }
+        } catch (ParseException e) {
+            Log.e(TAG, "Unable to parse provided timestamp, " + timestamp +
+                    ". Timestamp should be of the format \"2020-01-01T00:00:00.000000Z\".");
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private Locale getCurrentLocale() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return getResources().getConfiguration().getLocales().get(0);
+        } else {
+            return getResources().getConfiguration().locale;
         }
     }
 
