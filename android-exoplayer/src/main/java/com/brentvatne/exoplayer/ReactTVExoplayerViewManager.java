@@ -15,6 +15,7 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.imggaming.translations.DiceLocalizedStrings;
@@ -72,6 +73,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_TRANSLATIONS = "translations";
     private static final String PROP_LABEL_FONT_NAME = "labelFontName";
+
+    private static final int COMMAND_SEEK_TO_NOW = 1;
+    private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
+    private static final int COMMAND_SEEK_TO_POSITION = 3;
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -180,7 +185,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         Dynamic value = null;
         if (selectedAudioTrack != null) {
             typeString = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_TYPE)
-                    ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
+                         ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
             value = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_VALUE)
                     ? selectedAudioTrack.getDynamic(PROP_SELECTED_AUDIO_TRACK_VALUE) : null;
         }
@@ -194,7 +199,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         Dynamic value = null;
         if (selectedTextTrack != null) {
             typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
-                    ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
+                         ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
             value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
                     ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
         }
@@ -294,13 +299,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
         if (bufferConfig != null) {
             minBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MS)
-                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MIN_BUFFER_MS) : minBufferMs;
+                          ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MIN_BUFFER_MS) : minBufferMs;
             maxBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MAX_BUFFER_MS)
-                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MAX_BUFFER_MS) : maxBufferMs;
+                          ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MAX_BUFFER_MS) : maxBufferMs;
             bufferForPlaybackMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS)
-                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
+                                  ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
-                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
+                                               ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
     }
@@ -379,5 +384,34 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
 
         return result;
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        return MapBuilder.of(
+                "seekToNow",
+                COMMAND_SEEK_TO_NOW,
+                "seekToTimestamp",
+                COMMAND_SEEK_TO_TIMESTAMP,
+                "seekToPosition",
+                COMMAND_SEEK_TO_POSITION
+        );
+    }
+
+    @Override
+    public void receiveCommand(final ReactTVExoplayerView root, int commandId, @Nullable ReadableArray args) {
+        // This will be called whenever a command is sent from react-native.
+        switch (commandId) {
+            case COMMAND_SEEK_TO_NOW:
+                root.seekTo(C.TIME_UNSET);
+                break;
+            case COMMAND_SEEK_TO_TIMESTAMP:
+                root.seekTo(args.getString(0));
+                break;
+            case COMMAND_SEEK_TO_POSITION:
+                root.seekTo(args.getInt(0));
+                break;
+        }
     }
 }
