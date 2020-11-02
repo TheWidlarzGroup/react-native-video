@@ -59,6 +59,39 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
 
+RCT_EXPORT_METHOD(seekToNow:(nonnull NSNumber *)node) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
+                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
+                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
+                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
+                CGFloat livePosition = seekableStart + seekableDuration;
+                
+                NSDictionary *info = @{
+                    @"time": [NSNumber numberWithFloat:livePosition],
+                    @"tolerance": [NSNumber numberWithInt:100]
+                };
+                [view setSeek:info];
+            }
+        }
+    }];
+};
+
+RCT_EXPORT_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            NSDictionary *info = @{
+                @"time": [NSNumber numberWithFloat:position],
+                @"tolerance": [NSNumber numberWithInt:100]
+            };
+            [view setSeek:info];
+        }
+    }];
+};
+    
 RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary *)payload) {
   [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
     RCTVideo *view = (RCTVideo *)viewRegistry[node];
