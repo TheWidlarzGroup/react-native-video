@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform} from 'react-native';
+import {StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import VideoResizeMode from './VideoResizeMode.js';
@@ -210,9 +210,9 @@ export default class Video extends Component {
       args.push(time);
     }
 
-    if (this.refPlayer?.current) {
+    if (this._root) {
       NativeModules.UIManager.dispatchViewManagerCommand(
-        findNodeHandle(this.refPlayer.current),
+        findNodeHandle(this._root),
         NativeModules.UIManager.RCTVideo.Commands[command],
         args
       );
