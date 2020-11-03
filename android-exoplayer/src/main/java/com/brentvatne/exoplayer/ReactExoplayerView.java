@@ -255,7 +255,7 @@ class ReactExoplayerView extends FrameLayout implements
   }
 
   @Override
-  public void onKeysGenerated(final SecretKeySpec key, final IvParameterSpec ivParameterSpec) {
+  public void onKeysGenerated(SecretKeySpec key, IvParameterSpec ivParameterSpec) {
        mainHandler.post(new Runnable() {
         @Override
         public void run() {
