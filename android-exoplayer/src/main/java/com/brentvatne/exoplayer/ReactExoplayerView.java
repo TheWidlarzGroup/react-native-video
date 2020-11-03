@@ -254,6 +254,29 @@ class ReactExoplayerView extends FrameLayout implements
     ivParam = null;
   }
 
+  @Override
+  public void onKeysGenerated(final SecretKeySpec key, final IvParameterSpec ivParameterSpec) {
+       mainHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          ReactExoplayerView.this.key = key;
+          ReactExoplayerView.this.ivParam = ivParameterSpec;
+          initializePlayer();
+        }
+      });
+
+  }
+
+  @Override
+  public void ifKeyNotRequired() {
+    mainHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          initializePlayer();
+        }
+      });
+  }
+
 
     @Override
     public void setId(int id) {
