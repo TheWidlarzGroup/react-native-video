@@ -2,6 +2,7 @@
 #import "RCTVideo.h"
 #import <React/RCTBridge.h>
 #import <AVFoundation/AVFoundation.h>
+#import <React/RCTUIManager.h>
 
 @implementation RCTVideoManager
 
@@ -56,6 +57,99 @@ RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
+
+RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            NSDateFormatter* dateFormatter = [NSDateFormatter new];
+            dateFormatter.locale = [NSLocale currentLocale];
+            dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+            
+            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
+                NSTimeInterval timeIntervalFromLive = [[dateFormatter dateFromString:isoDate] timeIntervalSinceDate:[NSDate new]];
+                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
+                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
+                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
+                CGFloat livePosition = seekableStart + seekableDuration;
+                
+                NSDictionary *info = @{
+                    @"time": [NSNumber numberWithFloat:livePosition - timeIntervalFromLive],
+                    @"tolerance": [NSNumber numberWithInt:100]
+                };
+                [view setSeek:info];
+            }
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(seekToNow:(nonnull NSNumber *)node) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
+                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
+                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
+                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
+                CGFloat livePosition = seekableStart + seekableDuration;
+                
+                NSDictionary *info = @{
+                    @"time": [NSNumber numberWithFloat:livePosition],
+                    @"tolerance": [NSNumber numberWithInt:100]
+                };
+                [view setSeek:info];
+            }
+        }
+    }];
+};
+
+RCT_EXPORT_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTVideo *view = (RCTVideo *)viewRegistry[node];
+        if ([view isKindOfClass:[RCTVideo class]]) {
+            NSDictionary *info = @{
+                @"time": [NSNumber numberWithFloat:position],
+                @"tolerance": [NSNumber numberWithInt:100]
+            };
+            [view setSeek:info];
+        }
+    }];
+};
+    
+RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary *)payload) {
+  [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+    RCTVideo *view = (RCTVideo *)viewRegistry[node];
+    if ([view isKindOfClass:[RCTVideo class]]) {
+      NSMutableDictionary* _adTagParameters = [NSMutableDictionary new];
+      NSDate *_Nullable _startDate;
+      NSDate *_Nullable _endDate;
+      
+      id adTagParameters = [payload objectForKey:@"adTagParameters"];
+      id startDate = [payload objectForKey:@"startDate"];
+      id endDate = [payload objectForKey:@"endDate"];
+
+      if (adTagParameters &&
+          [adTagParameters isKindOfClass:NSDictionary.class]) {
+        _adTagParameters = adTagParameters;
+      }
+      
+      if (startDate &&
+          [startDate isKindOfClass:NSNumber.class]) {
+        _startDate = [[NSDate alloc] initWithTimeIntervalSince1970:[startDate doubleValue]];
+      }
+      
+      if (endDate &&
+          [endDate isKindOfClass:NSNumber.class]) {
+        _endDate = [[NSDate alloc] initWithTimeIntervalSince1970:[endDate doubleValue]];
+      }
+      
+      [view.player replaceAdTagParametersWithAdTagParameters:_adTagParameters
+                                                   validFrom: _startDate
+                                                  validUntil:_endDate];
+    }
+  }];
+};
 
 - (NSDictionary *)constantsToExport
 {

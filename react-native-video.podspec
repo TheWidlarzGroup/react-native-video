@@ -25,4 +25,5 @@ Pod::Spec.new do |s|
   s.dependency 'dice-shield-ios'
   s.dependency 'ReactVideoSubtitleSideloader_tvOS'
   s.dependency 'React'
+  s.dependency 'AVDoris'
 end

@@ -1,13 +1,25 @@
 #import "RCTVideoPlayerViewController.h"
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/AdSupport.h>
+
+static NSString *const currentItem = @"currentItem";
+const NSInteger kConditionLockWaitingPlayerItem = 0;
+const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
 
 @interface RCTVideoPlayerViewController ()
-
+@property (nonatomic, retain) NSConditionLock *conditionLock;
 @end
 
 @implementation RCTVideoPlayerViewController
 
-- (void)viewDidDisappear:(BOOL)animated
-{
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  [self setupAdView];
+  [self setupAdCountdownView];
+  _conditionLock = [[NSConditionLock alloc] initWithCondition:kConditionLockWaitingPlayerItem];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
   [_rctDelegate videoPlayerViewControllerWillDismiss:self];
   [_rctDelegate videoPlayerViewControllerDidDismiss:self];
