@@ -5,6 +5,7 @@ import { IVideoPlayerCallbacks } from './callbacks';
 import { VideoResizeMode } from './resizeMode';
 import { IVideoPlayerSource } from './source';
 import { IVideoPlayerTranslations } from './translations';
+import { IVideoPlayerTheme } from './theme';
 
 export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   audioOnly?: boolean;
@@ -20,6 +21,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   playInBackground: boolean;
   source: IVideoPlayerSource;
   resizeMode: VideoResizeMode;
+  theme: IVideoPlayerTheme;
   translations: IVideoPlayerTranslations;
   stateMiddleCoreControls: string;
 }
