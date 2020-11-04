@@ -595,6 +595,8 @@ class ReactTVExoplayerView extends RelativeLayout
             String title = (String) muxData.get("videoTitle");
             Boolean isLive = (Boolean) muxData.get("videoIsLive");
 
+            exoDorisPlayerView.setTitle(title);
+
             Source source = new SourceBuilder(srcUri, id)
                     .setExtension(extension)
                     .setTitle(title)
@@ -1906,6 +1908,7 @@ class ReactTVExoplayerView extends RelativeLayout
 //        }
 //
 //        return super.dispatchKeyEvent(event);
+
         return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
     }
 
