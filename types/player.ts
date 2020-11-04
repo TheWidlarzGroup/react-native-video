@@ -1,9 +1,9 @@
-import { ViewProps } from "react-native";
+import { ViewProps } from 'react-native';
 
-import { IVideoPlayerButtons } from "./buttons";
-import { IVideoPlayerCallbacks } from "./callbacks";
-import { VideoResizeMode } from "./resizeMode";
-import { IVideoPlayerSource } from "./source";
+import { IVideoPlayerButtons } from './buttons';
+import { IVideoPlayerCallbacks } from './callbacks';
+import { VideoResizeMode } from './resizeMode';
+import { IVideoPlayerSource } from './source';
 
 export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   audioOnly?: boolean;
@@ -22,5 +22,3 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   translations: IVideoPlayerTranslations;
   stateMiddleCoreControls: string;
 }
-
-

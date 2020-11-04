@@ -1,8 +1,8 @@
-import { IVideoPlayerDRM } from "./drm";
-import { IVideoPlayerIMA } from "./ima";
-import { IVideoPlayerMetadata } from "./metadata";
-import { IMuxData } from "./mux";
-import { IVideoPlayerSubtitles } from "./subtitles";
+import { IVideoPlayerDRM } from './drm';
+import { IVideoPlayerIMA } from './ima';
+import { IVideoPlayerMetadata } from './metadata';
+import { IMuxData } from './mux';
+import { IVideoPlayerSubtitles } from './subtitles';
 
 type SourceType = 'mpd' | 'm3u8';
 
