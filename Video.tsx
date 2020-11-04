@@ -90,7 +90,7 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
   };
 
   onBuffer = (event) => {
-    this.props?.onBuffer(event.nativeEvent);
+    this.props.onBuffer?.(event.nativeEvent);
   };
 
   /**
@@ -102,14 +102,14 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
    */
   seekTo = (time: 'now' | string | number) => {
     let command = SeekToCommand.SEEK_TO_NOW;
-    let args = [];
+    let args: string[] = [];
 
     if (time !== 'now') {
       command =
         typeof time === 'string'
           ? SeekToCommand.SEEK_TO_TIMESTAMP
           : SeekToCommand.SEEK_TO_POSITION;
-      args.push(time);
+      args.push(time as string);
     }
 
     if (this.refPlayer) {
@@ -133,6 +133,7 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
     } else {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleNone;
     }
+    return nativeResizeMode;
   }
 
   render() {
