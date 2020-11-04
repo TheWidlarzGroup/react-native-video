@@ -1,4 +1,4 @@
-import { ViewProps } from 'react-native';
+import { ImageProps, ViewProps } from 'react-native';
 
 import { IVideoPlayerButtons } from './buttons';
 import { IVideoPlayerCallbacks } from './callbacks';
@@ -6,22 +6,33 @@ import { VideoResizeMode } from './resizeMode';
 import { IVideoPlayerSource } from './source';
 import { IVideoPlayerTranslations } from './translations';
 import { IVideoPlayerTheme } from './theme';
+import { IVideoBufferConfig } from './buffer';
 
 export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   audioOnly?: boolean;
-  buttons: IVideoPlayerButtons;
+  bufferConfig?: IVideoBufferConfig;
+  buttons?: IVideoPlayerButtons;
   colorProgressBar?: string
-  controls: boolean;
-  hasEpg: boolean;
-  hasStats: boolean;
-  isFavourite: boolean;
+  controls?: boolean;
+  disableFocus?: boolean;
+  hasEpg?: boolean;
+  hasStats?: boolean;
+  height?: number;
+  isFavourite?: boolean;
   labelFontName?: string;
-  live: boolean;
-  overlayAutoHideTimeout: number,
+  live?: boolean;
+  mediaKeys?: boolean;
+  muted?: true;
+  overlayAutoHideTimeout: number;
+  poster?: string;
+  paused?: boolean;
   playInBackground: boolean;
   source: IVideoPlayerSource;
   resizeMode: VideoResizeMode;
-  theme: IVideoPlayerTheme;
-  translations: IVideoPlayerTranslations;
-  stateMiddleCoreControls: string;
+  repeat?: boolean;
+  theme?: IVideoPlayerTheme;
+  translations?: IVideoPlayerTranslations;
+  stateMiddleCoreControls?: string;
+  selectedAudioTrack?: any // TODO
+  width?: number;
 }
