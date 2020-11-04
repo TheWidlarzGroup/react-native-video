@@ -13,7 +13,7 @@ export interface IVideoPlayerSource {
   drm?: IVideoPlayerDRM;
   ima?: IVideoPlayerIMA;
   metadata?: IVideoPlayerMetadata;
-  config: {
+  config?: {
     muxData: IMuxData
   },
   mainVer?: number;
