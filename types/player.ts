@@ -4,6 +4,7 @@ import { IVideoPlayerButtons } from './buttons';
 import { IVideoPlayerCallbacks } from './callbacks';
 import { VideoResizeMode } from './resizeMode';
 import { IVideoPlayerSource } from './source';
+import { IVideoPlayerTranslations } from './translations';
 
 export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   audioOnly?: boolean;
@@ -12,7 +13,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   controls: boolean;
   hasEpg: boolean;
   hasStats: boolean;
-  isFavourites: boolean;
+  isFavourite: boolean;
   labelFontName?: string;
   live: boolean;
   overlayAutoHideTimeout: number,

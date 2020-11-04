@@ -142,8 +142,9 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
 
 
     return (
-      <RCTVideo 
-        ref={this.assignRoot} 
+      <RCTVideo
+        {...this.props}
+        ref={this.assignRoot}
         style={[styles.base, this.props.style]}
         resizeMode={this.getNativeResizeMode()}
         src={{
@@ -151,7 +152,7 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
           isAsset,
           ...source,
           mainVer: source.mainVer || 0,
-          patchVer: source.patchVer || 0,      
+          patchVer: source.patchVer || 0,
         }}
         onVideoLoadStart={this.onLoadStart}
         onVideoLoad={this.onLoad}
@@ -166,7 +167,7 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
         onPlaybackResume={this.onPlaybackResume}
         onPlaybackRateChange={this.onPlaybackRateChange}
       />
-    )
+    );
   }
 }
 
