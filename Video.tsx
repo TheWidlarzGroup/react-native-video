@@ -46,51 +46,47 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
   };
 
   onLoadStart = (event) => {
-    this.props?.onLoadStart(event.nativeEvent);
+    this.props.onLoadStart?.(event.nativeEvent);
   };
 
   onLoad = (event) => {
-    this.props?.onLoad(event.nativeEvent);
+    this.props.onLoad?.(event.nativeEvent);
   };
 
   onError = (event) => {
-    this.props?.onError(event.nativeEvent);
+    this.props.onError?.(event.nativeEvent);
   };
 
   onProgress = (event) => {
-    this.props?.onProgress(event.nativeEvent);
+    this.props.onProgress?.(event.nativeEvent);
   };
 
   onSeek = (event) => {
-    this.props?.onSeek(event.nativeEvent);
+    this.props.onSeek?.(event.nativeEvent);
   };
 
   onEnd = (event) => {
-    if (this.props.onEnd) {
-      this.props.onEnd(event.nativeEvent);
-    }
+    this.props.onEnd?.(event.nativeEvent);
   };
 
   onTimedMetadata = (event) => {
-    this.props?.onTimedMetadata(event.nativeEvent);
+    this.props.onTimedMetadata?.(event.nativeEvent);
   };
 
   onReadyForDisplay = (event) => {
-    this.props?.onReadyForDisplay(event.nativeEvent);
+    this.props.onReadyForDisplay?.(event.nativeEvent);
   };
 
   onPlaybackStalled = (event) => {
-    if (this.props.onPlaybackStalled) {
-      this.props.onPlaybackStalled(event.nativeEvent);
-    }
+    this.props.onPlaybackStalled?.(event.nativeEvent);
   };
 
   onPlaybackResume = (event) => {
-    this.props?.onPlaybackResume(event.nativeEvent);
+    this.props.onPlaybackResume?.(event.nativeEvent);
   };
 
   onPlaybackRateChange = (event) => {
-    this.props?.onPlaybackRateChange(event.nativeEvent);
+    this.props.onPlaybackRateChange?.(event.nativeEvent);
   };
 
   onBuffer = (event) => {
