@@ -1,4 +1,4 @@
-import { IVideoPlayerIMA } from "../types/VideoPlayer";
+import { IVideoPlayerIMA } from "../types/ima";
 
 export const isIMAStream = (url: string): boolean => {
   return url.startsWith('https://dai.google.com');
