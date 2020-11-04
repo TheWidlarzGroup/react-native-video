@@ -124,11 +124,11 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
   getNativeResizeMode = () => {
     const { resizeMode } = this.props;
     let nativeResizeMode;
-    if (resizeMode === VideoResizeMode.STRETCH) {
+    if (resizeMode === 'stretch') {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleToFill;
-    } else if (resizeMode === VideoResizeMode.CONTAIN) {
+    } else if (resizeMode === 'contain') {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFit;
-    } else if (resizeMode === VideoResizeMode.COVER) {
+    } else if (resizeMode === 'cover') {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleAspectFill;
     } else {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleNone;

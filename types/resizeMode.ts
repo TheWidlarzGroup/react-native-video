@@ -1,5 +1,1 @@
-export enum VideoResizeMode {
-  CONTAIN = 'contain',
-  COVER  = 'cover',
-  STRETCH = 'stretch'
-}
+export type VideoResizeMode = 'contain' | 'cover' | 'stretch';
