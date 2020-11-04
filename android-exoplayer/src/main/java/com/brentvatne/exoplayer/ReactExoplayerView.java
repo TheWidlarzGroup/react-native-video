@@ -100,7 +100,7 @@ class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        DrmSessionEventListener {
+        DrmSessionEventListener
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -249,10 +249,10 @@ class ReactExoplayerView extends FrameLayout implements
         clearKeys();
     }
 
-    private void clearKeys() {
-        key = null;
-        ivParam = null;
-    }
+  private void clearKeys() {
+    key = null;
+    ivParam = null;
+  }
 
 
     @Override
