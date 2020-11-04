@@ -27,7 +27,8 @@
         "react-native": "0.61.5"
     },
     "scripts": {
-        "install": "./scripts/install-dependencies && install-self-peers -- --ignore-scripts",
+        "install": "./scripts/install-dependencies",
+        "installpeers": "install-self-peers -- --ignore-scripts",
         "postinstall": "",
         "test": "node_modules/.bin/eslint *.js"
     },
