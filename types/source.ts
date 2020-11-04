@@ -8,10 +8,10 @@ type SourceType = 'mpd' | 'm3u8';
 
 export interface IVideoPlayerSource {
   uri: string;
-  subtitles: IVideoPlayerSubtitles[],
+  subtitles?: IVideoPlayerSubtitles[],
   type: SourceType;
-  drm: IVideoPlayerDRM;
-  ima: IVideoPlayerIMA;
+  drm?: IVideoPlayerDRM;
+  ima?: IVideoPlayerIMA;
   metadata: IVideoPlayerMetadata;
   config: {
     muxData: IMuxData

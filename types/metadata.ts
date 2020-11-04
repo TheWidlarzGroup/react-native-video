@@ -1,6 +1,6 @@
 export interface IVideoPlayerMetadata {
-  id: string;
-  description: string;
+  id: number;
+  description?: string;
   thumbnailUrl: string;
   title: string;
   type: string;
