@@ -111,7 +111,7 @@ import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout
-        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput, DorisPlayerView {
+        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -550,7 +550,7 @@ class ReactTVExoplayerView extends RelativeLayout
         }
         if (player == null) {
             if (isImaStream) {
-                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), this);
+                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), exoDorisPlayerView);
                 exoDorisImaWrapper = new ExoDorisImaWrapper(
                         getContext(),
                         exoDorisImaPlayer,
@@ -2041,48 +2041,5 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void applyTranslations() {
         updateLabelView(bottomBarWidget.getFocusedChild());
-    }
-
-    /**
-     * Sets the {@link ControlDispatcher}.
-     *
-     * @param controlDispatcher The {@link ControlDispatcher}, or null
-     *     to use {@link DefaultControlDispatcher}.
-     */
-    @Override
-    public void setControlDispatcher(ControlDispatcher controlDispatcher) {
-        this.controlDispatcher =
-                controlDispatcher == null ? new DefaultControlDispatcher() : controlDispatcher;
-    }
-
-    @Override
-    public void showController() {
-        setControls(true);
-        hideOverlay();
-    }
-
-    @Override
-    public void hideController() {
-        setControls(false);
-    }
-
-    @Override
-    public int getControllerShowTimeoutMs() {
-        return 0;
-    }
-
-    @Override
-    public void setControllerShowTimeoutMs(int i) {
-
-    }
-
-    @Override
-    public ViewGroup getAdViewGroup() {
-        return null;
-    }
-
-    @Override
-    public void setExtraAdGroupMarkers(@Nullable long[] longs, @Nullable boolean[] booleans) {
-
     }
 }
