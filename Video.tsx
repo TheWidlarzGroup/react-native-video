@@ -7,7 +7,9 @@ import {
   findNodeHandle,
 } from 'react-native';
 
-import { IVideoPlayer, SeekToCommand, VideoResizeMode } from './types';
+import { IVideoPlayer } from './types/player';
+import { VideoResizeMode } from './types/resizeMode';
+import { SeekToCommand } from './types/SeekToCommand';
 
 const RCTVideo = requireNativeComponent('RCTVideo');
 
