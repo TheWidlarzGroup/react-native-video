@@ -1,6 +1,7 @@
 export interface IVideoPlayerCallbacks {
   onBuffer: (e: any) => void;
   onEnd: (e: any) => void;
+  onEpgIconClick: (e: any) => void;
   onError: (e: any) => void;
   onLoad: (e: any) => void;
   onLoadStart: (e: any) => void;

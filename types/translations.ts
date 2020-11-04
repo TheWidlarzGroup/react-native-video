@@ -1,4 +1,4 @@
-interface IVideoPlayerTranslations {
+export interface IVideoPlayerTranslations {
   player_epg_button: string;
   player_stats_button: string;
   player_play_button: string;
