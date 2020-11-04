@@ -201,4 +201,8 @@ willResumePlaybackAfterUserNavigatedFromTime:(CMTime)oldTime
   }
 }
 
+- (void)dealloc {
+    [self.player removeObserver:self forKeyPath:currentItem context:nil];
+}
+
 @end
