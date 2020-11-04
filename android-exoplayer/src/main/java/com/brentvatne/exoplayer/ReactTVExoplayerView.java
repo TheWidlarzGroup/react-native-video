@@ -468,7 +468,7 @@ class ReactTVExoplayerView extends RelativeLayout
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                          MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
     }
@@ -560,7 +560,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             player.addListener(this);
             player.addMetadataOutput(this);
-            exoDorisPlayerView.setPlayer(player.getSimpleExoPlayer());
+            exoDorisPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -1107,7 +1107,7 @@ class ReactTVExoplayerView extends RelativeLayout
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getAudioTrackInfo(), getTextTrackInfo());
+                              getAudioTrackInfo(), getTextTrackInfo());
         }
     }
 
@@ -1232,10 +1232,10 @@ class ReactTVExoplayerView extends RelativeLayout
                     errorString = getResources().getString(R.string.error_querying_decoders);
                 } else if (decoderInitializationException.secureDecoderRequired) {
                     errorString = getResources().getString(R.string.error_no_secure_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 } else {
                     errorString = getResources().getString(R.string.error_no_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
@@ -1395,9 +1395,9 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
+                                                                         .buildUpon()
+                                                                         .setRendererDisabled(rendererIndex, true)
+                                                                         .build();
 
         if (type.equals("disabled")) {
             trackSelector.setParameters(disableParameters);
@@ -1441,11 +1441,11 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
-                .build();
+                                                                           .buildUpon()
+                                                                           .setRendererDisabled(rendererIndex, false)
+                                                                           .setSelectionOverride(rendererIndex, groups,
+                                                                                                 new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
+                                                                           .build();
         trackSelector.setParameters(selectionParameters);
     }
 
@@ -1907,8 +1907,8 @@ class ReactTVExoplayerView extends RelativeLayout
         int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
 
         int indicatorX = !isRew ?
-                thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
-                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
+                         thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
+                                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
 
         int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
 
@@ -2006,28 +2006,28 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void animateHideView(final View view, int duration) {
         view.animate()
-                .alpha(0.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        view.setVisibility(View.GONE);
-                    }
-                });
+            .alpha(0.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    view.setVisibility(View.GONE);
+                }
+            });
     }
 
     public void animateShowView(final View view, int duration) {
         view.animate()
-                .alpha(1.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        view.setVisibility(View.VISIBLE);
-                    }
-                });
+            .alpha(1.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    view.setVisibility(View.VISIBLE);
+                }
+            });
     }
 
     public void applyTranslations() {
