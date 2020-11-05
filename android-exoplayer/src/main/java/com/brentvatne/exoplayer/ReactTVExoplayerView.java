@@ -32,6 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.brentvatne.entity.RNImaSource;
+import com.brentvatne.entity.RNSource;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -160,21 +162,22 @@ class ReactTVExoplayerView extends RelativeLayout
     private boolean areControlsVisible = true;
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
+    private boolean isImaStream = false;
+
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
-    private Uri srcUri;
-    private String extension;
+    private RNSource src;
+    private RNImaSource imaSrc;
     private boolean repeat;
     private String audioTrackType;
     private Dynamic audioTrackValue;
     private ReadableArray audioTracks;
     private String textTrackType;
     private Dynamic textTrackValue;
-    private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean live = false;
     private boolean hasEpg;
@@ -185,14 +188,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
-
-    // IMA Props
-    private boolean isImaStream = true;
-    private String assetKey;
-    private String contentSourceId;
-    private String videoId;
-    private String authToken;
-    private AdTagParameters adTagParameters;
 
     // IMA Ad Tag Parameters
     private String iu = "/7009/prendetv/";
@@ -461,7 +456,7 @@ class ReactTVExoplayerView extends RelativeLayout
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                          MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
     }
@@ -564,7 +559,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             activateMediaSession();
         }
-        if (playerNeedsSource && srcUri != null) {
+        if (playerNeedsSource && src.getUri() != null) {
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
@@ -579,16 +574,12 @@ class ReactTVExoplayerView extends RelativeLayout
 
             playerInitTime = new Date().getTime();
 
-            String id = (String) muxData.get("videoId");
-            String title = (String) muxData.get("videoTitle");
-            Boolean isLive = (Boolean) muxData.get("videoIsLive");
-
-            Source source = new SourceBuilder(srcUri, id)
-                    .setExtension(extension)
-                    .setTitle(title)
-                    .setIsLive(isLive)
-                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView())
-                    .setTextTracks(getTextTracks())
+            Source source = new SourceBuilder(src.getUri(), src.getId())
+                    .setExtension(src.getExtension())
+                    .setTitle(src.getTitle())
+                    .setIsLive(src.isLive())
+                    .setMuxData(src.getMuxData(), exoPlayerView.getVideoSurfaceView())
+                    .setTextTracks(src.getTextTracks())
                     .build();
 
             if (isImaStream) {
@@ -603,10 +594,10 @@ class ReactTVExoplayerView extends RelativeLayout
                         .build();
 
                 ImaSource imaSource = new ImaSourceBuilder(source)
-                        .setAssetKey(assetKey)
-                        .setContentSourceId(contentSourceId)
-                        .setVideoId(videoId)
-                        .setAuthToken(authToken)
+                        .setAssetKey(imaSrc.getAssetKey())
+                        .setContentSourceId(imaSrc.getContentSourceId())
+                        .setVideoId(imaSrc.getVideoId())
+                        .setAuthToken(imaSrc.getAuthToken())
                         .setAdTagParameters(adTagParameters)
                         .build();
 
@@ -632,7 +623,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     @Nullable
-    private TextTrack[] getTextTracks() {
+    private TextTrack[] getTextTracks(ReadableArray textTracks) {
         if (textTracks != null && textTracks.size() > 0) {
             TextTrack[] dorisTextTracks = new TextTrack[textTracks.size()];
             for (int i = 0; i < textTracks.size(); ++i) {
@@ -1100,7 +1091,7 @@ class ReactTVExoplayerView extends RelativeLayout
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getAudioTrackInfo(), getTextTrackInfo());
+                              getAudioTrackInfo(), getTextTrackInfo());
         }
     }
 
@@ -1225,10 +1216,10 @@ class ReactTVExoplayerView extends RelativeLayout
                     errorString = getResources().getString(R.string.error_querying_decoders);
                 } else if (decoderInitializationException.secureDecoderRequired) {
                     errorString = getResources().getString(R.string.error_no_secure_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 } else {
                     errorString = getResources().getString(R.string.error_no_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
@@ -1280,45 +1271,34 @@ class ReactTVExoplayerView extends RelativeLayout
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken,
-                       @Nullable final Map<String, String> headers, @Nullable final Map<String, Object> muxData, final ReadableArray textTracks) {
+    public void setSrc(
+            Uri uri,
+            String id,
+            String extension,
+            String title,
+            String description,
+            String type,
+            ReadableArray textTracks,
+            ActionToken actionToken,
+            Map<String, String> headers,
+            Map<String, Object> muxData,
+            String thumbnailUrl,
+            Map<String, Object> ima) {
         if (uri != null) {
+            Uri srcUri = src != null ? src.getUri() : null;
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
-            this.srcUri = uri;
-            this.extension = extension;
-            this.actionToken = actionToken;
-            this.requestHeaders = headers;
-            this.muxData = muxData;
-            this.textTracks = textTracks;
-
-            if (uri.toString().contains("https://dai.google.com")) {
+            if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;
-                if (uri.toString().contains("event")) {
-                    int indexOfEvent = uri.getPath().indexOf("event") + 6;
-                    int indexOfMaster = uri.getPath().indexOf("/master");
+                this.imaSrc = new RNImaSource(ima);
 
-                    assetKey = uri.getPath().substring(indexOfEvent, indexOfMaster);
+                if (uri.toString().contains("event")) {
                     iu += "live/androidtv/comediaspicantes";
                     custParams = neighborhood + customParams;
                     output = "xml_vast4";
                     vpa = "2";
                 } else {
-                    int indexOfContent = uri.toString().indexOf("content") + 8;
-                    int indexOfVidStart = uri.toString().indexOf("/vid");
-                    int indexOfVidEnd = indexOfVidStart + 5;
-                    int indexOfMaster = uri.toString().indexOf("/master");
-                    int indexOfAuthToken = uri.toString().indexOf("auth-token") + 11;
-
-                    contentSourceId = uri.toString().substring(indexOfContent, indexOfVidStart);
-                    videoId = uri.toString().substring(indexOfVidEnd, indexOfMaster);
-                    authToken = uri.toString().substring(indexOfAuthToken).replaceAll("%3D", "=").replaceAll("%7E", "~");
-
-//                    contentSourceId = "2535044";
-//                    videoId = "229698";
-//                    authToken = "cmsid=2535044~exp=1602944305~vid=229698~hmac=8a04fea4fd06cbf89e32dbfecd6abe95b111199fe03633a625e64cd45a4935fa";
-
                     iu += "vod/androidtv/comediaspicantes";
                     custParams = row + customParams;
                     output = "xml_vmap4";
@@ -1328,12 +1308,25 @@ class ReactTVExoplayerView extends RelativeLayout
                 this.isImaStream = false;
             }
 
+            this.src = new RNSource(
+                    uri,
+                    id,
+                    extension,
+                    title,
+                    description,
+                    type,
+                    live,
+                    getTextTracks(textTracks),
+                    headers,
+                    muxData,
+                    thumbnailUrl,
+                    null,
+                    null
+            );
+            this.actionToken = actionToken;
+
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
-    }
-
-    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final Map<String, String> headers) {
-        setSrc(uri, extension, null, headers, null, null);
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
@@ -1342,11 +1335,11 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
         if (uri != null) {
-            boolean isOriginalSourceNull = srcUri == null;
-            boolean isSourceEqual = uri.equals(srcUri);
+            boolean isOriginalSourceNull = src.getUri() == null;
+            boolean isSourceEqual = uri.equals(src.getUri());
 
-            this.srcUri = uri;
-            this.extension = extension;
+            this.src.setUri(uri);
+            this.src.setExtension(extension);
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
@@ -1388,9 +1381,9 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
+                                                                         .buildUpon()
+                                                                         .setRendererDisabled(rendererIndex, true)
+                                                                         .build();
 
         if (type.equals("disabled")) {
             trackSelector.setParameters(disableParameters);
@@ -1434,11 +1427,11 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
-                .build();
+                                                                           .buildUpon()
+                                                                           .setRendererDisabled(rendererIndex, false)
+                                                                           .setSelectionOverride(rendererIndex, groups,
+                                                                                                 new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
+                                                                           .build();
         trackSelector.setParameters(selectionParameters);
     }
 
@@ -1900,8 +1893,8 @@ class ReactTVExoplayerView extends RelativeLayout
         int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
 
         int indicatorX = !isRew ?
-                thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
-                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
+                         thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
+                                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
 
         int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
 
@@ -1999,28 +1992,28 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void animateHideView(final View view, int duration) {
         view.animate()
-                .alpha(0.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        view.setVisibility(View.GONE);
-                    }
-                });
+            .alpha(0.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    view.setVisibility(View.GONE);
+                }
+            });
     }
 
     public void animateShowView(final View view, int duration) {
         view.animate()
-                .alpha(1.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        view.setVisibility(View.VISIBLE);
-                    }
-                });
+            .alpha(1.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    view.setVisibility(View.VISIBLE);
+                }
+            });
     }
 
     public void applyTranslations() {
