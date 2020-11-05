@@ -20,6 +20,7 @@ public class RNSource {
 
     private final Uri uri;
     private final String id;
+    private final String extension;
     private final String title;
     private final String description;
     private final String type;
@@ -37,6 +38,7 @@ public class RNSource {
     public RNSource(
             @NonNull Uri uri,
             @NonNull String id,
+            @Nullable String extension,
             @Nullable String title,
             @Nullable String description,
             @Nullable String type,
@@ -49,6 +51,7 @@ public class RNSource {
             @Nullable String locale) {
         this.uri = uri;
         this.id = id;
+        this.extension = extension;
         this.title = title;
         this.description = description;
         this.type = type;
@@ -69,6 +72,11 @@ public class RNSource {
     @NonNull
     public String getId() {
         return id;
+    }
+
+    @Nullable
+    public String getExtension() {
+        return extension;
     }
 
     @Nullable
