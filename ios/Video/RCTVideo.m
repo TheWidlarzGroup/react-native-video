@@ -603,7 +603,6 @@ static int const RCTVideoUnset = -1;
 static void extracted(RCTVideo *object, NSDictionary *source) {
   
   [object playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
-    NSMutableDictionary *tempSource = [[NSMutableDictionary alloc] initWithDictionary:source];
     [object.player pause];
     [object->_playerViewController.view removeFromSuperview];
     object->_playerViewController = nil;
@@ -615,11 +614,9 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     
     object.player = [AVDoris new];
     [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
+    [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
 
-    NSDictionary *imaInfo = [object getImaInfo:source];
-    [tempSource setValue:imaInfo forKey:@"ima"];
-
-    id imaObject = [tempSource objectForKey:@"ima"];
+    id imaObject = [source objectForKey:@"ima"];
     
     if ([imaObject isKindOfClass:NSDictionary.class]) {
       [object setupPlaybackWithAds:imaObject playerItem:playerItem];
@@ -628,10 +625,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     }
     
     object.player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-
-    [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
-    [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
-
     object->_playbackRateObserverRegistered = YES;
 
     [object addPlayerTimeObserver];
@@ -651,7 +644,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
 
 - (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
   [self usePlayerViewController];
-  [self.player addObserver:self->_playerViewController forKeyPath:currentItem options:0 context:nil];
   
   id assetKey = [imaDict objectForKey:@"assetKey"];
   id contentSourceId = [imaDict objectForKey:@"contentSourceId"];
@@ -734,49 +726,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   } else {
     [self.player replaceCurrentItemWithPlayerItem:playerItem];
   }
-}
-
-- (NSDictionary *)getImaInfo:(NSDictionary *) source {
-  NSString *urlString = [source objectForKey:@"uri"];
-  NSURL *url = [NSURL URLWithString:urlString];
-  
-  NSString *assetKey = nil;
-  NSString *contentId = nil;
-  NSString *vid = nil;
-  NSString *token = nil;
-  
-  for (int i=0; i<url.pathComponents.count; i++) {
-    if ([url.pathComponents containsObject:@"content"] &&
-        [url.pathComponents containsObject:@"vid"]) {
-      NSInteger preContentIdIndex = [url.pathComponents indexOfObject:@"content"];
-      NSInteger preVidIndex = [url.pathComponents indexOfObject:@"vid"];
-
-      contentId = url.pathComponents[preContentIdIndex + 1];
-      vid = url.pathComponents[preVidIndex + 1];
-    } else if ([url.pathComponents containsObject:@"event"]) {
-      NSInteger preAssetKeyIndex = [url.pathComponents indexOfObject:@"event"];
-      
-      assetKey = url.pathComponents[preAssetKeyIndex + 1];
-    }
-  }
-  
-  NSURLComponents *components = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
-  NSMutableDictionary *queryParamsDict = [NSMutableDictionary new];
-  for (int i=0; i<components.queryItems.count; i++) {
-    [queryParamsDict setValue:components.queryItems[i].value forKey:components.queryItems[i].name];
-  }
-  id tokenObject = [queryParamsDict objectForKey:@"auth-token"];
-  if ([tokenObject isKindOfClass:NSString.class]) {
-    token = tokenObject;
-  }
-  
-  NSMutableDictionary *imaDict = [NSMutableDictionary new];
-  [imaDict setValue:contentId forKey:@"contentSourceId"];
-  [imaDict setValue:vid forKey:@"videoId"];
-  [imaDict setValue:token forKey:@"authToken"];
-  [imaDict setValue:assetKey forKey:@"assetKey"];
-  
-  return imaDict;
 }
 
 - (void)setSrc:(NSDictionary *)source
@@ -1641,6 +1590,8 @@ dispatch_queue_t delegateQueue;
     _playerViewController = [self createPlayerViewController:self.player];
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
+    [self.player addObserver:self->_playerViewController forKeyPath:currentItem options:0 context:nil];
+
     [self setResizeMode:_resizeMode];
     [self addSubview:_playerViewController.view];
     [self setupMux];
