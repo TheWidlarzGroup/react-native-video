@@ -142,7 +142,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         ReadableMap ima = src.hasKey(PROP_SRC_IMA) ? src.getMap(PROP_SRC_IMA) : null;
 
         ReadableMap metadata = src.hasKey(PROP_SRC_METADATA) ? src.getMap(PROP_SRC_METADATA) : null;
-        String id = (metadata != null && metadata.hasKey(PROP_SRC_ID)) ? metadata.getString(PROP_SRC_ID) : null;
+        int id = (metadata != null && metadata.hasKey(PROP_SRC_ID)) ? metadata.getInt(PROP_SRC_ID) : null;
         String title = (metadata != null && metadata.hasKey(PROP_SRC_TITLE)) ? metadata.getString(PROP_SRC_TITLE) : null;
         String description = (metadata != null && metadata.hasKey(PROP_SRC_DESCRIPTION)) ? metadata.getString(PROP_SRC_DESCRIPTION) : null;
         String type = (metadata != null && metadata.hasKey(PROP_SRC_TYPE)) ? metadata.getString(PROP_SRC_TYPE) : null;
