@@ -1283,8 +1283,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     muxData,
                     thumbnailUrl,
                     null,
-                    null
-            );
+                    null);
             this.actionToken = actionToken;
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
