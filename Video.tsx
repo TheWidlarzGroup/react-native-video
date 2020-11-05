@@ -1,20 +1,29 @@
 import React from 'react';
 import {
+  Image,
   StyleSheet,
   requireNativeComponent,
   NativeModules,
   Platform,
   findNodeHandle,
+  View,
 } from 'react-native';
 
 import { IVideoPlayer } from './types/player';
-import { VideoResizeMode } from './types/resizeMode';
 import { SeekToCommand } from './types/SeekToCommand';
 
 const RCTVideo = requireNativeComponent('RCTVideo');
 
-export default class Video extends React.PureComponent<IVideoPlayer> {
+interface IState {
+  showPoster: boolean;
+}
+
+export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   private refPlayer: React.RefObject<any> = React.createRef();
+
+  state: IState = {
+    showPoster: true,
+  };
 
   constructor(props) {
     super(props);
@@ -62,6 +71,9 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
   };
 
   onSeek = (event) => {
+    if (this.state.showPoster && !this.props.audioOnly) {
+      this.setState({ showPoster: false });
+    }
     this.props.onSeek?.(event.nativeEvent);
   };
 
@@ -86,6 +98,9 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
   };
 
   onPlaybackRateChange = (event) => {
+    if (this.state.showPoster && event.nativeEvent.playbackRate !== 0 && !this.props.audioOnly) {
+      this.setState({ showPoster: false });
+    }
     this.props.onPlaybackRateChange?.(event.nativeEvent);
   };
 
@@ -102,13 +117,11 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
    */
   seekTo = (time: 'now' | string | number) => {
     let command = SeekToCommand.SEEK_TO_NOW;
-    let args: string[] = [];
+    const args: string[] = [];
 
     if (time !== 'now') {
       command =
-        typeof time === 'string'
-          ? SeekToCommand.SEEK_TO_TIMESTAMP
-          : SeekToCommand.SEEK_TO_POSITION;
+        typeof time === 'string' ? SeekToCommand.SEEK_TO_TIMESTAMP : SeekToCommand.SEEK_TO_POSITION;
       args.push(time as string);
     }
 
@@ -134,17 +147,47 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
       nativeResizeMode = NativeModules.UIManager.RCTVideo.Constants.ScaleNone;
     }
     return nativeResizeMode;
-  }
+  };
+
+  getVideoPlayerProps = () => {
+    return {
+      ...this.props,
+      resizeMode: this.getNativeResizeMode(),
+      onVideoLoadStart: this.onLoadStart,
+      onVideoLoad: this.onLoad,
+      onVideoError: this.onError,
+      onVideoProgress: this.onProgress,
+      onVideoSeek: this.onSeek,
+      onVideoEnd: this.onEnd,
+      onVideoBuffer: this.onBuffer,
+      onTimedMetadata: this.onTimedMetadata,
+      onReadyForDisplay: this.onReadyForDisplay,
+      onPlaybackStalled: this.onPlaybackStalled,
+      onPlaybackResume: this.onPlaybackResume,
+      onPlaybackRateChange: this.onPlaybackRateChange,
+    };
+  };
 
   render() {
-    const { source } = this.props;
+    const { source, poster } = this.props;
+    const { showPoster } = this.state;
     const isNetwork = !!(source.uri && source.uri.match(/^https?:/));
-    const isAsset = !!(source.uri && source.uri.match(/^(assets-library|file|content|ms-appx|ms-appdata):/));
+    const isAsset = !!(
+      source.uri && source.uri.match(/^(assets-library|file|content|ms-appx|ms-appdata):/)
+    );
 
+    if (poster && showPoster) {
+      return (
+        <View style={this.props.style}>
+          <RCTVideo ref={this.assignRoot} {...this.getVideoPlayerProps()} />
+          <Image source={{ uri: poster }} style={styles.posterStyle} />
+        </View>
+      );
+    }
 
     return (
       <RCTVideo
-        {...this.props}
+        {...this.getVideoPlayerProps()}
         ref={this.assignRoot}
         style={[styles.base, this.props.style]}
         resizeMode={this.getNativeResizeMode()}
@@ -155,27 +198,16 @@ export default class Video extends React.PureComponent<IVideoPlayer> {
           mainVer: source.mainVer || 0,
           patchVer: source.patchVer || 0,
         }}
-        onVideoLoadStart={this.onLoadStart}
-        onVideoLoad={this.onLoad}
-        onVideoError={this.onError}
-        onVideoProgress={this.onProgress}
-        onVideoSeek={this.onSeek}
-        onVideoEnd={this.onEnd}
-        onVideoBuffer={this.onBuffer}
-        onTimedMetadata={this.onTimedMetadata}
-        onReadyForDisplay={this.onReadyForDisplay}
-        onPlaybackStalled={this.onPlaybackStalled}
-        onPlaybackResume={this.onPlaybackResume}
-        onPlaybackRateChange={this.onPlaybackRateChange}
       />
     );
   }
 }
 
-
-
 const styles = StyleSheet.create({
   base: {
     overflow: 'hidden',
+  },
+  posterStyle: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
