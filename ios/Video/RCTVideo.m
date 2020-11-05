@@ -614,7 +614,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     
     object.player = [AVDoris new];
     [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
-
+    [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
 
     id imaObject = [source objectForKey:@"ima"];
     
@@ -625,10 +625,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     }
     
     object.player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-
-    [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
-    [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
-
     object->_playbackRateObserverRegistered = YES;
 
     [object addPlayerTimeObserver];
@@ -648,7 +644,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
 
 - (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
   [self usePlayerViewController];
-  [self.player addObserver:self->_playerViewController forKeyPath:currentItem options:0 context:nil];
   
   id assetKey = [imaDict objectForKey:@"assetKey"];
   id contentSourceId = [imaDict objectForKey:@"contentSourceId"];
@@ -1595,6 +1590,8 @@ dispatch_queue_t delegateQueue;
     _playerViewController = [self createPlayerViewController:self.player];
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before subview is added
+    [self.player addObserver:self->_playerViewController forKeyPath:currentItem options:0 context:nil];
+
     [self setResizeMode:_resizeMode];
     [self addSubview:_playerViewController.view];
     [self setupMux];
