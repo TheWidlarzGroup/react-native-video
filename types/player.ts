@@ -20,6 +20,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   height?: number;
   isFavourite?: boolean;
   labelFontName?: string;
+  locale?: string;
   live?: boolean;
   mediaKeys?: boolean;
   muted?: true;
