@@ -37,10 +37,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_IMA = "ima";
     private static final String PROP_SRC_METADATA = "metadata";
+    private static final String PROP_SRC_ID = "id";
+    private static final String PROP_SRC_TITLE = "title";
+    private static final String PROP_SRC_DESCRIPTION = "description";
+    private static final String PROP_SRC_THUMBNAIL_URL = "thumbnailUrl";
     private static final String PROP_SRC_CONFIG = "config";
     private static final String PROP_SRC_MUX_DATA = "muxData";
-    private static final String PROP_SRC_MAIN_VERSION = "mainVer";
-    private static final String PROP_SRC_PATCH_VERSION = "patchVer";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
 
     private static final String PROP_RESIZE_MODE = "resizeMode";
@@ -132,14 +134,24 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactTVExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
+
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
+        ReadableArray textTracks = src.hasKey(PROP_SRC_SUBTITLES) ? src.getArray(PROP_SRC_SUBTITLES) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String drm = src.hasKey(PROP_SRC_DRM) ? src.getString(PROP_SRC_DRM) : null;
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+        ReadableMap ima = src.hasKey(PROP_SRC_IMA) ? src.getMap(PROP_SRC_IMA) : null;
 
-        ReadableArray textTracks = src.hasKey(PROP_SRC_SUBTITLES) ? src.getArray(PROP_SRC_SUBTITLES) : null;
+        ReadableMap metadata = src.hasKey(PROP_SRC_METADATA) ? src.getMap(PROP_SRC_METADATA) : null;
+        String id = (metadata != null && metadata.hasKey(PROP_SRC_ID)) ? metadata.getString(PROP_SRC_ID) : null;
+        String title = (metadata != null && metadata.hasKey(PROP_SRC_TITLE)) ? metadata.getString(PROP_SRC_TITLE) : null;
+        String description = (metadata != null && metadata.hasKey(PROP_SRC_DESCRIPTION)) ? metadata.getString(PROP_SRC_DESCRIPTION) : null;
+        String type = (metadata != null && metadata.hasKey(PROP_SRC_TYPE)) ? metadata.getString(PROP_SRC_TYPE) : null;
+        String thumbnailUrl = (metadata != null && metadata.hasKey(PROP_SRC_THUMBNAIL_URL)) ? metadata.getString(PROP_SRC_THUMBNAIL_URL) : null;
+
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
+
+        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -150,7 +162,19 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             ActionToken actionToken = ActionToken.fromJson(drm);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, extension, actionToken, headers, muxData != null ? muxData.toHashMap() : null, textTracks);
+                videoView.setSrc(
+                        srcUri,
+                        id,
+                        extension,
+                        title,
+                        description,
+                        type,
+                        textTracks,
+                        actionToken,
+                        headers,
+                        muxData != null ? muxData.toHashMap() : null,
+                        thumbnailUrl,
+                        ima != null ? ima.toHashMap() : null);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
