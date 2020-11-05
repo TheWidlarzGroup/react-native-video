@@ -575,7 +575,6 @@ class ReactTVExoplayerView extends RelativeLayout
             playerInitTime = new Date().getTime();
 
             Source source = new SourceBuilder(src.getUri(), src.getId())
-                    .setExtension(src.getExtension())
                     .setTitle(src.getTitle())
                     .setIsLive(src.isLive())
                     .setMuxData(src.getMuxData(), exoPlayerView.getVideoSurfaceView())
