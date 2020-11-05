@@ -1,0 +1,1 @@
+export type VideoResizeMode = 'contain' | 'cover' | 'stretch';
