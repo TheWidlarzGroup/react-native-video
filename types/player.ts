@@ -23,7 +23,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   locale?: string;
   live?: boolean;
   mediaKeys?: boolean;
-  muted?: true;
+  muted?: boolean;
   overlayAutoHideTimeout?: number;
   poster?: string;
   paused?: boolean;
