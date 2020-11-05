@@ -14,14 +14,14 @@ public class VideoMetadata {
     private final String id;
     private final String title;
     private final String description;
-    private final VideoType type;
+    private final String type;
     private final String thumbnailUrl;
 
     public VideoMetadata(
             String id,
             String title,
             String description,
-            VideoType type,
+            String type,
             String thumbnailUrl) {
         this.id = id;
         this.title = title;
@@ -46,7 +46,7 @@ public class VideoMetadata {
     }
 
     @NonNull
-    public VideoType getType() {
+    public String getType() {
         return type;
     }
 
