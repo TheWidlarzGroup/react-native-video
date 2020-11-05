@@ -61,22 +61,27 @@ public class RNSource {
         this.locale = locale;
     }
 
+    @NonNull
     public Uri getUri() {
         return uri;
     }
 
+    @NonNull
     public String getId() {
         return id;
     }
 
+    @Nullable
     public String getTitle() {
         return title;
     }
 
+    @Nullable
     public String getDescription() {
         return description;
     }
 
+    @Nullable
     public String getType() {
         return type;
     }
@@ -85,26 +90,32 @@ public class RNSource {
         return isLive;
     }
 
+    @Nullable
     public ArrayList<SubtitleTrack> getTextTracks() {
         return textTracks;
     }
 
+    @Nullable
     public Map<String, String> getHeaders() {
         return headers;
     }
 
+    @Nullable
     public Map<String, Object> getMuxData() {
         return muxData;
     }
 
+    @Nullable
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
 
+    @Nullable
     public String getSelectedAudioTrack() {
         return selectedAudioTrack;
     }
 
+    @Nullable
     public String getLocale() {
         return locale;
     }
