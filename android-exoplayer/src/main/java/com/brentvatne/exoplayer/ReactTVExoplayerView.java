@@ -189,20 +189,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private int accentColor;
     // \ End props
 
-    // IMA Ad Tag Parameters
-    private String iu = "/7009/prendetv/";
-    private String custParams;
-    private String output;
-    private String pp = "DAI_TVApps";
-    private String vpa;
-    private String msid = "2098810";
-    private String an = "prendetv";
-
-    // IMA Custom Ad Tag Parameters
-    private String neighborhood = "neighborhood=drama&";
-    private String row = "row=indienovelas&";
-    private String customParams = "mcp_id=3751768&rating=pg&rating_qualifier=violence&content_source=univision&video_type=movie&subscriber=true&category=novelas,romance,drama&first_category=novelas&vertical=noticias&program_title=amaramuerte&season=1&episode=23&tags=kate%20de%20castillo,capitulo,amor&cast=selma%20hayek,jorge%20ramos&ph=1080&pw=1920&app_bundle=prendetv.android";
-
     // Custom
     private PowerManager powerManager;
     private long playerViewCreationTime;
@@ -582,22 +568,11 @@ class ReactTVExoplayerView extends RelativeLayout
                     .build();
 
             if (isImaStream) {
-                AdTagParameters adTagParameters = new AdTagParametersBuilder()
-                        .setIu(iu)
-                        .setCustParams(custParams)
-                        .setOutput(output)
-                        .setPp(pp)
-                        .setVpa(vpa)
-                        .setMsid(msid)
-                        .setAn(an)
-                        .build();
-
                 ImaSource imaSource = new ImaSourceBuilder(source)
                         .setAssetKey(imaSrc.getAssetKey())
                         .setContentSourceId(imaSrc.getContentSourceId())
                         .setVideoId(imaSrc.getVideoId())
                         .setAuthToken(imaSrc.getAuthToken())
-                        .setAdTagParameters(adTagParameters)
                         .build();
 
                 exoDorisImaPlayer.enableControls(true);
@@ -1291,18 +1266,6 @@ class ReactTVExoplayerView extends RelativeLayout
             if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;
                 this.imaSrc = new RNImaSource(ima);
-
-                if (uri.toString().contains("event")) {
-                    iu += "live/androidtv/comediaspicantes";
-                    custParams = neighborhood + customParams;
-                    output = "xml_vast4";
-                    vpa = "2";
-                } else {
-                    iu += "vod/androidtv/comediaspicantes";
-                    custParams = row + customParams;
-                    output = "xml_vmap4";
-                    vpa = "1";
-                }
             } else {
                 this.isImaStream = false;
             }
