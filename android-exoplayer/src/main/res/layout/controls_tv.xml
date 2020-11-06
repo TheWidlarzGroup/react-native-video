@@ -55,15 +55,6 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/previewFrameLayout" />
 
-            <TextView
-                    android:id="@+id/imaStreamIdTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:background="@android:color/white" />
-
             <com.previewseekbar.PreviewSeekbarTV
                     style="@style/TVSeekBar"
                     android:id="@+id/previewSeekBar"

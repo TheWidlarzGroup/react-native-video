@@ -141,10 +141,8 @@ class ReactTVExoplayerView extends RelativeLayout
     private ImageButton audioSubtitlesButton;
     private ImageButton scheduleButton;
     private ImageButton statsButton;
-    private TextView imaStreamIdTextView;
 
     private ExoDorisPlayerView exoDorisPlayerView;
-    private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
     private ExoDoris player;
     private ExoDorisImaPlayer exoDorisImaPlayer;
@@ -416,8 +414,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 }
             });
 
-            imaStreamIdTextView = findViewById(R.id.imaStreamIdTextView);
-
             labelTextView = findViewById(R.id.tvLabelView);
 
             bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
@@ -592,7 +588,7 @@ class ReactTVExoplayerView extends RelativeLayout
             Source source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(src.isLive())
-                    .setMuxData(src.getMuxData(), exoPlayerView.getVideoSurfaceView())
+                    .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .build();
 
@@ -918,7 +914,6 @@ class ReactTVExoplayerView extends RelativeLayout
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                                                               adInfo.getPlayedAdGroups());
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
-                    imaStreamIdTextView.setText("IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
                 }
 
                 // seek to edge of live window for live events
@@ -1601,7 +1596,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        exoPlayerView.setUseTextureView(useTextureView);
+//        exoPlayerView.setUseTextureView(useTextureView);
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
