@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -60,7 +62,7 @@
                     android:textSize="20sp"
                     android:textColor="@android:color/black"
                     android:textStyle="bold"
-                    android:background="@android:color/white"/>
+                    android:background="@android:color/white" />
 
             <com.previewseekbar.PreviewSeekbarTV
                     style="@style/TVSeekBar"
@@ -76,7 +78,8 @@
                     android:focusable="true"
                     android:nextFocusRight="@+id/tvPlayPauseImageView"
                     android:nextFocusDown="@+id/tvPlayPauseImageView">
-                <requestFocus/>
+
+                <requestFocus />
             </com.previewseekbar.PreviewSeekbarTV>
 
         </com.previewseekbar.PreviewSeekBarLayout>
