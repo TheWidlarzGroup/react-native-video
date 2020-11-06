@@ -1338,6 +1338,9 @@ class ReactTVExoplayerView extends RelativeLayout
             );
             this.actionToken = actionToken;
 
+            exoDorisPlayerView.setTitle(title);
+            exoDorisPlayerView.setDescription(description);
+
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
