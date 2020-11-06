@@ -313,15 +313,6 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//        exoPlayerView = new ExoPlayerView(getContext());
-//        exoPlayerView.setLayoutParams(layoutParams);
-//        addView(exoPlayerView, 0, layoutParams);
-//        setLayoutTransition(new LayoutTransition());
-
-//        exoDorisPlayerView = new ExoDorisPlayerView(getContext());
-//        exoDorisPlayerView.setLayoutParams(layoutParams);
-
-
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View layout = inflater.inflate(R.layout.react_tv_exoplayer_view, null);
         layout.setLayoutParams(layoutParams);
@@ -344,7 +335,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 }
             });
 
-//            LayoutInflater inflater = LayoutInflater.from(getContext());
             controls = inflater.inflate(R.layout.controls_tv, null);
             LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             controls.setLayoutParams(controlsParam);
@@ -1599,7 +1589,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setUseTextureView(boolean useTextureView) {
-//        exoPlayerView.setUseTextureView(useTextureView);
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
@@ -1776,131 +1765,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-//        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-//
-//            switch (event.getKeyCode()) {
-//                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-//                    showOverlay();
-//                    break;
-//                case KeyEvent.KEYCODE_DPAD_LEFT:
-//                case KeyEvent.KEYCODE_DPAD_RIGHT:
-//                case KeyEvent.KEYCODE_DPAD_UP:
-//                case KeyEvent.KEYCODE_DPAD_DOWN:
-//                case KeyEvent.KEYCODE_DPAD_CENTER:
-//                case KeyEvent.KEYCODE_ENTER:
-//                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-//                case KeyEvent.KEYCODE_MEDIA_REWIND:
-//                    if (controls.getAlpha() == 0.0f) {
-//                        showOverlay();
-//                        return true;
-//                    } else {
-//                        showOverlay();
-//                    }
-//
-//            }
-//
-//            switch (event.getKeyCode()) {
-//                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-//                    playPauseButton.requestFocus();
-//                    // Media session will pause the player
-//                    break;
-//
-//                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-//                case KeyEvent.KEYCODE_MEDIA_REWIND:
-//                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && !((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-//                        ((SeekBar) previewSeekBarLayout.getPreviewView()).requestFocus();
-//                    }
-//                case KeyEvent.KEYCODE_DPAD_LEFT:
-//                case KeyEvent.KEYCODE_DPAD_RIGHT:
-//
-//                    if (live || player == null) {
-//                        break;
-//                    }
-//
-//                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && ((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-//                        final long currentTime = System.currentTimeMillis();
-//
-//                        final int increment;
-//                        if (keyPressTime == null) {
-//                            keyPressTime = currentTime;
-//                            keyNotHandled = true;
-//                            showOverlay();
-//                            return true;
-//                        } else if ((currentTime - keyPressTime) / 1000 > 10) {
-//                            increment = 40;
-//                        } else if ((currentTime - keyPressTime) / 1000 > 6) {
-//                            increment = 25;
-//                        } else if ((currentTime - keyPressTime) / 1000 > 3) {
-//                            increment = 10;
-//                        } else {
-//                            increment = 1;
-//                        }
-//
-//                        SeekBar seekbar = ((SeekBar) previewSeekBarLayout.getPreviewView());
-//
-//                        seekbar.setKeyProgressIncrement(increment * 1000);
-//
-//                        boolean isRew = event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_REWIND || event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT;
-//                        seekIndicator.show(isRew, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 500, seekIndicatorRunnable);
-//                        moveSeekBarIndicator(seekbar, isRew);
-//
-//                        animateHideView(currentTextView, 200);
-//                    }
-//
-//                    keyNotHandled = false;
-//                    break;
-//            }
-//        } else if (event.getAction() == KeyEvent.ACTION_UP) {
-//
-//            if (keyNotHandled && previewSeekBarLayout.getPreviewView() instanceof SeekBar && ((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-//                switch (event.getKeyCode()) {
-//                    case KeyEvent.KEYCODE_DPAD_LEFT:
-//                    case KeyEvent.KEYCODE_MEDIA_REWIND: {
-//                        if (player == null || !areControlsVisible) {
-//                            break;
-//                        }
-//
-//                        long position = player.getCurrentPosition() - 10000;
-//                        if (position < 0) {
-//                            position = 0;
-//                        }
-//                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
-//                        //updateProgressControl(position);
-//                        seekIndicator.show(true, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
-//                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), true);
-//                        animateHideView(currentTextView, 200);
-//                        break;
-//                    }
-//                    case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-//                    case KeyEvent.KEYCODE_DPAD_RIGHT: {
-//                        if (player == null || !areControlsVisible) {
-//                            break;
-//                        }
-//
-//                        long position = player.getCurrentPosition() + 10000;
-//                        if (position > player.getDuration()) {
-//                            position = player.getDuration();
-//                        }
-//                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
-//                        //updateProgressControl(position);
-//                        seekIndicator.show(false, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
-//                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), false);
-//                        animateHideView(currentTextView, 200);
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            if (!isPaused) {
-//                hideOverlay();
-//            }
-//
-//            keyPressTime = null;
-//            keyNotHandled = false;
-//        }
-//
-//        return super.dispatchKeyEvent(event);
-
         return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
     }
 
