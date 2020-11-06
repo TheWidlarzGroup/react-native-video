@@ -22,6 +22,7 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.CaptioningManager;
 import android.widget.ImageButton;
@@ -31,16 +32,25 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.brentvatne.entity.RNImaSource;
+import com.brentvatne.entity.RNSource;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.dice.shield.downloads.manager.DlmWrapper;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
+import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
+import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
+import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
+import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
+import com.diceplatform.doris.ext.ima.entity.ImaSource;
+import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
+import com.diceplatform.doris.ui.DorisPlayerView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -50,6 +60,8 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ControlDispatcher;
+import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
@@ -63,15 +75,11 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataOutput;
-import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
@@ -93,7 +101,6 @@ import java.util.Collections;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -107,7 +114,7 @@ import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout
-        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
+        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput, DorisPlayerView {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -138,9 +145,11 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private ExoPlayerView exoPlayerView;
     private DceTracksDialog dialog;
-    private DataSource.Factory mediaDataSourceFactory;
     private ExoDoris player;
+    private ExoDorisImaPlayer exoDorisImaPlayer;
+    private ExoDorisImaWrapper exoDorisImaWrapper;
     private DefaultTrackSelector trackSelector;
+    private ControlDispatcher controlDispatcher;
     private boolean playerNeedsSource;
     private int resumeWindow;
     private long resumePosition;
@@ -153,21 +162,22 @@ class ReactTVExoplayerView extends RelativeLayout
     private boolean areControlsVisible = true;
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
+    private boolean isImaStream = false;
+
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
-    private Uri srcUri;
-    private String extension;
+    private RNSource src;
+    private RNImaSource imaSrc;
     private boolean repeat;
     private String audioTrackType;
     private Dynamic audioTrackValue;
     private ReadableArray audioTracks;
     private String textTrackType;
     private Dynamic textTrackValue;
-    private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean live = false;
     private boolean hasEpg;
@@ -256,6 +266,7 @@ class ReactTVExoplayerView extends RelativeLayout
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+        controlDispatcher = new DefaultControlDispatcher();
 
         setPausedModifier(false);
 
@@ -283,7 +294,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private void createViews() {
         clearResumePosition();
-        mediaDataSourceFactory = buildDataSourceFactory(true);
 
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
@@ -432,7 +442,7 @@ class ReactTVExoplayerView extends RelativeLayout
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                          MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
     }
@@ -508,8 +518,19 @@ class ReactTVExoplayerView extends RelativeLayout
             releasePlayer();
         }
         if (player == null) {
-            player = new ExoDorisBuilder(getContext()).build();
-            trackSelector = player.getTrackSelector();
+            if (isImaStream) {
+                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), this);
+                exoDorisImaWrapper = new ExoDorisImaWrapper(
+                        getContext(),
+                        exoDorisImaPlayer,
+                        exoPlayerView.getAdViewGroup(),
+                        ImaLanguage.SPANISH_UNITED_STATES);
+                player = exoDorisImaPlayer.getExoDoris();
+                trackSelector = exoDorisImaPlayer.getTrackSelector();
+            } else {
+                player = new ExoDorisBuilder(getContext()).build();
+                trackSelector = player.getTrackSelector();
+            }
 
             player.addListener(this);
             player.addMetadataOutput(this);
@@ -524,11 +545,11 @@ class ReactTVExoplayerView extends RelativeLayout
 
             activateMediaSession();
         }
-        if (playerNeedsSource && srcUri != null) {
+        if (playerNeedsSource && src.getUri() != null) {
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
-                player.seekTo(resumeWindow, resumePosition);
+                controlDispatcher.dispatchSeekTo(player, resumeWindow, resumePosition);
             }
 
             if (shouldSeekOnInit) {
@@ -539,19 +560,27 @@ class ReactTVExoplayerView extends RelativeLayout
 
             playerInitTime = new Date().getTime();
 
-            String id = (String) muxData.get("videoId");
-            String title = (String) muxData.get("videoTitle");
-            Boolean isLive = (Boolean) muxData.get("videoIsLive");
-
-            Source source = new SourceBuilder(srcUri, id)
-                    .setExtension(extension)
-                    .setTitle(title)
-                    .setIsLive(isLive)
-                    .setMuxData(muxData, exoPlayerView.getVideoSurfaceView())
-                    .setTextTracks(getTextTracks())
+            Source source = new SourceBuilder(src.getUri(), src.getId())
+                    .setTitle(src.getTitle())
+                    .setIsLive(src.isLive())
+                    .setMuxData(src.getMuxData(), exoPlayerView.getVideoSurfaceView())
+                    .setTextTracks(src.getTextTracks())
                     .build();
 
-            if (actionToken != null) {
+            if (isImaStream) {
+                ImaSource imaSource = new ImaSourceBuilder(source)
+                        .setAssetKey(imaSrc.getAssetKey())
+                        .setContentSourceId(imaSrc.getContentSourceId())
+                        .setVideoId(imaSrc.getVideoId())
+                        .setAuthToken(imaSrc.getAuthToken())
+                        .build();
+
+                exoDorisImaPlayer.enableControls(true);
+                exoDorisImaPlayer.setCanSeek(true);
+
+                exoDorisImaWrapper.setFallbackUrl(source.getUri().getPath());
+                exoDorisImaWrapper.requestAndPlayAds(imaSource);
+            } else if (actionToken != null) {
                 try {
                     player.load(source, !haveResumePosition, force, actionToken);
                 } catch (UnsupportedDrmException e) {
@@ -568,7 +597,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     @Nullable
-    private TextTrack[] getTextTracks() {
+    private TextTrack[] getTextTracks(ReadableArray textTracks) {
         if (textTracks != null && textTracks.size() > 0) {
             TextTrack[] dorisTextTracks = new TextTrack[textTracks.size()];
             for (int i = 0; i < textTracks.size(); ++i) {
@@ -659,12 +688,20 @@ class ReactTVExoplayerView extends RelativeLayout
 
         if (player != null) {
             updateResumePosition();
-            player.release();
+            player.removeListener(this);
             player.removeMetadataOutput(this);
+            player.release();
             player = null;
             trackSelector = null;
             shouldSeekTo = C.TIME_UNSET;
         }
+
+        if (exoDorisImaWrapper != null) {
+            exoDorisImaWrapper.release();
+            exoDorisImaWrapper = null;
+            exoDorisImaPlayer = null;
+        }
+
         progressHandler.removeMessages(SHOW_JS_PROGRESS);
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -702,10 +739,10 @@ class ReactTVExoplayerView extends RelativeLayout
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                player.setPlayWhenReady(true);
+                controlDispatcher.dispatchSetPlayWhenReady(player, true);
             }
         } else {
-            player.setPlayWhenReady(false);
+            controlDispatcher.dispatchSetPlayWhenReady(player, false);
         }
 
         updateControlsState();
@@ -783,18 +820,6 @@ class ReactTVExoplayerView extends RelativeLayout
         resumePosition = C.TIME_UNSET;
     }
 
-    /**
-     * Returns a new DataSource factory.
-     *
-     * @param useBandwidthMeter Whether to set {@link #BANDWIDTH_METER} as a listener to the new
-     *                          DataSource factory.
-     * @return A new DataSource factory.
-     */
-    private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DlmWrapper.getInstance(getContext().getApplicationContext())
-                .buildDataSourceFactory(useBandwidthMeter ? BANDWIDTH_METER : null);
-    }
-
     // AudioManager.OnAudioFocusChangeListener implementation
 
     @Override
@@ -847,6 +872,11 @@ class ReactTVExoplayerView extends RelativeLayout
                 break;
             case Player.STATE_READY:
                 text += "ready";
+
+                if (isImaStream) {
+                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
+                }
+
                 // seek to edge of live window for live events
                 seekToDefaultPosition();
                 eventEmitter.ready();
@@ -1015,7 +1045,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     @Override
                     public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
                         if (fromUser && player != null) {
-                            player.seekTo(progress);
+                            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), progress);
                             updateProgressControl(progress);
                         }
                     }
@@ -1035,7 +1065,7 @@ class ReactTVExoplayerView extends RelativeLayout
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getAudioTrackInfo(), getTextTrackInfo());
+                              getAudioTrackInfo(), getTextTrackInfo());
         }
     }
 
@@ -1160,10 +1190,10 @@ class ReactTVExoplayerView extends RelativeLayout
                     errorString = getResources().getString(R.string.error_querying_decoders);
                 } else if (decoderInitializationException.secureDecoderRequired) {
                     errorString = getResources().getString(R.string.error_no_secure_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 } else {
                     errorString = getResources().getString(R.string.error_no_decoder,
-                            decoderInitializationException.mimeType);
+                                                           decoderInitializationException.mimeType);
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
@@ -1215,26 +1245,49 @@ class ReactTVExoplayerView extends RelativeLayout
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final ActionToken actionToken,
-                       @Nullable final Map<String, String> headers, @Nullable final Map<String, Object> muxData, final ReadableArray textTracks) {
+    public void setSrc(
+            Uri uri,
+            int id,
+            String extension,
+            String title,
+            String description,
+            String type,
+            ReadableArray textTracks,
+            ActionToken actionToken,
+            Map<String, String> headers,
+            Map<String, Object> muxData,
+            String thumbnailUrl,
+            Map<String, Object> ima) {
         if (uri != null) {
+            Uri srcUri = src != null ? src.getUri() : null;
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
-            this.srcUri = uri;
-            this.extension = extension;
+            if (ima != null && !ima.isEmpty()) {
+                this.isImaStream = true;
+                this.imaSrc = new RNImaSource(ima);
+            } else {
+                this.isImaStream = false;
+            }
+
+            this.src = new RNSource(
+                    uri,
+                    Integer.toString(id),
+                    extension,
+                    title,
+                    description,
+                    type,
+                    live,
+                    getTextTracks(textTracks),
+                    headers,
+                    muxData,
+                    thumbnailUrl,
+                    null,
+                    null);
             this.actionToken = actionToken;
-            this.requestHeaders = headers;
-            this.mediaDataSourceFactory = buildDataSourceFactory(true);
-            this.muxData = muxData;
-            this.textTracks = textTracks;
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
-    }
-
-    public void setSrc(@NonNull final Uri uri, @Nullable final String extension, @Nullable final Map<String, String> headers) {
-        setSrc(uri, extension, null, headers, null, null);
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
@@ -1243,12 +1296,11 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
         if (uri != null) {
-            boolean isOriginalSourceNull = srcUri == null;
-            boolean isSourceEqual = uri.equals(srcUri);
+            boolean isOriginalSourceNull = src.getUri() == null;
+            boolean isSourceEqual = uri.equals(src.getUri());
 
-            this.srcUri = uri;
-            this.extension = extension;
-            this.mediaDataSourceFactory = buildDataSourceFactory(false);
+            this.src.setUri(uri);
+            this.src.setExtension(extension);
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
@@ -1283,14 +1335,16 @@ class ReactTVExoplayerView extends RelativeLayout
         TrackGroupArray groups = info.getTrackGroups(rendererIndex);
         int trackIndex = C.INDEX_UNSET;
 
-        if (TextUtils.isEmpty(type)) {
+        if (groups.isEmpty()) {
+            type = "disabled";
+        } else if (TextUtils.isEmpty(type)) {
             type = "default";
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
+                                                                         .buildUpon()
+                                                                         .setRendererDisabled(rendererIndex, true)
+                                                                         .build();
 
         if (type.equals("disabled")) {
             trackSelector.setParameters(disableParameters);
@@ -1334,11 +1388,11 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
-                .build();
+                                                                           .buildUpon()
+                                                                           .setRendererDisabled(rendererIndex, false)
+                                                                           .setSelectionOverride(rendererIndex, groups,
+                                                                                                 new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
+                                                                           .build();
         trackSelector.setParameters(selectionParameters);
     }
 
@@ -1418,7 +1472,7 @@ class ReactTVExoplayerView extends RelativeLayout
     public void seekTo(long positionMs) {
         if (player != null) {
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
-            player.seekTo(positionMs);
+            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), positionMs);
         }
     }
 
@@ -1747,7 +1801,7 @@ class ReactTVExoplayerView extends RelativeLayout
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                     case KeyEvent.KEYCODE_MEDIA_REWIND: {
-                        if (player == null) {
+                        if (player == null || !areControlsVisible) {
                             break;
                         }
 
@@ -1755,7 +1809,7 @@ class ReactTVExoplayerView extends RelativeLayout
                         if (position < 0) {
                             position = 0;
                         }
-                        player.seekTo(position);
+                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
                         //updateProgressControl(position);
                         seekIndicator.show(true, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
                         moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), true);
@@ -1764,7 +1818,7 @@ class ReactTVExoplayerView extends RelativeLayout
                     }
                     case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                     case KeyEvent.KEYCODE_DPAD_RIGHT: {
-                        if (player == null) {
+                        if (player == null || !areControlsVisible) {
                             break;
                         }
 
@@ -1772,7 +1826,7 @@ class ReactTVExoplayerView extends RelativeLayout
                         if (position > player.getDuration()) {
                             position = player.getDuration();
                         }
-                        player.seekTo(position);
+                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
                         //updateProgressControl(position);
                         seekIndicator.show(false, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
                         moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), false);
@@ -1800,8 +1854,8 @@ class ReactTVExoplayerView extends RelativeLayout
         int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
 
         int indicatorX = !isRew ?
-                thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
-                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
+                         thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
+                                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
 
         int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
 
@@ -1899,31 +1953,74 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void animateHideView(final View view, int duration) {
         view.animate()
-                .alpha(0.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        view.setVisibility(View.GONE);
-                    }
-                });
+            .alpha(0.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    view.setVisibility(View.GONE);
+                }
+            });
     }
 
     public void animateShowView(final View view, int duration) {
         view.animate()
-                .alpha(1.0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        view.setVisibility(View.VISIBLE);
-                    }
-                });
+            .alpha(1.0f)
+            .setDuration(duration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    view.setVisibility(View.VISIBLE);
+                }
+            });
     }
 
     public void applyTranslations() {
         updateLabelView(bottomBarWidget.getFocusedChild());
+    }
+
+    /**
+     * Sets the {@link ControlDispatcher}.
+     *
+     * @param controlDispatcher The {@link ControlDispatcher}, or null
+     *     to use {@link DefaultControlDispatcher}.
+     */
+    @Override
+    public void setControlDispatcher(ControlDispatcher controlDispatcher) {
+        this.controlDispatcher =
+                controlDispatcher == null ? new DefaultControlDispatcher() : controlDispatcher;
+    }
+
+    @Override
+    public void showController() {
+        setControls(true);
+        hideOverlay();
+    }
+
+    @Override
+    public void hideController() {
+        setControls(false);
+    }
+
+    @Override
+    public int getControllerShowTimeoutMs() {
+        return 0;
+    }
+
+    @Override
+    public void setControllerShowTimeoutMs(int i) {
+
+    }
+
+    @Override
+    public ViewGroup getAdViewGroup() {
+        return null;
+    }
+
+    @Override
+    public void setExtraAdGroupMarkers(@Nullable long[] longs, @Nullable boolean[] booleans) {
+
     }
 }

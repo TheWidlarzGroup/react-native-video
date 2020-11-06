@@ -59,5 +59,4 @@ class ResizeMode {
                 return ResizeMode.RESIZE_MODE_FIT;
         }
     }
-
 }

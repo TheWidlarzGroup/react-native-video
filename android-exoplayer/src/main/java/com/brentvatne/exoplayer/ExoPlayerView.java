@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.SurfaceView;
@@ -10,7 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.diceplatform.doris.ui.DorisPlayerView;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -22,9 +25,11 @@ import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.text.TextRenderer;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
+import com.google.android.exoplayer2.util.Assertions;
 
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 @TargetApi(16)
@@ -34,6 +39,7 @@ public final class ExoPlayerView extends FrameLayout {
     private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
+    private final FrameLayout adOverlayFrameLayout;
     private final ComponentListener componentListener;
     private SimpleExoPlayer player;
     private Context context;
@@ -67,6 +73,14 @@ public final class ExoPlayerView extends FrameLayout {
         layout = new AspectRatioFrameLayout(context);
         layout.setLayoutParams(aspectRatioParams);
 
+        // Ad overlay frame layout
+        FrameLayout.LayoutParams adOverlayParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        adOverlayParams.gravity = Gravity.CENTER;
+        adOverlayFrameLayout = new FrameLayout(context);
+        adOverlayFrameLayout.setLayoutParams(adOverlayParams);
+
         shutterView = new View(getContext());
         shutterView.setLayoutParams(layoutParams);
         shutterView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black));
@@ -82,6 +96,7 @@ public final class ExoPlayerView extends FrameLayout {
         layout.addView(subtitleLayout, 2, layoutParams);
 
         addViewInLayout(layout, 0, aspectRatioParams);
+        addViewInLayout(adOverlayFrameLayout, 1, adOverlayParams);
     }
 
     private void setVideoView() {
@@ -191,9 +206,19 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setVisibility(VISIBLE);
     }
 
+    /**
+     * Get the transparent overlay {@link ViewGroup} that can be used to display ads.
+     *
+     * @return The transparent overlay {@link ViewGroup} that can be used to display ads.
+     */
+    public ViewGroup getAdViewGroup() {
+        return Assertions.checkStateNotNull(
+                adOverlayFrameLayout, "exo_ad_overlay must be present for ad playback");
+    }
+
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,
-                                                     TextOutput,
-                                                     ExoPlayer.EventListener {
+            TextOutput,
+            ExoPlayer.EventListener {
 
         // TextRenderer.Output implementation
 
@@ -272,5 +297,4 @@ public final class ExoPlayerView extends FrameLayout {
             // Do nothing.
         }
     }
-
 }
