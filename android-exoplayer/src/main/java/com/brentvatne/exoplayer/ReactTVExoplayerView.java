@@ -45,12 +45,14 @@ import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
 import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
+import com.diceplatform.doris.ext.ima.entity.AdInfo;
 import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
 import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
 import com.diceplatform.doris.ui.DorisPlayerView;
+import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -81,7 +83,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
@@ -96,8 +97,6 @@ import com.previewseekbar.base.PreviewView;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -114,7 +113,7 @@ import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout
-        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput, DorisPlayerView {
+        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -143,7 +142,7 @@ class ReactTVExoplayerView extends RelativeLayout
     private ImageButton scheduleButton;
     private ImageButton statsButton;
 
-    private ExoPlayerView exoPlayerView;
+    private ExoDorisPlayerView exoDorisPlayerView;
     private DceTracksDialog dialog;
     private ExoDoris player;
     private ExoDorisImaPlayer exoDorisImaPlayer;
@@ -300,10 +299,13 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        exoPlayerView = new ExoPlayerView(getContext());
-        exoPlayerView.setLayoutParams(layoutParams);
-        addView(exoPlayerView, 0, layoutParams);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View layout = inflater.inflate(R.layout.react_tv_exoplayer_view, null);
+        layout.setLayoutParams(layoutParams);
+        addView(layout);
         setLayoutTransition(new LayoutTransition());
+
+        exoDorisPlayerView = findViewById(R.id.exoDorisPlayerView);
 
         if (areControlsVisible) {
             addOnLayoutChangeListener(new OnLayoutChangeListener() {
@@ -319,7 +321,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 }
             });
 
-            LayoutInflater inflater = LayoutInflater.from(getContext());
             controls = inflater.inflate(R.layout.controls_tv, null);
             LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             controls.setLayoutParams(controlsParam);
@@ -519,11 +520,11 @@ class ReactTVExoplayerView extends RelativeLayout
         }
         if (player == null) {
             if (isImaStream) {
-                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), this);
+                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), exoDorisPlayerView);
                 exoDorisImaWrapper = new ExoDorisImaWrapper(
                         getContext(),
                         exoDorisImaPlayer,
-                        exoPlayerView.getAdViewGroup(),
+                        exoDorisPlayerView.getAdViewGroup(),
                         ImaLanguage.SPANISH_UNITED_STATES);
                 player = exoDorisImaPlayer.getExoDoris();
                 trackSelector = exoDorisImaPlayer.getTrackSelector();
@@ -534,7 +535,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             player.addListener(this);
             player.addMetadataOutput(this);
-            exoPlayerView.setPlayer(player.getSimpleExoPlayer(), false);
+            exoDorisPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -563,7 +564,7 @@ class ReactTVExoplayerView extends RelativeLayout
             Source source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(src.isLive())
-                    .setMuxData(src.getMuxData(), exoPlayerView.getVideoSurfaceView())
+                    .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .build();
 
@@ -874,6 +875,9 @@ class ReactTVExoplayerView extends RelativeLayout
                 text += "ready";
 
                 if (isImaStream) {
+                    AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
+                    exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
+                                                              adInfo.getPlayedAdGroups());
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
                 }
 
@@ -1286,6 +1290,9 @@ class ReactTVExoplayerView extends RelativeLayout
                     null);
             this.actionToken = actionToken;
 
+            exoDorisPlayerView.setTitle(title);
+            exoDorisPlayerView.setDescription(description);
+
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
@@ -1307,7 +1314,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
-        exoPlayerView.setResizeMode(resizeMode);
+        exoDorisPlayerView.setResizeMode(resizeMode);
     }
 
     public void setRepeatModifier(boolean repeat) {
@@ -1544,7 +1551,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        exoPlayerView.setUseTextureView(useTextureView);
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
@@ -1704,7 +1710,7 @@ class ReactTVExoplayerView extends RelativeLayout
         super.onLayout(changed, l, t, r, b);
 
         if (player != null) {
-            player.setVideoSurfaceView(exoPlayerView.getVideoSurfaceView());
+            player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
         }
     }
 
@@ -1721,130 +1727,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-
-            switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    showOverlay();
-                    break;
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER:
-                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                case KeyEvent.KEYCODE_MEDIA_REWIND:
-                    if (controls.getAlpha() == 0.0f) {
-                        showOverlay();
-                        return true;
-                    } else {
-                        showOverlay();
-                    }
-
-            }
-
-            switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    playPauseButton.requestFocus();
-                    // Media session will pause the player
-                    break;
-
-                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                case KeyEvent.KEYCODE_MEDIA_REWIND:
-                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && !((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-                        ((SeekBar) previewSeekBarLayout.getPreviewView()).requestFocus();
-                    }
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-
-                    if (live || player == null) {
-                        break;
-                    }
-
-                    if (previewSeekBarLayout.getPreviewView() instanceof SeekBar && ((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-                        final long currentTime = System.currentTimeMillis();
-
-                        final int increment;
-                        if (keyPressTime == null) {
-                            keyPressTime = currentTime;
-                            keyNotHandled = true;
-                            showOverlay();
-                            return true;
-                        } else if ((currentTime - keyPressTime) / 1000 > 10) {
-                            increment = 40;
-                        } else if ((currentTime - keyPressTime) / 1000 > 6) {
-                            increment = 25;
-                        } else if ((currentTime - keyPressTime) / 1000 > 3) {
-                            increment = 10;
-                        } else {
-                            increment = 1;
-                        }
-
-                        SeekBar seekbar = ((SeekBar) previewSeekBarLayout.getPreviewView());
-
-                        seekbar.setKeyProgressIncrement(increment * 1000);
-
-                        boolean isRew = event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_REWIND || event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT;
-                        seekIndicator.show(isRew, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 500, seekIndicatorRunnable);
-                        moveSeekBarIndicator(seekbar, isRew);
-
-                        animateHideView(currentTextView, 200);
-                    }
-
-                    keyNotHandled = false;
-                    break;
-            }
-        } else if (event.getAction() == KeyEvent.ACTION_UP) {
-
-            if (keyNotHandled && previewSeekBarLayout.getPreviewView() instanceof SeekBar && ((SeekBar) previewSeekBarLayout.getPreviewView()).hasFocus()) {
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_DPAD_LEFT:
-                    case KeyEvent.KEYCODE_MEDIA_REWIND: {
-                        if (player == null || !areControlsVisible) {
-                            break;
-                        }
-
-                        long position = player.getCurrentPosition() - 10000;
-                        if (position < 0) {
-                            position = 0;
-                        }
-                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
-                        //updateProgressControl(position);
-                        seekIndicator.show(true, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
-                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), true);
-                        animateHideView(currentTextView, 200);
-                        break;
-                    }
-                    case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                    case KeyEvent.KEYCODE_DPAD_RIGHT: {
-                        if (player == null || !areControlsVisible) {
-                            break;
-                        }
-
-                        long position = player.getCurrentPosition() + 10000;
-                        if (position > player.getDuration()) {
-                            position = player.getDuration();
-                        }
-                        controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), position);
-                        //updateProgressControl(position);
-                        seekIndicator.show(false, getSeekBarPositionString(player.getCurrentPosition(), player.getDuration()), 1000, seekIndicatorRunnable);
-                        moveSeekBarIndicator((SeekBar) previewSeekBarLayout.getPreviewView(), false);
-                        animateHideView(currentTextView, 200);
-                        break;
-                    }
-                }
-            }
-
-            if (!isPaused) {
-                hideOverlay();
-            }
-
-            keyPressTime = null;
-            keyNotHandled = false;
-        }
-
-        return super.dispatchKeyEvent(event);
+        return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
     }
 
     private void moveSeekBarIndicator(SeekBar seekbar, boolean isRew) {
@@ -1979,48 +1862,5 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void applyTranslations() {
         updateLabelView(bottomBarWidget.getFocusedChild());
-    }
-
-    /**
-     * Sets the {@link ControlDispatcher}.
-     *
-     * @param controlDispatcher The {@link ControlDispatcher}, or null
-     *     to use {@link DefaultControlDispatcher}.
-     */
-    @Override
-    public void setControlDispatcher(ControlDispatcher controlDispatcher) {
-        this.controlDispatcher =
-                controlDispatcher == null ? new DefaultControlDispatcher() : controlDispatcher;
-    }
-
-    @Override
-    public void showController() {
-        setControls(true);
-        hideOverlay();
-    }
-
-    @Override
-    public void hideController() {
-        setControls(false);
-    }
-
-    @Override
-    public int getControllerShowTimeoutMs() {
-        return 0;
-    }
-
-    @Override
-    public void setControllerShowTimeoutMs(int i) {
-
-    }
-
-    @Override
-    public ViewGroup getAdViewGroup() {
-        return null;
-    }
-
-    @Override
-    public void setExtraAdGroupMarkers(@Nullable long[] longs, @Nullable boolean[] booleans) {
-
     }
 }
