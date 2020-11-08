@@ -78,7 +78,6 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.tracks.DcePlayerModel;
 import com.imggaming.tracks.DceTracksDialog;
@@ -113,7 +112,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private static final String TAG = "ReactTvExoplayerView";
 
-    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
