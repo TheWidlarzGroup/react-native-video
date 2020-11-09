@@ -135,7 +135,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private ConstraintLayout bottomBarWidget;
     private TextView labelTextView;
     private DceSeekIndicator seekIndicator;
-    private ImageButton statsButton;
 
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
@@ -334,16 +333,6 @@ class ReactTVExoplayerView extends RelativeLayout
             });
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
-            statsButton = findViewById(R.id.tvStatsBtn);
-
-            statsButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    eventEmitter.statsIconClick();
-                    setStateOverlay(ControlState.HIDDEN.toString());
-                }
-            });
-
             labelTextView = findViewById(R.id.tvLabelView);
 
             bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
@@ -357,8 +346,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             setEpg(false); // default value
             setStats(false);
-
-            setupButton(statsButton);
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -376,11 +363,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == statsButton) {
-            moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
-        } else {
-            labelTextView.setVisibility(INVISIBLE);
-        }
+        labelTextView.setVisibility(INVISIBLE);
     }
 
     private void manuallyLayoutChildren() {
@@ -856,24 +839,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 && player.getPlaybackState() != Player.STATE_ENDED
                 && player.getPlaybackState() != Player.STATE_IDLE
                 && player.getPlayWhenReady();
-    }
-
-    private void changeFocusedView() {
-        if (live) {
-            if (statsButton.getVisibility() != View.VISIBLE) {
-                controls.setFocusable(true);
-                controls.setFocusableInTouchMode(false);
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        controls.requestFocus();
-                    }
-                });
-            } else {
-                controls.setFocusable(false);
-                controls.setFocusableInTouchMode(false);
-            }
-        }
     }
 
     private void startProgressHandler() {
@@ -1490,8 +1455,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 }
             });
         }
-
-        changeFocusedView();
     }
 
     public void setEpg(boolean hasEpg) {
@@ -1500,13 +1463,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setStats(boolean hasStats) {
         this.hasStats = hasStats;
-        statsButton.setVisibility(hasStats ? View.VISIBLE : View.GONE);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.findFocus());
-            }
-        });
     }
 
     public void setControls(final boolean visible) {
