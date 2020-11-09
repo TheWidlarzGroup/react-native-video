@@ -127,7 +127,7 @@ class ReactTVExoplayerView extends RelativeLayout
     private LinearLayout bottomBarWidgetContainer;
     private TextView currentTextView;
     private TextView liveTextView;
-    private ImageButton playPauseButton;
+
     private View controls;
     private ConstraintLayout bottomBarWidget;
     private TextView labelTextView;
@@ -322,13 +322,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
 
-            playPauseButton = controls.findViewById(R.id.tvPlayPauseImageView);
-            playPauseButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setPausedModifier(!isPaused);
-                }
-            });
             currentTextView = controls.findViewById(R.id.currentTimeTextView);
             liveTextView = controls.findViewById(R.id.liveTextView);
             previewSeekBarLayout = controls.findViewById(R.id.previewSeekBarLayout);
@@ -398,7 +391,6 @@ class ReactTVExoplayerView extends RelativeLayout
             setEpg(false); // default value
             setStats(false);
 
-            setupButton(playPauseButton);
             setupButton(audioSubtitlesButton);
             setupButton(scheduleButton);
             setupButton(statsButton);
@@ -420,9 +412,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == playPauseButton) {
-            moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
-        } else if (newFocus == audioSubtitlesButton) {
+        if (newFocus == audioSubtitlesButton) {
             moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
         } else if (newFocus == scheduleButton) {
             moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
@@ -734,10 +724,10 @@ class ReactTVExoplayerView extends RelativeLayout
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                controlDispatcher.dispatchSetPlayWhenReady(player, true);
+                player.play();
             }
         } else {
-            controlDispatcher.dispatchSetPlayWhenReady(player, false);
+            player.pause();
         }
 
         updateControlsState();
@@ -765,10 +755,6 @@ class ReactTVExoplayerView extends RelativeLayout
                      * state
                      */
                     if (fromBackground && isPaused) {
-                        playPauseButton.requestFocus();
-                        if (player != null) {
-                            updateProgressControl(player.getCurrentPosition());
-                        }
                         fromBackground = false;
                     }
                     break;
@@ -1442,15 +1428,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateControlsState() {
-        if (playPauseButton != null) {
-            if (isPaused) {
-                playPauseButton.setImageResource(R.drawable.tv_play_btn_selector);
-            } else {
-                playPauseButton.setImageResource(R.drawable.tv_pause_btn_selector);
-            }
-            updateLabelView(bottomBarWidget.findFocus());
-        }
-
         if (isPaused || isBuffering) {
             showOverlay();
         } else {
@@ -1580,7 +1557,6 @@ class ReactTVExoplayerView extends RelativeLayout
             int controlsVisibility = live ? GONE : VISIBLE;
             currentTextView.setVisibility(controlsVisibility);
             previewSeekBarLayout.setVisibility(controlsVisibility);
-            playPauseButton.setVisibility(controlsVisibility);
 
             post(new Runnable() {
                 @Override
@@ -1642,8 +1618,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setStateMiddleCoreControls(final String state) {
         float alpha = getAlphaFromState(state);
-
-        playPauseButton.setAlpha(alpha);
     }
 
     public void setStateProgressBar(final String state) {

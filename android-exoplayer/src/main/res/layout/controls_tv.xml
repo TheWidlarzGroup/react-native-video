@@ -4,15 +4,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#72000000"
-        android:visibility="invisible">
+        android:background="#72000000">
 
     <LinearLayout
             android:id="@+id/tvBottomBarWidgetContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -89,6 +87,7 @@
 
             <ImageButton
                     android:id="@+id/tvPlayPauseImageView"
+                    android:visibility="invisible"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginRight="8dp"
