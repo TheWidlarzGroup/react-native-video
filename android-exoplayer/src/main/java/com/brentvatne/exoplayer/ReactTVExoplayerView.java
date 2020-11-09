@@ -1587,6 +1587,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLive(final boolean live) {
         this.live = live;
+        exoDorisPlayerView.setIsLive(live);
         if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null) {
             liveTextView.setVisibility(live ? VISIBLE : GONE);
             @IntegerRes
@@ -1868,7 +1869,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void applyTranslations(Map<String, Object> translations) {
-//        updateLabelView(bottomBarWidget.getFocusedChild());
         this.translations = new RNTranslations(translations);
         setLabelsOnPLayerUi();
     }
