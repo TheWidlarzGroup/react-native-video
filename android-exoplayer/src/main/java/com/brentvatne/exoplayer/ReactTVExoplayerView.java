@@ -135,12 +135,10 @@ class ReactTVExoplayerView extends RelativeLayout
     private ConstraintLayout bottomBarWidget;
     private TextView labelTextView;
     private DceSeekIndicator seekIndicator;
-    private ImageButton audioSubtitlesButton;
     private ImageButton scheduleButton;
     private ImageButton statsButton;
 
     private ExoDorisPlayerView exoDorisPlayerView;
-    private DceTracksDialog dialog;
     private ExoDoris player;
     private ExoDorisImaPlayer exoDorisImaPlayer;
     private ExoDorisImaWrapper exoDorisImaWrapper;
@@ -337,30 +335,6 @@ class ReactTVExoplayerView extends RelativeLayout
             });
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
-            audioSubtitlesButton = findViewById(R.id.tvAudioSubtitlesBtn);
-            audioSubtitlesButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    if (!live) {
-                        setPausedModifier(true);
-                    }
-
-                    setStateOverlay(ControlState.HIDDEN.toString());
-
-                    if (dialog != null) {
-                        dialog.dismiss();
-                        dialog = null;
-                    }
-
-                    dialog = new DceTracksDialog(getContext(), 0);
-                    dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
-                    dialog.setAccentColor(accentColor);
-
-                    dialog.show();
-                }
-            });
-
             scheduleButton = findViewById(R.id.tvScheduleBtn);
 
             scheduleButton.setOnClickListener(new OnClickListener() {
@@ -395,10 +369,8 @@ class ReactTVExoplayerView extends RelativeLayout
             setEpg(false); // default value
             setStats(false);
 
-            setupButton(audioSubtitlesButton);
             setupButton(scheduleButton);
             setupButton(statsButton);
-            setupSubtitlesButton();
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -416,9 +388,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == audioSubtitlesButton) {
-            moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
-        } else if (newFocus == scheduleButton) {
+        if (newFocus == scheduleButton) {
             moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
         } else if (newFocus == statsButton) {
             moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
@@ -673,8 +643,6 @@ class ReactTVExoplayerView extends RelativeLayout
         deactivateMediaSession();
         releaseMediaSession();
 
-        dismissTracksDialog();
-
         if (player != null) {
             updateResumePosition();
             player.removeListener(this);
@@ -695,13 +663,6 @@ class ReactTVExoplayerView extends RelativeLayout
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
-    }
-
-    private void dismissTracksDialog() {
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
     }
 
     private boolean requestAudioFocus() {
@@ -872,7 +833,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 startProgressHandler();
                 setupProgressBarSeekListener();
                 videoLoaded();
-                setupSubtitlesButton();
                 break;
             case Player.STATE_ENDED:
                 text += "ended";
@@ -912,37 +872,9 @@ class ReactTVExoplayerView extends RelativeLayout
                 && player.getPlayWhenReady();
     }
 
-    private void setupSubtitlesButton() {
-        Log.d(TAG, "setupSubtitlesButton()");
-        if (player != null && player.getPlaybackState() == Player.STATE_READY) {
-
-            DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
-
-            if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
-                Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.VISIBLE);
-            } else {
-                Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
-                audioSubtitlesButton.setVisibility(View.GONE);
-            }
-        } else {
-            Log.d(TAG, "setupSubtitlesButton() player or media not ready");
-            audioSubtitlesButton.setVisibility(View.GONE);
-        }
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.getFocusedChild());
-            }
-        });
-
-        changeFocusedView();
-    }
-
     private void changeFocusedView() {
         if (live) {
-            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE && statsButton.getVisibility() != View.VISIBLE) {
+            if (scheduleButton.getVisibility() != View.VISIBLE && statsButton.getVisibility() != View.VISIBLE) {
                 controls.setFocusable(true);
                 controls.setFocusableInTouchMode(false);
                 post(new Runnable() {
