@@ -1296,9 +1296,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             exoDorisPlayerView.setTitle(title);
             exoDorisPlayerView.setDescription(description);
-            exoDorisPlayerView.setIsLive(live);
-
-            setLabelsOnPLayerUi();
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
