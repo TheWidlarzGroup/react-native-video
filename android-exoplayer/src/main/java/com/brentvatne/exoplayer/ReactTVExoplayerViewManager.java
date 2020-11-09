@@ -372,7 +372,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_TRANSLATIONS)
     public void setTranslations(final ReactTVExoplayerView videoView, @Nullable ReadableMap translations) {
         DiceLocalizedStrings.getInstance().updateTranslations(toStringMap(translations));
-        videoView.applyTranslations();
+        videoView.applyTranslations(translations != null ? translations.toHashMap() : null);
     }
 
     private boolean startsWithValidScheme(String uriString) {
