@@ -1587,7 +1587,9 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLive(final boolean live) {
         this.live = live;
-        exoDorisPlayerView.setIsLive(live);
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setIsLive(live);
+        }
         if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null) {
             liveTextView.setVisibility(live ? VISIBLE : GONE);
             @IntegerRes
