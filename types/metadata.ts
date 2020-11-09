@@ -1,5 +1,5 @@
 export interface IVideoPlayerMetadata {
-  id: number;
+  id: string;
   description?: string;
   thumbnailUrl: string;
   title: string;

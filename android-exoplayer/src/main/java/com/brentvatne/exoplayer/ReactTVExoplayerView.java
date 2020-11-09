@@ -1251,7 +1251,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setSrc(
             Uri uri,
-            int id,
+            String id,
             String extension,
             String title,
             String description,
@@ -1276,7 +1276,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             this.src = new RNSource(
                     uri,
-                    Integer.toString(id),
+                    id,
                     extension,
                     title,
                     description,
