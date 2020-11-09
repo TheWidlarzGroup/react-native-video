@@ -135,7 +135,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private ConstraintLayout bottomBarWidget;
     private TextView labelTextView;
     private DceSeekIndicator seekIndicator;
-    private ImageButton scheduleButton;
     private ImageButton statsButton;
 
     private ExoDorisPlayerView exoDorisPlayerView;
@@ -335,16 +334,6 @@ class ReactTVExoplayerView extends RelativeLayout
             });
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
-            scheduleButton = findViewById(R.id.tvScheduleBtn);
-
-            scheduleButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    eventEmitter.epgIconClick();
-                    setStateOverlay(ControlState.HIDDEN.toString());
-                }
-            });
-
             statsButton = findViewById(R.id.tvStatsBtn);
 
             statsButton.setOnClickListener(new OnClickListener() {
@@ -369,7 +358,6 @@ class ReactTVExoplayerView extends RelativeLayout
             setEpg(false); // default value
             setStats(false);
 
-            setupButton(scheduleButton);
             setupButton(statsButton);
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
@@ -388,9 +376,7 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateLabelView(View newFocus) {
-        if (newFocus == scheduleButton) {
-            moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
-        } else if (newFocus == statsButton) {
+        if (newFocus == statsButton) {
             moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
         } else {
             labelTextView.setVisibility(INVISIBLE);
@@ -874,7 +860,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private void changeFocusedView() {
         if (live) {
-            if (scheduleButton.getVisibility() != View.VISIBLE && statsButton.getVisibility() != View.VISIBLE) {
+            if (statsButton.getVisibility() != View.VISIBLE) {
                 controls.setFocusable(true);
                 controls.setFocusableInTouchMode(false);
                 post(new Runnable() {
@@ -1510,13 +1496,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setEpg(boolean hasEpg) {
         this.hasEpg = hasEpg;
-        scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.findFocus());
-            }
-        });
     }
 
     public void setStats(boolean hasStats) {
