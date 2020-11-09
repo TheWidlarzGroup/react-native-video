@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
+import com.brentvatne.entity.RNTranslations;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -53,6 +54,8 @@ import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
 import com.diceplatform.doris.ui.DorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
+import com.diceplatform.doris.ui.entity.Labels;
+import com.diceplatform.doris.ui.entity.LabelsBuilder;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -171,6 +174,7 @@ class ReactTVExoplayerView extends RelativeLayout
     // Props from React
     private RNSource src;
     private RNImaSource imaSrc;
+    private RNTranslations translations;
     private boolean repeat;
     private String audioTrackType;
     private Dynamic audioTrackValue;
@@ -1292,6 +1296,9 @@ class ReactTVExoplayerView extends RelativeLayout
 
             exoDorisPlayerView.setTitle(title);
             exoDorisPlayerView.setDescription(description);
+            exoDorisPlayerView.setIsLive(live);
+
+            setLabelsOnPLayerUi();
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
@@ -1860,7 +1867,27 @@ class ReactTVExoplayerView extends RelativeLayout
             });
     }
 
-    public void applyTranslations() {
-        updateLabelView(bottomBarWidget.getFocusedChild());
+    public void applyTranslations(Map<String, Object> translations) {
+//        updateLabelView(bottomBarWidget.getFocusedChild());
+        this.translations = new RNTranslations(translations);
+        setLabelsOnPLayerUi();
+    }
+
+    private void setLabelsOnPLayerUi() {
+        if (exoDorisPlayerView != null && translations != null) {
+            Labels labels = new LabelsBuilder()
+                    .setEpgLabel(translations.getEpgLabel())
+                    .setStatsLabel(translations.getStatsLabel())
+                    .setPlayLabel(translations.getPlayLabel())
+                    .setPauseLabel(translations.getPauseLabel())
+                    .setAudioAndSubtitlesLabel(translations.getAudioAndSubtitlesLabel())
+                    .setLiveLabel(translations.getLiveLabel())
+                    .setFavoriteLabel(translations.getFavoriteLabel())
+                    .setMoreVideosLabel(translations.getMoreVideosLabel())
+                    .setWatchListLabel(translations.getWatchListLabel())
+                    .build();
+
+            exoDorisPlayerView.setLabels(labels);
+        }
     }
 }
