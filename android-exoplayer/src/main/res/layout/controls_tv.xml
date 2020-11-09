@@ -218,7 +218,7 @@
                     android:layout_marginEnd="8sp"
                     android:layout_marginBottom="24dp"
                     android:lines="1"
-                    android:visibility="visible"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:text="Audio &amp; Subtitles" />

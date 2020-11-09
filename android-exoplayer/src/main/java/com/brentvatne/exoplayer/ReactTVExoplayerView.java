@@ -133,7 +133,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private View controls;
     private ConstraintLayout bottomBarWidget;
-    private TextView labelTextView;
     private DceSeekIndicator seekIndicator;
 
     private ExoDorisPlayerView exoDorisPlayerView;
@@ -333,17 +332,6 @@ class ReactTVExoplayerView extends RelativeLayout
             });
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
-            labelTextView = findViewById(R.id.tvLabelView);
-
-            bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
-                @Override
-                public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-                    Log.d(TAG, "onGlobalFocusChanged()");
-
-                    updateLabelView(newFocus);
-                }
-            });
-
             setEpg(false); // default value
             setStats(false);
 
@@ -360,10 +348,6 @@ class ReactTVExoplayerView extends RelativeLayout
             seekIndicator = findViewById(R.id.seekIndicator);
             seekIndicatorLabel = findViewById(R.id.seekIndicatorLabel);
         }
-    }
-
-    private void updateLabelView(View newFocus) {
-        labelTextView.setVisibility(INVISIBLE);
     }
 
     private void manuallyLayoutChildren() {
@@ -1431,7 +1415,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLabelFont(final String fontName) {
         Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
-        labelTextView.setTypeface(typeface);
         currentTextView.setTypeface(typeface);
         seekIndicatorLabel.setTypeface(typeface);
     }
@@ -1447,13 +1430,6 @@ class ReactTVExoplayerView extends RelativeLayout
             int controlsVisibility = live ? GONE : VISIBLE;
             currentTextView.setVisibility(controlsVisibility);
             previewSeekBarLayout.setVisibility(controlsVisibility);
-
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    updateLabelView(bottomBarWidget.getFocusedChild());
-                }
-            });
         }
     }
 
@@ -1645,35 +1621,6 @@ class ReactTVExoplayerView extends RelativeLayout
             anim2.setDuration(100);
             anim2.start();
         }
-    }
-
-    private void moveLabelView(ImageButton button, String label) {
-        int buttonCentre = (int) (button.getX() + (button.getWidth() / 2));
-        int labelWidth = (int) labelTextView.getPaint().measureText(label);
-
-        MarginLayoutParams pl = (MarginLayoutParams) labelTextView.getLayoutParams();
-        final int marginStart = MarginLayoutParamsCompat.getMarginStart(pl);
-        final int marginEnd = MarginLayoutParamsCompat.getMarginEnd(pl);
-
-        float leftSpace = buttonCentre - marginStart - marginEnd;
-        float rightSpace = bottomBarWidget.getWidth() - buttonCentre - marginStart - marginEnd;
-        float space = Math.min(leftSpace, rightSpace) * 2;
-        float bias = labelWidth > 0 ? (space / labelWidth) / 2 : 0.5f;
-
-        final int labelId = labelTextView.getId();
-        final int buttonId = button.getId();
-
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(bottomBarWidget);
-        constraintSet.connect(labelId, ConstraintSet.START, buttonId, ConstraintSet.START, marginStart);
-        constraintSet.connect(labelId, ConstraintSet.END, buttonId, ConstraintSet.END, marginEnd);
-        constraintSet.setHorizontalBias(labelId, Math.min(bias, 0.5f));
-        constraintSet.applyTo(bottomBarWidget);
-
-        labelTextView.setWidth(labelWidth);
-        labelTextView.setText(label);
-        labelTextView.setAlpha(0.0f);
-        animateShowView(labelTextView, 100);
     }
 
     public void animateHideView(final View view, int duration) {
