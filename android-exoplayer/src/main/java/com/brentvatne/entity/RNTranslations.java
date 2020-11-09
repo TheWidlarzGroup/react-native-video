@@ -37,33 +37,30 @@ public class RNTranslations {
     private final String watchListLabel;
 
     public RNTranslations(@NonNull Map<String, Object> translations) {
-        this.epgLabel = translations.get(KEY_EPG_LABEL) != null ?
-                        (String) translations.get(KEY_EPG_LABEL) :
-                        DEFAULT_EPG_LABEL;
-        this.statsLabel = translations.get(KEY_STATS_LABEL) != null ?
-                          (String) translations.get(KEY_STATS_LABEL) :
-                          DEFAULT_STATS_LABEL;
-        this.playLabel = translations.get(KEY_PLAY_LABEL) != null ?
-                         (String) translations.get(KEY_PLAY_LABEL) :
-                         DEFAULT_PLAY_LABEL;
-        this.pauseLabel = translations.get(KEY_PAUSE_LABEL) != null ?
-                          (String) translations.get(KEY_PAUSE_LABEL) :
-                          DEFAULT_PAUSE_LABEL;
-        this.audioAndSubtitlesLabel = translations.get(KEY_AUDIO_AND_SUBTITLES_LABEL) != null ?
-                                      (String) translations.get(KEY_AUDIO_AND_SUBTITLES_LABEL) :
-                                      DEFAULT_AUDIO_AND_SUBTITLES_LABEL;
-        this.liveLabel = translations.get(KEY_LIVE_LABEL) != null ?
-                         (String) translations.get(KEY_LIVE_LABEL) :
-                         DEFAULT_LIVE_LABEL;
-        this.favoriteLabel = translations.get(KEY_FAVORITE_LABEL) != null ?
-                             (String) translations.get(KEY_FAVORITE_LABEL) :
-                             DEFAULT_FAVORITE_LABEL;
-        this.moreVideosLabel = translations.get(KEY_MORE_VIDEOS_LABEL) != null ?
-                               (String) translations.get(KEY_MORE_VIDEOS_LABEL) :
-                               DEFAULT_MORE_VIDEOS_LABEL;
-        this.watchListLabel = translations.get(KEY_WATCH_LIST_LABEL) != null ?
-                              (String) translations.get(KEY_WATCH_LIST_LABEL) :
-                              DEFAULT_WATCH_LIST_LABEL;
+        this.epgLabel = getStringFromMap(translations, KEY_EPG_LABEL, DEFAULT_EPG_LABEL);
+        this.statsLabel = getStringFromMap(translations, KEY_STATS_LABEL, DEFAULT_STATS_LABEL);
+        this.playLabel = getStringFromMap(translations, KEY_PLAY_LABEL, DEFAULT_PLAY_LABEL);
+        this.pauseLabel = getStringFromMap(translations, KEY_PAUSE_LABEL, DEFAULT_PAUSE_LABEL);
+        this.audioAndSubtitlesLabel = getStringFromMap(translations,
+                                                       KEY_AUDIO_AND_SUBTITLES_LABEL,
+                                                       DEFAULT_AUDIO_AND_SUBTITLES_LABEL);
+        this.liveLabel = getStringFromMap(translations, KEY_LIVE_LABEL, DEFAULT_LIVE_LABEL);
+        this.favoriteLabel = getStringFromMap(translations,
+                                              KEY_FAVORITE_LABEL,
+                                              DEFAULT_FAVORITE_LABEL);
+        this.moreVideosLabel = getStringFromMap(translations,
+                                                KEY_MORE_VIDEOS_LABEL,
+                                                DEFAULT_MORE_VIDEOS_LABEL);
+        this.watchListLabel = getStringFromMap(translations,
+                                               KEY_WATCH_LIST_LABEL,
+                                               DEFAULT_WATCH_LIST_LABEL);
+    }
+
+    private String getStringFromMap(
+            Map<String, Object> translations,
+            String key,
+            String defaultValue) {
+        return translations.get(key) != null ? (String) translations.get(key) : defaultValue;
     }
 
     public String getEpgLabel() {
