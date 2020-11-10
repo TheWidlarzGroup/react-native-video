@@ -22,7 +22,6 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.accessibility.CaptioningManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -82,10 +81,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
-import com.imggaming.tracks.DcePlayerModel;
-import com.imggaming.tracks.DceTracksDialog;
-import com.imggaming.translations.DiceLocalizedStrings;
-import com.imggaming.translations.DiceLocalizedStrings.StringId;
 import com.imggaming.utils.DensityPixels;
 import com.imggaming.widgets.DceSeekIndicator;
 import com.previewseekbar.PreviewSeekBarLayout;
@@ -106,8 +101,6 @@ import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends RelativeLayout
@@ -128,8 +121,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private PreviewSeekBarLayout previewSeekBarLayout;
     private LinearLayout bottomBarWidgetContainer;
-    private TextView currentTextView;
-    private TextView liveTextView;
 
     private View controls;
     private ConstraintLayout bottomBarWidget;
@@ -227,14 +218,6 @@ class ReactTVExoplayerView extends RelativeLayout
         }
     };
 
-    private Runnable seekIndicatorRunnable = new Runnable() {
-        @Override
-        public void run() {
-            animateHideView(seekIndicator, 400);
-            animateShowView(currentTextView, 400);
-        }
-    };
-
     private boolean playInBackground = false;
 
     //Drm
@@ -321,8 +304,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
 
-            currentTextView = controls.findViewById(R.id.currentTimeTextView);
-            liveTextView = controls.findViewById(R.id.liveTextView);
             previewSeekBarLayout = controls.findViewById(R.id.previewSeekBarLayout);
             previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
                 @Override
@@ -843,7 +824,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
         String positionString = getSeekBarPositionString(currentMillis, duration);
 
-        currentTextView.setText(positionString);
         seekIndicator.setLabel(positionString);
     }
 
@@ -1415,7 +1395,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLabelFont(final String fontName) {
         Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
-        currentTextView.setTypeface(typeface);
         seekIndicatorLabel.setTypeface(typeface);
     }
 
@@ -1424,11 +1403,9 @@ class ReactTVExoplayerView extends RelativeLayout
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
         }
-        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null) {
-            liveTextView.setVisibility(live ? VISIBLE : GONE);
+        if (previewSeekBarLayout != null) {
             @IntegerRes
             int controlsVisibility = live ? GONE : VISIBLE;
-            currentTextView.setVisibility(controlsVisibility);
             previewSeekBarLayout.setVisibility(controlsVisibility);
         }
     }
@@ -1485,8 +1462,6 @@ class ReactTVExoplayerView extends RelativeLayout
         bottomBarWidgetContainer.animate().alpha(alpha).start();
         bottomBarWidgetContainer.setEnabled(enabled);
         bottomBarWidget.setAlpha(alpha);
-        currentTextView.setEnabled(enabled);
-        currentTextView.setAlpha(alpha);
         previewSeekBarLayout.setEnabled(enabled);
         previewSeekBarLayout.setAlpha(alpha);
         ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
