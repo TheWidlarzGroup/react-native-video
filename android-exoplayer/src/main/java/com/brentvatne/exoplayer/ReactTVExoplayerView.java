@@ -114,8 +114,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private final VideoEventEmitter eventEmitter;
 
-    private View controls;
-
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
     private ExoDorisImaPlayer exoDorisImaPlayer;
@@ -264,26 +262,9 @@ class ReactTVExoplayerView extends RelativeLayout
         setLayoutTransition(new LayoutTransition());
 
         exoDorisPlayerView = findViewById(R.id.exoDorisPlayerView);
+        exoDorisPlayerView.setUseController(areControlsVisible);
 
         if (areControlsVisible) {
-            addOnLayoutChangeListener(new OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
-                                           int oldRight, int oldBottom) {
-                    postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            controls.requestLayout();
-                        }
-                    }, 200);
-                }
-            });
-
-            controls = inflater.inflate(R.layout.controls_tv, null);
-            LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            controls.setLayoutParams(controlsParam);
-            addView(controls);
-
             setEpg(false); // default value
             setStats(false);
 
@@ -1331,12 +1312,11 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setControls(final boolean visible) {
-        controls.setVisibility(visible ? VISIBLE : GONE);
         areControlsVisible = visible;
+        exoDorisPlayerView.setUseController(visible);
     }
 
     public void setControlsOpacity(final float opacity) {
-        controls.setAlpha(opacity);
     }
 
     public void setProgressBarMarginBottom(int marginBottom) {
@@ -1344,7 +1324,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setStateOverlay(final String state) {
         float alpha = getAlphaFromState(state);
-        controls.animate().alpha(alpha).setDuration(ANIMATION_DURATION_CONTROLS_VISIBILITY).start();
     }
 
     public void setStateMiddleCoreControls(final String state) {
