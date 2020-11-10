@@ -60,6 +60,7 @@ static int const RCTVideoUnset = -1;
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
   BOOL _playbackRateObserverRegistered;
+  BOOL _currentItemObserverRegistered;
   BOOL _videoLoadStarted;
 
   bool _pendingSeek;
@@ -146,13 +147,12 @@ static int const RCTVideoUnset = -1;
   return self;
 }
 
-- (AVPlayerViewController*)createPlayerViewController:(AVDoris*)player {
+- (AVPlayerViewController*)createPlayerViewController:(AVDorisPlayer*)player {
     RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
     playerLayer.showsPlaybackControls = YES;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = player;
-    player.delegate = playerLayer;
     playerLayer.view.frame = self.bounds;
     return playerLayer;
 }
@@ -467,6 +467,7 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [self.player removeObserver:self forKeyPath:playbackRate context:nil];
+  [self.player removeObserver:self forKeyPath:currentItem context:nil];
   [_diceBeaconRequst cancel];
   _diceBeaconRequst = nil;
 }
@@ -611,10 +612,17 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
       [object.player removeObserver:object forKeyPath:playbackRate context:nil];
       object->_playbackRateObserverRegistered = NO;
     }
+      
+    if (object->_playbackRateObserverRegistered) {
+        [object.player removeObserver:object forKeyPath:currentItem context:nil];
+        object->_currentItemObserverRegistered = NO;
+    }
     
-    object.player = [AVDoris new];
+    object.player = [AVDorisPlayer new];
     [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
     [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
+    object->_playbackRateObserverRegistered = YES;
+    object->_currentItemObserverRegistered = YES;
 
     id imaObject = [source objectForKey:@"ima"];
     
@@ -625,7 +633,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     }
     
     object.player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    object->_playbackRateObserverRegistered = YES;
 
     [object addPlayerTimeObserver];
 
@@ -643,13 +650,16 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
 }
 
 - (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
+  self.avdoris = [[AVDoris alloc] initWithPlayer:self.player];
   [self usePlayerViewController];
+  
+  self.avdoris.delegate = _playerViewController;
+  _playerViewController.avdoris = self.avdoris;
   
   id assetKey = [imaDict objectForKey:@"assetKey"];
   id contentSourceId = [imaDict objectForKey:@"contentSourceId"];
   id videoId = [imaDict objectForKey:@"videoId"];
   id authToken = [imaDict objectForKey:@"authToken"];
-  
   if (assetKey) {
     if ([assetKey isKindOfClass:NSString.class]) {
       AVDorisIMALiveStreamRequest *liveRequest = [[AVDorisIMALiveStreamRequest alloc]
@@ -682,7 +692,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
       
       liveRequest.adTagParameters = adtags;
       
-      [self.player requestIMAStreamWithStreamRequest:liveRequest];
+      [self.avdoris requestIMAStreamWithStreamRequest:liveRequest];
     }
   } else if (contentSourceId && videoId && authToken) {
     if ([contentSourceId isKindOfClass:NSString.class] &&
@@ -721,7 +731,7 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
       vodRequest.adTagParameters = adtags;
       vodRequest.authToken = authToken;
       
-      [self.player requestIMAStreamWithStreamRequest:vodRequest];
+      [self.avdoris requestIMAStreamWithStreamRequest:vodRequest];
     }
   } else {
     [self.player replaceCurrentItemWithPlayerItem:playerItem];
@@ -1764,6 +1774,10 @@ dispatch_queue_t delegateQueue;
   if (_playbackRateObserverRegistered) {
     [self.player removeObserver:self forKeyPath:playbackRate context:nil];
     _playbackRateObserverRegistered = NO;
+  }
+  if (_currentItemObserverRegistered) {
+    [self.player removeObserver:self forKeyPath:currentItem context:nil];
+    _currentItemObserverRegistered = NO;
   }
   self.player = nil;
   

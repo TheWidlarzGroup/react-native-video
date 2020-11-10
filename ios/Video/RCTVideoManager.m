@@ -144,9 +144,9 @@ RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDic
         _endDate = [[NSDate alloc] initWithTimeIntervalSince1970:[endDate doubleValue]];
       }
       
-      [view.player replaceAdTagParametersWithAdTagParameters:_adTagParameters
-                                                   validFrom: _startDate
-                                                  validUntil:_endDate];
+      [view.avdoris replaceAdTagParametersWithAdTagParameters:_adTagParameters
+                                                    validFrom: _startDate
+                                                   validUntil:_endDate];
     }
   }];
 };

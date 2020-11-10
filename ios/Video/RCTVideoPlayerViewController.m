@@ -134,9 +134,8 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
     if (self.isAdBreakActive) {
         // Send focus to the ad display container during an ad break.
-        if ([self.player isKindOfClass:[AVDoris class]]) {
-            AVDoris *avDoris = (AVDoris*) self.player;
-            return @[ avDoris.adFocusEnvironment ];
+        if (self.avdoris) {
+            return @[ self.avdoris.adFocusEnvironment ];
         } else {
             return @[ self ];
         }
@@ -165,9 +164,8 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
 - (void)playerViewController:(AVPlayerViewController *)playerViewController
 willResumePlaybackAfterUserNavigatedFromTime:(CMTime)oldTime
                       toTime:(CMTime)targetTime {
-    if ([self.player isKindOfClass:[AVDoris class]]) {
-        AVDoris *avDoris = (AVDoris*) self.player;
-        [avDoris seekWithSnapbackTo:targetTime];
+    if (self.avdoris) {
+      [self.avdoris seekWithSnapbackTo:targetTime];
     }
 }
 
