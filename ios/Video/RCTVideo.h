@@ -36,7 +36,8 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
-@property (nonatomic, strong) AVDoris *player;
+@property (nonatomic, strong) AVDorisPlayer *player;
+@property (nonatomic, strong) AVDoris *avdoris;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
