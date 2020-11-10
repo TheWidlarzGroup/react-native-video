@@ -114,8 +114,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private final VideoEventEmitter eventEmitter;
 
-    private LinearLayout bottomBarWidgetContainer;
-
     private View controls;
 
     private ExoDorisPlayerView exoDorisPlayerView;
@@ -285,8 +283,6 @@ class ReactTVExoplayerView extends RelativeLayout
             LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             controls.setLayoutParams(controlsParam);
             addView(controls);
-
-            bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
             setEpg(false); // default value
             setStats(false);
@@ -1344,7 +1340,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setProgressBarMarginBottom(int marginBottom) {
-        bottomBarWidgetContainer.setTranslationY(-DensityPixels.dpToPx(marginBottom));
     }
 
     public void setStateOverlay(final String state) {
@@ -1359,9 +1354,6 @@ class ReactTVExoplayerView extends RelativeLayout
     public void setStateProgressBar(final String state) {
         boolean enabled = getEnabledFromState(state);
         float alpha = getAlphaFromState(state);
-
-        bottomBarWidgetContainer.animate().alpha(alpha).start();
-        bottomBarWidgetContainer.setEnabled(enabled);
     }
 
     private boolean getEnabledFromState(String stateStr) {
