@@ -117,7 +117,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private LinearLayout bottomBarWidgetContainer;
 
     private View controls;
-    private ConstraintLayout bottomBarWidget;
 
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
@@ -286,8 +285,6 @@ class ReactTVExoplayerView extends RelativeLayout
             LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             controls.setLayoutParams(controlsParam);
             addView(controls);
-
-            bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
 
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
@@ -1343,13 +1340,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setControlsOpacity(final float opacity) {
-        float newTranslationY = ((1 - opacity) * bottomBarWidget.getHeight() * 0.5f);
-        if (newTranslationY < 0) {
-            newTranslationY = 0;
-        } else if (newTranslationY > bottomBarWidget.getHeight()) {
-            newTranslationY = bottomBarWidget.getHeight();
-        }
-        bottomBarWidget.setTranslationY(newTranslationY);
         controls.setAlpha(opacity);
     }
 
@@ -1370,17 +1360,8 @@ class ReactTVExoplayerView extends RelativeLayout
         boolean enabled = getEnabledFromState(state);
         float alpha = getAlphaFromState(state);
 
-        float newTranslationY = ((1 - alpha) * bottomBarWidget.getHeight() * 0.5f);
-        if (newTranslationY < 0) {
-            newTranslationY = 0;
-        } else if (newTranslationY > bottomBarWidget.getHeight()) {
-            newTranslationY = bottomBarWidget.getHeight();
-        }
-        bottomBarWidget.setTranslationY(newTranslationY);
-
         bottomBarWidgetContainer.animate().alpha(alpha).start();
         bottomBarWidgetContainer.setEnabled(enabled);
-        bottomBarWidget.setAlpha(alpha);
     }
 
     private boolean getEnabledFromState(String stateStr) {
