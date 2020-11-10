@@ -59,7 +59,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -115,7 +114,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private final VideoEventEmitter eventEmitter;
 
-    private PreviewSeekBarLayout previewSeekBarLayout;
     private LinearLayout bottomBarWidgetContainer;
 
     private View controls;
@@ -140,11 +138,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private boolean isImaStream = false;
-
-    private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-    private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-    private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-    private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
     private RNSource src;
@@ -206,8 +199,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
                 msg = obtainMessage(SHOW_NATIVE_PROGRESS);
                 sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
-
-                updateProgressControl(currentMillis);
             }
         }
     };
@@ -298,13 +289,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
             bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
 
-            previewSeekBarLayout = controls.findViewById(R.id.previewSeekBarLayout);
-            previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
-                @Override
-                public void loadPreview(long currentPosition, long max) {
-
-                }
-            });
             bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
 
             setEpg(false); // default value
@@ -756,7 +740,6 @@ class ReactTVExoplayerView extends RelativeLayout
                 eventEmitter.ready();
                 onBuffering(false);
                 startProgressHandler();
-                setupProgressBarSeekListener();
                 videoLoaded();
                 break;
             case Player.STATE_ENDED:
@@ -802,18 +785,6 @@ class ReactTVExoplayerView extends RelativeLayout
         nativeProgressHandler.sendEmptyMessage(SHOW_NATIVE_PROGRESS);
     }
 
-    private void updateProgressControl(long currentMillis) {
-
-        ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
-        if (player == null || progressBar == null) {
-            return;
-        }
-        long duration = player.getDuration();
-
-        progressBar.setProgress((int) currentMillis);
-        progressBar.setMax((int) duration);
-    }
-
     private String getSeekBarPositionString(long currentMillis, long duration) {
         String durationString = null;
 
@@ -848,33 +819,6 @@ class ReactTVExoplayerView extends RelativeLayout
         }
 
         return null;
-    }
-
-    private void setupProgressBarSeekListener() {
-        if (previewSeekBarLayout != null
-                && previewSeekBarLayout.checkChilds()
-                && previewSeekBarLayout.getPreviewView() instanceof ProgressBar) {
-            if (mPreviewChangeListener == null) {
-                mPreviewChangeListener = new PreviewView.OnPreviewChangeListener() {
-                    @Override
-                    public void onStartPreview(PreviewView previewView) {
-                    }
-
-                    @Override
-                    public void onStopPreview(PreviewView previewView) {
-                    }
-
-                    @Override
-                    public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
-                        if (fromUser && player != null) {
-                            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), progress);
-                            updateProgressControl(progress);
-                        }
-                    }
-                };
-            }
-            previewSeekBarLayout.getPreviewView().addOnPreviewChangeListener(mPreviewChangeListener);
-        }
     }
 
     private void videoLoaded() {
@@ -1362,10 +1306,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
-        minBufferMs = newMinBufferMs;
-        maxBufferMs = newMaxBufferMs;
-        bufferForPlaybackMs = newBufferForPlaybackMs;
-        bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
         initializePlayer(false);
     }
@@ -1373,7 +1313,6 @@ class ReactTVExoplayerView extends RelativeLayout
     public void setColorProgressBar(String color) {
         try {
             accentColor = Color.parseColor(color);
-            previewSeekBarLayout.setTintColor(accentColor);
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
@@ -1387,11 +1326,6 @@ class ReactTVExoplayerView extends RelativeLayout
         this.live = live;
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
-        }
-        if (previewSeekBarLayout != null) {
-            @IntegerRes
-            int controlsVisibility = live ? GONE : VISIBLE;
-            previewSeekBarLayout.setVisibility(controlsVisibility);
         }
     }
 
@@ -1447,12 +1381,6 @@ class ReactTVExoplayerView extends RelativeLayout
         bottomBarWidgetContainer.animate().alpha(alpha).start();
         bottomBarWidgetContainer.setEnabled(enabled);
         bottomBarWidget.setAlpha(alpha);
-        previewSeekBarLayout.setEnabled(enabled);
-        previewSeekBarLayout.setAlpha(alpha);
-        ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
-        if (progressBar != null) {
-            progressBar.setEnabled(enabled);
-        }
     }
 
     private boolean getEnabledFromState(String stateStr) {

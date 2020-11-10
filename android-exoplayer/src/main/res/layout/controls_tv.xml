@@ -17,6 +17,7 @@
 
         <com.previewseekbar.PreviewSeekBarLayout
                 android:id="@+id/previewSeekBarLayout"
+                android:visibility="invisible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
@@ -44,7 +45,6 @@
             <com.imggaming.widgets.DceSeekIndicator
                     android:id="@+id/seekIndicator"
                     android:visibility="gone"
-                    tools:visibility="visible"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/previewFrameLayout" />
@@ -52,6 +52,7 @@
             <com.previewseekbar.PreviewSeekbarTV
                     style="@style/TVSeekBar"
                     android:id="@+id/previewSeekBar"
+                    android:visibility="invisible"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:layout_marginLeft="4dp"
