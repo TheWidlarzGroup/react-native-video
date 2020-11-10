@@ -7,7 +7,6 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -27,8 +26,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
@@ -82,7 +79,6 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
 import com.imggaming.utils.DensityPixels;
-import com.imggaming.widgets.DceSeekIndicator;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
 import com.previewseekbar.base.PreviewView;
@@ -124,7 +120,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private View controls;
     private ConstraintLayout bottomBarWidget;
-    private DceSeekIndicator seekIndicator;
 
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
@@ -176,7 +171,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private PowerManager powerManager;
     private long playerViewCreationTime;
     private long playerInitTime;
-    private TextView seekIndicatorLabel;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -325,9 +319,6 @@ class ReactTVExoplayerView extends RelativeLayout
                     Choreographer.getInstance().postFrameCallback(this);
                 }
             });
-
-            seekIndicator = findViewById(R.id.seekIndicator);
-            seekIndicatorLabel = findViewById(R.id.seekIndicatorLabel);
         }
     }
 
@@ -821,10 +812,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
         progressBar.setProgress((int) currentMillis);
         progressBar.setMax((int) duration);
-
-        String positionString = getSeekBarPositionString(currentMillis, duration);
-
-        seekIndicator.setLabel(positionString);
     }
 
     private String getSeekBarPositionString(long currentMillis, long duration) {
@@ -895,7 +882,6 @@ class ReactTVExoplayerView extends RelativeLayout
             loadVideoStarted = false;
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
-            seekIndicator.setLabelMaxText(getSeekBarPositionString(0, player.getDuration()));
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -1395,7 +1381,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLabelFont(final String fontName) {
         Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
-        seekIndicatorLabel.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
@@ -1521,28 +1506,6 @@ class ReactTVExoplayerView extends RelativeLayout
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
-    }
-
-    private void moveSeekBarIndicator(SeekBar seekbar, boolean isRew) {
-        int paddingLeftX = previewSeekBarLayout.getPaddingLeft();
-        int indicatorWidth = seekIndicator.getMeasuredWidth();
-        Rect bounds = seekbar.getThumb().getBounds();
-        int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
-
-        int indicatorX = !isRew ?
-                         thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
-                                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
-
-        int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
-
-        if (indicatorX < paddingLeftX) {
-            indicatorX = paddingLeftX;
-        } else if (indicatorX > paddingRightX) {
-            indicatorX = paddingRightX;
-        }
-
-        seekIndicator.setX(indicatorX);
-        animateShowView(seekIndicator, 0);
     }
 
     public void showOverlay() {
