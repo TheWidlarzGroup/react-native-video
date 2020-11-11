@@ -2,7 +2,6 @@ package com.brentvatne.exoplayer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -22,10 +21,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.CaptioningManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
@@ -98,7 +95,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 @SuppressLint("ViewConstructor")
-class ReactTVExoplayerView extends RelativeLayout
+class ReactTVExoplayerView extends FrameLayout
         implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
@@ -254,14 +251,10 @@ class ReactTVExoplayerView extends RelativeLayout
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        View layout = inflater.inflate(R.layout.react_tv_exoplayer_view, null);
-        layout.setLayoutParams(layoutParams);
-        addView(layout);
-        setLayoutTransition(new LayoutTransition());
+        LayoutInflater.from(getContext()).inflate(R.layout.react_tv_exoplayer_view, this);
+        setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
-        exoDorisPlayerView = findViewById(R.id.exoDorisPlayerView);
+        exoDorisPlayerView = findViewById(R.id.playerView);
         exoDorisPlayerView.setUseController(areControlsVisible);
 
         if (areControlsVisible) {
@@ -701,6 +694,10 @@ class ReactTVExoplayerView extends RelativeLayout
                 break;
             case Player.STATE_READY:
                 text += "ready";
+
+                exoDorisPlayerView.setFocusable(true);
+                exoDorisPlayerView.setFocusableInTouchMode(true);
+                exoDorisPlayerView.requestFocus();
 
                 if (isImaStream) {
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
