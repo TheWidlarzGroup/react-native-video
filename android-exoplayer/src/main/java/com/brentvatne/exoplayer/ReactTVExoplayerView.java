@@ -269,6 +269,8 @@ class ReactTVExoplayerView extends FrameLayout
                     Choreographer.getInstance().postFrameCallback(this);
                 }
             });
+        } else {
+            exoDorisPlayerView.hideController();
         }
     }
 
@@ -1309,6 +1311,11 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setControls(final boolean visible) {
         areControlsVisible = visible;
+        if (visible) {
+            exoDorisPlayerView.showController();
+        } else {
+            exoDorisPlayerView.hideController();
+        }
     }
 
     public void setControlsOpacity(final float opacity) {
