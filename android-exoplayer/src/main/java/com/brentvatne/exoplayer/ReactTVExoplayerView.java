@@ -255,21 +255,20 @@ class ReactTVExoplayerView extends FrameLayout
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         exoDorisPlayerView = findViewById(R.id.playerView);
+        exoDorisPlayerView.setUseController(false);
 
-        if (areControlsVisible) {
-            setEpg(false); // default value
-            setStats(false);
+        setEpg(false); // default value
+        setStats(false);
 
-            // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
-            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-                @Override
-                public void doFrame(long frameTimeNanos) {
-                    manuallyLayoutChildren();
-                    getViewTreeObserver().dispatchOnGlobalLayout();
-                    Choreographer.getInstance().postFrameCallback(this);
-                }
-            });
-        }
+        // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
+        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                manuallyLayoutChildren();
+                getViewTreeObserver().dispatchOnGlobalLayout();
+                Choreographer.getInstance().postFrameCallback(this);
+            }
+        });
     }
 
     private void manuallyLayoutChildren() {
@@ -1309,6 +1308,15 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setControls(final boolean visible) {
         areControlsVisible = visible;
+        if (visible) {
+            if (!exoDorisPlayerView.getUseController()) {
+                exoDorisPlayerView.setUseController(true);
+            } else {
+                exoDorisPlayerView.showController();
+            }
+        } else {
+            exoDorisPlayerView.hideController();
+        }
     }
 
     public void setControlsOpacity(final float opacity) {
