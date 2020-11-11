@@ -2,12 +2,10 @@ package com.brentvatne.exoplayer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -22,15 +20,9 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.accessibility.CaptioningManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
@@ -47,12 +39,9 @@ import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
 import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
 import com.diceplatform.doris.ext.ima.entity.AdInfo;
-import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
-import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
-import com.diceplatform.doris.ui.DorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.entity.Labels;
 import com.diceplatform.doris.ui.entity.LabelsBuilder;
@@ -67,7 +56,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -85,14 +73,8 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
-import com.imggaming.tracks.DcePlayerModel;
-import com.imggaming.tracks.DceTracksDialog;
-import com.imggaming.translations.DiceLocalizedStrings;
-import com.imggaming.translations.DiceLocalizedStrings.StringId;
 import com.imggaming.utils.DensityPixels;
-import com.imggaming.widgets.DceSeekIndicator;
 import com.previewseekbar.PreviewSeekBarLayout;
 import com.previewseekbar.base.PreviewLoader;
 import com.previewseekbar.base.PreviewView;
@@ -111,16 +93,13 @@ import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.view.MarginLayoutParamsCompat;
 
 @SuppressLint("ViewConstructor")
-class ReactTVExoplayerView extends RelativeLayout
+class ReactTVExoplayerView extends FrameLayout
         implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
 
     private static final String TAG = "ReactTvExoplayerView";
 
-    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
@@ -132,21 +111,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
     private final VideoEventEmitter eventEmitter;
 
-    private PreviewSeekBarLayout previewSeekBarLayout;
-    private LinearLayout bottomBarWidgetContainer;
-    private TextView currentTextView;
-    private TextView liveTextView;
-    private ImageButton playPauseButton;
-    private View controls;
-    private ConstraintLayout bottomBarWidget;
-    private TextView labelTextView;
-    private DceSeekIndicator seekIndicator;
-    private ImageButton audioSubtitlesButton;
-    private ImageButton scheduleButton;
-    private ImageButton statsButton;
-
     private ExoDorisPlayerView exoDorisPlayerView;
-    private DceTracksDialog dialog;
     private ExoDoris player;
     private ExoDorisImaPlayer exoDorisImaPlayer;
     private ExoDorisImaWrapper exoDorisImaWrapper;
@@ -165,11 +130,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private boolean isImaStream = false;
-
-    private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-    private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-    private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-    private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
     private RNSource src;
@@ -196,7 +156,6 @@ class ReactTVExoplayerView extends RelativeLayout
     private PowerManager powerManager;
     private long playerViewCreationTime;
     private long playerInitTime;
-    private TextView seekIndicatorLabel;
 
     // React
     private final ThemedReactContext themedReactContext;
@@ -232,17 +191,7 @@ class ReactTVExoplayerView extends RelativeLayout
                 progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
                 msg = obtainMessage(SHOW_NATIVE_PROGRESS);
                 sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
-
-                updateProgressControl(currentMillis);
             }
-        }
-    };
-
-    private Runnable seekIndicatorRunnable = new Runnable() {
-        @Override
-        public void run() {
-            animateHideView(seekIndicator, 400);
-            animateShowView(currentTextView, 400);
         }
     };
 
@@ -302,117 +251,14 @@ class ReactTVExoplayerView extends RelativeLayout
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        View layout = inflater.inflate(R.layout.react_tv_exoplayer_view, null);
-        layout.setLayoutParams(layoutParams);
-        addView(layout);
-        setLayoutTransition(new LayoutTransition());
+        LayoutInflater.from(getContext()).inflate(R.layout.react_tv_exoplayer_view, this);
+        setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
-        exoDorisPlayerView = findViewById(R.id.exoDorisPlayerView);
+        exoDorisPlayerView = findViewById(R.id.playerView);
 
         if (areControlsVisible) {
-            addOnLayoutChangeListener(new OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
-                                           int oldRight, int oldBottom) {
-                    postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            controls.requestLayout();
-                        }
-                    }, 200);
-                }
-            });
-
-            controls = inflater.inflate(R.layout.controls_tv, null);
-            LayoutParams controlsParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            controls.setLayoutParams(controlsParam);
-            addView(controls);
-
-            bottomBarWidget = controls.findViewById(R.id.bottomBarWidget);
-
-            playPauseButton = controls.findViewById(R.id.tvPlayPauseImageView);
-            playPauseButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setPausedModifier(!isPaused);
-                }
-            });
-            currentTextView = controls.findViewById(R.id.currentTimeTextView);
-            liveTextView = controls.findViewById(R.id.liveTextView);
-            previewSeekBarLayout = controls.findViewById(R.id.previewSeekBarLayout);
-            previewSeekBarLayout.setPreviewLoader(new PreviewLoader() {
-                @Override
-                public void loadPreview(long currentPosition, long max) {
-
-                }
-            });
-            bottomBarWidgetContainer = controls.findViewById(R.id.tvBottomBarWidgetContainer);
-
-            audioSubtitlesButton = findViewById(R.id.tvAudioSubtitlesBtn);
-            audioSubtitlesButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    if (!live) {
-                        setPausedModifier(true);
-                    }
-
-                    setStateOverlay(ControlState.HIDDEN.toString());
-
-                    if (dialog != null) {
-                        dialog.dismiss();
-                        dialog = null;
-                    }
-
-                    dialog = new DceTracksDialog(getContext(), 0);
-                    dialog.setModel(new DcePlayerModel(getContext(), player, trackSelector));
-                    dialog.setAccentColor(accentColor);
-
-                    dialog.show();
-                }
-            });
-
-            scheduleButton = findViewById(R.id.tvScheduleBtn);
-
-            scheduleButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    eventEmitter.epgIconClick();
-                    setStateOverlay(ControlState.HIDDEN.toString());
-                }
-            });
-
-            statsButton = findViewById(R.id.tvStatsBtn);
-
-            statsButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    eventEmitter.statsIconClick();
-                    setStateOverlay(ControlState.HIDDEN.toString());
-                }
-            });
-
-            labelTextView = findViewById(R.id.tvLabelView);
-
-            bottomBarWidget.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
-                @Override
-                public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-                    Log.d(TAG, "onGlobalFocusChanged()");
-
-                    updateLabelView(newFocus);
-                }
-            });
-
             setEpg(false); // default value
             setStats(false);
-
-            setupButton(playPauseButton);
-            setupButton(audioSubtitlesButton);
-            setupButton(scheduleButton);
-            setupButton(statsButton);
-            setupSubtitlesButton();
 
             // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
@@ -423,23 +269,6 @@ class ReactTVExoplayerView extends RelativeLayout
                     Choreographer.getInstance().postFrameCallback(this);
                 }
             });
-
-            seekIndicator = findViewById(R.id.seekIndicator);
-            seekIndicatorLabel = findViewById(R.id.seekIndicatorLabel);
-        }
-    }
-
-    private void updateLabelView(View newFocus) {
-        if (newFocus == playPauseButton) {
-            moveLabelView(playPauseButton, DiceLocalizedStrings.getInstance().string(isPaused ? StringId.player_play_button : StringId.player_pause_button));
-        } else if (newFocus == audioSubtitlesButton) {
-            moveLabelView(audioSubtitlesButton, DiceLocalizedStrings.getInstance().string(StringId.player_audio_and_subtitles_button));
-        } else if (newFocus == scheduleButton) {
-            moveLabelView(scheduleButton, DiceLocalizedStrings.getInstance().string(StringId.player_epg_button));
-        } else if (newFocus == statsButton) {
-            moveLabelView(statsButton, DiceLocalizedStrings.getInstance().string(StringId.player_stats_button));
-        } else {
-            labelTextView.setVisibility(INVISIBLE);
         }
     }
 
@@ -567,7 +396,7 @@ class ReactTVExoplayerView extends RelativeLayout
 
             Source source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
-                    .setIsLive(src.isLive())
+                    .setIsLive(live)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .build();
@@ -689,8 +518,6 @@ class ReactTVExoplayerView extends RelativeLayout
         deactivateMediaSession();
         releaseMediaSession();
 
-        dismissTracksDialog();
-
         if (player != null) {
             updateResumePosition();
             player.removeListener(this);
@@ -711,13 +538,6 @@ class ReactTVExoplayerView extends RelativeLayout
         progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
-    }
-
-    private void dismissTracksDialog() {
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
     }
 
     private boolean requestAudioFocus() {
@@ -744,10 +564,10 @@ class ReactTVExoplayerView extends RelativeLayout
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                controlDispatcher.dispatchSetPlayWhenReady(player, true);
+                player.play();
             }
         } else {
-            controlDispatcher.dispatchSetPlayWhenReady(player, false);
+            player.pause();
         }
 
         updateControlsState();
@@ -775,10 +595,6 @@ class ReactTVExoplayerView extends RelativeLayout
                      * state
                      */
                     if (fromBackground && isPaused) {
-                        playPauseButton.requestFocus();
-                        if (player != null) {
-                            updateProgressControl(player.getCurrentPosition());
-                        }
                         fromBackground = false;
                     }
                     break;
@@ -878,6 +694,10 @@ class ReactTVExoplayerView extends RelativeLayout
             case Player.STATE_READY:
                 text += "ready";
 
+                exoDorisPlayerView.setFocusable(true);
+                exoDorisPlayerView.setFocusableInTouchMode(true);
+                exoDorisPlayerView.requestFocus();
+
                 if (isImaStream) {
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
@@ -890,9 +710,7 @@ class ReactTVExoplayerView extends RelativeLayout
                 eventEmitter.ready();
                 onBuffering(false);
                 startProgressHandler();
-                setupProgressBarSeekListener();
                 videoLoaded();
-                setupSubtitlesButton();
                 break;
             case Player.STATE_ENDED:
                 text += "ended";
@@ -932,72 +750,9 @@ class ReactTVExoplayerView extends RelativeLayout
                 && player.getPlayWhenReady();
     }
 
-    private void setupSubtitlesButton() {
-        Log.d(TAG, "setupSubtitlesButton()");
-        if (player != null && player.getPlaybackState() == Player.STATE_READY) {
-
-            DcePlayerModel model = new DcePlayerModel(getContext(), player, trackSelector);
-
-            if (model.areSubtitlesAvailable() || (model.areAudioTracksAvailable() && model.getAudioTracks().size() > 1)) {
-                Log.d(TAG, "setupSubtitlesButton() VISIBLE");
-                audioSubtitlesButton.setVisibility(View.VISIBLE);
-            } else {
-                Log.d(TAG, "setupSubtitlesButton() INVISIBLE");
-                audioSubtitlesButton.setVisibility(View.GONE);
-            }
-        } else {
-            Log.d(TAG, "setupSubtitlesButton() player or media not ready");
-            audioSubtitlesButton.setVisibility(View.GONE);
-        }
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.getFocusedChild());
-            }
-        });
-
-        changeFocusedView();
-    }
-
-    private void changeFocusedView() {
-        if (live) {
-            if (audioSubtitlesButton.getVisibility() != View.VISIBLE && scheduleButton.getVisibility() != View.VISIBLE && statsButton.getVisibility() != View.VISIBLE) {
-                controls.setFocusable(true);
-                controls.setFocusableInTouchMode(false);
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        controls.requestFocus();
-                    }
-                });
-            } else {
-                controls.setFocusable(false);
-                controls.setFocusableInTouchMode(false);
-            }
-        }
-    }
-
     private void startProgressHandler() {
         progressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
         nativeProgressHandler.sendEmptyMessage(SHOW_NATIVE_PROGRESS);
-    }
-
-    private void updateProgressControl(long currentMillis) {
-
-        ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
-        if (player == null || progressBar == null) {
-            return;
-        }
-        long duration = player.getDuration();
-
-        progressBar.setProgress((int) currentMillis);
-        progressBar.setMax((int) duration);
-
-        String positionString = getSeekBarPositionString(currentMillis, duration);
-
-        currentTextView.setText(positionString);
-        seekIndicator.setLabel(positionString);
     }
 
     private String getSeekBarPositionString(long currentMillis, long duration) {
@@ -1036,39 +791,11 @@ class ReactTVExoplayerView extends RelativeLayout
         return null;
     }
 
-    private void setupProgressBarSeekListener() {
-        if (previewSeekBarLayout != null
-                && previewSeekBarLayout.checkChilds()
-                && previewSeekBarLayout.getPreviewView() instanceof ProgressBar) {
-            if (mPreviewChangeListener == null) {
-                mPreviewChangeListener = new PreviewView.OnPreviewChangeListener() {
-                    @Override
-                    public void onStartPreview(PreviewView previewView) {
-                    }
-
-                    @Override
-                    public void onStopPreview(PreviewView previewView) {
-                    }
-
-                    @Override
-                    public void onPreview(PreviewView previewView, int progress, boolean fromUser) {
-                        if (fromUser && player != null) {
-                            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), progress);
-                            updateProgressControl(progress);
-                        }
-                    }
-                };
-            }
-            previewSeekBarLayout.getPreviewView().addOnPreviewChangeListener(mPreviewChangeListener);
-        }
-    }
-
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
-            seekIndicator.setLabelMaxText(getSeekBarPositionString(0, player.getDuration()));
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -1452,15 +1179,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     private void updateControlsState() {
-        if (playPauseButton != null) {
-            if (isPaused) {
-                playPauseButton.setImageResource(R.drawable.tv_play_btn_selector);
-            } else {
-                playPauseButton.setImageResource(R.drawable.tv_pause_btn_selector);
-            }
-            updateLabelView(bottomBarWidget.findFocus());
-        }
-
         if (isPaused || isBuffering) {
             showOverlay();
         } else {
@@ -1558,10 +1276,6 @@ class ReactTVExoplayerView extends RelativeLayout
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
-        minBufferMs = newMinBufferMs;
-        maxBufferMs = newMaxBufferMs;
-        bufferForPlaybackMs = newBufferForPlaybackMs;
-        bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
         initializePlayer(false);
     }
@@ -1569,7 +1283,6 @@ class ReactTVExoplayerView extends RelativeLayout
     public void setColorProgressBar(String color) {
         try {
             accentColor = Color.parseColor(color);
-            previewSeekBarLayout.setTintColor(accentColor);
         } catch (IllegalArgumentException e) {
             Log.e(getClass().getSimpleName(), e.getMessage(), e);
         }
@@ -1577,9 +1290,6 @@ class ReactTVExoplayerView extends RelativeLayout
 
     public void setLabelFont(final String fontName) {
         Typeface typeface = Typeface.createFromAsset(getResources().getAssets(), "fonts/" + fontName + ".ttf");
-        labelTextView.setTypeface(typeface);
-        currentTextView.setTypeface(typeface);
-        seekIndicatorLabel.setTypeface(typeface);
     }
 
     public void setLive(final boolean live) {
@@ -1587,101 +1297,37 @@ class ReactTVExoplayerView extends RelativeLayout
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
         }
-        if (liveTextView != null && currentTextView != null && previewSeekBarLayout != null) {
-            liveTextView.setVisibility(live ? VISIBLE : GONE);
-            @IntegerRes
-            int controlsVisibility = live ? GONE : VISIBLE;
-            currentTextView.setVisibility(controlsVisibility);
-            previewSeekBarLayout.setVisibility(controlsVisibility);
-            playPauseButton.setVisibility(controlsVisibility);
-
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    updateLabelView(bottomBarWidget.getFocusedChild());
-                }
-            });
-        }
-
-        changeFocusedView();
     }
 
     public void setEpg(boolean hasEpg) {
         this.hasEpg = hasEpg;
-        scheduleButton.setVisibility(hasEpg ? View.VISIBLE : View.GONE);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.findFocus());
-            }
-        });
     }
 
     public void setStats(boolean hasStats) {
         this.hasStats = hasStats;
-        statsButton.setVisibility(hasStats ? View.VISIBLE : View.GONE);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                updateLabelView(bottomBarWidget.findFocus());
-            }
-        });
     }
 
     public void setControls(final boolean visible) {
-        controls.setVisibility(visible ? VISIBLE : GONE);
         areControlsVisible = visible;
     }
 
     public void setControlsOpacity(final float opacity) {
-        float newTranslationY = ((1 - opacity) * bottomBarWidget.getHeight() * 0.5f);
-        if (newTranslationY < 0) {
-            newTranslationY = 0;
-        } else if (newTranslationY > bottomBarWidget.getHeight()) {
-            newTranslationY = bottomBarWidget.getHeight();
-        }
-        bottomBarWidget.setTranslationY(newTranslationY);
-        controls.setAlpha(opacity);
     }
 
     public void setProgressBarMarginBottom(int marginBottom) {
-        bottomBarWidgetContainer.setTranslationY(-DensityPixels.dpToPx(marginBottom));
     }
 
     public void setStateOverlay(final String state) {
         float alpha = getAlphaFromState(state);
-        controls.animate().alpha(alpha).setDuration(ANIMATION_DURATION_CONTROLS_VISIBILITY).start();
     }
 
     public void setStateMiddleCoreControls(final String state) {
         float alpha = getAlphaFromState(state);
-
-        playPauseButton.setAlpha(alpha);
     }
 
     public void setStateProgressBar(final String state) {
         boolean enabled = getEnabledFromState(state);
         float alpha = getAlphaFromState(state);
-
-        float newTranslationY = ((1 - alpha) * bottomBarWidget.getHeight() * 0.5f);
-        if (newTranslationY < 0) {
-            newTranslationY = 0;
-        } else if (newTranslationY > bottomBarWidget.getHeight()) {
-            newTranslationY = bottomBarWidget.getHeight();
-        }
-        bottomBarWidget.setTranslationY(newTranslationY);
-
-        bottomBarWidgetContainer.animate().alpha(alpha).start();
-        bottomBarWidgetContainer.setEnabled(enabled);
-        bottomBarWidget.setAlpha(alpha);
-        currentTextView.setEnabled(enabled);
-        currentTextView.setAlpha(alpha);
-        previewSeekBarLayout.setEnabled(enabled);
-        previewSeekBarLayout.setAlpha(alpha);
-        ProgressBar progressBar = (ProgressBar) previewSeekBarLayout.getPreviewView();
-        if (progressBar != null) {
-            progressBar.setEnabled(enabled);
-        }
     }
 
     private boolean getEnabledFromState(String stateStr) {
@@ -1737,28 +1383,6 @@ class ReactTVExoplayerView extends RelativeLayout
         return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
     }
 
-    private void moveSeekBarIndicator(SeekBar seekbar, boolean isRew) {
-        int paddingLeftX = previewSeekBarLayout.getPaddingLeft();
-        int indicatorWidth = seekIndicator.getMeasuredWidth();
-        Rect bounds = seekbar.getThumb().getBounds();
-        int thumbPos = (int) seekbar.getX() + bounds.centerX() + seekbar.getThumbOffset();
-
-        int indicatorX = !isRew ?
-                         thumbPos - ((indicatorWidth - seekIndicator.getForwardImageWidth()) / 2)
-                                : thumbPos - ((indicatorWidth - seekIndicator.getRewImageWidth()) / 2) - seekIndicator.getRewImageWidth();
-
-        int paddingRightX = previewSeekBarLayout.getMeasuredWidth() - previewSeekBarLayout.getPaddingRight() - indicatorWidth;
-
-        if (indicatorX < paddingLeftX) {
-            indicatorX = paddingLeftX;
-        } else if (indicatorX > paddingRightX) {
-            indicatorX = paddingRightX;
-        }
-
-        seekIndicator.setX(indicatorX);
-        animateShowView(seekIndicator, 0);
-    }
-
     public void showOverlay() {
         if (this.repeat || !areControlsVisible) {
             return;
@@ -1810,35 +1434,6 @@ class ReactTVExoplayerView extends RelativeLayout
             anim2.setDuration(100);
             anim2.start();
         }
-    }
-
-    private void moveLabelView(ImageButton button, String label) {
-        int buttonCentre = (int) (button.getX() + (button.getWidth() / 2));
-        int labelWidth = (int) labelTextView.getPaint().measureText(label);
-
-        MarginLayoutParams pl = (MarginLayoutParams) labelTextView.getLayoutParams();
-        final int marginStart = MarginLayoutParamsCompat.getMarginStart(pl);
-        final int marginEnd = MarginLayoutParamsCompat.getMarginEnd(pl);
-
-        float leftSpace = buttonCentre - marginStart - marginEnd;
-        float rightSpace = bottomBarWidget.getWidth() - buttonCentre - marginStart - marginEnd;
-        float space = Math.min(leftSpace, rightSpace) * 2;
-        float bias = labelWidth > 0 ? (space / labelWidth) / 2 : 0.5f;
-
-        final int labelId = labelTextView.getId();
-        final int buttonId = button.getId();
-
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(bottomBarWidget);
-        constraintSet.connect(labelId, ConstraintSet.START, buttonId, ConstraintSet.START, marginStart);
-        constraintSet.connect(labelId, ConstraintSet.END, buttonId, ConstraintSet.END, marginEnd);
-        constraintSet.setHorizontalBias(labelId, Math.min(bias, 0.5f));
-        constraintSet.applyTo(bottomBarWidget);
-
-        labelTextView.setWidth(labelWidth);
-        labelTextView.setText(label);
-        labelTextView.setAlpha(0.0f);
-        animateShowView(labelTextView, 100);
     }
 
     public void animateHideView(final View view, int duration) {
