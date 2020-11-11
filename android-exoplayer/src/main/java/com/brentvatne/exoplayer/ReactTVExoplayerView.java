@@ -255,6 +255,7 @@ class ReactTVExoplayerView extends FrameLayout
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         exoDorisPlayerView = findViewById(R.id.playerView);
+        exoDorisPlayerView.setUseController(false);
 
         if (areControlsVisible) {
             setEpg(false); // default value
@@ -269,8 +270,6 @@ class ReactTVExoplayerView extends FrameLayout
                     Choreographer.getInstance().postFrameCallback(this);
                 }
             });
-        } else {
-            exoDorisPlayerView.hideController();
         }
     }
 
@@ -1312,7 +1311,11 @@ class ReactTVExoplayerView extends FrameLayout
     public void setControls(final boolean visible) {
         areControlsVisible = visible;
         if (visible) {
-            exoDorisPlayerView.showController();
+            if (!exoDorisPlayerView.getUseController()) {
+                exoDorisPlayerView.setUseController(true);
+            } else {
+                exoDorisPlayerView.showController();
+            }
         } else {
             exoDorisPlayerView.hideController();
         }
