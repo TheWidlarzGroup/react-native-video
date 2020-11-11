@@ -255,7 +255,6 @@ class ReactTVExoplayerView extends FrameLayout
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         exoDorisPlayerView = findViewById(R.id.playerView);
-        exoDorisPlayerView.setUseController(areControlsVisible);
 
         if (areControlsVisible) {
             setEpg(false); // default value
@@ -397,7 +396,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             Source source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
-                    .setIsLive(src.isLive())
+                    .setIsLive(live)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .build();
@@ -1310,7 +1309,6 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setControls(final boolean visible) {
         areControlsVisible = visible;
-        exoDorisPlayerView.setUseController(visible);
     }
 
     public void setControlsOpacity(final float opacity) {
