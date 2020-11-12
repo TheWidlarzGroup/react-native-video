@@ -149,7 +149,7 @@ static int const RCTVideoUnset = -1;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVDorisPlayer*)player {
     RCTVideoPlayerViewController* playerLayer= [[RCTVideoPlayerViewController alloc] init];
-    playerLayer.showsPlaybackControls = YES;
+    playerLayer.showsPlaybackControls = _controls;
     playerLayer.rctDelegate = self;
     playerLayer.view.frame = self.bounds;
     playerLayer.player = player;
@@ -1654,6 +1654,7 @@ dispatch_queue_t delegateQueue;
       }
       _controls = controls;
       _playerViewController.view.userInteractionEnabled = _controls;
+      _playerViewController.showsPlaybackControls = _controls;
     }
   #endif
 }
