@@ -1443,7 +1443,8 @@ class ReactTVExoplayerView extends FrameLayout
         if (!areControlsVisible &&
                 event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY &&
                 event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PAUSE &&
-                event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+                event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE &&
+                event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return true;
         }
 
