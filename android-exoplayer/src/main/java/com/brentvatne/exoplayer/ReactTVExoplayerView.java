@@ -1364,9 +1364,8 @@ class ReactTVExoplayerView extends FrameLayout
         if (visible) {
             if (!exoDorisPlayerView.getUseController()) {
                 exoDorisPlayerView.setUseController(true);
-            } else {
-                exoDorisPlayerView.showController();
             }
+            exoDorisPlayerView.showController();
         } else {
             exoDorisPlayerView.hideController();
         }
