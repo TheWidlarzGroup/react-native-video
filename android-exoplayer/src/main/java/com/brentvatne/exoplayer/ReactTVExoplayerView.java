@@ -55,6 +55,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
@@ -76,9 +77,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
-import com.imggaming.utils.DensityPixels;
-import com.previewseekbar.PreviewSeekBarLayout;
-import com.previewseekbar.base.PreviewLoader;
 import com.previewseekbar.base.PreviewView;
 
 import java.net.CookieHandler;
@@ -91,14 +89,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
+
+import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED;
+import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends FrameLayout
-        implements LifecycleEventListener, Player.EventListener, BecomingNoisyListener, AudioManager.OnAudioFocusChangeListener, MetadataOutput {
+        implements LifecycleEventListener,
+                   Player.EventListener,
+                   BecomingNoisyListener,
+                   AudioManager.OnAudioFocusChangeListener,
+                   MetadataOutput,
+                   AdEvent.AdEventListener {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -728,6 +732,7 @@ class ReactTVExoplayerView extends FrameLayout
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                                                               adInfo.getPlayedAdGroups());
+                    exoDorisImaWrapper.addAdEventListener(this);
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
                 }
 
@@ -1353,9 +1358,8 @@ class ReactTVExoplayerView extends FrameLayout
         if (visible) {
             if (!exoDorisPlayerView.getUseController()) {
                 exoDorisPlayerView.setUseController(true);
-            } else {
-                exoDorisPlayerView.showController();
             }
+            exoDorisPlayerView.showController();
         } else {
             exoDorisPlayerView.hideController();
         }
@@ -1430,6 +1434,14 @@ class ReactTVExoplayerView extends FrameLayout
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (!areControlsVisible &&
+                event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY &&
+                event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PAUSE &&
+                event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE &&
+                event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+            return true;
+        }
+
         return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
     }
 
@@ -1532,6 +1544,18 @@ class ReactTVExoplayerView extends FrameLayout
                     .build();
 
             exoDorisPlayerView.setLabels(labels);
+        }
+    }
+
+    @Override
+    public void onAdEvent(AdEvent adEvent) {
+        if (adEvent.getType() == AD_BREAK_STARTED) {
+            setControls(false);
+            return;
+        }
+
+        if (adEvent.getType() == AD_BREAK_ENDED) {
+            setControls(true);
         }
     }
 }
