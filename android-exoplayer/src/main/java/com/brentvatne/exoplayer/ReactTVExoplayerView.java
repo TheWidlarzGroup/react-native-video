@@ -39,6 +39,8 @@ import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
 import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
 import com.diceplatform.doris.ext.ima.entity.AdInfo;
+import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
+import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
@@ -151,6 +153,20 @@ class ReactTVExoplayerView extends FrameLayout
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
+
+    // IMA Ad Tag Parameters
+    private String iu = "/7009/prendetv/";
+    private String custParams;
+    private String output;
+    private String pp = "DAI_TVApps";
+    private String vpa;
+    private String msid = "2098810";
+    private String an = "prendetv";
+
+    // IMA Custom Ad Tag Parameters
+    private String neighborhood = "neighborhood=drama&";
+    private String row = "row=indienovelas&";
+    private String customParams = "mcp_id=3751768&rating=pg&rating_qualifier=violence&content_source=univision&video_type=movie&subscriber=true&category=novelas,romance,drama&first_category=novelas&vertical=noticias&program_title=amaramuerte&season=1&episode=23&tags=kate%20de%20castillo,capitulo,amor&cast=selma%20hayek,jorge%20ramos&ph=1080&pw=1920&app_bundle=prendetv.android";
 
     // Custom
     private PowerManager powerManager;
@@ -401,11 +417,22 @@ class ReactTVExoplayerView extends FrameLayout
                     .build();
 
             if (isImaStream) {
+                AdTagParameters adTagParameters = new AdTagParametersBuilder()
+                        .setIu(iu)
+                        .setCustParams(custParams)
+                        .setOutput(output)
+                        .setPp(pp)
+                        .setVpa(vpa)
+                        .setMsid(msid)
+                        .setAn(an)
+                        .build();
+
                 ImaSource imaSource = new ImaSourceBuilder(source)
                         .setAssetKey(imaSrc.getAssetKey())
                         .setContentSourceId(imaSrc.getContentSourceId())
                         .setVideoId(imaSrc.getVideoId())
                         .setAuthToken(imaSrc.getAuthToken())
+                        .setAdTagParameters(adTagParameters)
                         .build();
 
                 exoDorisImaPlayer.enableControls(true);
@@ -1293,8 +1320,23 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setLive(final boolean live) {
         this.live = live;
+
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
+        }
+
+        if (isImaStream) {
+            if (live) {
+                iu += "live/androidtv/comediaspicantes";
+                custParams = neighborhood + customParams;
+                output = "xml_vast4";
+                vpa = "2";
+            } else {
+                iu += "vod/androidtv/comediaspicantes";
+                custParams = row + customParams;
+                output = "xml_vmap4";
+                vpa = "1";
+            }
         }
     }
 
