@@ -619,6 +619,8 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
     }
     
     object.player = [AVDorisPlayer new];
+    object.avdoris = [[AVDoris alloc] initWithPlayer:object.player];
+
     [object.player addObserver:object forKeyPath:currentItem options:0 context:nil];
     [object.player addObserver:object forKeyPath:playbackRate options:0 context:nil];
     object->_playbackRateObserverRegistered = YES;
@@ -650,7 +652,6 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
 }
 
 - (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
-  self.avdoris = [[AVDoris alloc] initWithPlayer:self.player];
   [self usePlayerViewController];
   
   self.avdoris.delegate = _playerViewController;
