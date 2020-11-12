@@ -77,9 +77,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
-import com.imggaming.utils.DensityPixels;
-import com.previewseekbar.PreviewSeekBarLayout;
-import com.previewseekbar.base.PreviewLoader;
 import com.previewseekbar.base.PreviewView;
 
 import java.net.CookieHandler;
@@ -92,14 +89,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED;
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED;
-import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends FrameLayout
