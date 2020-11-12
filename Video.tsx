@@ -50,10 +50,6 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     }
   };
 
-  assignRoot = (component) => {
-    this.refPlayer = component;
-  };
-
   onLoadStart = (event) => {
     this.props.onLoadStart?.(event.nativeEvent);
   };
@@ -179,7 +175,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     if (poster && showPoster) {
       return (
         <View style={this.props.style}>
-          <RCTVideo ref={this.assignRoot} {...this.getVideoPlayerProps()} />
+          <RCTVideo ref={this.refPlayer} {...this.getVideoPlayerProps()} />
           <Image source={{ uri: poster }} style={styles.posterStyle} />
         </View>
       );
@@ -188,7 +184,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     return (
       <RCTVideo
         {...this.getVideoPlayerProps()}
-        ref={this.assignRoot}
+        ref={this.refPlayer}
         style={[styles.base, this.props.style]}
         resizeMode={this.getNativeResizeMode()}
         src={{
