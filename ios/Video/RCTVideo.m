@@ -1764,7 +1764,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
   }
   _loadingRequest = loadingRequest;
   NSURL *url = loadingRequest.request.URL;
-  NSString *contentId = url.host;
+  NSString *contentId = [url.absoluteString stringByReplacingOccurrencesOfString:@"skd://" withString:@""];
   if (self->_drm != nil) {
     NSString *contentIdOverride = (NSString *)[self->_drm objectForKey:@"contentId"];
     if (contentIdOverride != nil) {
@@ -1782,7 +1782,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
           }
           
           if (certificateData != nil) {
-            NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *contentIdData = [NSData dataWithBytes: [contentId cStringUsingEncoding:NSUTF8StringEncoding] length:[contentId lengthOfBytesUsingEncoding:NSUTF8StringEncoding]];
             AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
             if (dataRequest != nil) {
               NSError *spcError = nil;
@@ -1794,14 +1794,22 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                 self->_requestingCertificateErrored = YES;
               }
               if (spcData != nil) {
+                NSString *spcEncoded = [spcData base64EncodedStringWithOptions:0];
                 if(self.onGetLicense) {
-                  NSString *spcStr = [[NSString alloc] initWithData:spcData encoding:NSASCIIStringEncoding];
                   self->_requestingCertificate = YES;
-                  self.onGetLicense(@{@"spc": spcStr,
+                  self.onGetLicense(@{@"licenseUrl": licenseServer,
                                       @"contentId": contentId,
-                                      @"spcBase64": [[[NSData alloc] initWithBase64EncodedData:certificateData options:NSDataBase64DecodingIgnoreUnknownCharacters] base64EncodedStringWithOptions:0],
+                                      @"spc": spcEncoded,
                                       @"target": self.reactTag});
                 } else if(licenseServer != nil) {
+                  NSData *responseData = nil;
+                  NSTimeInterval expiryDuration = 0.0;
+
+                  NSString *spcUrlEncoded = (NSString *) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)spcEncoded, NULL, CFSTR("?=&+"), kCFStringEncodingUTF8));
+                  NSString *post = [NSString stringWithFormat:@"spc=%@&%@", spcUrlEncoded, contentId];
+
+                  NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+                  
                   NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                   [request setHTTPMethod:@"POST"];
                   [request setURL:[NSURL URLWithString:licenseServer]];
@@ -1813,9 +1821,8 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                       [request setValue:value forHTTPHeaderField:key];
                     }
                   }
-                  //
                   
-                  [request setHTTPBody: spcData];
+                  [request setHTTPBody: postData];
                   NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
                   NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
                   NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -1838,7 +1845,8 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                         [self finishLoadingWithError:licenseError];
                         self->_requestingCertificateErrored = YES;
                       } else if (data != nil) {
-                        [dataRequest respondWithData:data];
+                        NSData *decodedData = [[NSData alloc] initWithBase64EncodedData:data options:0];
+                        [dataRequest respondWithData:decodedData];
                         [loadingRequest finishLoading];
                       } else {
                         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
@@ -1852,7 +1860,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                         [self finishLoadingWithError:licenseError];
                         self->_requestingCertificateErrored = YES;
                       }
-                      
+
                     }
                   }];
                   [postDataTask resume];
