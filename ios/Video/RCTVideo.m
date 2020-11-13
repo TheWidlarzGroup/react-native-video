@@ -1802,12 +1802,9 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                                       @"spc": spcEncoded,
                                       @"target": self.reactTag});
                 } else if(licenseServer != nil) {
-                  NSData *responseData = nil;
-                  NSTimeInterval expiryDuration = 0.0;
 
                   NSString *spcUrlEncoded = (NSString *) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)spcEncoded, NULL, CFSTR("?=&+"), kCFStringEncodingUTF8));
                   NSString *post = [NSString stringWithFormat:@"spc=%@&%@", spcUrlEncoded, contentId];
-
                   NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
                   
                   NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
