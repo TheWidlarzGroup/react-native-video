@@ -1842,8 +1842,9 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                         [self finishLoadingWithError:licenseError];
                         self->_requestingCertificateErrored = YES;
                       } else if (data != nil) {
-                        NSData *decodedData = [[NSData alloc] initWithBase64EncodedData:data options:0];
-                        [dataRequest respondWithData:decodedData];
+                        // NSData *decodedData = [[NSData alloc] initWithBase64EncodedData:data options:0];
+                        // [dataRequest respondWithData:decodedData];
+                        [dataRequest respondWithData:data];
                         [loadingRequest finishLoading];
                       } else {
                         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
