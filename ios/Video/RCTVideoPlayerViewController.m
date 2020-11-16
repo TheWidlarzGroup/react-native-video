@@ -130,6 +130,13 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
     }
 }
 
+- (void)avdoris:(AVDoris *)avdoris didFailWith:(enum AVDorisError)error payload:(id)payload {
+    if ([payload isKindOfClass:[AVDorisErrorData class]]) {
+        AVDorisErrorData *data = payload;
+        [_rctDelegate didFailWithError:error errorData:data];
+    }
+}
+
 #pragma mark - UIFocusEnvironment
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
     if (self.isAdBreakActive) {
