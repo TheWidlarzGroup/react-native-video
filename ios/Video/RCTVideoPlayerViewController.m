@@ -180,17 +180,10 @@ willResumePlaybackAfterUserNavigatedFromTime:(CMTime)oldTime
 }
 
 - (NSString *)countDownLabelTextFormatted:(AdProgressChangedData *)data {
-  int totalSeconds = (int)data.adDuration % 60;
-  int totalMinutes = (int)(data.adDuration / 60) % 60;
-  int totalHours = (int)data.adDuration / 3600;
-  
-  int currentSeconds = (int)data.time % 60;
-  int currentMinutes = (int)(data.time / 60) % 60;
-  int currentHours = (int)data.time / 3600;
-  
-  int resultSeconds = totalSeconds - currentSeconds;
-  int resultMinutes = totalMinutes - currentMinutes;
-  int resultHours = totalHours - currentHours;
+  int resultTime = (int)data.adDuration - (int)data.time;
+  int resultSeconds = resultTime % 60;
+  int resultMinutes = (resultTime / 60) % 60;
+  int resultHours = resultTime / 3600;
   
   if (resultHours == 0) {
     return [NSString stringWithFormat:@"Ad %d of %d : (%02d:%02d)", (int)data.adPosition, (int)data.totalAds, resultMinutes, resultSeconds];
