@@ -55,6 +55,8 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.ads.interactivemedia.v3.api.AdError;
+import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ControlDispatcher;
@@ -102,7 +104,8 @@ class ReactTVExoplayerView extends FrameLayout
                    BecomingNoisyListener,
                    AudioManager.OnAudioFocusChangeListener,
                    MetadataOutput,
-                   AdEvent.AdEventListener {
+                   AdEvent.AdEventListener,
+                   AdErrorEvent.AdErrorListener {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -442,7 +445,6 @@ class ReactTVExoplayerView extends FrameLayout
                 exoDorisImaPlayer.enableControls(true);
                 exoDorisImaPlayer.setCanSeek(true);
 
-                exoDorisImaWrapper.setFallbackUrl(source.getUri().getPath());
                 exoDorisImaWrapper.requestAndPlayAds(imaSource);
             } else if (actionToken != null) {
                 try {
@@ -732,7 +734,10 @@ class ReactTVExoplayerView extends FrameLayout
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                                                               adInfo.getPlayedAdGroups());
+
                     exoDorisImaWrapper.addAdEventListener(this);
+                    exoDorisImaWrapper.addAdErrorListener(this);
+
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
                 }
 
@@ -1557,5 +1562,15 @@ class ReactTVExoplayerView extends FrameLayout
         if (adEvent.getType() == AD_BREAK_ENDED) {
             setControls(true);
         }
+    }
+
+    @Override
+    public void onAdError(AdErrorEvent adErrorEvent) {
+        AdError error = adErrorEvent.getError();
+        eventEmitter.error(error.getMessage(), error);
+
+        // Reset imaSrc and isImaStream to allow a new source to be loaded
+        imaSrc = null;
+        this.isImaStream = false;
     }
 }
