@@ -1711,6 +1711,16 @@ dispatch_queue_t delegateQueue;
   }
 }
 
+- (void)didFailWithError:(AVDorisError)error errorData:(AVDorisErrorData *)errorData {
+    if(self.onVideoError) {
+        self.onVideoError(@{@"error": @{@"code": [[NSNumber alloc] initWithInteger:errorData.code],
+                                        @"domain": @"IMA",
+                                        @"messages": @[errorData.message]
+        },
+                            @"target": self.reactTag});
+    }
+}
+
 #pragma mark - React View Management
 
 - (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
