@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 
+import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
 import com.facebook.react.bridge.Dynamic;
@@ -20,7 +21,9 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.imggaming.translations.DiceLocalizedStrings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -81,6 +84,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_TRANSLATIONS = "translations";
     private static final String PROP_LABEL_FONT_NAME = "labelFontName";
+    private static final String PROP_RELATED_VIDEOS = "relatedVideos";
+    private static final String PROP_RELATED_VIDEOS_ITEMS = "items";
+    private static final String PROP_RELATED_VIDEOS_HEAD_INDEX = "headIndex";
+    private static final String PROP_RELATED_VIDEOS_HAS_MORE = "hasMore";
+    private static final String PROP_RELATED_VIDEOS_SUBTITLE = "subtitle";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -373,6 +381,35 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     public void setTranslations(final ReactTVExoplayerView videoView, @Nullable ReadableMap translations) {
         DiceLocalizedStrings.getInstance().updateTranslations(toStringMap(translations));
         videoView.applyTranslations(translations != null ? translations.toHashMap() : null);
+    }
+
+    @ReactProp(name = PROP_RELATED_VIDEOS)
+    public void setRelatedVideos(final ReactTVExoplayerView videoView, @Nullable ReadableMap relatedVideosMap) {
+        List<RelatedVideo> relatedVideos = new ArrayList<>();
+        int headIndex;
+        boolean hasMore;
+
+        if (relatedVideosMap != null) {
+            ReadableArray relatedVideosArray = relatedVideosMap.getArray(PROP_RELATED_VIDEOS_ITEMS);
+            for (int i = 0; i < relatedVideosArray.size(); i++) {
+                ReadableMap relatedVideo = relatedVideosArray.getMap(i);
+
+                String id = relatedVideo.hasKey(PROP_SRC_ID) ? relatedVideo.getString(PROP_SRC_ID) : null;
+                String title = relatedVideo.hasKey(PROP_SRC_TITLE) ? relatedVideo.getString(PROP_SRC_TITLE) : null;
+                String subtitle = relatedVideo.hasKey(PROP_RELATED_VIDEOS_SUBTITLE) ? relatedVideo.getString(PROP_RELATED_VIDEOS_SUBTITLE) : null;
+                String thumbnailUrl = relatedVideo.hasKey(PROP_SRC_THUMBNAIL_URL) ? relatedVideo.getString(PROP_SRC_THUMBNAIL_URL) : null;
+
+                relatedVideos.add(new RelatedVideo(id,
+                                                   title,
+                                                   subtitle,
+                                                   thumbnailUrl,
+                                                   relatedVideo.toHashMap()));
+            }
+            headIndex = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HEAD_INDEX) ? relatedVideosMap.getInt(PROP_RELATED_VIDEOS_HEAD_INDEX) : -1;
+            hasMore = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HAS_MORE) && relatedVideosMap.getBoolean(PROP_RELATED_VIDEOS_HAS_MORE);
+        }
+
+        videoView.setRelatedVideos(relatedVideos, headIndex, hasMore);
     }
 
     private boolean startsWithValidScheme(String uriString) {
