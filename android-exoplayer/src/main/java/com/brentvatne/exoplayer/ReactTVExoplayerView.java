@@ -27,6 +27,7 @@ import android.widget.ImageButton;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
+import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -45,8 +46,10 @@ import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
+import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
 import com.diceplatform.doris.ui.entity.Labels;
 import com.diceplatform.doris.ui.entity.LabelsBuilder;
+import com.diceplatform.doris.ui.entity.VideoTile;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -87,6 +90,7 @@ import java.net.CookiePolicy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -105,7 +109,8 @@ class ReactTVExoplayerView extends FrameLayout
                    AudioManager.OnAudioFocusChangeListener,
                    MetadataOutput,
                    AdEvent.AdEventListener,
-                   AdErrorEvent.AdErrorListener {
+                   AdErrorEvent.AdErrorListener,
+                   ExoDorisPlayerViewListener {
 
     private static final String TAG = "ReactTvExoplayerView";
 
@@ -278,6 +283,7 @@ class ReactTVExoplayerView extends FrameLayout
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         exoDorisPlayerView = findViewById(R.id.playerView);
+        exoDorisPlayerView.setExoDorisPlayerViewListener(this);
         exoDorisPlayerView.setUseController(false);
 
         setEpg(false); // default value
@@ -1370,6 +1376,23 @@ class ReactTVExoplayerView extends FrameLayout
         }
     }
 
+    public void setRelatedVideos(List<RelatedVideo> relatedVideos, int playlistHeadIndex, boolean hasMore) {
+        if (exoDorisPlayerView != null) {
+            VideoTile[] videoTiles = new VideoTile[relatedVideos.size()];
+
+            for (int i = 0; i < relatedVideos.size(); i++) {
+                String thumbnailUrl = relatedVideos.get(i).getThumbnailUrl();
+                String title = relatedVideos.get(i).getTitle();
+                String subtitle = relatedVideos.get(i).getSubtitle();
+                Map<String, Object> relatedVideoMap = relatedVideos.get(i).getRelatedVideoMap();
+
+                videoTiles[i] = new VideoTile(thumbnailUrl, title, subtitle, relatedVideoMap);
+            }
+
+            exoDorisPlayerView.setMoreVideosTiles(videoTiles);
+        }
+    }
+
     public void setControlsOpacity(final float opacity) {
     }
 
@@ -1572,5 +1595,19 @@ class ReactTVExoplayerView extends FrameLayout
         // Reset imaSrc and isImaStream to allow a new source to be loaded
         imaSrc = null;
         this.isImaStream = false;
+    }
+
+    @Override
+    public void onVideoTileClicked(VideoTile videoTile) {
+        RelatedVideo relatedVideo = new RelatedVideo(videoTile.getTitle(),
+                                                     videoTile.getSubtitle(),
+                                                     videoTile.getThumbnailUrl(),
+                                                     videoTile.getRelatedVideo());
+        eventEmitter.relatedVideoClick(relatedVideo.getId(), relatedVideo.getType());
+    }
+
+    @Override
+    public void onMoreVideosButtonClicked() {
+        eventEmitter.relatedVideosIconClicked();
     }
 }

@@ -52,6 +52,8 @@ class VideoEventEmitter {
     private static final String EVENT_TOUCH_ACTION_UP = "onTouchActionUp";
     private static final String EVENT_EPG_ICON_CLICK = "onEpgIconClick";
     private static final String EVENT_STATS_ICON_CLICK = "onStatsIconClick";
+    private static final String EVENT_RELATED_VIDEO_CLICKED = "onRelatedVideoClicked";
+    private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -78,37 +80,41 @@ class VideoEventEmitter {
             EVENT_TOUCH_ACTION_MOVE,
             EVENT_TOUCH_ACTION_UP,
             EVENT_EPG_ICON_CLICK,
-            EVENT_STATS_ICON_CLICK
+            EVENT_STATS_ICON_CLICK,
+            EVENT_RELATED_VIDEO_CLICKED,
+            EVENT_RELATED_VIDEOS_ICON_CLICKED
     };
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            EVENT_LOAD_START,
-            EVENT_LOAD,
-            EVENT_ERROR,
-            EVENT_PROGRESS,
-            EVENT_SEEK,
-            EVENT_END,
-            EVENT_FULLSCREEN_WILL_PRESENT,
-            EVENT_FULLSCREEN_DID_PRESENT,
-            EVENT_FULLSCREEN_WILL_DISMISS,
-            EVENT_FULLSCREEN_DID_DISMISS,
-            EVENT_STALLED,
-            EVENT_RESUME,
-            EVENT_READY,
-            EVENT_BUFFER,
-            EVENT_IDLE,
-            EVENT_TIMED_METADATA,
-            EVENT_AUDIO_BECOMING_NOISY,
-            EVENT_AUDIO_FOCUS_CHANGE,
-            EVENT_PLAYBACK_RATE_CHANGE,
-            EVENT_BOTTOM_RIGHT_ICON_CLICK,
-            EVENT_CONTROLS_VISIBILITY_CHANGE,
-            EVENT_TOUCH_ACTION_MOVE,
-            EVENT_TOUCH_ACTION_UP,
-            EVENT_EPG_ICON_CLICK,
-            EVENT_STATS_ICON_CLICK
-    })
+                       EVENT_LOAD_START,
+                       EVENT_LOAD,
+                       EVENT_ERROR,
+                       EVENT_PROGRESS,
+                       EVENT_SEEK,
+                       EVENT_END,
+                       EVENT_FULLSCREEN_WILL_PRESENT,
+                       EVENT_FULLSCREEN_DID_PRESENT,
+                       EVENT_FULLSCREEN_WILL_DISMISS,
+                       EVENT_FULLSCREEN_DID_DISMISS,
+                       EVENT_STALLED,
+                       EVENT_RESUME,
+                       EVENT_READY,
+                       EVENT_BUFFER,
+                       EVENT_IDLE,
+                       EVENT_TIMED_METADATA,
+                       EVENT_AUDIO_BECOMING_NOISY,
+                       EVENT_AUDIO_FOCUS_CHANGE,
+                       EVENT_PLAYBACK_RATE_CHANGE,
+                       EVENT_BOTTOM_RIGHT_ICON_CLICK,
+                       EVENT_CONTROLS_VISIBILITY_CHANGE,
+                       EVENT_TOUCH_ACTION_MOVE,
+                       EVENT_TOUCH_ACTION_UP,
+                       EVENT_EPG_ICON_CLICK,
+                       EVENT_STATS_ICON_CLICK,
+                       EVENT_RELATED_VIDEO_CLICKED,
+                       EVENT_RELATED_VIDEOS_ICON_CLICKED
+               })
     @interface VideoEvents {
     }
 
@@ -119,6 +125,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
+    private static final String EVENT_PROP_RELATED_VIDEO_ID = "id";
+    private static final String EVENT_PROP_RELATED_VIDEO_TYPE = "type";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -142,7 +150,6 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
-
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -257,6 +264,17 @@ class VideoEventEmitter {
 
     public void statsIconClick() {
         receiveEvent(EVENT_STATS_ICON_CLICK, null);
+    }
+
+    public void relatedVideoClick(int id, String type) {
+        WritableMap map = Arguments.createMap();
+        map.putInt(EVENT_PROP_RELATED_VIDEO_ID, id);
+        map.putString(EVENT_PROP_RELATED_VIDEO_TYPE, type);
+        receiveEvent(EVENT_RELATED_VIDEO_CLICKED, map);
+    }
+
+    public void relatedVideosIconClicked() {
+        receiveEvent(EVENT_RELATED_VIDEOS_ICON_CLICKED, null);
     }
 
     void controlsVisibilityChange(boolean visible) {
