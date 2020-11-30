@@ -386,21 +386,19 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_RELATED_VIDEOS)
     public void setRelatedVideos(final ReactTVExoplayerView videoView, @Nullable ReadableMap relatedVideosMap) {
         List<RelatedVideo> relatedVideos = new ArrayList<>();
-        int headIndex;
-        boolean hasMore;
+        int headIndex = -1;
+        boolean hasMore = false;
 
         if (relatedVideosMap != null) {
             ReadableArray relatedVideosArray = relatedVideosMap.getArray(PROP_RELATED_VIDEOS_ITEMS);
             for (int i = 0; i < relatedVideosArray.size(); i++) {
                 ReadableMap relatedVideo = relatedVideosArray.getMap(i);
 
-                String id = relatedVideo.hasKey(PROP_SRC_ID) ? relatedVideo.getString(PROP_SRC_ID) : null;
                 String title = relatedVideo.hasKey(PROP_SRC_TITLE) ? relatedVideo.getString(PROP_SRC_TITLE) : null;
                 String subtitle = relatedVideo.hasKey(PROP_RELATED_VIDEOS_SUBTITLE) ? relatedVideo.getString(PROP_RELATED_VIDEOS_SUBTITLE) : null;
                 String thumbnailUrl = relatedVideo.hasKey(PROP_SRC_THUMBNAIL_URL) ? relatedVideo.getString(PROP_SRC_THUMBNAIL_URL) : null;
 
-                relatedVideos.add(new RelatedVideo(id,
-                                                   title,
+                relatedVideos.add(new RelatedVideo(title,
                                                    subtitle,
                                                    thumbnailUrl,
                                                    relatedVideo.toHashMap()));
@@ -409,7 +407,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             hasMore = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HAS_MORE) && relatedVideosMap.getBoolean(PROP_RELATED_VIDEOS_HAS_MORE);
         }
 
-//        videoView.setRelatedVideos(relatedVideos, headIndex, hasMore);
+        videoView.setRelatedVideos(relatedVideos, headIndex, hasMore);
     }
 
     private boolean startsWithValidScheme(String uriString) {
