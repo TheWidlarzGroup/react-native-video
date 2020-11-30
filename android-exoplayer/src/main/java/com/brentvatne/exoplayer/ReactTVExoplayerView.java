@@ -1600,7 +1600,9 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onVideoTileClicked(VideoTile videoTile) {
         int id = (int) ((double) videoTile.getRelatedVideo().get("id"));
-        eventEmitter.relatedVideoClick(id);
+        String type = (String) videoTile.getRelatedVideo().get("type");
+
+        eventEmitter.relatedVideoClick(id, type);
     }
 
     @Override

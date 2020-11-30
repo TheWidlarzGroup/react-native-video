@@ -128,6 +128,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
     private static final String EVENT_PROP_RELATED_VIDEO_ID = "id";
+    private static final String EVENT_PROP_RELATED_VIDEO_TYPE = "type";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -267,9 +268,10 @@ class VideoEventEmitter {
         receiveEvent(EVENT_STATS_ICON_CLICK, null);
     }
 
-    public void relatedVideoClick(int id) {
+    public void relatedVideoClick(int id, String type) {
         WritableMap map = Arguments.createMap();
         map.putInt(EVENT_PROP_RELATED_VIDEO_ID, id);
+        map.putString(EVENT_PROP_RELATED_VIDEO_TYPE, type);
         receiveEvent(EVENT_RELATED_VIDEO_CLICKED, map);
     }
 
