@@ -104,6 +104,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onBuffer?.(event.nativeEvent);
   };
 
+  onRelatedVideosClicked = (event) => {
+      this.props.onRelatedVideoClicked?.(event.nativeEvent);
+  }
+
   /**
    * seekTo jumps to a certain position for vod and live content
    * time parameter can be the following:
@@ -161,6 +165,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onPlaybackStalled: this.onPlaybackStalled,
       onPlaybackResume: this.onPlaybackResume,
       onPlaybackRateChange: this.onPlaybackRateChange,
+      onRelatedVideoClicked: this.onRelatedVideosClicked,
     };
   };
 

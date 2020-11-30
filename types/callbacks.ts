@@ -13,4 +13,5 @@ export interface IVideoPlayerCallbacks {
   onTimedMetadata?: (e: any) => void;
   onPlaybackStalled?: (e: any) => void;
   onPlaybackResume?: (e: any) => void;
+  onRelatedVideoClicked?: (e: any) => void;
 }
