@@ -269,9 +269,9 @@ class VideoEventEmitter {
         receiveEvent(EVENT_STATS_ICON_CLICK, null);
     }
 
-    public void relatedVideoClick(String id) {
+    public void relatedVideoClick(int id) {
         WritableMap map = Arguments.createMap();
-        map.putString(EVENT_PROP_RELATED_VIDEO_ID, id);
+        map.putInt(EVENT_PROP_RELATED_VIDEO_ID, id);
         receiveEvent(EVENT_RELATED_VIDEO_CLICKED, map);
     }
 
