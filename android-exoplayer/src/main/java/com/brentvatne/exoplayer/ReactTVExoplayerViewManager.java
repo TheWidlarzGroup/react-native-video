@@ -409,7 +409,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             hasMore = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HAS_MORE) && relatedVideosMap.getBoolean(PROP_RELATED_VIDEOS_HAS_MORE);
         }
 
-        videoView.setRelatedVideos(relatedVideos, headIndex, hasMore);
+//        videoView.setRelatedVideos(relatedVideos, headIndex, hasMore);
     }
 
     private boolean startsWithValidScheme(String uriString) {
