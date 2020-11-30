@@ -55,7 +55,7 @@ class VideoEventEmitter {
     private static final String EVENT_EPG_ICON_CLICK = "onEpgIconClick";
     private static final String EVENT_STATS_ICON_CLICK = "onStatsIconClick";
     private static final String EVENT_RELATED_VIDEO_CLICKED = "onRelatedVideoClicked";
-    private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClikced";
+    private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -127,6 +127,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
+    private static final String EVENT_PROP_RELATED_VIDEO_ID = "id";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -150,9 +151,6 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
-
-    private static final String EVENT_PROP_RELATED_VIDEO_ID = "id";
-
 
     void setViewId(int viewId) {
         this.viewId = viewId;
