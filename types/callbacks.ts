@@ -14,4 +14,5 @@ export interface IVideoPlayerCallbacks {
   onPlaybackStalled?: (e: any) => void;
   onPlaybackResume?: (e: any) => void;
   onRelatedVideoClicked?: (e: any) => void;
+  onVideoAboutToEnd?: (e: any) => void;
 }
