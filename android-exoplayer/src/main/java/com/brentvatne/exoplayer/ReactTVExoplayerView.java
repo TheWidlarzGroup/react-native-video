@@ -201,7 +201,16 @@ class ReactTVExoplayerView extends FrameLayout
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
                     long pos = player.getCurrentPosition();
                     long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                    boolean isAboutToEnd;
+                    if (player.getDuration() - pos <= 10) {
+                        isAboutToEnd = true;
+                    } else {
+                        isAboutToEnd = false;
+                    }
+
                     eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
+                    eventEmitter.videoAboutToEnd(isAboutToEnd);
+
                     progressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);
                     sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
