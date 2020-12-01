@@ -36,6 +36,7 @@ class VideoEventEmitter {
     private static final String EVENT_FULLSCREEN_DID_PRESENT = "onVideoFullscreenPlayerDidPresent";
     private static final String EVENT_FULLSCREEN_WILL_DISMISS = "onVideoFullscreenPlayerWillDismiss";
     private static final String EVENT_FULLSCREEN_DID_DISMISS = "onVideoFullscreenPlayerDidDismiss";
+    private static final String EVENT_VIDEO_ABOUT_TO_END = "onVideoAboutToEnd";
 
     private static final String EVENT_STALLED = "onPlaybackStalled";
     private static final String EVENT_RESUME = "onPlaybackResume";
@@ -82,7 +83,8 @@ class VideoEventEmitter {
             EVENT_EPG_ICON_CLICK,
             EVENT_STATS_ICON_CLICK,
             EVENT_RELATED_VIDEO_CLICKED,
-            EVENT_RELATED_VIDEOS_ICON_CLICKED
+            EVENT_RELATED_VIDEOS_ICON_CLICKED,
+            EVENT_VIDEO_ABOUT_TO_END
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -113,7 +115,8 @@ class VideoEventEmitter {
                        EVENT_EPG_ICON_CLICK,
                        EVENT_STATS_ICON_CLICK,
                        EVENT_RELATED_VIDEO_CLICKED,
-                       EVENT_RELATED_VIDEOS_ICON_CLICKED
+                       EVENT_RELATED_VIDEOS_ICON_CLICKED,
+                       EVENT_VIDEO_ABOUT_TO_END
                })
     @interface VideoEvents {
     }
@@ -144,6 +147,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_CONTROLS_VISIBLE = "controlsVisible";
     private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DX = "dx";
     private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DY = "dy";
+    private static final String EVENT_PROP_IS_ABOUT_TO_END = "isAboutToEnd";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -159,8 +163,9 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks) {
+    void load(
+            double duration, double currentPosition, int videoWidth, int videoHeight,
+            WritableArray audioTracks, WritableArray textTracks) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -250,7 +255,7 @@ class VideoEventEmitter {
 
     void playbackRateChange(float rate) {
         WritableMap map = Arguments.createMap();
-        map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
+        map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double) rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
 
@@ -262,18 +267,18 @@ class VideoEventEmitter {
         receiveEvent(EVENT_EPG_ICON_CLICK, null);
     }
 
-    public void statsIconClick() {
+    void statsIconClick() {
         receiveEvent(EVENT_STATS_ICON_CLICK, null);
     }
 
-    public void relatedVideoClick(int id, String type) {
+    void relatedVideoClick(int id, String type) {
         WritableMap map = Arguments.createMap();
         map.putInt(EVENT_PROP_RELATED_VIDEO_ID, id);
         map.putString(EVENT_PROP_RELATED_VIDEO_TYPE, type);
         receiveEvent(EVENT_RELATED_VIDEO_CLICKED, map);
     }
 
-    public void relatedVideosIconClicked() {
+    void relatedVideosIconClicked() {
         receiveEvent(EVENT_RELATED_VIDEOS_ICON_CLICKED, null);
     }
 
@@ -336,5 +341,11 @@ class VideoEventEmitter {
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
         eventEmitter.receiveEvent(viewId, type, event);
+    }
+
+    void videoAboutToEnd(boolean isAboutToEnd) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_IS_ABOUT_TO_END, isAboutToEnd);
+        receiveEvent(EVENT_VIDEO_ABOUT_TO_END, map);
     }
 }
