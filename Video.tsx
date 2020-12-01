@@ -105,7 +105,11 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   };
 
   onRelatedVideosClicked = (event) => {
-      this.props.onRelatedVideoClicked?.(event.nativeEvent);
+    this.props.onRelatedVideoClicked?.(event.nativeEvent);
+  }
+
+  onRelatedVideosIconClicked = (event) => {
+    this.getVideoPlayerProps.onRelatedVideosIconClicked?.(event.nativeEvent);
   }
 
   onVideoAboutToEnd = (event) => {
@@ -170,6 +174,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onPlaybackResume: this.onPlaybackResume,
       onPlaybackRateChange: this.onPlaybackRateChange,
       onRelatedVideoClicked: this.onRelatedVideosClicked,
+      onRelatedVideosIconClicked: this.onRelatedVideosIconClicked,
       onVideoAboutToEnd: this.onVideoAboutToEnd,
     };
   };
