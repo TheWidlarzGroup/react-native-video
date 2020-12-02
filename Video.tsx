@@ -109,7 +109,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   }
 
   onRelatedVideosIconClicked = (event) => {
-    this.getVideoPlayerProps.onRelatedVideosIconClicked?.(event.nativeEvent);
+    this.props.onRelatedVideosIconClicked?.(event.nativeEvent);
   }
 
   onVideoAboutToEnd = (event) => {
