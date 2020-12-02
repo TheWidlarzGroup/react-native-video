@@ -58,6 +58,7 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoAboutToEnd, RCTBubblingEventBlock);
 
 RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {

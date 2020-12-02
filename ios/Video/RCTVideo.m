@@ -538,6 +538,15 @@ static int const RCTVideoUnset = -1;
                            @"target": self.reactTag,
                            @"seekableDuration": [self calculateSeekableDuration],
                            });
+      if (self.onVideoAboutToEnd) {
+          bool isAboutToEnd;
+          if (currentTimeSecs >= duration - 10) {
+              isAboutToEnd = YES;
+          } else {
+              isAboutToEnd = NO;
+          }
+          self.onVideoAboutToEnd(@{@"isAboutToEnd": [NSNumber numberWithBool:isAboutToEnd]});
+      }
   }
 }
 

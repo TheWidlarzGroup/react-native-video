@@ -36,6 +36,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackResume;
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoAboutToEnd;
 @property (nonatomic, strong) AVDorisPlayer *player;
 @property (nonatomic, strong) AVDoris *avdoris;
 
