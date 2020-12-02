@@ -753,6 +753,11 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
+    
+    if (_currentItemObserverRegistered) {
+        [self.player removeObserver:self forKeyPath:currentItem context:nil];
+        _currentItemObserverRegistered = NO;
+    }
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
 
