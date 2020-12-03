@@ -1784,6 +1784,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
           if (certificateData != nil) {
             if(self.onGetLicense) {
               NSData *contentIdData = [contentId dataUsingEncoding:NSUTF8StringEncoding];
+              AVAssetResourceLoadingDataRequest *dataRequest = [loadingRequest dataRequest];
               if (dataRequest != nil) {
                 NSError *spcError = nil;
                 NSData *spcData = [loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
