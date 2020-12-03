@@ -118,6 +118,15 @@ class ReactTVExoplayerView extends FrameLayout
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
 
+    private static final String KEY_IU = "iu";
+    private static final String KEY_CUST_PARAMS = "cust_params";
+    private static final String KEY_OUTPUT = "output";
+    private static final String KEY_VPA = "vpa";
+    private static final String KEY_MSID = "msid";
+    private static final String KEY_AN = "an";
+    private static final String KEY_DESCRIPTION_URL = "description_url";
+    private static final String KEY_URL = "url";
+
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
@@ -131,6 +140,7 @@ class ReactTVExoplayerView extends FrameLayout
     private ExoDorisImaWrapper exoDorisImaWrapper;
     private DefaultTrackSelector trackSelector;
     private ControlDispatcher controlDispatcher;
+    private Source source;
     private boolean playerNeedsSource;
     private int resumeWindow;
     private long resumePosition;
@@ -144,10 +154,10 @@ class ReactTVExoplayerView extends FrameLayout
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private boolean isImaStream = false;
+    private boolean isImaStreamLoaded = false;
 
     // Props from React
     private RNSource src;
-    private RNImaSource imaSrc;
     private RNTranslations translations;
     private boolean repeat;
     private String audioTrackType;
@@ -166,19 +176,9 @@ class ReactTVExoplayerView extends FrameLayout
     private int accentColor;
     // \ End props
 
-    // IMA Ad Tag Parameters
-    private String iu = "/7009/prendetv/";
-    private String custParams;
-    private String output;
-    private String pp = "DAI_TVApps";
-    private String vpa;
-    private String msid = "2098810";
-    private String an = "prendetv";
-
-    // IMA Custom Ad Tag Parameters
-    private String neighborhood = "neighborhood=drama&";
-    private String row = "row=indienovelas&";
-    private String customParams = "mcp_id=3751768&rating=pg&rating_qualifier=violence&content_source=univision&video_type=movie&subscriber=true&category=novelas,romance,drama&first_category=novelas&vertical=noticias&program_title=amaramuerte&season=1&episode=23&tags=kate%20de%20castillo,capitulo,amor&cast=selma%20hayek,jorge%20ramos&ph=1080&pw=1920&app_bundle=prendetv.android";
+    // IMA
+    private RNImaSource imaSrc;
+    private AdTagParameters adTagParameters;
 
     // Custom
     private PowerManager powerManager;
@@ -438,29 +438,8 @@ class ReactTVExoplayerView extends FrameLayout
                     .setTextTracks(src.getTextTracks())
                     .build();
 
-            if (isImaStream) {
-                AdTagParameters adTagParameters = new AdTagParametersBuilder()
-                        .setIu(iu)
-                        .setCustParams(custParams)
-                        .setOutput(output)
-                        .setPp(pp)
-                        .setVpa(vpa)
-                        .setMsid(msid)
-                        .setAn(an)
-                        .build();
-
-                ImaSource imaSource = new ImaSourceBuilder(source)
-                        .setAssetKey(imaSrc.getAssetKey())
-                        .setContentSourceId(imaSrc.getContentSourceId())
-                        .setVideoId(imaSrc.getVideoId())
-                        .setAuthToken(imaSrc.getAuthToken())
-                        .setAdTagParameters(adTagParameters)
-                        .build();
-
-                exoDorisImaPlayer.enableControls(true);
-                exoDorisImaPlayer.setCanSeek(true);
-
-                exoDorisImaWrapper.requestAndPlayAds(imaSource);
+            if (isImaStream && getWidth() != 0 && getHeight() != 0) {
+                loadImaStream();
             } else if (actionToken != null) {
                 try {
                     player.load(source, !haveResumePosition, force, actionToken);
@@ -475,6 +454,47 @@ class ReactTVExoplayerView extends FrameLayout
             eventEmitter.loadStart();
             loadVideoStarted = true;
         }
+    }
+
+    private void loadImaStream() {
+        isImaStreamLoaded = true;
+
+        String iu = (String) imaSrc.getAdTagParameters().get(KEY_IU);
+        String custParams = (String) imaSrc.getAdTagParameters().get(KEY_CUST_PARAMS);
+        String output = (String) imaSrc.getAdTagParameters().get(KEY_OUTPUT);
+        String vpa = (String) imaSrc.getAdTagParameters().get(KEY_VPA);
+        String an = (String) imaSrc.getAdTagParameters().get(KEY_AN);
+        String descriptionUrl = (String) imaSrc.getAdTagParameters().get(KEY_DESCRIPTION_URL);
+        String url = (String) imaSrc.getAdTagParameters().get(KEY_URL);
+
+        String msid = getContext().getPackageName();
+        String isLat = "0"; // Todo: Remove this hard-coded value once we ask the user if they want to enable/disable limited ad tracking
+        custParams += "&pw=" + getWidth() + "&ph=" + getHeight();
+
+        adTagParameters = new AdTagParametersBuilder()
+                .setIu(iu)
+                .setCustParams(custParams)
+                .setOutput(output)
+                .setVpa(vpa)
+                .setMsid(msid)
+                .setAn(an)
+                .setIsLat(isLat)
+                .setDescriptionUrl(descriptionUrl)
+                .setUrl(url)
+                .build();
+
+        ImaSource imaSource = new ImaSourceBuilder(source)
+                .setAssetKey(imaSrc.getAssetKey())
+                .setContentSourceId(imaSrc.getContentSourceId())
+                .setVideoId(imaSrc.getVideoId())
+                .setAuthToken(imaSrc.getAuthToken())
+                .setAdTagParameters(adTagParameters)
+                .build();
+
+        exoDorisImaPlayer.enableControls(true);
+        exoDorisImaPlayer.setCanSeek(true);
+
+        exoDorisImaWrapper.requestAndPlayAds(imaSource);
     }
 
     @Nullable
@@ -564,6 +584,8 @@ class ReactTVExoplayerView extends FrameLayout
         Log.d(TAG, "releasePlayer()");
         deactivateMediaSession();
         releaseMediaSession();
+        adTagParameters = null;
+        isImaStreamLoaded = false;
 
         if (player != null) {
             updateResumePosition();
@@ -1349,20 +1371,6 @@ class ReactTVExoplayerView extends FrameLayout
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
         }
-
-        if (isImaStream) {
-            if (live) {
-                iu += "live/androidtv/comediaspicantes";
-                custParams = neighborhood + customParams;
-                output = "xml_vast4";
-                vpa = "2";
-            } else {
-                iu += "vod/androidtv/comediaspicantes";
-                custParams = row + customParams;
-                output = "xml_vmap4";
-                vpa = "1";
-            }
-        }
     }
 
     public void setEpg(boolean hasEpg) {
@@ -1455,6 +1463,10 @@ class ReactTVExoplayerView extends FrameLayout
 
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
+        }
+
+        if (isImaStream && !isImaStreamLoaded) {
+            loadImaStream();
         }
     }
 
