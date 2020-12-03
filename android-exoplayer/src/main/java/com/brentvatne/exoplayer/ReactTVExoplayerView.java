@@ -1463,10 +1463,10 @@ class ReactTVExoplayerView extends FrameLayout
 
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
-        }
 
-        if (isImaStream && !isImaStreamLoaded) {
-            loadImaStream();
+            if (isImaStream && !isImaStreamLoaded) {
+                loadImaStream();
+            }
         }
     }
 
