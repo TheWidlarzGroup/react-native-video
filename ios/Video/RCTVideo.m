@@ -8,6 +8,8 @@
 #include "DiceUtils.h"
 #include "DiceBeaconRequest.h"
 #include "DiceHTTPRequester.h"
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/AdSupport.h>
 
 //@import ReactVideoSubtitleSideloader;
 #if TARGET_OS_IOS
@@ -670,79 +672,61 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   id contentSourceId = [imaDict objectForKey:@"contentSourceId"];
   id videoId = [imaDict objectForKey:@"videoId"];
   id authToken = [imaDict objectForKey:@"authToken"];
+  id adTagParameters = [imaDict objectForKey:@"adTagParameters"];
+    
+  AVDorisIMAStreamRequest *streamRequest;
+  
   if (assetKey) {
     if ([assetKey isKindOfClass:NSString.class]) {
-      AVDorisIMALiveStreamRequest *liveRequest = [[AVDorisIMALiveStreamRequest alloc]
-                                                  initWithAssetKey:assetKey
-                                                  adContainerView:self->_playerViewController.adView
-                                                  adContainerViewController:self->_playerViewController];
-      
-      NSDictionary *customParams = @{@"neighborhood": @"drama",
-                                     @"mcp_id": @"3751768",
-                                     @"rating": @"pg",
-                                     @"rating_qualifier": @"violence",
-                                     @"content_source": @"univision",
-                                     @"video_type": @"movie",
-                                     @"subscriber": @"true",
-                                     @"category": @"drama",
-                                     @"first_category": @"novelas",
-                                     @"vertical": @"noticias",
-                                     @"program_title": @"amar a muerte",
-                                     @"season": @"1",
-                                     @"episode": @"23",
-                                     @"tags": @"kate de castillo",
-                                     @"cast": @"selma hayek, jorge ramos",
-                                     @"app_bundle": @"univisionavod.ios",
-                                     @"ph": @"829",
-                                     @"pw": @"466"};
-
-      NSMutableDictionary *adtags = [NSMutableDictionary new];
-      [adtags setValue:@"/7009/prendetv/live/iosapp/drama" forKey:@"iu"];
-      [adtags setValue:customParams forKey:@"cust_params"];
-      
-      liveRequest.adTagParameters = adtags;
-      
-      [self.avdoris requestIMAStreamWithStreamRequest:liveRequest];
+      streamRequest = [[AVDorisIMALiveStreamRequest alloc]
+                       initWithAssetKey:assetKey
+                       adContainerView:self->_playerViewController.adView
+                       adContainerViewController:self->_playerViewController];
     }
   } else if (contentSourceId && videoId && authToken) {
     if ([contentSourceId isKindOfClass:NSString.class] &&
-        [videoId isKindOfClass:NSString.class] &&
-        [authToken isKindOfClass:NSString.class]) {
-      AVDorisIMAVODStreamRequest *vodRequest = [[AVDorisIMAVODStreamRequest alloc]
-                                                initWithContentSourceId:contentSourceId
-                                                videoId:videoId
-                                                adContainerView:self->_playerViewController.adView
-                                                adContainerViewController:self->_playerViewController];
-      
-      NSDictionary *customParams = @{@"row": @"indienovelas",
-                                     @"mcp_id": @"9999999",
-                                     @"rating": @"pg",
-                                     @"rating_qualifier": @"violence",
-                                     @"content_source": @"univision",
-                                     @"video_type": @"full episode",
-                                     @"subscriber": @"false",
-                                     @"category": @"indienovelas",
-                                     @"first_category": @"novelas",
-                                     @"vertical": @"noticias",
-                                     @"program_title": @"amar a muerte",
-                                     @"season": @"4",
-                                     @"episode": @"12",
-                                     @"tags": @"kate de castillo",
-                                     @"cast": @"selma hayek, jorge ramos",
-                                     @"app_bundle": @"univisionavod.ios",
-                                     @"ph": @"829",
-                                     @"pw": @"466"};
-      
-      
-      NSMutableDictionary *adtags = [NSMutableDictionary new];
-      [adtags setValue:@"/7009/prendetv/vod/tvosapp/indienovelas" forKey:@"iu"];
-      [adtags setValue:customParams forKey:@"cust_params"];
-      
-      vodRequest.adTagParameters = adtags;
-      vodRequest.authToken = authToken;
-      
-      [self.avdoris requestIMAStreamWithStreamRequest:vodRequest];
+        [videoId isKindOfClass:NSString.class]) {
+      streamRequest = [[AVDorisIMAVODStreamRequest alloc]
+                       initWithContentSourceId:contentSourceId
+                       videoId:videoId
+                       adContainerView:self->_playerViewController.adView
+                       adContainerViewController:self->_playerViewController];
     }
+  }
+  
+  if (streamRequest) {
+    if ([adTagParameters isKindOfClass:NSDictionary.class]) {
+      NSString* __nullable customParams = [adTagParameters stringForKey:@"cust_params"];
+      
+      if (customParams) {
+        NSString* widthString = [NSString stringWithFormat: @"&pw=%.0f", self.bounds.size.width];
+        NSString* heightString = [NSString stringWithFormat: @"&ph=%.0f", self.bounds.size.height];
+        
+        [customParams stringByAppendingString:widthString];
+        [customParams stringByAppendingString:heightString];
+        [adTagParameters setValue:customParams forKey:@"cust_params"];
+      }
+      
+      if (@available(tvOS 14, *)) {
+        [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+          if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+            [adTagParameters setValue:@"1" forKey:@"is_lat"];
+          } else {
+            [adTagParameters setValue:@"0" forKey:@"is_lat"];
+          }
+        }];
+      } else {
+        [adTagParameters setValue:@"0" forKey:@"is_lat"];
+      }
+            
+      streamRequest.adTagParameters = adTagParameters;
+    }
+    
+    if ([authToken isKindOfClass:NSString.class]) {
+      streamRequest.authToken = authToken;
+    }
+
+    [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
   } else {
     [self.player replaceCurrentItemWithPlayerItem:playerItem];
   }
