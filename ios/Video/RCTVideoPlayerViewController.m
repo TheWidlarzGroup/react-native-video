@@ -70,14 +70,6 @@ const NSInteger kConditionLockShouldProceedWithNewPlayerItem = 1;
 
 - (void)avdoris:(AVDoris *)avdoris didReceive:(enum AVDorisEvent)event payload:(id)payload {
     switch (event) {
-        case AVDorisEventSTREAM_STARTED:
-            if (@available(tvOS 14, *)) {
-                [self.player pause];
-                [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-                    [self.player play];
-                }];
-            }
-            break;
         case AVDorisEventAD_BREAK_STARTED:
             self.adView.hidden = NO;
             self.requiresLinearPlayback = YES;

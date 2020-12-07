@@ -11,6 +11,7 @@
 #import <AppTrackingTransparency/AppTrackingTransparency.h>
 #import <AdSupport/AdSupport.h>
 
+
 //@import ReactVideoSubtitleSideloader;
 #if TARGET_OS_IOS
 #import <ReactVideoSubtitleSideloader/ReactVideoSubtitleSideloader-Swift.h>
@@ -695,6 +696,10 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
   }
   
   if (streamRequest) {
+    if ([authToken isKindOfClass:NSString.class]) {
+      streamRequest.authToken = authToken;
+    }
+    
     if ([adTagParameters isKindOfClass:NSDictionary.class]) {
       NSString* __nullable customParams = [adTagParameters stringForKey:@"cust_params"];
       
@@ -702,8 +707,8 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
         NSString* widthString = [NSString stringWithFormat: @"&pw=%.0f", self.bounds.size.width];
         NSString* heightString = [NSString stringWithFormat: @"&ph=%.0f", self.bounds.size.height];
         
-        [customParams stringByAppendingString:widthString];
-        [customParams stringByAppendingString:heightString];
+        customParams = [customParams stringByAppendingString:widthString];
+        customParams = [customParams stringByAppendingString:heightString];
         [adTagParameters setValue:customParams forKey:@"cust_params"];
       }
       
@@ -714,19 +719,31 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
           } else {
             [adTagParameters setValue:@"0" forKey:@"is_lat"];
           }
+          streamRequest.adTagParameters = adTagParameters;
+          
+          [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+            if (appId) {
+              [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+            } else {
+              [adTagParameters setValue:@"0" forKey:@"msid"];
+            }
+            streamRequest.adTagParameters = adTagParameters;
+            [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
+          }];
         }];
       } else {
         [adTagParameters setValue:@"0" forKey:@"is_lat"];
+        [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+          if (appId) {
+            [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+          } else {
+            [adTagParameters setValue:@"0" forKey:@"msid"];
+          }
+          streamRequest.adTagParameters = adTagParameters;
+          [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
+        }];
       }
-            
-      streamRequest.adTagParameters = adTagParameters;
     }
-    
-    if ([authToken isKindOfClass:NSString.class]) {
-      streamRequest.authToken = authToken;
-    }
-
-    [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
   } else {
     [self.player replaceCurrentItemWithPlayerItem:playerItem];
   }
@@ -1803,6 +1820,54 @@ dispatch_queue_t delegateQueue;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   [super removeFromSuperview];
+}
+
+- (void)fetchAppIdWithCompletion:(void (^)(NSNumber* _Nullable appId))completionBlock {
+  NSURL* url = [self iTunesURLFromString];
+  NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
+  [request addValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+  request.HTTPMethod = @"GET";
+  [[NSURLSession.sharedSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    completionBlock([self parseAppIdwithData:data response:response error:error]);
+  }] resume];
+}
+
+- (NSURL *)iTunesURLFromString {
+  NSURLComponents* components = [NSURLComponents new];
+  components.scheme = @"https";
+  components.host = @"itunes.apple.com";
+  components.path = @"/lookup";
+  
+  NSURLQueryItem* item = [[NSURLQueryItem alloc] initWithName:@"bundleId" value:NSBundle.mainBundle.bundleIdentifier];
+  components.queryItems = @[item];
+  return components.URL;
+}
+
+- (nullable NSNumber*)parseAppIdwithData:(nullable NSData*)data response:(NSURLResponse*)response error:(NSError*)error {
+  if (error) {
+    return nil;
+  }
+  
+  if (data) {
+    NSError *error = nil;
+    id object = [NSJSONSerialization
+                 JSONObjectWithData:data
+                 options:0
+                 error:&error];
+    
+    if(error) {
+      return nil;
+    } else if([object isKindOfClass:[NSDictionary class]]) {
+      NSDictionary *dict = object;
+      NSArray* results = [dict mutableArrayValueForKey:@"results"];
+      NSDictionary *dict2 = [results firstObject];
+      id appid = [dict2 objectForKey:@"trackId"];
+      if ([appid isKindOfClass:NSNumber.class]) {
+        return appid;
+      }
+    }
+  }
+  return  nil;
 }
 
 @end
