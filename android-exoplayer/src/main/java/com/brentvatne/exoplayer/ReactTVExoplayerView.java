@@ -1410,6 +1410,19 @@ class ReactTVExoplayerView extends FrameLayout
         }
     }
 
+    public void setButtons(boolean showFavouriteButton, boolean showWatchlistButton) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setShowFavoriteButton(showFavouriteButton);
+            exoDorisPlayerView.setShowWatchListButton(showWatchlistButton);
+        }
+    }
+
+    public void setIsFavourite(boolean isFavourite) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setIsFavorite(isFavourite);
+        }
+    }
+
     public void setControlsOpacity(final float opacity) {
     }
 
@@ -1630,5 +1643,15 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onMoreVideosButtonClicked() {
         eventEmitter.relatedVideosIconClicked();
+    }
+
+    @Override
+    public void onFavoriteButtonClicked() {
+        eventEmitter.favouriteButtonClick();
+    }
+
+    @Override
+    public void onWatchListButtonClicked() {
+        // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
     }
 }
