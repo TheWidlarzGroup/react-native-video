@@ -16,4 +16,5 @@ export interface IVideoPlayerCallbacks {
   onRelatedVideoClicked?: (e: any) => void;
   onRelatedVideosIconClicked?: (e: any) => void;
   onVideoAboutToEnd?: (e: any) => void;
+  onFavouriteButtonClick?: (e: any) => void;
 }

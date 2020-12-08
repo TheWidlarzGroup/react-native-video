@@ -55,6 +55,7 @@ class VideoEventEmitter {
     private static final String EVENT_STATS_ICON_CLICK = "onStatsIconClick";
     private static final String EVENT_RELATED_VIDEO_CLICKED = "onRelatedVideoClicked";
     private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
+    private static final String EVENT_FAVOURITE_BUTTON_CLICK = "onFavouriteButtonClick";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -84,7 +85,8 @@ class VideoEventEmitter {
             EVENT_STATS_ICON_CLICK,
             EVENT_RELATED_VIDEO_CLICKED,
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
-            EVENT_VIDEO_ABOUT_TO_END
+            EVENT_VIDEO_ABOUT_TO_END,
+            EVENT_FAVOURITE_BUTTON_CLICK
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -116,7 +118,8 @@ class VideoEventEmitter {
                        EVENT_STATS_ICON_CLICK,
                        EVENT_RELATED_VIDEO_CLICKED,
                        EVENT_RELATED_VIDEOS_ICON_CLICKED,
-                       EVENT_VIDEO_ABOUT_TO_END
+                       EVENT_VIDEO_ABOUT_TO_END,
+                       EVENT_FAVOURITE_BUTTON_CLICK
                })
     @interface VideoEvents {
     }
@@ -347,5 +350,9 @@ class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_ABOUT_TO_END, isAboutToEnd);
         receiveEvent(EVENT_VIDEO_ABOUT_TO_END, map);
+    }
+
+    void favouriteButtonClick() {
+        receiveEvent(EVENT_FAVOURITE_BUTTON_CLICK, null);
     }
 }
