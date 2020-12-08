@@ -431,7 +431,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             playerInitTime = new Date().getTime();
 
-            Source source = new SourceBuilder(src.getUri(), src.getId())
+            source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(live)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
