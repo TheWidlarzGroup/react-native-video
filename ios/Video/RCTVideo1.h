@@ -32,7 +32,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoAboutToEnd;
 @property (nonatomic, copy) RCTBubblingEventBlock onFavouriteButtonClick;
-@property (nonatomic, strong) IMAPlayer *player;
+@property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) DorisUIModule *dorisUI;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;

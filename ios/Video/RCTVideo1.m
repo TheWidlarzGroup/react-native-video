@@ -38,8 +38,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
 
-        self.player = [IMAPlayer new];
-        self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player output:self];
+        self.player = [AVPlayer new];
+        self.dorisUI = [DorisUIModuleFactory createWithType:DorisUITypeNative player:self.player output:self];
         [self addSubview:self.dorisUI.view];
         [self.dorisUI fillSuperView];
     }
