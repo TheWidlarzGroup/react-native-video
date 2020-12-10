@@ -10,7 +10,7 @@
 
 @class RCTEventDispatcher;
 
-@interface RCTVideo1 : UIView <DorisExternalOutputProtocol>
+@interface RCTVideo1 : UIView <DorisUIModuleOutputProtocol>
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;
@@ -31,6 +31,7 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoAboutToEnd;
+@property (nonatomic, copy) RCTBubblingEventBlock onFavouriteButtonClick;
 @property (nonatomic, strong) IMAPlayer *player;
 @property (nonatomic, strong) DorisUIModule *dorisUI;
 

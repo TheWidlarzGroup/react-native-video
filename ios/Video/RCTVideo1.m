@@ -63,6 +63,17 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval {}
 - (void)setPaused:(BOOL)paused {}
 
+- (void)setButtons:(NSDictionary*)buttons {
+    bool canBeFavourite = [buttons objectForKey:@"favourite"];
+    if (canBeFavourite) {
+        [self.dorisUI.input setUIConfigurationWithCanBeFavourite:canBeFavourite];
+    }
+}
+
+- (void)setIsFavourite:(BOOL)isFavourite {
+    [self.dorisUI.input setIsFavourite:isFavourite];
+}
+
 - (void)setSrc:(NSDictionary *)source {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
@@ -311,6 +322,12 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)didChangeItemDuration:(double)duration {
     _itemDuration = [NSNumber numberWithDouble:duration];
+}
+
+- (void)didTapFavouriteButton {
+    if (self.onFavouriteButtonClick) {
+        self.onFavouriteButtonClick(@{@"target": self.reactTag});
+    }
 }
 
 

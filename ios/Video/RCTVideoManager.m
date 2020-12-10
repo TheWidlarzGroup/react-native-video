@@ -13,7 +13,7 @@ RCT_EXPORT_MODULE();
 
 - (UIView *)view
 {
-    //  return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+//    return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
     return [[RCTVideo1 alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
@@ -41,6 +41,9 @@ RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
+RCT_EXPORT_VIEW_PROPERTY(isFavourite, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(buttons, NSDictionary);
+
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTBubblingEventBlock);
@@ -61,6 +64,7 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoAboutToEnd, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onFavouriteButtonClick, RCTBubblingEventBlock);
 
 RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
