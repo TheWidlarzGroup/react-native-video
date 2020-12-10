@@ -64,10 +64,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setPaused:(BOOL)paused {}
 
 - (void)setButtons:(NSDictionary*)buttons {
-    bool canBeFavourite = [buttons objectForKey:@"favourite"];
-    if (canBeFavourite) {
-        [self.dorisUI.input setUIConfigurationWithCanBeFavourite:canBeFavourite];
-    }
+    bool canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
+    [self.dorisUI.input setUIConfigurationWithCanBeFavourite:canBeFavourite];
 }
 
 - (void)setIsFavourite:(BOOL)isFavourite {
@@ -332,8 +330,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 
 #pragma mark - Lifecycle
-- (void)dealloc
-{
+- (void)dealloc {
     if (_playerData || _videoData) {
         [MUXSDKStats destroyPlayer:@"dicePlayer"];
         _playerData = nil;
