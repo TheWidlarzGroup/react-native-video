@@ -24,6 +24,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSNumber* _Nullable _startPlayingAt;
     NSNumber* _Nullable _itemDuration;
     
+    bool _canBeFavourite;
+    
     SubtitleResourceLoaderDelegate* _delegate;
     dispatch_queue_t delegateQueue;
 
@@ -37,9 +39,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
-
+        _canBeFavourite = YES;
+        
         self.player = [AVPlayer new];
-        self.dorisUI = [DorisUIModuleFactory createWithType:DorisUITypeNative player:self.player output:self];
+        self.dorisUI = [DorisUIModuleFactory createWithType:DorisUITypeCustom player:self.player output:self];
         [self addSubview:self.dorisUI.view];
         [self.dorisUI fillSuperView];
     }
@@ -64,17 +67,20 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setPaused:(BOOL)paused {}
 
 - (void)setButtons:(NSDictionary*)buttons {
-    bool canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
-    [self.dorisUI.input setUIConfigurationWithCanBeFavourite:canBeFavourite];
+    _canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
+    [self updateDorisUI];
 }
 
 - (void)setIsFavourite:(BOOL)isFavourite {
-    [self.dorisUI.input setIsFavourite:isFavourite];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.dorisUI.input setIsFavourite:isFavourite];
+    });
 }
 
 - (void)setSrc:(NSDictionary *)source {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
+        
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
             id imaObject = [source objectForKey:@"ima"];
             
@@ -82,7 +88,9 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 [self setupPlaybackWithAds:imaObject playerItem:playerItem];
             } else {
                 PlayerItemSource *source = [[PlayerItemSource alloc] initWithPlayerItem:playerItem];
-                [self.dorisUI.input loadWithPlayerItemSource:source startPlayingAt:self->_startPlayingAt];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.dorisUI.input loadWithPlayerItemSource:source startPlayingAt:self->_startPlayingAt];
+                });
             }
             
             if (self.onVideoLoadStart) {
@@ -99,6 +107,18 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     });
 }
 
+- (void)updateDorisUI {
+    NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
+    bool videoIsLive = [[_videoData valueForKey:@"videoIsLive"] boolValue];
+
+    DorisUIConfiguration* configuration = [[DorisUIConfiguration alloc] initWithIsLive:videoIsLive
+                                                                    canBecomeFavourite:_canBeFavourite
+                                                                            videoTitle:videoTitle];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.dorisUI.input setUIConfiguration:configuration];
+    });
+}
+
 
 - (void)setSeek:(NSDictionary *)info {
     NSNumber *seekTime = info[@"time"];
@@ -107,11 +127,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 
 - (void)setControls:(BOOL)controls {
-    if (controls) {
-        [self.dorisUI.input showControls];
-    } else {
-        [self.dorisUI.input hideControls];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (controls) {
+            [self.dorisUI.input showControls];
+        } else {
+            [self.dorisUI.input hideControls];
+        }
+    });
 }
 
 
@@ -121,6 +143,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSString* __nullable videoId = [imaDict objectForKey:@"videoId"];
     NSString* __nullable authToken = [imaDict objectForKey:@"authToken"];
     NSDictionary* __nullable adTagParameters = [imaDict objectForKey:@"adTagParameters"];
+
+    NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
 
     if (adTagParameters) {
         NSString* __nullable customParams = [adTagParameters objectForKey:@"cust_params"];
@@ -149,8 +173,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                         [adTagParameters setValue:@"0" forKey:@"msid"];
                     }
                     
-                    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters];
-                    [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+                    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters title:videoTitle logoURL:nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+                    });
                 }];
             }];
         } else {
@@ -161,15 +187,19 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 } else {
                     [adTagParameters setValue:@"0" forKey:@"msid"];
                 }
-                IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters];
-                [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+                IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters title:videoTitle logoURL:nil];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+                });
             }];
         }
+    } else {
+        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:nil title:videoTitle logoURL:nil];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+        });
     }
-    
-    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters];
-    
-    [self.dorisUI.input loadWithImaSource:source startPlayingAt:_startPlayingAt];
 }
 
 
@@ -188,6 +218,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
         
     [self setupMuxDataFromSource:source];
+    [self updateDorisUI];
     
     if (isNetwork) {
         [self setupBeaconFromSource:source];
