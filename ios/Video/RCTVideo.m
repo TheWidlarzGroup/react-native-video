@@ -376,7 +376,7 @@ static int const RCTVideoUnset = -1;
       [self addPlayerItemObservers];
       [self setFilter:self->_filterName];
       [self setMaxBitRate:self->_maxBitRate];
-      [self setPitchAlgorithm:_pitchAlgorithm];
+      [self setPitchAlgorithm:self->_pitchAlgorithm];
 
       [_player pause];
 
