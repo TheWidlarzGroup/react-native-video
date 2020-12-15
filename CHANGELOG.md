@@ -3,11 +3,11 @@
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
+- Added `pitchAlgorithm` (iOS) - pitch algorithm for AVPlayerItem. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
 
 ### Version 5.1.0-alpha8
 
 - Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#2116](https://github.com/react-native-community/react-native-video/pull/2116)
-- Added `pitchAlgorithm` (iOS) - pitch algorithm for AVPlayerItem. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
 
 ### Version 5.1.0-alpha7
 
