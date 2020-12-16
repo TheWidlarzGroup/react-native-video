@@ -26,6 +26,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.util.RNLog;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -70,6 +71,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
 
 import java.net.CookieHandler;
@@ -147,6 +149,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Dynamic textTrackValue;
     private ReadableArray textTracks;
     private boolean disableFocus;
+    private boolean disableBuffering;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
@@ -182,7 +185,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     };
-    
+
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
         if(!player.getCurrentTimeline().isEmpty()) {    
@@ -387,6 +390,33 @@ class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+    private class RNVLoadControl extends DefaultLoadControl {
+        public RNVLoadControl(DefaultAllocator allocator, int minBufferAudioMs, int minBufferVideoMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
+            super(allocator,
+                    minBufferAudioMs,
+                    minBufferVideoMs,
+                    maxBufferMs,
+                    bufferForPlaybackMs,
+                    bufferForPlaybackAfterRebufferMs,
+                    targetBufferBytes,
+                    prioritizeTimeOverSizeThresholds,
+                    backBufferDurationMs,
+                    retainBackBufferFromKeyframe);
+        }
+
+        @Override
+        public boolean shouldContinueLoading(long bufferedDurationUs, float playbackSpeed) {
+            Log.i("NativeAdrian", "DisableBuffering is: " + String.valueOf(ReactExoplayerView.this.disableBuffering));
+            RNLog.l("DisableBuffering is: " + String.valueOf(ReactExoplayerView.this.disableBuffering));
+            if (ReactExoplayerView.this.disableBuffering) {
+                return false;
+            }
+            Log.i("NativeAdrian", "continue loading");
+            RNLog.l("continue loading");
+            return super.shouldContinueLoading(bufferedDurationUs, playbackSpeed);
+        }
+    }
+
     private void initializePlayer() {
         ReactExoplayerView self = this;
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -400,12 +430,25 @@ class ReactExoplayerView extends FrameLayout implements
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
                     DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-                    DefaultLoadControl.Builder defaultLoadControlBuilder = new DefaultLoadControl.Builder();
-                    defaultLoadControlBuilder.setAllocator(allocator);
-                    defaultLoadControlBuilder.setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
-                    defaultLoadControlBuilder.setTargetBufferBytes(-1);
-                    defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
-                    DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
+//                    RNVLoadControl.Builder loadControlBuilder = new RNVLoadControl.Builder();
+//                    loadControlBuilder.setAllocator(allocator);
+//                    loadControlBuilder.setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+//                    loadControlBuilder.setTargetBufferBytes(-1);
+//                    loadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
+
+                    RNVLoadControl loadControl = new RNVLoadControl(
+                            allocator,
+                            minBufferMs,
+                            minBufferMs,
+                            maxBufferMs,
+                            bufferForPlaybackMs,
+                            bufferForPlaybackAfterRebufferMs,
+                            -1,
+                            true,
+                            DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
+                            DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
+                    );
+//                    RNVLoadControl loadControl = loadControlBuilder.create();
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
                                     .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
@@ -425,7 +468,7 @@ class ReactExoplayerView extends FrameLayout implements
                     }
                     // End DRM
                     player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory,
-                            trackSelector, defaultLoadControl, drmSessionManager, bandwidthMeter);
+                            trackSelector, loadControl, drmSessionManager, bandwidthMeter);
                     player.addListener(self);
                     player.addMetadataOutput(self);
                     exoPlayerView.setPlayer(player);
@@ -1269,6 +1312,14 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableFocus(boolean disableFocus) {
         this.disableFocus = disableFocus;
+    }
+
+    public void setDisableBuffering(boolean disableBuffering) {
+        Log.i("NativeAdrian" ,"setDisableBuffering is currently: " + String.valueOf(this.disableBuffering));
+        RNLog.l("setDisableBuffering is currently: " + String.valueOf(this.disableBuffering));
+        this.disableBuffering = disableBuffering;
+        Log.i("NativeAdrian", "setDisableBuffering to: " + String.valueOf((this.disableBuffering)));
+        RNLog.l("setDisableBuffering to: " + String.valueOf((this.disableBuffering)));
     }
 
     public void setFullscreen(boolean fullscreen) {
