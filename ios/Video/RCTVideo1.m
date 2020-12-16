@@ -24,6 +24,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSNumber* _Nullable _startPlayingAt;
     NSNumber* _Nullable _itemDuration;
     
+    bool _controls;
     bool _canBeFavourite;
     
     SubtitleResourceLoaderDelegate* _delegate;
@@ -40,6 +41,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
         _canBeFavourite = YES;
+        _controls = YES;
         
         self.player = [AVPlayer new];
         self.dorisUI = [DorisUIModuleFactory createWithType:DorisUITypeCustom player:self.player output:self];
@@ -127,13 +129,14 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 
 - (void)setControls:(BOOL)controls {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if (controls != _controls) {
+        _controls = controls;
         if (controls) {
-            [self.dorisUI.input showControls];
+            [self.dorisUI.input enableUI];
         } else {
-            [self.dorisUI.input hideControls];
+            [self.dorisUI.input disableUI];
         }
-    });
+    }
 }
 
 

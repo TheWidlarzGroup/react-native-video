@@ -1646,6 +1646,7 @@ dispatch_queue_t delegateQueue;
 
 - (void)setControls:(BOOL)controls
 {
+    NSLog(@">>>>>> controls %s", controls ? "true" : "false");
   #if TARGET_OS_IOS
     if( _controls != controls || (!_playerLayer && !_playerViewController) )
     {
