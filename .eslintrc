@@ -1,4 +1,3 @@
 {
-  "extends": "airbnb",
-  "parser": "babel-eslint"
+  "extends": "@react-native-community",
 }

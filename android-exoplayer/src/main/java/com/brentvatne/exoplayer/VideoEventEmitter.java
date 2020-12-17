@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer;
 
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 import android.view.View;
 
 import com.facebook.react.bridge.Arguments;
@@ -9,6 +9,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.emsg.EventMessage;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
@@ -107,8 +108,10 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
+    private static final String EVENT_PROP_CURRENT_PLAYBACK_TIME = "currentPlaybackTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
+    private static final String EVENT_PROP_TRACK_ID = "trackId";
     private static final String EVENT_PROP_WIDTH = "width";
     private static final String EVENT_PROP_HEIGHT = "height";
     private static final String EVENT_PROP_ORIENTATION = "orientation";
@@ -137,7 +140,7 @@ class VideoEventEmitter {
     }
 
     void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks) {
+              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -151,7 +154,7 @@ class VideoEventEmitter {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
-
+        event.putString(EVENT_PROP_TRACK_ID, trackId);
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
         event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
         event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
@@ -168,17 +171,21 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration) {
+    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
+        event.putDouble(EVENT_PROP_CURRENT_PLAYBACK_TIME, currentPlaybackTime);
         receiveEvent(EVENT_PROGRESS, event);
     }
 
-    void bandwidthReport(double bitRateEstimate) {
+    void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_BITRATE, bitRateEstimate);
+        event.putInt(EVENT_PROP_WIDTH, width);
+        event.putInt(EVENT_PROP_HEIGHT, height);
+        event.putString(EVENT_PROP_TRACK_ID, id);
         receiveEvent(EVENT_BANDWIDTH, event);
     }    
 
@@ -226,7 +233,7 @@ class VideoEventEmitter {
     void error(String errorString, Exception exception) {
         WritableMap error = Arguments.createMap();
         error.putString(EVENT_PROP_ERROR_STRING, errorString);
-        error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.getMessage());
+        error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.toString());
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);
@@ -242,25 +249,38 @@ class VideoEventEmitter {
         WritableArray metadataArray = Arguments.createArray();
 
         for (int i = 0; i < metadata.length(); i++) {
+            
+            Metadata.Entry entry = metadata.get(i);
 
+            if (entry instanceof Id3Frame) {
 
-            Id3Frame frame = (Id3Frame) metadata.get(i);
+                Id3Frame frame = (Id3Frame) entry;
 
-            String value = "";
+                String value = "";
 
-            if (frame instanceof TextInformationFrame) {
-                TextInformationFrame txxxFrame = (TextInformationFrame) frame;
-                value = txxxFrame.value;
+                if (frame instanceof TextInformationFrame) {
+                    TextInformationFrame txxxFrame = (TextInformationFrame) frame;
+                    value = txxxFrame.value;
+                }
+
+                String identifier = frame.id;
+
+                WritableMap map = Arguments.createMap();
+                map.putString("identifier", identifier);
+                map.putString("value", value);
+
+                metadataArray.pushMap(map);
+                
+            } else if (entry instanceof EventMessage) {
+                
+                EventMessage eventMessage = (EventMessage) entry;
+                
+                WritableMap map = Arguments.createMap();
+                map.putString("identifier", eventMessage.schemeIdUri);
+                map.putString("value", eventMessage.value);
+                metadataArray.pushMap(map);
+                
             }
-
-            String identifier = frame.id;
-
-            WritableMap map = Arguments.createMap();
-            map.putString("identifier", identifier);
-            map.putString("value", value);
-
-            metadataArray.pushMap(map);
-
         }
 
         WritableMap event = Arguments.createMap();
