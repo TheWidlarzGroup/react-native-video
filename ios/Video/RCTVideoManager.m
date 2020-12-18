@@ -158,35 +158,39 @@ RCT_EXPORT_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)posit
 
 RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary *)payload) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        NSMutableDictionary* _adTagParameters = [NSMutableDictionary new];
+        NSDate *_Nullable _startDate;
+        NSDate *_Nullable _endDate;
+        
+        id adTagParameters = [payload objectForKey:@"adTagParameters"];
+        id startDate = [payload objectForKey:@"startDate"];
+        id endDate = [payload objectForKey:@"endDate"];
+        
+        if (adTagParameters &&
+            [adTagParameters isKindOfClass:NSDictionary.class]) {
+            _adTagParameters = adTagParameters;
+        }
+        
+        if (startDate &&
+            [startDate isKindOfClass:NSNumber.class]) {
+            _startDate = [[NSDate alloc] initWithTimeIntervalSince1970:[startDate doubleValue]];
+        }
+        
+        if (endDate &&
+            [endDate isKindOfClass:NSNumber.class]) {
+            _endDate = [[NSDate alloc] initWithTimeIntervalSince1970:[endDate doubleValue]];
+        }
+        
         if ([viewRegistry[node] isKindOfClass:[RCTVideo class]]) {
             RCTVideo *view = (RCTVideo *)viewRegistry[node];
-            NSMutableDictionary* _adTagParameters = [NSMutableDictionary new];
-            NSDate *_Nullable _startDate;
-            NSDate *_Nullable _endDate;
-            
-            id adTagParameters = [payload objectForKey:@"adTagParameters"];
-            id startDate = [payload objectForKey:@"startDate"];
-            id endDate = [payload objectForKey:@"endDate"];
-            
-            if (adTagParameters &&
-                [adTagParameters isKindOfClass:NSDictionary.class]) {
-                _adTagParameters = adTagParameters;
-            }
-            
-            if (startDate &&
-                [startDate isKindOfClass:NSNumber.class]) {
-                _startDate = [[NSDate alloc] initWithTimeIntervalSince1970:[startDate doubleValue]];
-            }
-            
-            if (endDate &&
-                [endDate isKindOfClass:NSNumber.class]) {
-                _endDate = [[NSDate alloc] initWithTimeIntervalSince1970:[endDate doubleValue]];
-            }
-            
             [view.avdoris replaceAdTagParametersWithAdTagParameters:_adTagParameters
                                                           validFrom: _startDate
                                                          validUntil:_endDate];
         } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
+            RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
+            [view.dorisUI.input replaceAdTagParametersWithAdTagParameters:_adTagParameters
+                                                                validFrom: _startDate
+                                                               validUntil:_endDate];
         }
     }];
 };

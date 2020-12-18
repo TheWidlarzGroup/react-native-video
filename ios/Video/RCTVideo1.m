@@ -146,7 +146,22 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSString* __nullable videoId = [imaDict objectForKey:@"videoId"];
     NSString* __nullable authToken = [imaDict objectForKey:@"authToken"];
     NSDictionary* __nullable adTagParameters = [imaDict objectForKey:@"adTagParameters"];
-
+    NSDate *_Nullable validFrom;
+    NSDate *_Nullable validUntil;
+    
+    id _validFrom = [imaDict objectForKey:@"startDate"];
+    id _validUntil = [imaDict objectForKey:@"endDate"];
+    
+    if (_validFrom &&
+        [_validFrom isKindOfClass:NSNumber.class]) {
+        validFrom = [[NSDate alloc] initWithTimeIntervalSince1970:[_validFrom doubleValue]];
+    }
+    
+    if (_validUntil &&
+        [_validUntil isKindOfClass:NSNumber.class]) {
+        validUntil = [[NSDate alloc] initWithTimeIntervalSince1970:[_validUntil doubleValue]];
+    }
+    
     NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
 
     if (adTagParameters) {
@@ -176,7 +191,15 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                         [adTagParameters setValue:@"0" forKey:@"msid"];
                     }
                     
-                    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters title:videoTitle logoURL:nil];
+                    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
+                                                            contentSourceId:contentSourceId
+                                                                    videoId:videoId
+                                                                  authToken:authToken
+                                                            adTagParameters:adTagParameters
+                                                   adTagParametersValidFrom:validFrom
+                                                  adTagParametersValidUntil:validUntil
+                                                                      title:videoTitle
+                                                                    logoURL:nil];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
                     });
@@ -190,14 +213,30 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 } else {
                     [adTagParameters setValue:@"0" forKey:@"msid"];
                 }
-                IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:adTagParameters title:videoTitle logoURL:nil];
+                IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
+                                                        contentSourceId:contentSourceId
+                                                                videoId:videoId
+                                                              authToken:authToken
+                                                        adTagParameters:adTagParameters
+                                               adTagParametersValidFrom:validFrom
+                                              adTagParametersValidUntil:validUntil
+                                                                  title:videoTitle
+                                                                logoURL:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
                 });
             }];
         }
     } else {
-        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey contentSourceId:contentSourceId videoId:videoId authToken:authToken adTagParameters:nil title:videoTitle logoURL:nil];
+        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
+                                                contentSourceId:contentSourceId
+                                                        videoId:videoId
+                                                      authToken:authToken
+                                                adTagParameters:adTagParameters
+                                       adTagParametersValidFrom:validFrom
+                                      adTagParametersValidUntil:validUntil
+                                                          title:videoTitle
+                                                        logoURL:nil];
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
