@@ -960,7 +960,6 @@ static int const RCTVideoUnset = -1;
       [_player play];
       [_player setRate:_rate];
     }
-    [_player setRate:_rate];
   }
   
   _paused = paused;
