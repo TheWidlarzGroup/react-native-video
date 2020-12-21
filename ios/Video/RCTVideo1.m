@@ -23,6 +23,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 @implementation RCTVideo1 {
     NSNumber* _Nullable _startPlayingAt;
     NSNumber* _Nullable _itemDuration;
+    NSNumber* _Nullable _appId;
     
     bool _controls;
     bool _canBeFavourite;
@@ -164,6 +165,24 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     
     NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
 
+    [self prepareAdTagParameters:adTagParameters withCallback:^(NSDictionary * _Nullable newAdTagParamerters) {
+        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
+                                                contentSourceId:contentSourceId
+                                                        videoId:videoId
+                                                      authToken:authToken
+                                                adTagParameters:adTagParameters
+                                       adTagParametersValidFrom:validFrom
+                                      adTagParametersValidUntil:validUntil
+                                                          title:videoTitle
+                                                        logoURL:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
+        });
+    }];
+}
+
+
+- (void)prepareAdTagParameters:(NSDictionary * _Nullable)adTagParameters withCallback:(void(^_Nonnull)(NSDictionary * _Nullable))handler {
     if (adTagParameters) {
         NSString* __nullable customParams = [adTagParameters objectForKey:@"cust_params"];
         
@@ -186,66 +205,30 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 
                 [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
                     if (appId) {
+                        self->_appId = appId;
                         [adTagParameters setValue:appId.stringValue forKey:@"msid"];
                     } else {
+                        self->_appId = 0;
                         [adTagParameters setValue:@"0" forKey:@"msid"];
                     }
-                    
-                    IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
-                                                            contentSourceId:contentSourceId
-                                                                    videoId:videoId
-                                                                  authToken:authToken
-                                                            adTagParameters:adTagParameters
-                                                   adTagParametersValidFrom:validFrom
-                                                  adTagParametersValidUntil:validUntil
-                                                                      title:videoTitle
-                                                                    logoURL:nil];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
-                    });
+                    handler(adTagParameters);
                 }];
             }];
         } else {
             [adTagParameters setValue:@"0" forKey:@"is_lat"];
             [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
                 if (appId) {
+                    self->_appId = appId;
                     [adTagParameters setValue:appId.stringValue forKey:@"msid"];
                 } else {
+                    self->_appId = 0;
                     [adTagParameters setValue:@"0" forKey:@"msid"];
                 }
-                IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
-                                                        contentSourceId:contentSourceId
-                                                                videoId:videoId
-                                                              authToken:authToken
-                                                        adTagParameters:adTagParameters
-                                               adTagParametersValidFrom:validFrom
-                                              adTagParametersValidUntil:validUntil
-                                                                  title:videoTitle
-                                                                logoURL:nil];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
-                });
+                handler(adTagParameters);
             }];
         }
-    } else {
-        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
-                                                contentSourceId:contentSourceId
-                                                        videoId:videoId
-                                                      authToken:authToken
-                                                adTagParameters:adTagParameters
-                                       adTagParametersValidFrom:validFrom
-                                      adTagParametersValidUntil:validUntil
-                                                          title:videoTitle
-                                                        logoURL:nil];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
-        });
     }
 }
-
-
-
 
 
 - (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler {
@@ -660,9 +643,14 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request addValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     request.HTTPMethod = @"GET";
-    [[NSURLSession.sharedSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        completionBlock([self parseAppIdwithData:data response:response error:error]);
-    }] resume];
+    
+    if (_appId) {
+        completionBlock(_appId);
+    } else {
+        [[NSURLSession.sharedSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            completionBlock([self parseAppIdwithData:data response:response error:error]);
+        }] resume];
+    }
 }
 
 - (NSURL *)iTunesURLFromString {

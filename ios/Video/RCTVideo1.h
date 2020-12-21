@@ -35,6 +35,7 @@
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) DorisUIModule *dorisUI;
 
+- (void)prepareAdTagParameters:(NSDictionary * _Nullable)adTagParameters withCallback:(void(^_Nonnull)(NSDictionary * _Nullable))handler;
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 - (void)setSeek:(NSDictionary *)info;
 

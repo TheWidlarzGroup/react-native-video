@@ -188,9 +188,12 @@ RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDic
                                                          validUntil:_endDate];
         } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
             RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
-            [view.dorisUI.input replaceAdTagParametersWithAdTagParameters:_adTagParameters
-                                                                validFrom: _startDate
-                                                               validUntil:_endDate];
+            [view prepareAdTagParameters:_adTagParameters withCallback:^(NSDictionary * _Nullable newAdTAgParameters) {
+                [view.dorisUI.input replaceAdTagParametersWithAdTagParameters:newAdTAgParameters
+                                                                    validFrom: _startDate
+                                                                   validUntil:_endDate];
+                
+            }];
         }
     }];
 };
