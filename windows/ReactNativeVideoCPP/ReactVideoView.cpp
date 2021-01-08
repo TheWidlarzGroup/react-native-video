@@ -17,7 +17,7 @@ using namespace Windows::Media::Playback;
 namespace winrt::ReactNativeVideoCPP::implementation {
 
 ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const& reactContext)
-    : m_reactContext(reactContext){
+    : m_reactContext(reactContext) {
     // always create and set the player here instead of depending on auto-create logic
     // in the MediaPlayerElement (only when auto play is on or URI is set)
     m_player = winrt::Windows::Media::Playback::MediaPlayer();
@@ -66,22 +66,24 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
     m_timer.Interval(std::chrono::milliseconds{ 250 });
     m_timer.Start();
     auto token = m_timer.Tick([ref = get_weak()](auto const&, auto const&) {
-        if (auto self = ref.get()){
+        if (auto self = ref.get()) {
             if (auto mediaPlayer = self->m_player) {
                 if (mediaPlayer.PlaybackSession().PlaybackState() ==
                     winrt::Windows::Media::Playback::MediaPlaybackState::Playing) {
-                    auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+                    auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000.0;
+                    auto totalTimeInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000.0;
                     self->m_reactContext.DispatchEvent(
                         *self,
-                        L"topProgress",
+                        L"topVideoProgress",
                         [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
-                        eventDataWriter.WriteObjectBegin();
-                        {
-                            WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
-                            WriteProperty(eventDataWriter, L"playableDuration", 0.0);
-                        }
-                        eventDataWriter.WriteObjectEnd();
-                    });
+                            eventDataWriter.WriteObjectBegin();
+                            {
+                                WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
+                                WriteProperty(eventDataWriter, L"playableDuration", totalTimeInSeconds);
+                                WriteProperty(eventDataWriter, L"seekableDuration", totalTimeInSeconds);
+                            }
+                            eventDataWriter.WriteObjectEnd();
+                        });
                 }
             }
         }
@@ -92,50 +94,72 @@ void ReactVideoView::OnMediaOpened(IInspectable const&, IInspectable const&) {
     runOnQueue([weak_this{ get_weak() }]() {
         if (auto strong_this{ weak_this.get() }) {
             if (auto mediaPlayer = strong_this->m_player) {
+                auto mediaItem = mediaPlayer.Source().as<MediaPlaybackItem>();
+                if (mediaItem.AudioTracks().Size() >= 0) {
+                    // choose the first audioTrack, default is all?
+                    mediaItem.AudioTracks().SelectedIndex(0);
+                }
+
                 auto width = mediaPlayer.PlaybackSession().NaturalVideoWidth();
                 auto height = mediaPlayer.PlaybackSession().NaturalVideoHeight();
                 auto orientation = (width > height) ? L"landscape" : L"portrait";
-                auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000;
-                auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+                auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000.0;
+                auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000.0;
 
                 strong_this->m_reactContext.DispatchEvent(
                     *strong_this,
-                    L"topLoad",
+                    L"topVideoLoad",
                     [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
-                    eventDataWriter.WriteObjectBegin();
-                    {
-                        WriteProperty(eventDataWriter, L"duration", durationInSeconds);
-                        WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
-
-                        eventDataWriter.WritePropertyName(L"naturalSize");
+                        eventDataWriter.WriteObjectBegin();
                         {
-                            eventDataWriter.WriteObjectBegin();
-                            WriteProperty(eventDataWriter, L"width", width);
-                            WriteProperty(eventDataWriter, L"height", height);
-                            WriteProperty(eventDataWriter, L"orientation", orientation);
-                            WriteProperty(eventDataWriter, L"orientation", orientation);
-                            eventDataWriter.WriteObjectEnd();
-                        }
+                            WriteProperty(eventDataWriter, L"duration", durationInSeconds);
+                            WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
 
-                        WriteProperty(eventDataWriter, L"canPlayFastForward", false);
-                        WriteProperty(eventDataWriter, L"canPlaySlowForward", false);
-                        WriteProperty(eventDataWriter, L"canPlaySlow", false);
-                        WriteProperty(eventDataWriter, L"canStepBackward", false);
-                        WriteProperty(eventDataWriter, L"canStepForward", false);
-                    }
-                    eventDataWriter.WriteObjectEnd();
-                });
+                            eventDataWriter.WritePropertyName(L"naturalSize");
+                            {
+                                eventDataWriter.WriteObjectBegin();
+                                WriteProperty(eventDataWriter, L"width", width);
+                                WriteProperty(eventDataWriter, L"height", height);
+                                WriteProperty(eventDataWriter, L"orientation", orientation);
+                                eventDataWriter.WriteObjectEnd();
+                            }
+
+                            WriteProperty(eventDataWriter, L"canPlayFastForward", false);
+                            WriteProperty(eventDataWriter, L"canPlaySlowForward", false);
+                            WriteProperty(eventDataWriter, L"canPlaySlow", false);
+                            WriteProperty(eventDataWriter, L"canStepBackward", false);
+                            WriteProperty(eventDataWriter, L"canStepForward", false);
+                        }
+                        eventDataWriter.WriteObjectEnd();
+                    });
             }
         }
     });
 }
 
-void ReactVideoView::OnMediaFailed(IInspectable const&, IInspectable const&) {}
+void ReactVideoView::OnMediaFailed(IInspectable const&, IInspectable const&) {
+    runOnQueue([weak_this{ get_weak() }]() {
+        if (auto strong_this{ weak_this.get() }) {
+            strong_this->m_reactContext.DispatchEvent(
+                *strong_this,
+                L"topVideoError",
+                [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
+                    eventDataWriter.WriteObjectBegin();
+                    {
+                        WriteProperty(eventDataWriter, L"what", -1);
+                        WriteProperty(eventDataWriter, L"extra", -1);
+                        WriteProperty(eventDataWriter, L"error", L"failed");
+                    }
+                    eventDataWriter.WriteObjectEnd();
+                });
+        }
+    });
+}
 
 void ReactVideoView::OnMediaEnded(IInspectable const&, IInspectable const&) {
     runOnQueue([weak_this{ get_weak() }]() {
         if (auto strong_this{ weak_this.get() }) {
-            strong_this->m_reactContext.DispatchEvent(*strong_this, L"topEnd", nullptr);
+            strong_this->m_reactContext.DispatchEvent(*strong_this, L"topVideoEnd", nullptr);
         }
     });
 }
@@ -147,7 +171,20 @@ void ReactVideoView::OnBufferingEnded(IInspectable const&, IInspectable const&) 
 void ReactVideoView::OnSeekCompleted(IInspectable const&, IInspectable const&) {
     runOnQueue([weak_this{ get_weak() }]() {
         if (auto strong_this{ weak_this.get() }) {
-            strong_this->m_reactContext.DispatchEvent(*strong_this, L"topSeek", nullptr);
+            if (auto mediaPlayer = strong_this->m_player) {
+                auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000.0;
+                auto seekTime = strong_this->m_position;
+
+                strong_this->m_reactContext.DispatchEvent(*strong_this, L"topVideoSeek",
+                    [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
+                        eventDataWriter.WriteObjectBegin();
+                        {
+                            WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
+                            WriteProperty(eventDataWriter, L"seekTime", seekTime);
+                        }
+                        eventDataWriter.WriteObjectEnd();
+                    });
+            }
         }
     });
 }
@@ -167,7 +204,9 @@ void ReactVideoView::Set_UriString(hstring const& value) {
     m_uriString = value;
     if (m_player != nullptr) {
         auto uri = Uri(m_uriString);
-        m_player.Source(MediaSource::CreateFromUri(uri));
+        auto mediaSource = MediaSource::CreateFromUri(uri);
+        auto trackSource = MediaPlaybackItem(mediaSource);
+        m_player.Source(trackSource);
     }
 }
 
@@ -222,6 +261,11 @@ void ReactVideoView::Set_Volume(double volume) {
 
 void ReactVideoView::Set_Position(double position) {
     m_position = position;
+
+    // char data[40];
+    // sprintf_s(data, "Set_Position:%lf", m_position);
+    // OutputDebugStringA(data);
+
     if (m_player != nullptr) {
         std::chrono::seconds duration(static_cast<int>(m_position));
         m_player.PlaybackSession().Position(duration);
