@@ -1065,6 +1065,7 @@ class ReactTVExoplayerView extends FrameLayout
             Map<String, String> headers,
             Map<String, Object> muxData,
             String thumbnailUrl,
+            String channelLogoUrl,
             Map<String, Object> ima) {
         if (uri != null) {
             Uri srcUri = src != null ? src.getUri() : null;
@@ -1090,12 +1091,14 @@ class ReactTVExoplayerView extends FrameLayout
                     headers,
                     muxData,
                     thumbnailUrl,
+                    channelLogoUrl,
                     null,
                     null);
             this.actionToken = actionToken;
 
             exoDorisPlayerView.setTitle(title);
             exoDorisPlayerView.setDescription(description);
+            exoDorisPlayerView.setChannelLogo(channelLogoUrl);
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
