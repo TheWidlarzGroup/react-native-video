@@ -24,6 +24,7 @@ public class RNSource {
     private final Map<String, String> headers;
     private final Map<String, Object> muxData;
     private final String thumbnailUrl;
+    private final String channelLogoUrl;
     private final String selectedAudioTrack;
     private final String locale;
 
@@ -39,6 +40,7 @@ public class RNSource {
             @Nullable Map<String, String> headers,
             @Nullable Map<String, Object> muxData,
             @Nullable String thumbnailUrl,
+            @Nullable String channelLogoUrl,
             @Nullable String selectedAudioTrack,
             @Nullable String locale) {
         this.uri = uri;
@@ -52,6 +54,7 @@ public class RNSource {
         this.headers = headers;
         this.muxData = muxData;
         this.thumbnailUrl = thumbnailUrl;
+        this.channelLogoUrl = channelLogoUrl;
         this.selectedAudioTrack = selectedAudioTrack;
         this.locale = locale;
     }
@@ -116,6 +119,11 @@ public class RNSource {
     @Nullable
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    @Nullable
+    public String getChannelLogoUrl() {
+        return channelLogoUrl;
     }
 
     @Nullable
