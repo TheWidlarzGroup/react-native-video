@@ -114,9 +114,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
     bool videoIsLive = [[_videoData valueForKey:@"videoIsLive"] boolValue];
 
-    DorisUIConfiguration* configuration = [[DorisUIConfiguration alloc] initWithIsLive:videoIsLive
-                                                                    canBecomeFavourite:_canBeFavourite
-                                                                            videoTitle:videoTitle];
+    DorisUIConfiguration* configuration = [[DorisUIConfiguration alloc] initWithIsLive:videoIsLive canBecomeFavourite:_canBeFavourite videoTitle:nil videoDescription:nil logoURL:nil];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.dorisUI.input setUIConfiguration:configuration];
     });
@@ -132,6 +130,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setControls:(BOOL)controls {
     if (controls != _controls) {
         _controls = controls;
+        NSLog(@"zzzz %@", controls ? @"true" : @"false");
         if (controls) {
             [self.dorisUI.input enableUI];
         } else {
