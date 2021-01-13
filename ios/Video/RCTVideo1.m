@@ -27,6 +27,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     
     bool _controls;
     bool _canBeFavourite;
+    NSDictionary* _Nullable _theme;
     
     SubtitleResourceLoaderDelegate* _delegate;
     dispatch_queue_t delegateQueue;
@@ -43,11 +44,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         _diceBeaconRequestOngoing = NO;
         _canBeFavourite = YES;
         _controls = YES;
-        
-        self.player = [AVPlayer new];
-        self.dorisUI = [DorisUIModuleFactory createWithType:DorisUITypeCustom player:self.player output:self];
-        [self addSubview:self.dorisUI.view];
-        [self.dorisUI fillSuperView];
     }
     
     return self;
@@ -71,7 +67,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)setButtons:(NSDictionary*)buttons {
     _canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
-    [self updateDorisUI];
 }
 
 - (void)setIsFavourite:(BOOL)isFavourite {
@@ -80,9 +75,24 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     });
 }
 
+- (void)setTheme:(NSDictionary *)theme {    
+    _theme = theme;
+    
+    DorisUIStyle* _Nullable style = [DorisUIStyle createFrom:_theme];
+    
+    if (style) {
+        self.player = [AVPlayer new];
+        self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player style:style output:self];
+        [self addSubview:self.dorisUI.view];
+        [self.dorisUI fillSuperView];
+    }
+}
+
 - (void)setSrc:(NSDictionary *)source {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
+        
+        [self updateDorisUI:source];
         
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
             id imaObject = [source objectForKey:@"ima"];
@@ -110,14 +120,17 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     });
 }
 
-- (void)updateDorisUI {
-    NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
-    bool videoIsLive = [[_videoData valueForKey:@"videoIsLive"] boolValue];
-
-    DorisUIConfiguration* configuration = [[DorisUIConfiguration alloc] initWithIsLive:videoIsLive canBecomeFavourite:_canBeFavourite videoTitle:nil videoDescription:nil logoURL:nil];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.dorisUI.input setUIConfiguration:configuration];
-    });
+- (void)updateDorisUI:(NSDictionary *)source {
+    NSMutableDictionary* metaData = [source objectForKey:@"metadata"];
+    [metaData setValue:[[NSNumber alloc] initWithBool:_canBeFavourite] forKey:@"canBeFavourite"];
+    
+    DorisUIConfiguration* _Nullable configuration = [DorisUIConfiguration createFrom:metaData];
+    
+    if (configuration) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dorisUI.input setUIConfiguration:configuration];
+        });
+    }
 }
 
 
@@ -242,7 +255,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
         
     [self setupMuxDataFromSource:source];
-    [self updateDorisUI];
     
     if (isNetwork) {
         [self setupBeaconFromSource:source];
