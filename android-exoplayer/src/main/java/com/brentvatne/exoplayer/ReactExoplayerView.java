@@ -406,13 +406,9 @@ class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public boolean shouldContinueLoading(long bufferedDurationUs, float playbackSpeed) {
-            Log.i("NativeAdrian", "DisableBuffering is: " + String.valueOf(ReactExoplayerView.this.disableBuffering));
-            RNLog.l("DisableBuffering is: " + String.valueOf(ReactExoplayerView.this.disableBuffering));
             if (ReactExoplayerView.this.disableBuffering) {
                 return false;
             }
-            Log.i("NativeAdrian", "continue loading");
-            RNLog.l("continue loading");
             return super.shouldContinueLoading(bufferedDurationUs, playbackSpeed);
         }
     }
@@ -430,12 +426,6 @@ class ReactExoplayerView extends FrameLayout implements
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
                     DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-//                    RNVLoadControl.Builder loadControlBuilder = new RNVLoadControl.Builder();
-//                    loadControlBuilder.setAllocator(allocator);
-//                    loadControlBuilder.setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
-//                    loadControlBuilder.setTargetBufferBytes(-1);
-//                    loadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
-
                     RNVLoadControl loadControl = new RNVLoadControl(
                             allocator,
                             minBufferMs,
@@ -448,7 +438,6 @@ class ReactExoplayerView extends FrameLayout implements
                             DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
                             DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
                     );
-//                    RNVLoadControl loadControl = loadControlBuilder.create();
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
                                     .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
@@ -1315,11 +1304,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setDisableBuffering(boolean disableBuffering) {
-        Log.i("NativeAdrian" ,"setDisableBuffering is currently: " + String.valueOf(this.disableBuffering));
-        RNLog.l("setDisableBuffering is currently: " + String.valueOf(this.disableBuffering));
         this.disableBuffering = disableBuffering;
-        Log.i("NativeAdrian", "setDisableBuffering to: " + String.valueOf((this.disableBuffering)));
-        RNLog.l("setDisableBuffering to: " + String.valueOf((this.disableBuffering)));
     }
 
     public void setFullscreen(boolean fullscreen) {
