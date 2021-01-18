@@ -11,6 +11,7 @@ import {
 
 import { IVideoPlayer } from './types/player';
 import { SeekToCommand } from './types/SeekToCommand';
+import { IVideoReplaceAdTagParametersPayload } from './types/ima';
 
 const RCTVideo = requireNativeComponent('RCTVideo');
 
@@ -106,19 +107,31 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
 
   onRelatedVideosClicked = (event) => {
     this.props.onRelatedVideoClicked?.(event.nativeEvent);
-  }
+  };
 
   onRelatedVideosIconClicked = (event) => {
     this.props.onRelatedVideosIconClicked?.(event.nativeEvent);
-  }
+  };
 
   onVideoAboutToEnd = (event) => {
     this.props.onVideoAboutToEnd?.(event.nativeEvent);
-  }
+  };
 
   onFavouriteButtonClick = (event) => {
     this.props.onFavouriteButtonClick?.(event.nativeEvent);
-  }
+  };
+
+  replaceAdTagParameters = (payload: IVideoReplaceAdTagParametersPayload) => {
+    let command = 'replaceAdTagParameters';
+
+    if (this.refPlayer) {
+      NativeModules.UIManager.dispatchViewManagerCommand(
+        findNodeHandle(this.refPlayer.current),
+        NativeModules.UIManager.RCTVideo.Commands[command],
+        [payload]
+      );
+    }
+  };
 
   /**
    * seekTo jumps to a certain position for vod and live content
