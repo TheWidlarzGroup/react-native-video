@@ -172,12 +172,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
 
         if (startsWithValidScheme(uriString)) {
-            Uri srcUri = Uri.parse(uriString);
             ActionToken actionToken = ActionToken.fromJson(drm);
 
-            if (srcUri != null) {
+            if (uriString != null) {
                 videoView.setSrc(
-                        srcUri,
+                        uriString,
                         id,
                         extension,
                         title,

@@ -416,7 +416,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             activateMediaSession();
         }
-        if (playerNeedsSource && src.getUri() != null) {
+        if (playerNeedsSource && src.getUrl() != null) {
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
@@ -431,7 +431,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             playerInitTime = new Date().getTime();
 
-            source = new SourceBuilder(src.getUri(), src.getId())
+            source = new SourceBuilder(src.getUrl(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(live)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
@@ -442,12 +442,12 @@ class ReactTVExoplayerView extends FrameLayout
                 loadImaStream();
             } else if (actionToken != null) {
                 try {
-                    player.load(source, !haveResumePosition, force, actionToken);
+                    player.load(source, !haveResumePosition, actionToken);
                 } catch (UnsupportedDrmException e) {
                     handleDrmError(e);
                 }
             } else {
-                player.load(source, !haveResumePosition, force);
+                player.load(source, !haveResumePosition);
             }
 
             playerNeedsSource = false;
@@ -749,9 +749,9 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
-        switch (playbackState) {
+    public void onPlaybackStateChanged(int state) {
+        String text = "onStateChanged: playbackState = " + state;
+        switch (state) {
             case Player.STATE_IDLE:
                 text += "idle";
                 eventEmitter.idle();
@@ -951,8 +951,8 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && live) {
+    public void onTimelineChanged(Timeline timeline, int reason) {
+        if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && live) {
             canSeekToLiveEdge = true;
         }
     }
@@ -1054,7 +1054,7 @@ class ReactTVExoplayerView extends FrameLayout
     // ReactExoplayerViewManager public api
 
     public void setSrc(
-            Uri uri,
+            String url,
             String id,
             String extension,
             String title,
@@ -1067,10 +1067,10 @@ class ReactTVExoplayerView extends FrameLayout
             String thumbnailUrl,
             String channelLogoUrl,
             Map<String, Object> ima) {
-        if (uri != null) {
-            Uri srcUri = src != null ? src.getUri() : null;
-            boolean isOriginalSourceNull = srcUri == null;
-            boolean isSourceEqual = uri.equals(srcUri);
+        if (url != null) {
+            String srcUrl = src != null ? src.getUrl() : null;
+            boolean isOriginalSourceNull = srcUrl == null;
+            boolean isSourceEqual = url.equals(srcUrl);
 
             if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;
@@ -1080,7 +1080,7 @@ class ReactTVExoplayerView extends FrameLayout
             }
 
             this.src = new RNSource(
-                    uri,
+                    url,
                     id,
                     extension,
                     title,
@@ -1110,8 +1110,8 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
         if (uri != null) {
-            boolean isOriginalSourceNull = src.getUri() == null;
-            boolean isSourceEqual = uri.equals(src.getUri());
+            boolean isOriginalSourceNull = src.getUrl() == null;
+            boolean isSourceEqual = uri.equals(src.getUrl());
 
             this.src.setUri(uri);
             this.src.setExtension(extension);

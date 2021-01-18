@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class RNSource {
 
-    private Uri uri;
+    private String url;
     private String extension;
 
     private final String id;
@@ -29,7 +29,7 @@ public class RNSource {
     private final String locale;
 
     public RNSource(
-            @NonNull Uri uri,
+            @NonNull String url,
             @NonNull String id,
             @Nullable String extension,
             @Nullable String title,
@@ -43,7 +43,7 @@ public class RNSource {
             @Nullable String channelLogoUrl,
             @Nullable String selectedAudioTrack,
             @Nullable String locale) {
-        this.uri = uri;
+        this.url = url;
         this.id = id;
         this.extension = extension;
         this.title = title;
@@ -60,12 +60,12 @@ public class RNSource {
     }
 
     @NonNull
-    public Uri getUri() {
-        return uri;
+    public String getUrl() {
+        return url;
     }
 
-    public void setUri(Uri uri) {
-        this.uri = uri;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @NonNull
