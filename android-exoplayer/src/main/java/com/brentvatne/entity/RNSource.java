@@ -68,6 +68,10 @@ public class RNSource {
         this.url = url;
     }
 
+    public void setUri(Uri uri) {
+        this.url = uri.getPath();
+    }
+
     @NonNull
     public String getId() {
         return id;

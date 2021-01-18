@@ -174,22 +174,19 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         if (startsWithValidScheme(uriString)) {
             ActionToken actionToken = ActionToken.fromJson(drm);
 
-            if (uriString != null) {
-                videoView.setSrc(
-                        uriString,
-                        id,
-                        extension,
-                        title,
-                        description,
-                        type,
-                        textTracks,
-                        actionToken,
-                        headers,
-                        muxData != null ? muxData.toHashMap() : null,
-                        thumbnailUrl,
-                        channelLogoUrl,
-                        ima != null ? ima.toHashMap() : null);
-            }
+            videoView.setSrc(uriString,
+                             id,
+                             extension,
+                             title,
+                             description,
+                             type,
+                             textTracks,
+                             actionToken,
+                             headers,
+                             muxData != null ? muxData.toHashMap() : null,
+                             thumbnailUrl,
+                             channelLogoUrl,
+                             ima != null ? ima.toHashMap() : null);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -429,6 +426,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     }
 
     private boolean startsWithValidScheme(String uriString) {
+        if (uriString == null) {
+            return false;
+        }
+
         return uriString.startsWith("http://")
                 || uriString.startsWith("https://")
                 || uriString.startsWith("content://")
