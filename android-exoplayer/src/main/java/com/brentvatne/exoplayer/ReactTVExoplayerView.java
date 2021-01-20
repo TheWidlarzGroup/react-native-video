@@ -113,6 +113,7 @@ class ReactTVExoplayerView extends FrameLayout
                    ExoDorisPlayerViewListener {
 
     private static final String TAG = "ReactTvExoplayerView";
+    private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
@@ -155,6 +156,7 @@ class ReactTVExoplayerView extends FrameLayout
     private float rate = 1f;
     private boolean isImaStream = false;
     private boolean isImaStreamLoaded = false;
+    private boolean isAmazonFireTv = false;
 
     // Props from React
     private RNSource src;
@@ -256,13 +258,13 @@ class ReactTVExoplayerView extends FrameLayout
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         controlDispatcher = new DefaultControlDispatcher();
+        isAmazonFireTv = isAmazonFireTv(context);
 
         setPausedModifier(false);
 
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
         mediaSessionConnector = new MediaSessionConnector(mediaSession);
     }
-
 
     @Override
     public void setId(int id) {
@@ -316,6 +318,10 @@ class ReactTVExoplayerView extends FrameLayout
                           MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
+    }
+
+    private boolean isAmazonFireTv(Context context) {
+        return context.getPackageManager().hasSystemFeature(AMAZON_FEATURE_FIRE_TV);
     }
 
     @Override
