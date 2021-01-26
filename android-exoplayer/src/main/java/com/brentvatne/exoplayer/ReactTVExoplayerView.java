@@ -155,6 +155,8 @@ class ReactTVExoplayerView extends FrameLayout
     private float rate = 1f;
     private boolean isImaStream = false;
     private boolean isImaStreamLoaded = false;
+    private int viewWidth;
+    private int viewHeight;
 
     // Props from React
     private RNSource src;
@@ -330,6 +332,16 @@ class ReactTVExoplayerView extends FrameLayout
         stopPlayback();
     }
 
+    @Override
+    protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        viewWidth = width;
+        viewHeight = height;
+        if (player != null) {
+            player.setMaxVideoSize(width, height);
+        }
+    }
+
     // LifecycleEventListener implementation
 
     @Override
@@ -436,6 +448,7 @@ class ReactTVExoplayerView extends FrameLayout
                     .setIsLive(live)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
+                    .setMaxVideoSize(viewWidth, viewHeight)
                     .build();
 
             if (isImaStream && getWidth() != 0 && getHeight() != 0) {
