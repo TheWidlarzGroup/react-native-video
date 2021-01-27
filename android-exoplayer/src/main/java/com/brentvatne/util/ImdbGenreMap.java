@@ -1,5 +1,7 @@
 package com.brentvatne.util;
 
+import androidx.annotation.Nullable;
+
 import com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
@@ -66,6 +68,7 @@ public final class ImdbGenreMap {
     private ImdbGenreMap() {
     }
 
+    @Nullable
     public static String getImdbGenre(String genre) {
         return imdbGenreMap.get(genre);
     }
