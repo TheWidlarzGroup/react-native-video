@@ -37,6 +37,9 @@ dependencies {
     // Amazon Publishing Services
     implementation project(":AmazonFireTVAdsSDK-release")
 
+    // Google Guava
+    implementation "com.google.guava:guava:30.1-android"
+
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.0.0"
     implementation "androidx.appcompat:appcompat:1.0.0"
