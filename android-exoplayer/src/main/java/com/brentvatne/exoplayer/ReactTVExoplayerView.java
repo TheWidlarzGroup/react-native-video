@@ -183,7 +183,7 @@ class ReactTVExoplayerView extends FrameLayout
     private String textTrackType;
     private Dynamic textTrackValue;
     private boolean disableFocus;
-    private boolean live = false;
+    private boolean isLive = false;
     private boolean hasEpg;
     private boolean hasStats;
     private float mProgressUpdateInterval = 250.0f;
@@ -366,9 +366,9 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onHostResume() {
         if (isInBackground) {
-            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
+            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + isLive);
             isInBackground = false; // reset to false first
-            if (live) {
+            if (isLive) {
                 // always seek to live edge when returning from background to a live event
                 canSeekToLiveEdge = true;
                 setPausedModifier(false);
@@ -464,7 +464,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             source = new SourceBuilder(src.getUri(), src.getId())
                     .setTitle(src.getTitle())
-                    .setIsLive(live)
+                    .setIsLive(isLive)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .setMaxVideoSize(viewWidth, viewHeight)
@@ -875,8 +875,8 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void seekToDefaultPosition() {
-        Log.d(TAG, "seekToDefaultPosition() live: " + live + " canSeekToLiveEdge: " + canSeekToLiveEdge);
-        if (player != null && canSeekToLiveEdge && live) {
+        Log.d(TAG, "seekToDefaultPosition() live: " + isLive + " canSeekToLiveEdge: " + canSeekToLiveEdge);
+        if (player != null && canSeekToLiveEdge && isLive) {
             player.seekToDefaultPosition();
             canSeekToLiveEdge = false; // reset needed otherwise falls into a loop when coming back from background
         }
@@ -1018,7 +1018,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && live) {
+        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && isLive) {
             canSeekToLiveEdge = true;
         }
     }
@@ -1158,7 +1158,7 @@ class ReactTVExoplayerView extends FrameLayout
                     title,
                     description,
                     type,
-                    live,
+                    isLive,
                     getTextTracks(textTracks),
                     headers,
                     muxData,
@@ -1447,7 +1447,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     public void setLive(final boolean live) {
-        this.live = live;
+        this.isLive = live;
 
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
