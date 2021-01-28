@@ -29,7 +29,6 @@ import com.amazon.device.ads.aftv.AmazonFireTVAdCallback;
 import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
 import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
 import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
-import com.brentvatne.entity.ApsAdBreak;
 import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
@@ -131,10 +130,6 @@ class ReactTVExoplayerView extends FrameLayout
 
     // APS
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
-    private static final ApsAdBreak APS_AD_BREAK_30 = new ApsAdBreak("Univision_VOD_30", "867288e5-d8c8-4a51-a18f-750b5223b635");
-    private static final ApsAdBreak APS_AD_BREAK_60 = new ApsAdBreak("Univision_VOD_60", "b55cea15-1531-423b-88cf-27b0172d433c");
-    private static final ApsAdBreak APS_AD_BREAK_90_PLUS = new ApsAdBreak("Univision_VOD_90_plus", "eac458da-981b-4ecb-b7c4-e61a44ab16b0");
-    private static final ApsAdBreak APS_AD_BREAK_LIVE = new ApsAdBreak("UnivisionNOW_LIVE", "72ab51cc-c3f5-479a-b430-6e50e32e7193");
     private static final String APS_SLOT_ID_30 = "867288e5-d8c8-4a51-a18f-750b5223b635";
     private static final String APS_SLOT_ID_60 = "b55cea15-1531-423b-88cf-27b0172d433c";
     private static final String APS_SLOT_ID_90_PLUS = "eac458da-981b-4ecb-b7c4-e61a44ab16b0";
@@ -587,7 +582,6 @@ class ReactTVExoplayerView extends FrameLayout
         jsonObject.add(APS_VIDEO_CONTENT_ROOT_ELEMENT, jsonElement);
         jsonObject.add("us_privacy", gson.toJsonTree("1---"));
 
-        ApsAdBreak apsAdBreak = null;
         String slotId = null;
 
         if (isLive) {
