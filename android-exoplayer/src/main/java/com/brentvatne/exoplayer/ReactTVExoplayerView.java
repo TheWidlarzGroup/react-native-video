@@ -557,7 +557,7 @@ class ReactTVExoplayerView extends FrameLayout
         String rating = ratingSubString.substring(0, ratingEndPos);
 
         String id = src.isLive() ? src.getChannelId() : src.getSeriesId();
-        String channelName = src.isLive() ? null : APS_VOD_CHANNEL_NAME;
+        String channelName = src.isLive() ? src.getChannelName() : APS_VOD_CHANNEL_NAME;
         String length = src.isLive() ? null : Integer.toString(src.getDuration());
 
         return new RNApsSource(id, rating, imdbGenres, channelName, length);
@@ -1137,7 +1137,8 @@ class ReactTVExoplayerView extends FrameLayout
             String seriesId,
             String seasonId,
             String playlistId,
-            int duration) {
+            int duration,
+            String channelName) {
         if (uri != null) {
             Uri srcUri = src != null ? src.getUri() : null;
             boolean isOriginalSourceNull = srcUri == null;
@@ -1169,7 +1170,8 @@ class ReactTVExoplayerView extends FrameLayout
                     seriesId,
                     seasonId,
                     playlistId,
-                    duration);
+                    duration,
+                    channelName);
             this.actionToken = actionToken;
 
             exoDorisPlayerView.setTitle(title);

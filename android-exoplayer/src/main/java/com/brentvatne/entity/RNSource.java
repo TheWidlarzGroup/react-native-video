@@ -32,6 +32,7 @@ public class RNSource {
     private final String seasonId;
     private final String playlistId;
     private final int duration;
+    private final String channelName;
 
     public RNSource(
             @NonNull Uri uri,
@@ -52,7 +53,8 @@ public class RNSource {
             @Nullable String seriesId,
             @Nullable String seasonId,
             @Nullable String playlistId,
-            int duration) {
+            int duration,
+            @Nullable String channelName) {
         this.uri = uri;
         this.id = id;
         this.extension = extension;
@@ -72,6 +74,7 @@ public class RNSource {
         this.seasonId = seasonId;
         this.playlistId = playlistId;
         this.duration = duration;
+        this.channelName = channelName;
     }
 
     @NonNull
@@ -173,5 +176,10 @@ public class RNSource {
 
     public int getDuration() {
         return duration;
+    }
+
+    @Nullable
+    public String getChannelName() {
+        return channelName;
     }
 }
