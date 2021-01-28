@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.amazon.device.ads.aftv.AdBreakPattern;
+import com.brentvatne.entity.RNApsSource;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
@@ -32,6 +33,7 @@ import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
@@ -122,6 +124,7 @@ class ReactTVExoplayerView extends FrameLayout
             "eac458da-981b-4ecb-b7c4-e61a44ab16b0",
             "72ab51cc-c3f5-479a-b430-6e50e32e7193"
     };
+    private static  final String APS_VOD_CHANNEL_NAME = "PrendeTV";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
@@ -135,6 +138,8 @@ class ReactTVExoplayerView extends FrameLayout
     private static final String KEY_AN = "an";
     private static final String KEY_DESCRIPTION_URL = "description_url";
     private static final String KEY_URL = "url";
+    private static final String KEY_FIRST_CATEGORY = "first_category=";
+    private static final String KEY_RATING = "rating=";
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -510,7 +515,7 @@ class ReactTVExoplayerView extends FrameLayout
                 .setUrl(url)
                 .build();
 
-        if (isAmazonFireTv) {
+        if (true) {
             createApsBidRequest();
         }
 
@@ -529,11 +534,33 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void createApsBidRequest() {
+        RNApsSource apsSource = createApsSource();
         AdBreakPattern adBreakPattern = AdBreakPattern.builder().withId(APS_APP_ID).build();
     }
 
-    private void createVideoContentJson() {
+    private RNApsSource createApsSource() {
+        String custParams = adTagParameters.getCustParams();
 
+        int genreStartPos = custParams.indexOf(KEY_FIRST_CATEGORY) + KEY_FIRST_CATEGORY.length();
+        String genreSubString = custParams.substring(genreStartPos);
+        int genreEndPos = genreSubString.indexOf("&");
+        String genreList = genreSubString.substring(0, genreEndPos);
+        String[] genres = genreList.split(",");
+        String[] imdbGenres = new String[genres.length];
+        for (int i = 0; i < genres.length; i++) {
+            imdbGenres[i] = ImdbGenreMap.getImdbGenre(genres[i]);
+        }
+
+        int ratingStartPos = custParams.indexOf(KEY_RATING) + KEY_RATING.length();
+        String ratingSubString = custParams.substring(ratingStartPos);
+        int ratingEndPos = ratingSubString.indexOf("&");
+        String rating = ratingSubString.substring(0, ratingEndPos);
+
+        String id = src.isLive() ? src.getChannelId() : src.getSeriesId();
+        String channelName = src.isLive() ? null : APS_VOD_CHANNEL_NAME;
+        String length = src.isLive() ? null : Integer.toString(src.getDuration());
+
+        return new RNApsSource(id, rating, imdbGenres, channelName, length);
     }
 
     @Nullable
