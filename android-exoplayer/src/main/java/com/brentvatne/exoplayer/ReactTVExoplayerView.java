@@ -24,6 +24,7 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import com.amazon.device.ads.aftv.AdBreakPattern;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
@@ -114,6 +115,13 @@ class ReactTVExoplayerView extends FrameLayout
 
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
+    private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
+    private static final String[] APS_SLOT_IDS = new String[] {
+            "867288e5-d8c8-4a51-a18f-750b5223b635",
+            "b55cea15-1531-423b-88cf-27b0172d433c",
+            "eac458da-981b-4ecb-b7c4-e61a44ab16b0",
+            "72ab51cc-c3f5-479a-b430-6e50e32e7193"
+    };
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
@@ -502,6 +510,10 @@ class ReactTVExoplayerView extends FrameLayout
                 .setUrl(url)
                 .build();
 
+        if (isAmazonFireTv) {
+            createApsBidRequest();
+        }
+
         ImaSource imaSource = new ImaSourceBuilder(source)
                 .setAssetKey(imaSrc.getAssetKey())
                 .setContentSourceId(imaSrc.getContentSourceId())
@@ -514,6 +526,14 @@ class ReactTVExoplayerView extends FrameLayout
         exoDorisImaPlayer.setCanSeek(true);
 
         exoDorisImaWrapper.requestAndPlayAds(imaSource);
+    }
+
+    private void createApsBidRequest() {
+        AdBreakPattern adBreakPattern = AdBreakPattern.builder().withId(APS_APP_ID).build();
+    }
+
+    private void createVideoContentJson() {
+
     }
 
     @Nullable
