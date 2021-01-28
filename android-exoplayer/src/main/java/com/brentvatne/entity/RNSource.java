@@ -27,6 +27,11 @@ public class RNSource {
     private final String channelLogoUrl;
     private final String selectedAudioTrack;
     private final String locale;
+    private final String channelId;
+    private final String seriesId;
+    private final String seasonId;
+    private final String playlistId;
+    private final int duration;
 
     public RNSource(
             @NonNull Uri uri,
@@ -42,7 +47,12 @@ public class RNSource {
             @Nullable String thumbnailUrl,
             @Nullable String channelLogoUrl,
             @Nullable String selectedAudioTrack,
-            @Nullable String locale) {
+            @Nullable String locale,
+            @Nullable String channelId,
+            @Nullable String seriesId,
+            @Nullable String seasonId,
+            @Nullable String playlistId,
+            int duration) {
         this.uri = uri;
         this.id = id;
         this.extension = extension;
@@ -57,6 +67,11 @@ public class RNSource {
         this.channelLogoUrl = channelLogoUrl;
         this.selectedAudioTrack = selectedAudioTrack;
         this.locale = locale;
+        this.channelId = channelId;
+        this.seriesId = seriesId;
+        this.seasonId = seasonId;
+        this.playlistId = playlistId;
+        this.duration = duration;
     }
 
     @NonNull
@@ -134,5 +149,29 @@ public class RNSource {
     @Nullable
     public String getLocale() {
         return locale;
+    }
+
+    @Nullable
+    public String getChannelId() {
+        return channelId;
+    }
+
+    @Nullable
+    public String getSeriesId() {
+        return seriesId;
+    }
+
+    @Nullable
+    public String getSeasonId() {
+        return seasonId;
+    }
+
+    @Nullable
+    public String getPlaylistId() {
+        return playlistId;
+    }
+
+    public int getDuration() {
+        return duration;
     }
 }

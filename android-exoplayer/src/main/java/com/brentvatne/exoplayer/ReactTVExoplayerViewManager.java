@@ -45,6 +45,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_DESCRIPTION = "description";
     private static final String PROP_SRC_THUMBNAIL_URL = "thumbnailUrl";
     private static final String PROP_SRC_CHANNEL_LOGO_URL = "channelLogoUrl";
+    private static final String PROP_SRC_CHANNEL_ID = "channelId";
+    private static final String PROP_SRC_SERIES_ID = "seriesId";
+    private static final String PROP_SRC_SEASON_ID = "seasonId";
+    private static final String PROP_SRC_PLAYLIST_ID = "playlistId";
+    private static final String PROP_SRC_DURATION = "duration";
     private static final String PROP_SRC_CONFIG = "config";
     private static final String PROP_SRC_MUX_DATA = "muxData";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
@@ -161,6 +166,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String type = (metadata != null && metadata.hasKey(PROP_SRC_TYPE)) ? metadata.getString(PROP_SRC_TYPE) : null;
         String thumbnailUrl = (metadata != null && metadata.hasKey(PROP_SRC_THUMBNAIL_URL)) ? metadata.getString(PROP_SRC_THUMBNAIL_URL) : null;
         String channelLogoUrl = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_LOGO_URL)) ? metadata.getString(PROP_SRC_CHANNEL_LOGO_URL) : null;
+        String channelId = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_ID)) ? metadata.getString(PROP_SRC_CHANNEL_ID) : null;
+        String seriesId = (metadata != null && metadata.hasKey(PROP_SRC_SERIES_ID)) ? metadata.getString(PROP_SRC_SERIES_ID) : null;
+        String seasonId = (metadata != null && metadata.hasKey(PROP_SRC_SEASON_ID)) ? metadata.getString(PROP_SRC_SEASON_ID) : null;
+        String playlistId = (metadata != null && metadata.hasKey(PROP_SRC_PLAYLIST_ID)) ? metadata.getString(PROP_SRC_PLAYLIST_ID) : null;
+        String duration = (metadata != null && metadata.hasKey(PROP_SRC_DURATION)) ? metadata.getString(PROP_SRC_DURATION) : null;
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
@@ -189,7 +199,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         muxData != null ? muxData.toHashMap() : null,
                         thumbnailUrl,
                         channelLogoUrl,
-                        ima != null ? ima.toHashMap() : null);
+                        ima != null ? ima.toHashMap() : null,
+                        channelId,
+                        seriesId,
+                        seasonId,
+                        playlistId,
+                        duration != null ? Integer.parseInt(duration) : 0);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
