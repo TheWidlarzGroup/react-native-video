@@ -6,19 +6,19 @@ public class ApsSource {
 
     private final String id;
     private final String rating;
-    private final String[] genre;
+    private final String[] genres;
     private final String channel;
     private final String length;
 
     public ApsSource(
             @Nullable String id,
             @Nullable String rating,
-            @Nullable String[] genre,
+            @Nullable String[] genres,
             @Nullable String channel,
             @Nullable String length) {
         this.id = id;
         this.rating = rating;
-        this.genre = genre;
+        this.genres = genres;
         this.channel = channel;
         this.length = length;
     }
@@ -34,8 +34,8 @@ public class ApsSource {
     }
 
     @Nullable
-    public String[] getGenre() {
-        return genre;
+    public String[] getGenres() {
+        return genres;
     }
 
     @Nullable
