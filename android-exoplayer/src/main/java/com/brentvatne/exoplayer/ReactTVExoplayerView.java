@@ -25,7 +25,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.amazon.device.ads.aftv.AdBreakPattern;
-import com.brentvatne.entity.RNApsSource;
+import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
+import com.brentvatne.entity.ApsAdBreak;
+import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
@@ -85,6 +87,9 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.previewseekbar.base.PreviewView;
 
 import java.net.CookieHandler;
@@ -118,13 +123,12 @@ class ReactTVExoplayerView extends FrameLayout
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
-    private static final String[] APS_SLOT_IDS = new String[] {
-            "867288e5-d8c8-4a51-a18f-750b5223b635",
-            "b55cea15-1531-423b-88cf-27b0172d433c",
-            "eac458da-981b-4ecb-b7c4-e61a44ab16b0",
-            "72ab51cc-c3f5-479a-b430-6e50e32e7193"
-    };
-    private static  final String APS_VOD_CHANNEL_NAME = "PrendeTV";
+    private static final ApsAdBreak APS_AD_BREAK_30 = new ApsAdBreak("Univision_VOD_30", "867288e5-d8c8-4a51-a18f-750b5223b635");
+    private static final ApsAdBreak APS_AD_BREAK_60 = new ApsAdBreak("Univision_VOD_60", "b55cea15-1531-423b-88cf-27b0172d433c");
+    private static final ApsAdBreak APS_AD_BREAK_90_PLUS = new ApsAdBreak("Univision_VOD_90_plus", "eac458da-981b-4ecb-b7c4-e61a44ab16b0");
+    private static final ApsAdBreak APS_AD_BREAK_LIVE = new ApsAdBreak("UnivisionNOW_LIVE", "72ab51cc-c3f5-479a-b430-6e50e32e7193");
+    private static final String APS_VOD_CHANNEL_NAME = "PrendeTV";
+    private static final String APS_VIDEO_CONTENT_ROOT_ELEMENT = "content";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
@@ -534,11 +538,35 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void createApsBidRequest() {
-        RNApsSource apsSource = createApsSource();
-        AdBreakPattern adBreakPattern = AdBreakPattern.builder().withId(APS_APP_ID).build();
+        Gson gson = new Gson();
+        ApsSource apsSource = createApsSource();
+        JsonElement jsonElement = gson.toJsonTree(apsSource);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add(APS_VIDEO_CONTENT_ROOT_ELEMENT, jsonElement);
+
+        ApsAdBreak apsAdBreak = null;
+
+        if (isLive) {
+            apsAdBreak = APS_AD_BREAK_LIVE;
+        } else if (src.getDuration() <= 30) {
+            apsAdBreak = APS_AD_BREAK_30;
+        } else if (src.getDuration() > 30 && src.getDuration() <= 60) {
+            apsAdBreak = APS_AD_BREAK_60;
+        } else if (src.getDuration() > 60) {
+            apsAdBreak = APS_AD_BREAK_90_PLUS;
+        }
+
+        if (apsAdBreak != null) {
+            AdBreakPattern adBreakPattern = AdBreakPattern.builder()
+                                                          .withId(apsAdBreak.getAdLayoutName())
+                                                          .withJsonString(jsonObject.toString())
+                                                          .build();
+
+//            AmazonFireTVAdRequest adRequest = AmazonFireTVAdRequest.builder().withAppID()
+        }
     }
 
-    private RNApsSource createApsSource() {
+    private ApsSource createApsSource() {
         String custParams = adTagParameters.getCustParams();
 
         int genreStartPos = custParams.indexOf(KEY_FIRST_CATEGORY) + KEY_FIRST_CATEGORY.length();
@@ -554,13 +582,14 @@ class ReactTVExoplayerView extends FrameLayout
         int ratingStartPos = custParams.indexOf(KEY_RATING) + KEY_RATING.length();
         String ratingSubString = custParams.substring(ratingStartPos);
         int ratingEndPos = ratingSubString.indexOf("&");
-        String rating = ratingSubString.substring(0, ratingEndPos);
+        String rating = ratingSubString.substring(0, ratingEndPos).toUpperCase();
 
-        String id = src.isLive() ? src.getChannelId() : src.getSeriesId();
-        String channelName = src.isLive() ? src.getChannelName() : APS_VOD_CHANNEL_NAME;
-        String length = src.isLive() ? null : Integer.toString(src.getDuration());
+        String vodId = src.getSeriesId() != null ? src.getSeriesId() : src.getId();
+        String id = isLive ? src.getChannelId() : vodId;
+        String channelName = isLive ? src.getChannelName() : APS_VOD_CHANNEL_NAME;
+        String length = isLive ? null : Integer.toString(src.getDuration());
 
-        return new RNApsSource(id, rating, imdbGenres, channelName, length);
+        return new ApsSource(id, rating, imdbGenres, channelName, length);
     }
 
     @Nullable
