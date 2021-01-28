@@ -25,7 +25,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.amazon.device.ads.aftv.AdBreakPattern;
+import com.amazon.device.ads.aftv.AmazonFireTVAdCallback;
 import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
+import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
+import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
 import com.brentvatne.entity.ApsAdBreak;
 import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaSource;
@@ -122,11 +125,20 @@ class ReactTVExoplayerView extends FrameLayout
 
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
+
+    private static final int SECONDS_IN_30_MINUTES = 1800;
+    private static final int SECONDS_IN_60_MINUTES = 3600;
+
+    // APS
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
     private static final ApsAdBreak APS_AD_BREAK_30 = new ApsAdBreak("Univision_VOD_30", "867288e5-d8c8-4a51-a18f-750b5223b635");
     private static final ApsAdBreak APS_AD_BREAK_60 = new ApsAdBreak("Univision_VOD_60", "b55cea15-1531-423b-88cf-27b0172d433c");
     private static final ApsAdBreak APS_AD_BREAK_90_PLUS = new ApsAdBreak("Univision_VOD_90_plus", "eac458da-981b-4ecb-b7c4-e61a44ab16b0");
     private static final ApsAdBreak APS_AD_BREAK_LIVE = new ApsAdBreak("UnivisionNOW_LIVE", "72ab51cc-c3f5-479a-b430-6e50e32e7193");
+    private static final String APS_SLOT_ID_30 = "867288e5-d8c8-4a51-a18f-750b5223b635";
+    private static final String APS_SLOT_ID_60 = "b55cea15-1531-423b-88cf-27b0172d433c";
+    private static final String APS_SLOT_ID_90_PLUS = "eac458da-981b-4ecb-b7c4-e61a44ab16b0";
+    private static final String APS_SLOT_ID_LIVE = "72ab51cc-c3f5-479a-b430-6e50e32e7193";
     private static final String APS_VOD_CHANNEL_NAME = "PrendeTV";
     private static final String APS_VIDEO_CONTENT_ROOT_ELEMENT = "content";
 
@@ -250,6 +262,28 @@ class ReactTVExoplayerView extends FrameLayout
                 msg = obtainMessage(SHOW_NATIVE_PROGRESS);
                 sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
             }
+        }
+    };
+
+    private final AmazonFireTVAdCallback amazonFireTVAdCallback = new AmazonFireTVAdCallback() {
+        @Override
+        public void onSuccess(AmazonFireTVAdResponse amazonFireTVAdResponse) {
+            Log.v(TAG, "APS - Successful response");
+            List<AmazonFireTVAdsKeyValuePair> amazonKeyWords = amazonFireTVAdResponse.getAdServerTargetingParams();
+            StringBuilder customParams = new StringBuilder();
+            for (AmazonFireTVAdsKeyValuePair pair: amazonKeyWords) {
+                customParams.append(pair.getKey()).append("=").append(pair.getValue()).append("&");
+            }
+
+            customParams.append(adTagParameters.getCustParams());
+            adTagParameters.setCustParams(customParams.toString());
+            playImaStream();
+        }
+
+        @Override
+        public void onFailure(AmazonFireTVAdResponse amazonFireTVAdResponse) {
+            Log.e(TAG, "APS - Unsuccessful response. Reason: " + amazonFireTVAdResponse.getReasonString());
+            playImaStream();
         }
     };
 
@@ -519,10 +553,18 @@ class ReactTVExoplayerView extends FrameLayout
                 .setUrl(url)
                 .build();
 
-        if (true) {
-            createApsBidRequest();
+        if (isAmazonFireTv) {
+            AmazonFireTVAdRequest amazonFireTVAdRequest = createApsBidRequest();
+            if (amazonFireTVAdRequest != null) {
+                amazonFireTVAdRequest.executeRequest();
+                return;
+            }
         }
 
+        playImaStream();
+    }
+
+    private void playImaStream() {
         ImaSource imaSource = new ImaSourceBuilder(source)
                 .setAssetKey(imaSrc.getAssetKey())
                 .setContentSourceId(imaSrc.getContentSourceId())
@@ -537,33 +579,44 @@ class ReactTVExoplayerView extends FrameLayout
         exoDorisImaWrapper.requestAndPlayAds(imaSource);
     }
 
-    private void createApsBidRequest() {
+    private AmazonFireTVAdRequest createApsBidRequest() {
         Gson gson = new Gson();
         ApsSource apsSource = createApsSource();
         JsonElement jsonElement = gson.toJsonTree(apsSource);
         JsonObject jsonObject = new JsonObject();
         jsonObject.add(APS_VIDEO_CONTENT_ROOT_ELEMENT, jsonElement);
+        jsonObject.add("us_privacy", gson.toJsonTree("1---"));
 
         ApsAdBreak apsAdBreak = null;
+        String slotId = null;
 
         if (isLive) {
-            apsAdBreak = APS_AD_BREAK_LIVE;
-        } else if (src.getDuration() <= 30) {
-            apsAdBreak = APS_AD_BREAK_30;
-        } else if (src.getDuration() > 30 && src.getDuration() <= 60) {
-            apsAdBreak = APS_AD_BREAK_60;
-        } else if (src.getDuration() > 60) {
-            apsAdBreak = APS_AD_BREAK_90_PLUS;
+            slotId = APS_SLOT_ID_LIVE;
+        } else if (src.getDuration() <= SECONDS_IN_30_MINUTES) {
+            slotId = APS_SLOT_ID_30;
+        } else if (src.getDuration() <= SECONDS_IN_60_MINUTES) {
+            slotId = APS_SLOT_ID_60;
+        } else if (src.getDuration() > SECONDS_IN_60_MINUTES) {
+            slotId = APS_SLOT_ID_90_PLUS;
         }
 
-        if (apsAdBreak != null) {
+        if (slotId != null) {
             AdBreakPattern adBreakPattern = AdBreakPattern.builder()
-                                                          .withId(apsAdBreak.getAdLayoutName())
+                                                          .withId(slotId)
                                                           .withJsonString(jsonObject.toString())
                                                           .build();
 
-//            AmazonFireTVAdRequest adRequest = AmazonFireTVAdRequest.builder().withAppID()
+            return AmazonFireTVAdRequest.builder()
+                                        .withAppID(APS_APP_ID)
+                                        .withContext(getContext())
+                                        .withAdBreakPattern(adBreakPattern)
+                                        .withTimeOut(5000L)
+                                        .withCallback(amazonFireTVAdCallback)
+                                        .withTestFlag(true)
+                                        .build();
         }
+
+        return null;
     }
 
     private ApsSource createApsSource() {
