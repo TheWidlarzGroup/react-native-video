@@ -2,7 +2,7 @@ package com.brentvatne.entity;
 
 import androidx.annotation.Nullable;
 
-public class RNApsSource {
+public class ApsSource {
 
     private final String id;
     private final String rating;
@@ -10,7 +10,7 @@ public class RNApsSource {
     private final String channel;
     private final String length;
 
-    public RNApsSource(
+    public ApsSource(
             @Nullable String id,
             @Nullable String rating,
             @Nullable String[] genre,
