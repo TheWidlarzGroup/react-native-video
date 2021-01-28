@@ -10,4 +10,5 @@ export interface IVideoPlayerMetadata {
   seasonId?: string;
   playlistId?: string;
   duration?: string;
+  channelName?: string;
 }
