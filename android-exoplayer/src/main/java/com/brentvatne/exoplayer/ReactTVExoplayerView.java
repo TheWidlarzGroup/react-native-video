@@ -604,7 +604,7 @@ class ReactTVExoplayerView extends FrameLayout
                                         .withAppID(APS_APP_ID)
                                         .withContext(getContext())
                                         .withAdBreakPattern(adBreakPattern)
-                                        .withTimeOut(5000L)
+                                        .withTimeOut(1000L)
                                         .withCallback(amazonFireTVAdCallback)
                                         .withTestFlag(true)
                                         .build();
