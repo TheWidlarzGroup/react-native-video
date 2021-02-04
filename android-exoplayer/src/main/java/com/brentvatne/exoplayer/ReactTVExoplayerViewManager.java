@@ -54,6 +54,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_CONFIG = "config";
     private static final String PROP_SRC_MUX_DATA = "muxData";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
+    private static final String PROP_SRC_APS = "aps";
+    private static final String PROP_SRC_APS_TEST_MODE = "testMode";
 
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -179,6 +181,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
+        ReadableMap aps = src.hasKey(PROP_SRC_APS) ? src.getMap(PROP_SRC_APS) : null;
+        boolean apsTestMode = (aps != null && aps.hasKey(PROP_SRC_APS_TEST_MODE)) && aps.getBoolean(PROP_SRC_APS_TEST_MODE);
+
         if (TextUtils.isEmpty(uriString)) {
             return;
         }
@@ -207,7 +212,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         seasonId,
                         playlistId,
                         duration != null ? Integer.parseInt(duration) : 0,
-                        channelName);
+                        channelName,
+                        apsTestMode);
             }
         } else {
             int identifier = context.getResources().getIdentifier(

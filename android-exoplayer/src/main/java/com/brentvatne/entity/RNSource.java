@@ -33,6 +33,7 @@ public class RNSource {
     private final String playlistId;
     private final int duration;
     private final String channelName;
+    private final boolean apsTestFlag;
 
     public RNSource(
             @NonNull Uri uri,
@@ -54,7 +55,8 @@ public class RNSource {
             @Nullable String seasonId,
             @Nullable String playlistId,
             int duration,
-            @Nullable String channelName) {
+            @Nullable String channelName,
+            boolean apsTestFlag) {
         this.uri = uri;
         this.id = id;
         this.extension = extension;
@@ -75,6 +77,7 @@ public class RNSource {
         this.playlistId = playlistId;
         this.duration = duration;
         this.channelName = channelName;
+        this.apsTestFlag = apsTestFlag;
     }
 
     @NonNull
@@ -181,5 +184,9 @@ public class RNSource {
     @Nullable
     public String getChannelName() {
         return channelName;
+    }
+
+    public boolean getApsTestFlag() {
+        return apsTestFlag;
     }
 }

@@ -606,7 +606,7 @@ class ReactTVExoplayerView extends FrameLayout
                                         .withAdBreakPattern(adBreakPattern)
                                         .withTimeOut(1000L)
                                         .withCallback(amazonFireTVAdCallback)
-                                        .withTestFlag(true)
+                                        .withTestFlag(src.getApsTestFlag())
                                         .build();
         }
 
@@ -1214,7 +1214,8 @@ class ReactTVExoplayerView extends FrameLayout
             String seasonId,
             String playlistId,
             int duration,
-            String channelName) {
+            String channelName,
+            boolean apsTestFlag) {
         if (uri != null) {
             Uri srcUri = src != null ? src.getUri() : null;
             boolean isOriginalSourceNull = srcUri == null;
@@ -1247,7 +1248,8 @@ class ReactTVExoplayerView extends FrameLayout
                     seasonId,
                     playlistId,
                     duration,
-                    channelName);
+                    channelName,
+                    apsTestFlag);
             this.actionToken = actionToken;
 
             exoDorisPlayerView.setTitle(title);
