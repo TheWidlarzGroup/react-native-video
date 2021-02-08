@@ -46,12 +46,28 @@ interface INormaliseStringOption {
    * @default false
    */
   removeEmptyChars: boolean;
+
+  /**
+   * Remove underscores from the string.
+   * 
+   * @default false
+   */
+  removeUnderscores: boolean;
+
+  /**
+   * Remove dashes from the string.
+   * 
+   * @default false
+   */
+  removeDashes: boolean;
 }
 
 const NORMALISE_STRING_OPTION: INormaliseStringOption = {
   toLowerCase: true,
   removeNonEnglishChars: true,
-  removeEmptyChars: false
+  removeEmptyChars: false,
+  removeUnderscores: false,
+  removeDashes: false
 }
 
 export const normalizeString = (value: string, option: INormaliseStringOption = NORMALISE_STRING_OPTION): string => {
@@ -82,13 +98,33 @@ export const normalizeString = (value: string, option: INormaliseStringOption = 
     formattedString = formattedString.replace(/[^a-z]/g, '');
   }
 
+  if (option.removeUnderscores) {
+    // Remove underscores from string
+    formattedString = formattedString.replace(/[_]/g, '');
+  }
+
+  if (option.removeDashes) {
+    // Remove dashes from string
+    formattedString = formattedString.replace(/[-]/g, '');
+  }
+
   return formattedString;
 };
 
 const NORMALISE_AD_TAG_PARAMS_OPTION: INormaliseStringOption = {
   toLowerCase: true,
   removeNonEnglishChars: false,
-  removeEmptyChars: true
+  removeEmptyChars: true,
+  removeUnderscores: false,
+  removeDashes: false
+}
+
+const NORMALIISE_IU_AND_CUST_PARAMS_OPTION: INormaliseStringOption = {
+  toLowerCase: true,
+  removeNonEnglishChars: false,
+  removeEmptyChars: true,
+  removeUnderscores: true,
+  removeDashes: true
 }
 
 export const sanitiseAdTagParams = (customParams: Record<string, any>): Record<string, any> => {
@@ -98,7 +134,11 @@ export const sanitiseAdTagParams = (customParams: Record<string, any>): Record<s
     const value = customParams[key];
 
     if (typeof value === 'string') {
-      customParameters[key] = normalizeString(value, NORMALISE_AD_TAG_PARAMS_OPTION);
+      if (key === 'iu' || key === 'cust_params') {
+        customParameters[key] = normalizeString(value, NORMALIISE_IU_AND_CUST_PARAMS_OPTION);
+      } else {
+        customParameters[key] = normalizeString(value, NORMALISE_AD_TAG_PARAMS_OPTION);
+      }
     } else if (typeof value === 'object') {
       customParameters[key] = sanitiseAdTagParams(value);
     } else {
