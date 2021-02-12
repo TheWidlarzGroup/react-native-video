@@ -1,4 +1,4 @@
-package com.dice.video;
+package com.brentvatne.util;
 
 import android.content.Context;
 
