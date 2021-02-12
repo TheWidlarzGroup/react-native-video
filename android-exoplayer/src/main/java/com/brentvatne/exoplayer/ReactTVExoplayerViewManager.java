@@ -106,7 +106,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
     private static final int COMMAND_SEEK_TO_POSITION = 3;
-    private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -504,27 +503,23 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 "seekToTimestamp",
                 COMMAND_SEEK_TO_TIMESTAMP,
                 "seekToPosition",
-                COMMAND_SEEK_TO_POSITION,
-                "replaceAdTagParameters",
-                COMMAND_REPLACE_AD_TAG_PARAMETERS
+                COMMAND_SEEK_TO_POSITION
         );
     }
 
     @Override
-    public void receiveCommand(final RNDicePlayerView root, int commandId, @Nullable ReadableArray args) {
+    public void receiveCommand(final ReactTVExoplayerView root, int commandId, @Nullable ReadableArray args) {
         // This will be called whenever a command is sent from react-native.
         switch (commandId) {
             case COMMAND_SEEK_TO_NOW:
-                root.playerSeekTo(C.TIME_UNSET);
+                root.seekTo(C.TIME_UNSET);
                 break;
             case COMMAND_SEEK_TO_TIMESTAMP:
-                root.playerSeekTo(args.getString(0));
+                root.seekTo(args.getString(0));
                 break;
             case COMMAND_SEEK_TO_POSITION:
-                root.playerSeekTo(args.getInt(0));
+                root.seekTo(args.getInt(0));
                 break;
-            case COMMAND_REPLACE_AD_TAG_PARAMETERS:
-                root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
         }
     }
 }
