@@ -142,6 +142,8 @@ class ReactTVExoplayerView extends FrameLayout
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
 
+    private static final String KEY_FIRST_CATEGORY = "first_category=";
+    private static final String KEY_RATING = "rating=";
     private static final String KEY_AD_TAG_PARAMETERS = "adTagParameters";
     private static final String KEY_START_DATE = "startDate";
     private static final String KEY_END_DATE = "endDate";
@@ -224,7 +226,7 @@ class ReactTVExoplayerView extends FrameLayout
                     long position = player.getCurrentPosition();
                     long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
 
-                    if (src.isLive) {
+                    if (isLive) {
                         Timeline timeline = player.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
                             position -= timeline.getPeriod(player.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
@@ -252,7 +254,7 @@ class ReactTVExoplayerView extends FrameLayout
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
                     long position = player.getCurrentPosition();
 
-                    if (src.isLive && isImaStream) {
+                    if (isLive && isImaStream) {
                         Timeline timeline = player.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
                             long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
