@@ -9,7 +9,7 @@ import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 
 import java.util.Map;
 
-final class AdTagParametersHelper {
+public final class AdTagParametersHelper {
 
     private static final String KEY_IU = "iu";
     private static final String KEY_CUST_PARAMS = "cust_params";
