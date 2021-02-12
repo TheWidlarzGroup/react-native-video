@@ -2,7 +2,7 @@ package com.brentvatne.util;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
 import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
@@ -23,12 +23,12 @@ public final class AdTagParametersHelper {
     private AdTagParametersHelper() {
     }
 
-    @Nullable
-    static AdTagParameters createAdTagParameters(
+    @NonNull
+    public static AdTagParameters createAdTagParameters(
             Context context,
             Map<String, Object> adTagParametersMap) {
         if (adTagParametersMap == null || adTagParametersMap.isEmpty()) {
-            return null;
+            return new AdTagParametersBuilder().build();
         }
 
         String iu = (String) adTagParametersMap.get(KEY_IU);
