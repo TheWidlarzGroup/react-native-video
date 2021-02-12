@@ -141,16 +141,9 @@ class ReactTVExoplayerView extends FrameLayout
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
 
-    private static final String KEY_IU = "iu";
-    private static final String KEY_CUST_PARAMS = "cust_params";
-    private static final String KEY_OUTPUT = "output";
-    private static final String KEY_VPA = "vpa";
-    private static final String KEY_MSID = "msid";
-    private static final String KEY_AN = "an";
-    private static final String KEY_DESCRIPTION_URL = "description_url";
-    private static final String KEY_URL = "url";
-    private static final String KEY_FIRST_CATEGORY = "first_category=";
-    private static final String KEY_RATING = "rating=";
+    private static final String KEY_AD_TAG_PARAMETERS = "adTagParameters";
+    private static final String KEY_START_DATE = "startDate";
+    private static final String KEY_END_DATE = "endDate";
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -197,7 +190,7 @@ class ReactTVExoplayerView extends FrameLayout
     private boolean isLive = false;
     private boolean hasEpg;
     private boolean hasStats;
-    private float mProgressUpdateInterval = 250.0f;
+    private float jsProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private boolean canSeekToLiveEdge = false;
     private Map<String, String> requestHeaders;
@@ -222,26 +215,29 @@ class ReactTVExoplayerView extends FrameLayout
     private final int ANIMATION_DURATION_CONTROLS_VISIBILITY = 500;
 
     @SuppressLint("HandlerLeak")
-    private final Handler progressHandler = new Handler() {
+    private final Handler jsProgressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_JS_PROGRESS) {
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                    long pos = player.getCurrentPosition();
+                    long position = player.getCurrentPosition();
                     long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                    boolean isAboutToEnd;
-                    if (player.getDuration() - pos <= 10) {
-                        isAboutToEnd = true;
+
+                    if (src.isLive) {
+                        Timeline timeline = player.getCurrentTimeline();
+                        if (!timeline.isEmpty()) {
+                            position -= timeline.getPeriod(player.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
+                        }
                     } else {
-                        isAboutToEnd = false;
+                        boolean isAboutToEnd = player.getDuration() - position <= 10_000;
+                        eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
-                    eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
-                    eventEmitter.videoAboutToEnd(isAboutToEnd);
+                    eventEmitter.progressChanged(position, bufferedDuration, player.getDuration());
 
-                    progressHandler.removeMessages(SHOW_JS_PROGRESS);
+                    jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);
-                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                    sendMessageDelayed(msg, Math.round(jsProgressUpdateInterval));
                 }
             }
         }
@@ -251,11 +247,26 @@ class ReactTVExoplayerView extends FrameLayout
     private final Handler nativeProgressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == SHOW_NATIVE_PROGRESS && player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                long currentMillis = player.getCurrentPosition();
-                progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
-                msg = obtainMessage(SHOW_NATIVE_PROGRESS);
-                sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
+            if (msg.what == SHOW_NATIVE_PROGRESS) {
+                if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
+                    long position = player.getCurrentPosition();
+
+                    if (src.isLive && isImaStream) {
+                        Timeline timeline = player.getCurrentTimeline();
+                        if (!timeline.isEmpty()) {
+                            long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
+                            position = (windowStartTimeMs + position) / 1000L;
+
+                            if (position < imaSrc.getStartDate() || position > imaSrc.getEndDate()) {
+                                eventEmitter.requireAdParameters((double) position);
+                            }
+                        }
+                    }
+
+                    nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
+                    msg = obtainMessage(SHOW_NATIVE_PROGRESS);
+                    sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
+                }
             }
         }
     };
@@ -524,29 +535,10 @@ class ReactTVExoplayerView extends FrameLayout
     private void loadImaStream() {
         isImaStreamLoaded = true;
 
-        String iu = (String) imaSrc.getAdTagParameters().get(KEY_IU);
-        String custParams = (String) imaSrc.getAdTagParameters().get(KEY_CUST_PARAMS);
-        String output = (String) imaSrc.getAdTagParameters().get(KEY_OUTPUT);
-        String vpa = (String) imaSrc.getAdTagParameters().get(KEY_VPA);
-        String an = (String) imaSrc.getAdTagParameters().get(KEY_AN);
-        String descriptionUrl = (String) imaSrc.getAdTagParameters().get(KEY_DESCRIPTION_URL);
-        String url = (String) imaSrc.getAdTagParameters().get(KEY_URL);
-
-        String msid = getContext().getPackageName();
-        String isLat = "0"; // Todo: Remove this hard-coded value once we ask the user if they want to enable/disable limited ad tracking
-        custParams += "&pw=" + getWidth() + "&ph=" + getHeight();
-
-        adTagParameters = new AdTagParametersBuilder()
-                .setIu(iu)
-                .setCustParams(custParams)
-                .setOutput(output)
-                .setVpa(vpa)
-                .setMsid(msid)
-                .setAn(an)
-                .setIsLat(isLat)
-                .setDescriptionUrl(descriptionUrl)
-                .setUrl(url)
-                .build();
+        adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(),
+                                                                      imaSrc.getAdTagParametersMap());
+        adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth() + "&ph="
+                                              + getHeight());
 
         if (isAmazonFireTv) {
             AmazonFireTVAdRequest amazonFireTVAdRequest = createApsBidRequest();
@@ -566,6 +558,8 @@ class ReactTVExoplayerView extends FrameLayout
                 .setVideoId(imaSrc.getVideoId())
                 .setAuthToken(imaSrc.getAuthToken())
                 .setAdTagParameters(adTagParameters)
+                .setAdTagParametersValidFrom((long) imaSrc.getStartDate())
+                .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
                 .build();
 
         exoDorisImaPlayer.enableControls(true);
@@ -745,8 +739,8 @@ class ReactTVExoplayerView extends FrameLayout
             exoDorisImaPlayer = null;
         }
 
-        progressHandler.removeMessages(SHOW_JS_PROGRESS);
-        progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
+        jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
+        nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
     }
@@ -966,7 +960,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void startProgressHandler() {
-        progressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
+        jsProgressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
         nativeProgressHandler.sendEmptyMessage(SHOW_NATIVE_PROGRESS);
     }
 
@@ -1261,7 +1255,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
-        mProgressUpdateInterval = progressUpdateInterval;
+        this.jsProgressUpdateInterval = progressUpdateInterval;
     }
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {

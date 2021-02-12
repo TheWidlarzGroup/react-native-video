@@ -50,7 +50,7 @@ public final class ImdbGenreMap {
             .put("realityshow", "Reality-TV")
             .put("religious", "Drama")
             .put("romance", "Romance")
-            .put("sci-fi", "Sci-Fi")
+            .put("scifi", "Sci-Fi")
             .put("soccer", "Sport")
             .put("special", "Drama")
             .put("sports", "Sport")
