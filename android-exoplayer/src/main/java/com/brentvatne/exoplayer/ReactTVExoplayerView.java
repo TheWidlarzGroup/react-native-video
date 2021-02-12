@@ -259,7 +259,7 @@ class ReactTVExoplayerView extends FrameLayout
                             position = (windowStartTimeMs + position) / 1000L;
 
                             if (position < imaSrc.getStartDate() || position > imaSrc.getEndDate()) {
-                                eventEmitter.requireAdParameters((double) position);
+                                eventEmitter.requireAdParameters((double) position, false);
                             }
                         }
                     }

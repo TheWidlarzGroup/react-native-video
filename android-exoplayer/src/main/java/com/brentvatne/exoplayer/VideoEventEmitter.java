@@ -155,6 +155,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DY = "dy";
     private static final String EVENT_PROP_IS_ABOUT_TO_END = "isAboutToEnd";
     private static final String EVENT_PROP_DATE = "date";
+    private static final String EVENT_PROP_IS_BLOCKING = "isBlocking";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -360,9 +361,10 @@ class VideoEventEmitter {
         receiveEvent(EVENT_FAVOURITE_BUTTON_CLICK, null);
     }
 
-    void requireAdParameters(double date) {
+    void requireAdParameters(double date, boolean isBlocking) {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_DATE, date);
+        map.putBoolean(EVENT_PROP_IS_BLOCKING, isBlocking);
         receiveEvent(EVENT_REQUIRE_AD_PARAMETERS, map);
     }
 }
