@@ -37,6 +37,7 @@ import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
@@ -1806,5 +1807,24 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onWatchListButtonClicked() {
         // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
+    }
+
+    public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
+        if (replaceAdTagParametersMap == null || exoDorisImaWrapper == null) {
+            return;
+        }
+
+        double startDate = replaceAdTagParametersMap.get(KEY_START_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_START_DATE) : Long.MIN_VALUE;
+        double endDate = replaceAdTagParametersMap.get(KEY_END_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_END_DATE) : Long.MAX_VALUE;
+
+        if (imaSrc.getStartDate() != startDate || imaSrc.getEndDate() != endDate) {
+            Map<String, Object> adTagParametersMap = (Map<String, Object>) replaceAdTagParametersMap.get(KEY_AD_TAG_PARAMETERS);
+            AdTagParameters adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(), adTagParametersMap);
+            adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth()
+                                                  + "&ph=" + getHeight());
+
+            imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
+            exoDorisImaWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
+        }
     }
 }
