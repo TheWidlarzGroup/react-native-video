@@ -106,6 +106,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
     private static final int COMMAND_SEEK_TO_POSITION = 3;
+    private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -503,7 +504,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 "seekToTimestamp",
                 COMMAND_SEEK_TO_TIMESTAMP,
                 "seekToPosition",
-                COMMAND_SEEK_TO_POSITION
+                COMMAND_SEEK_TO_POSITION,
+                "replaceAdTagParameters",
+                COMMAND_REPLACE_AD_TAG_PARAMETERS
         );
     }
 
@@ -519,6 +522,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 break;
             case COMMAND_SEEK_TO_POSITION:
                 root.seekTo(args.getInt(0));
+                break;
+            case COMMAND_REPLACE_AD_TAG_PARAMETERS:
+                root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
                 break;
         }
     }
