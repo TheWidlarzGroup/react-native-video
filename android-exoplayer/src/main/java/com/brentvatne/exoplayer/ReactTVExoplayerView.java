@@ -1091,7 +1091,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     @Override
     public void onTimelineChanged(Timeline timeline, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && isLive) {
+        if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && isLive) {
             canSeekToLiveEdge = true;
         }
     }
@@ -1213,10 +1213,10 @@ class ReactTVExoplayerView extends FrameLayout
             int duration,
             String channelName,
             boolean apsTestFlag) {
-            if (url != null) {
-                String srcUrl = src != null ? src.getUrl() : null;
-                boolean isOriginalSourceNull = srcUrl == null;
-                boolean isSourceEqual = url.equals(srcUrl);
+        if (url != null) {
+            String srcUrl = src != null ? src.getUrl() : null;
+            boolean isOriginalSourceNull = srcUrl == null;
+            boolean isSourceEqual = url.equals(srcUrl);
 
             if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;

@@ -192,29 +192,27 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         if (startsWithValidScheme(uriString)) {
             ActionToken actionToken = ActionToken.fromJson(drm);
 
-            if (srcUri != null) {
-                videoView.setSrc(
-                        uriString,
-                        id,
-                        extension,
-                        title,
-                        description,
-                        type,
-                        textTracks,
-                        actionToken,
-                        headers,
-                        muxData != null ? muxData.toHashMap() : null,
-                        thumbnailUrl,
-                        channelLogoUrl,
-                        ima != null ? ima.toHashMap() : null,
-                        channelId,
-                        seriesId,
-                        seasonId,
-                        playlistId,
-                        duration != null ? Integer.parseInt(duration) : 0,
-                        channelName,
-                        apsTestMode);
-            }
+            videoView.setSrc(
+                    uriString,
+                    id,
+                    extension,
+                    title,
+                    description,
+                    type,
+                    textTracks,
+                    actionToken,
+                    headers,
+                    muxData != null ? muxData.toHashMap() : null,
+                    thumbnailUrl,
+                    channelLogoUrl,
+                    ima != null ? ima.toHashMap() : null,
+                    channelId,
+                    seriesId,
+                    seasonId,
+                    playlistId,
+                    duration != null ? Integer.parseInt(duration) : 0,
+                    channelName,
+                    apsTestMode);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
