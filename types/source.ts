@@ -3,6 +3,7 @@ import { IVideoPlayerIMA } from './ima';
 import { IVideoPlayerMetadata } from './metadata';
 import { IMuxData } from './mux';
 import { IVideoPlayerSubtitles } from './subtitles';
+import { IVideoPlayerAPS } from './aps';
 
 type SourceType = 'mpd' | 'm3u8';
 
@@ -18,5 +19,6 @@ export interface IVideoPlayerSource {
   },
   mainVer?: number;
   patchVer?: number;
-  requestHeaders?: Record<string, any>
+  requestHeaders?: Record<string, any>;
+  aps?: IVideoPlayerAPS;
 }

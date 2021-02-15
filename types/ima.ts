@@ -16,4 +16,5 @@ export interface IVideoReplaceAdTagParametersPayload {
 
 export interface IVideoPlayerOnRequireAdParametersPayload {
   date: number;
+  isBlocking: boolean;
 }

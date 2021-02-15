@@ -5,4 +5,10 @@ export interface IVideoPlayerMetadata {
   thumbnailUrl: string;
   title: string;
   type: string;
+  channelId?: string;
+  seriesId?: string;
+  seasonId?: string;
+  playlistId?: string;
+  duration?: string;
+  channelName?: string;
 }

@@ -37,6 +37,7 @@ class VideoEventEmitter {
     private static final String EVENT_FULLSCREEN_WILL_DISMISS = "onVideoFullscreenPlayerWillDismiss";
     private static final String EVENT_FULLSCREEN_DID_DISMISS = "onVideoFullscreenPlayerDidDismiss";
     private static final String EVENT_VIDEO_ABOUT_TO_END = "onVideoAboutToEnd";
+    private static final String EVENT_REQUIRE_AD_PARAMETERS = "onRequireAdParameters";
 
     private static final String EVENT_STALLED = "onPlaybackStalled";
     private static final String EVENT_RESUME = "onPlaybackResume";
@@ -86,7 +87,8 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEO_CLICKED,
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
-            EVENT_FAVOURITE_BUTTON_CLICK
+            EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_REQUIRE_AD_PARAMETERS
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -119,7 +121,8 @@ class VideoEventEmitter {
                        EVENT_RELATED_VIDEO_CLICKED,
                        EVENT_RELATED_VIDEOS_ICON_CLICKED,
                        EVENT_VIDEO_ABOUT_TO_END,
-                       EVENT_FAVOURITE_BUTTON_CLICK
+                       EVENT_FAVOURITE_BUTTON_CLICK,
+                       EVENT_REQUIRE_AD_PARAMETERS
                })
     @interface VideoEvents {
     }
@@ -151,6 +154,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DX = "dx";
     private static final String EVENT_PROP_TOUCH_ACTION_MOVE_DY = "dy";
     private static final String EVENT_PROP_IS_ABOUT_TO_END = "isAboutToEnd";
+    private static final String EVENT_PROP_DATE = "date";
+    private static final String EVENT_PROP_IS_BLOCKING = "isBlocking";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -354,5 +359,12 @@ class VideoEventEmitter {
 
     void favouriteButtonClick() {
         receiveEvent(EVENT_FAVOURITE_BUTTON_CLICK, null);
+    }
+
+    void requireAdParameters(double date, boolean isBlocking) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_DATE, date);
+        map.putBoolean(EVENT_PROP_IS_BLOCKING, isBlocking);
+        receiveEvent(EVENT_REQUIRE_AD_PARAMETERS, map);
     }
 }

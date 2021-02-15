@@ -45,9 +45,17 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_DESCRIPTION = "description";
     private static final String PROP_SRC_THUMBNAIL_URL = "thumbnailUrl";
     private static final String PROP_SRC_CHANNEL_LOGO_URL = "channelLogoUrl";
+    private static final String PROP_SRC_CHANNEL_ID = "channelId";
+    private static final String PROP_SRC_SERIES_ID = "seriesId";
+    private static final String PROP_SRC_SEASON_ID = "seasonId";
+    private static final String PROP_SRC_PLAYLIST_ID = "playlistId";
+    private static final String PROP_SRC_DURATION = "duration";
+    private static final String PROP_SRC_CHANNEL_NAME = "channelName";
     private static final String PROP_SRC_CONFIG = "config";
     private static final String PROP_SRC_MUX_DATA = "muxData";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
+    private static final String PROP_SRC_APS = "aps";
+    private static final String PROP_SRC_APS_TEST_MODE = "testMode";
 
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -98,6 +106,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
     private static final int COMMAND_SEEK_TO_POSITION = 3;
+    private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
 
     private final ReactApplicationContext reactApplicationContext;
 
@@ -161,11 +170,20 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String type = (metadata != null && metadata.hasKey(PROP_SRC_TYPE)) ? metadata.getString(PROP_SRC_TYPE) : null;
         String thumbnailUrl = (metadata != null && metadata.hasKey(PROP_SRC_THUMBNAIL_URL)) ? metadata.getString(PROP_SRC_THUMBNAIL_URL) : null;
         String channelLogoUrl = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_LOGO_URL)) ? metadata.getString(PROP_SRC_CHANNEL_LOGO_URL) : null;
+        String channelId = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_ID)) ? metadata.getString(PROP_SRC_CHANNEL_ID) : null;
+        String seriesId = (metadata != null && metadata.hasKey(PROP_SRC_SERIES_ID)) ? metadata.getString(PROP_SRC_SERIES_ID) : null;
+        String seasonId = (metadata != null && metadata.hasKey(PROP_SRC_SEASON_ID)) ? metadata.getString(PROP_SRC_SEASON_ID) : null;
+        String playlistId = (metadata != null && metadata.hasKey(PROP_SRC_PLAYLIST_ID)) ? metadata.getString(PROP_SRC_PLAYLIST_ID) : null;
+        String duration = (metadata != null && metadata.hasKey(PROP_SRC_DURATION)) ? metadata.getString(PROP_SRC_DURATION) : null;
+        String channelName = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_NAME)) ? metadata.getString(PROP_SRC_CHANNEL_NAME) : null;
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
 
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+
+        ReadableMap aps = src.hasKey(PROP_SRC_APS) ? src.getMap(PROP_SRC_APS) : null;
+        boolean apsTestMode = (aps != null && aps.hasKey(PROP_SRC_APS_TEST_MODE)) && aps.getBoolean(PROP_SRC_APS_TEST_MODE);
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -174,19 +192,29 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         if (startsWithValidScheme(uriString)) {
             ActionToken actionToken = ActionToken.fromJson(drm);
 
-            videoView.setSrc(uriString,
-                             id,
-                             extension,
-                             title,
-                             description,
-                             type,
-                             textTracks,
-                             actionToken,
-                             headers,
-                             muxData != null ? muxData.toHashMap() : null,
-                             thumbnailUrl,
-                             channelLogoUrl,
-                             ima != null ? ima.toHashMap() : null);
+            if (srcUri != null) {
+                videoView.setSrc(
+                        uriString,
+                        id,
+                        extension,
+                        title,
+                        description,
+                        type,
+                        textTracks,
+                        actionToken,
+                        headers,
+                        muxData != null ? muxData.toHashMap() : null,
+                        thumbnailUrl,
+                        channelLogoUrl,
+                        ima != null ? ima.toHashMap() : null,
+                        channelId,
+                        seriesId,
+                        seasonId,
+                        playlistId,
+                        duration != null ? Integer.parseInt(duration) : 0,
+                        channelName,
+                        apsTestMode);
+            }
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -479,7 +507,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 "seekToTimestamp",
                 COMMAND_SEEK_TO_TIMESTAMP,
                 "seekToPosition",
-                COMMAND_SEEK_TO_POSITION
+                COMMAND_SEEK_TO_POSITION,
+                "replaceAdTagParameters",
+                COMMAND_REPLACE_AD_TAG_PARAMETERS
         );
     }
 
@@ -495,6 +525,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 break;
             case COMMAND_SEEK_TO_POSITION:
                 root.seekTo(args.getInt(0));
+                break;
+            case COMMAND_REPLACE_AD_TAG_PARAMETERS:
+                root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
                 break;
         }
     }

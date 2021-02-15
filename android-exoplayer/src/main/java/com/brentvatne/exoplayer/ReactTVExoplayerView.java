@@ -24,6 +24,12 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import com.amazon.device.ads.aftv.AdBreakPattern;
+import com.amazon.device.ads.aftv.AmazonFireTVAdCallback;
+import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
+import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
+import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
+import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaSource;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
@@ -31,6 +37,8 @@ import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.util.AdTagParametersHelper;
+import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
@@ -82,6 +90,9 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.previewseekbar.base.PreviewView;
 
 import java.net.CookieHandler;
@@ -113,19 +124,29 @@ class ReactTVExoplayerView extends FrameLayout
                    ExoDorisPlayerViewListener {
 
     private static final String TAG = "ReactTvExoplayerView";
+    private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
+
+    private static final int SECONDS_IN_30_MINUTES = 1800;
+    private static final int SECONDS_IN_60_MINUTES = 3600;
+
+    // APS
+    private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
+    private static final String APS_SLOT_ID_30 = "867288e5-d8c8-4a51-a18f-750b5223b635";
+    private static final String APS_SLOT_ID_60 = "b55cea15-1531-423b-88cf-27b0172d433c";
+    private static final String APS_SLOT_ID_90_PLUS = "eac458da-981b-4ecb-b7c4-e61a44ab16b0";
+    private static final String APS_SLOT_ID_LIVE = "72ab51cc-c3f5-479a-b430-6e50e32e7193";
+    private static final String APS_VOD_CHANNEL_NAME = "PrendeTV";
+    private static final String APS_VIDEO_CONTENT_ROOT_ELEMENT = "content";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_JS_PROGRESS = 1;
     private static final int SHOW_NATIVE_PROGRESS = 2;
 
-    private static final String KEY_IU = "iu";
-    private static final String KEY_CUST_PARAMS = "cust_params";
-    private static final String KEY_OUTPUT = "output";
-    private static final String KEY_VPA = "vpa";
-    private static final String KEY_MSID = "msid";
-    private static final String KEY_AN = "an";
-    private static final String KEY_DESCRIPTION_URL = "description_url";
-    private static final String KEY_URL = "url";
+    private static final String KEY_FIRST_CATEGORY = "first_category=";
+    private static final String KEY_RATING = "rating=";
+    private static final String KEY_AD_TAG_PARAMETERS = "adTagParameters";
+    private static final String KEY_START_DATE = "startDate";
+    private static final String KEY_END_DATE = "endDate";
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -155,6 +176,9 @@ class ReactTVExoplayerView extends FrameLayout
     private float rate = 1f;
     private boolean isImaStream = false;
     private boolean isImaStreamLoaded = false;
+    private boolean isAmazonFireTv = false;
+    private int viewWidth;
+    private int viewHeight;
 
     // Props from React
     private RNSource src;
@@ -166,10 +190,10 @@ class ReactTVExoplayerView extends FrameLayout
     private String textTrackType;
     private Dynamic textTrackValue;
     private boolean disableFocus;
-    private boolean live = false;
+    private boolean isLive = false;
     private boolean hasEpg;
     private boolean hasStats;
-    private float mProgressUpdateInterval = 250.0f;
+    private float jsProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
     private boolean canSeekToLiveEdge = false;
     private Map<String, String> requestHeaders;
@@ -194,26 +218,29 @@ class ReactTVExoplayerView extends FrameLayout
     private final int ANIMATION_DURATION_CONTROLS_VISIBILITY = 500;
 
     @SuppressLint("HandlerLeak")
-    private final Handler progressHandler = new Handler() {
+    private final Handler jsProgressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_JS_PROGRESS) {
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                    long pos = player.getCurrentPosition();
+                    long position = player.getCurrentPosition();
                     long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                    boolean isAboutToEnd;
-                    if (player.getDuration() - pos <= 10) {
-                        isAboutToEnd = true;
+
+                    if (isLive) {
+                        Timeline timeline = player.getCurrentTimeline();
+                        if (!timeline.isEmpty()) {
+                            position -= timeline.getPeriod(player.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
+                        }
                     } else {
-                        isAboutToEnd = false;
+                        boolean isAboutToEnd = player.getDuration() - position <= 10_000;
+                        eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
-                    eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration());
-                    eventEmitter.videoAboutToEnd(isAboutToEnd);
+                    eventEmitter.progressChanged(position, bufferedDuration, player.getDuration());
 
-                    progressHandler.removeMessages(SHOW_JS_PROGRESS);
+                    jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);
-                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                    sendMessageDelayed(msg, Math.round(jsProgressUpdateInterval));
                 }
             }
         }
@@ -223,12 +250,49 @@ class ReactTVExoplayerView extends FrameLayout
     private final Handler nativeProgressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == SHOW_NATIVE_PROGRESS && player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                long currentMillis = player.getCurrentPosition();
-                progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
-                msg = obtainMessage(SHOW_NATIVE_PROGRESS);
-                sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
+            if (msg.what == SHOW_NATIVE_PROGRESS) {
+                if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
+                    long position = player.getCurrentPosition();
+
+                    if (isLive && isImaStream) {
+                        Timeline timeline = player.getCurrentTimeline();
+                        if (!timeline.isEmpty()) {
+                            long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
+                            position = (windowStartTimeMs + position) / 1000L;
+
+                            if (position < imaSrc.getStartDate() || position > imaSrc.getEndDate()) {
+                                eventEmitter.requireAdParameters((double) position, false);
+                            }
+                        }
+                    }
+
+                    nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
+                    msg = obtainMessage(SHOW_NATIVE_PROGRESS);
+                    sendMessageDelayed(msg, Math.round(NATIVE_PROGRESS_UPDATE_INTERVAL));
+                }
             }
+        }
+    };
+
+    private final AmazonFireTVAdCallback amazonFireTVAdCallback = new AmazonFireTVAdCallback() {
+        @Override
+        public void onSuccess(AmazonFireTVAdResponse amazonFireTVAdResponse) {
+            Log.v(TAG, "APS - Successful response");
+            List<AmazonFireTVAdsKeyValuePair> amazonKeyWords = amazonFireTVAdResponse.getAdServerTargetingParams();
+            StringBuilder customParams = new StringBuilder();
+            for (AmazonFireTVAdsKeyValuePair pair: amazonKeyWords) {
+                customParams.append(pair.getKey()).append("=").append(pair.getValue()).append("&");
+            }
+
+            customParams.append(adTagParameters.getCustParams());
+            adTagParameters.setCustParams(customParams.toString());
+            playImaStream();
+        }
+
+        @Override
+        public void onFailure(AmazonFireTVAdResponse amazonFireTVAdResponse) {
+            Log.e(TAG, "APS - Unsuccessful response. Reason: " + amazonFireTVAdResponse.getReasonString());
+            playImaStream();
         }
     };
 
@@ -256,13 +320,13 @@ class ReactTVExoplayerView extends FrameLayout
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         controlDispatcher = new DefaultControlDispatcher();
+        isAmazonFireTv = isAmazonFireTv(context);
 
         setPausedModifier(false);
 
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
         mediaSessionConnector = new MediaSessionConnector(mediaSession);
     }
-
 
     @Override
     public void setId(int id) {
@@ -318,6 +382,10 @@ class ReactTVExoplayerView extends FrameLayout
         }
     }
 
+    private boolean isAmazonFireTv(Context context) {
+        return context.getPackageManager().hasSystemFeature(AMAZON_FEATURE_FIRE_TV);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -330,14 +398,24 @@ class ReactTVExoplayerView extends FrameLayout
         stopPlayback();
     }
 
+    @Override
+    protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        viewWidth = width;
+        viewHeight = height;
+        if (player != null) {
+            player.setMaxVideoSize(width, height);
+        }
+    }
+
     // LifecycleEventListener implementation
 
     @Override
     public void onHostResume() {
         if (isInBackground) {
-            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + live);
+            Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + isLive);
             isInBackground = false; // reset to false first
-            if (live) {
+            if (isLive) {
                 // always seek to live edge when returning from background to a live event
                 canSeekToLiveEdge = true;
                 setPausedModifier(false);
@@ -433,9 +511,10 @@ class ReactTVExoplayerView extends FrameLayout
 
             source = new SourceBuilder(src.getUrl(), src.getId())
                     .setTitle(src.getTitle())
-                    .setIsLive(live)
+                    .setIsLive(isLive)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
+                    .setMaxVideoSize(viewWidth, viewHeight)
                     .build();
 
             if (isImaStream && getWidth() != 0 && getHeight() != 0) {
@@ -459,42 +538,102 @@ class ReactTVExoplayerView extends FrameLayout
     private void loadImaStream() {
         isImaStreamLoaded = true;
 
-        String iu = (String) imaSrc.getAdTagParameters().get(KEY_IU);
-        String custParams = (String) imaSrc.getAdTagParameters().get(KEY_CUST_PARAMS);
-        String output = (String) imaSrc.getAdTagParameters().get(KEY_OUTPUT);
-        String vpa = (String) imaSrc.getAdTagParameters().get(KEY_VPA);
-        String an = (String) imaSrc.getAdTagParameters().get(KEY_AN);
-        String descriptionUrl = (String) imaSrc.getAdTagParameters().get(KEY_DESCRIPTION_URL);
-        String url = (String) imaSrc.getAdTagParameters().get(KEY_URL);
+        adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(),
+                                                                      imaSrc.getAdTagParametersMap());
+        adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth() + "&ph="
+                                              + getHeight());
 
-        String msid = getContext().getPackageName();
-        String isLat = "0"; // Todo: Remove this hard-coded value once we ask the user if they want to enable/disable limited ad tracking
-        custParams += "&pw=" + getWidth() + "&ph=" + getHeight();
+        if (isAmazonFireTv) {
+            AmazonFireTVAdRequest amazonFireTVAdRequest = createApsBidRequest();
+            if (amazonFireTVAdRequest != null) {
+                amazonFireTVAdRequest.executeRequest();
+                return;
+            }
+        }
 
-        adTagParameters = new AdTagParametersBuilder()
-                .setIu(iu)
-                .setCustParams(custParams)
-                .setOutput(output)
-                .setVpa(vpa)
-                .setMsid(msid)
-                .setAn(an)
-                .setIsLat(isLat)
-                .setDescriptionUrl(descriptionUrl)
-                .setUrl(url)
-                .build();
+        playImaStream();
+    }
 
+    private void playImaStream() {
         ImaSource imaSource = new ImaSourceBuilder(source)
                 .setAssetKey(imaSrc.getAssetKey())
                 .setContentSourceId(imaSrc.getContentSourceId())
                 .setVideoId(imaSrc.getVideoId())
                 .setAuthToken(imaSrc.getAuthToken())
                 .setAdTagParameters(adTagParameters)
+                .setAdTagParametersValidFrom((long) imaSrc.getStartDate())
+                .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
                 .build();
 
         exoDorisImaPlayer.enableControls(true);
         exoDorisImaPlayer.setCanSeek(true);
 
         exoDorisImaWrapper.requestAndPlayAds(imaSource);
+    }
+
+    private AmazonFireTVAdRequest createApsBidRequest() {
+        Gson gson = new Gson();
+        ApsSource apsSource = createApsSource();
+        JsonElement jsonElement = gson.toJsonTree(apsSource);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add(APS_VIDEO_CONTENT_ROOT_ELEMENT, jsonElement);
+        jsonObject.add("us_privacy", gson.toJsonTree("1---"));
+
+        String slotId = null;
+
+        if (isLive) {
+            slotId = APS_SLOT_ID_LIVE;
+        } else if (src.getDuration() <= SECONDS_IN_30_MINUTES) {
+            slotId = APS_SLOT_ID_30;
+        } else if (src.getDuration() <= SECONDS_IN_60_MINUTES) {
+            slotId = APS_SLOT_ID_60;
+        } else if (src.getDuration() > SECONDS_IN_60_MINUTES) {
+            slotId = APS_SLOT_ID_90_PLUS;
+        }
+
+        if (slotId != null) {
+            AdBreakPattern adBreakPattern = AdBreakPattern.builder()
+                                                          .withId(slotId)
+                                                          .withJsonString(jsonObject.toString())
+                                                          .build();
+
+            return AmazonFireTVAdRequest.builder()
+                                        .withAppID(APS_APP_ID)
+                                        .withContext(getContext())
+                                        .withAdBreakPattern(adBreakPattern)
+                                        .withTimeOut(1000L)
+                                        .withCallback(amazonFireTVAdCallback)
+                                        .withTestFlag(src.getApsTestFlag())
+                                        .build();
+        }
+
+        return null;
+    }
+
+    private ApsSource createApsSource() {
+        String custParams = adTagParameters.getCustParams();
+
+        int genreStartPos = custParams.indexOf(KEY_FIRST_CATEGORY) + KEY_FIRST_CATEGORY.length();
+        String genreSubString = custParams.substring(genreStartPos);
+        int genreEndPos = genreSubString.indexOf("&");
+        String genreList = genreSubString.substring(0, genreEndPos);
+        String[] genres = genreList.split(",");
+        String[] imdbGenres = new String[genres.length];
+        for (int i = 0; i < genres.length; i++) {
+            imdbGenres[i] = ImdbGenreMap.getImdbGenre(genres[i]);
+        }
+
+        int ratingStartPos = custParams.indexOf(KEY_RATING) + KEY_RATING.length();
+        String ratingSubString = custParams.substring(ratingStartPos);
+        int ratingEndPos = ratingSubString.indexOf("&");
+        String rating = ratingSubString.substring(0, ratingEndPos).toUpperCase();
+
+        String vodId = src.getSeriesId() != null ? src.getSeriesId() : src.getId();
+        String id = isLive ? src.getChannelId() : vodId;
+        String channelName = isLive ? src.getChannelName() : APS_VOD_CHANNEL_NAME;
+        String length = isLive ? null : Integer.toString(src.getDuration());
+
+        return new ApsSource(id, rating, imdbGenres, channelName, length);
     }
 
     @Nullable
@@ -603,8 +742,8 @@ class ReactTVExoplayerView extends FrameLayout
             exoDorisImaPlayer = null;
         }
 
-        progressHandler.removeMessages(SHOW_JS_PROGRESS);
-        progressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
+        jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
+        nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
     }
@@ -809,8 +948,8 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void seekToDefaultPosition() {
-        Log.d(TAG, "seekToDefaultPosition() live: " + live + " canSeekToLiveEdge: " + canSeekToLiveEdge);
-        if (player != null && canSeekToLiveEdge && live) {
+        Log.d(TAG, "seekToDefaultPosition() live: " + isLive + " canSeekToLiveEdge: " + canSeekToLiveEdge);
+        if (player != null && canSeekToLiveEdge && isLive) {
             player.seekToDefaultPosition();
             canSeekToLiveEdge = false; // reset needed otherwise falls into a loop when coming back from background
         }
@@ -824,7 +963,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     private void startProgressHandler() {
-        progressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
+        jsProgressHandler.sendEmptyMessage(SHOW_JS_PROGRESS);
         nativeProgressHandler.sendEmptyMessage(SHOW_NATIVE_PROGRESS);
     }
 
@@ -952,7 +1091,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     @Override
     public void onTimelineChanged(Timeline timeline, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && live) {
+        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && isLive) {
             canSeekToLiveEdge = true;
         }
     }
@@ -1066,11 +1205,18 @@ class ReactTVExoplayerView extends FrameLayout
             Map<String, Object> muxData,
             String thumbnailUrl,
             String channelLogoUrl,
-            Map<String, Object> ima) {
-        if (url != null) {
-            String srcUrl = src != null ? src.getUrl() : null;
-            boolean isOriginalSourceNull = srcUrl == null;
-            boolean isSourceEqual = url.equals(srcUrl);
+            Map<String, Object> ima,
+            String channelId,
+            String seriesId,
+            String seasonId,
+            String playlistId,
+            int duration,
+            String channelName,
+            boolean apsTestFlag) {
+            if (url != null) {
+                String srcUrl = src != null ? src.getUrl() : null;
+                boolean isOriginalSourceNull = srcUrl == null;
+                boolean isSourceEqual = url.equals(srcUrl);
 
             if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;
@@ -1086,14 +1232,21 @@ class ReactTVExoplayerView extends FrameLayout
                     title,
                     description,
                     type,
-                    live,
+                    isLive,
                     getTextTracks(textTracks),
                     headers,
                     muxData,
                     thumbnailUrl,
                     channelLogoUrl,
                     null,
-                    null);
+                    null,
+                    channelId,
+                    seriesId,
+                    seasonId,
+                    playlistId,
+                    duration,
+                    channelName,
+                    apsTestFlag);
             this.actionToken = actionToken;
 
             exoDorisPlayerView.setTitle(title);
@@ -1105,7 +1258,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
-        mProgressUpdateInterval = progressUpdateInterval;
+        this.jsProgressUpdateInterval = progressUpdateInterval;
     }
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
@@ -1369,7 +1522,7 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     public void setLive(final boolean live) {
-        this.live = live;
+        this.isLive = live;
 
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsLive(live);
@@ -1656,5 +1809,24 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onWatchListButtonClicked() {
         // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
+    }
+
+    public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
+        if (replaceAdTagParametersMap == null || exoDorisImaWrapper == null) {
+            return;
+        }
+
+        double startDate = replaceAdTagParametersMap.get(KEY_START_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_START_DATE) : Long.MIN_VALUE;
+        double endDate = replaceAdTagParametersMap.get(KEY_END_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_END_DATE) : Long.MAX_VALUE;
+
+        if (imaSrc.getStartDate() != startDate || imaSrc.getEndDate() != endDate) {
+            Map<String, Object> adTagParametersMap = (Map<String, Object>) replaceAdTagParametersMap.get(KEY_AD_TAG_PARAMETERS);
+            AdTagParameters adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(), adTagParametersMap);
+            adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth()
+                                                  + "&ph=" + getHeight());
+
+            imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
+            exoDorisImaWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
+        }
     }
 }
