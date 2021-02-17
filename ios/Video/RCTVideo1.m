@@ -28,6 +28,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     bool _controls;
     bool _canBeFavourite;
     NSDictionary* _Nullable _theme;
+    NSDictionary* _Nullable _relatedVideos;
     
     SubtitleResourceLoaderDelegate* _delegate;
     dispatch_queue_t delegateQueue;
@@ -65,6 +66,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval {}
 - (void)setPaused:(BOOL)paused {}
 
+- (void)setRelatedVideos:(NSDictionary*)relatedVideos {
+    _relatedVideos = relatedVideos;
+}
+
 - (void)setButtons:(NSDictionary*)buttons {
     _canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
 }
@@ -89,10 +94,12 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)setSrc:(NSDictionary *)source {
+    NSLog(@"zzz src set");
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
         
         [self updateDorisUI:source];
+        [self updateRelatedVideos];
         
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
             id imaObject = [source objectForKey:@"ima"];
@@ -120,6 +127,30 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     });
 }
 
+- (void)updateRelatedVideos {
+    id headIndex = [_relatedVideos objectForKey:@"headIndex"];
+    
+    id _items = [_relatedVideos objectForKey:@"items"];
+    if ([_items isKindOfClass:NSArray.class] &&
+        [headIndex isKindOfClass:NSNumber.class]) {
+        int _headIndex = [headIndex intValue];
+        NSMutableArray* relatedVideos = [NSMutableArray new];
+        NSArray* items = _items;
+        int count = 0;
+        for (id object in items) {
+            if ([object isKindOfClass:NSDictionary.class] &&
+                count <= _headIndex + 3 &&
+                count >= _headIndex) {
+
+                [relatedVideos addObject: [DorisRelatedVideo createFrom:object]];
+            }
+            count++;
+        }
+        
+        [self.dorisUI.input setRelatedVideos: relatedVideos];
+    }
+}
+
 - (void)updateDorisUI:(NSDictionary *)source {
     NSMutableDictionary* metaData = [source objectForKey:@"metadata"];
     [metaData setValue:[[NSNumber alloc] initWithBool:_canBeFavourite] forKey:@"canBeFavourite"];
@@ -143,7 +174,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setControls:(BOOL)controls {
     if (controls != _controls) {
         _controls = controls;
-        NSLog(@"zzzz %@", controls ? @"true" : @"false");
         if (controls) {
             [self.dorisUI.input enableUI];
         } else {
@@ -392,6 +422,20 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)didTapFavouriteButton {
     if (self.onFavouriteButtonClick) {
         self.onFavouriteButtonClick(@{@"target": self.reactTag});
+    }
+}
+
+- (void)didTapMoreRelatedVideosButton {
+    if (self.onRelatedVideosIconClicked) {
+        self.onRelatedVideosIconClicked(@{@"target": self.reactTag});
+    }
+}
+
+- (void)didSelectRelatedVideoWithIdentifier:(NSNumber *)identifier type:(NSString *)type {
+    if (self.onRelatedVideoClicked) {
+        self.onRelatedVideoClicked(@{@"id": identifier,
+                                     @"type": type,
+                                     @"target": self.reactTag});
     }
 }
 
