@@ -1302,7 +1302,7 @@ On iOS, if you would like to allow other apps to play music over your video comp
 }
 ```
 
-You can also use the [ignoreSilentSwitch](ignoresilentswitch) prop.
+You can also use the [ignoreSilentSwitch](#ignoresilentswitch) prop.
 </details>
 
 ### Android Expansion File Usage
