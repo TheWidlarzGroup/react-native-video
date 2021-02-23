@@ -143,7 +143,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setControls:(BOOL)controls {
     if (controls != _controls) {
         _controls = controls;
-        NSLog(@"zzzz %@", controls ? @"true" : @"false");
         if (controls) {
             [self.dorisUI.input enableUI];
         } else {
@@ -320,10 +319,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 #pragma mark - DorisExternalOutputProtocol
 
-- (void)didRequestAdTagParametersFor:(NSTimeInterval)timeInterval {
+- (void)didRequestAdTagParametersFor:(NSTimeInterval)timeInterval isBlocking:(BOOL)isBlocking {
     if(self.onRequireAdParameters) {
         NSNumber* _timeIntervalSince1970 = [[NSNumber alloc] initWithDouble:timeInterval];
-        self.onRequireAdParameters(@{@"date": _timeIntervalSince1970});
+        NSNumber* _isBlocking = [[NSNumber alloc] initWithBool:isBlocking];
+        
+        self.onRequireAdParameters(@{@"date": _timeIntervalSince1970,
+                                     @"isBlocking": _isBlocking});
     }
 }
 
