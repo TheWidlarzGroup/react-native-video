@@ -131,7 +131,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     // APS
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
-    private static final String APS_SLOT_ID_30 = "8f56413a-5fe1-40f8-9d46-0a34792b849d5";
+    private static final String APS_SLOT_ID_30 = "8f56413a-5fe1-40f8-9d46-0a34792b849d";
     private static final String APS_SLOT_ID_60 = "a0bcae0c-df57-4544-8431-8e8d2f1ab577";
     private static final String APS_SLOT_ID_90_PLUS = "8164f377-cee1-4edc-9786-8f1323008cef";
     private static final String APS_SLOT_ID_LIVE = "1bf05a33-f5a1-47a9-bcd9-fae1cc953dca";
