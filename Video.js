@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle } from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, View, ViewPropTypes, Image, Platform, findNodeHandle, UIManager } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -254,10 +254,10 @@ export default class Video extends Component {
     }
   }
   getViewManagerConfig = viewManagerName => {
-    if (!NativeModules.UIManager.getViewManagerConfig) {
-      return NativeModules.UIManager[viewManagerName];
+    if (!UIManager.getViewManagerConfig) {
+      return UIManager[viewManagerName];
     }
-    return NativeModules.UIManager.getViewManagerConfig(viewManagerName);
+    return UIManager.getViewManagerConfig(viewManagerName);
   };
 
   render() {
