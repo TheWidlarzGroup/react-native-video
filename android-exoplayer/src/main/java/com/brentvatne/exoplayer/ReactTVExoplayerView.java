@@ -1811,6 +1811,11 @@ class ReactTVExoplayerView extends FrameLayout
         // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
     }
 
+    @Override
+    public void onEpgButtonClicked() {
+        eventEmitter.epgIconClick();
+    }
+
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
         if (replaceAdTagParametersMap == null || exoDorisImaWrapper == null) {
             return;
