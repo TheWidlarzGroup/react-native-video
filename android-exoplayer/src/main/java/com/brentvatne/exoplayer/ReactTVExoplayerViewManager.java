@@ -102,6 +102,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_WATCHLIST_BUTTON = "watchlist";
     private static final String PROP_FAVOURITE_BUTTON = "favourite";
     private static final String PROP_IS_FAVOURITE = "isFavourite";
+    private static final String PROP_EPG_BUTTON = "epg";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -443,7 +444,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     public void setButtons(final ReactTVExoplayerView videoView, @Nullable ReadableMap buttons) {
         boolean showFavouriteButton = (buttons != null && buttons.hasKey(PROP_FAVOURITE_BUTTON)) && buttons.getBoolean(PROP_FAVOURITE_BUTTON);
         boolean showWatchlistButton = (buttons != null && buttons.hasKey(PROP_WATCHLIST_BUTTON)) && buttons.getBoolean(PROP_WATCHLIST_BUTTON);
-        videoView.setButtons(showFavouriteButton, showWatchlistButton);
+        boolean showEpgButton = (buttons != null && buttons.hasKey(PROP_EPG_BUTTON)) && buttons.getBoolean(PROP_EPG_BUTTON);
+        videoView.setButtons(showFavouriteButton, showWatchlistButton, showEpgButton);
     }
 
     @ReactProp(name = PROP_IS_FAVOURITE)

@@ -1566,10 +1566,14 @@ class ReactTVExoplayerView extends FrameLayout
         }
     }
 
-    public void setButtons(boolean showFavouriteButton, boolean showWatchlistButton) {
+    public void setButtons(
+            boolean showFavouriteButton,
+            boolean showWatchlistButton,
+            boolean showEpgButton) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setShowFavoriteButton(showFavouriteButton);
             exoDorisPlayerView.setShowWatchListButton(showWatchlistButton);
+            exoDorisPlayerView.setShowEpgButton(showEpgButton);
         }
     }
 
