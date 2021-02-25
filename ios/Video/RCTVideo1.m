@@ -28,7 +28,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     bool _controls;
     bool _canBeFavourite;
     bool _shouldRequestTrackingAuthorization;
-
     NSDictionary* _Nullable _theme;
     
     SubtitleResourceLoaderDelegate* _delegate;
@@ -210,38 +209,38 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         }
         
         if (@available(tvOS 14, *)) {
-            if (_shouldRequestTrackingAuthorization) {
-                [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-                    if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
-                        [adTagParameters setValue:@"1" forKey:@"is_lat"];
-                    } else {
-                        [adTagParameters setValue:@"0" forKey:@"is_lat"];
-                    }
-                    
-                    [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-                        if (appId) {
-                            self->_appId = appId;
-                            [adTagParameters setValue:appId.stringValue forKey:@"msid"];
-                        } else {
-                            self->_appId = 0;
-                            [adTagParameters setValue:@"0" forKey:@"msid"];
-                        }
-                        handler(adTagParameters);
-                    }];
-                }];
-            } else {
-                [adTagParameters setValue:@"0" forKey:@"is_lat"];
-                [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-                    if (appId) {
-                        self->_appId = appId;
-                        [adTagParameters setValue:appId.stringValue forKey:@"msid"];
-                    } else {
-                        self->_appId = 0;
-                        [adTagParameters setValue:@"0" forKey:@"msid"];
-                    }
-                    handler(adTagParameters);
-                }];
-            }
+			if (_shouldRequestTrackingAuthorization) {
+				[ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+					if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+						[adTagParameters setValue:@"1" forKey:@"is_lat"];
+					} else {
+						[adTagParameters setValue:@"0" forKey:@"is_lat"];
+					}
+					
+					[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+						if (appId) {
+							self->_appId = appId;
+							[adTagParameters setValue:appId.stringValue forKey:@"msid"];
+						} else {
+							self->_appId = 0;
+							[adTagParameters setValue:@"0" forKey:@"msid"];
+						}
+						handler(adTagParameters);
+					}];
+				}];
+			} else {
+				[adTagParameters setValue:@"0" forKey:@"is_lat"];
+				[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+					if (appId) {
+						self->_appId = appId;
+						[adTagParameters setValue:appId.stringValue forKey:@"msid"];
+					} else {
+						self->_appId = 0;
+						[adTagParameters setValue:@"0" forKey:@"msid"];
+					}
+					handler(adTagParameters);
+				}];
+			}
         } else {
             [adTagParameters setValue:@"0" forKey:@"is_lat"];
             [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
