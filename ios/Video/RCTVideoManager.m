@@ -44,6 +44,8 @@ RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(isFavourite, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(buttons, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(theme, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(translations, NSDictionary);
+
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
