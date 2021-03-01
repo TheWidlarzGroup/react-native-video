@@ -418,13 +418,9 @@ class ReactTVExoplayerView extends FrameLayout
             if (isLive) {
                 // always seek to live edge when returning from background to a live event
                 canSeekToLiveEdge = true;
-                setPausedModifier(false);
-                setPlayWhenReady(true);
-            } else {
-                // otherwise whatever abide by what the previous user action was
-                setPausedModifier(isPaused);
-                setPlayWhenReady(!isPaused);
+                player.seekToDefaultPosition();
             }
+            player.play();
             fromBackground = true;
         }
     }
