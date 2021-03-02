@@ -29,6 +29,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     bool _canBeFavourite;
     bool _shouldRequestTrackingAuthorization;
     NSDictionary* _Nullable _theme;
+    NSDictionary* _Nullable _translations;
     NSDictionary* _Nullable _relatedVideos;
     
     SubtitleResourceLoaderDelegate* _delegate;
@@ -86,17 +87,24 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     _theme = theme;
     
     DorisUIStyle* _Nullable style = [DorisUIStyle createFrom:_theme];
+    DorisUITranslations* _Nullable translations = [DorisUITranslations createFrom:_translations];
     
     if (style) {
         self.player = [AVPlayer new];
-        self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player style:style output:self];
+        self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player
+                                                                style:style
+                                                         translations:translations
+                                                               output:self];
         [self addSubview:self.dorisUI.view];
         [self.dorisUI fillSuperView];
     }
 }
 
+- (void)setTranslations:(NSDictionary *)translations {
+    _translations = translations;
+}
+
 - (void)setSrc:(NSDictionary *)source {
-    NSLog(@"zzz src set");
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
         
