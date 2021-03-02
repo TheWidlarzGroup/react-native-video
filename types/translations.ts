@@ -9,4 +9,9 @@ export interface IVideoPlayerTranslations {
   favourite: string;
   watchlist: string;
   moreVideos: string;
+  captions: string;
+  rewind: string;
+  fastForward: string;
+  audioTracks: string;
+  info: string;
 }
