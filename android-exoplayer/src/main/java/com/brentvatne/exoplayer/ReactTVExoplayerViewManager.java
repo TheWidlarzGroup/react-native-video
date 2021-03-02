@@ -524,7 +524,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 root.seekTo(args.getString(0));
                 break;
             case COMMAND_SEEK_TO_POSITION:
-                root.seekTo(args.getInt(0));
+                root.seekTo(args.getInt(0) * 1000);
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
