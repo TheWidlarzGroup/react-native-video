@@ -147,7 +147,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     if (time !== 'now') {
       command =
         typeof time === 'string' ? SeekToCommand.SEEK_TO_TIMESTAMP : SeekToCommand.SEEK_TO_POSITION;
-      args.push(time as string);
+        args.push(time);
     }
 
     if (this.refPlayer) {
