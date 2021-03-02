@@ -32,6 +32,8 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoAboutToEnd;
 @property (nonatomic, copy) RCTBubblingEventBlock onFavouriteButtonClick;
+@property (nonatomic, copy) RCTBubblingEventBlock onRelatedVideoClicked;
+@property (nonatomic, copy) RCTBubblingEventBlock onRelatedVideosIconClicked;
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) DorisUIModule *dorisUI;
 
