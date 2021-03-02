@@ -131,7 +131,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     // APS
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
-    private static final String APS_SLOT_ID_30 = "8f56413a-5fe1-40f8-9d46-0a34792b849d5";
+    private static final String APS_SLOT_ID_30 = "8f56413a-5fe1-40f8-9d46-0a34792b849d";
     private static final String APS_SLOT_ID_60 = "a0bcae0c-df57-4544-8431-8e8d2f1ab577";
     private static final String APS_SLOT_ID_90_PLUS = "8164f377-cee1-4edc-9786-8f1323008cef";
     private static final String APS_SLOT_ID_LIVE = "1bf05a33-f5a1-47a9-bcd9-fae1cc953dca";
@@ -418,13 +418,9 @@ class ReactTVExoplayerView extends FrameLayout
             if (isLive) {
                 // always seek to live edge when returning from background to a live event
                 canSeekToLiveEdge = true;
-                setPausedModifier(false);
-                setPlayWhenReady(true);
-            } else {
-                // otherwise whatever abide by what the previous user action was
-                setPausedModifier(isPaused);
-                setPlayWhenReady(!isPaused);
+                player.seekToDefaultPosition();
             }
+            player.play();
             fromBackground = true;
         }
     }
@@ -494,7 +490,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             activateMediaSession();
         }
-        if (playerNeedsSource && src.getUri() != null) {
+        if (playerNeedsSource && src.getUrl() != null) {
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
             if (haveResumePosition && !force) {
@@ -509,7 +505,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             playerInitTime = new Date().getTime();
 
-            source = new SourceBuilder(src.getUri(), src.getId())
+            source = new SourceBuilder(src.getUrl(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(isLive)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
@@ -521,12 +517,12 @@ class ReactTVExoplayerView extends FrameLayout
                 loadImaStream();
             } else if (actionToken != null) {
                 try {
-                    player.load(source, !haveResumePosition, force, actionToken);
+                    player.load(source, !haveResumePosition, actionToken);
                 } catch (UnsupportedDrmException e) {
                     handleDrmError(e);
                 }
             } else {
-                player.load(source, !haveResumePosition, force);
+                player.load(source, !haveResumePosition);
             }
 
             playerNeedsSource = false;
@@ -888,9 +884,9 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
-        switch (playbackState) {
+    public void onPlaybackStateChanged(int state) {
+        String text = "onStateChanged: playbackState = " + state;
+        switch (state) {
             case Player.STATE_IDLE:
                 text += "idle";
                 eventEmitter.idle();
@@ -1090,8 +1086,8 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PREPARED && isLive) {
+    public void onTimelineChanged(Timeline timeline, int reason) {
+        if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && isLive) {
             canSeekToLiveEdge = true;
         }
     }
@@ -1193,7 +1189,7 @@ class ReactTVExoplayerView extends FrameLayout
     // ReactExoplayerViewManager public api
 
     public void setSrc(
-            Uri uri,
+            String url,
             String id,
             String extension,
             String title,
@@ -1213,10 +1209,10 @@ class ReactTVExoplayerView extends FrameLayout
             int duration,
             String channelName,
             boolean apsTestFlag) {
-        if (uri != null) {
-            Uri srcUri = src != null ? src.getUri() : null;
-            boolean isOriginalSourceNull = srcUri == null;
-            boolean isSourceEqual = uri.equals(srcUri);
+        if (url != null) {
+            String srcUrl = src != null ? src.getUrl() : null;
+            boolean isOriginalSourceNull = srcUrl == null;
+            boolean isSourceEqual = url.equals(srcUrl);
 
             if (ima != null && !ima.isEmpty()) {
                 this.isImaStream = true;
@@ -1226,7 +1222,7 @@ class ReactTVExoplayerView extends FrameLayout
             }
 
             this.src = new RNSource(
-                    uri,
+                    url,
                     id,
                     extension,
                     title,
@@ -1263,8 +1259,8 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void setRawSrc(@NonNull final Uri uri, @Nullable final String extension) {
         if (uri != null) {
-            boolean isOriginalSourceNull = src.getUri() == null;
-            boolean isSourceEqual = uri.equals(src.getUri());
+            boolean isOriginalSourceNull = src.getUrl() == null;
+            boolean isSourceEqual = uri.equals(src.getUrl());
 
             this.src.setUri(uri);
             this.src.setExtension(extension);
@@ -1566,10 +1562,14 @@ class ReactTVExoplayerView extends FrameLayout
         }
     }
 
-    public void setButtons(boolean showFavouriteButton, boolean showWatchlistButton) {
+    public void setButtons(
+            boolean showFavouriteButton,
+            boolean showWatchlistButton,
+            boolean showEpgButton) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setShowFavoriteButton(showFavouriteButton);
             exoDorisPlayerView.setShowWatchListButton(showWatchlistButton);
+            exoDorisPlayerView.setShowEpgButton(showEpgButton);
         }
     }
 
@@ -1809,6 +1809,11 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onWatchListButtonClicked() {
         // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
+    }
+
+    @Override
+    public void onEpgButtonClicked() {
+        eventEmitter.epgIconClick();
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {

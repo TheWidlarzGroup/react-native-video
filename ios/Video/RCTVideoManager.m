@@ -44,6 +44,7 @@ RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(isFavourite, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(buttons, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(theme, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(relatedVideos, NSDictionary);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
@@ -66,6 +67,9 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRequireAdParameters, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoAboutToEnd, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onFavouriteButtonClick, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRelatedVideoClicked, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRelatedVideosIconClicked, RCTBubblingEventBlock);
+
 
 RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {

@@ -102,6 +102,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_WATCHLIST_BUTTON = "watchlist";
     private static final String PROP_FAVOURITE_BUTTON = "favourite";
     private static final String PROP_IS_FAVOURITE = "isFavourite";
+    private static final String PROP_EPG_BUTTON = "epg";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -190,32 +191,29 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
 
         if (startsWithValidScheme(uriString)) {
-            Uri srcUri = Uri.parse(uriString);
             ActionToken actionToken = ActionToken.fromJson(drm);
 
-            if (srcUri != null) {
-                videoView.setSrc(
-                        srcUri,
-                        id,
-                        extension,
-                        title,
-                        description,
-                        type,
-                        textTracks,
-                        actionToken,
-                        headers,
-                        muxData != null ? muxData.toHashMap() : null,
-                        thumbnailUrl,
-                        channelLogoUrl,
-                        ima != null ? ima.toHashMap() : null,
-                        channelId,
-                        seriesId,
-                        seasonId,
-                        playlistId,
-                        duration != null ? Integer.parseInt(duration) : 0,
-                        channelName,
-                        apsTestMode);
-            }
+            videoView.setSrc(
+                    uriString,
+                    id,
+                    extension,
+                    title,
+                    description,
+                    type,
+                    textTracks,
+                    actionToken,
+                    headers,
+                    muxData != null ? muxData.toHashMap() : null,
+                    thumbnailUrl,
+                    channelLogoUrl,
+                    ima != null ? ima.toHashMap() : null,
+                    channelId,
+                    seriesId,
+                    seasonId,
+                    playlistId,
+                    duration != null ? Integer.parseInt(duration) : 0,
+                    channelName,
+                    apsTestMode);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -446,7 +444,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     public void setButtons(final ReactTVExoplayerView videoView, @Nullable ReadableMap buttons) {
         boolean showFavouriteButton = (buttons != null && buttons.hasKey(PROP_FAVOURITE_BUTTON)) && buttons.getBoolean(PROP_FAVOURITE_BUTTON);
         boolean showWatchlistButton = (buttons != null && buttons.hasKey(PROP_WATCHLIST_BUTTON)) && buttons.getBoolean(PROP_WATCHLIST_BUTTON);
-        videoView.setButtons(showFavouriteButton, showWatchlistButton);
+        boolean showEpgButton = (buttons != null && buttons.hasKey(PROP_EPG_BUTTON)) && buttons.getBoolean(PROP_EPG_BUTTON);
+        videoView.setButtons(showFavouriteButton, showWatchlistButton, showEpgButton);
     }
 
     @ReactProp(name = PROP_IS_FAVOURITE)
@@ -455,6 +454,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     }
 
     private boolean startsWithValidScheme(String uriString) {
+        if (uriString == null) {
+            return false;
+        }
+
         return uriString.startsWith("http://")
                 || uriString.startsWith("https://")
                 || uriString.startsWith("content://")
