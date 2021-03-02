@@ -493,25 +493,26 @@ class ReactTVExoplayerView extends FrameLayout
         if (playerNeedsSource && src.getUrl() != null) {
             boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
-            if (haveResumePosition && !force) {
-                controlDispatcher.dispatchSeekTo(player, resumeWindow, resumePosition);
-            }
-
-            if (shouldSeekOnInit) {
-                this.seekTo(shouldSeekTo);
-            }
 
             showOverlay();
 
-            playerInitTime = new Date().getTime();
-
-            source = new SourceBuilder(src.getUrl(), src.getId())
+            SourceBuilder sourceBuilder = new SourceBuilder(src.getUrl(), src.getId())
                     .setTitle(src.getTitle())
                     .setIsLive(isLive)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
-                    .setMaxVideoSize(viewWidth, viewHeight)
-                    .build();
+                    .setMaxVideoSize(viewWidth, viewHeight);
+
+            if (shouldSeekOnInit) {
+                sourceBuilder.setInitialPlaybackPosition(shouldSeekTo);
+            } else if (haveResumePosition && !force) {
+                sourceBuilder.setInitialWindowIndex(resumeWindow);
+                sourceBuilder.setInitialPlaybackPosition(resumePosition);
+            }
+
+            source = sourceBuilder.build();
+
+            playerInitTime = new Date().getTime();
 
             if (isImaStream && getWidth() != 0 && getHeight() != 0) {
                 loadImaStream();
@@ -1427,6 +1428,8 @@ class ReactTVExoplayerView extends FrameLayout
         if (player != null) {
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
             controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), positionMs);
+        } else {
+            shouldSeekTo = positionMs;
         }
     }
 
