@@ -27,6 +27,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     
     bool _controls;
     bool _canBeFavourite;
+    bool _shouldRequestTrackingAuthorization;
     NSDictionary* _Nullable _theme;
     NSDictionary* _Nullable _relatedVideos;
     
@@ -43,6 +44,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
+        _shouldRequestTrackingAuthorization = NO;
         _canBeFavourite = YES;
         _controls = YES;
     }
@@ -238,24 +240,38 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         }
         
         if (@available(tvOS 14, *)) {
-            [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-                if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
-                    [adTagParameters setValue:@"1" forKey:@"is_lat"];
-                } else {
-                    [adTagParameters setValue:@"0" forKey:@"is_lat"];
-                }
-                
-                [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-                    if (appId) {
-                        self->_appId = appId;
-                        [adTagParameters setValue:appId.stringValue forKey:@"msid"];
-                    } else {
-                        self->_appId = 0;
-                        [adTagParameters setValue:@"0" forKey:@"msid"];
-                    }
-                    handler(adTagParameters);
-                }];
-            }];
+			if (_shouldRequestTrackingAuthorization) {
+				[ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+					if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+						[adTagParameters setValue:@"1" forKey:@"is_lat"];
+					} else {
+						[adTagParameters setValue:@"0" forKey:@"is_lat"];
+					}
+					
+					[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+						if (appId) {
+							self->_appId = appId;
+							[adTagParameters setValue:appId.stringValue forKey:@"msid"];
+						} else {
+							self->_appId = 0;
+							[adTagParameters setValue:@"0" forKey:@"msid"];
+						}
+						handler(adTagParameters);
+					}];
+				}];
+			} else {
+				[adTagParameters setValue:@"0" forKey:@"is_lat"];
+				[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+					if (appId) {
+						self->_appId = appId;
+						[adTagParameters setValue:appId.stringValue forKey:@"msid"];
+					} else {
+						self->_appId = 0;
+						[adTagParameters setValue:@"0" forKey:@"msid"];
+					}
+					handler(adTagParameters);
+				}];
+			}
         } else {
             [adTagParameters setValue:@"0" forKey:@"is_lat"];
             [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
@@ -350,10 +366,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 #pragma mark - DorisExternalOutputProtocol
 
-- (void)didRequestAdTagParametersFor:(NSTimeInterval)timeInterval {
+- (void)didRequestAdTagParametersFor:(NSTimeInterval)timeInterval isBlocking:(BOOL)isBlocking {
     if(self.onRequireAdParameters) {
         NSNumber* _timeIntervalSince1970 = [[NSNumber alloc] initWithDouble:timeInterval];
-        self.onRequireAdParameters(@{@"date": _timeIntervalSince1970});
+        NSNumber* _isBlocking = [[NSNumber alloc] initWithBool:isBlocking];
+        
+        self.onRequireAdParameters(@{@"date": _timeIntervalSince1970,
+                                     @"isBlocking": _isBlocking});
     }
 }
 
