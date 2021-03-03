@@ -142,7 +142,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
    */
   seekTo = (time: 'now' | string | number) => {
     let command = SeekToCommand.SEEK_TO_NOW;
-    const args: string[] = [];
+    const args: Array<string | number> = [];
 
     if (time !== 'now') {
       command =

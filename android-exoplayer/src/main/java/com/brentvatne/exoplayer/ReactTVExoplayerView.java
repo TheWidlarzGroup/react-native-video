@@ -1776,7 +1776,9 @@ class ReactTVExoplayerView extends FrameLayout
         }
 
         if (adEvent.getType() == AD_BREAK_ENDED) {
-            setControls(true);
+            if (areControlsVisible) {
+                setControls(true);
+            }
         }
     }
 
