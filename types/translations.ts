@@ -14,4 +14,6 @@ export interface IVideoPlayerTranslations {
   fastForward: string;
   audioTracks: string;
   info: string;
+  adsCountdownAd: string;
+  adsCountdownOf: string;
 }
