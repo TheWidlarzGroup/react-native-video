@@ -12,6 +12,11 @@
 #import <DVAssetLoaderDelegate/DVAssetLoaderDelegate.h>
 #endif
 
+@protocol RCTVideoDelegate <NSObject>
+@optional
+- (BOOL)shouldSetupPlayerItem:(AVPlayerItem *) playerItem forSource:(NSDictionary *) source;
+@end
+
 @class RCTEventDispatcher;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate>
@@ -43,6 +48,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onPictureInPictureStatusChanged;
 @property (nonatomic, copy) RCTDirectEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 @property (nonatomic, copy) RCTDirectEventBlock onGetLicense;
+@property (nonatomic, weak) id <RCTVideoDelegate> rctVideoDelegate;
 
 typedef NS_ENUM(NSInteger, RCTVideoError) {
     RCTVideoErrorFromJSPart,
@@ -59,6 +65,7 @@ typedef NS_ENUM(NSInteger, RCTVideoError) {
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
+- (void)setupPlayerItem:(AVPlayerItem *)playerItem forSource:(NSDictionary *)source withPlayer:(AVPlayer *)player;
 
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)setLicenseResult:(NSString * )license;

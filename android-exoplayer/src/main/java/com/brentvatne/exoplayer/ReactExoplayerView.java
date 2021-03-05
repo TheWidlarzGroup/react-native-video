@@ -81,7 +81,7 @@ import java.util.UUID;
 import java.util.Map;
 
 @SuppressLint("ViewConstructor")
-class ReactExoplayerView extends FrameLayout implements
+public class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
         Player.EventListener,
         BandwidthMeter.EventListener,
@@ -163,6 +163,8 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
+    public ReactExoplayerViewDelegateInterface delegate;
+
     private final Handler progressHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -182,7 +184,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     };
-    
+
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
         if(!player.getCurrentTimeline().isEmpty()) {    
@@ -437,11 +439,15 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
                 }
-                if (playerNeedsSource && srcUri != null) {
+                Uri uri = srcUri;
+                if (delegate != null) {
+                    uri = delegate.getSrcUri(self, uri);
+                }
+                if (playerNeedsSource && uri != null) {
                     exoPlayerView.invalidateAspectRatio();
 
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(srcUri, extension);
+                    MediaSource videoSource = buildMediaSource(uri, extension);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
                         mediaSource = videoSource;
@@ -490,6 +496,17 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
+        return buildMediaSource(uri, overrideExtension, true);
+    }
+
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension, boolean useDelegate) {
+        if (delegate != null && useDelegate) {
+            MediaSource mediaSource = delegate.buildMediaSource(this, uri, overrideExtension);
+
+            if (mediaSource != null) {
+                return mediaSource;
+            }
+        }
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         switch (type) {
@@ -1000,7 +1017,16 @@ class ReactExoplayerView extends FrameLayout implements
     // ReactExoplayerViewManager public api
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
+        setSrc(uri, extension, headers, true);
+    }
+
+    public void setSrc(final Uri uri, final String extension, Map<String, String> headers, boolean useDelegate) {
         if (uri != null) {
+//            if (delegate != null && useDelegate) {
+//                if (delegate.setSrc(this, uri, extension, headers)) {
+//                    return;
+//                }
+//            }
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
@@ -1372,5 +1398,9 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
+    }
+
+    public void setDelegate(ReactExoplayerViewDelegateInterface reactExoplayerViewDelegate) {
+        this.delegate = reactExoplayerViewDelegate;
     }
 }
