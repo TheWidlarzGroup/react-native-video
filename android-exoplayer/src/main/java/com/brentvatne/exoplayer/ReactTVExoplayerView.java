@@ -412,7 +412,7 @@ class ReactTVExoplayerView extends FrameLayout
 
     @Override
     public void onHostResume() {
-        if (isInBackground) {
+        if (isInBackground && player != null) {
             Log.d(TAG, "onHostResume() isPaused: " + isPaused + " live: " + isLive);
             isInBackground = false; // reset to false first
             if (isLive) {
@@ -420,7 +420,7 @@ class ReactTVExoplayerView extends FrameLayout
                 canSeekToLiveEdge = true;
                 player.seekToDefaultPosition();
             }
-            player.play();
+            setPlayWhenReady(true);
             fromBackground = true;
         }
     }
@@ -430,8 +430,13 @@ class ReactTVExoplayerView extends FrameLayout
         Log.d(TAG, "onHostPause()");
         setPlayInBackground(false);
         setPlayWhenReady(false);
+        player.pause();
         onStopPlayback();
         isInBackground = true;
+
+        if (!isInteractive()) {
+            stopPlayback();
+        }
     }
 
     @Override
@@ -722,6 +727,7 @@ class ReactTVExoplayerView extends FrameLayout
         releaseMediaSession();
         adTagParameters = null;
         isImaStreamLoaded = false;
+        isInBackground = false;
 
         if (player != null) {
             updateResumePosition();
