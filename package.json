@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "5.19.11",
+    "version": "5.19.12",
     "description": "A <Video /> element for react-native",
     "main": "Video.tsx",
     "license": "MIT",
@@ -19,7 +19,7 @@
         "eslint-plugin-react": "3.16.1"
     },
     "dependencies": {
-        "@imggaming/dice-shield": "git+ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=2.3.1",
+        "@imggaming/dice-shield": "git+ssh://git@github.com:DiceTechnology/dice-shield.git#semver:=2.9.1",
         "keymirror": "0.1.1",
         "prop-types": "^15.5.10"
     },
