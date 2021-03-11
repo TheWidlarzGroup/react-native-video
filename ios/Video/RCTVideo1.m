@@ -123,7 +123,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
         
-        [self updateDorisUI:source];
         [self updateRelatedVideos];
         
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
@@ -173,19 +172,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         }
         
         [self.dorisUI.input setRelatedVideos: relatedVideos];
-    }
-}
-
-- (void)updateDorisUI:(NSDictionary *)source {
-    NSMutableDictionary* metaData = [source objectForKey:@"metadata"];
-    [metaData setValue:[[NSNumber alloc] initWithBool:_canBeFavourite] forKey:@"canBeFavourite"];
-    
-    DorisUIConfiguration* _Nullable configuration = [DorisUIConfiguration createFrom:metaData];
-    
-    if (configuration) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.dorisUI.input setUIConfiguration:configuration];
-        });
     }
 }
 
