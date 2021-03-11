@@ -8,7 +8,7 @@ type SourceType = 'mpd' | 'm3u8';
 
 export interface IVideoPlayerSource {
   uri: string;
-  id: string;
+  id?: string;
   subtitles?: IVideoPlayerSubtitles[],
   type?: SourceType;
   duration?: string;
