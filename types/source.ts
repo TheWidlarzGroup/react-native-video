@@ -1,6 +1,5 @@
 import { IVideoPlayerDRM } from './drm';
 import { IVideoPlayerIMA } from './ima';
-import { IVideoPlayerMetadata } from './metadata';
 import { IMuxData } from './mux';
 import { IVideoPlayerSubtitles } from './subtitles';
 import { IVideoPlayerAPS } from './aps';
@@ -13,7 +12,6 @@ export interface IVideoPlayerSource {
   type?: SourceType;
   drm?: IVideoPlayerDRM;
   ima?: IVideoPlayerIMA;
-  metadata?: IVideoPlayerMetadata;
   config?: {
     muxData: IMuxData
   },
@@ -21,4 +19,8 @@ export interface IVideoPlayerSource {
   patchVer?: number;
   requestHeaders?: Record<string, any>;
   aps?: IVideoPlayerAPS;
+  channelId?: string;
+  seriesId?: string;
+  seasonId?: string;
+  playlistId?: string;
 }
