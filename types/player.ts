@@ -2,6 +2,7 @@ import { ViewProps } from 'react-native';
 
 import { IVideoPlayerButtons } from './buttons';
 import { IVideoPlayerCallbacks } from './callbacks';
+import { IVideoPlayerMetadata } from './metadata';
 import { VideoResizeMode } from './resizeMode';
 import { IVideoPlayerSource } from './source';
 import { IVideoPlayerTranslations } from './translations';
@@ -24,6 +25,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   locale?: string;
   live?: boolean;
   mediaKeys?: boolean;
+  metadata?: IVideoPlayerMetadata;
   muted?: boolean;
   overlayAutoHideTimeout?: number;
   poster?: string;
