@@ -31,6 +31,7 @@ import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
 import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
 import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaSource;
+import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
 import com.brentvatne.entity.RelatedVideo;
@@ -502,7 +503,6 @@ class ReactTVExoplayerView extends FrameLayout
             showOverlay();
 
             SourceBuilder sourceBuilder = new SourceBuilder(src.getUrl(), src.getId())
-                    .setTitle(src.getTitle())
                     .setIsLive(isLive)
                     .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
@@ -1199,15 +1199,11 @@ class ReactTVExoplayerView extends FrameLayout
             String url,
             String id,
             String extension,
-            String title,
-            String description,
             String type,
             ReadableArray textTracks,
             ActionToken actionToken,
             Map<String, String> headers,
             Map<String, Object> muxData,
-            String thumbnailUrl,
-            String channelLogoUrl,
             Map<String, Object> ima,
             String channelId,
             String seriesId,
@@ -1232,15 +1228,10 @@ class ReactTVExoplayerView extends FrameLayout
                     url,
                     id,
                     extension,
-                    title,
-                    description,
-                    type,
                     isLive,
                     getTextTracks(textTracks),
                     headers,
                     muxData,
-                    thumbnailUrl,
-                    channelLogoUrl,
                     null,
                     null,
                     channelId,
@@ -1252,11 +1243,15 @@ class ReactTVExoplayerView extends FrameLayout
                     apsTestFlag);
             this.actionToken = actionToken;
 
-            exoDorisPlayerView.setTitle(title);
-            exoDorisPlayerView.setDescription(description);
-            exoDorisPlayerView.setChannelLogo(channelLogoUrl);
-
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
+        }
+    }
+
+    public void setMetadata(RNMetadata metadata) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setTitle(metadata.getTitle());
+            exoDorisPlayerView.setDescription(metadata.getDescription());
+            exoDorisPlayerView.setChannelLogo(metadata.getChannelLogoUrl());
         }
     }
 

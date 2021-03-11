@@ -3,28 +3,25 @@ package com.brentvatne.entity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class Metadata {
+public class RNMetadata {
 
     private final String channelLogoUrl;
     private final String description;
     private final String thumbnailUrl;
     private final String title;
     private final String type;
-    private final int duration;
 
-    public Metadata(
+    public RNMetadata(
             @Nullable String channelLogoUrl,
             @Nullable String description,
             @NonNull String thumbnailUrl,
             @NonNull String title,
-            @NonNull String type,
-            int duration) {
+            @NonNull String type) {
         this.channelLogoUrl = channelLogoUrl;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
         this.title = title;
         this.type = type;
-        this.duration = duration;
     }
 
     @Nullable
@@ -50,9 +47,5 @@ public class Metadata {
     @NonNull
     public String getType() {
         return type;
-    }
-
-    public int getDuration() {
-        return duration;
     }
 }
