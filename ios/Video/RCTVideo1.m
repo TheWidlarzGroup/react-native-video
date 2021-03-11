@@ -106,8 +106,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)setMetadata:(NSDictionary *)metadata {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
-        NSMutableDictionary* _metaData = metadata;
-        [_metaData setValue:[[NSNumber alloc] initWithBool:_canBeFavourite] forKey:@"canBeFavourite"];
+        NSMutableDictionary* _metaData = (NSMutableDictionary*)metadata;
+        [_metaData setValue:[[NSNumber alloc] initWithBool:self->_canBeFavourite] forKey:@"canBeFavourite"];
         
         DorisUIConfiguration* _Nullable configuration = [DorisUIConfiguration createFrom:_metaData];
         
