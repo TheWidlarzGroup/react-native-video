@@ -5,6 +5,5 @@ export interface IVideoPlayerMetadata {
   thumbnailUrl: string;
   title: string;
   type: string;
-  duration?: string;
   channelName?: string;
 }

@@ -10,6 +10,7 @@ export interface IVideoPlayerSource {
   uri: string;
   subtitles?: IVideoPlayerSubtitles[],
   type?: SourceType;
+  duration?: string;
   drm?: IVideoPlayerDRM;
   ima?: IVideoPlayerIMA;
   config?: {
