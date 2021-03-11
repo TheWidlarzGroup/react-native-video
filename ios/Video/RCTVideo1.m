@@ -104,6 +104,21 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     _translations = translations;
 }
 
+- (void)setMetadata:(NSDictionary *)metadata {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
+        NSMutableDictionary* _metaData = metadata;
+        [_metaData setValue:[[NSNumber alloc] initWithBool:_canBeFavourite] forKey:@"canBeFavourite"];
+        
+        DorisUIConfiguration* _Nullable configuration = [DorisUIConfiguration createFrom:_metaData];
+        
+        if (configuration) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dorisUI.input setUIConfiguration:configuration];
+            });
+        }
+    });
+}
+
 - (void)setSrc:(NSDictionary *)source {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
@@ -248,40 +263,43 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         }
         
         if (@available(tvOS 14, *)) {
-			if (_shouldRequestTrackingAuthorization) {
-				[ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-					if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
-						[adTagParameters setValue:@"1" forKey:@"is_lat"];
-					} else {
-						[adTagParameters setValue:@"0" forKey:@"is_lat"];
-					}
-					
-					[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-						if (appId) {
-							self->_appId = appId;
-							[adTagParameters setValue:appId.stringValue forKey:@"msid"];
-						} else {
-							self->_appId = 0;
-							[adTagParameters setValue:@"0" forKey:@"msid"];
-						}
-						handler(adTagParameters);
-					}];
-				}];
-			} else {
-				[adTagParameters setValue:@"0" forKey:@"is_lat"];
-				[self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-					if (appId) {
-						self->_appId = appId;
-						[adTagParameters setValue:appId.stringValue forKey:@"msid"];
-					} else {
-						self->_appId = 0;
-						[adTagParameters setValue:@"0" forKey:@"msid"];
-					}
-					handler(adTagParameters);
-				}];
-			}
+            if (_shouldRequestTrackingAuthorization) {
+                [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+                    if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+                        [adTagParameters setValue:@"0" forKey:@"is_lat"];
+                        [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
+                    } else {
+                        [adTagParameters setValue:@"1" forKey:@"is_lat"];
+                    }
+                    
+                    [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+                        if (appId) {
+                            self->_appId = appId;
+                            [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+                        } else {
+                            self->_appId = 0;
+                            [adTagParameters setValue:@"0" forKey:@"msid"];
+                        }
+                        handler(adTagParameters);
+                    }];
+                }];
+            } else {
+                [adTagParameters setValue:@"0" forKey:@"is_lat"];
+                [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
+                [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+                    if (appId) {
+                        self->_appId = appId;
+                        [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+                    } else {
+                        self->_appId = 0;
+                        [adTagParameters setValue:@"0" forKey:@"msid"];
+                    }
+                    handler(adTagParameters);
+                }];
+            }
         } else {
             [adTagParameters setValue:@"0" forKey:@"is_lat"];
+            [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
             [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
                 if (appId) {
                     self->_appId = appId;
