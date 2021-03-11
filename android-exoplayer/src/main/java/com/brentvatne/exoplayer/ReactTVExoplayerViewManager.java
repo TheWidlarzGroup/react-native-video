@@ -39,23 +39,26 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_IMA = "ima";
-    private static final String PROP_SRC_METADATA = "metadata";
-    private static final String PROP_SRC_ID = "id";
-    private static final String PROP_SRC_TITLE = "title";
-    private static final String PROP_SRC_DESCRIPTION = "description";
-    private static final String PROP_SRC_THUMBNAIL_URL = "thumbnailUrl";
-    private static final String PROP_SRC_CHANNEL_LOGO_URL = "channelLogoUrl";
     private static final String PROP_SRC_CHANNEL_ID = "channelId";
     private static final String PROP_SRC_SERIES_ID = "seriesId";
     private static final String PROP_SRC_SEASON_ID = "seasonId";
     private static final String PROP_SRC_PLAYLIST_ID = "playlistId";
     private static final String PROP_SRC_DURATION = "duration";
-    private static final String PROP_SRC_CHANNEL_NAME = "channelName";
     private static final String PROP_SRC_CONFIG = "config";
     private static final String PROP_SRC_MUX_DATA = "muxData";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_SRC_APS = "aps";
     private static final String PROP_SRC_APS_TEST_MODE = "testMode";
+
+    // Metadata properties
+    private static final String PROP_METADATA = "metadata";
+    private static final String PROP_METADATA_ID = "id";
+    private static final String PROP_METADATA_CHANNEL_LOGO_URL = "channelLogoUrl";
+    private static final String PROP_METADATA_DESCRIPTION = "description";
+    private static final String PROP_METADATA_THUMBNAIL_URL = "thumbnailUrl";
+    private static final String PROP_METADATA_TITLE = "title";
+    private static final String PROP_METADATA_TYPE = "type";
+    private static final String PROP_METADATA_CHANNEL_NAME = "channelName";
 
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -163,20 +166,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String drm = src.hasKey(PROP_SRC_DRM) ? src.getString(PROP_SRC_DRM) : null;
         ReadableMap ima = src.hasKey(PROP_SRC_IMA) ? src.getMap(PROP_SRC_IMA) : null;
-
-        ReadableMap metadata = src.hasKey(PROP_SRC_METADATA) ? src.getMap(PROP_SRC_METADATA) : null;
-        String id = (metadata != null && metadata.hasKey(PROP_SRC_ID)) ? metadata.getString(PROP_SRC_ID) : null;
-        String title = (metadata != null && metadata.hasKey(PROP_SRC_TITLE)) ? metadata.getString(PROP_SRC_TITLE) : null;
-        String description = (metadata != null && metadata.hasKey(PROP_SRC_DESCRIPTION)) ? metadata.getString(PROP_SRC_DESCRIPTION) : null;
-        String type = (metadata != null && metadata.hasKey(PROP_SRC_TYPE)) ? metadata.getString(PROP_SRC_TYPE) : null;
-        String thumbnailUrl = (metadata != null && metadata.hasKey(PROP_SRC_THUMBNAIL_URL)) ? metadata.getString(PROP_SRC_THUMBNAIL_URL) : null;
-        String channelLogoUrl = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_LOGO_URL)) ? metadata.getString(PROP_SRC_CHANNEL_LOGO_URL) : null;
-        String channelId = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_ID)) ? metadata.getString(PROP_SRC_CHANNEL_ID) : null;
-        String seriesId = (metadata != null && metadata.hasKey(PROP_SRC_SERIES_ID)) ? metadata.getString(PROP_SRC_SERIES_ID) : null;
-        String seasonId = (metadata != null && metadata.hasKey(PROP_SRC_SEASON_ID)) ? metadata.getString(PROP_SRC_SEASON_ID) : null;
-        String playlistId = (metadata != null && metadata.hasKey(PROP_SRC_PLAYLIST_ID)) ? metadata.getString(PROP_SRC_PLAYLIST_ID) : null;
-        String duration = (metadata != null && metadata.hasKey(PROP_SRC_DURATION)) ? metadata.getString(PROP_SRC_DURATION) : null;
-        String channelName = (metadata != null && metadata.hasKey(PROP_SRC_CHANNEL_NAME)) ? metadata.getString(PROP_SRC_CHANNEL_NAME) : null;
+        String type = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
+        String channelId = src.hasKey(PROP_SRC_CHANNEL_ID) ? src.getString(PROP_SRC_CHANNEL_ID) : null;
+        String seriesId = src.hasKey(PROP_SRC_SERIES_ID) ? src.getString(PROP_SRC_SERIES_ID) : null;
+        String seasonId = src.hasKey(PROP_SRC_SEASON_ID) ? src.getString(PROP_SRC_SEASON_ID) : null;
+        String playlistId = src.hasKey(PROP_SRC_PLAYLIST_ID) ? src.getString(PROP_SRC_PLAYLIST_ID) : null;
+        String duration = src.hasKey(PROP_SRC_DURATION) ? src.getString(PROP_SRC_DURATION) : null;
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
@@ -195,24 +190,18 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
             videoView.setSrc(
                     uriString,
-                    id,
                     extension,
-                    title,
-                    description,
                     type,
                     textTracks,
                     actionToken,
                     headers,
                     muxData != null ? muxData.toHashMap() : null,
-                    thumbnailUrl,
-                    channelLogoUrl,
                     ima != null ? ima.toHashMap() : null,
                     channelId,
                     seriesId,
                     seasonId,
                     playlistId,
                     duration != null ? Integer.parseInt(duration) : 0,
-                    channelName,
                     apsTestMode);
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -233,6 +222,19 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     videoView.setRawSrc(srcUri, extension);
                 }
             }
+        }
+    }
+
+    @ReactProp(name = PROP_METADATA)
+    public void setMetadata(final ReactTVExoplayerView videoView, final ReadableMap metadata) {
+        if (metadata != null) {
+            String id = metadata.hasKey(PROP_METADATA_ID) ? metadata.getString(PROP_METADATA_ID) : null;
+            String channelLogoUrl = metadata.hasKey(PROP_METADATA_CHANNEL_LOGO_URL) ? metadata.getString(PROP_METADATA_CHANNEL_LOGO_URL) : null;
+            String description = metadata.hasKey(PROP_METADATA_DESCRIPTION) ? metadata.getString(PROP_METADATA_DESCRIPTION) : null;
+            String thumbnailUrl = metadata.hasKey(PROP_METADATA_THUMBNAIL_URL) ? metadata.getString(PROP_METADATA_THUMBNAIL_URL) : null;
+            String title = metadata.hasKey(PROP_METADATA_TITLE) ? metadata.getString(PROP_METADATA_TITLE) : null;
+            String type = metadata.hasKey(PROP_METADATA_TYPE) ? metadata.getString(PROP_METADATA_TYPE) : null;
+            String channelName = metadata.hasKey(PROP_METADATA_CHANNEL_NAME) ? metadata.getString(PROP_METADATA_CHANNEL_NAME) : null;
         }
     }
 
@@ -424,9 +426,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             for (int i = 0; i < relatedVideosArray.size(); i++) {
                 ReadableMap relatedVideo = relatedVideosArray.getMap(i);
 
-                String title = relatedVideo.hasKey(PROP_SRC_TITLE) ? relatedVideo.getString(PROP_SRC_TITLE) : null;
+                String title = relatedVideo.hasKey(PROP_METADATA_TITLE) ? relatedVideo.getString(PROP_METADATA_TITLE) : null;
                 String subtitle = relatedVideo.hasKey(PROP_RELATED_VIDEOS_SUBTITLE) ? relatedVideo.getString(PROP_RELATED_VIDEOS_SUBTITLE) : null;
-                String thumbnailUrl = relatedVideo.hasKey(PROP_SRC_THUMBNAIL_URL) ? relatedVideo.getString(PROP_SRC_THUMBNAIL_URL) : null;
+                String thumbnailUrl = relatedVideo.hasKey(PROP_METADATA_THUMBNAIL_URL) ? relatedVideo.getString(PROP_METADATA_THUMBNAIL_URL) : null;
 
                 relatedVideos.add(new RelatedVideo(title,
                                                    subtitle,

@@ -14,6 +14,7 @@ public class RNSource {
     private String url;
     private String extension;
 
+    private final String id;
     private final boolean isLive;
     private final TextTrack[] textTracks;
     private final Map<String, String> headers;
@@ -24,10 +25,13 @@ public class RNSource {
     private final String seriesId;
     private final String seasonId;
     private final String playlistId;
+    private final int duration;
+    private final String channelName;
     private final boolean apsTestFlag;
 
     public RNSource(
             @NonNull String url,
+            @NonNull String id,
             @Nullable String extension,
             boolean isLive,
             @Nullable TextTrack[] textTracks,
@@ -39,7 +43,10 @@ public class RNSource {
             @Nullable String seriesId,
             @Nullable String seasonId,
             @Nullable String playlistId,
+            int duration,
+            @Nullable String channelName,
             boolean apsTestFlag) {
+        this.id = id;
         this.url = url;
         this.extension = extension;
         this.isLive = isLive;
@@ -52,6 +59,8 @@ public class RNSource {
         this.seriesId = seriesId;
         this.seasonId = seasonId;
         this.playlistId = playlistId;
+        this.channelName = channelName;
+        this.duration = duration;
         this.apsTestFlag = apsTestFlag;
     }
 
@@ -66,6 +75,10 @@ public class RNSource {
 
     public void setUri(Uri uri) {
         this.url = uri.toString();
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Nullable
@@ -124,6 +137,14 @@ public class RNSource {
     @Nullable
     public String getPlaylistId() {
         return playlistId;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public String getChannelName() {
+        return channelName;
     }
 
     public boolean getApsTestFlag() {
