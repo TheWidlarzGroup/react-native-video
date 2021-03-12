@@ -50,7 +50,6 @@ import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
 import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
 import com.diceplatform.doris.ext.ima.entity.AdInfo;
 import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
-import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
 import com.diceplatform.doris.ext.ima.entity.ImaSource;
 import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
@@ -173,11 +172,12 @@ class ReactTVExoplayerView extends FrameLayout
     private boolean isBuffering;
     private boolean isMediaKeysEnabled = true;
     private boolean areControlsVisible = true;
+    private boolean areControlsAllowed = true;
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
     private boolean isImaStream = false;
     private boolean isImaStreamLoaded = false;
-    private boolean isAmazonFireTv = false;
+    private boolean isAmazonFireTv;
     private int viewWidth;
     private int viewHeight;
 
@@ -1537,6 +1537,11 @@ class ReactTVExoplayerView extends FrameLayout
         this.hasStats = hasStats;
     }
 
+    public void setAreControlsAllowed(boolean allowed) {
+        areControlsAllowed = allowed;
+        setControls(allowed);
+    }
+
     public void setControls(final boolean visible) {
         areControlsVisible = visible;
         if (visible) {
@@ -1772,12 +1777,14 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onAdEvent(AdEvent adEvent) {
         if (adEvent.getType() == AD_BREAK_STARTED) {
-            setControls(false);
+            if (areControlsAllowed) {
+                setControls(false);
+            }
             return;
         }
 
         if (adEvent.getType() == AD_BREAK_ENDED) {
-            if (areControlsVisible) {
+            if (areControlsAllowed) {
                 setControls(true);
             }
         }
