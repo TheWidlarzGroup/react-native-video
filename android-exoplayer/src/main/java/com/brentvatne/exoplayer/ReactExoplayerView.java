@@ -10,6 +10,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
@@ -439,15 +440,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
                 }
-                Uri uri = srcUri;
-                if (delegate != null) {
-                    uri = delegate.getSrcUri(self, uri);
-                }
-                if (playerNeedsSource && uri != null) {
+                if (playerNeedsSource && srcUri != null) {
                     exoPlayerView.invalidateAspectRatio();
 
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(uri, extension);
+                    MediaSource videoSource = buildMediaSource(srcUri, extension);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
                         mediaSource = videoSource;
@@ -1022,11 +1019,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers, boolean useDelegate) {
         if (uri != null) {
-//            if (delegate != null && useDelegate) {
-//                if (delegate.setSrc(this, uri, extension, headers)) {
-//                    return;
-//                }
-//            }
+            if (useDelegate && delegate != null) {
+                if (delegate.setSrc(this, uri, extension, headers)) {
+                    return;
+                }
+            }
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
@@ -1402,5 +1399,22 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setDelegate(ReactExoplayerViewDelegateInterface reactExoplayerViewDelegate) {
         this.delegate = reactExoplayerViewDelegate;
+    }
+
+    public static ReactExoplayerView findRCTVideo(View view) {
+        ReactExoplayerView reactExoplayerView = null;
+        if (view instanceof ReactExoplayerView) {
+            reactExoplayerView = (ReactExoplayerView) view;
+        } else if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+            int count = viewGroup.getChildCount();
+            for (int i = 0; i < count; i++) {
+                reactExoplayerView = findRCTVideo(viewGroup.getChildAt(i));
+                if (reactExoplayerView != null) {
+                    break;
+                }
+            }
+        }
+        return reactExoplayerView;
     }
 }

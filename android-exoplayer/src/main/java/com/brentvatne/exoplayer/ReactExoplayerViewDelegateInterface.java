@@ -9,5 +9,5 @@ import java.util.Map;
 public interface ReactExoplayerViewDelegateInterface {
     public MediaSource buildMediaSource(ReactExoplayerView reactExoplayerView, Uri uri, String overrideExtension);
 
-    public Uri getSrcUri(ReactExoplayerView reactExoplayerView, Uri uri);
+    public boolean setSrc(ReactExoplayerView reactExoplayerView, final Uri uri, final String extension, Map<String, String> headers);
 }
