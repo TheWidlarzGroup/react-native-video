@@ -357,7 +357,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_CONTROLS)
     public void setControls(final ReactTVExoplayerView videoView, final boolean visible) {
-        videoView.setControls(visible);
+        videoView.setAreControlsAllowed(visible);
     }
 
     @ReactProp(name = PROP_CONTROLS_OPACITY)
