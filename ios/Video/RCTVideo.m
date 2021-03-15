@@ -8,8 +8,6 @@
 #include "DiceUtils.h"
 #include "DiceBeaconRequest.h"
 #include "DiceHTTPRequester.h"
-#import <AppTrackingTransparency/AppTrackingTransparency.h>
-#import <AdSupport/AdSupport.h>
 
 
 //@import ReactVideoSubtitleSideloader;
@@ -712,37 +710,17 @@ static void extracted(RCTVideo *object, NSDictionary *source) {
         [adTagParameters setValue:customParams forKey:@"cust_params"];
       }
       
-      if (@available(tvOS 14, *)) {
-        [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-          if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
-            [adTagParameters setValue:@"1" forKey:@"is_lat"];
-          } else {
-            [adTagParameters setValue:@"0" forKey:@"is_lat"];
-          }
-          streamRequest.adTagParameters = adTagParameters;
-          
-          [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+
+        [adTagParameters setValue:@"0" forKey:@"is_lat"];
+        [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
             if (appId) {
-              [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+                [adTagParameters setValue:appId.stringValue forKey:@"msid"];
             } else {
-              [adTagParameters setValue:@"0" forKey:@"msid"];
+                [adTagParameters setValue:@"0" forKey:@"msid"];
             }
             streamRequest.adTagParameters = adTagParameters;
             [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
-          }];
         }];
-      } else {
-        [adTagParameters setValue:@"0" forKey:@"is_lat"];
-        [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-          if (appId) {
-            [adTagParameters setValue:appId.stringValue forKey:@"msid"];
-          } else {
-            [adTagParameters setValue:@"0" forKey:@"msid"];
-          }
-          streamRequest.adTagParameters = adTagParameters;
-          [self.avdoris requestIMAStreamWithStreamRequest:streamRequest];
-        }];
-      }
     }
   } else {
     [self.player replaceCurrentItemWithPlayerItem:playerItem];
