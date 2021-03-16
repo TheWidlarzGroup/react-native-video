@@ -178,8 +178,8 @@ class ReactTVExoplayerView extends FrameLayout
     private boolean isImaStream = false;
     private boolean isImaStreamLoaded = false;
     private boolean isAmazonFireTv;
-    private int viewWidth;
-    private int viewHeight;
+    private int viewWidth = 0;
+    private int viewHeight = 0;
 
     // Props from React
     private RNSource src;
@@ -519,7 +519,7 @@ class ReactTVExoplayerView extends FrameLayout
 
             playerInitTime = new Date().getTime();
 
-            if (isImaStream && getWidth() != 0 && getHeight() != 0) {
+            if (isImaStream && viewWidth != 0 && viewHeight != 0) {
                 loadImaStream();
             } else if (actionToken != null) {
                 try {
@@ -541,9 +541,9 @@ class ReactTVExoplayerView extends FrameLayout
         isImaStreamLoaded = true;
 
         adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(),
-                                                                      imaSrc.getAdTagParametersMap());
-        adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth() + "&ph="
-                                              + getHeight());
+                imaSrc.getAdTagParametersMap());
+        adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + viewWidth + "&ph="
+                + viewHeight);
 
         if (isAmazonFireTv) {
             AmazonFireTVAdRequest amazonFireTVAdRequest = createApsBidRequest();
@@ -1642,7 +1642,7 @@ class ReactTVExoplayerView extends FrameLayout
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
 
-            if (isImaStream && !isImaStreamLoaded) {
+            if (isImaStream && !isImaStreamLoaded && exoDorisImaWrapper != null) {
                 loadImaStream();
             }
         }
@@ -1840,8 +1840,8 @@ class ReactTVExoplayerView extends FrameLayout
         if (imaSrc.getStartDate() != startDate || imaSrc.getEndDate() != endDate) {
             Map<String, Object> adTagParametersMap = (Map<String, Object>) replaceAdTagParametersMap.get(KEY_AD_TAG_PARAMETERS);
             AdTagParameters adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(), adTagParametersMap);
-            adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + getWidth()
-                                                  + "&ph=" + getHeight());
+            adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + viewWidth
+                    + "&ph=" + viewHeight);
 
             imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
             exoDorisImaWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
