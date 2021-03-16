@@ -3,8 +3,10 @@ package com.brentvatne.react;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.TimedMetaData;
 import android.net.Uri;
@@ -50,6 +52,7 @@ public class ReactVideoView extends ScalableVideoView implements
     MediaPlayer.OnSeekCompleteListener,
     MediaPlayer.OnCompletionListener,
     MediaPlayer.OnInfoListener,
+    AudioManager.OnAudioFocusChangeListener,
     LifecycleEventListener,
     MediaController.MediaPlayerControl {
 
@@ -113,6 +116,7 @@ public class ReactVideoView extends ScalableVideoView implements
     private Runnable mProgressUpdateRunnable = null;
     private Handler videoControlHandler = new Handler();
     private MediaController mediaController;
+    private AudioManager mAudioManager = null;
 
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
@@ -147,6 +151,7 @@ public class ReactVideoView extends ScalableVideoView implements
     public ReactVideoView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
 
+        mAudioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
         mThemedReactContext = themedReactContext;
         mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
         themedReactContext.addLifecycleEventListener(this);
@@ -400,17 +405,43 @@ public class ReactVideoView extends ScalableVideoView implements
             }
         } else {
             if (!mMediaPlayer.isPlaying()) {
-                start();
-                // Setting the rate unpauses, so we have to wait for an unpause
-                if (mRate != mActiveRate) { 
-                    setRateModifier(mRate);
-                }
+                int focusResult = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    start();
+                    // Setting the rate unpauses, so we have to wait for an unpause
+                    if (mRate != mActiveRate) {
+                        setRateModifier(mRate);
+                    }
 
-                // Also Start the Progress Update Handler
-                mProgressUpdateHandler.post(mProgressUpdateRunnable);
+                    // Also Start the Progress Update Handler
+                    mProgressUpdateHandler.post(mProgressUpdateRunnable);
+                }
             }
         }
         setKeepScreenOn(!mPaused && mPreventsDisplaySleepDuringVideoPlayback);
+    }
+
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // Do nothing here, this is handled in setPauseModifier
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                setPausedModifier(false);
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE:
+                setPausedModifier(false);
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                if (!mMuted) {
+                    setVolumeModifier(mVolume);
+                }
+            case AudioManager.AUDIOFOCUS_LOSS:
+                setPausedModifier(true);
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                setPausedModifier(true);
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                if (!mMuted) {
+                    mMediaPlayer.setVolume(0.1f, 0.1f);
+                }
+        }
     }
 
     // reduces the volume based on stereoPan
