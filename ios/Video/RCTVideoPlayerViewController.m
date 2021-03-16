@@ -1,6 +1,4 @@
 #import "RCTVideoPlayerViewController.h"
-#import <AppTrackingTransparency/AppTrackingTransparency.h>
-#import <AdSupport/AdSupport.h>
 
 static NSString *const currentItem = @"currentItem";
 const NSInteger kConditionLockWaitingPlayerItem = 0;
