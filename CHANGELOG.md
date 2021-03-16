@@ -1,9 +1,10 @@
 ## Changelog
 
+- Request and respect audio focus on Android [#2318](https://github.com/react-native-video/react-native-video/pull/2318)
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
-- Request and respect audio focus on Android [#2318](https://github.com/react-native-video/react-native-video/pull/2318)
 
 ### Version 5.1.0-alpha8
 
