@@ -433,7 +433,7 @@ class ReactTVExoplayerView extends FrameLayout
         setPlayWhenReady(false);
         player.pause();
         onStopPlayback();
-        isInBackground = true;
+        isInBackground = isInteractive();
 
         if (!isInteractive()) {
             stopPlayback();
