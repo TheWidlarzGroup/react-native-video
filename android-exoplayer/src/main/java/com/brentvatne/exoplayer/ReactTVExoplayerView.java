@@ -436,7 +436,6 @@ class ReactTVExoplayerView extends FrameLayout
         isInBackground = isInteractive();
     }
 
-
     @Override
     public void onHostDestroy() {
         stopPlayback();
