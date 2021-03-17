@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.video.VideoListener;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
@@ -113,16 +114,16 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     /**
-     * Set the {@link SimpleExoPlayer} to use. The {@link SimpleExoPlayer#setTextOutput} and
-     * {@link SimpleExoPlayer#setVideoListener} method of the player will be called and previous
+     * Set the {@link SimpleExoPlayer} to use. The {@link SimpleExoPlayer#addTextOutput} and
+     * {@link SimpleExoPlayer#addVideoListener} method of the player will be called and previous
      * assignments are overridden.
      *
      * @param player The {@link SimpleExoPlayer} to use.
      */
     public void setPlayer(SimpleExoPlayer player) {
         if (this.player != null) {
-            this.player.setTextOutput(null);
-            this.player.setVideoListener(null);
+            this.player.addTextOutput(null);
+            this.player.removeVideoListener(componentListener);
             this.player.removeListener(componentListener);
             this.player.setVideoSurface(null);
         }
@@ -130,9 +131,9 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setVisibility(VISIBLE);
         if (player != null) {
             setVideoView();
-            player.setVideoListener(componentListener);
+            player.addVideoListener(componentListener);
             player.addListener(componentListener);
-            player.setTextOutput(componentListener);
+            player.addTextOutput(componentListener);
         }
     }
 
@@ -202,7 +203,7 @@ public final class ExoPlayerView extends FrameLayout {
         layout.invalidateAspectRatio();
     }
 
-    private final class ComponentListener implements SimpleExoPlayer.VideoListener,
+    private final class ComponentListener implements VideoListener,
             TextOutput, ExoPlayer.EventListener {
 
         // TextRenderer.Output implementation
