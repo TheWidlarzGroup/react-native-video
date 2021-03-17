@@ -71,6 +71,8 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoAboutToEnd, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onFavouriteButtonClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRelatedVideoClicked, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRelatedVideosIconClicked, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onStatsIconClick, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onEpgIconClick, RCTBubblingEventBlock);
 
 
 RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate) {
