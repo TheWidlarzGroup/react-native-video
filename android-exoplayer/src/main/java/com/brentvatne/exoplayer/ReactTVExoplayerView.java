@@ -24,6 +24,9 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.amazon.device.ads.aftv.AdBreakPattern;
 import com.amazon.device.ads.aftv.AmazonFireTVAdCallback;
 import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
@@ -89,6 +92,7 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -100,28 +104,25 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED;
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED;
 
 @SuppressLint("ViewConstructor")
-class ReactTVExoplayerView extends FrameLayout
-        implements LifecycleEventListener,
-                   Player.EventListener,
-                   BecomingNoisyListener,
-                   AudioManager.OnAudioFocusChangeListener,
-                   MetadataOutput,
-                   AdEvent.AdEventListener,
-                   AdErrorEvent.AdErrorListener,
-                   ExoDorisPlayerViewListener {
+class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener,
+        Player.EventListener,
+        BecomingNoisyListener,
+        AudioManager.OnAudioFocusChangeListener,
+        MetadataOutput,
+        AdEvent.AdEventListener,
+        AdErrorEvent.AdErrorListener,
+        ExoDorisPlayerViewListener {
 
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
@@ -180,9 +181,11 @@ class ReactTVExoplayerView extends FrameLayout
     private boolean isAmazonFireTv;
     private int viewWidth = 0;
     private int viewHeight = 0;
+    private int unauthorizedExceptionCount = 0;
 
     // Props from React
     private RNSource src;
+    private RNMetadata metadata;
     private RNTranslations translations;
     private boolean repeat;
     private String audioTrackType;
@@ -378,7 +381,7 @@ class ReactTVExoplayerView extends FrameLayout
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-                          MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
     }
@@ -432,6 +435,7 @@ class ReactTVExoplayerView extends FrameLayout
         setPlayInBackground(false);
         setPlayWhenReady(false);
         player.pause();
+        updateResumePosition();
         onStopPlayback();
         isInBackground = isInteractive();
     }
@@ -591,18 +595,18 @@ class ReactTVExoplayerView extends FrameLayout
 
         if (slotId != null) {
             AdBreakPattern adBreakPattern = AdBreakPattern.builder()
-                                                          .withId(slotId)
-                                                          .withJsonString(jsonObject.toString())
-                                                          .build();
+                    .withId(slotId)
+                    .withJsonString(jsonObject.toString())
+                    .build();
 
             return AmazonFireTVAdRequest.builder()
-                                        .withAppID(APS_APP_ID)
-                                        .withContext(getContext())
-                                        .withAdBreakPattern(adBreakPattern)
-                                        .withTimeOut(1000L)
-                                        .withCallback(amazonFireTVAdCallback)
-                                        .withTestFlag(src.getApsTestFlag())
-                                        .build();
+                    .withAppID(APS_APP_ID)
+                    .withContext(getContext())
+                    .withAdBreakPattern(adBreakPattern)
+                    .withTimeOut(1000L)
+                    .withCallback(amazonFireTVAdCallback)
+                    .withTestFlag(src.getApsTestFlag())
+                    .build();
         }
 
         return null;
@@ -908,7 +912,7 @@ class ReactTVExoplayerView extends FrameLayout
                 if (isImaStream) {
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
-                                                              adInfo.getPlayedAdGroups());
+                            adInfo.getPlayedAdGroups());
 
                     exoDorisImaWrapper.addAdEventListener(this);
                     exoDorisImaWrapper.addAdErrorListener(this);
@@ -1011,7 +1015,7 @@ class ReactTVExoplayerView extends FrameLayout
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                              getAudioTrackInfo(), getTextTrackInfo());
+                    getAudioTrackInfo(), getTextTrackInfo());
         }
     }
 
@@ -1127,6 +1131,9 @@ class ReactTVExoplayerView extends FrameLayout
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer(false);
+        } else if (isUnauthorizedException(e) && unauthorizedExceptionCount < 1) {
+            unauthorizedExceptionCount++;
+            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -1136,10 +1143,10 @@ class ReactTVExoplayerView extends FrameLayout
                     errorString = getResources().getString(R.string.error_querying_decoders);
                 } else if (decoderInitializationException.secureDecoderRequired) {
                     errorString = getResources().getString(R.string.error_no_secure_decoder,
-                                                           decoderInitializationException.mimeType);
+                            decoderInitializationException.mimeType);
                 } else {
                     errorString = getResources().getString(R.string.error_no_decoder,
-                                                           decoderInitializationException.mimeType);
+                            decoderInitializationException.mimeType);
                 }
             } else if (cause instanceof DrmSession.DrmSessionException) {
                 ex = cause;
@@ -1165,6 +1172,25 @@ class ReactTVExoplayerView extends FrameLayout
         Throwable cause = e.getSourceException();
         while (cause != null) {
             if (cause instanceof BehindLiveWindowException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    private boolean isUnauthorizedException(ExoPlaybackException e) {
+        if (e.type != ExoPlaybackException.TYPE_SOURCE) {
+            return false;
+        }
+
+        final List<Throwable> causes = new ArrayList<>();
+        Throwable cause = e.getSourceException();
+
+        while (cause != null && !causes.contains(cause)) {
+            causes.add(cause);
+            if (cause instanceof HttpDataSource.InvalidResponseCodeException
+                    && ((HttpDataSource.InvalidResponseCodeException) cause).responseCode == 403) {
                 return true;
             }
             cause = cause.getCause();
@@ -1244,6 +1270,8 @@ class ReactTVExoplayerView extends FrameLayout
     }
 
     public void setMetadata(RNMetadata metadata) {
+        this.metadata = metadata;
+
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setTitle(metadata.getTitle());
             exoDorisPlayerView.setDescription(metadata.getDescription());
@@ -1303,9 +1331,9 @@ class ReactTVExoplayerView extends FrameLayout
         }
 
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                                                                         .buildUpon()
-                                                                         .setRendererDisabled(rendererIndex, true)
-                                                                         .build();
+                .buildUpon()
+                .setRendererDisabled(rendererIndex, true)
+                .build();
 
         if (type.equals("disabled")) {
             trackSelector.setParameters(disableParameters);
@@ -1349,11 +1377,11 @@ class ReactTVExoplayerView extends FrameLayout
         }
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                                                                           .buildUpon()
-                                                                           .setRendererDisabled(rendererIndex, false)
-                                                                           .setSelectionOverride(rendererIndex, groups,
-                                                                                                 new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
-                                                                           .build();
+                .buildUpon()
+                .setRendererDisabled(rendererIndex, false)
+                .setSelectionOverride(rendererIndex, groups,
+                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
+                .build();
         trackSelector.setParameters(selectionParameters);
     }
 
@@ -1723,28 +1751,28 @@ class ReactTVExoplayerView extends FrameLayout
 
     public void animateHideView(final View view, int duration) {
         view.animate()
-            .alpha(0.0f)
-            .setDuration(duration)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    view.setVisibility(View.GONE);
-                }
-            });
+                .alpha(0.0f)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        view.setVisibility(View.GONE);
+                    }
+                });
     }
 
     public void animateShowView(final View view, int duration) {
         view.animate()
-            .alpha(1.0f)
-            .setDuration(duration)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    super.onAnimationStart(animation);
-                    view.setVisibility(View.VISIBLE);
-                }
-            });
+                .alpha(1.0f)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        view.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 
     public void applyTranslations(Map<String, Object> translations) {
@@ -1799,9 +1827,9 @@ class ReactTVExoplayerView extends FrameLayout
     @Override
     public void onVideoTileClicked(VideoTile videoTile) {
         RelatedVideo relatedVideo = new RelatedVideo(videoTile.getTitle(),
-                                                     videoTile.getSubtitle(),
-                                                     videoTile.getThumbnailUrl(),
-                                                     videoTile.getRelatedVideo());
+                videoTile.getSubtitle(),
+                videoTile.getThumbnailUrl(),
+                videoTile.getRelatedVideo());
         eventEmitter.relatedVideoClick(relatedVideo.getId(), relatedVideo.getType());
     }
 
