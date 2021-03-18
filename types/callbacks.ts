@@ -20,4 +20,5 @@ export interface IVideoPlayerCallbacks {
   onStatsIconClick?: () => void;
   onTimedMetadata?: (e: any) => void;
   onVideoAboutToEnd?: (e: any) => void;
+  onReloadCurrentSource?: (e: any) => void;
 }
