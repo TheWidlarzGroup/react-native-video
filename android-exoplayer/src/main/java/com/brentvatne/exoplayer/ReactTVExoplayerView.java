@@ -1131,7 +1131,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer(false);
-        } else if (isUnauthorizedException(e) && unauthorizedExceptionCount < 1) {
+        } else if (unauthorizedExceptionCount < 1 && isUnauthorizedException(e)) {
             unauthorizedExceptionCount++;
             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
