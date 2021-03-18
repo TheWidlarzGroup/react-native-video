@@ -133,6 +133,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     }
   };
 
+  onReloadCurrentSource = (event) => {
+    this.props.onReloadCurrentSource?.(event.nativeEvent);
+  }
+
   /**
    * seekTo jumps to a certain position for vod and live content
    * time parameter can be the following:
@@ -194,6 +198,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onRelatedVideosIconClicked: this.onRelatedVideosIconClicked,
       onVideoAboutToEnd: this.onVideoAboutToEnd,
       onFavouriteButtonClick: this.onFavouriteButtonClick,
+      onReloadCurrentSource: this.onReloadCurrentSource,
     };
   };
 

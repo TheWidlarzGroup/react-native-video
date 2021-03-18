@@ -2,6 +2,8 @@ package com.brentvatne.exoplayer;
 
 import android.view.View;
 
+import androidx.annotation.StringDef;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
@@ -13,8 +15,6 @@ import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import androidx.annotation.StringDef;
 
 class VideoEventEmitter {
 
@@ -38,6 +38,7 @@ class VideoEventEmitter {
     private static final String EVENT_FULLSCREEN_DID_DISMISS = "onVideoFullscreenPlayerDidDismiss";
     private static final String EVENT_VIDEO_ABOUT_TO_END = "onVideoAboutToEnd";
     private static final String EVENT_REQUIRE_AD_PARAMETERS = "onRequireAdParameters";
+    private static final String EVENT_RELOAD_CURRENT_SOURCE = "onReloadCurrentSource";
 
     private static final String EVENT_STALLED = "onPlaybackStalled";
     private static final String EVENT_RESUME = "onPlaybackResume";
@@ -88,42 +89,44 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
-            EVENT_REQUIRE_AD_PARAMETERS
+            EVENT_REQUIRE_AD_PARAMETERS,
+            EVENT_RELOAD_CURRENT_SOURCE
     };
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-                       EVENT_LOAD_START,
-                       EVENT_LOAD,
-                       EVENT_ERROR,
-                       EVENT_PROGRESS,
-                       EVENT_SEEK,
-                       EVENT_END,
-                       EVENT_FULLSCREEN_WILL_PRESENT,
-                       EVENT_FULLSCREEN_DID_PRESENT,
-                       EVENT_FULLSCREEN_WILL_DISMISS,
-                       EVENT_FULLSCREEN_DID_DISMISS,
-                       EVENT_STALLED,
-                       EVENT_RESUME,
-                       EVENT_READY,
-                       EVENT_BUFFER,
-                       EVENT_IDLE,
-                       EVENT_TIMED_METADATA,
-                       EVENT_AUDIO_BECOMING_NOISY,
-                       EVENT_AUDIO_FOCUS_CHANGE,
-                       EVENT_PLAYBACK_RATE_CHANGE,
-                       EVENT_BOTTOM_RIGHT_ICON_CLICK,
-                       EVENT_CONTROLS_VISIBILITY_CHANGE,
-                       EVENT_TOUCH_ACTION_MOVE,
-                       EVENT_TOUCH_ACTION_UP,
-                       EVENT_EPG_ICON_CLICK,
-                       EVENT_STATS_ICON_CLICK,
-                       EVENT_RELATED_VIDEO_CLICKED,
-                       EVENT_RELATED_VIDEOS_ICON_CLICKED,
-                       EVENT_VIDEO_ABOUT_TO_END,
-                       EVENT_FAVOURITE_BUTTON_CLICK,
-                       EVENT_REQUIRE_AD_PARAMETERS
-               })
+            EVENT_LOAD_START,
+            EVENT_LOAD,
+            EVENT_ERROR,
+            EVENT_PROGRESS,
+            EVENT_SEEK,
+            EVENT_END,
+            EVENT_FULLSCREEN_WILL_PRESENT,
+            EVENT_FULLSCREEN_DID_PRESENT,
+            EVENT_FULLSCREEN_WILL_DISMISS,
+            EVENT_FULLSCREEN_DID_DISMISS,
+            EVENT_STALLED,
+            EVENT_RESUME,
+            EVENT_READY,
+            EVENT_BUFFER,
+            EVENT_IDLE,
+            EVENT_TIMED_METADATA,
+            EVENT_AUDIO_BECOMING_NOISY,
+            EVENT_AUDIO_FOCUS_CHANGE,
+            EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_BOTTOM_RIGHT_ICON_CLICK,
+            EVENT_CONTROLS_VISIBILITY_CHANGE,
+            EVENT_TOUCH_ACTION_MOVE,
+            EVENT_TOUCH_ACTION_UP,
+            EVENT_EPG_ICON_CLICK,
+            EVENT_STATS_ICON_CLICK,
+            EVENT_RELATED_VIDEO_CLICKED,
+            EVENT_RELATED_VIDEOS_ICON_CLICKED,
+            EVENT_VIDEO_ABOUT_TO_END,
+            EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_REQUIRE_AD_PARAMETERS,
+            EVENT_RELOAD_CURRENT_SOURCE
+    })
     @interface VideoEvents {
     }
 
@@ -134,8 +137,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
-    private static final String EVENT_PROP_RELATED_VIDEO_ID = "id";
-    private static final String EVENT_PROP_RELATED_VIDEO_TYPE = "type";
+    private static final String EVENT_PROP_ID = "id";
+    private static final String EVENT_PROP_TYPE = "type";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -281,8 +284,8 @@ class VideoEventEmitter {
 
     void relatedVideoClick(int id, String type) {
         WritableMap map = Arguments.createMap();
-        map.putInt(EVENT_PROP_RELATED_VIDEO_ID, id);
-        map.putString(EVENT_PROP_RELATED_VIDEO_TYPE, type);
+        map.putInt(EVENT_PROP_ID, id);
+        map.putString(EVENT_PROP_TYPE, type);
         receiveEvent(EVENT_RELATED_VIDEO_CLICKED, map);
     }
 
@@ -366,5 +369,12 @@ class VideoEventEmitter {
         map.putDouble(EVENT_PROP_DATE, date);
         map.putBoolean(EVENT_PROP_IS_BLOCKING, isBlocking);
         receiveEvent(EVENT_REQUIRE_AD_PARAMETERS, map);
+    }
+
+    void reloadCurrentSource(String id, String type) {
+        WritableMap event = Arguments.createMap();
+        event.putString(EVENT_PROP_ID, id);
+        event.putString(EVENT_PROP_TYPE, type);
+        receiveEvent(EVENT_RELOAD_CURRENT_SOURCE, event);
     }
 }
