@@ -181,7 +181,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean isAmazonFireTv;
     private int viewWidth = 0;
     private int viewHeight = 0;
-    private int unauthorizedExceptionCount = 0;
+    private boolean hasReloadedCurrentSource = false;
 
     // Props from React
     private RNSource src;
@@ -909,6 +909,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 exoDorisPlayerView.setFocusableInTouchMode(true);
                 exoDorisPlayerView.requestFocus();
 
+                hasReloadedCurrentSource = false;
+
                 if (isImaStream) {
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
@@ -1131,8 +1133,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer(false);
-        } else if (unauthorizedExceptionCount < 1 && isUnauthorizedException(e)) {
-            unauthorizedExceptionCount++;
+        } else if (!hasReloadedCurrentSource && isUnauthorizedException(e)) {
+            hasReloadedCurrentSource = true;
             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
