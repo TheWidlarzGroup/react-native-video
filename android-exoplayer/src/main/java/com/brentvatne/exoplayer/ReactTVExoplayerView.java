@@ -51,6 +51,7 @@ import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
 import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
+import com.diceplatform.doris.ext.ima.ExoDorisImaWrapperListener;
 import com.diceplatform.doris.ext.ima.entity.AdInfo;
 import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
 import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
@@ -120,9 +121,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        AdEvent.AdEventListener,
-        AdErrorEvent.AdErrorListener,
-        ExoDorisPlayerViewListener {
+        ExoDorisPlayerViewListener,
+        ExoDorisImaWrapperListener {
 
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
@@ -476,6 +476,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                         exoDorisImaPlayer,
                         exoDorisPlayerView.getAdViewGroup(),
                         ImaLanguage.SPANISH_UNITED_STATES);
+                exoDorisImaWrapper.setExoDorisImaWrapperListener(this);
                 player = exoDorisImaPlayer.getExoDoris();
                 trackSelector = exoDorisImaPlayer.getTrackSelector();
             } else {
@@ -915,9 +916,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                             adInfo.getPlayedAdGroups());
-
-                    exoDorisImaWrapper.addAdEventListener(this);
-                    exoDorisImaWrapper.addAdErrorListener(this);
 
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
                 }
@@ -1819,11 +1817,20 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     @Override
     public void onAdError(AdErrorEvent adErrorEvent) {
         AdError error = adErrorEvent.getError();
-        eventEmitter.error(error.getMessage(), error);
+        if (!hasReloadedCurrentSource && isUnauthorizedAdError(error)) {
+            hasReloadedCurrentSource = true;
+            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+        } else {
+            eventEmitter.error(error.getMessage(), error);
+        }
 
         // Reset imaSrc and isImaStream to allow a new source to be loaded
         imaSrc = null;
-        this.isImaStream = false;
+        isImaStream = false;
+    }
+
+    private boolean isUnauthorizedAdError(AdError error) {
+        return error.getMessage().contains("HTTP status code: 403");
     }
 
     @Override
@@ -1872,5 +1879,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
             exoDorisImaWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
         }
+    }
+
+    @Override
+    public void onRequireAdTagParameters(long seekPosition) {
+        eventEmitter.requireAdParameters((double) seekPosition, true);
     }
 }
