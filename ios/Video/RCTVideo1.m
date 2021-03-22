@@ -22,7 +22,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSNumber* _Nullable _appId;
     
     bool _controls;
-    bool _canBeFavourite;
     NSDictionary* _Nullable _theme;
     NSDictionary* _Nullable _translations;
     NSDictionary* _Nullable _relatedVideos;
@@ -40,11 +39,25 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
-        _canBeFavourite = YES;
         _controls = YES;
     }
     
     return self;
+}
+
+- (void)didMoveToWindow {
+    [super didMoveToWindow];
+    
+    DorisUIStyle* _Nullable style = [DorisUIStyle createFrom:_theme];
+    DorisUITranslations* _Nullable translations = [DorisUITranslations createFrom:_translations];
+    
+    self.player = [AVPlayer new];
+    self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player
+                                                            style:style
+                                                     translations:translations
+                                                           output:self];
+    [self addSubview:self.dorisUI.view];
+    [self.dorisUI fillSuperView];
 }
 
 #pragma mark - Prop setters
@@ -68,7 +81,15 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)setButtons:(NSDictionary*)buttons {
-    _canBeFavourite = [[buttons objectForKey:@"favourite"] boolValue];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
+        DorisUIButtonsConfiguration* _Nullable configuration = [DorisUIButtonsConfiguration createFrom:buttons];
+        
+        if (configuration) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dorisUI.input setUIButtonsConfiguration:configuration];
+            });
+        }
+    });
 }
 
 - (void)setIsFavourite:(BOOL)isFavourite {
@@ -79,19 +100,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)setTheme:(NSDictionary *)theme {    
     _theme = theme;
-    
-    DorisUIStyle* _Nullable style = [DorisUIStyle createFrom:_theme];
-    DorisUITranslations* _Nullable translations = [DorisUITranslations createFrom:_translations];
-    
-    if (style) {
-        self.player = [AVPlayer new];
-        self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player
-                                                                style:style
-                                                         translations:translations
-                                                               output:self];
-        [self addSubview:self.dorisUI.view];
-        [self.dorisUI fillSuperView];
-    }
 }
 
 - (void)setTranslations:(NSDictionary *)translations {
@@ -100,14 +108,11 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)setMetadata:(NSDictionary *)metadata {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
-        NSMutableDictionary* _metaData = (NSMutableDictionary*)metadata;
-        [_metaData setValue:[[NSNumber alloc] initWithBool:self->_canBeFavourite] forKey:@"canBeFavourite"];
-        
-        DorisUIConfiguration* _Nullable configuration = [DorisUIConfiguration createFrom:_metaData];
+        DorisUIMetadataConfiguration* _Nullable configuration = [DorisUIMetadataConfiguration createFrom:metadata];
         
         if (configuration) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.dorisUI.input setUIConfiguration:configuration];
+                [self.dorisUI.input setUIMetadataConfiguration:configuration];
             });
         }
     });
@@ -145,6 +150,22 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     });
 }
 
+- (void)setSeek:(NSDictionary *)info {
+    NSNumber *seekTime = info[@"time"];
+    _startPlayingAt = seekTime;
+}
+
+- (void)setControls:(BOOL)controls {
+    if (controls != _controls) {
+        _controls = controls;
+        if (controls) {
+            [self.dorisUI.input enableUI];
+        } else {
+            [self.dorisUI.input disableUI];
+        }
+    }
+}
+
 - (void)updateRelatedVideos {
     id headIndex = [_relatedVideos objectForKey:@"headIndex"];
     
@@ -159,7 +180,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
             if ([object isKindOfClass:NSDictionary.class] &&
                 count <= _headIndex + 3 &&
                 count >= _headIndex) {
-
+                
                 [relatedVideos addObject: [DorisRelatedVideo createFrom:object]];
             }
             count++;
@@ -168,25 +189,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         [self.dorisUI.input setRelatedVideos: relatedVideos];
     }
 }
-
-
-- (void)setSeek:(NSDictionary *)info {
-    NSNumber *seekTime = info[@"time"];
-    _startPlayingAt = seekTime;
-}
-
-
-- (void)setControls:(BOOL)controls {
-    if (controls != _controls) {
-        _controls = controls;
-        if (controls) {
-            [self.dorisUI.input enableUI];
-        } else {
-            [self.dorisUI.input disableUI];
-        }
-    }
-}
-
 
 - (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
     NSString* __nullable assetKey = [imaDict objectForKey:@"assetKey"];
@@ -424,6 +426,18 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         self.onRelatedVideoClicked(@{@"id": identifier,
                                      @"type": type,
                                      @"target": self.reactTag});
+    }
+}
+
+- (void)didTapStatsButton {
+    if (self.onStatsIconClick) {
+        self.onStatsIconClick(@{@"target": self.reactTag});
+    }
+}
+
+- (void)didTapScheduleButton {
+    if (self.onEpgIconClick) {
+        self.onEpgIconClick(@{@"target": self.reactTag});
     }
 }
 
