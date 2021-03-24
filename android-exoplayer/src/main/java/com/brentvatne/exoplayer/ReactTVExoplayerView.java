@@ -424,6 +424,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 canSeekToLiveEdge = true;
                 player.seekToDefaultPosition();
             }
+            activateMediaSession();
             setPlayWhenReady(true);
             fromBackground = true;
         }
@@ -438,6 +439,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         updateResumePosition();
         onStopPlayback();
         isInBackground = isInteractive();
+        deactivateMediaSession();
     }
 
     @Override
