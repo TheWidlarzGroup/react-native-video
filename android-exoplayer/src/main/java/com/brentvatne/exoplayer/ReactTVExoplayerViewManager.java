@@ -20,6 +20,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String id = src.hasKey(PROP_SRC_ID) ? src.getString(PROP_SRC_ID) : null;
         ReadableArray textTracks = src.hasKey(PROP_SRC_SUBTITLES) ? src.getArray(PROP_SRC_SUBTITLES) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
-        String drm = src.hasKey(PROP_SRC_DRM) ? src.getString(PROP_SRC_DRM) : null;
+        ReadableMap drm = src.hasKey(PROP_SRC_DRM) ? src.getMap(PROP_SRC_DRM) : null;
         ReadableMap ima = src.hasKey(PROP_SRC_IMA) ? src.getMap(PROP_SRC_IMA) : null;
         String type = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String channelId = src.hasKey(PROP_SRC_CHANNEL_ID) ? src.getString(PROP_SRC_CHANNEL_ID) : null;
@@ -189,7 +190,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
 
         if (startsWithValidScheme(uriString)) {
-            ActionToken actionToken = ActionToken.fromJson(drm);
+            Map drmMap = toStringMap(drm);
+            ActionToken actionToken = drmMap != null ? ActionToken.fromJson(new Gson().toJson(drmMap)) : null;
 
             videoView.setSrc(
                     uriString,
@@ -240,10 +242,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             String type = metadata.hasKey(PROP_METADATA_TYPE) ? metadata.getString(PROP_METADATA_TYPE) : null;
 
             videoView.setMetadata(new RNMetadata(channelLogoUrl,
-                                                 description,
-                                                 thumbnailUrl,
-                                                 title,
-                                                 type));
+                    description,
+                    thumbnailUrl,
+                    title,
+                    type));
         }
     }
 
@@ -264,7 +266,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         Dynamic value = null;
         if (selectedAudioTrack != null) {
             typeString = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_TYPE)
-                         ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
+                    ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
             value = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_VALUE)
                     ? selectedAudioTrack.getDynamic(PROP_SELECTED_AUDIO_TRACK_VALUE) : null;
         }
@@ -278,7 +280,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         Dynamic value = null;
         if (selectedTextTrack != null) {
             typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
-                         ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
+                    ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
             value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
                     ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
         }
@@ -378,13 +380,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
         if (bufferConfig != null) {
             minBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MS)
-                          ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MIN_BUFFER_MS) : minBufferMs;
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MIN_BUFFER_MS) : minBufferMs;
             maxBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MAX_BUFFER_MS)
-                          ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MAX_BUFFER_MS) : maxBufferMs;
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_MAX_BUFFER_MS) : maxBufferMs;
             bufferForPlaybackMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS)
-                                  ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS) : bufferForPlaybackMs;
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
-                                               ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
+                    ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
     }
@@ -440,9 +442,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 String thumbnailUrl = relatedVideo.hasKey(PROP_METADATA_THUMBNAIL_URL) ? relatedVideo.getString(PROP_METADATA_THUMBNAIL_URL) : null;
 
                 relatedVideos.add(new RelatedVideo(title,
-                                                   subtitle,
-                                                   thumbnailUrl,
-                                                   relatedVideo.toHashMap()));
+                        subtitle,
+                        thumbnailUrl,
+                        relatedVideo.toHashMap()));
             }
             headIndex = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HEAD_INDEX) ? relatedVideosMap.getInt(PROP_RELATED_VIDEOS_HEAD_INDEX) : -1;
             hasMore = relatedVideosMap.hasKey(PROP_RELATED_VIDEOS_HAS_MORE) && relatedVideosMap.getBoolean(PROP_RELATED_VIDEOS_HAS_MORE);
