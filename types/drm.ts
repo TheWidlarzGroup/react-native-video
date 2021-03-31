@@ -1,5 +1,5 @@
 export interface IVideoPlayerDRM {
-  id: number;
+  id: string;
   contentUrl: string;
   drmScheme: string;
   licensingServerUrl: string;
