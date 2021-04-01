@@ -486,6 +486,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 trackSelector = player.getTrackSelector();
             }
 
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.CONTENT_TYPE_MOVIE)
+                    .build();
+
+            player.setAudioAttributes(audioAttributes, false);
             player.addListener(this);
             player.addMetadataOutput(this);
             exoDorisPlayerView.setPlayer(player);
