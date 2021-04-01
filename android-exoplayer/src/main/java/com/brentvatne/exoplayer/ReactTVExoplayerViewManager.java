@@ -62,6 +62,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_METADATA_TITLE = "title";
     private static final String PROP_METADATA_TYPE = "type";
 
+    // DRM properties
+    private static final String PROP_DRM_CRO_TOKEN = "croToken";
+
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -190,8 +193,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
 
         if (startsWithValidScheme(uriString)) {
-            Map drmMap = toStringMap(drm);
-            ActionToken actionToken = drmMap != null ? ActionToken.fromJson(new Gson().toJson(drmMap)) : null;
+            Map<String, String> drmMap = toStringMap(drm);
+            ActionToken actionToken = null;
+            if (drmMap != null) {
+                drmMap.put(PROP_DRM_CRO_TOKEN, drmMap.get(PROP_DRM_CRO_TOKEN)
+                        .replace("Bearer ", ""));
+                actionToken = ActionToken.fromJson(new Gson().toJson(drmMap));
+            }
 
             videoView.setSrc(
                     uriString,
