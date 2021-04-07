@@ -1,6 +1,6 @@
 {
     "name": "react-native-fast-video",
-    "version": "5.1.1",
+    "version": "5.1.2",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "types": "Video.d.ts",
