@@ -6,14 +6,14 @@
 #import <React/RCTComponent.h>
 #import <React/RCTBridgeModule.h>
 
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-#import <react-native-video/RCTVideoCache.h>
+#if __has_include(<react-native-fast-video/RCTVideoCache.h>)
+#import <react-native-fast-video/RCTVideoCache.h>
 #import <DVAssetLoaderDelegate/DVURLAsset.h>
 #import <DVAssetLoaderDelegate/DVAssetLoaderDelegate.h>
 #endif
 
 @class RCTEventDispatcher;
-#if __has_include(<react-native-video/RCTVideoCache.h>)
+#if __has_include(<react-native-fast-video/RCTVideoCache.h>)
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate>
 #elif TARGET_OS_TV
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVAssetResourceLoaderDelegate>

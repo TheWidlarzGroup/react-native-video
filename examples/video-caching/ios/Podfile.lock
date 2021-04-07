@@ -9,12 +9,12 @@ PODS:
   - glog (0.3.4)
   - React (0.56.0):
     - React/Core (= 0.56.0)
-  - react-native-video/Video (4.3.1):
+  - react-native-fast-video/Video (4.3.1):
     - React
-  - react-native-video/VideoCaching (4.3.1):
+  - react-native-fast-video/VideoCaching (4.3.1):
     - DVAssetLoaderDelegate (~> 0.3.1)
     - React
-    - react-native-video/Video
+    - react-native-fast-video/Video
     - SPTPersistentCache (~> 1.1.0)
   - React/Core (0.56.0):
     - yoga (= 0.56.0.React)
@@ -73,7 +73,7 @@ DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/GLog.podspec`)
-  - react-native-video/VideoCaching (from `../../../react-native-video.podspec`)
+  - react-native-fast-video/VideoCaching (from `../../../react-native-fast-video.podspec`)
   - React/Core (from `../node_modules/react-native`)
   - React/CxxBridge (from `../node_modules/react-native`)
   - React/DevSupport (from `../node_modules/react-native`)
@@ -107,8 +107,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/GLog.podspec"
   React:
     :path: "../node_modules/react-native"
-  react-native-video:
-    :path: "../../../react-native-video.podspec"
+  react-native-fast-video:
+    :path: "../../../react-native-fast-video.podspec"
   yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga/yoga.podspec"
 
@@ -119,7 +119,7 @@ SPEC CHECKSUMS:
   Folly: c89ac2d5c6ab169cd7397ef27485c44f35f742c7
   glog: b3b0330915eccea41c5cc9731a77cf564a9be5ea
   React: 1fe0eb13d90b625d94c3b117c274dcfd2e760e11
-  react-native-video: 44c6befbc1526283ca1919891fcebe4680feade4
+  react-native-fast-video: 44c6befbc1526283ca1919891fcebe4680feade4
   SPTPersistentCache: df36ea46762d7cf026502bbb86a8b79d0080dff4
   yoga: b1ce48b6cf950b98deae82838f5173ea7cf89e85
 

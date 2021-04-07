@@ -1,4 +1,4 @@
-## react-native-video - ExoPlayer
+## react-native-fast-video - ExoPlayer
 
 This is an Android React Native video component based on ExoPlayer v2.
 
@@ -6,7 +6,7 @@ This is an Android React Native video component based on ExoPlayer v2.
 
 https://github.com/google/ExoPlayer
 
-## Benefits over `react-native-video@0.9.0`:
+## Benefits over `react-native-fast-video@0.9.0`:
 
 - Android Video library built by Google, with a lot of support
 - Supports DASH, HlS, & SmoothStreaming adaptive streams

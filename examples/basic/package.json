@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "postinstall": "rm -rf node_modules/react-native-video/{examples,node_modules}",
+    "postinstall": "rm -rf node_modules/react-native-fast-video/{examples,node_modules}",
     "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
     "react": "16.9.0",
     "react-native": "0.60.5",
-    "react-native-video": "file:../.."
+    "react-native-fast-video": "file:../.."
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",

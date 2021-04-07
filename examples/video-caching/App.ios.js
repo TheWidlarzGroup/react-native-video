@@ -6,7 +6,7 @@
 
 import React, { Component } from "react";
 import { Alert, StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
-import Video from "react-native-video";
+import Video from "react-native-fast-video";
 
 const { height, width } = Dimensions.get("screen");
 

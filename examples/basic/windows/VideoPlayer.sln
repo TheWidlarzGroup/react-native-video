@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNative", "..\node_modu
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraBridge", "..\node_modules\react-native-windows\ReactWindows\ChakraBridge\ChakraBridge.vcxproj", "{4B72C796-16D5-4E3A-81C0-3E36F531E578}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNativeVideo", "..\node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj", "{E8F5F57F-757E-4237-AD23-F7A8755427CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNativeVideo", "..\node_modules\react-native-fast-video\windows\ReactNativeVideo\ReactNativeVideo.csproj", "{E8F5F57F-757E-4237-AD23-F7A8755427CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

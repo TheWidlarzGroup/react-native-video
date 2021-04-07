@@ -1,4 +1,4 @@
-# react-native-video caching example (currently only working on iOS)
+# react-native-fast-video caching example (currently only working on iOS)
 
 # How to verify that caching is working (iOS)
 
@@ -13,8 +13,8 @@
 
 1. In `ios/Podfile` apply the following changes
 ```diff
-- pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'
-+ pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'
+- pod 'react-native-fast-video/VideoCaching', :path => '../node_modules/react-native-fast-video/react-native-fast-video.podspec'
++ pod 'react-native-fast-video', :path => '../node_modules/react-native-fast-video/react-native-fast-video.podspec'
 ```
 2. run `./update.sh`
 3. open `ios/VideoCaching.xcworkspace`

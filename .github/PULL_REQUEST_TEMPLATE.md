@@ -6,9 +6,6 @@ The following steps will help get your PR merged quickly:
 If you've added new functionality, update the README.md with an entry for your prop or event.
 The entry should be inserted in alphabetical order.
 
-#### Update the changelog
-After you open the PR, update the CHANGELOG.md file with an entry pointing to your PR.
-
 #### Provide an example of how to test the change
 If the PR requires special testing setup provide all the relevant instructions and files. This may include a sample video file or URL, configuration, or setup steps.
 

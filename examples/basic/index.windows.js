@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import Video from 'react-native-video';
+import Video from 'react-native-fast-video';
 
 class VideoPlayer extends Component {
   constructor(props) {

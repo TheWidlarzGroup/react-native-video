@@ -1,27 +1,6 @@
-## react-native-video
+## react-native-fast-video
 
-A `<Video>` component for react-native, as seen in
-[react-native-login](https://github.com/brentvatne/react-native-login)!
-
-Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
-
-Version 4.x requires react-native >= 0.57.0
-
-Version 3.x requires react-native >= 0.40.0
-
-### Version 5.0.0 breaking changes
-
-Version 5 introduces breaking changes on Android, please check carefully the steps described there: [Android Installation](#Android-installation)
-
-### Version 4.0.0 breaking changes
-Version 4.0.0 changes some behaviors and may require updates to your Gradle files.  See [Updating](#updating) for details.
-
-Version 4.0.0 now requires Android target SDK 26+ and Gradle 3 plugin in order to support ExoPlayer 2.9.0. Google is dropping support for apps using target SDKs older than 26 as of October 2018 and Gradle 2 as of January 2019. React Native 0.57 defaults to Gradle 3 & SDK 27.
-
-If you need to support an older React Native version, you should use react-native-video 3.2.1.
-
-### Version 3.0.0 breaking changes
-Version 3.0 features a number of changes to existing behavior. See [Updating](#updating) for changes.
+A better `<Video>` component for react-native. Forked from https://github.com/react-native-fast-video/react-native-fast-video to keep up to date.
 
 ## Table of Contents
 
@@ -39,19 +18,11 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
 
 ## Installation
 
-Using npm:
-
 ```shell
-npm install --save react-native-video
+npm i react-native-fast-video
 ```
 
-or using yarn:
-
-```shell
-yarn add react-native-video
-```
-
-Then follow the instructions for your platform to link react-native-video into your project:
+Then follow the instructions for your platform to link react-native-fast-video into your project:
 
 ### iOS installation
 <details>
@@ -65,11 +36,11 @@ Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 
 **React Native 0.59 and below**
 
-Run `react-native link react-native-video` to link the react-native-video library.
+Run `react-native link react-native-fast-video` to link the react-native-fast-video library.
 
 #### Using CocoaPods (required to enable caching)
 
-Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
+Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies).
 
 Depending on your requirements you have to choose between the two possible subpodspecs:
 
@@ -77,7 +48,7 @@ Video only:
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
++  `pod 'react-native-fast-video', :path => '../node_modules/react-native-fast-video/react-native-fast-video.podspec'`
 end
 ```
 
@@ -85,7 +56,7 @@ Video with caching ([more info](docs/caching.md)):
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
++  `pod 'react-native-fast-video/VideoCaching', :path => '../node_modules/react-native-fast-video/react-native-fast-video.podspec'`
 end
 ```
 
@@ -95,7 +66,7 @@ end
   <details>
   <summary>tvOS details</summary>
 
-`react-native link react-native-video` doesn’t work properly with the tvOS target so we need to add the library manually.
+`react-native link react-native-fast-video` doesn’t work properly with the tvOS target so we need to add the library manually.
 
 First select your project in Xcode.
 
@@ -117,9 +88,9 @@ Select RCTVideo-tvOS
 ### Android installation
 <details>
   <summary>Android details</summary>
- 
+
 Linking is not required in React Native 0.60 and above.
-If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
+If your project is using React Native < 0.60, run `react-native link react-native-fast-video` to link the react-native-fast-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
@@ -128,15 +99,15 @@ Or if you have trouble, make the following additions to the given files manually
 The newer ExoPlayer library will work for most people.
 
 ```gradle
-include ':react-native-video'
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+include ':react-native-fast-video'
+project(':react-native-fast-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fast-video/android-exoplayer')
 ```
 
 If you need to use the old Android MediaPlayer based player, use the following instead:
 
 ```gradle
-include ':react-native-video'
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+include ':react-native-fast-video'
+project(':react-native-fast-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fast-video/android')
 ```
 
 #### **android/app/build.gradle**
@@ -146,7 +117,7 @@ From version >= 5.0.0, you have to apply these changes:
 ```diff
 dependencies {
    ...
-    compile project(':react-native-video')
+    compile project(':react-native-fast-video')
 +   implementation "androidx.appcompat:appcompat:1.0.0"
 -   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
 
@@ -195,7 +166,7 @@ Add the `ReactNativeVideoCPP` project to your solution.
 
 1. Open the solution in Visual Studio 2019
 2. Right-click Solution icon in Solution Explorer > Add > Existing Project
-   Select `node_modules\react-native-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
+   Select `node_modules\react-native-fast-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
 
 #### **windows/myapp/myapp.vcxproj**
 
@@ -228,7 +199,7 @@ Import RCTVideoManager and add it to the list of nativeModules:
 ```javascript
 import { RNDomInstance } from "react-native-dom";
 import { name as appName } from "../app.json";
-import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
+import RCTVideoManager from 'react-native-fast-video/dom/RCTVideoManager'; // Add this
 
 // Path to RN Bundle Entrypoint ================================================
 const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
@@ -246,7 +217,7 @@ const ReactNativeDomOptions = {
 ```javascript
 // Load the module
 
-import Video from 'react-native-video';
+import Video from 'react-native-fast-video';
 
 // Within your render function, assuming you have a file called
 // "background.mp4" in your project. You can include multiple videos
@@ -403,9 +374,9 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 
-For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
+For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-fast-video-controls](https://github.com/itsnubix/react-native-fast-video-controls) or [react-native-fast-video-player](https://github.com/cornedor/react-native-fast-video-player).
 
-Note on Android ExoPlayer, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
+Note on Android ExoPlayer, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-fast-video-controls].
 
 Platforms: Android ExoPlayer, iOS, react-native-dom
 
@@ -442,7 +413,7 @@ Add video filter
 
 For more details on these filters refer to the [iOS docs](https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/uid/TP30000136-SW55).
 
-Notes: 
+Notes:
 1. Using a filter can impact CPU usage. A workaround is to save the video with the filter and then load the saved video.
 2. Video filter is currently not supported on HLS playlists.
 3. `filterEnabled` must be set to `true`
@@ -450,7 +421,7 @@ Notes:
 Platforms: iOS
 
 #### filterEnabled
-Enable video filter. 
+Enable video filter.
 
 * **false (default)** - Don't enable filter
 * **true** - Enable filter
@@ -471,7 +442,7 @@ Platforms: iOS
 
 #### fullscreenOrientation
 
-* **all (default)** - 
+* **all (default)** -
 * **landscape**
 * **portrait**
 
@@ -496,7 +467,7 @@ Platforms: Android ExoPlayer
 #### hideShutterView
 Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
 
-* **false (default)** - Show shutter view 
+* **false (default)** - Show shutter view
 * **true** - Hide shutter view
 
 Platforms: Android ExoPlayer
@@ -629,7 +600,7 @@ Default: 250.0
 Platforms: all
 
 ### rate
-Speed at which the media should play. 
+Speed at which the media should play.
 * **0.0** - Pauses the video
 * **1.0** - Play at normal speed
 * **Other values** - Slow down or speed up playback
@@ -718,7 +689,7 @@ Type | Value | Description
 "language" | string | Display the text track with the language specified as the Value, e.g. "fr"
 "index" | number | Display the text track with the index specified as the value, e.g. 0
 
-Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it. 
+Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it.
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
@@ -761,7 +732,7 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 ##### Asset loaded via require
 
-Example: 
+Example:
 ```
 const sintel = require('./sintel.mp4');
 
@@ -846,7 +817,7 @@ Note: Due to iOS limitations, sidecar text tracks are not compatible with Airpla
 
 Example:
 ```
-import { TextTrackType }, Video from 'react-native-video';
+import { TextTrackType }, Video from 'react-native-fast-video';
 
 textTracks={[
   {
@@ -993,7 +964,7 @@ videoTracks | array | An array of video track info objects with the following pr
 
 Example:
 ```
-{ 
+{
   canPlaySlowForward: true,
   canPlayReverse: false,
   canPlaySlowReverse: false,
@@ -1136,7 +1107,7 @@ Both the currentTime & seekTime are reported because the video player may not se
 Platforms: Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP
 
 #### onRestoreUserInterfaceForPictureInPictureStop
-Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
+Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface.
 
 Payload: none
 
@@ -1217,13 +1188,13 @@ let path = response.uri;
 Notes:
  - Currently only supports highest quality export
  - Currently only supports MP4 export
- - Currently only supports exporting to user's cache directory with a generated UUID filename. 
+ - Currently only supports exporting to user's cache directory with a generated UUID filename.
  - User will need to remove the saved video through their Photos app
  - Works with cached videos as well. (Checkout video-caching example)
  - If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
  - If the video is buffering then the save function promise will return after the video has finished buffering and processing.
 
-Future: 
+Future:
  - Will support multiple qualities through options
  - Will support more formats in the future through options
  - Will support custom directory and file name through options
@@ -1233,7 +1204,7 @@ Platforms: iOS
 #### restoreUserInterfaceForPictureInPictureStopCompleted
 `restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
 
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
 
 Example:
 ```
@@ -1285,7 +1256,7 @@ For more detailed info check this [article](https://cocoacasts.com/how-to-add-ap
 
 ### Audio Mixing
 
-At some point in the future, react-native-video will include an Audio Manager for configuring how videos mix with other apps playing sounds on the device.
+At some point in the future, react-native-fast-video will include an Audio Manager for configuring how videos mix with other apps playing sounds on the device.
 
 On iOS, if you would like to allow other apps to play music over your video component, make the following change:
 
@@ -1323,7 +1294,7 @@ zip -r -n .mp4 *.mp4 player.video.example.com
 
 ### Load files with the RN Asset System
 
-The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
+The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-fast-video@0.9.0`.
 
 ```javascript
 <Video
@@ -1333,16 +1304,16 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 
 ### Play in background on iOS
 
-To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
+To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-fast-video/issues/310) )
 
 ## Examples
 
-- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-video').default` as per instructions above.*
+- See an [Example integration][1] in `react-native-login` *note that this example uses an older version of this library, before we used `export default` -- if you use `require` you will need to do `require('react-native-fast-video').default` as per instructions above.*
 - Try the included [VideoPlayer example][2] yourself:
 
    ```sh
-   git clone git@github.com:react-native-community/react-native-video.git
-   cd react-native-video/example
+   git clone git@github.com:react-native-community/react-native-fast-video.git
+   cd react-native-fast-video/example
    npm install
    open ios/VideoPlayer.xcodeproj
 
@@ -1370,7 +1341,7 @@ From version >= 5.0.0, you have to apply this changes:
 ```diff
 dependencies {
    ...
-    compile project(':react-native-video')
+    compile project(':react-native-fast-video')
 +   implementation "androidx.appcompat:appcompat:1.0.0"
 -   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
 
@@ -1427,7 +1398,7 @@ Note, Windows does not have a concept of an app going into the background, so th
 #### Use Android target SDK 27 by default
 Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
-You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
+You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-fast-video to use the same build settings as the rest of your app as described below.
 
 ##### Using app build settings
 You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
@@ -1460,7 +1431,7 @@ If you encounter an error `Could not find com.android.support:support-annotation
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
-[2]: https://github.com/react-native-community/react-native-video/tree/master/example
+[2]: https://github.com/react-native-community/react-native-fast-video/tree/master/example
 [3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
 
 ---

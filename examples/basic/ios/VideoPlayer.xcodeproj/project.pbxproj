@@ -320,9 +320,9 @@
 		627363E07276C06249D7CEBF /* libPods-VideoPlayer-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VideoPlayer-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/ios/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		8C2A0F651E25608300E31596 /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-fast-video/ios/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
 		FA8681CE216D5C6D0010C92A /* VideoPlayer-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VideoPlayer-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		FA8681D0216D5C6E0010C92A /* VideoPlayer-tvOS.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VideoPlayer-tvOS.plist"; path = "/Users/amishra/Development/react-native-video-nfb/examples/basic/ios/VideoPlayer-tvOS.plist"; sourceTree = "<absolute>"; };
+		FA8681D0216D5C6E0010C92A /* VideoPlayer-tvOS.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "VideoPlayer-tvOS.plist"; path = "/Users/amishra/Development/react-native-fast-video-nfb/examples/basic/ios/VideoPlayer-tvOS.plist"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

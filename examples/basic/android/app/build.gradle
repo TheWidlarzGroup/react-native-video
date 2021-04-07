@@ -135,7 +135,7 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-video')
+    implementation project(':react-native-fast-video')
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'org.webkit:android-jsc:+'
 }

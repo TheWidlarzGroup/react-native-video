@@ -14,7 +14,7 @@ import {
 
 import Util from './Utils'
 
-import Video from 'react-native-video';
+import Video from 'react-native-fast-video';
 
 export default class VideoPlayer extends Component {
   constructor(props) {
@@ -27,7 +27,7 @@ export default class VideoPlayer extends Component {
   }
 
   render() {
-    return <View 
+    return <View
       onLayout={this.onLayout}
       style={styles.container}>
       <Text>Here's some pre-Text</Text>

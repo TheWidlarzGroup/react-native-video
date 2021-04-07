@@ -6,13 +6,13 @@ const blacklist = require('metro').createBlacklist;
 const rootProjectDir = path.resolve(__dirname, '..', '..')
 
 module.exports = {
-  // Resolve react-native-video from parent directory so we do not have to install react-native-video after each change applied
+  // Resolve react-native-fast-video from parent directory so we do not have to install react-native-fast-video after each change applied
   getBlacklistRE: function() {
-    return blacklist([/node_modules\/react-native-video\/.*/, new RegExp(`${rootProjectDir}/node_modules/react-native/.*`)])
+    return blacklist([/node_modules\/react-native-fast-video\/.*/, new RegExp(`${rootProjectDir}/node_modules/react-native/.*`)])
   },
   getProjectRoots() {
     return [
-      __dirname, 
+      __dirname,
       rootProjectDir
     ]
   }

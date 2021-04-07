@@ -202,7 +202,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\node_modules\react-native-video\windows\ReactNativeVideo\ReactNativeVideo.csproj">
+    <ProjectReference Include="..\..\node_modules\react-native-fast-video\windows\ReactNativeVideo\ReactNativeVideo.csproj">
       <Project>{e8f5f57f-757e-4237-ad23-f7a8755427cd}</Project>
       <Name>ReactNativeVideo</Name>
     </ProjectReference>
