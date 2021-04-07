@@ -156,6 +156,9 @@ static int const RCTVideoUnset = -1;
   viewController.showsPlaybackControls = YES;
   viewController.rctDelegate = self;
   viewController.preferredOrientation = _fullscreenOrientation;
+  if (@available(iOS 9.0, *)) {
+ 	  viewController.allowsPictureInPicturePlayback = _pictureInPicture;
+  }
 
   viewController.view.frame = self.bounds;
   viewController.player = player;
@@ -659,7 +662,7 @@ static int const RCTVideoUnset = -1;
           width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
           height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
           CGAffineTransform preferredTransform = [videoTrack preferredTransform];
-          
+
           if ((videoTrack.naturalSize.width == preferredTransform.tx
                && videoTrack.naturalSize.height == preferredTransform.ty)
               || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
