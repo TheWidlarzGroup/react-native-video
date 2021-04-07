@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class RNTranslations {
 
-    private static final String KEY_EPG_LABEL = " player_epg_button";
+    private static final String KEY_EPG_LABEL = "player_epg_button";
     private static final String KEY_STATS_LABEL = "player_stats_button";
     private static final String KEY_PLAY_LABEL = "player_play_button";
     private static final String KEY_PAUSE_LABEL = "player_pause_button";
