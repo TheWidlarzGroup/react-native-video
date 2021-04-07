@@ -650,12 +650,16 @@ static int const RCTVideoUnset = -1;
         NSObject *height = @"undefined";
         NSString *orientation = @"undefined";
 
-        if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
+        if (_playerItem.presentationSize.height) {
+          width = [NSNumber numberWithFloat:_playerItem.presentationSize.width];
+          height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
+          orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? @"landscape" : @"portrait";
+        } else if ([_playerItem.asset tracksWithMediaType:AVMediaTypeVideo].count > 0) {
           AVAssetTrack *videoTrack = [[_playerItem.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
           width = [NSNumber numberWithFloat:videoTrack.naturalSize.width];
           height = [NSNumber numberWithFloat:videoTrack.naturalSize.height];
           CGAffineTransform preferredTransform = [videoTrack preferredTransform];
-
+          
           if ((videoTrack.naturalSize.width == preferredTransform.tx
                && videoTrack.naturalSize.height == preferredTransform.ty)
               || (preferredTransform.tx == 0 && preferredTransform.ty == 0))
@@ -664,10 +668,6 @@ static int const RCTVideoUnset = -1;
           } else {
             orientation = @"portrait";
           }
-        } else if (_playerItem.presentationSize.height) {
-          width = [NSNumber numberWithFloat:_playerItem.presentationSize.width];
-          height = [NSNumber numberWithFloat:_playerItem.presentationSize.height];
-          orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? @"landscape" : @"portrait";
         }
 
         if (_pendingSeek) {
