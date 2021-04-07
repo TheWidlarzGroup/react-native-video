@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include "RNPhotosFrameworkExtension.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -87,6 +88,7 @@ static int const RCTVideoUnset = -1;
 #if __has_include(<react-native-fast-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
+  RNPhotosFrameworkExtension *photosFrameworkExtension;
 #if TARGET_OS_IOS
   void (^__strong _Nonnull _restoreUserInterfaceForPIPStopCompletionHandler)(BOOL);
   AVPictureInPictureController *_pipController;
@@ -507,6 +509,18 @@ static int const RCTVideoUnset = -1;
     DebugLog(@"Could not find video URL in source '%@'", source);
     return;
   }
+
+    if ([uri hasPrefix:@"ph://"]) {
+        if(!photosFrameworkExtension) {
+            photosFrameworkExtension = [RNPhotosFrameworkExtension new];
+        }
+        NSString *loadedIdentifier = [photosFrameworkExtension startLoadingPhotosAsset:source bufferingCallback:self.onVideoBuffer andReactTag:self.reactTag andCompleteBlock:^(NSDictionary *source, AVAsset *asset, PHImageRequestID imageRequestID) {
+            NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
+            [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+        }];
+
+        return;
+    }
 
   NSURL *url = isNetwork || isAsset
     ? [NSURL URLWithString:uri]
