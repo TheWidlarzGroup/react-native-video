@@ -907,7 +907,7 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setupPipController {
-  if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
+  if (_pictureInPicture && !_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
     // Create new controller passing reference to the AVPlayerLayer
     _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
     _pipController.delegate = self;
