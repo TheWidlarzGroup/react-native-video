@@ -3,6 +3,7 @@
     "version": "5.1.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
+    "types": "Video.d.ts",
     "license": "MIT",
     "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
     "contributors": [
@@ -29,6 +30,8 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "0.0.7",
+        "@types/react": "^17.0.3",
+        "@types/react-native": "^0.64.2",
         "babel-eslint": "10.0.3",
         "eslint": "6.8.0",
         "react": "^16.12.0",
@@ -54,6 +57,7 @@
         "DRMType.js",
         "TextTrackType.js",
         "VideoResizeMode.js",
+        "Video.js",
         "react-native-fast-video.podspec"
     ]
 }
