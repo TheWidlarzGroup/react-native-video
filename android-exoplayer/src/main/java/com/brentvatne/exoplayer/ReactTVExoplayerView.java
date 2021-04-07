@@ -1796,11 +1796,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setStatsLabel(translations.getStatsLabel())
                     .setPlayLabel(translations.getPlayLabel())
                     .setPauseLabel(translations.getPauseLabel())
-                    .setAudioAndSubtitlesLabel(translations.getAudioAndSubtitlesLabel())
+                    .setSubtitlesLabel(translations.getCaptionsLabel())
+                    .setAudioLanguagesLabel(translations.getAudioTracksLabel())
                     .setLiveLabel(translations.getLiveLabel())
                     .setFavoriteLabel(translations.getFavoriteLabel())
                     .setMoreVideosLabel(translations.getMoreVideosLabel())
-                    .setWatchListLabel(translations.getWatchListLabel())
+                    .setWatchListLabel(translations.getWatchlistLabel())
                     .build();
 
             exoDorisPlayerView.setLabels(labels);
