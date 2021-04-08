@@ -49,6 +49,7 @@ IMapView<hstring, ViewManagerPropertyType> ReactVideoViewManager::NativeProps() 
   nativeProps.Insert(L"controls", ViewManagerPropertyType::Boolean);
   nativeProps.Insert(L"fullscreen", ViewManagerPropertyType::Boolean);
   nativeProps.Insert(L"progressUpdateInterval", ViewManagerPropertyType::Number);
+  nativeProps.Insert(L"rate", ViewManagerPropertyType::Number);
 
   return nativeProps.GetView();
 }
@@ -64,28 +65,30 @@ void ReactVideoViewManager::UpdateProperties(
       auto const &propertyValue = pair.second;
       if (!propertyValue.IsNull()) {
         if (propertyName == "src") {
-            auto const &srcMap = propertyValue.AsObject();
-            auto const &uri = srcMap.at("uri");
-            reactVideoView.Set_UriString(to_hstring(uri.AsString()));
+          auto const &srcMap = propertyValue.AsObject();
+          auto const &uri = srcMap.at("uri");
+          reactVideoView.Set_UriString(to_hstring(uri.AsString()));
         } else if (propertyName == "resizeMode") {
-            reactVideoView.Stretch(static_cast<Stretch>(std::stoul(propertyValue.AsString())));
+          reactVideoView.Stretch(static_cast<Stretch>(std::stoul(propertyValue.AsString())));
         } else if (propertyName == "repeat") {
-            reactVideoView.Set_IsLoopingEnabled(propertyValue.AsBoolean());
+          reactVideoView.Set_IsLoopingEnabled(propertyValue.AsBoolean());
         } else if (propertyName == "paused") {
-            m_paused = propertyValue.AsBoolean();
-            reactVideoView.Set_Paused(m_paused);
+          m_paused = propertyValue.AsBoolean();
+          reactVideoView.Set_Paused(m_paused);
         } else if (propertyName == "muted") {
-            reactVideoView.Set_Muted(propertyValue.AsBoolean());
+          reactVideoView.Set_Muted(propertyValue.AsBoolean());
         } else if (propertyName == "volume") {
-            reactVideoView.Set_Volume(propertyValue.AsDouble());
+          reactVideoView.Set_Volume(propertyValue.AsDouble());
         } else if (propertyName == "seek") {
-            reactVideoView.Set_Position(propertyValue.AsDouble());
+          reactVideoView.Set_Position(propertyValue.AsDouble());
         } else if (propertyName == "controls") {
-            reactVideoView.Set_Controls(propertyValue.AsBoolean());
+          reactVideoView.Set_Controls(propertyValue.AsBoolean());
         } else if (propertyName == "fullscreen") {
-            reactVideoView.Set_FullScreen(propertyValue.AsBoolean());
+          reactVideoView.Set_FullScreen(propertyValue.AsBoolean());
         } else if (propertyName == "progressUpdateInterval") {
-            reactVideoView.Set_ProgressUpdateInterval(propertyValue.AsInt64());
+          reactVideoView.Set_ProgressUpdateInterval(propertyValue.AsInt64());
+        } else if (propertyName == "rate") {
+          reactVideoView.Set_PlaybackRate(propertyValue.AsDouble());
         }
       }
     }
