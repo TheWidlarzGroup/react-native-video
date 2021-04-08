@@ -1605,13 +1605,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void setButtons(
-            boolean showFavouriteButton,
             boolean showWatchlistButton,
-            boolean showEpgButton) {
+            boolean showFavouriteButton,
+            boolean showEpgButton,
+            boolean showStatsButton) {
         if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setShowWatchlistButton(showWatchlistButton);
             exoDorisPlayerView.setShowFavoriteButton(showFavouriteButton);
-            exoDorisPlayerView.setShowWatchListButton(showWatchlistButton);
             exoDorisPlayerView.setShowEpgButton(showEpgButton);
+            exoDorisPlayerView.setShowStatsButton(showStatsButton);
         }
     }
 
@@ -1796,12 +1798,17 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setStatsLabel(translations.getStatsLabel())
                     .setPlayLabel(translations.getPlayLabel())
                     .setPauseLabel(translations.getPauseLabel())
-                    .setSubtitlesLabel(translations.getCaptionsLabel())
-                    .setAudioLanguagesLabel(translations.getAudioTracksLabel())
                     .setLiveLabel(translations.getLiveLabel())
                     .setFavoriteLabel(translations.getFavoriteLabel())
+                    .setWatchlistLabel(translations.getWatchlistLabel())
                     .setMoreVideosLabel(translations.getMoreVideosLabel())
-                    .setWatchListLabel(translations.getWatchlistLabel())
+                    .setSubtitlesLabel(translations.getCaptionsLabel())
+                    .setRewindLabel(translations.getRewindLabel())
+                    .setFastForwardLabel(translations.getFastForwardLabel())
+                    .setAudioLanguagesLabel(translations.getAudioTracksLabel())
+                    .setInfoLabel(translations.getInfoLabel())
+                    .setAdsCountdownAdLabel(translations.getAdsCountdownAdLabel())
+                    .setAdsCountdownOfLabel(translations.getAdsCountdownOfLabel())
                     .build();
 
             exoDorisPlayerView.setLabels(labels);
@@ -1863,13 +1870,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onWatchListButtonClicked() {
+    public void onWatchlistButtonClicked() {
         // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
     }
 
     @Override
     public void onEpgButtonClicked() {
         eventEmitter.epgIconClick();
+    }
+
+    @Override
+    public void onStatsButtonClicked() {
+        eventEmitter.statsIconClick();
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
