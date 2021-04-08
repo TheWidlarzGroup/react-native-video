@@ -65,6 +65,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     // DRM properties
     private static final String PROP_DRM_CRO_TOKEN = "croToken";
 
+    // Buttons properties
+    private static final String PROP_BUTTONS = "buttons";
+    private static final String PROP_WATCHLIST_BUTTON = "watchlist";
+    private static final String PROP_FAVOURITE_BUTTON = "favourite";
+    private static final String PROP_EPG_BUTTON = "epg";
+    private static final String PROP_STATS_BUTTON = "stats";
+
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -106,11 +113,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_RELATED_VIDEOS_HEAD_INDEX = "headIndex";
     private static final String PROP_RELATED_VIDEOS_HAS_MORE = "hasMore";
     private static final String PROP_RELATED_VIDEOS_SUBTITLE = "subtitle";
-    private static final String PROP_BUTTONS = "buttons";
-    private static final String PROP_WATCHLIST_BUTTON = "watchlist";
-    private static final String PROP_FAVOURITE_BUTTON = "favourite";
     private static final String PROP_IS_FAVOURITE = "isFavourite";
-    private static final String PROP_EPG_BUTTON = "epg";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -463,10 +466,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_BUTTONS)
     public void setButtons(final ReactTVExoplayerView videoView, @Nullable ReadableMap buttons) {
-        boolean showFavouriteButton = (buttons != null && buttons.hasKey(PROP_FAVOURITE_BUTTON)) && buttons.getBoolean(PROP_FAVOURITE_BUTTON);
         boolean showWatchlistButton = (buttons != null && buttons.hasKey(PROP_WATCHLIST_BUTTON)) && buttons.getBoolean(PROP_WATCHLIST_BUTTON);
+        boolean showFavouriteButton = (buttons != null && buttons.hasKey(PROP_FAVOURITE_BUTTON)) && buttons.getBoolean(PROP_FAVOURITE_BUTTON);
         boolean showEpgButton = (buttons != null && buttons.hasKey(PROP_EPG_BUTTON)) && buttons.getBoolean(PROP_EPG_BUTTON);
-        videoView.setButtons(showFavouriteButton, showWatchlistButton, showEpgButton);
+        boolean showStatsButton = (buttons != null && buttons.hasKey(PROP_STATS_BUTTON)) && buttons.getBoolean(PROP_STATS_BUTTON);
+        videoView.setButtons(showWatchlistButton, showFavouriteButton, showEpgButton, showStatsButton);
     }
 
     @ReactProp(name = PROP_IS_FAVOURITE)
