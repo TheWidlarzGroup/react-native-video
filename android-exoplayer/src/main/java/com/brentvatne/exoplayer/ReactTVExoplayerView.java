@@ -1582,6 +1582,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 exoDorisPlayerView.setUseController(true);
             }
             exoDorisPlayerView.showController();
+            exoDorisPlayerView.requestFocus();
         } else {
             exoDorisPlayerView.hideController();
         }
