@@ -48,8 +48,15 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)didMoveToWindow {
     [super didMoveToWindow];
     
-    DorisUIStyle* _Nullable style = [DorisUIStyle createFrom:_theme];
-    DorisUITranslations* _Nullable translations = [DorisUITranslations createFrom:_translations];
+    DorisUIStyle* _Nullable style;
+    if (_theme) {
+        style = [DorisUIStyle createFrom:_theme];
+    }
+    
+    DorisUITranslations* _Nullable translations;
+    if (_translations) {
+        translations = [DorisUITranslations createFrom:_translations];
+    }
     
     self.player = [AVPlayer new];
     self.dorisUI = [DorisUIModuleFactory createCustomUIWithPlayer:self.player
@@ -68,13 +75,21 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setPlayWhenInactive:(BOOL)playWhenInactive {}
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch {}
 - (void)setRate:(float)rate {}
-- (void)setMuted:(BOOL)muted {}
 - (void)setVolume:(float)volume {}
 - (void)setRepeat:(BOOL)repeat {}
 - (void)setTextTracks:(NSArray*) textTracks {}
 - (void)setFullscreen:(BOOL)fullscreen {}
+- (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {}
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval {}
 - (void)setPaused:(BOOL)paused {}
+
+- (void)setMuted:(BOOL)muted {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dorisUI.input setMuteWithIsMuted:muted];
+        });
+    });
+}
 
 - (void)setRelatedVideos:(NSDictionary*)relatedVideos {
     _relatedVideos = relatedVideos;
