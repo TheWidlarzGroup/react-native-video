@@ -917,7 +917,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
                 exoDorisPlayerView.setFocusable(true);
                 exoDorisPlayerView.setFocusableInTouchMode(true);
-                exoDorisPlayerView.requestFocus();
 
                 hasReloadedCurrentSource = false;
 
