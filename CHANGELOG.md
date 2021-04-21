@@ -1,7 +1,7 @@
 ## Changelog
 
 ### next
-* Handle racing conditions when props are setted on exoplayer
+* Fix mute/unmute when controls are present (iOS) [#1654](https://github.com/react-native-community/react-native-video/pull/1654)
 
 ### Version 4.4.2
 * Change compileOnly to implementation on gradle (for newer gradle versions and react-native 0.59 support) [#1592](https://github.com/react-native-community/react-native-video/pull/1592)
