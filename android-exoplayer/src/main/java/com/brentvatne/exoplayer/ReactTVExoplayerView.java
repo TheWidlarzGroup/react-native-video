@@ -572,6 +572,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 .setContentSourceId(imaSrc.getContentSourceId())
                 .setVideoId(imaSrc.getVideoId())
                 .setAuthToken(imaSrc.getAuthToken())
+                .setDrmParams(actionToken)
                 .setAdTagParameters(adTagParameters)
                 .setAdTagParametersValidFrom((long) imaSrc.getStartDate())
                 .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
