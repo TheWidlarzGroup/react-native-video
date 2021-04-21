@@ -22,13 +22,13 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation project(':ReactAndroid')
 
-    implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
+    implementation("com.github.DiceTechnology.doris-android:doris:$exodorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation("com.github.DiceTechnology.doris-android:extension-ima:$exodoris_version") {
+    implementation("com.github.DiceTechnology.doris-android:extension-ima:$exodorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation "com.github.DiceTechnology.doris-android:doris-ui:$exodoris_version"
+    implementation "com.github.DiceTechnology.doris-android:doris-ui:$exodorisVersion"
 
     implementation("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion") {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
