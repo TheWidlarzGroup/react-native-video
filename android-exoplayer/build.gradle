@@ -5,32 +5,27 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 28)
-    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
+    compileSdkVersion safeExtGet('compileSdkVersion', 29)
+    buildToolsVersion safeExtGet('buildToolsVersion', '29.0.3')
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 19)
-        targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        minSdkVersion safeExtGet('minSdkVersion', 22)
+        targetSdkVersion safeExtGet('targetSdkVersion', 29)
         versionCode 1
         versionName "1.0"
-
-        missingDimensionStrategy 'shield-ep-api', rootProject.ext.shield_ep_api
     }
 }
 
-def exoplayerVersion = rootProject.ext.exoplayerVersion
-
 dependencies {
-    //noinspection GradleDynamicVersion
     implementation project(':ReactAndroid')
 
-    implementation("com.github.DiceTechnology.doris-android:doris:$exodoris_version") {
+    implementation("com.github.DiceTechnology.doris-android:doris:$exodorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation("com.github.DiceTechnology.doris-android:extension-ima:$exodoris_version") {
+    implementation("com.github.DiceTechnology.doris-android:extension-ima:$exodorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation "com.github.DiceTechnology.doris-android:doris-ui:$exodoris_version"
+    implementation "com.github.DiceTechnology.doris-android:doris-ui:$exodorisVersion"
 
     implementation("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion") {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
@@ -54,11 +49,12 @@ dependencies {
 
     implementation("com.google.android.exoplayer:extension-okhttp:$exoplayerVersion") {
         exclude group: "com.squareup.okhttp3", module: "okhttp"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-common"
     }
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     implementation(project(':dice-shield-android')) {
+        exclude group: "com.google.android.exoplayer", module: "exoplayer-common"
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
         exclude group: "com.google.android.exoplayer", module: "exoplayer-dash"
         exclude group: "com.google.android.exoplayer", module: "exoplayer-hls"

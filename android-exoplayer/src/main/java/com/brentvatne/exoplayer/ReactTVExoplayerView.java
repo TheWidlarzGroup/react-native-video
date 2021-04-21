@@ -572,6 +572,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 .setContentSourceId(imaSrc.getContentSourceId())
                 .setVideoId(imaSrc.getVideoId())
                 .setAuthToken(imaSrc.getAuthToken())
+                .setDrmParams(actionToken)
                 .setAdTagParameters(adTagParameters)
                 .setAdTagParametersValidFrom((long) imaSrc.getStartDate())
                 .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
@@ -896,11 +897,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    @Override
     public void onPlaybackStateChanged(int state) {
         String text = "onStateChanged: playbackState = " + state;
         switch (state) {
@@ -1105,11 +1101,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && isLive) {
             canSeekToLiveEdge = true;
         }
-    }
-
-    @Override
-    public void onSeekProcessed() {
-        // Do nothing.
     }
 
     @Override
