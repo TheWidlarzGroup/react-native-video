@@ -13,8 +13,6 @@ android {
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
-
-        missingDimensionStrategy 'shield-ep-api', rootProject.ext.shield_ep_api
     }
 }
 
