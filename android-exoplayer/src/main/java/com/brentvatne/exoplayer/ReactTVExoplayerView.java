@@ -183,6 +183,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private int viewWidth = 0;
     private int viewHeight = 0;
     private boolean hasReloadedCurrentSource = false;
+    private boolean isMuted = false;
 
     // Props from React
     private RNSource src;
@@ -502,6 +503,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
             player.setPlaybackParameters(params);
+            player.setVolume(isMuted ? 0 : 1);
             Log.d(TAG, "initialisePlayer() new instance: " + force);
 
             activateMediaSession();
@@ -1437,6 +1439,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void setMutedModifier(boolean muted) {
+        isMuted = muted;
+
         if (player != null) {
             player.setVolume(muted ? 0 : 1);
         }
