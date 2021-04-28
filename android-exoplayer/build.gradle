@@ -1,4 +1,14 @@
+import groovy.json.JsonSlurper
+
 apply plugin: 'com.android.library'
+
+/**
+ * Load ExoDoris and ExoPlayer versions from package.json file
+ */
+def packageJsonFile = file('../package.json')
+def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
+def exoDorisVersion = packageJson.exoDorisVersion
+def exoPlayerVersion = packageJson.exoPlayerVersion
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -23,7 +33,6 @@ dependencies {
     implementation project(":AmazonFireTVAdsSDK-release")
 
     // ExoDoris
-    def exoDorisVersion = "0.13.0"
     implementation("com.github.DiceTechnology.doris-android:doris:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
@@ -33,7 +42,6 @@ dependencies {
     implementation "com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion"
 
     // ExoPlayer
-    def exoPlayerVersion = "2.13.3"
     implementation("com.google.android.exoplayer:extension-mediasession:$exoPlayerVersion") {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
     }
