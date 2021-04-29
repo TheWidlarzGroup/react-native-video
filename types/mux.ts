@@ -7,4 +7,5 @@ export interface IMuxData {
   videoIsLive: boolean;
   videoStreamType: string;
   videoTitle: string;
+  playerName: string;
 }
