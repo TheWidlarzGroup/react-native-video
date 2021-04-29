@@ -25,6 +25,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSDictionary* _Nullable _theme;
     NSDictionary* _Nullable _translations;
     NSDictionary* _Nullable _relatedVideos;
+    NSString* _playerName;
     
     SubtitleResourceLoaderDelegate* _delegate;
     dispatch_queue_t delegateQueue;
@@ -40,6 +41,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
         _controls = YES;
+        _playerName = @"DicePlayer";
     }
     
     return self;
@@ -460,7 +462,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 #pragma mark - Lifecycle
 - (void)dealloc {
     if (_playerData || _videoData) {
-        [MUXSDKStats destroyPlayer:@"dicePlayer"];
+        [MUXSDKStats destroyPlayer:_playerName];
         _playerData = nil;
         _videoData = nil;
     }
@@ -641,7 +643,11 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 
                 [_playerData setPlayerVersion:playerVersion];
                 
-                [_playerData setPlayerName:@"react-native-video/dice"];
+                value = [self stringFromDict:muxDict forKey:@"playerName"];
+                if (value) {
+                    _playerName = value;
+                }
+                [_playerData setPlayerName:_playerName];
                 
                 value = [self stringFromDict:muxDict forKey:@"subPropertyId"];
                 [_playerData setSubPropertyId:value];
@@ -684,8 +690,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
             [_videoData setVideoStreamType:value];
             
             
+            value = [self stringFromDict:muxDict forKey:@"playerName"];
+            if (value) {
+                _playerName = value;
+            }
+            
             if (isReplace) {
-                [MUXSDKStats videoChangeForPlayer:@"dicePlayer" withVideoData:_videoData];
+                [MUXSDKStats videoChangeForPlayer:_playerName withVideoData:_videoData];
             } else {
                 [self setupMux];
             }
@@ -701,9 +712,9 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     }
     
     if (self.dorisUI.playerLayer != nil) {
-        [MUXSDKStats monitorAVPlayerLayer:self.dorisUI.playerLayer withPlayerName:@"dicePlayer" playerData:_playerData videoData:_videoData];
+        [MUXSDKStats monitorAVPlayerLayer:self.dorisUI.playerLayer withPlayerName:_playerName playerData:_playerData videoData:_videoData];
     } else if (self.dorisUI.playerViewController != nil) {
-        [MUXSDKStats monitorAVPlayerViewController:self.dorisUI.playerViewController withPlayerName:@"dicePlayer" playerData:_playerData videoData:_videoData];
+        [MUXSDKStats monitorAVPlayerViewController:self.dorisUI.playerViewController withPlayerName:_playerName playerData:_playerData videoData:_videoData];
     }
 }
 
