@@ -8,6 +8,10 @@
 #include "DiceUtils.h"
 #include "DiceBeaconRequest.h"
 #include "DiceHTTPRequester.h"
+
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/AdSupport.h>
+
 #import <ReactVideoSubtitleSideloader_tvOS/ReactVideoSubtitleSideloader_tvOS-Swift.h>
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
 @import MuxCoreTv;
@@ -261,18 +265,40 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
             [adTagParameters setValue:customParams forKey:@"cust_params"];
         }
         
-        [adTagParameters setValue:@"0" forKey:@"is_lat"];
-        [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
-        [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
-            if (appId) {
-                self->_appId = appId;
-                [adTagParameters setValue:appId.stringValue forKey:@"msid"];
-            } else {
-                self->_appId = 0;
-                [adTagParameters setValue:@"0" forKey:@"msid"];
-            }
-            handler(adTagParameters);
-        }];
+        if (@available(tvOS 14, *)) {
+            [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+                if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+                    [adTagParameters setValue:@"0" forKey:@"is_lat"];
+                    [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
+                } else {
+                    [adTagParameters setValue:@"1" forKey:@"is_lat"];
+                }
+                
+                [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+                    if (appId) {
+                        self->_appId = appId;
+                        [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+                    } else {
+                        self->_appId = 0;
+                        [adTagParameters setValue:@"0" forKey:@"msid"];
+                    }
+                    handler(adTagParameters);
+                }];
+            }];
+        } else {
+            [adTagParameters setValue:@"0" forKey:@"is_lat"];
+            [adTagParameters setValue:UIDevice.currentDevice.identifierForVendor.UUIDString forKey:@"rdid"];
+            [self fetchAppIdWithCompletion:^(NSNumber * _Nullable appId) {
+                if (appId) {
+                    self->_appId = appId;
+                    [adTagParameters setValue:appId.stringValue forKey:@"msid"];
+                } else {
+                    self->_appId = 0;
+                    [adTagParameters setValue:@"0" forKey:@"msid"];
+                }
+                handler(adTagParameters);
+            }];
+        }
     }
 }
 
