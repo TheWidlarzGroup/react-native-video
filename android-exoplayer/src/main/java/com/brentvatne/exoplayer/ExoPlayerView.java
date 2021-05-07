@@ -86,6 +86,14 @@ public final class ExoPlayerView extends FrameLayout {
         addViewInLayout(layout, 0, aspectRatioParams);
     }
 
+    private void clearVideoView() {
+        if (surfaceView instanceof TextureView) {
+            player.clearVideoTextureView((TextureView) surfaceView);
+        } else if (surfaceView instanceof SurfaceView) {
+            player.clearVideoSurfaceView((SurfaceView) surfaceView);
+        }
+    }
+
     private void setVideoView() {
         if (surfaceView instanceof TextureView) {
             player.setVideoTextureView((TextureView) surfaceView);
@@ -125,10 +133,10 @@ public final class ExoPlayerView extends FrameLayout {
             return;
         }
         if (this.player != null) {
-            this.player.addTextOutput(null);
+            this.player.removeTextOutput(componentListener);
             this.player.removeVideoListener(componentListener);
             this.player.removeListener(componentListener);
-            this.player.setVideoSurface(null);
+            clearVideoView();
         }
         this.player = player;
         shutterView.setVisibility(VISIBLE);
