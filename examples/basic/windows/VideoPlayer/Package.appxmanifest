@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
@@ -6,16 +6,16 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   IgnorableNamespaces="uap mp">
 
-  <Identity
-    Name="176c1514-b49e-4277-ad47-c17d9b8f034b"
-    Publisher="CN=publisher"
+ <Identity
+    Name="20164b9d-dedc-4b42-ac7a-27e45953166a"
+    Publisher="CN=react-native-video"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="176c1514-b49e-4277-ad47-c17d9b8f034b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="20164b9d-dedc-4b42-ac7a-27e45953166a" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>VideoPlayer</DisplayName>
-    <PublisherDisplayName>React Native for UWP</PublisherDisplayName>
+    <PublisherDisplayName>react-native-video</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

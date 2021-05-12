@@ -1,6 +1,20 @@
 ## Changelog
 
-### Version 5.1.0-alpha6 [WIP]
+### Version 5.1.0-alpha9
+
+- Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
+- Fix deprecated API bug for windows [#2119](https://github.com/react-native-video/react-native-video/pull/2119)
+- Added `rate` property and autolinking support for windows [#2206](https://github.com/react-native-video/react-native-video/pull/2206)
+
+### Version 5.1.0-alpha8
+
+- Fixing ID3 Frame Error When Receiving EventMessage in TimedMetadata [#2116](https://github.com/react-native-community/react-native-video/pull/2116)
+
+### Version 5.1.0-alpha7
+
+- Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
+
+### Version 5.1.0-alpha6 
 
 - Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
 - Fix video dimensions being undefined when playing HLS in ios. [#1992](https://github.com/react-native-community/react-native-video/pull/1992)

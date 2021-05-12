@@ -19,6 +19,7 @@ RCT_EXPORT_MODULE();
 }
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(drm, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(maxBitRate, float);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
@@ -68,6 +69,7 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
 RCT_REMAP_METHOD(save,
         options:(NSDictionary *)options
         reactTag:(nonnull NSNumber *)reactTag
@@ -82,7 +84,34 @@ RCT_REMAP_METHOD(save,
             [view save:options resolve:resolve reject:reject];
         }
     }];
-}
+};
+RCT_REMAP_METHOD(setLicenseResult,
+         license:(NSString *)license
+         reactTag:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+        RCTVideo *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[RCTVideo class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+        } else {
+            [view setLicenseResult:license];
+        }
+    }];
+};
+
+RCT_REMAP_METHOD(setLicenseResultError,
+                 error:(NSString *)error
+                 reactTag:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+        RCTVideo *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[RCTVideo class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+        } else {
+            [view setLicenseResultError:error];
+        }
+    }];
+};
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 

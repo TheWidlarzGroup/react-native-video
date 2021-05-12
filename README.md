@@ -117,8 +117,9 @@ Select RCTVideo-tvOS
 ### Android installation
 <details>
   <summary>Android details</summary>
-
-Run `react-native link react-native-video` to link the react-native-video library.
+ 
+Linking is not required in React Native 0.60 and above.
+If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
 
 Or if you have trouble, make the following additions to the given files manually:
 
@@ -186,31 +187,45 @@ protected List<ReactPackage> getPackages() {
 <details>
   <summary>Windows RNW C++/WinRT details</summary>
 
+#### Autolinking
+
+**React Native Windows 0.63 and above**
+
+Autolinking should automatically add react-native-video to your app.
+
+#### Manual Linking
+
+**React Native Windows 0.62**
+
 Make the following additions to the given files manually:
 
-#### **windows/myapp.sln**
+##### **windows\myapp.sln**
 
-Add the `ReactNativeVideoCPP` project to your solution.
+Add the _ReactNativeVideoCPP_ project to your solution (eg. `windows\myapp.sln`):
 
-1. Open the solution in Visual Studio 2019
-2. Right-click Solution icon in Solution Explorer > Add > Existing Project
-   Select `node_modules\react-native-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
+1. Open your solution in Visual Studio 2019
+2. Right-click Solution icon in Solution Explorer > Add > Existing Project...
+3. Select `node_modules\react-native-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`
 
-#### **windows/myapp/myapp.vcxproj**
+##### **windows\myapp\myapp.vcxproj**
 
-Add a reference to `ReactNativeVideoCPP` to your main application project. From Visual Studio 2019:
+Add a reference to _ReactNativeVideoCPP_ to your main application project (eg. `windows\myapp\myapp.vcxproj`):
 
-1. Right-click main application project > Add > Reference...
-  Check `ReactNativeVideoCPP` from Solution Projects.
+1. Open your solution in Visual Studio 2019
+2. Right-click main application project > Add > Reference...
+3. Check _ReactNativeVideoCPP_ from Solution Projects
 
-2. Modify files below to add the video package providers to your main application project
-#### **pch.h**
+##### **pch.h**
 
 Add `#include "winrt/ReactNativeVideoCPP.h"`.
 
-#### **app.cpp**
+##### **app.cpp**
 
 Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());` before `InitializeComponent();`.
+
+**React Native Windows 0.61 and below**
+
+Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
 </details>
 
@@ -414,6 +429,11 @@ Determines whether video audio should override background music/audio in Android
 * **true** - Let background audio/music from other apps play
 
 Platforms: Android Exoplayer
+
+### DRM
+To setup DRM please follow [this guide](./DRM.md)
+
+Platforms: Android Exoplayer, iOS
 
 #### filter
 Add video filter
@@ -798,6 +818,17 @@ source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 Note: Using this feature adding an entry for NSAppleMusicUsageDescription to your Info.plist file as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html)
 
 Platforms: iOS
+
+##### Explicit mimetype for the stream
+
+Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object.
+Sometimes is needed when URL extension does not match with the mimetype that you are expecting, as seen on the next example. (Extension is .ism -smooth streaming- but file served is on format mpd -mpeg dash-)
+
+Example:
+```
+source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
+type: 'mpd' }}
+```
 
 ###### Other protocols
 
@@ -1285,7 +1316,7 @@ On iOS, if you would like to allow other apps to play music over your video comp
 }
 ```
 
-You can also use the [ignoreSilentSwitch](ignoresilentswitch) prop.
+You can also use the [ignoreSilentSwitch](#ignoresilentswitch) prop.
 </details>
 
 ### Android Expansion File Usage
