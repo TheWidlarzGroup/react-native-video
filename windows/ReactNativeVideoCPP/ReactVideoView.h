@@ -18,6 +18,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   void Set_FullScreen(bool fullScreen);
   void Set_ProgressUpdateInterval(int64_t interval);
   void Set_AutoPlay(bool autoPlay);
+  void Set_PlaybackRate(double rate);
 
  private:
   hstring m_uriString;
