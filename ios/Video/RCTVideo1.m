@@ -149,7 +149,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
             id imaObject = [source objectForKey:@"ima"];
             
             if ([imaObject isKindOfClass:NSDictionary.class]) {
-                [self setupPlaybackWithAds:imaObject playerItem:playerItem];
+                NSDictionary* __nullable drmSource = [source objectForKey:@"drm"];
+                [self setupPlaybackWithAds:imaObject drmDict:drmSource playerItem:playerItem];
             } else {
                 PlayerItemSource *source = [[PlayerItemSource alloc] initWithPlayerItem:playerItem];
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -211,7 +212,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     }
 }
 
-- (void)setupPlaybackWithAds:(NSDictionary *)imaDict playerItem:(AVPlayerItem *)playerItem {
+- (void) setupPlaybackWithAds:(NSDictionary *)imaDict drmDict:(NSDictionary  * _Nullable)drmDict playerItem:(AVPlayerItem *)playerItem {
     NSString* __nullable assetKey = [imaDict objectForKey:@"assetKey"];
     NSString* __nullable contentSourceId = [imaDict objectForKey:@"contentSourceId"];
     NSString* __nullable videoId = [imaDict objectForKey:@"videoId"];
@@ -233,18 +234,24 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         validUntil = [[NSDate alloc] initWithTimeIntervalSince1970:[_validUntil doubleValue]];
     }
     
-    NSString* __nullable videoTitle = [_videoData valueForKey:@"videoTitle"];
-
     [self prepareAdTagParameters:adTagParameters withCallback:^(NSDictionary * _Nullable newAdTagParamerters) {
-        IMASource* source = [[IMASource alloc] initWithAssetKey:assetKey
+        DAISource* source = [[DAISource alloc] initWithAssetKey:assetKey
                                                 contentSourceId:contentSourceId
                                                         videoId:videoId
                                                       authToken:authToken
                                                 adTagParameters:adTagParameters
                                        adTagParametersValidFrom:validFrom
-                                      adTagParametersValidUntil:validUntil
-                                                          title:videoTitle
-                                                        logoURL:nil];
+                                      adTagParametersValidUntil:validUntil];
+        
+        if (drmDict) {
+            NSString* __nullable croToken = [drmDict objectForKey:@"croToken"];
+            NSString* __nullable licensingServerUrl = [drmDict objectForKey:@"licensingServerUrl"];
+            
+            if (croToken && licensingServerUrl) {
+                DorisDRMSource* drm = [DorisDRMSource.alloc initWithCroToken:croToken licensingServerUrl:licensingServerUrl];
+                source.drm = drm;
+            }
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.dorisUI.input loadWithImaSource:source startPlayingAt:self->_startPlayingAt];
         });
