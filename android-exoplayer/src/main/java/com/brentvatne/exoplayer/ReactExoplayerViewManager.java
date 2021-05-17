@@ -49,6 +49,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_VOLUME = "volume";
+    private static final String PROP_BACK_BUFFER_DURATION_MS = "backBufferDurationMs";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
     private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs";
     private static final String PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs";
@@ -64,6 +65,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
+    private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
@@ -294,9 +296,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setDisableFocus(disableFocus);
     }
 
+    @ReactProp(name = PROP_BACK_BUFFER_DURATION_MS, defaultInt = 0)
+    public void setBackBufferDurationMs(final ReactExoplayerView videoView, final int backBufferDurationMs) {
+        videoView.setBackBufferDurationMs(backBufferDurationMs);
+    }
+
     @ReactProp(name = PROP_DISABLE_BUFFERING, defaultBoolean = false)
     public void setDisableBuffering(final ReactExoplayerView videoView, final boolean disableBuffering) {
         videoView.setDisableBuffering(disableBuffering);
+    }
+
+    @ReactProp(name = PROP_DISABLE_DISCONNECT_ERROR, defaultBoolean = false)
+    public void setDisableDisconnectError(final ReactExoplayerView videoView, final boolean disableDisconnectError) {
+        videoView.setDisableDisconnectError(disableDisconnectError);
     }
 
     @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)

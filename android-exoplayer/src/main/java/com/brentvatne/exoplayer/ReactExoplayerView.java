@@ -139,6 +139,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Handler mainHandler;
 
     // Props from React
+    private int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
     private Uri srcUri;
     private String extension;
     private boolean repeat;
@@ -151,6 +152,7 @@ class ReactExoplayerView extends FrameLayout implements
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean disableBuffering;
+    private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
@@ -434,7 +436,7 @@ class ReactExoplayerView extends FrameLayout implements
                             bufferForPlaybackAfterRebufferMs,
                             -1,
                             true,
-                            DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
+                            backBufferDurationMs,
                             DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
                     );
                     DefaultRenderersFactory renderersFactory =
@@ -527,6 +529,7 @@ class ReactExoplayerView extends FrameLayout implements
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
+        config.setDisableDisconnectError(this.disableDisconnectError);
         switch (type) {
             case C.TYPE_SS:
                 return new SsMediaSource.Factory(
@@ -1312,8 +1315,16 @@ class ReactExoplayerView extends FrameLayout implements
         this.disableFocus = disableFocus;
     }
 
+    public void setBackBufferDurationMs(int backBufferDurationMs) {
+        this.backBufferDurationMs = backBufferDurationMs;
+    }
+
     public void setDisableBuffering(boolean disableBuffering) {
         this.disableBuffering = disableBuffering;
+    }
+
+    public void setDisableDisconnectError(boolean disableDisconnectError) {
+        this.disableDisconnectError = disableDisconnectError;
     }
 
     public void setFullscreen(boolean fullscreen) {

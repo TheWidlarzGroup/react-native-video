@@ -276,10 +276,12 @@ var styles = StyleSheet.create({
 * [allowsExternalPlayback](#allowsexternalplayback)
 * [audioOnly](#audioonly)
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
+* [backBufferDurationMs](#backBufferDurationMs)
 * [bufferConfig](#bufferconfig)
 * [controls](#controls)
 * [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
+* [disableDisconnectError](#disableDisconnectError)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
 * [fullscreen](#fullscreen)
@@ -367,6 +369,11 @@ A Boolean value that indicates whether the player should automatically delay pla
 
 Platforms: iOS
 
+#### backBufferDurationMs
+The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.
+
+Platforms: Android ExoPlayer
+
 #### bufferConfig
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
@@ -413,6 +420,13 @@ Platforms: Android ExoPlayer, iOS, react-native-dom
 Determines whether video audio should override background music/audio in Android devices.
 * ** false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
+
+Platforms: Android Exoplayer
+
+#### disableDisconnectError
+Determines if the player needs to throw an error when connection is lost or not
+* **false (default)** - Player will throw an error when connection is lost
+* **true** - Player will keep trying to buffer when network connect is lost
 
 Platforms: Android Exoplayer
 
