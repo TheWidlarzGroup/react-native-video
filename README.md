@@ -1189,6 +1189,19 @@ return (
 );
 ```
 
+#### getVideoBufferedDuration
+`getVideoBufferedDuration()`
+
+Return the current video buffered duration.
+
+Example:
+```js
+let bufferDuration = this.player.getVideoBufferedDuration();
+console.log({bufferDuration});
+```
+
+Platforms: Android 
+
 #### dismissFullscreenPlayer
 `dismissFullscreenPlayer()`
 

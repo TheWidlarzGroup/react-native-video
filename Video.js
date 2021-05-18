@@ -52,6 +52,16 @@ export default class Video extends Component {
     return strObj;
   }
 
+  getVideoBufferedDuration = () => {
+    if (typeof this._root.getVideoBufferedDuration !== 'undefined') {
+      return this._root.getVideoBufferedDuration()
+    }
+    if (NativeModules.VideoManager.getVideoBufferedDuration !== 'undefined') {
+      return NativeModules.VideoManager.getVideoBufferedDuration()
+    }
+    return -1; // not supported
+  }
+
   seek = (time, tolerance = 100) => {
     if (isNaN(time)) {throw new Error('Specified time is not a number');}
 

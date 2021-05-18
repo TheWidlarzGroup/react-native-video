@@ -172,6 +172,10 @@ public class ReactVideoView extends ScalableVideoView implements
         };
     }
 
+    public float getVideoBufferedDuration() {
+        return mVideoBufferedDuration;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mUseNativeControls) {
