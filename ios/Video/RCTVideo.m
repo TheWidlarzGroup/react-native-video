@@ -225,6 +225,14 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
+  // Forced disabling PiP on background if background playback is disabled
+  if ([AVPictureInPictureController isPictureInPictureSupported]
+      && _pipController
+      && _playInBackground == false) {
+    _pipController = nil;
+    self.onPictureInPictureStatusChanged(@{@"isActive": [NSNumber numberWithBool:false]});
+  }
+
   if (_playInBackground || _playWhenInactive || _paused) return;
   
   [_player pause];
@@ -243,8 +251,9 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
+  [self setupPipController];
   [self applyModifiers];
-  if (_playInBackground) {
+  if (_playInBackground && (_playerLayer.player == nil || _playerViewController.player == nil)) {
     [_playerLayer setPlayer:_player];
     [_playerViewController setPlayer:_player];
   }
