@@ -14,8 +14,6 @@
 
 #import <ReactVideoSubtitleSideloader_tvOS/ReactVideoSubtitleSideloader_tvOS-Swift.h>
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
-@import MuxCoreTv;
-@import MUXSDKStatsTv;
 @import AVDoris;
 
 static NSString *const playerVersion = @"react-native-video/3.3.1";
@@ -37,8 +35,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     ActionToken * _actionToken;
     DiceBeaconRequest * _diceBeaconRequst;
     BOOL _diceBeaconRequestOngoing;
-    MUXSDKCustomerVideoData * _videoData;
-    MUXSDKCustomerPlayerData * _playerData;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
@@ -494,12 +490,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 #pragma mark - Lifecycle
 - (void)dealloc {
-    if (_playerData || _videoData) {
-        [MUXSDKStats destroyPlayer:_playerName];
-        _playerData = nil;
-        _videoData = nil;
-    }
-    
     [_diceBeaconRequst cancel];
     _diceBeaconRequst = nil;
 }
@@ -653,105 +643,53 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                 DICELog(@"Failed to create JSON object from provided playbackData: %@", muxDataString);
             }
         }
+        
         if ([muxData isKindOfClass:NSDictionary.class]) {
             NSDictionary *muxDict = muxData;
             
-            NSString* envKey = [muxDict objectForKey:@"envKey"];
+            NSString * envKey = [muxDict objectForKey:@"envKey"];
+            NSString * _Nullable playerName = [self stringFromDict:muxDict forKey:@"playerName"];
+
             if (envKey == nil) {
                 DICELog(@"envKey is not present. Mux will not be available.");
                 return;
             }
             
-            NSString *value = nil;
-            // Video metadata (cleared with videoChangeForPlayer:withVideoData:)
-            BOOL isReplace = NO;
-            if (_videoData != nil) {
-                isReplace = YES;
-            } else {
-                // Environment and player data that persists until the player is destroyed
-                _playerData = [[MUXSDKCustomerPlayerData alloc] initWithEnvironmentKey:envKey];
-                // ...insert player metadata
-                value = [self stringFromDict:muxDict forKey:@"viewerUserId"];
-                [_playerData setViewerUserId:value];
-                
-                [_playerData setPlayerVersion:playerVersion];
-                
-                value = [self stringFromDict:muxDict forKey:@"playerName"];
-                if (value) {
-                    _playerName = value;
-                }
-                [_playerData setPlayerName:_playerName];
-                
-                value = [self stringFromDict:muxDict forKey:@"subPropertyId"];
-                [_playerData setSubPropertyId:value];
-                
-                value = [self stringFromDict:muxDict forKey:@"experimentName"];
-                [_playerData setExperimentName:value];
+            if (playerName == nil) {
+                playerName = @"AVDoris";
             }
+                        
+            DorisMuxCustomerPlayerData * playerData = [[DorisMuxCustomerPlayerData alloc] initWithPlayerName:playerName environmentKey:envKey];
+            playerData.viewerUserId = [self stringFromDict:muxDict forKey:@"viewerUserId"];
+            playerData.subPropertyId = [self stringFromDict:muxDict forKey:@"subPropertyId"];
+            playerData.experimentName = [self stringFromDict:muxDict forKey:@"experimentName"];
+            playerData.playerVersion = playerVersion;
             
-            _videoData = [MUXSDKCustomerVideoData new];
+            DorisMuxCustomerVideoData* videoData = [[DorisMuxCustomerVideoData alloc] init];
             
             // ...insert video metadata
-            value = [self stringFromDict:muxDict forKey:@"videoTitle"];
-            [_videoData setVideoTitle:value];
-            
-            value = [self stringFromDict:muxDict forKey:@"videoId"];
-            [_videoData setVideoId:value];
-            
-            value = [self stringFromDict:muxDict forKey:@"videoSeries"];
-            [_videoData setVideoSeries:value];
-            
-            value = [self stringFromDict:muxDict forKey:@"videoCdn"];
-            [_videoData setVideoCdn:value];
+            videoData.videoTitle = [self stringFromDict:muxDict forKey:@"videoTitle"];
+            videoData.videoId = [self stringFromDict:muxDict forKey:@"videoId"];
+            videoData.videoSeries = [self stringFromDict:muxDict forKey:@"videoSeries"];
+            videoData.videoCdn = [self stringFromDict:muxDict forKey:@"videoCdn"];
+            videoData.videoStreamType = [self stringFromDict:muxDict forKey:@"videoStreamType"];
             
             id videoIsLive = [muxDict objectForKey:@"videoIsLive"];
             if (videoIsLive != nil && [videoIsLive isKindOfClass:NSNumber.class]) {
-                NSNumber* num = videoIsLive;
-                [_videoData setVideoIsLive:num];
-            } else {
-                [_videoData setVideoIsLive:nil];
+                videoData.videoIsLive = videoIsLive;
             }
             
             id videoDuration = [muxDict objectForKey:@"videoDuration"];
             if (videoDuration != nil && [videoDuration isKindOfClass:NSNumber.class]) {
-                [_videoData setVideoDuration:((NSNumber*)videoDuration)];
-            } else {
-                [_videoData setVideoDuration:nil];
+                videoData.videoDuration = videoDuration;
             }
-            
-            value = [self stringFromDict:muxDict forKey:@"videoStreamType"];
-            [_videoData setVideoStreamType:value];
-            
-            
-            value = [self stringFromDict:muxDict forKey:@"playerName"];
-            if (value) {
-                _playerName = value;
-            }
-            
-            if (isReplace) {
-                [MUXSDKStats videoChangeForPlayer:_playerName withVideoData:_videoData];
-            } else {
-                [self setupMux];
-            }
+                        
+            [self.dorisUI.input configureMuxWithPlayerData:playerData videoData:videoData];
         } else {
             DICELog(@"Failed to read dictionary object provided playbackData: %@", muxData);
         }
     }
 }
-
-- (void)setupMux {
-    if (_playerData == nil || _videoData == nil) {
-        return;
-    }
-    
-    if (self.dorisUI.playerLayer != nil) {
-        [MUXSDKStats monitorAVPlayerLayer:self.dorisUI.playerLayer withPlayerName:_playerName playerData:_playerData videoData:_videoData];
-    } else if (self.dorisUI.playerViewController != nil) {
-        [MUXSDKStats monitorAVPlayerViewController:self.dorisUI.playerViewController withPlayerName:_playerName playerData:_playerData videoData:_videoData];
-    }
-}
-
-
 
 
 - (void)fetchAppIdWithCompletion:(void (^)(NSNumber* _Nullable appId))completionBlock {
