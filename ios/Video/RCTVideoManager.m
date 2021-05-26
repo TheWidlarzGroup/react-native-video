@@ -1,6 +1,5 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
-#import "RCTVideo1.h"
 #import <React/RCTBridge.h>
 #import <AVFoundation/AVFoundation.h>
 #import <React/RCTUIManager.h>
@@ -13,8 +12,7 @@ RCT_EXPORT_MODULE();
 
 - (UIView *)view
 {
-//    return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
-    return [[RCTVideo1 alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+    return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -90,25 +88,6 @@ RCT_EXPORT_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)i
                 CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
                 CGFloat livePosition = seekableStart + seekableDuration;
                 
-                NSDictionary *info = @{
-                    @"time": [NSNumber numberWithFloat:livePosition - timeIntervalFromLive],
-                    @"tolerance": [NSNumber numberWithInt:100]
-                };
-                [view setSeek:info];
-            }
-        } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
-            RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
-            NSDateFormatter* dateFormatter = [NSDateFormatter new];
-            dateFormatter.locale = [NSLocale currentLocale];
-            dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
-            
-            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
-                NSTimeInterval timeIntervalFromLive = [[dateFormatter dateFromString:isoDate] timeIntervalSinceDate:[NSDate new]];
-                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
-                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
-                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
-                CGFloat livePosition = seekableStart + seekableDuration;
-                
                 [view.dorisUI.input seekTo:livePosition - timeIntervalFromLive];
             }
         }
@@ -125,20 +104,6 @@ RCT_EXPORT_METHOD(seekToNow:(nonnull NSNumber *)node) {
                 CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
                 CGFloat livePosition = seekableStart + seekableDuration;
                 
-                NSDictionary *info = @{
-                    @"time": [NSNumber numberWithFloat:livePosition],
-                    @"tolerance": [NSNumber numberWithInt:100]
-                };
-                [view setSeek:info];
-            }
-        } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
-            RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
-            if (view.player.currentItem && view.player.currentItem.seekableTimeRanges.lastObject) {
-                CMTimeRange seekableRange = [view.player.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
-                CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
-                CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
-                CGFloat livePosition = seekableStart + seekableDuration;
-                
                 [view.dorisUI.input seekTo:livePosition];
             }
         }
@@ -149,13 +114,6 @@ RCT_EXPORT_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)posit
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         if ([viewRegistry[node] isKindOfClass:[RCTVideo class]]) {
             RCTVideo *view = (RCTVideo *)viewRegistry[node];
-            NSDictionary *info = @{
-                @"time": [NSNumber numberWithFloat:position],
-                @"tolerance": [NSNumber numberWithInt:100]
-            };
-            [view setSeek:info];
-        } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
-            RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
             NSDictionary *info = @{
                 @"time": [NSNumber numberWithFloat:position],
                 @"tolerance": [NSNumber numberWithInt:100]
@@ -192,11 +150,6 @@ RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDic
         
         if ([viewRegistry[node] isKindOfClass:[RCTVideo class]]) {
             RCTVideo *view = (RCTVideo *)viewRegistry[node];
-            [view.avdoris replaceAdTagParametersWithAdTagParameters:_adTagParameters
-                                                          validFrom: _startDate
-                                                         validUntil:_endDate];
-        } else if ([viewRegistry[node] isKindOfClass:[RCTVideo1 class]]) {
-            RCTVideo1 *view = (RCTVideo1 *)viewRegistry[node];
             [view prepareAdTagParameters:_adTagParameters withCallback:^(NSDictionary * _Nullable newAdTAgParameters) {
                 [view.dorisUI.input replaceAdTagParametersWithAdTagParameters:newAdTAgParameters
                                                                     validFrom: _startDate

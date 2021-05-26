@@ -1,9 +1,6 @@
 #import <React/RCTView.h>
 #import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
-#import "UIView+FindUIViewController.h"
-#import "RCTVideoPlayerViewController.h"
-#import "RCTVideoPlayerViewControllerDelegate.h"
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 #import <react-native-video/RCTVideoCache.h>
 #import <DVAssetLoaderDelegate/DVURLAsset.h>
@@ -12,11 +9,8 @@
 @import AVDoris;
 
 @class RCTEventDispatcher;
-#if __has_include(<react-native-video/RCTVideoCache.h>)
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate>
-#else
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate>
-#endif
+
+@interface RCTVideo : UIView <DorisUIModuleOutputProtocol>
 
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoLoad;
@@ -37,12 +31,16 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPlaybackRateChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onRequireAdParameters;
 @property (nonatomic, copy) RCTBubblingEventBlock onVideoAboutToEnd;
-@property (nonatomic, strong) AVDorisPlayer *player;
-@property (nonatomic, strong) AVDoris *avdoris;
+@property (nonatomic, copy) RCTBubblingEventBlock onFavouriteButtonClick;
+@property (nonatomic, copy) RCTBubblingEventBlock onRelatedVideoClicked;
+@property (nonatomic, copy) RCTBubblingEventBlock onRelatedVideosIconClicked;
+@property (nonatomic, copy) RCTBubblingEventBlock onStatsIconClick;
+@property (nonatomic, copy) RCTBubblingEventBlock onEpgIconClick;
+@property (nonatomic, strong) AVPlayer *player;
+@property (nonatomic, strong) DorisUIModule *dorisUI;
 
+- (void)prepareAdTagParameters:(NSDictionary * _Nullable)adTagParameters withCallback:(void(^_Nonnull)(NSDictionary * _Nullable))handler;
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
-
-- (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player;
 - (void)setSeek:(NSDictionary *)info;
 
 @end
