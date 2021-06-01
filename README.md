@@ -1,6 +1,6 @@
 ## react-native-video
 
-A `<Video>` component for react-native, as seen in
+A `<Video> ` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
 Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
