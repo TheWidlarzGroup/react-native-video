@@ -1350,6 +1350,8 @@ static int const RCTVideoUnset = -1;
     }
     if( viewController )
     {
+      [_playerLayer setPlayer: nil];
+      _playerViewController.player = _player;
       _presentingViewController = viewController;
       if(self.onVideoFullscreenPlayerWillPresent) {
         self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
