@@ -18,6 +18,7 @@ public final class AdTagParametersHelper {
     private static final String KEY_AN = "an";
     private static final String KEY_DESCRIPTION_URL = "description_url";
     private static final String KEY_URL = "url";
+    private static final String KEY_TFCD = "tfcd";
 
     // Prevents instantiation
     private AdTagParametersHelper() {
@@ -38,6 +39,7 @@ public final class AdTagParametersHelper {
         String an = (String) adTagParametersMap.get(KEY_AN);
         String descriptionUrl = (String) adTagParametersMap.get(KEY_DESCRIPTION_URL);
         String url = (String) adTagParametersMap.get(KEY_URL);
+        String tfcd = (String) adTagParametersMap.get(KEY_TFCD);
 
         String msid = context.getPackageName();
         String isLat = "0"; // Todo: Remove this hard-coded value once we ask the user if they want to enable/disable limited ad tracking
@@ -52,6 +54,7 @@ public final class AdTagParametersHelper {
                 .setIsLat(isLat)
                 .setDescriptionUrl(descriptionUrl)
                 .setUrl(url)
+                .setTfcd(tfcd)
                 .build();
     }
 }

@@ -531,8 +531,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             playerInitTime = new Date().getTime();
 
-            if (isImaStream && viewWidth != 0 && viewHeight != 0) {
-                loadImaStream();
+            if (isImaStream) {
+                if (!isImaStreamLoaded && viewWidth != 0 && viewHeight != 0) {
+                    loadImaStream();
+                }
             } else if (actionToken != null) {
                 try {
                     player.load(source, !haveResumePosition, actionToken);
