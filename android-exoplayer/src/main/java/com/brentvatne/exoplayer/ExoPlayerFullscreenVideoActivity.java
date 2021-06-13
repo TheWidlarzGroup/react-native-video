@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,8 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         id = getIntent().getIntExtra(EXTRA_ID, -1);
         String orientation = getIntent().getStringExtra(EXTRA_ORIENTATION);
         if ("landscape".equals(orientation)) {
