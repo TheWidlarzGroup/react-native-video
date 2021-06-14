@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.Cache;
@@ -87,10 +89,17 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
                         cacheKeyFactory
                     );
 
+                    if (!targetFile.exists()) {
+                        throw new Exception("Target file not present after writing bytes");
+                    }
+
                     Log.d(getName(), "Export succeeded");
                     Log.d(getName(), targetFile.getPath());
 
-                    promise.resolve(targetFile.getPath());
+                    WritableMap result =  Arguments.createMap();
+                    result.putString("path", targetFile.getPath());
+
+                    promise.resolve(result);
                 } catch (Exception e) {
                     Log.d(getName(), "Export error");
                     e.printStackTrace();
