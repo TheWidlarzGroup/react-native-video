@@ -12,10 +12,12 @@ Pod::Spec.new do |s|
   s.homepage       = 'https://github.com/react-native-community/react-native-video'
   s.source       = { :git => "https://github.com/react-native-community/react-native-video.git", :tag => "#{s.version}" }
 
-  s.ios.deployment_target = "8.0"
+  s.ios.deployment_target = "9.0"
   s.tvos.deployment_target = "9.0"
 
   s.subspec "Video" do |ss|
+    ss.dependency "GoogleAds-IMA-iOS-SDK", "~> 3.9"
+
     ss.source_files  = "ios/Video/*.{h,m}"
     s.static_framework = true
   end

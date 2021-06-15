@@ -1,7 +1,7 @@
 {
-    "name": "react-native-video",
+    "name": "react-native-video-inc-ads",
     "version": "5.1.1",
-    "description": "A <Video /> element for react-native",
+    "description": "A <Video /> element for react-native with ads support. This is a project merging a fork and its master",
     "main": "Video.js",
     "license": "MIT",
     "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
@@ -21,11 +21,15 @@
         {
             "name": "Hampton Maxwell",
             "email": "me@hamptonmaxwell.com"
+        },
+        {
+            "name": "Olgun Kaya",
+            "email": "olgunkaya2002@gmail.com"
         }
     ],
     "repository": {
         "type": "git",
-        "url": "git@github.com:react-native-community/react-native-video.git"
+        "url": "git@github.com:olgunkaya/react-native-video-inc-ads.git"
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "0.0.7",

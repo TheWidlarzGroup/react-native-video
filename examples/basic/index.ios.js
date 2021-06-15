@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 
 import {
-  AlertIOS,
+  Alert,
   AppRegistry,
   Platform,
   StyleSheet,
@@ -14,6 +14,11 @@ import {
 } from 'react-native';
 
 import Video,{FilterType} from 'react-native-video';
+
+const adTagUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/"
++ "ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp"
++ "&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite"
++ "%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=";
 
 const filterTypes = [
     FilterType.NONE,
@@ -188,7 +193,7 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             filter={this.state.filter}
             filterEnabled={this.state.filterEnabled}
@@ -282,11 +287,12 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => { AlertIOS.alert('Done!') }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             controls={this.state.controls}
             filter={this.state.filter}
             filterEnabled={this.state.filterEnabled}
+            adTagUrl={adTagUrl}
           />
         </View>
         <View style={styles.controls}>
