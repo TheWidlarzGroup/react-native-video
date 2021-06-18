@@ -137,6 +137,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onReloadCurrentSource?.(event.nativeEvent);
   }
 
+  onBehindLiveWindowError = (event) => {
+    this.props.onBehindLiveVideoError?.(event.nativeEvent);
+  }
+
   /**
    * seekTo jumps to a certain position for vod and live content
    * time parameter can be the following:
@@ -199,6 +203,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onVideoAboutToEnd: this.onVideoAboutToEnd,
       onFavouriteButtonClick: this.onFavouriteButtonClick,
       onReloadCurrentSource: this.onReloadCurrentSource,
+      onBehindLiveWindowError: this.onBehindLiveWindowError,
     };
   };
 
