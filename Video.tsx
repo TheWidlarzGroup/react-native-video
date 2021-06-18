@@ -138,7 +138,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   }
 
   onBehindLiveWindowError = (event) => {
-    this.props.onBehindLiveVideoError?.(event.nativeEvent);
+    this.props.onBehindLiveWindowError?.(event.nativeEvent);
   }
 
   /**
