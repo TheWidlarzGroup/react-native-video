@@ -1,7 +1,7 @@
 {
     "name": "react-native-video",
     "version": "5.23.4",
-    "exoDorisVersion": "0.13.5-alpha01",
+    "exoDorisVersion": "0.13.5",
     "exoPlayerVersion": "2.13.3",
     "description": "A <Video /> element for react-native",
     "main": "Video.tsx",
