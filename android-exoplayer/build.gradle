@@ -31,7 +31,6 @@ dependencies {
     implementation('com.google.android.exoplayer:exoplayer:2.11.4') {
         exclude group: 'com.android.support'
     }
-    implementation 'com.google.android.exoplayer:extension-ima:2.11.4'
 
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"
@@ -41,6 +40,8 @@ dependencies {
     implementation('com.google.android.exoplayer:extension-okhttp:2.11.4') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
+        implementation 'com.google.android.exoplayer:extension-ima:2.11.4'
+        
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
 
 }
