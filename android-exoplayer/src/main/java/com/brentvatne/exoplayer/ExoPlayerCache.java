@@ -7,8 +7,9 @@ import android.util.Log;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.Cache;
+import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.upstream.cache.CacheUtil;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
@@ -17,10 +18,8 @@ import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceInputStream;
 
-import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
@@ -33,6 +32,8 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
 
     private static SimpleCache instance = null;
     private static final String CACHE_KEY_PREFIX = "exoPlayerCacheKeyPrefix";
+    private static int maxCacheSizeBytes = -1; // Default no maximum size
+    private static String cacheSubDirectory = "";
 
     public ExoPlayerCache(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -41,6 +42,18 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "ExoPlayerCache";
+    }
+
+    @ReactMethod
+    public void setMaxCacheSize(final int bytes, final Promise promise) {
+        maxCacheSizeBytes = bytes;
+        promise.resolve(maxCacheSizeBytes);
+    }
+
+    @ReactMethod
+    public void setCacheSubDirectory(final String directory, final Promise promise) {
+        cacheSubDirectory = directory;
+        promise.resolve(cacheSubDirectory);
     }
 
     @ReactMethod
@@ -115,7 +128,12 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
 
     public static SimpleCache getInstance(Context context) {
         if(instance == null) {
-            instance = new SimpleCache(new File(ExoPlayerCache.getCacheDir(context)), new NoOpCacheEvictor());
+            instance = new SimpleCache(
+                new File(ExoPlayerCache.getCacheDir(context) + cacheSubDirectory),
+                maxCacheSizeBytes == -1
+                    ? new NoOpCacheEvictor()
+                    : new LeastRecentlyUsedCacheEvictor(maxCacheSizeBytes)
+            );
         }
         return instance;
     }
