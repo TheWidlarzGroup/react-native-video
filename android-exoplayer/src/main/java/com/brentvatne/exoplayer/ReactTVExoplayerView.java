@@ -1133,6 +1133,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Exception ex = e;
         if (isBehindLiveWindow(e)) {
             if (actionToken != null) {
+                resetSourceUrl();
                 eventEmitter.behindLiveWindowError();
             } else {
                 clearResumePosition();
@@ -1141,6 +1142,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         } else if (!hasReloadedCurrentSource && isUnauthorizedException(e)) {
             hasReloadedCurrentSource = true;
             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+            resetSourceUrl();
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -1164,11 +1166,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             errorString = getResources().getString(R.string.unrecognized_media_format);
         }
         if (errorString != null) {
+            resetSourceUrl();
             eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
         if (!isBehindLiveWindow(e)) {
             updateResumePosition();
+        }
+    }
+
+    private void resetSourceUrl() {
+        if (src != null) {
+            src.setUrl("");
         }
     }
 
