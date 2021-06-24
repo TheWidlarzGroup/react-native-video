@@ -718,7 +718,10 @@ static int const RCTVideoUnset = -1;
     }
   } else if (object == _player) {
     if([keyPath isEqualToString:playbackRate]) {
-      if(self.onPlaybackRateChange) {
+      if (_player.rate > 0 && _rate > 0 && _player.rate != _rate) {
+        // Playback is resuming, apply rate modifer.
+        [_player setRate:_rate];
+      } else if(self.onPlaybackRateChange) {
         self.onPlaybackRateChange(@{@"playbackRate": [NSNumber numberWithFloat:_player.rate],
                                     @"target": self.reactTag});
       }
