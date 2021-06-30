@@ -1128,15 +1128,21 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onPlayerError(ExoPlaybackException e) {
+    public void onPlayerError(@NonNull ExoPlaybackException e) {
         String errorString = null;
         Exception ex = e;
         if (isBehindLiveWindow(e)) {
-            clearResumePosition();
-            initializePlayer(false);
+            if (actionToken != null) {
+                resetSourceUrl();
+                eventEmitter.behindLiveWindowError();
+            } else {
+                clearResumePosition();
+                initializePlayer(false);
+            }
         } else if (!hasReloadedCurrentSource && isUnauthorizedException(e)) {
             hasReloadedCurrentSource = true;
             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+            resetSourceUrl();
         } else if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
             if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
@@ -1160,11 +1166,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             errorString = getResources().getString(R.string.unrecognized_media_format);
         }
         if (errorString != null) {
+            resetSourceUrl();
             eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
         if (!isBehindLiveWindow(e)) {
             updateResumePosition();
+        }
+    }
+
+    private void resetSourceUrl() {
+        if (src != null) {
+            src.setUrl("");
         }
     }
 

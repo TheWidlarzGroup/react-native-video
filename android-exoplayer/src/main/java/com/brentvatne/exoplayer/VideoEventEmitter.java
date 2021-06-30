@@ -39,6 +39,7 @@ class VideoEventEmitter {
     private static final String EVENT_VIDEO_ABOUT_TO_END = "onVideoAboutToEnd";
     private static final String EVENT_REQUIRE_AD_PARAMETERS = "onRequireAdParameters";
     private static final String EVENT_RELOAD_CURRENT_SOURCE = "onReloadCurrentSource";
+    private static final String EVENT_BEHIND_LIVE_WINDOW_ERROR = "onBehindLiveWindowError";
 
     private static final String EVENT_STALLED = "onPlaybackStalled";
     private static final String EVENT_RESUME = "onPlaybackResume";
@@ -90,7 +91,8 @@ class VideoEventEmitter {
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_REQUIRE_AD_PARAMETERS,
-            EVENT_RELOAD_CURRENT_SOURCE
+            EVENT_RELOAD_CURRENT_SOURCE,
+            EVENT_BEHIND_LIVE_WINDOW_ERROR
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -125,7 +127,8 @@ class VideoEventEmitter {
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_REQUIRE_AD_PARAMETERS,
-            EVENT_RELOAD_CURRENT_SOURCE
+            EVENT_RELOAD_CURRENT_SOURCE,
+            EVENT_BEHIND_LIVE_WINDOW_ERROR
     })
     @interface VideoEvents {
     }
@@ -376,5 +379,9 @@ class VideoEventEmitter {
         event.putString(EVENT_PROP_ID, id);
         event.putString(EVENT_PROP_TYPE, type);
         receiveEvent(EVENT_RELOAD_CURRENT_SOURCE, event);
+    }
+
+    void behindLiveWindowError() {
+        receiveEvent(EVENT_BEHIND_LIVE_WINDOW_ERROR, null);
     }
 }
