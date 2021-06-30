@@ -147,6 +147,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
         if (TextUtils.isEmpty(uriString)) {
+            videoView.clearSrc();
             return;
         }
 

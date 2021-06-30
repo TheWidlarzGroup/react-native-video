@@ -770,6 +770,12 @@ Platforms: Android ExoPlayer
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
 
+Setting the source will trigger the player to attempt to load the provided media with all other given props. Please be sure that all props are provided before/at the same time as setting the source.
+
+Rendering the player component with a null source will init the player, and start playing once a source value is provided.
+
+Providing a null source value after loading a previous source will stop playback, and clear out the previous source content.
+
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
 
