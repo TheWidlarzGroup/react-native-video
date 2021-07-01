@@ -36,7 +36,7 @@ dependencies {
     implementation("com.github.DiceTechnology.doris-android:doris:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation("com.github.DiceTechnology.doris-android:extension-ima:$exoDorisVersion") {
+    implementation("com.github.DiceTechnology.doris-android:extension-ima-dai:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
     implementation "com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion"

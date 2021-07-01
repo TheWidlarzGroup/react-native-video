@@ -49,14 +49,14 @@ import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
-import com.diceplatform.doris.ext.ima.ExoDorisImaPlayer;
-import com.diceplatform.doris.ext.ima.ExoDorisImaWrapper;
-import com.diceplatform.doris.ext.ima.ExoDorisImaWrapperListener;
-import com.diceplatform.doris.ext.ima.entity.AdInfo;
-import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
-import com.diceplatform.doris.ext.ima.entity.ImaLanguage;
-import com.diceplatform.doris.ext.ima.entity.ImaSource;
-import com.diceplatform.doris.ext.ima.entity.ImaSourceBuilder;
+import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiPlayer;
+import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiWrapper;
+import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiWrapperListener;
+import com.diceplatform.doris.ext.imadai.entity.AdInfo;
+import com.diceplatform.doris.ext.imadai.entity.AdTagParameters;
+import com.diceplatform.doris.ext.imadai.entity.ImaDaiSource;
+import com.diceplatform.doris.ext.imadai.entity.ImaDaiSourceBuilder;
+import com.diceplatform.doris.ext.imadai.entity.ImaLanguage;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
 import com.diceplatform.doris.ui.entity.Labels;
@@ -123,7 +123,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
         ExoDorisPlayerViewListener,
-        ExoDorisImaWrapperListener {
+        ExoDorisImaDaiWrapperListener {
 
     private static final String TAG = "ReactTvExoplayerView";
     private static final String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
@@ -159,8 +159,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
-    private ExoDorisImaPlayer exoDorisImaPlayer;
-    private ExoDorisImaWrapper exoDorisImaWrapper;
+    private ExoDorisImaDaiPlayer exoDorisImaDaiPlayer;
+    private ExoDorisImaDaiWrapper exoDorisImaDaiWrapper;
     private DefaultTrackSelector trackSelector;
     private ControlDispatcher controlDispatcher;
     private Source source;
@@ -474,15 +474,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
         if (player == null) {
             if (isImaStream) {
-                exoDorisImaPlayer = new ExoDorisImaPlayer(getContext(), exoDorisPlayerView);
-                exoDorisImaWrapper = new ExoDorisImaWrapper(
+                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView);
+                exoDorisImaDaiWrapper = new ExoDorisImaDaiWrapper(
                         getContext(),
-                        exoDorisImaPlayer,
+                        exoDorisImaDaiPlayer,
                         exoDorisPlayerView.getAdViewGroup(),
                         ImaLanguage.SPANISH_UNITED_STATES);
-                exoDorisImaWrapper.setExoDorisImaWrapperListener(this);
-                player = exoDorisImaPlayer.getExoDoris();
-                trackSelector = exoDorisImaPlayer.getTrackSelector();
+                exoDorisImaDaiWrapper.setExoDorisImaWrapperListener(this);
+                player = exoDorisImaDaiPlayer.getExoDoris();
+                trackSelector = exoDorisImaDaiPlayer.getTrackSelector();
             } else {
                 player = new ExoDorisBuilder(getContext()).build();
                 trackSelector = player.getTrackSelector();
@@ -571,7 +571,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void playImaStream() {
-        ImaSource imaSource = new ImaSourceBuilder(source)
+        ImaDaiSource imaSource = new ImaDaiSourceBuilder(source)
                 .setAssetKey(imaSrc.getAssetKey())
                 .setContentSourceId(imaSrc.getContentSourceId())
                 .setVideoId(imaSrc.getVideoId())
@@ -582,10 +582,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
                 .build();
 
-        exoDorisImaPlayer.enableControls(true);
-        exoDorisImaPlayer.setCanSeek(true);
+        exoDorisImaDaiPlayer.enableControls(true);
+        exoDorisImaDaiPlayer.setCanSeek(true);
 
-        exoDorisImaWrapper.requestAndPlayAds(imaSource);
+        exoDorisImaDaiWrapper.requestAndPlayAds(imaSource);
     }
 
     private AmazonFireTVAdRequest createApsBidRequest() {
@@ -754,10 +754,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             shouldSeekTo = C.TIME_UNSET;
         }
 
-        if (exoDorisImaWrapper != null) {
-            exoDorisImaWrapper.release();
-            exoDorisImaWrapper = null;
-            exoDorisImaPlayer = null;
+        if (exoDorisImaDaiWrapper != null) {
+            exoDorisImaDaiWrapper.release();
+            exoDorisImaDaiWrapper = null;
+            exoDorisImaDaiPlayer = null;
         }
 
         jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
@@ -921,11 +921,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 hasReloadedCurrentSource = false;
 
                 if (isImaStream) {
-                    AdInfo adInfo = exoDorisImaWrapper.getAdInfo();
+                    AdInfo adInfo = exoDorisImaDaiWrapper.getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                             adInfo.getPlayedAdGroups());
 
-                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaWrapper.getStreamId());
+                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaDaiWrapper.getStreamId());
                 }
 
                 // seek to edge of live window for live events
@@ -1687,7 +1687,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
 
-            if (isImaStream && !isImaStreamLoaded && exoDorisImaWrapper != null) {
+            if (isImaStream && !isImaStreamLoaded && exoDorisImaDaiWrapper != null) {
                 loadImaStream();
             }
         }
@@ -1895,7 +1895,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
-        if (replaceAdTagParametersMap == null || exoDorisImaWrapper == null) {
+        if (replaceAdTagParametersMap == null || exoDorisImaDaiWrapper == null) {
             return;
         }
 
@@ -1909,7 +1909,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     + "&ph=" + viewHeight);
 
             imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
-            exoDorisImaWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
+            exoDorisImaDaiWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
         }
     }
 

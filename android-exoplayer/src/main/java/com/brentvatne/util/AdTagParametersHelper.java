@@ -4,8 +4,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.diceplatform.doris.ext.ima.entity.AdTagParameters;
-import com.diceplatform.doris.ext.ima.entity.AdTagParametersBuilder;
+import com.diceplatform.doris.ext.imadai.entity.AdTagParameters;
+import com.diceplatform.doris.ext.imadai.entity.AdTagParametersBuilder;
 
 import java.util.Map;
 
