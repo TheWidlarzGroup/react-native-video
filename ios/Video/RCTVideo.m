@@ -5,6 +5,10 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#include <MediaPlayer/MPNowPlayingInfoCenter.h>
+#include <MediaPlayer/MPMediaItem.h>
+#include <MediaPlayer/MPRemoteCommand.h>
+#include <MediaPlayer/MPRemoteCommandCenter.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -126,10 +130,6 @@ static int const RCTVideoUnset = -1;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
     _videoCache = [RCTVideoCache sharedInstance];
 #endif
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillResignActive:)
-                                                 name:UIApplicationWillResignActiveNotification
-                                               object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationDidEnterBackground:)
@@ -153,7 +153,7 @@ static int const RCTVideoUnset = -1;
 - (RCTVideoPlayerViewController*)createPlayerViewController:(AVPlayer*)player
                                              withPlayerItem:(AVPlayerItem*)playerItem {
   RCTVideoPlayerViewController* viewController = [[RCTVideoPlayerViewController alloc] init];
-  viewController.showsPlaybackControls = YES;
+  viewController.showsPlaybackControls = NO;
   viewController.rctDelegate = self;
   viewController.preferredOrientation = _fullscreenOrientation;
   
@@ -215,6 +215,7 @@ static int const RCTVideoUnset = -1;
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [self cleanupRemoteTransportControl];
   [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
@@ -223,34 +224,14 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - App lifecycle handlers
 
-- (void)applicationWillResignActive:(NSNotification *)notification
-{
-  if (_playInBackground || _playWhenInactive || _paused) return;
-  
-  [_player pause];
-  [_player setRate:0.0];
-}
-
 - (void) disableVideoTracks
 {
-    NSArray *tracks = [_playerItem tracks];
-    for (AVPlayerItemTrack* currentTrack in tracks)
-    {
-        if ([[currentTrack assetTrack] hasMediaCharacteristic:(AVMediaCharacteristicVisual)]) {
-            currentTrack.enabled = false;
-        }
-    }
+    _playerViewController.player = nil;
 }
 
 - (void) enableVideoTracks
 {
-    NSArray *tracks = [_playerItem tracks];
-    for (AVPlayerItemTrack* currentTrack in tracks)
-    {
-        if ([[currentTrack assetTrack] hasMediaCharacteristic:(AVMediaCharacteristicVisual)]) {
-            currentTrack.enabled = true;
-        }
-    }
+    _playerViewController.player = _player;
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
@@ -260,7 +241,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
-  [self applyModifiers];
+    [self applyModifiers];
     [self enableVideoTracks];
 }
 
@@ -425,7 +406,89 @@ static int const RCTVideoUnset = -1;
       }
     }];
   });
+    [self setupNowPlaying];
+    [self setupRemoteTransportControl];
   _videoLoadStarted = YES;
+}
+
+-(MPRemoteCommandHandlerStatus)toggleFromRemote:(MPRemoteCommandEvent *)event {
+    NSLog(@"toggleFromRemote rate:%f", _player.rate);
+    
+    if (_player.rate == 0.0) {
+        [self setPaused:false];
+        return MPRemoteCommandHandlerStatusSuccess;
+    } else {
+        [self setPaused:true];
+        return MPRemoteCommandHandlerStatusSuccess;
+    }
+    
+    return MPRemoteCommandHandlerStatusCommandFailed;
+}
+
+-(MPRemoteCommandHandlerStatus)playFromRemote:(MPRemoteCommandEvent *)event {
+    NSLog(@"playFromRemote rate:%f", _player.rate);
+    
+    if (_player.rate == 0.0) {
+        [self setPaused:false];
+        return MPRemoteCommandHandlerStatusSuccess;
+    }
+    
+    return MPRemoteCommandHandlerStatusCommandFailed;
+}
+
+-(MPRemoteCommandHandlerStatus)pauseFromRemote:(MPRemoteCommandEvent *)event {
+    NSLog(@"pauseFromRemote rate:%f", _player.rate);
+    
+    if (_player.rate == 1.0) {
+        [self setPaused:true];
+        return MPRemoteCommandHandlerStatusSuccess;
+    }
+    
+    return MPRemoteCommandHandlerStatusCommandFailed;
+}
+
+-(MPRemoteCommandHandlerStatus)stopFromRemote:(MPRemoteCommandEvent *)event {
+    NSLog(@"stopFromRemote rate:%f", _player.rate);
+    
+    if (_player.rate == 1.0) {
+        [self setPaused:true];
+        return MPRemoteCommandHandlerStatusSuccess;
+    }
+    
+    return MPRemoteCommandHandlerStatusCommandFailed;
+}
+
+-(void)setupRemoteTransportControl {
+    NSLog(@"setupRemoteTransportControl");
+    MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [[commandCenter playCommand] addTarget:self action:@selector(playFromRemote:)];
+    [[commandCenter pauseCommand] addTarget:self action:@selector(pauseFromRemote:)];
+    [[commandCenter togglePlayPauseCommand] addTarget:self action:@selector(playFromRemote:)];
+    [[commandCenter stopCommand] addTarget:self action:@selector(stopFromRemote:)];
+}
+
+-(void)cleanupRemoteTransportControl {
+    NSLog(@"cleanupRemoteTransportControl");
+    MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    
+    [[commandCenter playCommand] removeTarget:self action:@selector(playFromRemote:)];
+    [[commandCenter pauseCommand] removeTarget:self action:@selector(pauseFromRemote:)];
+    [[commandCenter togglePlayPauseCommand] removeTarget:self action:@selector(playFromRemote:)];
+    [[commandCenter stopCommand] removeTarget:self action:@selector(stopFromRemote:)];
+}
+
+
+- (void)setupNowPlaying {
+    NSLog(@"setupNowPlaying");
+    MPNowPlayingInfoCenter *playingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
+    
+    NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
+
+    [songInfo setObject:@"Fireside" forKey:MPMediaItemPropertyTitle];
+    [songInfo setObject:[NSNumber numberWithDouble:_playerItem.currentTime.value] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    [songInfo setObject:[NSNumber numberWithDouble:_playerItem.duration.value] forKey:MPMediaItemPropertyPlaybackDuration];
+    [songInfo setObject:[NSNumber numberWithDouble:(_player.rate ? 0.0f : 1.0f)] forKey:MPNowPlayingInfoPropertyPlaybackRate];
+    [playingInfoCenter setNowPlayingInfo:songInfo];
 }
 
 - (void)setDrm:(NSDictionary *)drm {
@@ -946,28 +1009,11 @@ static int const RCTVideoUnset = -1;
     [_player setRate:0.0];
   } else {
     AVAudioSession *session = [AVAudioSession sharedInstance];
-    AVAudioSessionCategory category = nil;
-    AVAudioSessionCategoryOptions options = nil;
+      
+      
+      [session setCategory: AVAudioSessionCategoryPlayback error:nil];
+      [session setMode: AVAudioSessionModeMoviePlayback error: nil];
 
-    if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
-      category = AVAudioSessionCategoryPlayback;
-    } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
-      category = AVAudioSessionCategoryAmbient;
-    }
-
-    if([_mixWithOthers isEqualToString:@"mix"]) {
-      options = AVAudioSessionCategoryOptionMixWithOthers;
-    } else if([_mixWithOthers isEqualToString:@"duck"]) {
-      options = AVAudioSessionCategoryOptionDuckOthers;
-    }
-
-    if (category != nil && options != nil) {
-      [session setCategory:category withOptions:options error:nil];
-    } else if (category != nil && options == nil) {
-      [session setCategory:category error:nil];
-    } else if (category == nil && options != nil) {
-      [session setCategory:session.category withOptions:options error:nil];
-    }
 
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
@@ -1370,7 +1416,7 @@ static int const RCTVideoUnset = -1;
         self.onVideoFullscreenPlayerWillPresent(@{@"target": self.reactTag});
       }
       [viewController presentViewController:_playerViewController animated:true completion:^{
-        _playerViewController.showsPlaybackControls = YES;
+        _playerViewController.showsPlaybackControls = NO;
         _fullscreenPlayerPresented = fullscreen;
         _playerViewController.autorotate = _fullscreenAutorotate;
         if(self.onVideoFullscreenPlayerDidPresent) {
