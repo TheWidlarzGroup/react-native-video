@@ -42,6 +42,7 @@ class VideoEventEmitter {
     private static final String EVENT_RESUME = "onPlaybackResume";
     private static final String EVENT_READY = "onReadyForDisplay";
     private static final String EVENT_BUFFER = "onVideoBuffer";
+    private static final String EVENT_BUFFER_PROGRESS = "onVideoBufferProgress";
     private static final String EVENT_IDLE = "onVideoIdle";
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
@@ -63,6 +64,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_BUFFER_PROGRESS,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
@@ -87,6 +89,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_BUFFER_PROGRESS,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
@@ -104,6 +107,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
+    private static final String EVENT_PROP_BUFFER_START = "bufferStart";
+    private static final String EVENT_PROP_BUFFER_END = "bufferEnd";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -204,6 +209,13 @@ class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_BUFFERING, isBuffering);
         receiveEvent(EVENT_BUFFER, map);
+    }
+
+    void bufferProgress(double start, double end) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_BUFFER_START, start);
+        map.putDouble(EVENT_PROP_BUFFER_END, end);
+        receiveEvent(EVENT_BUFFER_PROGRESS, map);
     }
 
     void idle() {

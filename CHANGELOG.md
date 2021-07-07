@@ -1,5 +1,7 @@
 ## Changelog
 
+- Add support for `onBufferProgress` on Android for getting buffer data even when the player is paused
+
 - Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
 
 ### Version 5.1.0-alpha9
