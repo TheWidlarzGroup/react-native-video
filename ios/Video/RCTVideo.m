@@ -290,6 +290,7 @@ static int const RCTVideoUnset = -1;
                            @"currentPlaybackTime": [NSNumber numberWithLongLong:[@(floor([currentPlaybackTime timeIntervalSince1970] * 1000)) longLongValue]],
                            @"target": self.reactTag,
                            @"seekableDuration": [self calculateSeekableDuration],
+                           @"seekableStart": [self calculateSeekableStart],
                            });
   }
 }
@@ -315,6 +316,16 @@ static int const RCTVideoUnset = -1;
     if (playableDuration > 0) {
       return [NSNumber numberWithFloat:playableDuration];
     }
+  }
+  return [NSNumber numberWithInteger:0];
+}
+
+- (NSNumber *)calculateSeekableStart
+{
+  CMTimeRange timeRange = [self playerItemSeekableTimeRange];
+  if (CMTIME_IS_NUMERIC(timeRange.duration))
+  {
+    return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.start)];
   }
   return [NSNumber numberWithInteger:0];
 }
