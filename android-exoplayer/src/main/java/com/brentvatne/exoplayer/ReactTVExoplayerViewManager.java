@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 
 import com.brentvatne.entity.RNMetadata;
@@ -19,6 +20,8 @@ import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.endeavor.DebugUtil;
+import com.google.android.exoplayer2.endeavor.WebUtil;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
@@ -124,6 +127,18 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
         this.reactApplicationContext = reactApplicationContext;
+        setDebug();
+    }
+
+    private void setDebug() {
+        final boolean debug = false;
+        if (debug) {
+            DebugUtil.debug_drm = true;
+            DebugUtil.debug_media = true;
+            DebugUtil.debug_manifest = true;
+            // Change the ip and port to your file upload server.
+            DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
+        }
     }
 
     @Override
@@ -203,6 +218,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         .replace("Bearer ", ""));
                 actionToken = ActionToken.fromJson(new Gson().toJson(drmMap));
             }
+            Log.d(WebUtil.DEBUG, String.format("setSrc - channelName %s, isImaDai %b, license %s, token %s, url %s",
+                    channelName,
+                    ima != null,
+                    (actionToken == null ? "-" : actionToken.getLicensingServerUrl()),
+                    (actionToken == null ? "-" : actionToken.getCroToken()),
+                    uriString));
 
             videoView.setSrc(
                     uriString,

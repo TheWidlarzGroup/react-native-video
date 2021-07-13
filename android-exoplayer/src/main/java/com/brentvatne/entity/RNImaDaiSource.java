@@ -5,7 +5,7 @@ import androidx.annotation.Nullable;
 
 import java.util.Map;
 
-public class RNImaSource {
+public class RNImaDaiSource {
 
     private static final String KEY_ASSET_KEY = "assetKey";
     private static final String KEY_CONTENT_SOURCE_ID = "contentSourceId";
@@ -24,7 +24,7 @@ public class RNImaSource {
     private double startDate;
     private double endDate;
 
-    public RNImaSource(@NonNull Map<String, Object> imaSource) {
+    public RNImaDaiSource(@NonNull Map<String, Object> imaSource) {
         this.assetKey = (String) imaSource.get(KEY_ASSET_KEY);
         this.contentSourceId = (String) imaSource.get(KEY_CONTENT_SOURCE_ID);
         this.videoId = (String) imaSource.get(KEY_VIDEO_ID);

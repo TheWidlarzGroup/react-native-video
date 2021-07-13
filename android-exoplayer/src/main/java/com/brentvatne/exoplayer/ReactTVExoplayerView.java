@@ -33,7 +33,7 @@ import com.amazon.device.ads.aftv.AmazonFireTVAdRequest;
 import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
 import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
 import com.brentvatne.entity.ApsSource;
-import com.brentvatne.entity.RNImaSource;
+import com.brentvatne.entity.RNImaDaiSource;
 import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
@@ -46,16 +46,15 @@ import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
+import com.diceplatform.doris.entity.AdTagParameters;
+import com.diceplatform.doris.entity.ImaDaiProperties;
+import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiPlayer;
-import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiWrapper;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiWrapperListener;
 import com.diceplatform.doris.ext.imadai.entity.AdInfo;
-import com.diceplatform.doris.ext.imadai.entity.AdTagParameters;
-import com.diceplatform.doris.ext.imadai.entity.ImaDaiSource;
-import com.diceplatform.doris.ext.imadai.entity.ImaDaiSourceBuilder;
 import com.diceplatform.doris.ext.imadai.entity.ImaLanguage;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
@@ -160,7 +159,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
     private ExoDorisImaDaiPlayer exoDorisImaDaiPlayer;
-    private ExoDorisImaDaiWrapper exoDorisImaDaiWrapper;
     private DefaultTrackSelector trackSelector;
     private ControlDispatcher controlDispatcher;
     private Source source;
@@ -177,8 +175,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean areControlsAllowed = true;
     private long shouldSeekTo = C.TIME_UNSET;
     private float rate = 1f;
-    private boolean isImaStream = false;
-    private boolean isImaStreamLoaded = false;
     private boolean isAmazonFireTv;
     private int viewWidth = 0;
     private int viewHeight = 0;
@@ -206,8 +202,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private int accentColor;
     // \ End props
 
-    // IMA
-    private RNImaSource imaSrc;
+    // IMA DAI
+    private RNImaDaiSource imaDaiSrc;
+    private boolean isImaDaiStreamLoaded = false;
     private AdTagParameters adTagParameters;
 
     // Custom
@@ -260,13 +257,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
                     long position = player.getCurrentPosition();
 
-                    if (isLive && isImaStream) {
+                    if (isLive && imaDaiSrc != null) {
                         Timeline timeline = player.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
                             long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
                             position = (windowStartTimeMs + position) / 1000L;
 
-                            if (position < imaSrc.getStartDate() || position > imaSrc.getEndDate()) {
+                            if (position < imaDaiSrc.getStartDate() || position > imaDaiSrc.getEndDate()) {
                                 eventEmitter.requireAdParameters((double) position, false);
                             }
                         }
@@ -292,13 +289,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             customParams.append(adTagParameters.getCustParams());
             adTagParameters.setCustParams(customParams.toString());
-            playImaStream();
+            playImaDaiStream();
         }
 
         @Override
         public void onFailure(AmazonFireTVAdResponse amazonFireTVAdResponse) {
             Log.e(TAG, "APS - Unsuccessful response. Reason: " + amazonFireTVAdResponse.getReasonString());
-            playImaStream();
+            playImaDaiStream();
         }
     };
 
@@ -473,14 +470,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             releasePlayer();
         }
         if (player == null) {
-            if (isImaStream) {
-                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView);
-                exoDorisImaDaiWrapper = new ExoDorisImaDaiWrapper(
-                        getContext(),
-                        exoDorisImaDaiPlayer,
-                        exoDorisPlayerView.getAdViewGroup(),
-                        ImaLanguage.SPANISH_UNITED_STATES);
-                exoDorisImaDaiWrapper.setExoDorisImaWrapperListener(this);
+            if (imaDaiSrc != null) {
+                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView, exoDorisPlayerView.getAdViewGroup());
                 player = exoDorisImaDaiPlayer.getExoDoris();
                 trackSelector = exoDorisImaDaiPlayer.getTrackSelector();
             } else {
@@ -514,11 +505,26 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             showOverlay();
 
-            SourceBuilder sourceBuilder = new SourceBuilder(src.getUrl(), src.getId())
-                    .setIsLive(isLive)
-                    .setMuxData(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
+            SourceBuilder sourceBuilder = new SourceBuilder()
+                    .setUrl(src.getUrl())
+                    .setId(src.getId())
+                    .setMuxProperties(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
-                    .setMaxVideoSize(viewWidth, viewHeight);
+                    .setMaxVideoSize(viewWidth, viewHeight)
+                    .setDrmParams(actionToken);
+
+            if (imaDaiSrc != null) {
+                ImaDaiProperties imaDaiProperties = new ImaDaiPropertiesBuilder()
+                        .setAssetKey(imaDaiSrc.getAssetKey())
+                        .setContentSourceId(imaDaiSrc.getContentSourceId())
+                        .setVideoId(imaDaiSrc.getVideoId())
+                        .setAuthToken(imaDaiSrc.getAuthToken())
+                        .setAdTagParameters(adTagParameters)
+                        .setAdTagParametersValidFrom((long) imaDaiSrc.getStartDate())
+                        .setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate())
+                        .build();
+                sourceBuilder.setImaDaiProperties(imaDaiProperties);
+            }
 
             if (shouldSeekOnInit) {
                 sourceBuilder.setInitialPlaybackPosition(shouldSeekTo);
@@ -531,15 +537,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             playerInitTime = new Date().getTime();
 
-            if (isImaStream) {
-                if (!isImaStreamLoaded && viewWidth != 0 && viewHeight != 0) {
-                    loadImaStream();
-                }
-            } else if (actionToken != null) {
-                try {
-                    player.load(source, !haveResumePosition, actionToken);
-                } catch (UnsupportedDrmException e) {
-                    handleDrmError(e);
+            if (imaDaiSrc != null) {
+                if (!isImaDaiStreamLoaded && viewWidth != 0 && viewHeight != 0) {
+                    loadImaDaiStream();
                 }
             } else {
                 player.load(source, !haveResumePosition);
@@ -551,11 +551,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
-    private void loadImaStream() {
-        isImaStreamLoaded = true;
+    private void loadImaDaiStream() {
+        isImaDaiStreamLoaded = true;
 
         adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(),
-                imaSrc.getAdTagParametersMap());
+                imaDaiSrc.getAdTagParametersMap());
         adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + viewWidth + "&ph="
                 + viewHeight);
 
@@ -567,25 +567,20 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
         }
 
-        playImaStream();
+        playImaDaiStream();
     }
 
-    private void playImaStream() {
-        ImaDaiSource imaSource = new ImaDaiSourceBuilder(source)
-                .setAssetKey(imaSrc.getAssetKey())
-                .setContentSourceId(imaSrc.getContentSourceId())
-                .setVideoId(imaSrc.getVideoId())
-                .setAuthToken(imaSrc.getAuthToken())
-                .setDrmParams(actionToken)
-                .setAdTagParameters(adTagParameters)
-                .setAdTagParametersValidFrom((long) imaSrc.getStartDate())
-                .setAdTagParametersValidUntil((long) imaSrc.getEndDate())
-                .build();
-
+    private void playImaDaiStream() {
         exoDorisImaDaiPlayer.enableControls(true);
         exoDorisImaDaiPlayer.setCanSeek(true);
 
-        exoDorisImaDaiWrapper.requestAndPlayAds(imaSource);
+        ImaDaiProperties imaDaiProperties = source.getImaDaiProperties();
+        imaDaiProperties.setAdTagParameters(adTagParameters);
+        imaDaiProperties.setAdTagParametersValidFrom((long) imaDaiSrc.getStartDate());
+        imaDaiProperties.setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate());
+
+        exoDorisImaDaiPlayer.load(source, true, ImaLanguage.SPANISH_UNITED_STATES);
+		exoDorisImaDaiPlayer.getImaDaiWrapper().setExoDorisImaWrapperListener(this);
     }
 
     private AmazonFireTVAdRequest createApsBidRequest() {
@@ -741,7 +736,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         deactivateMediaSession();
         releaseMediaSession();
         adTagParameters = null;
-        isImaStreamLoaded = false;
+        isImaDaiStreamLoaded = false;
         isInBackground = false;
 
         if (player != null) {
@@ -754,9 +749,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             shouldSeekTo = C.TIME_UNSET;
         }
 
-        if (exoDorisImaDaiWrapper != null) {
-            exoDorisImaDaiWrapper.release();
-            exoDorisImaDaiWrapper = null;
+        if (exoDorisImaDaiPlayer != null) {
+            exoDorisImaDaiPlayer.release();
             exoDorisImaDaiPlayer = null;
         }
 
@@ -920,12 +914,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
                 hasReloadedCurrentSource = false;
 
-                if (isImaStream) {
-                    AdInfo adInfo = exoDorisImaDaiWrapper.getAdInfo();
+                if (imaDaiSrc != null && exoDorisImaDaiPlayer.getImaDaiWrapper() != null) {
+                    AdInfo adInfo = exoDorisImaDaiPlayer.getImaDaiWrapper().getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                             adInfo.getPlayedAdGroups());
 
-                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaDaiWrapper.getStreamId());
+                    Log.d(TAG, "IMA Stream ID = " + exoDorisImaDaiPlayer.getImaDaiWrapper().getStreamId());
                 }
 
                 // seek to edge of live window for live events
@@ -1255,12 +1249,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isOriginalSourceNull = srcUrl == null;
             boolean isSourceEqual = url.equals(srcUrl);
 
-            if (ima != null && !ima.isEmpty()) {
-                this.isImaStream = true;
-                this.imaSrc = new RNImaSource(ima);
-            } else {
-                this.isImaStream = false;
-            }
+            this.isImaDaiStreamLoaded = false;
+            this.imaDaiSrc = (ima != null && !ima.isEmpty() ? new RNImaDaiSource(ima) : null);
 
             this.src = new RNSource(
                     url,
@@ -1687,8 +1677,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
 
-            if (isImaStream && !isImaStreamLoaded && exoDorisImaDaiWrapper != null) {
-                loadImaStream();
+            if (imaDaiSrc != null && !isImaDaiStreamLoaded) {
+                loadImaDaiStream();
             }
         }
     }
@@ -1851,9 +1841,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             eventEmitter.error(error.getMessage(), error);
         }
 
-        // Reset imaSrc and isImaStream to allow a new source to be loaded
-        imaSrc = null;
-        isImaStream = false;
+        // Reset imaDaiSrc to allow a new source to be loaded
+        imaDaiSrc = null;
     }
 
     private boolean isUnauthorizedAdError(AdError error) {
@@ -1895,21 +1884,21 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
-        if (replaceAdTagParametersMap == null || exoDorisImaDaiWrapper == null) {
+        if (replaceAdTagParametersMap == null || exoDorisImaDaiPlayer == null || exoDorisImaDaiPlayer.getImaDaiWrapper() == null) {
             return;
         }
 
         double startDate = replaceAdTagParametersMap.get(KEY_START_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_START_DATE) : Long.MIN_VALUE;
         double endDate = replaceAdTagParametersMap.get(KEY_END_DATE) != null ? (double) replaceAdTagParametersMap.get(KEY_END_DATE) : Long.MAX_VALUE;
 
-        if (imaSrc.getStartDate() != startDate || imaSrc.getEndDate() != endDate) {
+        if (imaDaiSrc.getStartDate() != startDate || imaDaiSrc.getEndDate() != endDate) {
             Map<String, Object> adTagParametersMap = (Map<String, Object>) replaceAdTagParametersMap.get(KEY_AD_TAG_PARAMETERS);
             AdTagParameters adTagParameters = AdTagParametersHelper.createAdTagParameters(getContext(), adTagParametersMap);
             adTagParameters.setCustParams(adTagParameters.getCustParams() + "&pw=" + viewWidth
                     + "&ph=" + viewHeight);
 
-            imaSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
-            exoDorisImaDaiWrapper.replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
+            imaDaiSrc.replaceAdTagParameters(adTagParametersMap, startDate, endDate);
+            exoDorisImaDaiPlayer.getImaDaiWrapper().replaceAdTagParameters(adTagParameters, (long) startDate, (long) endDate);
         }
     }
 

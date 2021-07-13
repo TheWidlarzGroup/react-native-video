@@ -3,12 +3,11 @@ import groovy.json.JsonSlurper
 apply plugin: 'com.android.library'
 
 /**
- * Load ExoDoris and ExoPlayer versions from package.json file
+ * Load ExoDoris versions from package.json file
  */
 def packageJsonFile = file('../package.json')
 def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
 def exoDorisVersion = packageJson.exoDorisVersion
-def exoPlayerVersion = packageJson.exoPlayerVersion
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -36,18 +35,17 @@ dependencies {
     implementation("com.github.DiceTechnology.doris-android:doris:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
+    implementation("com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion") {
+        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    }
+    implementation("com.github.DiceTechnology.doris-android:extension-audio-only:$exoDorisVersion") {
+        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    }
     implementation("com.github.DiceTechnology.doris-android:extension-ima-dai:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
-    implementation "com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion"
-
-    // ExoPlayer
-    implementation("com.google.android.exoplayer:extension-mediasession:$exoPlayerVersion") {
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
-    }
-    implementation("com.google.android.exoplayer:extension-okhttp:$exoPlayerVersion") {
-        exclude group: "com.squareup.okhttp3", module: "okhttp"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-common"
+    implementation("com.github.DiceTechnology.doris-android:extension-ima-csai:$exoDorisVersion") {
+        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
 
     // Google Guava
@@ -62,8 +60,6 @@ dependencies {
     implementation "androidx.media:media:1.0.0"
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     implementation(project(':dice-shield-android')) {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-common"
