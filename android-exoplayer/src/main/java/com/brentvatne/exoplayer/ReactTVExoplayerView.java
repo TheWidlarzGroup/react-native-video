@@ -204,6 +204,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     // IMA DAI
     private RNImaDaiSource imaDaiSrc;
+    private boolean isImaDaiStream = false;
     private boolean isImaDaiStreamLoaded = false;
     private AdTagParameters adTagParameters;
 
@@ -257,7 +258,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
                     long position = player.getCurrentPosition();
 
-                    if (isLive && imaDaiSrc != null) {
+                    if (isLive && isImaDaiStream) {
                         Timeline timeline = player.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
                             long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
@@ -470,7 +471,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             releasePlayer();
         }
         if (player == null) {
-            if (imaDaiSrc != null) {
+            if (isImaDaiStream) {
                 exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView, exoDorisPlayerView.getAdViewGroup());
                 player = exoDorisImaDaiPlayer.getExoDoris();
                 trackSelector = exoDorisImaDaiPlayer.getTrackSelector();
@@ -537,7 +538,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             playerInitTime = new Date().getTime();
 
-            if (imaDaiSrc != null) {
+            if (isImaDaiStream) {
                 if (!isImaDaiStreamLoaded && viewWidth != 0 && viewHeight != 0) {
                     loadImaDaiStream();
                 }
@@ -914,7 +915,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
                 hasReloadedCurrentSource = false;
 
-                if (imaDaiSrc != null && exoDorisImaDaiPlayer.getImaDaiWrapper() != null) {
+                if (isImaDaiStream && exoDorisImaDaiPlayer.getImaDaiWrapper() != null) {
                     AdInfo adInfo = exoDorisImaDaiPlayer.getImaDaiWrapper().getAdInfo();
                     exoDorisPlayerView.setExtraAdGroupMarkers(adInfo.getAdGroupTimesMs(),
                             adInfo.getPlayedAdGroups());
@@ -1250,7 +1251,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isSourceEqual = url.equals(srcUrl);
 
             this.isImaDaiStreamLoaded = false;
-            this.imaDaiSrc = (ima != null && !ima.isEmpty() ? new RNImaDaiSource(ima) : null);
+            if (ima != null && !ima.isEmpty()) {
+                this.isImaDaiStream = true;
+                this.imaDaiSrc = new RNImaDaiSource(ima);
+            } else {
+                this.isImaDaiStream = false;
+            }
 
             this.src = new RNSource(
                     url,
@@ -1677,7 +1683,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
 
-            if (imaDaiSrc != null && !isImaDaiStreamLoaded) {
+            if (isImaDaiStream && !isImaDaiStreamLoaded && exoDorisImaDaiPlayer != null) {
                 loadImaDaiStream();
             }
         }
@@ -1841,8 +1847,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             eventEmitter.error(error.getMessage(), error);
         }
 
-        // Reset imaDaiSrc to allow a new source to be loaded
+        // Reset imaDaiSrc and isImaDaiStream to allow a new source to be loaded
         imaDaiSrc = null;
+        isImaDaiStream = false;
     }
 
     private boolean isUnauthorizedAdError(AdError error) {
