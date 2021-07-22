@@ -33,4 +33,5 @@
     <string name="error_drm_not_supported">Protected content not supported on API levels below 18</string>
     <string name="error_drm_unsupported_scheme">This device does not support the required DRM scheme</string>
     <string name="error_drm_unknown">An unknown DRM error occurred</string>
+    <string name="error_drm_session_manager">A DRM session manager error occurred</string>
 </resources>

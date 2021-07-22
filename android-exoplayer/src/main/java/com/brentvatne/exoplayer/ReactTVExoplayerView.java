@@ -80,6 +80,7 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSession;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
@@ -118,6 +119,7 @@ import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREA
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener,
         Player.EventListener,
+        AnalyticsListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
@@ -487,6 +489,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             player.setAudioAttributes(audioAttributes, false);
             player.addListener(this);
+            player.addAnalyticsListener(this);
             player.addMetadataOutput(this);
             exoDorisPlayerView.setPlayer(player);
             audioBecomingNoisyReceiver.setListener(this);
@@ -514,7 +517,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setMaxVideoSize(viewWidth, viewHeight)
                     .setDrmParams(actionToken);
 
-            if (imaDaiSrc != null) {
+            if (isImaDaiStream) {
                 ImaDaiProperties imaDaiProperties = new ImaDaiPropertiesBuilder()
                         .setAssetKey(imaDaiSrc.getAssetKey())
                         .setContentSourceId(imaDaiSrc.getContentSourceId())
@@ -581,7 +584,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         imaDaiProperties.setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate());
 
         exoDorisImaDaiPlayer.load(source, true, ImaLanguage.SPANISH_UNITED_STATES);
-		exoDorisImaDaiPlayer.getImaDaiWrapper().setExoDorisImaWrapperListener(this);
+        exoDorisImaDaiPlayer.getImaDaiWrapper().setExoDorisImaWrapperListener(this);
     }
 
     private AmazonFireTVAdRequest createApsBidRequest() {
@@ -714,20 +717,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         isMediaKeysEnabled = visible;
     }
 
-    private void handleDrmError(UnsupportedDrmException exception) {
-        final int errorStringId;
-        switch (exception.reason) {
-            case 0:
-                errorStringId = R.string.error_drm_not_supported;
-                break;
-            case UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME:
-                errorStringId = R.string.error_drm_unsupported_scheme;
-                break;
-            default:
-                errorStringId = R.string.error_drm_unknown;
-                break;
-        }
-
+    private void handleDrmSessionManagerError(Exception exception) {
+        final int errorStringId = R.string.error_drm_session_manager;
         final String errorString = getContext().getString(errorStringId);
         eventEmitter.error(errorString, exception);
     }
@@ -893,6 +884,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     @Override
     public void onAudioBecomingNoisy() {
         eventEmitter.audioBecomingNoisy();
+    }
+
+    // AnalyticsListener implementation
+
+    @Override
+    public void onDrmSessionManagerError(EventTime eventTime, Exception e) {
+        handleDrmSessionManagerError(e);
     }
 
     @Override
@@ -1250,12 +1248,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isOriginalSourceNull = srcUrl == null;
             boolean isSourceEqual = url.equals(srcUrl);
 
+            this.isImaDaiStream = false;
             this.isImaDaiStreamLoaded = false;
             if (ima != null && !ima.isEmpty()) {
                 this.isImaDaiStream = true;
                 this.imaDaiSrc = new RNImaDaiSource(ima);
-            } else {
-                this.isImaDaiStream = false;
             }
 
             this.src = new RNSource(

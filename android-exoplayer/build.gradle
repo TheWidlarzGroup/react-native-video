@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 apply plugin: 'com.android.library'
 
 /**
- * Load ExoDoris versions from package.json file
+ * Load ExoDoris version from package.json file
  */
 def packageJsonFile = file('../package.json')
 def packageJson = new JsonSlurper().parseText(packageJsonFile.text)

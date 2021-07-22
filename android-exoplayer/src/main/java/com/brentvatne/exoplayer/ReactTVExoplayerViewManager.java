@@ -123,16 +123,17 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_SEEK_TO_POSITION = 3;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
 
+    private static final boolean IS_DEBUG = false;
+
     private final ReactApplicationContext reactApplicationContext;
 
     public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
         this.reactApplicationContext = reactApplicationContext;
-        setDebug();
+        setPlayerConfig();
     }
 
-    private void setDebug() {
-        final boolean debug = false;
-        if (debug) {
+    private void setPlayerConfig() {
+        if (IS_DEBUG) {
             DebugUtil.debug_drm = true;
             DebugUtil.debug_media = true;
             DebugUtil.debug_manifest = true;
