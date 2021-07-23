@@ -52,6 +52,7 @@ import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiPlayer;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiPlayer;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiWrapperListener;
 import com.diceplatform.doris.ext.imadai.entity.AdInfo;
@@ -77,13 +78,13 @@ import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSession;
-import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -161,6 +162,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ExoDorisPlayerView exoDorisPlayerView;
     private ExoDoris player;
     private ExoDorisImaDaiPlayer exoDorisImaDaiPlayer;
+    private ExoDorisImaCsaiPlayer exoDorisImaCsaiPlayer;
     private DefaultTrackSelector trackSelector;
     private ControlDispatcher controlDispatcher;
     private Source source;
@@ -209,6 +211,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean isImaDaiStream = false;
     private boolean isImaDaiStreamLoaded = false;
     private AdTagParameters adTagParameters;
+
+    // IMA CSAI
+    private boolean isImaCsaiStream = false;
 
     // Custom
     private PowerManager powerManager;
@@ -476,11 +481,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (isImaDaiStream) {
                 exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView, exoDorisPlayerView.getAdViewGroup());
                 player = exoDorisImaDaiPlayer.getExoDoris();
-                trackSelector = exoDorisImaDaiPlayer.getTrackSelector();
+            } else if (isImaCsaiStream) {
+                exoDorisImaCsaiPlayer = new ExoDorisImaCsaiPlayer(getContext(), exoDorisPlayerView);
+                player = exoDorisImaCsaiPlayer.getExoDoris();
             } else {
                 player = new ExoDorisBuilder(getContext()).build();
-                trackSelector = player.getTrackSelector();
             }
+            trackSelector = player.getTrackSelector();
 
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
@@ -509,8 +516,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             showOverlay();
 
+            MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
+                    .setUri(src.getUrl())
+                    .setAdTagUri(src.getAdTagUrl());
             SourceBuilder sourceBuilder = new SourceBuilder()
-                    .setUrl(src.getUrl())
+                    .setMediaItemBuilder(mediaItemBuilder)
                     .setId(src.getId())
                     .setMuxProperties(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
@@ -545,6 +555,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 if (!isImaDaiStreamLoaded && viewWidth != 0 && viewHeight != 0) {
                     loadImaDaiStream();
                 }
+            } else if (isImaCsaiStream) {
+                exoDorisImaCsaiPlayer.load(source);
             } else {
                 player.load(source, !haveResumePosition);
             }
@@ -744,6 +756,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (exoDorisImaDaiPlayer != null) {
             exoDorisImaDaiPlayer.release();
             exoDorisImaDaiPlayer = null;
+        }
+
+        if (exoDorisImaCsaiPlayer != null) {
+            exoDorisImaCsaiPlayer.release();
+            exoDorisImaCsaiPlayer = null;
         }
 
         jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
@@ -1242,7 +1259,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             String playlistId,
             int duration,
             String channelName,
-            boolean apsTestFlag) {
+            boolean apsTestFlag,
+            @Nullable String adTagUrl) {
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1250,9 +1268,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             this.isImaDaiStream = false;
             this.isImaDaiStreamLoaded = false;
+            this.isImaCsaiStream = false;
             if (ima != null && !ima.isEmpty()) {
                 this.isImaDaiStream = true;
                 this.imaDaiSrc = new RNImaDaiSource(ima);
+            } else if (adTagUrl != null) {
+                this.isImaCsaiStream = true;
             }
 
             this.src = new RNSource(
@@ -1271,7 +1292,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     playlistId,
                     duration,
                     channelName,
-                    apsTestFlag);
+                    apsTestFlag,
+                    adTagUrl);
             this.actionToken = actionToken;
 
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);

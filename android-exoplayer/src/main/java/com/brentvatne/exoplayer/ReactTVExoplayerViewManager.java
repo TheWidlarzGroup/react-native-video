@@ -45,6 +45,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_IMA = "ima";
+    private static final String PROP_SRC_AD_TAG_URL = "vastVodURL";
     private static final String PROP_SRC_CHANNEL_ID = "channelId";
     private static final String PROP_SRC_SERIES_ID = "seriesId";
     private static final String PROP_SRC_SEASON_ID = "seasonId";
@@ -198,6 +199,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String playlistId = src.hasKey(PROP_SRC_PLAYLIST_ID) ? src.getString(PROP_SRC_PLAYLIST_ID) : null;
         String duration = src.hasKey(PROP_SRC_DURATION) ? src.getString(PROP_SRC_DURATION) : null;
         String channelName = src.hasKey(PROP_SRC_CHANNEL_NAME) ? src.getString(PROP_SRC_CHANNEL_NAME) : null;
+        String adTagUrl = src.hasKey(PROP_SRC_AD_TAG_URL) ? src.getString(PROP_SRC_AD_TAG_URL) : null;
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
@@ -219,9 +221,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         .replace("Bearer ", ""));
                 actionToken = ActionToken.fromJson(new Gson().toJson(drmMap));
             }
-            Log.d(WebUtil.DEBUG, String.format("setSrc - channelName %s, isImaDai %b, license %s, token %s, url %s",
-                    channelName,
+            Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, isImaDai %b, adTag %s, license %s, token %s, url %s",
+                    channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
                     ima != null,
+                    adTagUrl == null ? "-" : adTagUrl,
                     (actionToken == null ? "-" : actionToken.getLicensingServerUrl()),
                     (actionToken == null ? "-" : actionToken.getCroToken()),
                     uriString));
@@ -242,7 +245,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     playlistId,
                     duration != null ? Integer.parseInt(duration) : 0,
                     channelName,
-                    apsTestMode);
+                    apsTestMode,
+                    adTagUrl);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
