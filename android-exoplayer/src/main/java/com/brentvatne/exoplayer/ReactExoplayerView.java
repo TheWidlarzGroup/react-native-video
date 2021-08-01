@@ -92,8 +92,7 @@ class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        DefaultDrmSessionEventListener,
-        AdsMediaSource.MediaSourceFactory {
+        DefaultDrmSessionEventListener {
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -446,7 +445,7 @@ class ReactExoplayerView extends FrameLayout implements
                     player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory,
                             trackSelector, defaultLoadControl, drmSessionManager, bandwidthMeter);
                     player.addListener(self);
-                    player.addMetadataOutput(self);
+                    player.addMetadataOutput(self); //a random comment here
                     adsLoader.setPlayer(player);
                     exoPlayerView.setPlayer(player);
                     audioBecomingNoisyReceiver.setListener(self);
@@ -508,18 +507,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
         return new DefaultDrmSessionManager<>(uuid,
                 FrameworkMediaDrm.newInstance(uuid), drmCallback, null, false, 3);
-    // AdsMediaSource.MediaSourceFactory implementation.
-    }
-
-    @Override
-    public MediaSource createMediaSource(Uri uri) {
-      return buildMediaSource(uri, extension);
-    }
-
-    @Override
-    public int[] getSupportedTypes() {
-      // IMA does not support Smooth Streaming ads.
-      return new int[] {C.TYPE_DASH, C.TYPE_HLS, C.TYPE_OTHER};
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
