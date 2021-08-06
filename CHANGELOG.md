@@ -1,9 +1,14 @@
 ## Changelog
 
+- Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
+
+- Added `pitchAlgorithm` (iOS) - pitch algorithm for AVPlayerItem. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
-- Added `pitchAlgorithm` (iOS) - pitch algorithm for AVPlayerItem. [#1570](https://github.com/react-native-community/react-native-video/pull/1570)
+- Fix deprecated API bug for windows [#2119](https://github.com/react-native-video/react-native-video/pull/2119)
+- Added `rate` property and autolinking support for windows [#2206](https://github.com/react-native-video/react-native-video/pull/2206)
 
 ### Version 5.1.0-alpha8
 
