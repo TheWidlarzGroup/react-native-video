@@ -556,7 +556,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     loadImaDaiStream();
                 }
             } else if (isImaCsaiStream) {
-                exoDorisImaCsaiPlayer.load(source);
+                exoDorisImaCsaiPlayer.load(source, !haveResumePosition);
             } else {
                 player.load(source, !haveResumePosition);
             }

@@ -21,6 +21,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.endeavor.DebugUtil;
+import com.google.android.exoplayer2.endeavor.ExoConfig;
 import com.google.android.exoplayer2.endeavor.WebUtil;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.google.gson.Gson;
@@ -45,7 +46,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_IMA = "ima";
-    private static final String PROP_SRC_AD_TAG_URL = "vastVodURL";
+    private static final String PROP_SRC_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_CHANNEL_ID = "channelId";
     private static final String PROP_SRC_SERIES_ID = "seriesId";
     private static final String PROP_SRC_SEASON_ID = "seasonId";
@@ -141,6 +142,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             // Change the ip and port to your file upload server.
             DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
         }
+        ExoConfig.getInstance().setObtainKeyIdsFromManifest(true);
+
+        Log.d(WebUtil.DEBUG, String.format("config player - keyIdsMode %s, debug %b",
+                ExoConfig.getInstance().isObtainKeyIdsFromManifest() ? "manifest" : "stream",
+                IS_DEBUG));
     }
 
     @Override
