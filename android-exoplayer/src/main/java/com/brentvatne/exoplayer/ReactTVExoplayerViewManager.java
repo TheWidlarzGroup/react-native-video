@@ -21,6 +21,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.endeavor.DebugUtil;
+import com.google.android.exoplayer2.endeavor.ExoConfig;
 import com.google.android.exoplayer2.endeavor.WebUtil;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.google.gson.Gson;
@@ -140,6 +141,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             // Change the ip and port to your file upload server.
             DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
         }
+        ExoConfig.getInstance().setObtainKeyIdsFromManifest(true);
+
+        Log.d(WebUtil.DEBUG, String.format("config player - keyIdsMode %s, debug %b",
+                ExoConfig.getInstance().isObtainKeyIdsFromManifest() ? "manifest" : "stream",
+                IS_DEBUG));
     }
 
     @Override
@@ -219,8 +225,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         .replace("Bearer ", ""));
                 actionToken = ActionToken.fromJson(new Gson().toJson(drmMap));
             }
-            Log.d(WebUtil.DEBUG, String.format("setSrc - channelName %s, isImaDai %b, license %s, token %s, url %s",
-                    channelName,
+            Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, isImaDai %b, license %s, token %s, url %s",
+                    channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
                     ima != null,
                     (actionToken == null ? "-" : actionToken.getLicensingServerUrl()),
                     (actionToken == null ? "-" : actionToken.getCroToken()),
