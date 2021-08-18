@@ -83,7 +83,6 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSession;
-import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -150,6 +149,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private static final String KEY_AD_TAG_PARAMETERS = "adTagParameters";
     private static final String KEY_START_DATE = "startDate";
     private static final String KEY_END_DATE = "endDate";
+
+    private static final int MAX_LOAD_BUFFER_MS = 30_000;
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -474,11 +475,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
         if (player == null) {
             if (isImaDaiStream) {
-                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView, exoDorisPlayerView.getAdViewGroup());
+                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView,
+                        exoDorisPlayerView.getAdViewGroup(), MAX_LOAD_BUFFER_MS);
                 player = exoDorisImaDaiPlayer.getExoDoris();
                 trackSelector = exoDorisImaDaiPlayer.getTrackSelector();
             } else {
-                player = new ExoDorisBuilder(getContext()).build();
+                player = new ExoDorisBuilder(getContext()).setLoadBufferMs(MAX_LOAD_BUFFER_MS).build();
                 trackSelector = player.getTrackSelector();
             }
 
