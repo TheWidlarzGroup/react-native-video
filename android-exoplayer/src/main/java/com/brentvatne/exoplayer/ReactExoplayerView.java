@@ -586,6 +586,14 @@ class ReactExoplayerView extends FrameLayout implements
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
+    private boolean abandonAudioFocus() {
+        if (disableFocus || srcUri == null || !this.hasAudioFocus) {
+            return true;
+        }
+        int result = audioManager.abandonAudioFocus(this);
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
     private void setPlayWhenReady(boolean playWhenReady) {
         if (player == null) {
             return;
@@ -644,7 +652,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (isFullscreen) {
             setFullscreen(false);
         }
-        audioManager.abandonAudioFocus(this);
+        abandonAudioFocus();
     }
 
     private void updateResumePosition() {
@@ -691,7 +699,7 @@ class ReactExoplayerView extends FrameLayout implements
                 this.hasAudioFocus = false;
                 eventEmitter.audioFocusChanged(false);
                 pausePlayback();
-                audioManager.abandonAudioFocus(this);
+                abandonAudioFocus();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 eventEmitter.audioFocusChanged(false);
