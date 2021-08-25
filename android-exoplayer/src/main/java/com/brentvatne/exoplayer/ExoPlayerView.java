@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -255,7 +256,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onPlayerError(ExoPlaybackException e) {
+        public void onPlayerError(PlaybackException e) {
             // Do nothing.
         }
 
@@ -265,7 +266,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+        public void onTimelineChanged(Timeline timeline, int reason) {
             // Do nothing.
         }
 
