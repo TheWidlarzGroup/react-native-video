@@ -204,6 +204,8 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+
+        Log.d(TAG, 'createViewInstance -> new ReactExoplayerView(), instance=' + hashCode());
     }
 
 
@@ -271,6 +273,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void cleanUpResources() {
+        Log.d(TAG, 'onDropViewInstance -> cleanUpResources, instance=' + hashCode());
         stopPlayback();
     }
 
@@ -580,6 +583,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (disableFocus || srcUri == null || this.hasAudioFocus) {
             return true;
         }
+        Log.d(TAG, 'abandonAudioFocus, instance=' + hashCode());
         int result = audioManager.requestAudioFocus(this,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
@@ -590,6 +594,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (disableFocus || srcUri == null || !this.hasAudioFocus) {
             return true;
         }
+        Log.d(TAG, 'abandonAudioFocus, instance=' + hashCode());
         int result = audioManager.abandonAudioFocus(this);
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
@@ -652,7 +657,10 @@ class ReactExoplayerView extends FrameLayout implements
         if (isFullscreen) {
             setFullscreen(false);
         }
-        abandonAudioFocus();
+
+        if (abandonAudioFocus()) {
+            this.hasAudioFocus = false;
+        }
     }
 
     private void updateResumePosition() {
@@ -694,21 +702,27 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAudioFocusChange(int focusChange) {
+        String text = "onAudioFocusChange: focusChange=";
+
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
+                text += "loss";
                 this.hasAudioFocus = false;
                 eventEmitter.audioFocusChanged(false);
                 pausePlayback();
                 abandonAudioFocus();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                text += "loss_transient";
                 eventEmitter.audioFocusChanged(false);
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:
+                text += "gain";
                 this.hasAudioFocus = true;
                 eventEmitter.audioFocusChanged(true);
                 break;
             default:
+                text += "unknown";
                 break;
         }
 
@@ -725,6 +739,8 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+
+        Log.d(TAG, text + ', instance=' + hashCode());
     }
 
     // AudioBecomingNoisyListener implementation
@@ -781,7 +797,8 @@ class ReactExoplayerView extends FrameLayout implements
                 text += "unknown";
                 break;
         }
-        Log.d(TAG, text);
+
+        Log.d(TAG, text + ', instance=' + hashCode());
     }
 
     private void startProgressHandler() {
@@ -1366,23 +1383,23 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysLoaded");
+        // Log.d("DRM Info", "onDrmKeysLoaded");
     }
 
     @Override
     public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
-        Log.d("DRM Info", "onDrmSessionManagerError");
+        // Log.d("DRM Info", "onDrmSessionManagerError");
         eventEmitter.error("onDrmSessionManagerError", e);
     }
 
     @Override
     public void onDrmKeysRestored(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysRestored");
+        // Log.d("DRM Info", "onDrmKeysRestored");
     }
 
     @Override
     public void onDrmKeysRemoved(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysRemoved");
+        // Log.d("DRM Info", "onDrmKeysRemoved");
     }
 
     /**
