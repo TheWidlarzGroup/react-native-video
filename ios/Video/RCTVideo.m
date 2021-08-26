@@ -227,11 +227,13 @@ static int const RCTVideoUnset = -1;
 - (void) disableVideoTracks
 {
     _playerViewController.player = nil;
+    _playerLayer.player = nil;
 }
 
 - (void) enableVideoTracks
 {
     _playerViewController.player = _player;
+    _playerLayer.player = _player;
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
