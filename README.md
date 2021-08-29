@@ -291,6 +291,7 @@ var styles = StyleSheet.create({
 * [audioOnly](#audioonly)
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [bufferConfig](#bufferconfig)
+* [cache](#cache)
 * [controls](#controls)
 * [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
@@ -304,6 +305,8 @@ var styles = StyleSheet.create({
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
 * [maxBitRate](#maxbitrate)
+* [maxCacheFileSize](#maxcachefilesize)
+* [maxCacheSize](#maxcachesize)
 * [minLoadRetryCount](#minLoadRetryCount)
 * [mixWithOthers](#mixWithOthers)
 * [muted](#muted)
@@ -405,6 +408,13 @@ bufferConfig={{
 
 Platforms: Android ExoPlayer
 
+#### cache
+To enable or disable caching for the particular video src. Caching is done in a folder name `video` in the internal cache.
+* **false (default)** - Disable caching
+* **true** - Enable caching
+
+Platforms: Android ExoPlayer
+
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
 
@@ -412,7 +422,7 @@ Platforms: Android ExoPlayer, iOS
 
 #### controls
 Determines whether to show player controls.
-* ** false (default)** - Don't show player controls
+* **false (default)** - Don't show player controls
 * **true** - Show player controls
 
 Note on iOS, controls are always shown when in fullscreen mode.
@@ -425,7 +435,7 @@ Platforms: Android ExoPlayer, iOS, react-native-dom
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
-* ** false (default)** - Override background audio/music
+* **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
 
 Platforms: Android Exoplayer
@@ -544,6 +554,31 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 Platforms: Android ExoPlayer, iOS
+
+#### maxCacheFileSize
+Sets the maximum size for each file to be cached. If a file or larger size comes, it would not be cached.
+
+Default: 10MB
+
+Example:
+```
+maxCacheFileSize={20} // 20MB cache size for each file
+```
+
+Platforms: Android ExoPlayer
+
+#### maxCacheSize
+Sets the maximum cache size for videos. It follows LRU cache eviction and removes the Least Recently Used
+video from cache after the size if filled.
+
+Default: 100MB
+
+Example:
+```
+maxCacheSize={300} // 300MB total cache size
+```
+
+Platforms: Android ExoPlayer
 
 #### minLoadRetryCount
 Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
