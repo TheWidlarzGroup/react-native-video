@@ -1,6 +1,6 @@
 # Caching
 
-Caching is currently only supported on `iOS` platforms with a CocoaPods setup.
+Caching is currently supported on `iOS` platforms with a CocoaPods setup.
 
 # Technology
 
