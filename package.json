@@ -55,6 +55,7 @@
         "DRMType.js",
         "TextTrackType.js",
         "VideoResizeMode.js",
-        "react-native-video.podspec"
+        "react-native-video.podspec",
+        "index.d.ts"
     ]
 }
