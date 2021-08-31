@@ -1776,11 +1776,11 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
 }
 
 - (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
-  if (self->_requestingCertificate) {
-    return YES;
-  } else if (self->_requestingCertificateErrored) {
-    return NO;
-  }
+//  if (self->_requestingCertificate) {
+//    return YES;
+//  } else if (self->_requestingCertificateErrored) {
+//    return NO;
+//  }
   _loadingRequest = loadingRequest;
   NSURL *url = loadingRequest.request.URL;
   if (self->_drm != nil) {
