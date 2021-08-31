@@ -31,6 +31,8 @@ Pod::Spec.new do |s|
 
   s.dependency "React-Core"
 
+  s.dependency "VirtuosoClientDownloadEngine", "~> 4.2"
+
   s.default_subspec = "Video"
 
   s.xcconfig = {

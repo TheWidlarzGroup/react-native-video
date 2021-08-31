@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#import "VirtuosoClientDownloadEngine/VirtuosoClientDownloadEngine.h"
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -323,7 +324,7 @@ static int const RCTVideoUnset = -1;
 - (NSNumber *)calculateSeekableStart
 {
   CMTimeRange timeRange = [self playerItemSeekableTimeRange];
-  if (CMTIME_IS_NUMERIC(timeRange.duration))
+  if (CMTIME_IS_NUMERIC(timeRange.start))
   {
     return [NSNumber numberWithFloat:CMTimeGetSeconds(timeRange.start)];
   }
@@ -542,6 +543,10 @@ static int const RCTVideoUnset = -1;
 #endif
     
     asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    if ([type isEqualToString:@"download"] && @available(iOS 10.3, *)) {
+      AVContentKeySession* avContentKeySession = [VirtuosoLicenseManager registeredAVContentKeySession];
+      [avContentKeySession addContentKeyRecipient:asset];
+    }
   } else if (isAsset) {
     asset = [AVURLAsset URLAssetWithURL:url options:nil];
   } else {
