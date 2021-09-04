@@ -9,6 +9,8 @@ const adTagUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124
 
 In case of any issue, one can follow RobbyWH's comments on the issue : https://github.com/react-native-video/react-native-video/issues/488 :)
 
+A new function property `onReceiveAdEvent` added. this is used to notify ad events from native component to react component. 
+
 ## react-native-video
 
 A `<Video>` component for react-native, as seen in
