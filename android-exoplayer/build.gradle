@@ -45,3 +45,33 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
 
 }
+
+
+/* If one wants to open this module in Android studio. Uncomment these repositories and buildscript parts*/
+
+/*
+repositories {
+    maven {
+        url 'https://maven.google.com/'
+        name 'Google'
+    }
+    jcenter()
+    google()
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+        jcenter()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.3'
+    }
+}
+*/

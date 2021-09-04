@@ -26,6 +26,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -92,7 +93,7 @@ class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        DefaultDrmSessionEventListener {
+        DefaultDrmSessionEventListener, AdEvent.AdEventListener {
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -1049,6 +1050,8 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAdTagUrl(final Uri uri) {
         adTagUrl = uri;
         adsLoader = new ImaAdsLoader(this.themedReactContext, adTagUrl);
+        adsLoader = new ImaAdsLoader.Builder(this.themedReactContext).setAdEventListener(this).buildForAdTag(adTagUrl);
+
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
@@ -1399,4 +1402,10 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     }
+
+    @Override
+    public void onAdEvent(AdEvent adEvent) {
+        eventEmitter.receiveAdEvent(adEvent.getType().name());
+    }
+
 }
