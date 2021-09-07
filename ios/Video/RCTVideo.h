@@ -5,6 +5,8 @@
 #import "RCTVideoPlayerViewControllerDelegate.h"
 #import <React/RCTComponent.h>
 #import <React/RCTBridgeModule.h>
+//#import <YouboraAVPlayerAdapter/YouboraAVPlayerAdapter.h>
+//#import <YouboraLib/YouboraLib.h>
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
 #import <react-native-video/RCTVideoCache.h>
@@ -43,6 +45,8 @@
 @property (nonatomic, copy) RCTDirectEventBlock onPictureInPictureStatusChanged;
 @property (nonatomic, copy) RCTDirectEventBlock onRestoreUserInterfaceForPictureInPictureStop;
 @property (nonatomic, copy) RCTDirectEventBlock onGetLicense;
+@property NSDictionary * analyticsMeta;
+//@property YBPlugin *plugin;
 
 typedef NS_ENUM(NSInteger, RCTVideoError) {
     RCTVideoErrorFromJSPart,
