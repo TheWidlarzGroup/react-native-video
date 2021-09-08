@@ -411,30 +411,25 @@ class ReactExoplayerView extends FrameLayout implements
                 youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
                 youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
                 youboraOptions.setUsername(analyticsMeta.getString("username"));
-                youboraOptions.setContentTransactionCode(analyticsMeta.getString("content.transactionCode"));
+                youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
 
-                youboraOptions.setContentCustomDimension1(analyticsMeta.getString("content.customDimension.1"));
-                youboraOptions.setContentCustomDimension2(analyticsMeta.getString("content.customDimension.2"));
-                youboraOptions.setContentCustomDimension3(analyticsMeta.getString("content.customDimension.3"));
-                youboraOptions.setContentCustomDimension4(analyticsMeta.getString("content.customDimension.4"));
-                youboraOptions.setContentCustomDimension5(analyticsMeta.getString("content.customDimension.5"));
-                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("content.customDimension.6"));
-                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("content.customDimension.7"));
-                youboraOptions.setContentCustomDimension8(analyticsMeta.getString("content.customDimension.8"));
 
-                youboraOptions.setContentIsLive(analyticsMeta.getBoolean("content.isLive"));
-                youboraOptions.setContentType(analyticsMeta.getString("content.type"));
-                youboraOptions.setContentTitle(analyticsMeta.getString("content.title"));
-                youboraOptions.setProgram(analyticsMeta.getString("content.program"));
-                youboraOptions.setContentResource(analyticsMeta.getString("content.resource"));
-                youboraOptions.setContentSeason(analyticsMeta.getString("content.season"));
-                youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("content.episodeTitle"));
-                youboraOptions.setContentChannel(analyticsMeta.getString("content.channel"));
-                youboraOptions.setContentId(analyticsMeta.getString("content.id"));
-                youboraOptions.setContentGenre(analyticsMeta.getString("content.genre"));
-                youboraOptions.setContentContractedResolution(analyticsMeta.getString("content.contractedResolution"));
-                youboraOptions.setContentDuration(analyticsMeta.getDouble("content.duration"));
-                youboraOptions.setContentPackage(analyticsMeta.getString("content.package"));
+                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("customDimension6"));
+                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("customDimension7"));
+
+                youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
+                youboraOptions.setContentType(analyticsMeta.getString("contentType"));
+                youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
+                youboraOptions.setProgram(analyticsMeta.getString("program"));
+                youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+                youboraOptions.setContentSeason(String.valueOf(analyticsMeta.getDouble("contentSeason")));
+                youboraOptions.setContentEpisodeTitle(String.valueOf(analyticsMeta.getDouble("contentEpisodeTitle")));
+                youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
+                youboraOptions.setContentId(analyticsMeta.getString("contentId"));
+                youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
+                youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+                youboraOptions.setAppName(analyticsMeta.getString("appName"));
+                youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
 
                 youboraPlugin = new Plugin(youboraOptions, getContext());
 
