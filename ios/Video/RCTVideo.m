@@ -151,11 +151,6 @@ static int const RCTVideoUnset = -1;
                                                object:nil];
   }
 
-  YBOptions *options = [YBOptions new];
-  [options setValuesForKeysWithDictionary:self.analyticsMeta];
-  _plugin = [[YBPlugin alloc] initWithOptions:options];
-  [_plugin setAdapter:[[YBAVPlayerAdapter alloc] initWithPlayer:_player]];
-
   return self;
 }
 
@@ -403,6 +398,9 @@ static int const RCTVideoUnset = -1;
       }
 
       self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
+      [self initAnalytics];
+
+
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
       [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
@@ -510,6 +508,14 @@ static int const RCTVideoUnset = -1;
   }
 
   handler([AVPlayerItem playerItemWithAsset:mixComposition]);
+}
+
+- (void)initAnalytics
+{
+  YBOptions *options = [YBOptions new];
+  [options setValuesForKeysWithDictionary:_analyticsMeta];
+  _plugin = [[YBPlugin alloc] initWithOptions:options];
+  [_plugin setAdapter:[[YBAVPlayerAdapter alloc] initWithPlayer:_player]];
 }
 
 - (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler
@@ -1633,6 +1639,7 @@ static int const RCTVideoUnset = -1;
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
   _player = nil;
+  _plugin = nil;
 
   [self removePlayerLayer];
 
