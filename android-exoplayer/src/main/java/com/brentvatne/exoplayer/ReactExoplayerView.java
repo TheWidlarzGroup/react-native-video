@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.react.BuildConfig;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -402,7 +403,9 @@ class ReactExoplayerView extends FrameLayout implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
+                if (BuildConfig.DEBUG) {
+                    YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
+                }
 
                 Options youboraOptions = new Options();
                 youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
