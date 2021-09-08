@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -79,6 +80,11 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
+
+import com.npaw.youbora.lib6.YouboraLog;
+import com.npaw.youbora.lib6.plugin.Options;
+import com.npaw.youbora.lib6.plugin.Plugin;
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -157,12 +163,14 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    private ReadableMap analyticsMeta;
     // \ End props
 
     // React
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
+    private Plugin youboraPlugin;
 
     private final Handler progressHandler = new Handler() {
         @Override
@@ -394,6 +402,46 @@ class ReactExoplayerView extends FrameLayout implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
+
+                Options youboraOptions = new Options();
+                youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
+                youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
+                youboraOptions.setUsername(analyticsMeta.getString("username"));
+                youboraOptions.setContentTransactionCode(analyticsMeta.getString("content.transactionCode"));
+
+                youboraOptions.setContentCustomDimension1(analyticsMeta.getString("content.customDimension.1"));
+                youboraOptions.setContentCustomDimension2(analyticsMeta.getString("content.customDimension.2"));
+                youboraOptions.setContentCustomDimension3(analyticsMeta.getString("content.customDimension.3"));
+                youboraOptions.setContentCustomDimension4(analyticsMeta.getString("content.customDimension.4"));
+                youboraOptions.setContentCustomDimension5(analyticsMeta.getString("content.customDimension.5"));
+                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("content.customDimension.6"));
+                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("content.customDimension.7"));
+                youboraOptions.setContentCustomDimension8(analyticsMeta.getString("content.customDimension.8"));
+
+                youboraOptions.setContentIsLive(analyticsMeta.getBoolean("content.isLive"));
+                youboraOptions.setContentType(analyticsMeta.getString("content.type"));
+                youboraOptions.setContentTitle(analyticsMeta.getString("content.title"));
+                youboraOptions.setProgram(analyticsMeta.getString("content.program"));
+                youboraOptions.setContentResource(analyticsMeta.getString("content.resource"));
+                youboraOptions.setContentSeason(analyticsMeta.getString("content.season"));
+                youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("content.episodeTitle"));
+                youboraOptions.setContentChannel(analyticsMeta.getString("content.channel"));
+                youboraOptions.setContentId(analyticsMeta.getString("content.id"));
+                youboraOptions.setContentGenre(analyticsMeta.getString("content.genre"));
+                youboraOptions.setContentContractedResolution(analyticsMeta.getString("content.contractedResolution"));
+                youboraOptions.setContentDuration(analyticsMeta.getDouble("content.duration"));
+                youboraOptions.setContentPackage(analyticsMeta.getString("content.package"));
+
+                youboraPlugin = new Plugin(youboraOptions, getContext());
+
+                Activity activity = themedReactContext.getCurrentActivity();	
+                if (activity == null) {	
+                    return;	
+                }
+
+                youboraPlugin.setActivity(activity);
+
                 if (player == null) {
                     ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                     trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -425,6 +473,9 @@ class ReactExoplayerView extends FrameLayout implements
 
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
+
+                    Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+                    youboraPlugin.setAdapter(adapter);
                 }
                 if (playerNeedsSource && srcUri != null) {
                     exoPlayerView.invalidateAspectRatio();
@@ -569,6 +620,7 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeMetadataOutput(this);
             trackSelector = null;
             player = null;
+            youboraPlugin.removeAdapter();
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -1355,6 +1407,9 @@ class ReactExoplayerView extends FrameLayout implements
         this.drmLicenseHeader = header;
     }
 
+    public void setAnalyticsMeta(ReadableMap analyticsData) {
+        this.analyticsMeta = analyticsData;
+    }
 
     @Override
     public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
