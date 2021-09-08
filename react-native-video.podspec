@@ -32,6 +32,7 @@ Pod::Spec.new do |s|
   s.dependency "React-Core"
 
   s.dependency "VirtuosoClientDownloadEngine", "~> 4.2"
+  s.dependency "YouboraAVPlayerAdapter"
 
   s.default_subspec = "Video"
 
