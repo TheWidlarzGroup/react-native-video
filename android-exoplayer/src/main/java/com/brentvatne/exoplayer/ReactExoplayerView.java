@@ -430,6 +430,7 @@ class ReactExoplayerView extends FrameLayout implements
                 youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
                 youboraOptions.setAppName(analyticsMeta.getString("appName"));
                 youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
+                youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
 
                 youboraPlugin = new Plugin(youboraOptions, getContext());
 
