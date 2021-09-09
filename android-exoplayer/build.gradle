@@ -38,6 +38,9 @@ dependencies {
     implementation "androidx.media:media:1.1.0"
     implementation "com.nicepeopleatwork:exoplayer-adapter:6.7.25"
 
+    implementation 'com.penthera:cnc-android-sdk:4.0.1'
+    implementation 'com.penthera:cnc-exoplayer-2_13-support:4.0.1'
+
     implementation('com.google.android.exoplayer:extension-okhttp:2.13.2') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
