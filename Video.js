@@ -300,6 +300,7 @@ export default class Video extends Component {
         isAsset,
         shouldCache,
         type: source.type || '',
+        assetId: source.assetId || '',
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},

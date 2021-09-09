@@ -32,6 +32,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
+    private static final String PROP_SRC_ASSET_ID = "assetId";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
     private static final String PROP_DRM_LICENSESERVER = "licenseServer";
@@ -142,6 +143,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
+        String assetId = src.hasKey(PROP_SRC_ASSET_ID) ? src.getString(PROP_SRC_ASSET_ID) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
         if (TextUtils.isEmpty(uriString)) {
@@ -154,6 +156,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
             if (srcUri != null) {
                 videoView.setSrc(srcUri, extension, headers);
+            }
+            if (assetId != null) {
+                videoView.setAssetId(assetId);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -172,6 +177,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 Uri srcUri = RawResourceDataSource.buildRawResourceUri(identifier);
                 if (srcUri != null) {
                     videoView.setRawSrc(srcUri, extension);
+                }
+                if (assetId != null) {
+                    videoView.setAssetId(assetId);
                 }
             }
         }
