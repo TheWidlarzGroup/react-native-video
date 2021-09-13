@@ -515,6 +515,11 @@ static int const RCTVideoUnset = -1;
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
+  BOOL isOffline = [[_analyticsMeta objectForKey:@"offline"] boolValue];
+  if (!isOffline)
+  {
+    [_plugin fireOfflineEvents];
+  }
   [_plugin setAdapter:[[YBAVPlayerAdapter alloc] initWithPlayer:_player]];
 }
 
