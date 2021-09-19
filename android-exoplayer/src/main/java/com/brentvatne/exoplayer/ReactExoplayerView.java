@@ -422,22 +422,23 @@ class ReactExoplayerView extends FrameLayout implements
                 youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
 
 
-                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("customDimension6"));
-                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("customDimension7"));
+                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
+                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
 
                 youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
                 youboraOptions.setContentType(analyticsMeta.getString("contentType"));
                 youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
                 youboraOptions.setProgram(analyticsMeta.getString("program"));
                 youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-                youboraOptions.setContentSeason(String.valueOf(analyticsMeta.getDouble("contentSeason")));
-                youboraOptions.setContentEpisodeTitle(String.valueOf(analyticsMeta.getDouble("contentEpisodeTitle")));
+                youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
+                youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
                 youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
                 youboraOptions.setContentId(analyticsMeta.getString("contentId"));
                 youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
                 youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
                 youboraOptions.setAppName(analyticsMeta.getString("appName"));
                 youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
+                youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
                 youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
 
                 youboraPlugin = new Plugin(youboraOptions, getContext());
