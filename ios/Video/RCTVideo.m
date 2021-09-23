@@ -512,6 +512,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)initAnalytics
 {
+  if (!_analyticsMeta){
+    DebugLog(@"No youbora analytics data");
+    return;
+  }
+  [YBLog setDebugLevel:YBLogLevelVerbose];
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
@@ -1643,6 +1648,8 @@ static int const RCTVideoUnset = -1;
     [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
+  [_plugin removeAdapter];
+
   _player = nil;
   _plugin = nil;
 
