@@ -173,7 +173,6 @@ class ReactExoplayerView extends FrameLayout implements
     private String assetId = null;
     private boolean controls;
     private ReadableMap analyticsMeta;
-    private String slotProgramStart;
     // \ End props
 
     // React
@@ -1525,10 +1524,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-    }
-
-    public void setSlotProgramStart(String slotProgramStart) {
-        this.slotProgramStart = slotProgramStart;
     }
 
     public void setAssetId(String assetId){
