@@ -464,49 +464,6 @@ class ReactExoplayerView extends FrameLayout implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (BuildConfig.DEBUG) {
-                    YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
-                }
-
-                Options youboraOptions = new Options();
-                youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
-                youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
-                youboraOptions.setUsername(analyticsMeta.getString("username"));
-                youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
-
-
-                youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
-                youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
-
-                youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
-                youboraOptions.setContentType(analyticsMeta.getString("contentType"));
-                youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
-                youboraOptions.setProgram(analyticsMeta.getString("program"));
-                youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-                youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
-                youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
-                youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
-                youboraOptions.setContentId(analyticsMeta.getString("contentId"));
-                youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
-                youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
-                youboraOptions.setAppName(analyticsMeta.getString("appName"));
-                youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
-                youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-                youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
-
-                youboraPlugin = new Plugin(youboraOptions, getContext());
-
-                if(!analyticsMeta.getBoolean("offline")) {
-                    youboraPlugin.fireOfflineEvents();
-                }
-
-                Activity activity = themedReactContext.getCurrentActivity();	
-                if (activity == null) {	
-                    return;	
-                }
-
-                youboraPlugin.setActivity(activity);
-
                 if (player == null) {
                     ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                     trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -1392,12 +1349,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void setPausedModifier(boolean paused) {
         isPaused = paused;
         if (player != null) {
-            if (youboraPlugin != null) {
-                youboraPlugin.fireStop();
-                youboraPlugin.removeAdapter();
-            }
             if (!paused) {
-                initialiseYoubora(player);
                 startPlayback();
             } else {
                 pausePlayback();
