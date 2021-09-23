@@ -528,6 +528,10 @@ static int const RCTVideoUnset = -1;
 
 - (void)initAnalytics
 {
+  if (!_analyticsMeta){
+    DebugLog(@"No youbora analytics data");
+    return;
+  }
   [YBLog setDebugLevel:YBLogLevelVerbose];
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
