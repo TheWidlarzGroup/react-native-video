@@ -88,6 +88,7 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   BOOL _filterEnabled;
   UIViewController * _presentingViewController;
+  NSString * _slotProgramStart;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -367,6 +368,20 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+#pragma mark - Program start
+
+- (void)setSlotProgramStart:(NSString *)slotProgramStart
+{
+    if ([[_analyticsMeta objectForKey:@"contentIsLive"] boolValue]  && _slotProgramStart != slotProgramStart) {
+       [_plugin fireStop];
+       [_plugin removeAdapter];
+
+       [self initAnalytics];
+    }
+
+    _slotProgramStart = slotProgramStart;
+}
+
 #pragma mark - Player and source
 
 - (void)setSrc:(NSDictionary *)source
@@ -385,6 +400,7 @@ static int const RCTVideoUnset = -1;
       [self addPlayerItemObservers];
       [self setFilter:self->_filterName];
       [self setMaxBitRate:self->_maxBitRate];
+      [self setSlotProgramStart:self->_slotProgramStart];
 
       [_player pause];
 
@@ -512,6 +528,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)initAnalytics
 {
+  [YBLog setDebugLevel:YBLogLevelVerbose];
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
@@ -1643,6 +1660,8 @@ static int const RCTVideoUnset = -1;
     [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
+  [_plugin removeAdapter];
+
   _player = nil;
   _plugin = nil;
 

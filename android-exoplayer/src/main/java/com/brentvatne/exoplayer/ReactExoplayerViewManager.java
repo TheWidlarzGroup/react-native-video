@@ -72,6 +72,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
+    private static final String PROP_SLOT_PROGRAM_START = "slotProgramStart";
 
     private ReactExoplayerConfig config;
 
@@ -339,6 +340,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
+    }
+
+    @ReactProp(name = PROP_SLOT_PROGRAM_START)
+    public void setSlotProgramStart(final ReactExoplayerView videoView, @Nullable String slotProgramStart) {
+        Log.d("Something2", "setSlotProgramStart");
+        if (slotProgramStart != null) {
+            // Do something like a comparison here
         }
     }
 

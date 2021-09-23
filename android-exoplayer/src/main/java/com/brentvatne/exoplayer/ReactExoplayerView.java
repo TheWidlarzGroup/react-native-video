@@ -173,6 +173,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String assetId = null;
     private boolean controls;
     private ReadableMap analyticsMeta;
+    private String slotProgramStart;
     // \ End props
 
     // React
@@ -405,6 +406,59 @@ class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+    private void initialiseYoubora(Player player) {
+        if (analyticsMeta == null) {
+            return;
+        }
+        if (BuildConfig.DEBUG) {
+            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
+        }
+
+        Options youboraOptions = new Options();
+        youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
+        youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
+        youboraOptions.setUsername(analyticsMeta.getString("username"));
+        youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
+
+
+        youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
+        youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
+
+        youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
+        youboraOptions.setContentType(analyticsMeta.getString("contentType"));
+        youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
+        youboraOptions.setProgram(analyticsMeta.getString("program"));
+        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
+        youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
+        youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
+        youboraOptions.setContentId(analyticsMeta.getString("contentId"));
+        youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
+        youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        youboraOptions.setAppName(analyticsMeta.getString("appName"));
+        youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
+        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
+        youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+
+        youboraPlugin = new Plugin(youboraOptions, getContext());
+
+        if(!analyticsMeta.getBoolean("offline")) {
+            youboraPlugin.fireOfflineEvents();
+        }
+
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) {
+            return;
+        }
+
+        youboraPlugin.setActivity(activity);
+
+        Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+        youboraPlugin.setAdapter(adapter);
+    }
+
     private void initializePlayer() {
         ReactExoplayerView self = this;
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -489,8 +543,7 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-                    youboraPlugin.setAdapter(adapter);
+                    initialiseYoubora(player);
                 }
                 if (playerNeedsSource && srcUri != null) {
                     exoPlayerView.invalidateAspectRatio();
@@ -679,7 +732,6 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeMetadataOutput(this);
             trackSelector = null;
             player = null;
-            youboraPlugin.removeAdapter();
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -1341,7 +1393,12 @@ class ReactExoplayerView extends FrameLayout implements
     public void setPausedModifier(boolean paused) {
         isPaused = paused;
         if (player != null) {
+            if (youboraPlugin != null) {
+                youboraPlugin.fireStop();
+                youboraPlugin.removeAdapter();
+            }
             if (!paused) {
+                initialiseYoubora(player);
                 startPlayback();
             } else {
                 pausePlayback();
@@ -1468,6 +1525,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+    }
+
+    public void setSlotProgramStart(String slotProgramStart) {
+        this.slotProgramStart = slotProgramStart;
     }
 
     public void setAssetId(String assetId){
