@@ -1288,6 +1288,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     apsTestFlag);
             this.actionToken = actionToken;
 
+            clearResumePosition();
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
