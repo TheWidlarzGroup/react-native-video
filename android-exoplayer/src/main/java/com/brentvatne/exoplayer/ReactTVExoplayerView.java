@@ -1516,7 +1516,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public long parseTimestamp(String timestamp) {
         Locale currentLocale = getCurrentLocale();
-        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, currentLocale);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -1525,7 +1525,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return seekPosition.getTime();
         } catch (ParseException e) {
             Log.e(TAG, "Unable to parse provided timestamp, " + timestamp +
-                    ". Timestamp should be of the format \"2020-01-01T00:00:00Z\".");
+                    ". Timestamp should be of the format \"2020-01-01T00:00:00.000Z\".");
         }
         return C.POSITION_UNSET;
     }
