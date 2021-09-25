@@ -512,7 +512,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)initAnalytics
 {
-  if (!_analyticsMeta){
+  if (_analyticsMeta == nil){
     DebugLog(@"No youbora analytics data");
     return;
   }
