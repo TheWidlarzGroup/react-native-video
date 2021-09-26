@@ -44,6 +44,7 @@ import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
+import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -921,7 +922,9 @@ class ReactExoplayerView extends FrameLayout implements
                 videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
                 videoTrack.putString("trackId",
                         format.id == null ? String.valueOf(trackIndex) : format.id);
-                videoTracks.pushMap(videoTrack);
+                if (isFormatSupported(format)) {
+                    videoTracks.pushMap(videoTrack);
+                }
             }
         }
         return videoTracks;
@@ -1241,10 +1244,31 @@ class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new int[group.length];
+            int[] allTracks = new int[group.length];
             groupIndex = 0;
+            
             for (int j = 0; j < group.length; j++) {
-                tracks[j] = j;
+                allTracks[j] = j;
+            }
+            
+            // Valiate list of all tracks and add only supported formats
+            int supportedFormatLength = 0;
+            ArrayList<Integer> supportedTrackList = new ArrayList<Integer>();
+            for (int g = 0; g < allTracks.length; g++) {
+                Format format = group.getFormat(g);
+                if (isFormatSupported(format)) {
+                    supportedFormatLength++;
+                }
+            }
+            tracks = new int[supportedFormatLength + 1];
+            int o = 0;
+            for (int k = 0; k < allTracks.length; k++) {
+                Format format = group.getFormat(k);
+                if (isFormatSupported(format)) {
+                    tracks[o] = allTracks[k];
+                    supportedTrackList.add(allTracks[k]);
+                    o++;
+                }
             }
         }
 
@@ -1260,6 +1284,25 @@ class ReactExoplayerView extends FrameLayout implements
                         new DefaultTrackSelector.SelectionOverride(groupIndex, tracks))
                 .build();
         trackSelector.setParameters(selectionParameters);
+    }
+
+    private boolean isFormatSupported(Format format) {
+        int width = format.width == Format.NO_VALUE ? 0 : format.width;
+        int height = format.height == Format.NO_VALUE ? 0 : format.height;
+        float frameRate = format.frameRate == Format.NO_VALUE ? 0 : format.frameRate;
+        String mimeType = format.sampleMimeType;
+        if (mimeType == null) {
+            return true;
+        }
+        boolean isSupported = false;
+        try {
+            MediaCodecInfo codecInfo = MediaCodecUtil.getDecoderInfo(mimeType, false, false);
+            isSupported = codecInfo.isVideoSizeAndRateSupportedV21(width, height, frameRate);
+        } catch (Exception e) {
+            // Failed to get decoder info - assume it is supported
+            isSupported = true;
+        }
+        return isSupported;
     }
 
     private int getGroupIndexForDefaultLocale(TrackGroupArray groups) {
