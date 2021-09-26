@@ -180,6 +180,7 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
     private Plugin youboraPlugin;
+    private String contentId;
 
     private final Handler progressHandler = new Handler() {
         @Override
@@ -412,6 +413,8 @@ class ReactExoplayerView extends FrameLayout implements
         if (BuildConfig.DEBUG) {
             YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
         }
+
+        contentId = analyticsMeta.getString("contentId");
 
         Options youboraOptions = new Options();
         youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
@@ -1476,6 +1479,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+        if (player != null && youboraPlugin != null &&  contentId != analyticsData.getString("contentId")) {
+            youboraPlugin.fireStop();
+            youboraPlugin.removeAdapter();
+            initialiseYoubora(player);
+        }
     }
 
     public void setAssetId(String assetId){

@@ -88,6 +88,8 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   BOOL _filterEnabled;
   UIViewController * _presentingViewController;
+  NSString * _contentId;
+  NSDictionary *_analyticsMeta;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -367,6 +369,19 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+- (void)setAnalyticsMeta:(NSDictionary *)analyticsMeta
+{
+    _analyticsMeta = analyticsMeta;
+
+    if (_plugin && _contentId != [_analyticsMeta objectForKey:@"contentId"]) {
+        [_plugin removeAdapter];
+        [_plugin fireStop];
+        [self initAnalytics];
+    } else {
+        [self initAnalytics];
+    }
+}
+
 #pragma mark - Player and source
 
 - (void)setSrc:(NSDictionary *)source
@@ -398,8 +413,6 @@ static int const RCTVideoUnset = -1;
       }
 
       self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
-      [self initAnalytics];
-
 
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
@@ -512,7 +525,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)initAnalytics
 {
-  if (!_analyticsMeta){
+  if (_analyticsMeta == nil){
     DebugLog(@"No youbora analytics data");
     return;
   }
@@ -520,6 +533,7 @@ static int const RCTVideoUnset = -1;
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
+  _contentId = [_analyticsMeta objectForKey:@"contentId"];
   BOOL isOffline = [[_analyticsMeta objectForKey:@"offline"] boolValue];
   if (!isOffline)
   {
