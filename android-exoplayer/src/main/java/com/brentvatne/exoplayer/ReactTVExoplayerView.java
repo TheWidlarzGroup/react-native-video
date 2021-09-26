@@ -742,7 +742,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         isInBackground = false;
 
         if (player != null) {
-            updateResumePosition();
             player.removeListener(this);
             player.removeMetadataOutput(this);
             player.release();
@@ -783,6 +782,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return;
         }
 
+        isPaused = playWhenReady;
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
@@ -902,6 +902,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     @Override
     public void onDrmSessionManagerError(EventTime eventTime, Exception e) {
         handleDrmSessionManagerError(e);
+    }
+
+    @Override
+    public void onIsPlayingChanged(EventTime eventTime, boolean isPlaying) {
+        isPaused = !isPlaying;
+        if (isPlaying) {
+            startProgressHandler();
+        }
     }
 
     @Override
@@ -1288,7 +1296,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     apsTestFlag);
             this.actionToken = actionToken;
 
-            clearResumePosition();
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }

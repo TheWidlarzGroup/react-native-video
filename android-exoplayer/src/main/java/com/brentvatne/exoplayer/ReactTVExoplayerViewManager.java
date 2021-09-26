@@ -571,17 +571,21 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         // This will be called whenever a command is sent from react-native.
         switch (commandId) {
             case COMMAND_SEEK_TO_NOW:
+                Log.d(WebUtil.DEBUG, "resumeToNow");
                 root.resumeTo(C.TIME_UNSET);
                 break;
             case COMMAND_SEEK_TO_TIMESTAMP:
                 String timestamp = args.getString(0);
+                Log.d(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
                 long positionMs = root.parseTimestamp(timestamp);
                 if (positionMs != C.POSITION_UNSET) {
                     root.resumeTo(positionMs);
                 }
                 break;
             case COMMAND_SEEK_TO_POSITION:
-                root.resumeTo(args.getInt(0) * 1000);
+                long resumeMs = args.getInt(0) * 1000;
+                Log.d(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
+                root.resumeTo(resumeMs);
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
