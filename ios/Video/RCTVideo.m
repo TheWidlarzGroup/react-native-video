@@ -662,6 +662,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+
   if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
     self.onReadyForDisplay(@{@"target": self.reactTag});
     return;
@@ -1062,8 +1063,8 @@ static int const RCTVideoUnset = -1;
         if (!wasPaused) {
           [self setPaused:false];
         }
-          if(self.onVideoSeek) {
-              self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
+        if(self.onVideoSeek) {
+          self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                              @"seekTime": seekTime,
                              @"target": self.reactTag});
         }
