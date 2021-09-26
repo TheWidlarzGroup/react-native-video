@@ -88,6 +88,7 @@ static int const RCTVideoUnset = -1;
   NSString *_filterName;
   BOOL _filterEnabled;
   UIViewController * _presentingViewController;
+  NSString * _contentId;
 #if __has_include(<react-native-video/RCTVideoCache.h>)
   RCTVideoCache * _videoCache;
 #endif
@@ -520,6 +521,7 @@ static int const RCTVideoUnset = -1;
   YBOptions *options = [YBOptions new];
   [options setValuesForKeysWithDictionary:_analyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
+  _contentId = [_analyticsMeta objectForKey:@"contentId"];
   BOOL isOffline = [[_analyticsMeta objectForKey:@"offline"] boolValue];
   if (!isOffline)
   {
@@ -648,7 +650,6 @@ static int const RCTVideoUnset = -1;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-
   if([keyPath isEqualToString:readyForDisplayKeyPath] && [change objectForKey:NSKeyValueChangeNewKey] && self.onReadyForDisplay) {
     self.onReadyForDisplay(@{@"target": self.reactTag});
     return;
@@ -1050,6 +1051,11 @@ static int const RCTVideoUnset = -1;
           [self setPaused:false];
         }
         if(self.onVideoSeek) {
+          if (_contentId != [_analyticsMeta objectForKey:@"contentId"]) {
+              [_plugin removeAdapter];
+              [_plugin fireStop];
+              [self initAnalytics];
+          }
           self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                              @"seekTime": seekTime,
                              @"target": self.reactTag});
