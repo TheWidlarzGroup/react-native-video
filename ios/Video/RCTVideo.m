@@ -103,7 +103,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+      _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -372,7 +372,7 @@ static int const RCTVideoUnset = -1;
 - (void)setAnalyticsMeta:(NSDictionary *)analyticsMeta
 {
     _analyticsMeta = analyticsMeta;
-
+    
     if (_plugin && _contentId != [_analyticsMeta objectForKey:@"contentId"]) {
         [_plugin removeAdapter];
         [_plugin fireStop];
@@ -421,6 +421,12 @@ static int const RCTVideoUnset = -1;
 
       [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
       self->_isExternalPlaybackActiveObserverRegistered = YES;
+      
+      NSString *_origin = [self->_analyticsMeta objectForKey:@"origin"];
+      if ([_origin length] == 0)
+      {
+        [self initAnalytics];
+      }
 
       [self addPlayerTimeObserver];
       if (@available(iOS 10.0, *)) {
@@ -529,12 +535,18 @@ static int const RCTVideoUnset = -1;
     DebugLog(@"No youbora analytics data");
     return;
   }
+
+  NSMutableDictionary *youboraAnalyticsMeta = [[NSMutableDictionary alloc] init];
+  [youboraAnalyticsMeta setDictionary:_analyticsMeta];
+
+  [youboraAnalyticsMeta removeObjectForKey:@"origin"];
+
   [YBLog setDebugLevel:YBLogLevelVerbose];
   YBOptions *options = [YBOptions new];
-  [options setValuesForKeysWithDictionary:_analyticsMeta];
+  [options setValuesForKeysWithDictionary:youboraAnalyticsMeta];
   _plugin = [[YBPlugin alloc] initWithOptions:options];
-  _contentId = [_analyticsMeta objectForKey:@"contentId"];
-  BOOL isOffline = [[_analyticsMeta objectForKey:@"offline"] boolValue];
+  _contentId = [youboraAnalyticsMeta objectForKey:@"contentId"];
+  BOOL isOffline = [[youboraAnalyticsMeta objectForKey:@"offline"] boolValue];
   if (!isOffline)
   {
     [_plugin fireOfflineEvents];
@@ -1110,8 +1122,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
 {
-	_automaticallyWaitsToMinimizeStalling = waits;
-	_player.automaticallyWaitsToMinimizeStalling = waits;
+    _automaticallyWaitsToMinimizeStalling = waits;
+    _player.automaticallyWaitsToMinimizeStalling = waits;
 }
 
 
