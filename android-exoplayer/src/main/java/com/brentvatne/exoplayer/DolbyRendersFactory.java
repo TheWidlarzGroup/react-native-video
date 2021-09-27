@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
+import com.google.android.exoplayer2.audio.AudioSink;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.mediacodec.MediaCodecSelector;
@@ -28,19 +29,16 @@ public class DolbyRendersFactory extends DefaultRenderersFactory {
 
     @Override
     protected void buildAudioRenderers(
-            @NonNull Context context,
+            Context context,
             int extensionRendererMode,
-            @NonNull MediaCodecSelector mediaCodecSelector,
-            @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager,
-            boolean playClearSamplesWithoutKeys,
+            MediaCodecSelector mediaCodecSelector,
             boolean enableDecoderFallback,
-            @NonNull AudioProcessor[] audioProcessors,
-            @NonNull Handler eventHandler,
-            @NonNull AudioRendererEventListener eventListener,
-            @NonNull ArrayList<Renderer> out) {
-        super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector, drmSessionManager,
-                playClearSamplesWithoutKeys, enableDecoderFallback, audioProcessors, eventHandler, eventListener, out);
-
+            AudioSink audioSink,
+            Handler eventHandler,
+            AudioRendererEventListener eventListener,
+            ArrayList<Renderer> out) {
+        super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector,
+                enableDecoderFallback, audioSink, eventHandler, eventListener, out);
         try {
             // Full class names used for constructor args so the LINT rule triggers if any of them move.
             // LINT.IfChange
@@ -49,10 +47,10 @@ public class DolbyRendersFactory extends DefaultRenderersFactory {
                     clazz.getConstructor(
                             android.os.Handler.class,
                             com.google.android.exoplayer2.audio.AudioRendererEventListener.class,
-                            com.google.android.exoplayer2.audio.AudioProcessor[].class);
+                            com.google.android.exoplayer2.audio.AudioSink.class);
             // LINT.ThenChange(../../../../../../../proguard-rules.txt)
             Renderer renderer =
-                    (Renderer) constructor.newInstance(eventHandler, eventListener, audioProcessors);
+                    (Renderer) constructor.newInstance(eventHandler, eventListener, audioSink);
             out.add(renderer);
             Log.i(TAG, "Loaded LibDaaAudioRenderer.");
         } catch (ClassNotFoundException e) {
@@ -65,3 +63,4 @@ public class DolbyRendersFactory extends DefaultRenderersFactory {
         }
     }
 }
+
