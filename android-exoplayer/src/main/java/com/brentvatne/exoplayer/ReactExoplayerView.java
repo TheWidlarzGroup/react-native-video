@@ -173,7 +173,6 @@ class ReactExoplayerView extends FrameLayout implements
     private String assetId = null;
     private boolean controls;
     private ReadableMap analyticsMeta;
-    private String origin;
     // \ End props
 
     // React
@@ -498,7 +497,7 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    if (origin == null && analyticsMeta != null) {
+                    if (analyticsMeta != null && analyticsMeta.getString("origin") == null) {
                         initialiseYoubora();
                         Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
                         youboraPlugin.setAdapter(adapter);
@@ -1481,8 +1480,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        
-        // Youbora logic for live player from TV guide
+
         if(this.player !=null && analyticsData !=null) {
             initialiseYoubora();
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
@@ -1491,10 +1489,6 @@ class ReactExoplayerView extends FrameLayout implements
             }
             youboraPlugin.setAdapter(adapter);
         }
-    }
-
-    public void setOrigin(String origin){
-        this.origin = origin;
     }
 
     public void setAssetId(String assetId){

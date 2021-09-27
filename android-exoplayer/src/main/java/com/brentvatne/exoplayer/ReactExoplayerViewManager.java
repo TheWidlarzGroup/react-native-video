@@ -72,7 +72,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
-    private static final String PROP_ORIGIN = "origin";
 
     private ReactExoplayerConfig config;
 
@@ -347,13 +346,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setAnalyticsMeta(final ReactExoplayerView videoView, @Nullable ReadableMap analyticsMeta) {
         if (analyticsMeta != null) {
             videoView.setAnalyticsMeta(analyticsMeta);
-        }
-    }
-
-    @ReactProp(name = PROP_ORIGIN)
-    public void setOrigin(final ReactExoplayerView videoView, @Nullable String origin) {
-        if (origin != null) {
-            videoView.setOrigin(origin);
         }
     }
 
