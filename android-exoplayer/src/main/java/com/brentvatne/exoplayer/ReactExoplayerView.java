@@ -406,7 +406,7 @@ class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void initialiseYoubora(Player player) {
+    private void initialiseYoubora() {
         if (analyticsMeta == null) {
             return;
         }
@@ -456,9 +456,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         youboraPlugin.setActivity(activity);
-
-        Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-        youboraPlugin.setAdapter(adapter);
     }
 
     private void initializePlayer() {
@@ -502,7 +499,11 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    initialiseYoubora(player);
+                    initialiseYoubora();
+                    Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+                    if (youboraPlugin != null) {
+                        youboraPlugin.setAdapter(adapter);
+                    }
                 }
                 if (playerNeedsSource && srcUri != null) {
                     exoPlayerView.invalidateAspectRatio();
@@ -691,6 +692,10 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeMetadataOutput(this);
             trackSelector = null;
             player = null;
+            if (youboraPlugin != null){
+                youboraPlugin.fireStop();
+                youboraPlugin.removeAdapter();
+            }
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
@@ -1479,11 +1484,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        if (player != null && youboraPlugin != null &&  contentId != analyticsData.getString("contentId")) {
-            youboraPlugin.fireStop();
-            youboraPlugin.removeAdapter();
-            initialiseYoubora(player);
-        }
     }
 
     public void setAssetId(String assetId){
