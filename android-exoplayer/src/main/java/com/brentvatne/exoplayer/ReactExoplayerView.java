@@ -173,6 +173,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String assetId = null;
     private boolean controls;
     private ReadableMap analyticsMeta;
+    private String origin;
     // \ End props
 
     // React
@@ -407,9 +408,8 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initialiseYoubora() {
-        if (analyticsMeta == null) {
-            return;
-        }
+        if (analyticsMeta == null) return;
+
         if (BuildConfig.DEBUG) {
             YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
         }
@@ -443,6 +443,7 @@ class ReactExoplayerView extends FrameLayout implements
         youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
         youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
         youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        youboraOptions.setAutoDetectBackground(true);
 
         youboraPlugin = new Plugin(youboraOptions, getContext());
 
@@ -451,9 +452,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         Activity activity = themedReactContext.getCurrentActivity();
-        if (activity == null) {
-            return;
-        }
+        if (activity == null) return;
 
         youboraPlugin.setActivity(activity);
     }
@@ -499,9 +498,9 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    initialiseYoubora();
-                    Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-                    if (youboraPlugin != null) {
+                    if (origin == null && analyticsMeta != null) {
+                        initialiseYoubora();
+                        Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
                         youboraPlugin.setAdapter(adapter);
                     }
                 }
@@ -693,7 +692,6 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null){
-                youboraPlugin.fireStop();
                 youboraPlugin.removeAdapter();
             }
         }
@@ -1148,7 +1146,6 @@ class ReactExoplayerView extends FrameLayout implements
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
-
             if (!isSourceEqual) {
                 reloadSource();
             }
@@ -1484,6 +1481,20 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+        
+        // Youbora logic for live player from TV guide
+        if(this.player !=null && analyticsData !=null) {
+            initialiseYoubora();
+            Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+            if (youboraPlugin != null && contentId != analyticsData.getString("contentId")) {
+                youboraPlugin.removeAdapter();
+            }
+            youboraPlugin.setAdapter(adapter);
+        }
+    }
+
+    public void setOrigin(String origin){
+        this.origin = origin;
     }
 
     public void setAssetId(String assetId){
