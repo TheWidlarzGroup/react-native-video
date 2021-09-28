@@ -497,7 +497,7 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    if (analyticsMeta != null && analyticsMeta.getString("origin") == null) {
+                    if (analyticsMeta != null && analyticsMeta.getString("origin").length() == 0) {
                         initialiseYoubora();
                         Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
                         youboraPlugin.setAdapter(adapter);
