@@ -782,7 +782,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return;
         }
 
-        isPaused = playWhenReady;
+        isPaused = !playWhenReady;
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
@@ -906,8 +906,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onIsPlayingChanged(EventTime eventTime, boolean isPlaying) {
-        isPaused = !isPlaying;
         if (isPlaying) {
+            isPaused = false;
             startProgressHandler();
         }
     }

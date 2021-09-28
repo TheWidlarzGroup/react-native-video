@@ -141,9 +141,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             // Change the ip and port to your file upload server.
             DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
         }
+        ExoConfig.getInstance().setHttpTimeoutMs(6000);
         ExoConfig.getInstance().setObtainKeyIdsFromManifest(true);
 
-        Log.d(WebUtil.DEBUG, String.format("config player - keyIdsMode %s, debug %b",
+        Log.d(WebUtil.DEBUG, String.format("config player - httpTimeoutMs %d, keyIdsMode %s, debug %b",
+                ExoConfig.getInstance().getHttpTimeoutMs(),
                 ExoConfig.getInstance().isObtainKeyIdsFromManifest() ? "manifest" : "stream",
                 IS_DEBUG));
     }
