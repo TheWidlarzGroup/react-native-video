@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -29,11 +31,13 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.DefaultRenderersFactory.ExtensionRendererMode;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
@@ -156,6 +160,8 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    @ExtensionRendererMode
+    private int extensionRenderMode = EXTENSION_RENDERER_MODE_OFF;
     // \ End props
 
     // React
@@ -406,9 +412,8 @@ class ReactExoplayerView extends FrameLayout implements
                     defaultLoadControlBuilder.setTargetBufferBytes(-1);
                     defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
                     DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
-                    DefaultRenderersFactory renderersFactory =
-                            new DefaultRenderersFactory(getContext())
-                                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                    RenderersFactory renderersFactory = new DolbyRendersFactory(getContext())
+                                    .setExtensionRendererMode(extensionRenderMode);
                     // DRM
                     DrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
                     if (self.drmUUID != null) {
@@ -1371,6 +1376,13 @@ class ReactExoplayerView extends FrameLayout implements
             if (indexOfPC != -1) {
                 removeViewAt(indexOfPC);
             }
+        }
+    }
+
+    public void setExtensionRenderMode(int mode) {
+        extensionRenderMode = mode < 0 ? DolbyDefaultExtensionMode.getDefaultMode() : mode;
+        if (player != null) {
+            Log.d("ExtensionMode", "set extension mode after player initialized doesn't have effect");
         }
     }
 }
