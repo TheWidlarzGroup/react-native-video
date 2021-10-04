@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation project(':ReactAndroid')
+    implementation 'com.facebook.react:react-native:+'
 
     // Amazon Publishing Services
     implementation project(":AmazonFireTVAdsSDK-release")
