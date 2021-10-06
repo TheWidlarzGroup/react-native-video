@@ -454,6 +454,11 @@ class ReactExoplayerView extends FrameLayout implements
         if (activity == null) return;
 
         youboraPlugin.setActivity(activity);
+        if (player != null && youboraPlugin != null && youboraPlugin.getAdapter() == null) {
+            Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+            youboraPlugin.setAdapter(adapter);
+            youboraPlugin.getAdapter().fireStart();
+        }
     }
 
     private void initializePlayer() {
@@ -497,10 +502,8 @@ class ReactExoplayerView extends FrameLayout implements
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
                     player.setPlaybackParameters(params);
 
-                    if (analyticsMeta != null && analyticsMeta.getString("origin").length() == 0) {
+                    if (analyticsMeta != null) {
                         initialiseYoubora();
-                        Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-                        youboraPlugin.setAdapter(adapter);
                     }
                 }
                 if (playerNeedsSource && srcUri != null) {
@@ -691,7 +694,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null){
-                youboraPlugin.removeAdapter();
+                youboraPlugin.getAdapter().fireStop();
             }
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
@@ -1481,13 +1484,9 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
-        if(this.player !=null && analyticsData !=null) {
+        if(player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
+            youboraPlugin.getAdapter().fireStop();
             initialiseYoubora();
-            Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-            if (youboraPlugin != null && contentId != analyticsData.getString("contentId")) {
-                youboraPlugin.removeAdapter();
-            }
-            youboraPlugin.setAdapter(adapter);
         }
     }
 
