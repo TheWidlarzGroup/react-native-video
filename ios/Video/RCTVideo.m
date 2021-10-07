@@ -916,10 +916,9 @@ static int const RCTVideoUnset = -1;
 - (void)setupPipController {
   if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
    //line : 920 & 921 initiate the pip controller :
-   ///In phase 2 uncomment these lines in order to stop pip from initializing in ios.
     // Create new controller passing reference to the AVPlayerLayer
-   // _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
-   // _pipController.delegate = self;
+    _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
+    _pipController.delegate = self;
   }
 }
 #endif
