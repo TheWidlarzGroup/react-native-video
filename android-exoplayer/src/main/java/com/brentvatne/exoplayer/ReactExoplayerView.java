@@ -423,7 +423,7 @@ class ReactExoplayerView extends FrameLayout implements
                     RenderersFactory renderersFactory = new DolbyRendersFactory(getContext())
                                     .setExtensionRendererMode(extensionRenderMode);
                     player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
-                                .setTrackSelector​(trackSelector)
+                                .setTrackSelector(trackSelector)
                                 .setBandwidthMeter(bandwidthMeter)
                                 .setLoadControl(defaultLoadControl)
                                 .build();
