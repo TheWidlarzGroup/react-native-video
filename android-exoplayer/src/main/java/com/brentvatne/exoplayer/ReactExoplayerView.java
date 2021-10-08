@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -28,21 +30,23 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.DefaultRenderersFactory.ExtensionRendererMode;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionEventListener;
+import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
+import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -77,8 +81,8 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.Map;
+import java.util.UUID;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -156,6 +160,8 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    @ExtensionRendererMode
+    private int extensionRenderMode = EXTENSION_RENDERER_MODE_OFF;
     // \ End props
 
     // React
@@ -406,9 +412,8 @@ class ReactExoplayerView extends FrameLayout implements
                     defaultLoadControlBuilder.setTargetBufferBytes(-1);
                     defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
                     DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
-                    DefaultRenderersFactory renderersFactory =
-                            new DefaultRenderersFactory(getContext())
-                                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                    RenderersFactory renderersFactory = new DolbyRendersFactory(getContext())
+                                    .setExtensionRendererMode(extensionRenderMode);
                     // DRM
                     DrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
                     if (self.drmUUID != null) {
@@ -935,7 +940,8 @@ class ReactExoplayerView extends FrameLayout implements
                 // Special case for decoder initialization failures.
                 MediaCodecRenderer.DecoderInitializationException decoderInitializationException =
                         (MediaCodecRenderer.DecoderInitializationException) cause;
-                if (decoderInitializationException.codecInfo.name == null) {
+                MediaCodecInfo codecInfo = decoderInitializationException.codecInfo;
+                if (codecInfo == null || codecInfo.name == null) {
                     if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
                         errorString = getResources().getString(R.string.error_querying_decoders);
                     } else if (decoderInitializationException.secureDecoderRequired) {
@@ -946,8 +952,7 @@ class ReactExoplayerView extends FrameLayout implements
                                 decoderInitializationException.mimeType);
                     }
                 } else {
-                    errorString = getResources().getString(R.string.error_instantiating_decoder,
-                            decoderInitializationException.codecInfo.name);
+                    errorString = getResources().getString(R.string.error_instantiating_decoder, codecInfo.name);
                 }
             }
         }
@@ -1371,6 +1376,13 @@ class ReactExoplayerView extends FrameLayout implements
             if (indexOfPC != -1) {
                 removeViewAt(indexOfPC);
             }
+        }
+    }
+
+    public void setExtensionRenderMode(int mode) {
+        extensionRenderMode = mode < 0 ? DolbyDefaultExtensionMode.getDefaultMode() : mode;
+        if (player != null) {
+            Log.d("ExtensionMode", "set extension mode after player initialized doesn't have effect");
         }
     }
 }

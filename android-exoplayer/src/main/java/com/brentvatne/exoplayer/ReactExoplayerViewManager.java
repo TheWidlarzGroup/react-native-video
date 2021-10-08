@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
+
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -14,6 +16,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.bridge.ReactMethod;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
@@ -70,6 +73,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_EXTENSION_RENDER_MODE = "extensionRenderMode";
 
     private ReactExoplayerConfig config;
 
@@ -330,6 +334,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
         }
+    }
+
+    /**
+     * Accepted value is one of ExtensionRendererMode or -1 for default selection
+     * @see com.google.android.exoplayer2.DefaultRenderersFactory.ExtensionRendererMode
+     */
+    @ReactProp(name= PROP_EXTENSION_RENDER_MODE, defaultInt = EXTENSION_RENDERER_MODE_OFF)
+    public void setExtensionRendererMode(final ReactExoplayerView videoView, final int mode) {
+        videoView.setExtensionRenderMode(mode);
     }
 
     private boolean startsWithValidScheme(String uriString) {
