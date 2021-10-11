@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "5.1.1",
+    "version": "5.2.0-alpha1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -19,7 +19,7 @@
             "email": "baris.sncn@gmail.com"
         },
         {
-            "name": "Hampton Maxwell",
+            "name": "Hampton Maxwell",np
             "email": "me@hamptonmaxwell.com"
         }
     ],
