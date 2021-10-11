@@ -214,9 +214,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)dealloc
 {
+  NSLog(@"RCTVideo dealloc");
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self cleanupRemoteTransportControl];
   [self removePlayerLayer];
+  [self cleanupNowPlaying];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
   [_player removeObserver:self forKeyPath:externalPlaybackActive context: nil];
@@ -414,7 +416,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(MPRemoteCommandHandlerStatus)toggleFromRemote:(MPRemoteCommandEvent *)event {
-    NSLog(@"toggleFromRemote rate:%f", _player.rate);
+    NSLog(@"RCTVideo toggleFromRemote rate:%f", _player.rate);
     
     if (_player.rate == 0.0) {
         [self setPaused:false];
@@ -428,7 +430,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(MPRemoteCommandHandlerStatus)playFromRemote:(MPRemoteCommandEvent *)event {
-    NSLog(@"playFromRemote rate:%f", _player.rate);
+    NSLog(@"RCTVideo playFromRemote rate:%f", _player.rate);
     
     if (_player.rate == 0.0) {
         [self setPaused:false];
@@ -439,7 +441,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(MPRemoteCommandHandlerStatus)pauseFromRemote:(MPRemoteCommandEvent *)event {
-    NSLog(@"pauseFromRemote rate:%f", _player.rate);
+    NSLog(@"RCTVideo pauseFromRemote rate:%f", _player.rate);
     
     if (_player.rate == 1.0) {
         [self setPaused:true];
@@ -450,7 +452,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(MPRemoteCommandHandlerStatus)stopFromRemote:(MPRemoteCommandEvent *)event {
-    NSLog(@"stopFromRemote rate:%f", _player.rate);
+    NSLog(@"RCTVideo stopFromRemote rate:%f", _player.rate);
     
     if (_player.rate == 1.0) {
         [self setPaused:true];
@@ -461,7 +463,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(void)setupRemoteTransportControl {
-    NSLog(@"setupRemoteTransportControl");
+    NSLog(@"RCTVideo setupRemoteTransportControl");
     MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
     [[commandCenter playCommand] addTarget:self action:@selector(playFromRemote:)];
     [[commandCenter pauseCommand] addTarget:self action:@selector(pauseFromRemote:)];
@@ -470,18 +472,23 @@ static int const RCTVideoUnset = -1;
 }
 
 -(void)cleanupRemoteTransportControl {
-    NSLog(@"cleanupRemoteTransportControl");
+    NSLog(@"RCTVideo cleanupRemoteTransportControl");
     MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
-    
-    [[commandCenter playCommand] removeTarget:self action:@selector(playFromRemote:)];
-    [[commandCenter pauseCommand] removeTarget:self action:@selector(pauseFromRemote:)];
-    [[commandCenter togglePlayPauseCommand] removeTarget:self action:@selector(playFromRemote:)];
-    [[commandCenter stopCommand] removeTarget:self action:@selector(stopFromRemote:)];
+    [[commandCenter playCommand] removeTarget:nil];
+    [[commandCenter pauseCommand] removeTarget:nil];
+    [[commandCenter togglePlayPauseCommand] removeTarget:nil];
+    [[commandCenter stopCommand] removeTarget:nil];
 }
 
+-(void)cleanupNowPlaying {
+    NSLog(@"RCTVideo cleanupNowPlaying");
+    MPNowPlayingInfoCenter *playingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
+    NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
+    [playingInfoCenter setNowPlayingInfo:songInfo];
+}
 
 - (void)setupNowPlaying {
-    NSLog(@"setupNowPlaying");
+    NSLog(@"RCTVideo setupNowPlaying");
     MPNowPlayingInfoCenter *playingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
     
     NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
@@ -825,11 +832,11 @@ static int const RCTVideoUnset = -1;
 
         if (!CGRectEqualToRect(oldRect, newRect)) {
           if (CGRectEqualToRect(newRect, [UIScreen mainScreen].bounds)) {
-            NSLog(@"in fullscreen");
+            NSLog(@"RCTVideo in fullscreen");
 
             [self.reactViewController.view setFrame:[UIScreen mainScreen].bounds];
             [self.reactViewController.view setNeedsLayout];
-          } else NSLog(@"not fullscreen");
+          } else NSLog(@"RCTVideo not fullscreen");
         }
 
         return;
@@ -1816,7 +1823,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
 didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
-  NSLog(@"didCancelLoadingRequest");
+  NSLog(@"RCTVideo didCancelLoadingRequest");
 }
 
 - (BOOL)loadingRequestHandling:(AVAssetResourceLoadingRequest *)loadingRequest {
@@ -1884,12 +1891,12 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
                   NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
                     if (error != nil) {
-                      NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                      NSLog(@"RCTVideo Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
                       [self finishLoadingWithError:error];
                       self->_requestingCertificateErrored = YES;
                     } else {
                       if([httpResponse statusCode] != 200){
-                        NSLog(@"Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
+                        NSLog(@"RCTVideo Error getting license from %@, HTTP status code %li", url, (long)[httpResponse statusCode]);
                         NSError *licenseError = [NSError errorWithDomain: @"RCTVideo"
                                                                     code: RCTVideoErrorLicenseRequestNotOk
                                                                 userInfo: @{
