@@ -331,6 +331,7 @@ var styles = StyleSheet.create({
 * [onReadyForDisplay](#onreadyfordisplay)
 * [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
 * [onPlaybackRateChange](#onplaybackratechange)
+* [onUnsupportedTrack](#onunsupportedtrack)
 * [onProgress](#onprogress)
 * [onSeek](#onseek)
 * [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
@@ -1103,6 +1104,22 @@ Example:
 ```
 
 Platforms: all
+
+#### onUnsupportedTrack
+Callback function that is called when a track of type {@code trackType} is not supported by the player.
+
+Property | Type | Description
+--- | --- | ---
+trackType | number | One of the {@link com.google.android.exoplayer2.C}{@code .TRACK_TYPE_*} constants. 2 - video tack, 1 - audio track 
+
+Example:
+```
+{
+  playbackRate: 2, // indicates video tack
+}
+```
+
+Platforms: Android ExoPlayer
 
 
 #### onProgress
