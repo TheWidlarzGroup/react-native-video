@@ -701,7 +701,9 @@ class ReactExoplayerView extends FrameLayout implements
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
                 eventEmitter.audioFocusChanged(false);
-                pausePlayback();
+                //ANDROID FULLSCREEN PLAY/PAUSE PROBLEM FIXED [Ahmet Berk İnçoğlu](https://github.com/ahmetberkinc)
+                //https://github.com/react-native-video/react-native-video/issues/2130
+                // pausePlayback();
                 audioManager.abandonAudioFocus(this);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
