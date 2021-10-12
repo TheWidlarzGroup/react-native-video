@@ -1,6 +1,6 @@
 {
     "name": "react-native-video-inc-ads",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "A <Video /> element for react-native with ads support. This is a project merging a fork and its master",
     "main": "Video.js",
     "license": "MIT",
