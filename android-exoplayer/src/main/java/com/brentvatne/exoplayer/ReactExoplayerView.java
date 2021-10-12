@@ -43,6 +43,7 @@ import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
+import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
@@ -459,94 +460,103 @@ class ReactExoplayerView extends FrameLayout implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (player == null) {
-                    ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-                    trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-                    trackSelector.setParameters(trackSelector.buildUponParameters()
-                            .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
+                try {
+                    if (player == null) {
+                        ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+                        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+                        trackSelector.setParameters(trackSelector.buildUponParameters()
+                                .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
-                    DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-                    RNVLoadControl loadControl = new RNVLoadControl(
-                            allocator,
-                            minBufferMs,
-                            maxBufferMs,
-                            bufferForPlaybackMs,
-                            bufferForPlaybackAfterRebufferMs,
-                            -1,
-                            true,
-                            backBufferDurationMs,
-                            DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
-                    );
-                    DefaultRenderersFactory renderersFactory =
-                            new DefaultRenderersFactory(getContext())
-                                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-                    player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
-                                .setTrackSelector​(trackSelector)
-                                .setBandwidthMeter(bandwidthMeter)
-                                .setLoadControl(loadControl)
-                                .build();
-                    player.addListener(self);
-                    player.addMetadataOutput(self);
-                    exoPlayerView.setPlayer(player);
-                    audioBecomingNoisyReceiver.setListener(self);
-                    bandwidthMeter.addEventListener(new Handler(), self);
-                    setPlayWhenReady(!isPaused);
-                    playerNeedsSource = true;
-
-                    PlaybackParameters params = new PlaybackParameters(rate, 1f);
-                    player.setPlaybackParameters(params);
-                }
-                if (playerNeedsSource && srcUri != null) {
-                    exoPlayerView.invalidateAspectRatio();
-
-                    // DRM
-                    DrmSessionManager drmSessionManager = null;
-                    if (self.drmUUID != null) {
-                        try {
-                            drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                                    self.drmLicenseHeader);
-                        } catch (UnsupportedDrmException e) {
-                            int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                                    : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                                    ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                            eventEmitter.error(getResources().getString(errorStringId), e);
-                            return;
-                        }
-                    }
-                    // End DRM
-
-                    ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
-                    MediaSource mediaSource;
-                    if (mediaSourceList.size() == 0) {
-                        mediaSource = videoSource;
-                    } else {
-                        mediaSourceList.add(0, videoSource);
-                        MediaSource[] textSourceArray = mediaSourceList.toArray(
-                                new MediaSource[mediaSourceList.size()]
+                        DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+                        RNVLoadControl loadControl = new RNVLoadControl(
+                                allocator,
+                                minBufferMs,
+                                maxBufferMs,
+                                bufferForPlaybackMs,
+                                bufferForPlaybackAfterRebufferMs,
+                                -1,
+                                true,
+                                backBufferDurationMs,
+                                DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
                         );
-                        mediaSource = new MergingMediaSource(textSourceArray);
+                        DefaultRenderersFactory renderersFactory =
+                                new DefaultRenderersFactory(getContext())
+                                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                        player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+                                    .setTrackSelector​(trackSelector)
+                                    .setBandwidthMeter(bandwidthMeter)
+                                    .setLoadControl(loadControl)
+                                    .build();
+                        player.addListener(self);
+                        player.addMetadataOutput(self);
+                        exoPlayerView.setPlayer(player);
+                        audioBecomingNoisyReceiver.setListener(self);
+                        bandwidthMeter.addEventListener(new Handler(), self);
+                        setPlayWhenReady(!isPaused);
+                        playerNeedsSource = true;
+
+                        PlaybackParameters params = new PlaybackParameters(rate, 1f);
+                        player.setPlaybackParameters(params);
+                    }
+                    if (playerNeedsSource && srcUri != null) {
+                        exoPlayerView.invalidateAspectRatio();
+
+                        // DRM
+                        DrmSessionManager drmSessionManager = null;
+                        if (self.drmUUID != null) {
+                            try {
+                                drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                                        self.drmLicenseHeader);
+                            } catch (UnsupportedDrmException e) {
+                                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                                eventEmitter.error(getResources().getString(errorStringId), e, "3003");
+                                return;
+                            }
+                        }
+                        // End DRM
+
+                        ArrayList<MediaSource> mediaSourceList = buildTextSources();
+                        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+                        MediaSource mediaSource;
+                        if (mediaSourceList.size() == 0) {
+                            mediaSource = videoSource;
+                        } else {
+                            mediaSourceList.add(0, videoSource);
+                            MediaSource[] textSourceArray = mediaSourceList.toArray(
+                                    new MediaSource[mediaSourceList.size()]
+                            );
+                            mediaSource = new MergingMediaSource(textSourceArray);
+                        }
+
+                        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+                        if (haveResumePosition) {
+                            player.seekTo(resumeWindow, resumePosition);
+                        }
+                        player.prepare(mediaSource, !haveResumePosition, false);
+                        playerNeedsSource = false;
+
+                        reLayout(exoPlayerView);
+                        eventEmitter.loadStart();
+                        loadVideoStarted = true;
                     }
 
-                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-                    if (haveResumePosition) {
-                        player.seekTo(resumeWindow, resumePosition);
-                    }
-                    player.prepare(mediaSource, !haveResumePosition, false);
-                    playerNeedsSource = false;
-
-                    reLayout(exoPlayerView);
-                    eventEmitter.loadStart();
-                    loadVideoStarted = true;
+                    // Initializing the playerControlView
+                    initializePlayerControl();
+                    setControls(controls);
+                    applyModifiers();
+                    startBufferCheckTimer();
+                
+                } catch (Exception ex) {
+                    self.playerNeedsSource = true;
+                    Log.e("ExoPlayer Exception", "Failed to initialize Player!");
+                    Log.e("ExoPlayer Exception", ex.toString());
+                    eventEmitter.error(ex.toString(), ex, "1001");
                 }
-
-                // Initializing the playerControlView
-                initializePlayerControl();
-                setControls(controls);
-                applyModifiers();
-                startBufferCheckTimer();
             }
         }, 1);
+        
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid,
@@ -567,6 +577,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
+        if (uri == null) {
+            throw new IllegalStateException("Invalid video uri");
+        }
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
@@ -1015,6 +1028,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = "ExoPlaybackException type : " + e.type;
+        String errorCode = "2001"; // Playback error code 2xxx (2001 - unknown playback exception)
         Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
@@ -1024,24 +1038,45 @@ class ReactExoplayerView extends FrameLayout implements
                         (MediaCodecRenderer.DecoderInitializationException) cause;
                 if (decoderInitializationException.codecInfo.name == null) {
                     if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
+                        errorCode = "2011"; 
                         errorString = getResources().getString(R.string.error_querying_decoders);
                     } else if (decoderInitializationException.secureDecoderRequired) {
+                        errorCode = "2012";
                         errorString = getResources().getString(R.string.error_no_secure_decoder,
                                 decoderInitializationException.mimeType);
                     } else {
+                        errorCode = "2013";
                         errorString = getResources().getString(R.string.error_no_decoder,
                                 decoderInitializationException.mimeType);
                     }
                 } else {
+                    errorCode = "2014";
                     errorString = getResources().getString(R.string.error_instantiating_decoder,
                             decoderInitializationException.codecInfo.name);
                 }
             }
         }
         else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
-            errorString = getResources().getString(R.string.unrecognized_media_format);
+            Exception cause = e.getSourceException();
+            if (cause instanceof DefaultDrmSessionManager.MissingSchemeDataException) {
+                errorCode = "3004";
+                errorString = getResources().getString(R.string.unrecognized_media_format);
+            } else if(cause instanceof MediaDrmCallbackException) {
+                errorCode = "3005";
+                errorString = getResources().getString(R.string.unrecognized_media_format);
+            } else {
+                errorCode = "2021";
+                errorString = getResources().getString(R.string.unrecognized_media_format);
+            }
+            if (cause != null) {
+                Throwable rootCause = cause.getCause();
+                if (rootCause instanceof MediaDrmCallbackException) {
+                    errorCode = "3005";
+                    errorString = getResources().getString(R.string.unrecognized_media_format);
+                }
+            }
         }
-        eventEmitter.error(errorString, ex);
+        eventEmitter.error(errorString, ex, errorCode);
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
@@ -1491,7 +1526,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
         Log.d("DRM Info", "onDrmSessionManagerError");
-        eventEmitter.error("onDrmSessionManagerError", e);
+        eventEmitter.error("onDrmSessionManagerError", e, "3002");
     }
 
     @Override
