@@ -31,6 +31,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -134,6 +135,7 @@ class ReactExoplayerView extends FrameLayout implements
     private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
     private long seekTime = C.TIME_UNSET;
+    private boolean hasDrmFailed = false;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -572,8 +574,13 @@ class ReactExoplayerView extends FrameLayout implements
                         keyRequestPropertiesArray[i + 1]);
             }
         }
+        FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
+        if (hasDrmFailed) {
+            // When DRM fails using L1 we want to switch to L3
+            mediaDrm.setPropertyString("securityLevel", "L3");
+        }
         return new DefaultDrmSessionManager(uuid,
-                FrameworkMediaDrm.newInstance(uuid), drmCallback, null, false, 3);
+                mediaDrm, drmCallback, null, false, 3);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
@@ -1029,6 +1036,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void onPlayerError(ExoPlaybackException e) {
         String errorString = "ExoPlaybackException type : " + e.type;
         String errorCode = "2001"; // Playback error code 2xxx (2001 - unknown playback exception)
+        boolean needsReInitialization = false;
         Exception ex = e;
         if (e.type == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = e.getRendererException();
@@ -1057,6 +1065,9 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+            // Re-initialization improves recovery speed and properly resumes
+            needsReInitialization = true;
+            errorString = getResources().getString(R.string.unrecognized_media_format);
             Exception cause = e.getSourceException();
             if (cause instanceof DefaultDrmSessionManager.MissingSchemeDataException) {
                 errorCode = "3004";
@@ -1073,6 +1084,14 @@ class ReactExoplayerView extends FrameLayout implements
                 if (rootCause instanceof MediaDrmCallbackException) {
                     errorCode = "3005";
                     errorString = getResources().getString(R.string.unrecognized_media_format);
+                    if (!hasDrmFailed) {
+                        // When DRM fails to reach the app level certificate server it will fail with a source error so we assume that it is DRM related and try one more time
+                        hasDrmFailed = true;
+                        playerNeedsSource = true;
+                        updateResumePosition();
+                        initializePlayer();
+                        return;
+                    }
                 }
             }
         }
@@ -1083,6 +1102,9 @@ class ReactExoplayerView extends FrameLayout implements
             initializePlayer();
         } else {
             updateResumePosition();
+            if (needsReInitialization) {
+                initializePlayer();
+            }
         }
     }
 
