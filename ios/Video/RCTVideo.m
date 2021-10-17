@@ -223,6 +223,10 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - App lifecycle handlers
 
+- (BOOL)canBecomeFirstResponder {
+  return YES;
+}
+
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
   if (_playInBackground || _playWhenInactive || _paused) return;
@@ -233,6 +237,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
+  [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+  
   if (_playInBackground) {
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
@@ -242,6 +248,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
+  [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+
   [self applyModifiers];
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
