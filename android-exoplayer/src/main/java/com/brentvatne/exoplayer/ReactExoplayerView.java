@@ -37,7 +37,7 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
-import com.google.android.exoplayer2.drm.DefaultDrmSessionEventListener;
+import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
@@ -62,7 +62,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -88,7 +88,7 @@ class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
         MetadataOutput,
-        DefaultDrmSessionEventListener {
+        DrmSessionEventListener {
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -122,6 +122,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
+    private boolean hasAudioFocus = false;
     private float rate = 1f;
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
@@ -391,7 +392,7 @@ class ReactExoplayerView extends FrameLayout implements
             @Override
             public void run() {
                 if (player == null) {
-                    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+                    ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                     trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
                     trackSelector.setParameters(trackSelector.buildUponParameters()
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
@@ -406,23 +407,11 @@ class ReactExoplayerView extends FrameLayout implements
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
                                     .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-                    // DRM
-                    DrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
-                    if (self.drmUUID != null) {
-                        try {
-                            drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                                    self.drmLicenseHeader);
-                        } catch (UnsupportedDrmException e) {
-                            int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                                    : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                                    ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                            eventEmitter.error(getResources().getString(errorStringId), e);
-                            return;
-                        }
-                    }
-                    // End DRM
-                    player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory,
-                            trackSelector, defaultLoadControl, drmSessionManager, bandwidthMeter);
+                    player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+                                .setTrackSelector​(trackSelector)
+                                .setBandwidthMeter(bandwidthMeter)
+                                .setLoadControl(defaultLoadControl)
+                                .build();
                     player.addListener(self);
                     player.addMetadataOutput(self);
                     exoPlayerView.setPlayer(player);
@@ -437,8 +426,24 @@ class ReactExoplayerView extends FrameLayout implements
                 if (playerNeedsSource && srcUri != null) {
                     exoPlayerView.invalidateAspectRatio();
 
+                    // DRM
+                    DrmSessionManager drmSessionManager = null;
+                    if (self.drmUUID != null) {
+                        try {
+                            drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                                    self.drmLicenseHeader);
+                        } catch (UnsupportedDrmException e) {
+                            int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                                    : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                                    ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                            eventEmitter.error(getResources().getString(errorStringId), e);
+                            return;
+                        }
+                    }
+                    // End DRM
+
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(srcUri, extension);
+                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
                         mediaSource = videoSource;
@@ -457,6 +462,7 @@ class ReactExoplayerView extends FrameLayout implements
                     player.prepare(mediaSource, !haveResumePosition, false);
                     playerNeedsSource = false;
 
+                    reLayout(exoPlayerView);
                     eventEmitter.loadStart();
                     loadVideoStarted = true;
                 }
@@ -469,7 +475,7 @@ class ReactExoplayerView extends FrameLayout implements
         }, 1);
     }
 
-    private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManager(UUID uuid,
+    private DrmSessionManager buildDrmSessionManager(UUID uuid,
                                                                            String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
         if (Util.SDK_INT < 18) {
             return null;
@@ -482,11 +488,11 @@ class ReactExoplayerView extends FrameLayout implements
                         keyRequestPropertiesArray[i + 1]);
             }
         }
-        return new DefaultDrmSessionManager<>(uuid,
+        return new DefaultDrmSessionManager(uuid,
                 FrameworkMediaDrm.newInstance(uuid), drmCallback, null, false, 3);
     }
 
-    private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         switch (type) {
@@ -494,26 +500,30 @@ class ReactExoplayerView extends FrameLayout implements
                 return new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setLoadErrorHandlingPolicy(
+                ).setDrmSessionManager(drmSessionManager)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(uri);
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setLoadErrorHandlingPolicy(
+                ).setDrmSessionManager(drmSessionManager)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(uri);
             case C.TYPE_HLS:
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setLoadErrorHandlingPolicy(
+                ).setDrmSessionManager(drmSessionManager)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(uri);
             case C.TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setLoadErrorHandlingPolicy(
+                ).setDrmSessionManager(drmSessionManager)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(uri);
             default: {
@@ -564,7 +574,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private boolean requestAudioFocus() {
-        if (disableFocus || srcUri == null) {
+        if (disableFocus || srcUri == null || this.hasAudioFocus) {
             return true;
         }
         int result = audioManager.requestAudioFocus(this,
@@ -579,8 +589,8 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         if (playWhenReady) {
-            boolean hasAudioFocus = requestAudioFocus();
-            if (hasAudioFocus) {
+            this.hasAudioFocus = requestAudioFocus();
+            if (this.hasAudioFocus) {
                 player.setPlayWhenReady(true);
             }
         } else {
@@ -675,6 +685,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
+                this.hasAudioFocus = false;
                 eventEmitter.audioFocusChanged(false);
                 pausePlayback();
                 audioManager.abandonAudioFocus(this);
@@ -683,6 +694,7 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.audioFocusChanged(false);
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:
+                this.hasAudioFocus = true;
                 eventEmitter.audioFocusChanged(true);
                 break;
             default:
@@ -998,7 +1010,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
-            boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
             this.srcUri = uri;
@@ -1008,9 +1019,20 @@ class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
 
-            if (!isOriginalSourceNull && !isSourceEqual) {
+            if (!isSourceEqual) {
                 reloadSource();
             }
+        }
+    }
+
+    public void clearSrc() {
+        if (srcUri != null) {
+            player.stop(true);
+            this.srcUri = null;
+            this.extension = null;
+            this.requestHeaders = null;
+            this.mediaDataSourceFactory = null;
+            clearResumePosition();
         }
     }
 
@@ -1024,14 +1046,13 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setRawSrc(final Uri uri, final String extension) {
         if (uri != null) {
-            boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = uri.equals(srcUri);
 
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = buildDataSourceFactory(true);
 
-            if (!isOriginalSourceNull && !isSourceEqual) {
+            if (!isSourceEqual) {
                 reloadSource();
             }
         }
@@ -1333,23 +1354,23 @@ class ReactExoplayerView extends FrameLayout implements
 
 
     @Override
-    public void onDrmKeysLoaded() {
+    public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
         Log.d("DRM Info", "onDrmKeysLoaded");
     }
 
     @Override
-    public void onDrmSessionManagerError(Exception e) {
+    public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
         Log.d("DRM Info", "onDrmSessionManagerError");
         eventEmitter.error("onDrmSessionManagerError", e);
     }
 
     @Override
-    public void onDrmKeysRestored() {
+    public void onDrmKeysRestored(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
         Log.d("DRM Info", "onDrmKeysRestored");
     }
 
     @Override
-    public void onDrmKeysRemoved() {
+    public void onDrmKeysRemoved(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
         Log.d("DRM Info", "onDrmKeysRemoved");
     }
 

@@ -1,5 +1,7 @@
 ## Changelog
 
+- Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
