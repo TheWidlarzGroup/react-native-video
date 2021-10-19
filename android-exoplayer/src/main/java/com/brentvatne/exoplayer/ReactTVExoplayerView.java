@@ -853,7 +853,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void updateResumePosition() {
-        if (player.isCurrentWindowSeekable()) {
+        if (player != null && player.isCurrentWindowSeekable()) {
             resumeWindow = player.getCurrentWindowIndex();
             resumePosition = Math.max(0, player.getCurrentPosition());
         }
