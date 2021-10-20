@@ -1,6 +1,6 @@
 ## Changelog
 
-### Version 5.2.0-alpha1
+### Version 5.2.0
 
 - Fix for tvOS native audio menu language selector
 - Update ExoPlayer to allow pre-init and content clear [#2412] (https://github.com/react-native-video/react-native-video/pull/2412)
