@@ -39,6 +39,15 @@ public class DolbyRendersFactory extends DefaultRenderersFactory {
             ArrayList<Renderer> out) {
         super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector,
                 enableDecoderFallback, audioSink, eventHandler, eventListener, out);
+
+        if (extensionRendererMode == EXTENSION_RENDERER_MODE_OFF) {
+            return;
+        }
+        int extensionRendererIndex = out.size();
+        if (extensionRendererMode == EXTENSION_RENDERER_MODE_PREFER) {
+            extensionRendererIndex--;
+        }
+
         try {
             // Full class names used for constructor args so the LINT rule triggers if any of them move.
             // LINT.IfChange
@@ -51,7 +60,7 @@ public class DolbyRendersFactory extends DefaultRenderersFactory {
             // LINT.ThenChange(../../../../../../../proguard-rules.txt)
             Renderer renderer =
                     (Renderer) constructor.newInstance(eventHandler, eventListener, audioSink);
-            out.add(renderer);
+            out.add(extensionRendererIndex, renderer);
             Log.i(TAG, "Loaded LibDaaAudioRenderer.");
         } catch (ClassNotFoundException e) {
             Log.e(TAG, "Unable to load LibDaaAudioRenderer.", e);
