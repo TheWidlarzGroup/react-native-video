@@ -377,8 +377,6 @@ static int const RCTVideoUnset = -1;
         [_plugin removeAdapter];
         [_plugin fireStop];
         [self initAnalytics];
-    } else {
-        [self initAnalytics];
     }
 }
 
