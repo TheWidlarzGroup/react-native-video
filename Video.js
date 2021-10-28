@@ -418,6 +418,7 @@ Video.propTypes = {
     certificateUrl: PropTypes.string,
     getLicense: PropTypes.func,
   }),
+  localSourceEncryptionKeyScheme: PropTypes.string,
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,
   resizeMode: PropTypes.string,

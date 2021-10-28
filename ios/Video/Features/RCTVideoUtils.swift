@@ -1,4 +1,5 @@
 import AVFoundation
+import Promises
 
 /*!
  * Collection of pure functions
@@ -139,5 +140,111 @@ enum RCTVideoUtils {
     // UNUSED
     static func getCurrentTime(playerItem:AVPlayerItem?) -> Float {
         return Float(CMTimeGetSeconds(playerItem?.currentTime() ?? .zero))
+    }
+    
+    static func base64DataFromBase64String(base64String:String?) -> Data? {
+        if let base64String = base64String {
+            return Data(base64Encoded:base64String)
+        }
+        return nil
+    }
+
+    static func replaceURLScheme(url: URL, scheme: String?) -> URL? {
+        var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        urlComponents?.scheme = scheme
+
+        return urlComponents?.url
+    }
+
+    static func extractDataFromCustomSchemeUrl(from url: URL, scheme: String) -> Data? {
+        guard url.scheme == scheme,
+              let adoptURL = RCTVideoUtils.replaceURLScheme(url:url, scheme: nil) else { return nil }
+
+        return Data(base64Encoded: adoptURL.absoluteString)
+    }
+    
+    static func generateMixComposition(_ asset:AVAsset) -> AVMutableComposition {
+        let mixComposition:AVMutableComposition = AVMutableComposition()
+        
+        let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
+        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
+        do {
+            try videoCompTrack.insertTimeRange(
+                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                of: videoAsset,
+                at: .zero)
+        } catch {
+        }
+        
+        let audioAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
+        let audioCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID:kCMPersistentTrackID_Invalid)
+        do {
+            try audioCompTrack.insertTimeRange(
+                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                of: audioAsset,
+                at: .zero)
+        } catch {
+        }
+        
+        return mixComposition
+    }
+    
+    static func getValidTextTracks(asset:AVAsset, assetOptions:NSDictionary?, mixComposition:AVMutableComposition, textTracks:[TextTrack]?) -> [TextTrack] {
+        let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
+        var validTextTracks:[TextTrack] = []
+        if let textTracks = textTracks, textTracks.count > 0 {
+            for i in 0..<textTracks.count {
+                var textURLAsset:AVURLAsset!
+                let textUri:String = textTracks[i].uri
+                if textUri.lowercased().hasPrefix("http") {
+                    textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options:(assetOptions as! [String : Any]))
+                } else {
+                    textURLAsset = AVURLAsset(url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?) as URL, options:nil)
+                }
+                let textTrackAsset:AVAssetTrack! = textURLAsset.tracks(withMediaType: AVMediaType.text).first
+                if (textTrackAsset == nil) {continue} // fix when there's no textTrackAsset
+                validTextTracks.append(textTracks[i])
+                let textCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
+                                                                                              preferredTrackID:kCMPersistentTrackID_Invalid)
+                do {
+                    try textCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                        of: textTrackAsset,
+                        at: .zero)
+                } catch {
+                }
+            }
+        }
+        return validTextTracks
+    }
+
+    static func delay(seconds: Int = 0) -> Promise<Void> {
+        return Promise<Void>(on: .global()) { fulfill, reject in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(seconds)) / Double(NSEC_PER_SEC), execute: {
+                fulfill(())
+            })
+        }
+    }
+    
+    static func prepareAsset(source:VideoSource) -> (asset:AVURLAsset?, assetOptions:NSMutableDictionary?)? {
+        guard source.uri != nil && source.uri != "" else { return nil }
+        var asset:AVURLAsset!
+        let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
+        let url = source.isNetwork || source.isAsset
+        ? URL(string: source.uri ?? "")
+        : URL(fileURLWithPath: bundlePath)
+        let assetOptions:NSMutableDictionary! = NSMutableDictionary()
+        
+        if source.isNetwork {
+            if let headers = source.requestHeaders, headers.count > 0 {
+                assetOptions.setObject(headers, forKey:"AVURLAssetHTTPHeaderFieldsKey" as NSCopying)
+            }
+            let cookies:[AnyObject]! = HTTPCookieStorage.shared.cookies
+            assetOptions.setObject(cookies, forKey:AVURLAssetHTTPCookiesKey as NSCopying)
+            asset = AVURLAsset(url: url!, options:assetOptions as! [String : Any])
+        } else {
+            asset = AVURLAsset(url: url!)
+        }
+        return (asset, assetOptions)
     }
 }

@@ -317,6 +317,7 @@ var styles = StyleSheet.create({
 * [trackId](#trackId)
 * [useTextureView](#usetextureview)
 * [volume](#volume)
+* [localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)
 
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
@@ -914,6 +915,18 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
+#### localSourceEncryptionKeyScheme
+Set the url scheme for stream encryption key for local assets
+
+Type: String
+
+Example:
+```
+localSourceEncryptionKeyScheme="my-offline-key"
+```
+
+Platforms: iOS
 
 
 ### Event props

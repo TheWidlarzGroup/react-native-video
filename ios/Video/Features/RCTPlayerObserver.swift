@@ -28,39 +28,43 @@ class RCTPlayerObserver: NSObject {
     var _handlers: RCTPlayerObserverHandler!
     
     var player:AVPlayer? {
+        willSet {
+            removePlayerObservers()
+            removePlayerTimeObserver()
+        }
         didSet {
-            if player == nil {
-                removePlayerObservers()
-                removePlayerTimeObserver()
-            } else {
+            if player != nil {
                 addPlayerObservers()
                 addPlayerTimeObserver()
             }
         }
     }
     var playerItem:AVPlayerItem? {
+        willSet {
+            removePlayerItemObservers()
+        }
         didSet {
-            if playerItem == nil {
-                removePlayerItemObservers()
-            } else {
+            if playerItem != nil {
                 addPlayerItemObservers()
             }
         }
     }
     var playerViewController:AVPlayerViewController? {
+        willSet {
+            removePlayerViewControllerObservers()
+        }
         didSet {
-            if playerViewController == nil {
-                removePlayerViewControllerObservers()
-            } else {
+            if playerViewController != nil {
                 addPlayerViewControllerObservers()
             }
         }
     }
     var playerLayer:AVPlayerLayer? {
+        willSet {
+            removePlayerLayerObserver()
+        }
         didSet {
             if playerLayer == nil {
-                removePlayerLayerObserver()
-            } else {
                 addPlayerLayerObserver()
             }
         }
@@ -148,8 +152,8 @@ class RCTPlayerObserver: NSObject {
     
     /* Cancels the previously registered time observer. */
     func removePlayerTimeObserver() {
-        if let timeObserver = _timeObserver {
-            player?.removeTimeObserver(timeObserver)
+        if _timeObserver != nil {
+            player?.removeTimeObserver(_timeObserver)
             _timeObserver = nil
         }
     }

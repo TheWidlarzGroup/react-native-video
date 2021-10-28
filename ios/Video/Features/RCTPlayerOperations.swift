@@ -1,5 +1,6 @@
 import AVFoundation
 import MediaAccessibility
+import Promises
 
 let RCTVideoUnset = -1
 
@@ -156,5 +157,24 @@ enum RCTPlayerOperations {
             player?.currentItem?.select(mediaOption, in:group)
         }
         
+    }
+
+    static func seek(player: AVPlayer, playerItem:AVPlayerItem, paused:Bool, seekTime:Float, seekTolerance:Float) -> Promise<Bool> {
+        let timeScale:Int = 1000
+        let cmSeekTime:CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
+        let current:CMTime = playerItem.currentTime()
+        let tolerance:CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
+        
+        return Promise<Bool>(on: .global()) { fulfill, reject in
+            guard CMTimeCompare(current, cmSeekTime) != 0 else {
+                reject(NSError())
+                return
+            }
+            if !paused { player.pause() }
+
+            player.seek(to: cmSeekTime, toleranceBefore:tolerance, toleranceAfter:tolerance, completionHandler:{ (finished:Bool) in
+                fulfill(finished)
+            })
+        }
     }
 }

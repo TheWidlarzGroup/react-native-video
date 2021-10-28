@@ -1,5 +1,6 @@
 enum RCTVideoError : Int {
     case fromJSPart
+    case noLicenseServerURL
     case licenseRequestNotOk
     case noDataFromLicenseRequest
     case noSPC
@@ -8,11 +9,12 @@ enum RCTVideoError : Int {
     case noCertificateURL
     case noFairplayDRM
     case noDRMData
+    case invalidContentId
 }
 
 enum RCTVideoErrorHandler {
     
-    static let noDRMData: NSError = NSError(
+    static let noDRMData = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.noDRMData.rawValue,
         userInfo: [
@@ -21,7 +23,7 @@ enum RCTVideoErrorHandler {
             NSLocalizedRecoverySuggestionErrorKey: "Have you specified the 'drm' prop?"
         ])
     
-    static let noCertificateURL: NSError = NSError(
+    static let noCertificateURL = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.noCertificateURL.rawValue,
         userInfo: [
@@ -30,7 +32,7 @@ enum RCTVideoErrorHandler {
             NSLocalizedRecoverySuggestionErrorKey: "Did you specified the prop certificateUrl?"
         ])
     
-    static let noCertificateData: NSError = NSError(
+    static let noCertificateData = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.noCertificateData.rawValue,
         userInfo: [
@@ -39,7 +41,7 @@ enum RCTVideoErrorHandler {
             NSLocalizedRecoverySuggestionErrorKey: "Have you specified a valid 'certificateUrl'?"
         ])
     
-    static let noSPC:NSError! = NSError(
+    static let noSPC = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.noSPC.rawValue,
         userInfo: [
@@ -48,13 +50,22 @@ enum RCTVideoErrorHandler {
             NSLocalizedRecoverySuggestionErrorKey: "Check your DRM config."
         ])
     
-    static let noDataFromLicenseRequest:NSError! = NSError(
+    static let noLicenseServerURL = NSError(
+        domain: "RCTVideo",
+        code: RCTVideoError.noLicenseServerURL.rawValue,
+        userInfo: [
+            NSLocalizedDescriptionKey: "Error obtaining DRM License.",
+            NSLocalizedFailureReasonErrorKey: "No license server URL has been found.",
+            NSLocalizedRecoverySuggestionErrorKey: "Did you specified the prop licenseServer?"
+        ])
+    
+    static let noDataFromLicenseRequest = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.noDataFromLicenseRequest.rawValue,
         userInfo: [
             NSLocalizedDescriptionKey: "Error obtaining DRM license.",
             NSLocalizedFailureReasonErrorKey: "No data received from the license server.",
-            NSLocalizedRecoverySuggestionErrorKey: "Is the licenseServer ok?."
+            NSLocalizedRecoverySuggestionErrorKey: "Is the licenseServer ok?"
         ])
     
     static func licenseRequestNotOk(_ statusCode: Int) -> NSError {
@@ -80,4 +91,13 @@ enum RCTVideoErrorHandler {
                 NSLocalizedRecoverySuggestionErrorKey: error
             ])
     }
+    
+    static let invalidContentId = NSError(
+        domain: "RCTVideo",
+        code: RCTVideoError.invalidContentId.rawValue,
+        userInfo: [
+            NSLocalizedDescriptionKey: "Error obtaining DRM license.",
+            NSLocalizedFailureReasonErrorKey: "No valide content Id received",
+            NSLocalizedRecoverySuggestionErrorKey: "Is the contentId and url ok?"
+        ])
 }
