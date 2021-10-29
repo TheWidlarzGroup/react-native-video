@@ -103,7 +103,8 @@ ConstantProviderDelegate ReactVideoViewManager::ExportedCustomDirectEventTypeCon
     WriteCustomDirectEventTypeConstant(constantWriter, "Load");
     WriteCustomDirectEventTypeConstant(constantWriter, "End");
     WriteCustomDirectEventTypeConstant(constantWriter, "Seek");
-    WriteCustomDirectEventTypeConstant(constantWriter, "Progress");
+    WriteCustomDirectEventTypeConstant(constantWriter, "VideoProgress");
+    WriteCustomDirectEventTypeConstant(constantWriter, "PlaybackRateChange");
   };
 }
 

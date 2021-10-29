@@ -39,6 +39,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   Windows::Media::Playback::MediaPlaybackSession::BufferingStarted_revoker m_bufferingStartedToken{};
   Windows::Media::Playback::MediaPlaybackSession::BufferingEnded_revoker m_bufferingEndedToken{};
   Windows::Media::Playback::MediaPlaybackSession::SeekCompleted_revoker m_seekCompletedToken{};
+  Windows::Media::Playback::MediaPlaybackSession::PlaybackStateChanged_revoker m_playbackStateChangedToken{};
 
   bool IsPlaying(Windows::Media::Playback::MediaPlaybackState currentState);
   void OnMediaOpened(IInspectable const &sender, IInspectable const &args);
@@ -47,6 +48,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   void OnBufferingStarted(IInspectable const &sender, IInspectable const &);
   void OnBufferingEnded(IInspectable const &sender, IInspectable const &);
   void OnSeekCompleted(IInspectable const &sender, IInspectable const &);
+  void OnPlaybackStateChanged(IInspectable const& sender, IInspectable const&);
 
   void runOnQueue(std::function<void()> &&func);
 };

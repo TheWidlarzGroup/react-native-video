@@ -62,6 +62,13 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
         }
     });
 
+    m_playbackStateChangedToken =
+        m_player.PlaybackSession().PlaybackStateChanged(winrt::auto_revoke, [ref = get_weak()](auto const& sender, auto const& args) {
+        if (auto self = ref.get()) {
+            self->OnPlaybackStateChanged(sender, args);
+        }
+    });
+
     m_timer = Windows::UI::Xaml::DispatcherTimer();
     m_timer.Interval(std::chrono::milliseconds{ 250 });
     m_timer.Start();
@@ -73,7 +80,7 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
                     auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
                     self->m_reactContext.DispatchEvent(
                         *self,
-                        L"topProgress",
+                        L"topVideoProgress",
                         [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
                         eventDataWriter.WriteObjectBegin();
                         {
@@ -148,6 +155,14 @@ void ReactVideoView::OnSeekCompleted(IInspectable const&, IInspectable const&) {
     runOnQueue([weak_this{ get_weak() }]() {
         if (auto strong_this{ weak_this.get() }) {
             strong_this->m_reactContext.DispatchEvent(*strong_this, L"topSeek", nullptr);
+        }
+    });
+}
+
+void ReactVideoView::OnPlaybackStateChanged(IInspectable const&, IInspectable const&) {
+    runOnQueue([weak_this{ get_weak() }]() {
+        if (auto strong_this{ weak_this.get() }) {
+            strong_this->m_reactContext.DispatchEvent(*strong_this, L"topPlaybackRateChange", nullptr);
         }
     });
 }
