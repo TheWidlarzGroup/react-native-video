@@ -100,7 +100,7 @@ ConstantProviderDelegate ReactVideoViewManager::ExportedCustomBubblingEventTypeC
 
 ConstantProviderDelegate ReactVideoViewManager::ExportedCustomDirectEventTypeConstants() noexcept {
   return [](winrt::Microsoft::ReactNative::IJSValueWriter const &constantWriter) {
-    WriteCustomDirectEventTypeConstant(constantWriter, "Load");
+    WriteCustomDirectEventTypeConstant(constantWriter, "VideoLoad");
     WriteCustomDirectEventTypeConstant(constantWriter, "End");
     WriteCustomDirectEventTypeConstant(constantWriter, "Seek");
     WriteCustomDirectEventTypeConstant(constantWriter, "VideoProgress");

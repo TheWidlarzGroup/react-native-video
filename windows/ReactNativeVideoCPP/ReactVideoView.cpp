@@ -107,7 +107,7 @@ void ReactVideoView::OnMediaOpened(IInspectable const&, IInspectable const&) {
 
                 strong_this->m_reactContext.DispatchEvent(
                     *strong_this,
-                    L"topLoad",
+                    L"topVideoLoad",
                     [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
                     eventDataWriter.WriteObjectBegin();
                     {
