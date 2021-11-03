@@ -413,7 +413,7 @@ class ReactExoplayerView extends FrameLayout implements
                     prioritizeTimeOverSizeThresholds,
                     backBufferDurationMs,
                     retainBackBufferFromKeyframe);
-            if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.N) {
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
                 ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
                 availableHeapInBytes = activityManager.getMemoryClass() / 2 * 1024 * 1024;
             }
