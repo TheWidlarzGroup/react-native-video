@@ -29,6 +29,9 @@ project.xcworkspace
 .gradle
 local.properties
 *.hprof
+.project
+.settings
+.classpath
 
 # node.js
 #
