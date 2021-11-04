@@ -368,13 +368,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setIgnoreSilentSwitch(_ ignoreSilentSwitch:String?) {
         _ignoreSilentSwitch = ignoreSilentSwitch
-        self.applyModifiers()
+        RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
+        applyModifiers()
     }
     
     @objc
     func setMixWithOthers(_ mixWithOthers:String?) {
         _mixWithOthers = mixWithOthers
-        self.applyModifiers()
+        applyModifiers()
     }
     
     @objc
@@ -383,38 +384,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.pause()
             _player?.rate = 0.0
         } else {
-            let session:AVAudioSession! = AVAudioSession.sharedInstance()
-            var category:AVAudioSession.Category? = nil
-            var options:AVAudioSession.CategoryOptions? = nil
-            
-            if (_ignoreSilentSwitch == "ignore") {
-                category = AVAudioSession.Category.playback
-            } else if (_ignoreSilentSwitch == "obey") {
-                category = AVAudioSession.Category.ambient
-            }
-            
-            if (_mixWithOthers == "mix") {
-                options = .mixWithOthers
-            } else if (_mixWithOthers == "duck") {
-                options = .duckOthers
-            }
-            
-            if let category = category, let options = options {
-                do {
-                    try session.setCategory(category, options: options)
-                } catch {
-                }
-            } else if let category = category, options == nil {
-                do {
-                    try session.setCategory(category)
-                } catch {
-                }
-            } else if category == nil, let options = options {
-                do {
-                    try session.setCategory(session.category, options: options)
-                } catch {
-                }
-            }
+            RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
             
             if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
                 _player?.playImmediately(atRate: _rate)
