@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 5.3.0-alpha1
+
+- Convert iOS implementation to Swift
+- Add iOS support for decoding offline sources
+
 ### Version 5.2.0
 
 - Fix for tvOS native audio menu language selector
