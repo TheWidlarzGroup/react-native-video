@@ -1071,9 +1071,9 @@ static int const RCTVideoUnset = -1;
 
 - (void)configureAudio
 {
-	if(_selectedAudioTrack == nil || [_selectedAudioTrack[@"type"] isEqualToString:@"disabled"]) {
-		return;
-	}
+    if(_selectedAudioTrack != nil && [_selectedAudioTrack[@"type"] isEqualToString:@"disabled"]) {
+        return;
+    }
     AVAudioSession *session = [AVAudioSession sharedInstance];
     AVAudioSessionCategory category = nil;
     AVAudioSessionCategoryOptions options = nil;
