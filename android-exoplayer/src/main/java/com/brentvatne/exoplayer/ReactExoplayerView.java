@@ -479,24 +479,22 @@ class ReactExoplayerView extends FrameLayout implements
         if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
-        if (analyticsMeta.hasKey("offline")){
-            youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
-        }
         if (analyticsMeta.hasKey("contentDuration")){
             youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
         }
         if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
-        youboraOptions.setAutoDetectBackground(true);
+        if (analyticsMeta.hasKey("offline")){
+            youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
 
-        youboraPlugin = new Plugin(youboraOptions, getContext());
-
-        if(analyticsMeta.hasKey("offline")) {
             if (analyticsMeta.getBoolean("offline")) {
                 youboraPlugin.fireOfflineEvents();
             }
         }
+        youboraOptions.setAutoDetectBackground(true);
+
+        youboraPlugin = new Plugin(youboraOptions, getContext());
 
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity == null) return;
