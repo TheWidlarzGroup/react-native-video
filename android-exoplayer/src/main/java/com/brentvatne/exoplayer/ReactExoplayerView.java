@@ -416,84 +416,86 @@ class ReactExoplayerView extends FrameLayout implements
         contentId = analyticsMeta.getString("contentId");
 
         Options youboraOptions = new Options();
-        if (!analyticsMeta.isNull("accountCode")){
+        if (analyticsMeta.hasKey("accountCode")){
             youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
         }
-        if (!analyticsMeta.isNull("enabled")){
+        if (analyticsMeta.hasKey("enabled")){
             youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
         }
-        if (!analyticsMeta.isNull("username")){
+        if (analyticsMeta.hasKey("username")){
             youboraOptions.setUsername(analyticsMeta.getString("username"));
         }
-        if (!analyticsMeta.isNull("contentTransactionCode")){
+        if (analyticsMeta.hasKey("contentTransactionCode")){
             youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
         }
 
 
-        if (!analyticsMeta.isNull("contentCustomDimension6")){
+        if (analyticsMeta.hasKey("contentCustomDimension6")){
             youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
         }
-        if (!analyticsMeta.isNull("contentCustomDimension7")){
+        if (analyticsMeta.hasKey("contentCustomDimension7")){
             youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
         }
 
-        if (!analyticsMeta.isNull("contentIsLive")){
+        if (analyticsMeta.hasKey("contentIsLive")){
             youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
         }
-        if (!analyticsMeta.isNull("contentType")){
+        if (analyticsMeta.hasKey("contentType")){
             youboraOptions.setContentType(analyticsMeta.getString("contentType"));
         }
-        if (!analyticsMeta.isNull("contentTitle")){
+        if (analyticsMeta.hasKey("contentTitle")){
             youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
         }
-        if (!analyticsMeta.isNull("program")){
+        if (analyticsMeta.hasKey("program")){
             youboraOptions.setProgram(analyticsMeta.getString("program"));
         }
-        if (!analyticsMeta.isNull("contentResource")){
+        if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
-        if (!analyticsMeta.isNull("contentSeason")){
+        if (analyticsMeta.hasKey("contentSeason")){
             youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
         }
-        if (!analyticsMeta.isNull("contentEpisodeTitle")){
+        if (analyticsMeta.hasKey("contentEpisodeTitle")){
             youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
         }
-        if (!analyticsMeta.isNull("contentChannel")){
+        if (analyticsMeta.hasKey("contentChannel")){
             youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
         }
-        if (!analyticsMeta.isNull("contentId")){
+        if (analyticsMeta.hasKey("contentId")){
             youboraOptions.setContentId(analyticsMeta.getString("contentId"));
         }
-        if (!analyticsMeta.isNull("contentGenre")){
+        if (analyticsMeta.hasKey("contentGenre")){
             youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
         }
-        if (!analyticsMeta.isNull("contentDuration")){
+        if (analyticsMeta.hasKey("contentDuration")){
             youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
         }
-        if (!analyticsMeta.isNull("appName")){
+        if (analyticsMeta.hasKey("appName")){
             youboraOptions.setAppName(analyticsMeta.getString("appName"));
         }
-        if (!analyticsMeta.isNull("appReleaseVersion")){
+        if (analyticsMeta.hasKey("appReleaseVersion")){
             youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
         }
-        if (!analyticsMeta.isNull("contentResource")){
+        if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
-        if (!analyticsMeta.isNull("offline")){
+        if (analyticsMeta.hasKey("offline")){
             youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
         }
-        if (!analyticsMeta.isNull("contentDuration")){
+        if (analyticsMeta.hasKey("contentDuration")){
             youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
         }
-        if (!analyticsMeta.isNull("contentResource")){
+        if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
         youboraOptions.setAutoDetectBackground(true);
 
         youboraPlugin = new Plugin(youboraOptions, getContext());
 
-        if(!analyticsMeta.getBoolean("offline")) {
-            youboraPlugin.fireOfflineEvents();
+        if(analyticsMeta.hasKey("offline")) {
+            if (analyticsMeta.getBoolean("offline")) {
+                youboraPlugin.fireOfflineEvents();
+            }
         }
 
         Activity activity = themedReactContext.getCurrentActivity();
