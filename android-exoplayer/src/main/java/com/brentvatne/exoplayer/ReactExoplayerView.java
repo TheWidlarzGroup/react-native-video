@@ -416,39 +416,85 @@ class ReactExoplayerView extends FrameLayout implements
         contentId = analyticsMeta.getString("contentId");
 
         Options youboraOptions = new Options();
-        youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
-        youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
-        youboraOptions.setUsername(analyticsMeta.getString("username"));
-        youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
+        if (analyticsMeta.hasKey("accountCode")){
+            youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
+        }
+        if (analyticsMeta.hasKey("enabled")){
+            youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
+        }
+        if (analyticsMeta.hasKey("username")){
+            youboraOptions.setUsername(analyticsMeta.getString("username"));
+        }
+        if (analyticsMeta.hasKey("contentTransactionCode")){
+            youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
+        }
 
 
-        youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
-        youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
+        if (analyticsMeta.hasKey("contentCustomDimension6")){
+            youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
+        }
+        if (analyticsMeta.hasKey("contentCustomDimension7")){
+            youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
+        }
 
-        youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
-        youboraOptions.setContentType(analyticsMeta.getString("contentType"));
-        youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
-        youboraOptions.setProgram(analyticsMeta.getString("program"));
-        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-        youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
-        youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
-        youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
-        youboraOptions.setContentId(analyticsMeta.getString("contentId"));
-        youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
-        youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
-        youboraOptions.setAppName(analyticsMeta.getString("appName"));
-        youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
-        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-        youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
-        youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
-        youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        if (analyticsMeta.hasKey("contentIsLive")){
+            youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
+        }
+        if (analyticsMeta.hasKey("contentType")){
+            youboraOptions.setContentType(analyticsMeta.getString("contentType"));
+        }
+        if (analyticsMeta.hasKey("contentTitle")){
+            youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
+        }
+        if (analyticsMeta.hasKey("program")){
+            youboraOptions.setProgram(analyticsMeta.getString("program"));
+        }
+        if (analyticsMeta.hasKey("contentResource")){
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("contentSeason")){
+            youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
+        }
+        if (analyticsMeta.hasKey("contentEpisodeTitle")){
+            youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
+        }
+        if (analyticsMeta.hasKey("contentChannel")){
+            youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
+        }
+        if (analyticsMeta.hasKey("contentId")){
+            youboraOptions.setContentId(analyticsMeta.getString("contentId"));
+        }
+        if (analyticsMeta.hasKey("contentGenre")){
+            youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
+        }
+        if (analyticsMeta.hasKey("contentDuration")){
+            youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        }
+        if (analyticsMeta.hasKey("appName")){
+            youboraOptions.setAppName(analyticsMeta.getString("appName"));
+        }
+        if (analyticsMeta.hasKey("appReleaseVersion")){
+            youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
+        }
+        if (analyticsMeta.hasKey("contentResource")){
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("contentDuration")){
+            youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        }
+        if (analyticsMeta.hasKey("contentResource")){
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("offline")){
+            youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
+
+            if (analyticsMeta.getBoolean("offline")) {
+                youboraPlugin.fireOfflineEvents();
+            }
+        }
         youboraOptions.setAutoDetectBackground(true);
 
         youboraPlugin = new Plugin(youboraOptions, getContext());
-
-        if(!analyticsMeta.getBoolean("offline")) {
-            youboraPlugin.fireOfflineEvents();
-        }
 
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity == null) return;
