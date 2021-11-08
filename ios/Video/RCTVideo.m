@@ -382,7 +382,13 @@ static int const RCTVideoUnset = -1;
         self->_isExternalPlaybackActiveObserverRegistered = NO;
       }
       
-      self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
+      if(self->_player == nil) {
+        self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
+        [self applyModifiers];
+      } else {
+        [self applyModifiers];
+        [self->_player replaceCurrentItemWithPlayerItem:self->_playerItem];
+      }
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
       
       [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
@@ -907,7 +913,8 @@ static int const RCTVideoUnset = -1;
 }
 
 - (void)setupPipController {
-  if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
+  if (!_pipController && (_pictureInPicture || _playInBackground) && _playerLayer
+      && [AVPictureInPictureController isPictureInPictureSupported]) {
     // Create new controller passing reference to the AVPlayerLayer
     _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
     _pipController.delegate = self;
