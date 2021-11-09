@@ -397,8 +397,8 @@ static int const RCTVideoUnset = -1;
         self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
         [self applyModifiers];
       } else {
-        [self applyModifiers];
         [self->_player replaceCurrentItemWithPlayerItem:self->_playerItem];
+        [self applyModifiers];
       }
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
       
@@ -1644,7 +1644,6 @@ static int const RCTVideoUnset = -1;
     [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
-  _player = nil;
   
   [self removePlayerLayer];
   
@@ -1662,6 +1661,13 @@ static int const RCTVideoUnset = -1;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   [super removeFromSuperview];
+}
+
+-(void)didMoveToWindow {
+  [super didMoveToWindow];
+  if(self.window != nil && _player != nil) {
+    [self applyModifiers];
+  }
 }
 
 #pragma mark - Export
