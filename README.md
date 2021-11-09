@@ -385,6 +385,7 @@ minBufferMs | number | The default minimum duration of media that the player wil
 maxBufferMs | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
 bufferForPlaybackMs | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
 bufferForPlaybackAfterRebufferMs | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
+maxHeapAllocationPercent | number | The percentage of available heap that the video can use to buffer, between 0 and 1
 
 This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 

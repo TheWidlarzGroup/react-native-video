@@ -468,6 +468,7 @@ Video.propTypes = {
     maxBufferMs: PropTypes.number,
     bufferForPlaybackMs: PropTypes.number,
     bufferForPlaybackAfterRebufferMs: PropTypes.number,
+    maxHeapAllocationPercent: PropTypes.number,
   }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,

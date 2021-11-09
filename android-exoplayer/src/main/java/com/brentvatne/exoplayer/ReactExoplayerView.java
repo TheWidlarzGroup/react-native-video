@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -111,6 +112,8 @@ class ReactExoplayerView extends FrameLayout implements
         MetadataOutput,
         DrmSessionEventListener {
 
+    public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
+
     private static final String TAG = "ReactExoplayerView";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
@@ -157,6 +160,7 @@ class ReactExoplayerView extends FrameLayout implements
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+    private double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
 
     private Handler mainHandler;
     private Timer bufferCheckTimer;
@@ -215,7 +219,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
-        if(!player.getCurrentTimeline().isEmpty()) {    
+        if(!player.getCurrentTimeline().isEmpty()) {
             player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
         }
         return window.windowStartTimeMs + currentPosition;
@@ -418,6 +422,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
+        private int availableHeapInBytes = 0;
         public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
             super(allocator,
                     minBufferMs,
@@ -428,11 +433,18 @@ class ReactExoplayerView extends FrameLayout implements
                     prioritizeTimeOverSizeThresholds,
                     backBufferDurationMs,
                     retainBackBufferFromKeyframe);
+            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
+            availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
         }
 
         @Override
         public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
             if (ReactExoplayerView.this.disableBuffering) {
+                return false;
+            }
+            int loadedBytes = getAllocator().getTotalBytesAllocated();
+            boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
+            if (isHeapReached) {
                 return false;
             }
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
@@ -1660,11 +1672,12 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setHideShutterView(hideShutterView);
     }
 
-    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs) {
+    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent) {
         minBufferMs = newMinBufferMs;
         maxBufferMs = newMaxBufferMs;
         bufferForPlaybackMs = newBufferForPlaybackMs;
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
+        maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         releasePlayer();
         initializePlayer();
     }
