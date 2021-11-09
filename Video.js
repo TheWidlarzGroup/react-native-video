@@ -477,6 +477,7 @@ Video.propTypes = {
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
   reportBandwidth: PropTypes.bool,
+  contentStartTime: PropTypes.number,
   disableFocus: PropTypes.bool,
   disableBuffering: PropTypes.bool,
   controls: PropTypes.bool,

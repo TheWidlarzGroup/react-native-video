@@ -76,6 +76,13 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.source.dash.DashUtil;
+import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
+import com.google.android.exoplayer2.source.dash.manifest.Period;
+import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
+import com.google.android.exoplayer2.source.dash.manifest.Representation;
+import com.google.android.exoplayer2.source.dash.manifest.Descriptor;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -86,6 +93,13 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.List;
+import java.lang.Thread;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.lang.Integer;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -136,6 +150,8 @@ class ReactExoplayerView extends FrameLayout implements
     private int maxBitRate = 0;
     private long seekTime = C.TIME_UNSET;
     private boolean hasDrmFailed = false;
+    private boolean isUsingContentResolution = false;
+    private boolean selectTrackWhenReady = false;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -159,6 +175,7 @@ class ReactExoplayerView extends FrameLayout implements
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean disableBuffering;
+    private long contentStartTime;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
@@ -850,6 +867,10 @@ class ReactExoplayerView extends FrameLayout implements
                 onBuffering(false);
                 startProgressHandler();
                 videoLoaded();
+                if (selectTrackWhenReady && isUsingContentResolution) {
+                    selectTrackWhenReady = false;
+                    setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+                }
                 // Setting the visibility for the playerControlView
                 if (playerControlView != null) {
                     playerControlView.show();
@@ -921,6 +942,13 @@ class ReactExoplayerView extends FrameLayout implements
         return audioTracks;
     }
     private WritableArray getVideoTrackInfo() {
+
+        WritableArray contentVideoTracks = this.getVideoTrackInfoFromManifest();
+        if (contentVideoTracks != null) {
+            isUsingContentResolution = true;
+            return contentVideoTracks;
+        }
+
         WritableArray videoTracks = Arguments.createArray();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
@@ -947,7 +975,71 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
+
         return videoTracks;
+    }
+
+    private WritableArray getVideoTrackInfoFromManifest() {
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        final DataSource dataSource = this.mediaDataSourceFactory.createDataSource();
+        final Uri sourceUri = this.srcUri;
+        final Timeline timelineRef = this.player.getCurrentTimeline();
+        final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
+
+        Future<WritableArray> result = es.submit(new Callable<WritableArray>() {
+            DataSource ds = dataSource;
+            Uri uri = sourceUri;
+            Timeline timeline = timelineRef;
+            long startTimeUs = startTime * 1000; // ms -> us
+
+            public WritableArray call() throws Exception {
+                WritableArray videoTracks = Arguments.createArray();
+                try  {
+                    DashManifest manifest = DashUtil.loadManifest(this.ds, this.uri);
+                    int periodCount = manifest.getPeriodCount();
+                    for (int i = 0; i < periodCount; i++) {
+                        Period period = manifest.getPeriod(i);
+                        for (int adaptationIndex = 0; adaptationIndex < period.adaptationSets.size(); adaptationIndex++) {
+                            AdaptationSet adaptation = period.adaptationSets.get(adaptationIndex);
+                            if (adaptation.type != C.TRACK_TYPE_VIDEO) {
+                                continue;
+                            }
+                            boolean hasFoundContentPeriod = false;
+                            for (int representationIndex = 0; representationIndex < adaptation.representations.size(); representationIndex++) {
+                                Representation representation = adaptation.representations.get(representationIndex);
+                                Format format = representation.format;
+                                if (representation.presentationTimeOffsetUs <= startTimeUs) {
+                                    break;
+                                }
+                                hasFoundContentPeriod = true;
+                                WritableMap videoTrack = Arguments.createMap();
+                                videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
+                                videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
+                                videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+                                videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
+                                videoTrack.putString("trackId",
+                                        format.id == null ? String.valueOf(representationIndex) : format.id);
+                                if (isFormatSupported(format)) {
+                                    videoTracks.pushMap(videoTrack);
+                                }
+                            }
+                            if (hasFoundContentPeriod) {
+                                return videoTracks;
+                            }
+                        }
+                    }
+                } catch (Exception e) {}
+                return null;
+            }
+        });
+
+        try {
+            WritableArray results = result.get();
+            es.shutdown();
+            return results;
+        } catch (Exception e) {}
+
+        return null;
     }
 
     private WritableArray getTextTrackInfo() {
@@ -993,6 +1085,11 @@ class ReactExoplayerView extends FrameLayout implements
             // which they seeked.
             updateResumePosition();
         }
+        if (isUsingContentResolution) {
+            // Discontinuity events might have a different track list so we update the selected track
+            setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+            selectTrackWhenReady = true;
+        }
         // When repeat is turned on, reaching the end of the video will not cause a state change
         // so we need to explicitly detect it.
         if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION
@@ -1010,6 +1107,10 @@ class ReactExoplayerView extends FrameLayout implements
     public void onSeekProcessed() {
         eventEmitter.seek(player.getCurrentPosition(), seekTime);
         seekTime = C.TIME_UNSET;
+        if (isUsingContentResolution) {
+            // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
+            setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+        }
     }
 
     @Override
@@ -1278,13 +1379,50 @@ class ReactExoplayerView extends FrameLayout implements
             int height = value.asInt();
             for (int i = 0; i < groups.length; ++i) { // Search for the exact height
                 TrackGroup group = groups.get(i);
+                Format closestFormat = null;
+                int closestTrackIndex = -1;
+                boolean usingExactMatch = false;
                 for (int j = 0; j < group.length; j++) {
                     Format format = group.getFormat(j);
                     if (format.height == height) {
                         groupIndex = i;
                         tracks[0] = j;
+                        closestFormat = null;
+                        closestTrackIndex = -1;
+                        usingExactMatch = true;
                         break;
+                    } else if (isUsingContentResolution) {
+                        // When using content resolution rather than ads, we need to try and find the closest match if there is no exact match
+                        if (closestFormat != null) {
+                            if ((format.bitrate > closestFormat.bitrate || format.height > closestFormat.height) && format.height < height) {
+                                // Higher quality match
+                                closestFormat = format;
+                                closestTrackIndex = j;
+                            }
+                        } else if(format.height < height) {
+                            closestFormat = format;
+                            closestTrackIndex = j;
+                        }
                     }
+                }
+                // This is a fallback if the new period contains only higher resolutions than the user has selected
+                if (closestFormat == null && isUsingContentResolution && !usingExactMatch) {
+                    // No close match found - so we pick the lowest quality
+                    int minHeight = Integer.MAX_VALUE;
+                    for (int j = 0; j < group.length; j++) {
+                        Format format = group.getFormat(j);
+                        if (format.height < minHeight) {
+                            minHeight = format.height;
+                            groupIndex = i;
+                            tracks[0] = j;
+                        }
+                    }
+                }
+                // Selecting the closest match found
+                if (closestFormat != null && closestTrackIndex != -1) {
+                    // We found the closest match instead of an exact one
+                    groupIndex = i;
+                    tracks[0] = closestTrackIndex;
                 }
             }
         } else if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
@@ -1466,6 +1604,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setBackBufferDurationMs(int backBufferDurationMs) {
         this.backBufferDurationMs = backBufferDurationMs;
+    }
+
+    public void setContentStartTime(int contentStartTime) {
+        this.contentStartTime = (long)contentStartTime;
     }
 
     public void setDisableBuffering(boolean disableBuffering) {
