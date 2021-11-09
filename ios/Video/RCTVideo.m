@@ -142,6 +142,11 @@ static int const RCTVideoUnset = -1;
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(audioRouteChanged:)
                                                  name:AVAudioSessionRouteChangeNotification
                                                object:nil];
@@ -246,6 +251,12 @@ static int const RCTVideoUnset = -1;
   if (_playInBackground) {
     [_playerLayer setPlayer:_player];
     [_playerViewController setPlayer:_player];
+  }
+}
+
+-(void)applicationDidBecomeActive:(NSNotification*)notification {
+  if(!_playInBackground && !_paused && _player != nil) {
+    [_player play];
   }
 }
 
