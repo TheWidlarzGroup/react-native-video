@@ -50,6 +50,7 @@
 		D1107C072110259000073188 /* RCTVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideo.h; path = Video/RCTVideo.h; sourceTree = "<group>"; };
 		D1107C082110259000073188 /* RCTVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTVideoPlayerViewController.m; path = Video/RCTVideoPlayerViewController.m; sourceTree = "<group>"; };
 		D1107C092110259000073188 /* RCTVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoManager.h; path = Video/RCTVideoManager.h; sourceTree = "<group>"; };
+		FF34A23B273BB77E0046DCE9 /* RCTVideoPlayerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerDelegate.h; path = Video/RCTVideoPlayerDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +96,7 @@
 				D1107C012110259000073188 /* RCTVideoPlayerViewController.h */,
 				D1107C082110259000073188 /* RCTVideoPlayerViewController.m */,
 				D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */,
+				FF34A23B273BB77E0046DCE9 /* RCTVideoPlayerDelegate.h */,
 				D1107C042110259000073188 /* UIView+FindUIViewController.h */,
 				D1107C032110259000073188 /* UIView+FindUIViewController.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
@@ -163,6 +165,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;

@@ -9,6 +9,7 @@
 #import <AVKit/AVKit.h>
 #import "RCTVideo.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import "RCTVideoPlayerDelegate.h"
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
 @property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
@@ -16,5 +17,6 @@
 // Optional paramters
 @property (nonatomic, weak) NSString* preferredOrientation;
 @property (nonatomic) BOOL autorotate;
+@property (class, nonatomic, copy) id<RCTVideoPlayerDelegate> _Nullable videoPlayerDelegate;
 
 @end
