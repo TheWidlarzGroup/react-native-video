@@ -485,6 +485,10 @@ class ReactExoplayerView extends FrameLayout implements
         if (analyticsMeta.hasKey("contentResource")){
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
+        youboraOptions.setAutoDetectBackground(true);
+
+        youboraPlugin = new Plugin(youboraOptions, getContext());
+
         if (analyticsMeta.hasKey("offline")){
             youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
 
@@ -492,9 +496,6 @@ class ReactExoplayerView extends FrameLayout implements
                 youboraPlugin.fireOfflineEvents();
             }
         }
-        youboraOptions.setAutoDetectBackground(true);
-
-        youboraPlugin = new Plugin(youboraOptions, getContext());
 
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity == null) return;
