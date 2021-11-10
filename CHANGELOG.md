@@ -1,5 +1,9 @@
 ## Changelog
 
+### Next version
+
+- Add optional delegate for RCTVideoPlayerViewController to access the player on native side [#2533](https://github.com/react-native-video/react-native-video/pull/2533)
+
 ### Version 5.2.0
 
 - Fix for tvOS native audio menu language selector
