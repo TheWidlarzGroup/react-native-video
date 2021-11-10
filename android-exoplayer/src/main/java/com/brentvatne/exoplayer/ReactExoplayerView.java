@@ -488,7 +488,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (analyticsMeta.hasKey("offline")){
             youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
 
-            if (analyticsMeta.getBoolean("offline")) {
+            if (!analyticsMeta.getBoolean("offline")) {
                 youboraPlugin.fireOfflineEvents();
             }
         }
