@@ -450,7 +450,7 @@ class ReactExoplayerView extends FrameLayout implements
                 return false;
             }
             if (runtime.freeMemory() == 0) {
-                Log.w("ExoPlayer Warning", "free memory reached 0, forcing garbage collection");
+                Log.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
                 runtime.gc();
                 return false;
             }
