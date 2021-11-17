@@ -423,6 +423,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private class RNVLoadControl extends DefaultLoadControl {
         private int availableHeapInBytes = 0;
+        private Runtime runtime;
         public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
             super(allocator,
                     minBufferMs,
@@ -433,6 +434,7 @@ class ReactExoplayerView extends FrameLayout implements
                     prioritizeTimeOverSizeThresholds,
                     backBufferDurationMs,
                     retainBackBufferFromKeyframe);
+            runtime = Runtime.getRuntime();
             ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
             availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
         }
@@ -445,6 +447,11 @@ class ReactExoplayerView extends FrameLayout implements
             int loadedBytes = getAllocator().getTotalBytesAllocated();
             boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
             if (isHeapReached) {
+                return false;
+            }
+            if (runtime.freeMemory() == 0) {
+                Log.w("ExoPlayer Warning", "free memory reached 0, forcing garbage collection");
+                runtime.gc();
                 return false;
             }
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
