@@ -78,6 +78,7 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
                 if (mediaPlayer.PlaybackSession().PlaybackState() ==
                     winrt::Windows::Media::Playback::MediaPlaybackState::Playing) {
                     auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+                    auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000;
                     self->m_reactContext.DispatchEvent(
                         *self,
                         L"topVideoProgress",
@@ -85,6 +86,7 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
                         eventDataWriter.WriteObjectBegin();
                         {
                             WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
+                            WriteProperty(eventDataWriter, L"seekableDuration", durationInSeconds);
                             WriteProperty(eventDataWriter, L"playableDuration", 0.0);
                         }
                         eventDataWriter.WriteObjectEnd();
