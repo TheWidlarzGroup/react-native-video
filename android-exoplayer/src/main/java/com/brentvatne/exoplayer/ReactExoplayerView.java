@@ -100,13 +100,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private static final String TAG = "ReactExoplayerView";
 
-    private static final CookieManager DEFAULT_COOKIE_MANAGER;
+    private static final CookieManager DEFAULT_COOKIE_MANAGER = new CookieManager();
     private static final int SHOW_PROGRESS = 1;
-
-    static {
-        DEFAULT_COOKIE_MANAGER = new CookieManager();
-        DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-    }
 
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
@@ -162,6 +157,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
+    private CookiesPolicy mCookiesPolicy = CookiesPolicy.SYSTEM_DEFAULT;
     private UUID drmUUID = null;
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
@@ -227,9 +223,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void createViews() {
         clearResumePosition();
         mediaDataSourceFactory = buildDataSourceFactory(true);
-        if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
-            CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
-        }
+        applyCookiesPolicy();
 
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -1084,6 +1078,20 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
+    }
+
+    public void setCookiesPolicy(String cookiesPolicy) {
+        mCookiesPolicy = CookiesPolicy.valueOf(cookiesPolicy);
+        applyCookiesPolicy();
+    }
+
+    private void applyCookiesPolicy() {
+        if (mCookiesPolicy.cookiePolicy != null) {
+            DEFAULT_COOKIE_MANAGER.setCookiePolicy(mCookiesPolicy.cookiePolicy);
+            CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
+        } else {
+            CookieHandler.setDefault(null);
+        }
     }
 
     public void setRawSrc(final Uri uri, final String extension) {

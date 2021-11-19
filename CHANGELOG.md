@@ -3,6 +3,7 @@
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
+- Added `cookiePolicy` property for ExoPlayer CookieManager [Valtech #5](https://github.com/valtech-sd/react-native-video/pull/5) based on [#2082](https://github.com/react-native-community/react-native-video/pull/2082)
 
 ### Version 5.1.0-alpha8
 

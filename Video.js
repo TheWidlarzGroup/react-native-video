@@ -468,6 +468,7 @@ Video.propTypes = {
   preferredForwardBufferDuration: PropTypes.number,
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
+  cookiePolicy: PropTypes.oneOf(['original', 'all', 'none', 'system_default']),
   reportBandwidth: PropTypes.bool,
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
