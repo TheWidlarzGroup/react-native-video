@@ -88,9 +88,9 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.MetadataOutput;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -118,11 +118,10 @@ import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREA
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener,
-        Player.EventListener,
+        Player.Listener,
         AnalyticsListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
-        MetadataOutput,
         ExoDorisPlayerViewListener,
         ExoDorisImaDaiWrapperListener {
 
@@ -500,7 +499,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoPlayer.setAudioAttributes(audioAttributes, false);
             exoPlayer.addListener(this);
             exoPlayer.addAnalyticsListener(this);
-            exoPlayer.addMetadataOutput(this);
             exoDorisPlayerView.setPlayer(exoPlayer);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
@@ -747,7 +745,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
         if (player != null) {
             player.getSimpleExoPlayer().removeListener(this);
-            player.getSimpleExoPlayer().removeMetadataOutput(this);
             player.release();
             player = null;
             trackSelector = null;
@@ -1098,7 +1095,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onPositionDiscontinuity(int reason) {
+    public void onCues(List<Cue> cues) {
+    }
+
+    @Override
+    public void onPositionDiscontinuity(
+            Player.PositionInfo oldPosition, Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
