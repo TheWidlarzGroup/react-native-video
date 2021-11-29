@@ -1394,4 +1394,22 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     }
+
+    /**
+     * Handling font size prop
+     *
+     * @param fontSizeTrack  fontSizeTrack prop, integer to define the font size of the text track
+    */
+    public void setFontSizeTrack(int fontSizeTrack) {
+        exoPlayerView.setFontSizeTrack(fontSizeTrack);
+    }
+
+    /**
+     * Handling padding bottom track prop
+     *
+     * @param fontSizeTrack  paddingBottomTrack prop, float to define the padding bottom of the text track
+    */
+    public void setPaddingBottomTrack(float paddingBottomTrack) {
+        exoPlayerView.setPaddingBottomTrack(paddingBottomTrack);
+    }
 }

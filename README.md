@@ -296,6 +296,7 @@ var styles = StyleSheet.create({
 * [disableFocus](#disableFocus)
 * [filter](#filter)
 * [filterEnabled](#filterEnabled)
+* [fontSizeTrack](#fontSizeTrack)
 * [fullscreen](#fullscreen)
 * [fullscreenAutorotate](#fullscreenautorotate)
 * [fullscreenOrientation](#fullscreenorientation)
@@ -307,6 +308,7 @@ var styles = StyleSheet.create({
 * [minLoadRetryCount](#minLoadRetryCount)
 * [mixWithOthers](#mixWithOthers)
 * [muted](#muted)
+* [paddingBottomTrack](#paddingBottomTrack)
 * [paused](#paused)
 * [pictureInPicture](#pictureinpicture)
 * [playInBackground](#playinbackground)
@@ -471,6 +473,13 @@ Enable video filter.
 
 Platforms: iOS
 
+#### fontSizeTrack
+Adjust the font size of the subtitles in Android.
+* **Default font size of the device** - The default value for this props
+* **Other values (int)** - Change the font size
+
+Platforms: Android ExoPlayer
+
 #### fullscreen
 Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
@@ -571,6 +580,13 @@ Controls whether the audio is muted
 * **true** - Mute audio
 
 Platforms: all
+
+#### paddingBottomTrack
+Adjust the padding bottom of the subtitles in Android.
+* **0.1 (default)** - Give a padding bottom of 0.1
+* **Other values (float)** - Change the padding bottom
+
+Platforms: Android ExoPlayer
 
 #### paused
 Controls whether the media is paused
