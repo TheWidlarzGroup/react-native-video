@@ -290,6 +290,7 @@ var styles = StyleSheet.create({
 * [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
+* [cookiePolicy](#cookiepolicy)
 * [maxBitRate](#maxbitrate)
 * [minLoadRetryCount](#minLoadRetryCount)
 * [mixWithOthers](#mixWithOthers)
@@ -532,6 +533,15 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### cookiePolicy
+Changes the android cookie policy
+* **"original"** - Sets the CookiePolicy as ACCEPT_ORIGINAL_SERVER
+* **"all"** - Sets the CookiePolicy as ACCEPT_ALL
+* **"none"** - Sets the CookiePolicy as ACCEPT_NONE
+* **"system_default (default)"** - Unsets CookiePolicy completely (default is Android system, default in this library)
+
+Platforms: Android ExoPlayer
 
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
