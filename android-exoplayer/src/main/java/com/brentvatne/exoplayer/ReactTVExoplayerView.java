@@ -112,6 +112,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED;
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED;
@@ -186,6 +187,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private int viewHeight = 0;
     private boolean hasReloadedCurrentSource = false;
     private boolean isMuted = false;
+    private UUID correlationId;
 
     // Props from React
     private RNSource src;
@@ -520,7 +522,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             SourceBuilder sourceBuilder = new SourceBuilder()
                     .setUrl(src.getUrl())
                     .setId(src.getId())
-                    .setMuxProperties(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
+                    .setMuxProperties(src.getMuxData(), String.valueOf(correlationId), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .setMaxVideoSize(viewWidth, viewHeight)
                     .setDrmParams(actionToken);
@@ -1279,6 +1281,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isOriginalSourceNull = srcUrl == null;
             boolean isSourceEqual = url.equals(srcUrl);
 
+            this.correlationId = UUID.randomUUID();
             this.isImaDaiStream = false;
             this.isImaDaiStreamLoaded = false;
             if (ima != null && !ima.isEmpty()) {
