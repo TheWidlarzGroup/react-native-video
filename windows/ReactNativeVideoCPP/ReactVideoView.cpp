@@ -77,8 +77,8 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
             if (auto mediaPlayer = self->m_player) {
                 if (mediaPlayer.PlaybackSession().PlaybackState() ==
                     winrt::Windows::Media::Playback::MediaPlaybackState::Playing) {
-                    auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
-                    auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000;
+                    auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000.0;
+                    auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000.0;
                     self->m_reactContext.DispatchEvent(
                         *self,
                         L"topVideoProgress",
@@ -104,8 +104,8 @@ void ReactVideoView::OnMediaOpened(IInspectable const&, IInspectable const&) {
                 auto width = mediaPlayer.PlaybackSession().NaturalVideoWidth();
                 auto height = mediaPlayer.PlaybackSession().NaturalVideoHeight();
                 auto orientation = (width > height) ? L"landscape" : L"portrait";
-                auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000;
-                auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+                auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000.0;
+                auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000.0;
 
                 strong_this->m_reactContext.DispatchEvent(
                     *strong_this,
