@@ -426,7 +426,6 @@ Sets the extension renderer mode, which determines if and how available extensio
 * **2** EXTENSION_RENDERER_MODE_PREFER Allow use of extension renderers. Extension renderers are indexed *before* core renderers of the same type.
 * **-1** Select one of above modes depending on device supported media codecs.
   * audio/ac4 is supported then EXTENSION_RENDERER_MODE_OFF is selected
-  * audio/eac3 is supported then EXTENSION_RENDERER_MODE_ON is selected
   * otherwise EXTENSION_RENDERER_MODE_PREFER is selected
 
 Platforms: Android ExoPlayer
