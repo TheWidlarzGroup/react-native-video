@@ -71,6 +71,7 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.SeekParameters;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -414,6 +415,7 @@ class ReactExoplayerView extends FrameLayout implements
                                 .setTrackSelector​(trackSelector)
                                 .setBandwidthMeter(bandwidthMeter)
                                 .setLoadControl(defaultLoadControl)
+                                .setSeekParameters(SeekParameters.CLOSEST_SYNC)
                                 .build();
                     player.addListener(self);
                     player.addMetadataOutput(self);
