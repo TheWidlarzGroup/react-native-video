@@ -1,6 +1,12 @@
 ## Changelog
 
-- Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
+### Version 5.2.0
+
+- Fix for tvOS native audio menu language selector
+- Update ExoPlayer to allow pre-init and content clear [#2412] (https://github.com/react-native-video/react-native-video/pull/2412)
+- iOS rate is reset to 1.0 after play/pause [#2167] (https://github.com/react-native-video/react-native-video/pull/2167)
+- Upgrade ExoPlayer to 2.13.2 [#2317] (https://github.com/react-native-video/react-native-video/pull/2317)
+- Fix AudioFocus pausing video when attempting to play [#2311] (https://github.com/react-native-video/react-native-video/pull/2311)
 
 ### Version 5.1.0-alpha9
 
