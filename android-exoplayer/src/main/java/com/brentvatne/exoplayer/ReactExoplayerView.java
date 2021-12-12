@@ -29,7 +29,6 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -38,7 +37,6 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
-import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
@@ -60,8 +58,8 @@ import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -77,8 +75,8 @@ import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.Map;
+import java.util.UUID;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -101,8 +99,6 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private static Map<Integer, ReactExoplayerView> instances = new HashMap<>();
-    private static int UNIQUE_ID = 0;
-    private int uid = ++UNIQUE_ID;
     private FullScreenDelegate fullScreenDelegate;
 
     private final VideoEventEmitter eventEmitter;
@@ -140,8 +136,6 @@ class ReactExoplayerView extends FrameLayout implements
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
-
-    private Handler mainHandler;
 
     // Props from React
     private Uri srcUri;
@@ -233,8 +227,6 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
-
-        mainHandler = new Handler();
     }
 
     @Override
@@ -286,7 +278,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void cleanUpResources() {
         stopPlayback();
-        instances.remove(uid);
+        instances.remove(this.getId());
     }
 
     //BandwidthMeter.EventListener implementation
@@ -344,9 +336,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void showFullscreen() {
-        instances.put(uid, this);
+        instances.put(this.getId(), this);
         Intent intent = new Intent(getContext(), ExoPlayerFullscreenVideoActivity.class);
-        intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_ID, this.uid);
+        intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_EXO_PLAYER_VIEW_ID, this.getId());
         intent.putExtra(ExoPlayerFullscreenVideoActivity.EXTRA_ORIENTATION, this.fullScreenOrientation);
         getContext().startActivity(intent);
         isInFullscreen = true;
