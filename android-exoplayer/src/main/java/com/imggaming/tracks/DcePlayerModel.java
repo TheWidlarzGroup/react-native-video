@@ -6,8 +6,8 @@ import android.util.Log;
 
 import com.brentvatne.react.R;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -23,12 +23,12 @@ import java.util.Locale;
 
 public class DcePlayerModel {
 
-    private final Player player;
+    private final ExoPlayer player;
     private final Context context;
     private DefaultTrackSelector trackSelector;
     private boolean areAnnotationsEnabled; //ToDo: this needs to come from player
 
-    public DcePlayerModel(Context context, Player player, DefaultTrackSelector selector) {
+    public DcePlayerModel(Context context, ExoPlayer player, DefaultTrackSelector selector) {
         this.context = context;
         this.player = player;
         this.trackSelector = selector;
