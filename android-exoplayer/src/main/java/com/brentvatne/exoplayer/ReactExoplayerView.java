@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
@@ -25,13 +24,10 @@ import androidx.annotation.Nullable;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -61,7 +57,6 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
-import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
@@ -71,7 +66,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -83,9 +78,7 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -810,95 +803,24 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
-            if (audioTrackType != null && audioTrackValue != null) {
-                setSelectedAudioTrack(audioTrackType, audioTrackValue);
-            }
-            if (videoTrackType != null && videoTrackValue != null) {
-                setSelectedVideoTrack(videoTrackType, videoTrackValue);
-            }
-            if (textTrackType != null && textTrackValue != null) {
-                setSelectedTextTrack(textTrackType, textTrackValue);
-            }
+            setSelectedAudioTrack(audioTrackType, audioTrackValue);
+            setSelectedVideoTrack(videoTrackType, videoTrackValue);
+            setSelectedTextTrack(textTrackType, textTrackValue);
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getAudioTrackInfo(), getTextTrackInfo(), getVideoTrackInfo(), trackId);
+            MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+            eventEmitter.load(
+                    player.getDuration(),
+                    player.getCurrentPosition(),
+                    width,
+                    height,
+                    TracksUtil.getAudioTrackInfo(info),
+                    TracksUtil.getTextTrackInfo(info),
+                    TracksUtil.getVideoTrackInfo(info),
+                    trackId);
         }
-    }
-
-    private WritableArray getAudioTrackInfo() {
-        WritableArray audioTracks = Arguments.createArray();
-
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
-        if (info == null || index == C.INDEX_UNSET) {
-            return audioTracks;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(index);
-        for (int i = 0; i < groups.length; ++i) {
-            Format format = groups.get(i).getFormat(0);
-            WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putInt("index", i);
-            audioTrack.putString("title", format.id != null ? format.id : "");
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
-                                    : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
-            audioTracks.pushMap(audioTrack);
-        }
-        return audioTracks;
-    }
-    private WritableArray getVideoTrackInfo() {
-        WritableArray videoTracks = Arguments.createArray();
-
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        int index = getTrackRendererIndex(C.TRACK_TYPE_VIDEO);
-        if (info == null || index == C.INDEX_UNSET) {
-            return videoTracks;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(index);
-        for (int i = 0; i < groups.length; ++i) {
-            TrackGroup group = groups.get(i);
-
-            for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
-                Format format = group.getFormat(trackIndex);
-                WritableMap videoTrack = Arguments.createMap();
-                videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
-                videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
-                videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-                videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
-                videoTrack.putString("trackId",
-                        format.id == null ? String.valueOf(trackIndex) : format.id);
-                videoTracks.pushMap(videoTrack);
-            }
-        }
-        return videoTracks;
-    }
-
-    private WritableArray getTextTrackInfo() {
-        WritableArray textTracks = Arguments.createArray();
-
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
-        if (info == null || index == C.INDEX_UNSET) {
-            return textTracks;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(index);
-        for (int i = 0; i < groups.length; ++i) {
-             Format format = groups.get(i).getFormat(0);
-             WritableMap textTrack = Arguments.createMap();
-             textTrack.putInt("index", i);
-             textTrack.putString("title", format.id != null ? format.id : "");
-             textTrack.putString("type", format.sampleMimeType);
-             textTrack.putString("language", format.language != null ? format.language : "");
-             textTracks.pushMap(textTrack);
-        }
-        return textTracks;
     }
 
     private void onBuffering(boolean buffering) {
@@ -949,7 +871,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onTracksChanged(@NonNull TrackGroupArray trackGroups, @NonNull TrackSelectionArray trackSelections) {
         if (trackGroups != lastSeenTrackGroupArray) {
-            MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+            MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
             if (mappedTrackInfo != null) {
                 if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
                     eventEmitter.unsupportedTrack(C.TRACK_TYPE_VIDEO);
@@ -1142,120 +1064,6 @@ class ReactExoplayerView extends FrameLayout implements
         this.preventsDisplaySleepDuringVideoPlayback = preventsDisplaySleepDuringVideoPlayback;
     }
 
-    public void setSelectedTrack(int trackType, String type, Dynamic value) {
-        if (player == null) return;
-        int rendererIndex = getTrackRendererIndex(trackType);
-        if (rendererIndex == C.INDEX_UNSET) {
-            return;
-        }
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        if (info == null) {
-            return;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(rendererIndex);
-        int groupIndex = C.INDEX_UNSET;
-        int[] tracks = {0} ;
-
-        if (TextUtils.isEmpty(type)) {
-            type = "default";
-        }
-
-        DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
-
-        if (type.equals("disabled")) {
-            trackSelector.setParameters(disableParameters);
-            return;
-        } else if (type.equals("language")) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.language != null && format.language.equals(value.asString())) {
-                    groupIndex = i;
-                    break;
-                }
-            }
-        } else if (type.equals("title")) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value.asString())) {
-                    groupIndex = i;
-                    break;
-                }
-            }
-        } else if (type.equals("index")) {
-            if (value.asInt() < groups.length) {
-                groupIndex = value.asInt();
-            }
-        } else if (type.equals("resolution")) {
-            int height = value.asInt();
-            for (int i = 0; i < groups.length; ++i) { // Search for the exact height
-                TrackGroup group = groups.get(i);
-                for (int j = 0; j < group.length; j++) {
-                    Format format = group.getFormat(j);
-                    if (format.height == height) {
-                        groupIndex = i;
-                        tracks[0] = j;
-                        break;
-                    }
-                }
-            }
-        } else if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
-            // Use system settings if possible
-            CaptioningManager captioningManager
-                    = (CaptioningManager)themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-            if (captioningManager != null && captioningManager.isEnabled()) {
-                groupIndex = getGroupIndexForDefaultLocale(groups);
-            }
-        } else if (rendererIndex == C.TRACK_TYPE_AUDIO) { // Audio default
-            groupIndex = getGroupIndexForDefaultLocale(groups);
-        }
-
-        if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
-            // Add all tracks as valid options for ABR to choose from
-            TrackGroup group = groups.get(0);
-            tracks = new int[group.length];
-            groupIndex = 0;
-            for (int j = 0; j < group.length; j++) {
-                tracks[j] = j;
-            }
-        }
-
-        if (groupIndex == C.INDEX_UNSET) {
-            trackSelector.setParameters(disableParameters);
-            return;
-        }
-
-        DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(groupIndex, tracks))
-                .build();
-        trackSelector.setParameters(selectionParameters);
-    }
-
-    private int getGroupIndexForDefaultLocale(TrackGroupArray groups) {
-        if (groups.length == 0){
-            return C.INDEX_UNSET;
-        }
-
-        int groupIndex = 0; // default if no match
-        String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
-        String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
-        for (int i = 0; i < groups.length; ++i) {
-            Format format = groups.get(i).getFormat(0);
-            String language = format.language;
-            if (language != null && (language.equals(locale2) || language.equals(locale3))) {
-                groupIndex = i;
-                break;
-            }
-        }
-        return groupIndex;
-    }
-
     public void setSelectedVideoTrack(String type, Dynamic value) {
         videoTrackType = type;
         videoTrackValue = value;
@@ -1272,6 +1080,20 @@ class ReactExoplayerView extends FrameLayout implements
         textTrackType = type;
         textTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
+    }
+
+    public void setSelectedTrack(int trackType, String type, Dynamic value) {
+        if (player == null) return;
+        MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        if (info == null) return;
+        DefaultTrackSelector.Parameters parameters = TracksUtil.buildSelectionParameters(
+                themedReactContext,
+                trackSelector.getParameters(),
+                info,
+                trackType,
+                type,
+                value);
+        trackSelector.setParameters(parameters);
     }
 
     public void setPausedModifier(boolean paused) {

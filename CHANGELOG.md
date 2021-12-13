@@ -1,5 +1,13 @@
 ## Changelog
 
+### Version 5.1.0-alpha10
+
+- Fix track selections. 
+  - Fix assumption of single render in method getTrackRendererIndex. Provide tracks from different renders of same type in onLoad callback
+  - Dispatch only support track in onLoad callback
+  - Fix choosing single track from a group .getFormat(0) in multiple places.
+  - Fix audio deselection
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
