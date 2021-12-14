@@ -1,9 +1,11 @@
 package com.brentvatne.exoplayer;
 
 import static android.content.Context.CAPTIONING_SERVICE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Pair;
 import android.view.accessibility.CaptioningManager;
 
@@ -24,6 +26,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Paramet
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.ParametersBuilder;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.util.Consumer;
+import com.google.android.exoplayer2.util.Util;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
@@ -46,7 +49,8 @@ public class TracksUtil {
             Format format = input.second;
             WritableMap audioTrack = Arguments.createMap();
             audioTrack.putDouble("index", complexIndex);
-            audioTrack.putString("title", format.id != null ? format.id : "");
+            audioTrack.putString("trackId", format.id != null ? format.id : "");
+            audioTrack.putString("title", getLanguageDisplayName(format.language));
             audioTrack.putString("type", format.sampleMimeType);
             audioTrack.putString("language", format.language != null ? format.language : "");
             audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
@@ -60,11 +64,12 @@ public class TracksUtil {
             long complexIndex = input.first;
             Format format = input.second;
             WritableMap videoTrack = Arguments.createMap();
+            videoTrack.putDouble("index", complexIndex);
+            videoTrack.putString("trackId", format.id != null ? format.id : "");
             videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
             videoTrack.putInt("height", format.height == Format.NO_VALUE ? 0 : format.height);
             videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
             videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
-            videoTrack.putString("trackId", format.id == null ? String.valueOf(complexIndex) : format.id);
             return videoTrack;
         });
     }
@@ -75,7 +80,8 @@ public class TracksUtil {
             Format format = input.second;
             WritableMap textTrack = Arguments.createMap();
             textTrack.putDouble("index", complexIndex);
-            textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("trackId", format.id != null ? format.id : "");
+            textTrack.putString("title", getLanguageDisplayName(format.language));
             textTrack.putString("type", format.sampleMimeType);
             textTrack.putString("language", format.language != null ? format.language : "");
             return textTrack;
@@ -88,34 +94,42 @@ public class TracksUtil {
             @NonNull MappedTrackInfo info,
             int trackType,
             @Nullable String type,
-            Dynamic value) {
+            @Nullable Dynamic value) {
         List<TrackInfo> selection = new ArrayList<>();
-        if (type == null) type = "system";
+        ParametersBuilder builder = initialParameters.buildUpon();
+        if (type == null || value == null) type = "default";
         switch (type) {
             case "disabled": {
-                ParametersBuilder builder = initialParameters.buildUpon();
                 for (int renderIndex = 0; renderIndex < info.getRendererCount(); renderIndex++) {
                     if (info.getRendererType(renderIndex) == trackType) {
                         builder.setRendererDisabled(renderIndex, true);
                     }
                 }
+                // return without changing any overrides
                 return builder.build();
             }
             case "language": {
                 String expected = value.asString();
-                TrackInfo track = searchTrack(info, trackType, format -> expected.equals(format.language));
-                if (track != null) selection.add(track);
+                if (trackType == C.TRACK_TYPE_AUDIO) {
+                    builder.setPreferredAudioLanguage(expected);
+                } else if (trackType == C.TRACK_TYPE_TEXT) {
+                    builder.setPreferredTextLanguage(expected);
+                }
                 break;
             }
             case "title": {
                 String expected = value.asString();
-                TrackInfo track = searchTrack(info, trackType, format -> expected.equals(format.id));
+                TrackInfo track = searchTrack(info, trackType, format ->
+                        expected.equals(getLanguageDisplayName(format.language))
+                );
                 if (track != null) selection.add(track);
                 break;
             }
             case "resolution": {
                 int expected = getDynamicInt(value);
-                TrackInfo track = searchTrack(info, trackType, format -> expected == format.height);
+                TrackInfo track = searchTrack(info, trackType, format ->
+                        expected == format.height
+                );
                 if (track != null) selection.add(track);
                 break;
             }
@@ -139,22 +153,40 @@ public class TracksUtil {
                 }
                 break;
             }
-            case "system": {
-                String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
-                String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
-                if (trackType == C.TRACK_TYPE_TEXT && Build.VERSION.SDK_INT > 18) { // Default subtitle selection
-                    CaptioningManager captioningManager = (CaptioningManager) context.getSystemService(CAPTIONING_SERVICE);
-                    if (captioningManager != null && captioningManager.isEnabled()) {
-                        TrackInfo track = searchTrack(info, trackType, format ->
-                                format.language != null && (format.language.equals(locale2) || format.language.equals(locale3))
-                        );
-                        if (track != null) selection.add(track);
-                    }
-                } else if (trackType == C.TRACK_TYPE_AUDIO) { // Default audio selection
+            case "auto":
+            case "system":
+            case "default": {
+                // Enable all renders and clear any strict selection overrides
+                // In case of C.TRACK_TYPE_VIDEO - all video tracks as valid options for ABR to choose from
+                iterateRenders(info, trackType, renderIndex -> {
+                    builder.setRendererDisabled(renderIndex, false);
+                    builder.clearSelectionOverrides(renderIndex);
+                });
+
+                // Apply audio/subtitle selection base on current locale
+                Locale currentLocale = Locale.getDefault();
+                String locale2 = currentLocale.getLanguage(); // 2 letter code
+                String locale3 = currentLocale.getISO3Language(); // 3 letter code
+
+                if (trackType == C.TRACK_TYPE_AUDIO) { // Default audio selection
                     TrackInfo track = searchTrack(info, trackType, format ->
                             format.language != null && (format.language.equals(locale2) || format.language.equals(locale3))
                     );
-                    if (track != null) selection.add(track);
+                    String preferred = track != null ? track.format.language : null;
+                    builder.setPreferredAudioLanguage(preferred);
+                } else if (trackType == C.TRACK_TYPE_TEXT) { // Default subtitle selection
+                    if (SDK_INT > JELLY_BEAN_MR2) {
+                        CaptioningManager captioning = (CaptioningManager) context.getSystemService(CAPTIONING_SERVICE);
+                        if (captioning != null && captioning.isEnabled()) {
+                            TrackInfo track = searchTrack(info, trackType, format ->
+                                    format.language != null && (format.language.equals(locale2) || format.language.equals(locale3))
+                            );
+                            String preferred = track != null ? track.format.language : null;
+                            builder.setPreferredTextLanguage(preferred);
+                        }
+                    } else {
+                        builder.setPreferredTextLanguage(null);
+                    }
                 }
                 break;
             }
@@ -163,29 +195,14 @@ public class TracksUtil {
             }
         }
 
-        // Build selection params
-        ParametersBuilder builder = initialParameters.buildUpon();
-        boolean hasVideoSelected = false;
-        boolean hasAudioSelected = false;
+        // Apply strict selection overrides
         for (TrackInfo track : selection) {
-            if (track.type == C.TRACK_TYPE_VIDEO) hasVideoSelected = true;
-            if (track.type == C.TRACK_TYPE_AUDIO) hasAudioSelected = true;
             int renderIndex = track.renderIndex;
             builder.setRendererDisabled(renderIndex, false);
             builder.clearSelectionOverrides(renderIndex);
             builder.setSelectionOverride(renderIndex, info.getTrackGroups(renderIndex),
                     new DefaultTrackSelector.SelectionOverride(track.groupIndex, track.trackIndex));
         }
-        // Add all video tracks as valid options for ABR to choose from when there is no strict selection
-        if (!hasVideoSelected) iterateRenders(info, C.TRACK_TYPE_VIDEO, renderIndex -> {
-            builder.setRendererDisabled(renderIndex, false);
-            builder.clearSelectionOverrides(renderIndex);
-        });
-        // Add all audio tracks as valid options for ABR to choose from when there is no strict selection
-        if (!hasAudioSelected) iterateRenders(info, C.TRACK_TYPE_AUDIO, renderIndex -> {
-            builder.setRendererDisabled(renderIndex, false);
-            builder.clearSelectionOverrides(renderIndex);
-        });
         return builder.build();
     }
 
@@ -259,6 +276,15 @@ public class TracksUtil {
     private static void populateIndices(long complexIndex, ByteBuffer out) {
         out.clear();
         out.putLong(complexIndex);
+    }
+
+    private static String getLanguageDisplayName(@Nullable String lang) {
+        if (lang == null) return "";
+        String normalizedLang = Util.normalizeLanguageCode(lang);
+        Locale locale = SDK_INT >= LOLLIPOP ? Locale.forLanguageTag(normalizedLang) : new Locale(normalizedLang);
+        String display = locale.getDisplayName(locale);
+        if (display.length() > 0) display = display.substring(0, 1).toUpperCase() + display.substring(1);
+        return display;
     }
 
     private static long getDynamicLong(Dynamic value) {
