@@ -711,7 +711,7 @@ Type | Value | Description
 "language" | string | Play the audio track with the language specified as the Value, e.g. "fr"
 "index" | number | Play the audio track with the index specified as the value, e.g. 0
 
-If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
+If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria than: the first match will be used (iOS), player will choose one of tracks for specified language (Android ExoPlayer)
 
 Platforms: Android ExoPlayer, iOS
 
@@ -743,7 +743,7 @@ Type | Value | Description
 
 Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for hearing impaired people. If "system" is selected and the Captions Setting is enabled, iOS/Android will look for a caption that matches that customer's language and display it. 
 
-If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
+If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria than: the first match will be used (iOS), player will choose one of tracks for specified language (Android ExoPlayer)
 
 Platforms: Android ExoPlayer, iOS
 
@@ -1010,9 +1010,9 @@ Property | Type | Description
 currentPosition | number | Time in seconds where the media will start
 duration | number | Length of the media in seconds
 naturalSize | object | Properties:<br> * width - Width in pixels that the video was encoded at<br> * height - Height in pixels that the video was encoded at<br> * orientation - "portrait" or "landscape"
-audioTracks | array | An array of audio track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
-textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number<br> * title - Description of the track<br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
-videoTracks | array | An array of video track info objects with the following properties:<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video
+audioTracks | array | An array of audio track info objects with the following properties:<br> * index - Index number (note: in Android Exoplayer it is not simple index in a list, it complex index which calculation is based on render, group and track indices)<br> * trackId - ID for the track <br> * title - Description of the track (Android Exoplayer: it is capitalized `Locale#getDisplayName(locale))` created from language code <br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+textTracks | array | An array of text track info objects with the following properties:<br> * index - Index number (note: in Android Exoplayer it is not simple index in a list, it complex index which calculation is based on render, group and track indices)<br> * trackId - ID for the track <br> * title - Description of the track (Android Exoplayer: it is capitalized `Locale#getDisplayName(locale))` created from language code <br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+videoTracks | array | An array of video track info objects with the following properties:<br> * index - Index number (note: in Android Exoplayer it is not simple index in a list, it complex index which calculation is based on render, group and track indices)<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video
 
 Example:
 ```
