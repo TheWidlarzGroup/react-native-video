@@ -908,6 +908,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setupPipController {
   if (!_pipController && _playerLayer && [AVPictureInPictureController isPictureInPictureSupported]) {
+    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     // Create new controller passing reference to the AVPlayerLayer
     _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
     _pipController.delegate = self;
