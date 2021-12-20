@@ -1,5 +1,8 @@
 ## Changelog
 
+### Next
+- Add audio configs required for PIP for iOS
+
 ### Version 5.2.0
 
 - Fix for tvOS native audio menu language selector
