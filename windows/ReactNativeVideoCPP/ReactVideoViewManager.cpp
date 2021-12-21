@@ -30,9 +30,9 @@ void ReactVideoViewManager::ReactContext(IReactContext reactContext) noexcept {
 winrt::Microsoft::ReactNative::ConstantProviderDelegate ReactVideoViewManager::ExportedViewConstants() noexcept {
   return [](winrt::Microsoft::ReactNative::IJSValueWriter const &constantWriter) {
     WriteProperty(constantWriter, L"ScaleNone", to_hstring(std::to_string((int)Stretch::None)));
-    WriteProperty(constantWriter, L"ScaleToFill", to_hstring(std::to_string((int)Stretch::UniformToFill)));
+    WriteProperty(constantWriter, L"ScaleToFill", to_hstring(std::to_string((int)Stretch::Fill)));
     WriteProperty(constantWriter, L"ScaleAspectFit", to_hstring(std::to_string((int)Stretch::Uniform)));
-    WriteProperty(constantWriter, L"ScaleAspectFill", to_hstring(std::to_string((int)Stretch::Fill)));
+    WriteProperty(constantWriter, L"ScaleAspectFill", to_hstring(std::to_string((int)Stretch::UniformToFill)));
   };
 }
 
