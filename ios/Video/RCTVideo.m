@@ -912,6 +912,7 @@ static int const RCTVideoUnset = -1;
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     // Create new controller passing reference to the AVPlayerLayer
     _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
+    _pipController.canStartPictureInPictureAutomaticallyFromInline = true;
     _pipController.delegate = self;
   }
 }
