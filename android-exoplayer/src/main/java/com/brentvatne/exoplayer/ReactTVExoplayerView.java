@@ -44,6 +44,7 @@ import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
+import com.dice.util.DorisHelper;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.AdTagParameters;
@@ -1036,6 +1037,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
+            DorisHelper.logDceTracks(C.TRACK_TYPE_AUDIO, exoPlayer, trackSelector);
+            DorisHelper.logDceTracks(C.TRACK_TYPE_TEXT, exoPlayer, trackSelector);
             eventEmitter.load(exoPlayer.getDuration(), exoPlayer.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
@@ -1043,6 +1046,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private WritableArray getAudioTrackInfo() {
         WritableArray audioTracks = Arguments.createArray();
+        final Set<String> addedLanguages = new HashSet<>();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
@@ -1054,11 +1058,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
             WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putInt("index", i);
-            audioTrack.putString("title", format.id != null ? format.id : "");
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTracks.pushMap(audioTrack);
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
+                audioTrack.putInt("index", i);
+                audioTrack.putString("title", format.id != null ? format.id : "");
+                audioTrack.putString("type", format.sampleMimeType);
+                audioTrack.putString("language", format.language != null ? format.language : "");
+                audioTracks.pushMap(audioTrack);
+                addedLanguages.add(name);
+            }
         }
         return audioTracks;
     }
@@ -1076,8 +1087,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
-            String name = format.language != null ? format.language : "";
-            if(!addedLanguages.contains(name)) {
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
                 WritableMap textTrack = Arguments.createMap();
                 textTrack.putInt("index", i);
                 textTrack.putString("title", format.id != null ? format.id : "");

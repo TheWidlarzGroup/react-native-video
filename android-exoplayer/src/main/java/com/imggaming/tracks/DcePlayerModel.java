@@ -160,7 +160,6 @@ public class DcePlayerModel {
         final ArrayList<DceTrack> ret = new ArrayList<>();
         final Set<String> addedLanguages = new HashSet<>();
 
-
         int index = findTrackTypeAvailable(trackType);
 
         if (index >= 0) {
