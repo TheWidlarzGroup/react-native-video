@@ -225,6 +225,7 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
+#if TARGET_OS_IOS
   // Forced disabling PiP on background if background playback is disabled
   if ([AVPictureInPictureController isPictureInPictureSupported]
       && _pipController
@@ -232,7 +233,7 @@ static int const RCTVideoUnset = -1;
     _pipController = nil;
     self.onPictureInPictureStatusChanged(@{@"isActive": [NSNumber numberWithBool:false]});
   }
-
+#endif
   if (_playInBackground || _playWhenInactive || _paused) return;
   
   [_player pause];
@@ -241,17 +242,21 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
+#if TARGET_OS_IOS
   if (_playInBackground) {
     if ([_pipController isPictureInPicturePossible]) return;
     // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
     [_playerLayer setPlayer:nil];
     [_playerViewController setPlayer:nil];
   }
+#endif
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
+#if TARGET_OS_IOS
   [self setupPipController];
+#endif
   [self applyModifiers];
   if (_playInBackground && (_playerLayer.player == nil || _playerViewController.player == nil)) {
     [_playerLayer setPlayer:_player];
