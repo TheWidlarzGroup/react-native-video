@@ -202,6 +202,18 @@ class ReactExoplayerView extends FrameLayout implements
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
                         eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos), height, width, bitrate);
+                    if (player != null
+                            && player.getPlaybackState() == Player.STATE_READY
+                            && player.getPlayWhenReady()
+                    ) {
+                        Format videoFormat = player.getVideoFormat();
+                        int width = videoFormat != null ? videoFormat.width : 0;
+                        int height = videoFormat != null ? videoFormat.height : 0;
+                        int bitrate = videoFormat != null ? videoFormat.bitrate : 0;
+
+                        long pos = player.getCurrentPosition();
+                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), height, width, bitrate);
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -844,12 +856,7 @@ class ReactExoplayerView extends FrameLayout implements
             int height = videoFormat != null ? videoFormat.height : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
             int bitrate = videoFormat != null ? videoFormat.bitrate : 0;
-            Long currentPosition = ThreadUtil.callOnApplicationThread(player, () -> player.getCurrentPosition());
-            Long duration = ThreadUtil.callOnApplicationThread(player, () -> player.getDuration());
-            if (currentPosition == null || duration == null) {
-                return;
-            }
-            eventEmitter.load(duration, currentPosition, width, height,
+            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo(), getVideoTrackInfo(), trackId, bitrate);
         }
     }

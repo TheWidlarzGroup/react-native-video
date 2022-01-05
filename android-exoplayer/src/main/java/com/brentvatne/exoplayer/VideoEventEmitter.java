@@ -134,6 +134,9 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
+    private static final String EVENT_PROP_BITRATE = "bitrate";
+
+
     void setViewId(int viewId) {
         this.viewId = viewId;
     }
