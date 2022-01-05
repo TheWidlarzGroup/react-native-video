@@ -44,7 +44,6 @@ import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
-import com.dice.util.DorisHelper;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.AdTagParameters;
@@ -1037,8 +1036,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
-            DorisHelper.logDceTracks(C.TRACK_TYPE_AUDIO, exoPlayer, trackSelector);
-            DorisHelper.logDceTracks(C.TRACK_TYPE_TEXT, exoPlayer, trackSelector);
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_AUDIO, exoPlayer, trackSelector);
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_TEXT, exoPlayer, trackSelector);
             eventEmitter.load(exoPlayer.getDuration(), exoPlayer.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
