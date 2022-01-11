@@ -108,9 +108,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -1034,6 +1036,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_AUDIO, exoPlayer, trackSelector);
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_TEXT, exoPlayer, trackSelector);
             eventEmitter.load(exoPlayer.getDuration(), exoPlayer.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
@@ -1041,6 +1045,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private WritableArray getAudioTrackInfo() {
         WritableArray audioTracks = Arguments.createArray();
+        final Set<String> addedLanguages = new HashSet<>();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
@@ -1052,17 +1057,25 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
             WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putInt("index", i);
-            audioTrack.putString("title", format.id != null ? format.id : "");
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTracks.pushMap(audioTrack);
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
+                audioTrack.putInt("index", i);
+                audioTrack.putString("title", format.id != null ? format.id : "");
+                audioTrack.putString("type", format.sampleMimeType);
+                audioTrack.putString("language", format.language != null ? format.language : "");
+                audioTracks.pushMap(audioTrack);
+                addedLanguages.add(name);
+            }
         }
         return audioTracks;
     }
 
     private WritableArray getTextTrackInfo() {
         WritableArray textTracks = Arguments.createArray();
+        final Set<String> addedLanguages = new HashSet<>();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
@@ -1073,12 +1086,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
-            WritableMap textTrack = Arguments.createMap();
-            textTrack.putInt("index", i);
-            textTrack.putString("title", format.id != null ? format.id : "");
-            textTrack.putString("type", format.sampleMimeType);
-            textTrack.putString("language", format.language != null ? format.language : "");
-            textTracks.pushMap(textTrack);
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
+                WritableMap textTrack = Arguments.createMap();
+                textTrack.putInt("index", i);
+                textTrack.putString("title", format.id != null ? format.id : "");
+                textTrack.putString("type", format.sampleMimeType);
+                textTrack.putString("language", format.language != null ? format.language : "");
+                textTracks.pushMap(textTrack);
+                addedLanguages.add(name);
+            }
         }
         return textTracks;
     }

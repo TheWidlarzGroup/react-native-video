@@ -18,8 +18,10 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class DcePlayerModel {
 
@@ -156,6 +158,7 @@ public class DcePlayerModel {
 
     private ArrayList<DceTrack> getDceTracks(int trackType) {
         final ArrayList<DceTrack> ret = new ArrayList<>();
+        final Set<String> addedLanguages = new HashSet<>();
 
         int index = findTrackTypeAvailable(trackType);
 
@@ -198,7 +201,10 @@ public class DcePlayerModel {
 
                     Log.d(DcePlayerModel.class.getName(), " group =  " + languageLabel + " selected = " + isSelected);
 
-                    ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
+                    if(!addedLanguages.contains(languageLabel)){
+                        ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
+                        addedLanguages.add(languageLabel);
+                    }
                 }
             }
         }
