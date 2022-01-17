@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -39,6 +40,9 @@ static int const RCTVideoUnset = -1;
   /* DRM */
   NSDictionary *_drm;
   AVAssetResourceLoadingRequest *_loadingRequest;
+  
+  /* Workaround for Dolby Atmos on OS 15.2 and beyond */
+  id _remoteCommandHandlerForSpatialAudio;
   
   /* Required to publish events */
   RCTEventDispatcher *_eventDispatcher;
@@ -217,8 +221,33 @@ static int const RCTVideoUnset = -1;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self removePlayerLayer];
   [self removePlayerItemObservers];
+  [self removeSpatialAudioRemoteCommandHandler];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
   [_player removeObserver:self forKeyPath:externalPlaybackActive context: nil];
+}
+
+#pragma mark - Spatial Audio / Dolby Atmos Workaround
+
+/* These functions are a temporarily workaround to enable the rendering of Dolby Atmos on
+ * iOS 15 and above.
+ */
+- (void)addSpatialAudioRemoteCommandHandler
+{
+  MPRemoteCommand *remoteCommand = [MPRemoteCommandCenter sharedCommandCenter].playCommand;
+  
+  _remoteCommandHandlerForSpatialAudio = [remoteCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent *event) {
+      return MPRemoteCommandHandlerStatusSuccess;
+  }];
+}
+
+- (void)removeSpatialAudioRemoteCommandHandler
+{
+  MPRemoteCommand *remoteCommand = [MPRemoteCommandCenter sharedCommandCenter].playCommand;
+  
+  if (_remoteCommandHandlerForSpatialAudio != nil) {
+      [remoteCommand removeTarget:_remoteCommandHandlerForSpatialAudio];
+      _remoteCommandHandlerForSpatialAudio = nil;
+  }
 }
 
 #pragma mark - App lifecycle handlers
@@ -933,9 +962,11 @@ static int const RCTVideoUnset = -1;
   if (paused) {
     [_player pause];
     [_player setRate:0.0];
+    [self removeSpatialAudioRemoteCommandHandler];
   } else {
 
     [self configureAudio];
+    [self addSpatialAudioRemoteCommandHandler];
 
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
