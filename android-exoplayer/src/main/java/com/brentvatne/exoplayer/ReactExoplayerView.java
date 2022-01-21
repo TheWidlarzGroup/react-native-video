@@ -74,6 +74,7 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.SeekParameters;
 import com.penthera.virtuososdk.client.IAsset;
 import com.penthera.virtuososdk.client.IIdentifier;
 import com.penthera.virtuososdk.client.ISegmentedAsset;
@@ -535,6 +536,7 @@ class ReactExoplayerView extends FrameLayout implements
                             .setTrackSelector​(trackSelector)
                             .setBandwidthMeter(bandwidthMeter)
                             .setLoadControl(defaultLoadControl)
+                            .setSeekParameters(SeekParameters.CLOSEST_SYNC)
                             .build();
 
 
