@@ -1,7 +1,6 @@
 package com.brentvatne.exoplayer;
 
 import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
-import static com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -111,6 +110,8 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playerNeedsSource;
     @Nullable
     private TrackGroupArray lastSeenTrackGroupArray;
+    @Nullable
+    private TrackSelectionArray lastSeenTrackSelectionArray;
 
     private int resumeWindow;
     private long resumePosition;
@@ -816,9 +817,9 @@ class ReactExoplayerView extends FrameLayout implements
                     player.getCurrentPosition(),
                     width,
                     height,
-                    TracksUtil.getAudioTrackInfo(info),
-                    TracksUtil.getTextTrackInfo(info),
-                    TracksUtil.getVideoTrackInfo(info),
+                    TracksUtil.getAudioTracks(info),
+                    TracksUtil.getTextTracks(info),
+                    TracksUtil.getVideoTracks(info),
                     trackId);
         }
     }
@@ -870,9 +871,15 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(@NonNull TrackGroupArray trackGroups, @NonNull TrackSelectionArray trackSelections) {
-        if (trackGroups != lastSeenTrackGroupArray) {
-            // todo dispatch played track changes
+        if (trackGroups != lastSeenTrackGroupArray || TracksUtil.selectionChanged(lastSeenTrackSelectionArray, trackSelections)) {
             lastSeenTrackGroupArray = trackGroups;
+
+            MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+            eventEmitter.tracksChange(
+                    TracksUtil.getSelectedAudioTrack(info, trackSelections),
+                    TracksUtil.getSelectedTextTrack(info, trackSelections),
+                    TracksUtil.getSelectedVideoTrack(info, trackSelections)
+            );
         }
     }
 

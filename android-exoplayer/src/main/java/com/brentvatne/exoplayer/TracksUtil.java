@@ -3,20 +3,16 @@ package com.brentvatne.exoplayer;
 import static android.content.Context.CAPTIONING_SERVICE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static com.brentvatne.exoplayer.LocaleUtils.getLanguageDisplayName;
 
 import android.content.Context;
-import android.util.Pair;
 import android.view.accessibility.CaptioningManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.TrackGroup;
@@ -24,68 +20,48 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Parameters;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.ParametersBuilder;
+import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Consumer;
-import com.google.android.exoplayer2.util.Util;
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 public class TracksUtil {
 
-    private static final int SHORT_BYTES = 2;
-    private static final int LONG_BYTES = 8;
-
     private TracksUtil() {
     }
 
-    static WritableArray getAudioTrackInfo(@Nullable MappedTrackInfo info) {
-        return getAllTracks(info, C.TRACK_TYPE_AUDIO, input -> {
-            long complexIndex = input.first;
-            Format format = input.second;
-            WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putDouble("index", complexIndex);
-            audioTrack.putString("trackId", format.id != null ? format.id : "");
-            audioTrack.putString("title", getLanguageDisplayName(format.language));
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
-                    : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
-            return audioTrack;
-        });
+    static List<TrackInfo> getAudioTracks(@Nullable MappedTrackInfo info) {
+        return getTracks(info, C.TRACK_TYPE_AUDIO);
     }
 
-    static WritableArray getVideoTrackInfo(@Nullable MappedTrackInfo info) {
-        return getAllTracks(info, C.TRACK_TYPE_VIDEO, input -> {
-            long complexIndex = input.first;
-            Format format = input.second;
-            WritableMap videoTrack = Arguments.createMap();
-            videoTrack.putDouble("index", complexIndex);
-            videoTrack.putString("trackId", format.id != null ? format.id : "");
-            videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
-            videoTrack.putInt("height", format.height == Format.NO_VALUE ? 0 : format.height);
-            videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-            videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
-            return videoTrack;
-        });
+    static List<TrackInfo> getVideoTracks(@Nullable MappedTrackInfo info) {
+        return getTracks(info, C.TRACK_TYPE_VIDEO);
     }
 
-    static WritableArray getTextTrackInfo(@Nullable MappedTrackInfo info) {
-        return getAllTracks(info, C.TRACK_TYPE_TEXT, input -> {
-            long complexIndex = input.first;
-            Format format = input.second;
-            WritableMap textTrack = Arguments.createMap();
-            textTrack.putDouble("index", complexIndex);
-            textTrack.putString("trackId", format.id != null ? format.id : "");
-            textTrack.putString("title", getLanguageDisplayName(format.language));
-            textTrack.putString("type", format.sampleMimeType);
-            textTrack.putString("language", format.language != null ? format.language : "");
-            return textTrack;
-        });
+    static List<TrackInfo> getTextTracks(@Nullable MappedTrackInfo info) {
+        return getTracks(info, C.TRACK_TYPE_TEXT);
+    }
+
+    @Nullable
+    static TrackInfo getSelectedAudioTrack(@Nullable MappedTrackInfo info, @Nullable TrackSelectionArray selections) {
+        return getSelectedTrack(info, selections, C.TRACK_TYPE_AUDIO);
+    }
+
+    @Nullable
+    static TrackInfo getSelectedVideoTrack(@Nullable MappedTrackInfo info, @Nullable TrackSelectionArray selections) {
+        return getSelectedTrack(info, selections, C.TRACK_TYPE_VIDEO);
+    }
+
+    @Nullable
+    static TrackInfo getSelectedTextTrack(@Nullable MappedTrackInfo info, @Nullable TrackSelectionArray selections) {
+        return getSelectedTrack(info, selections, C.TRACK_TYPE_TEXT);
     }
 
     static Parameters buildSelectionParameters(
@@ -135,11 +111,9 @@ public class TracksUtil {
             }
             case "index": {
                 long complexIndex = getDynamicLong(value);
-                ByteBuffer tmpIndicesOut = ByteBuffer.allocate(LONG_BYTES);
-                populateIndices(complexIndex, tmpIndicesOut);
-                int renderIndex = tmpIndicesOut.getShort(0);
-                int groupIndex = tmpIndicesOut.getShort(0 + SHORT_BYTES);
-                int trackIndex = tmpIndicesOut.getShort(0 + SHORT_BYTES + SHORT_BYTES);
+                int renderIndex = TrackInfo.getRenderIndex(complexIndex);
+                int groupIndex = TrackInfo.getGroupIndex(complexIndex);
+                int trackIndex = TrackInfo.getTrackIndex(complexIndex);
                 if (renderIndex >= 0 && renderIndex < info.getRendererCount()) {
                     TrackGroupArray groups = info.getTrackGroups(renderIndex);
                     if (groupIndex >= 0 && groupIndex < groups.length) {
@@ -206,16 +180,20 @@ public class TracksUtil {
         return builder.build();
     }
 
-    private static WritableArray getAllTracks(@Nullable MappedTrackInfo info, int trackType, Function<Pair<Long, Format>, WritableMap> transformation) {
-        WritableArray tracks = Arguments.createArray();
-        ByteBuffer tmpIndicesOut = ByteBuffer.allocate(LONG_BYTES);
-        iterateTracks(info, trackType, trackInfo -> {
-            populateIndices(trackInfo.renderIndex, trackInfo.groupIndex, trackInfo.trackIndex, tmpIndicesOut);
-            long complexIndex = tmpIndicesOut.getLong(0);
-            tracks.pushMap(transformation.apply(Pair.create(complexIndex, trackInfo.format)));
-
-        });
-        return tracks;
+    static boolean selectionChanged(@Nullable TrackSelectionArray lha, @Nullable TrackSelectionArray rha) {
+        if (lha == null || lha != rha) {
+            return true;
+        } else {
+            for (int i = 0; i < lha.length; i++) {
+                ExoTrackSelection lhSelection = (ExoTrackSelection) lha.get(i);
+                ExoTrackSelection rhSelection = ((ExoTrackSelection) rha.get(i));
+                if (lhSelection != null && rhSelection != null &&
+                        lhSelection.getSelectedFormat() != rhSelection.getSelectedFormat()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Nullable
@@ -238,10 +216,9 @@ public class TracksUtil {
         return null;
     }
 
-    private static void iterateTracks(@Nullable MappedTrackInfo info, int trackType, Consumer<TrackInfo> consumer) {
-        if (info == null) {
-            return;
-        }
+    private static List<TrackInfo> getTracks(@Nullable MappedTrackInfo info, int trackType) {
+        if (info == null) return Collections.emptyList();
+        ArrayList<TrackInfo> tracks = new ArrayList<>();
         for (int renderIndex = 0; renderIndex < info.getRendererCount(); renderIndex++) {
             if (info.getRendererType(renderIndex) != trackType) continue;
             TrackGroupArray groups = info.getTrackGroups(renderIndex);
@@ -250,11 +227,36 @@ public class TracksUtil {
                 for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                     if (info.getTrackSupport(renderIndex, groupIndex, trackIndex) == C.FORMAT_HANDLED) {
                         Format format = group.getFormat(trackIndex);
-                        consumer.accept(new TrackInfo(trackType, renderIndex, groupIndex, trackIndex, format));
+                        tracks.add(new TrackInfo(trackType, renderIndex, groupIndex, trackIndex, format));
                     }
                 }
             }
         }
+        return tracks;
+    }
+
+    private static TrackInfo getSelectedTrack(
+            @Nullable MappedTrackInfo info,
+            @Nullable TrackSelectionArray selections,
+            int trackType) {
+        if (info == null || selections == null) {
+            return null;
+        }
+        for (int renderIndex = 0; renderIndex < info.getRendererCount(); renderIndex++) {
+            int rendererType = info.getRendererType(renderIndex);
+            if (rendererType != trackType) continue;
+            TrackSelection selection = selections.get(renderIndex);
+            if (!(selection instanceof ExoTrackSelection)) continue;
+
+            TrackGroupArray renderGroups = info.getTrackGroups(renderIndex);
+            TrackGroup selectedTrackGroup = selection.getTrackGroup();
+            Format selectedFormat = ((ExoTrackSelection) selection).getSelectedFormat();
+            int groupIndex = renderGroups.indexOf(selectedTrackGroup);
+            int formatIndex = selectedTrackGroup.indexOf(selectedFormat);
+            return new TrackInfo(trackType, renderIndex, groupIndex, formatIndex, selectedFormat);
+        }
+        return null;
+
     }
 
     private static void iterateRenders(@Nullable MappedTrackInfo info, int trackType, Consumer<Integer> consumer) {
@@ -264,27 +266,6 @@ public class TracksUtil {
         for (int renderIndex = 0; renderIndex < info.getRendererCount(); renderIndex++) {
             if (info.getRendererType(renderIndex) == trackType) consumer.accept(renderIndex);
         }
-    }
-
-    private static void populateIndices(int renderIndex, int groupIndex, int trackIndex, ByteBuffer out) {
-        out.clear();
-        out.putShort(((short) renderIndex));
-        out.putShort(((short) groupIndex));
-        out.putShort(((short) trackIndex));
-    }
-
-    private static void populateIndices(long complexIndex, ByteBuffer out) {
-        out.clear();
-        out.putLong(complexIndex);
-    }
-
-    private static String getLanguageDisplayName(@Nullable String lang) {
-        if (lang == null) return "";
-        String normalizedLang = Util.normalizeLanguageCode(lang);
-        Locale locale = SDK_INT >= LOLLIPOP ? Locale.forLanguageTag(normalizedLang) : new Locale(normalizedLang);
-        String display = locale.getDisplayName(locale);
-        if (display.length() > 0) display = display.substring(0, 1).toUpperCase() + display.substring(1);
-        return display;
     }
 
     private static long getDynamicLong(Dynamic value) {
@@ -304,21 +285,4 @@ public class TracksUtil {
         else
             throw new IllegalArgumentException("Unable to read int from " + value);
     }
-
-    private static final class TrackInfo {
-        public final int type;
-        public final int renderIndex;
-        public final int groupIndex;
-        public final int trackIndex;
-        public final Format format;
-
-        public TrackInfo(int type, int renderIndex, int groupIndex, int trackIndex, Format format) {
-            this.type = type;
-            this.renderIndex = renderIndex;
-            this.groupIndex = groupIndex;
-            this.trackIndex = trackIndex;
-            this.format = format;
-        }
-    }
-
 }
