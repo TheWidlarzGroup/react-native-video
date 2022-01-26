@@ -871,15 +871,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onTracksChanged(@NonNull TrackGroupArray trackGroups, @NonNull TrackSelectionArray trackSelections) {
         if (trackGroups != lastSeenTrackGroupArray) {
-            MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
-            if (mappedTrackInfo != null) {
-                if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    eventEmitter.unsupportedTrack(C.TRACK_TYPE_VIDEO);
-                }
-                if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    eventEmitter.unsupportedTrack(C.TRACK_TYPE_AUDIO);
-                }
-            }
+            // todo dispatch played track changes
             lastSeenTrackGroupArray = trackGroups;
         }
     }

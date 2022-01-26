@@ -332,7 +332,7 @@ var styles = StyleSheet.create({
 * [onReadyForDisplay](#onreadyfordisplay)
 * [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
 * [onPlaybackRateChange](#onplaybackratechange)
-* [onUnsupportedTrack](#onunsupportedtrack)
+* [onPlayedTracksChange](#onplayedtrackschange)
 * [onProgress](#onprogress)
 * [onSeek](#onseek)
 * [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
@@ -1114,22 +1114,16 @@ Example:
 
 Platforms: all
 
-#### onUnsupportedTrack
-Callback function that is called when a track of type {@code trackType} is not supported by the player.
+#### onPlayedTracksChange
+Callback function that is called when currently played track change.
 
 Property | Type | Description
 --- | --- | ---
-trackType | number | One of the {@link com.google.android.exoplayer2.C}{@code .TRACK_TYPE_*} constants. 2 - video tack, 1 - audio track 
-
-Example:
-```
-{
-  playbackRate: 2, // indicates video tack
-}
-```
+audioTrack | object (optional) | Selected audio track info object with the following properties:<br> * trackId - ID for the track <br> * title - Description of the track (Android Exoplayer: it is capitalized `Locale#getDisplayName(locale))` created from language code <br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+textTrack | object (optional) | Selected text track info object with the following properties:<br> * trackId - ID for the track <br> * title - Description of the track (Android Exoplayer: it is capitalized `Locale#getDisplayName(locale))` created from language code <br> * language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br> * type - Mime type of track
+videoTrack | object (optional) | Selected video track info object with the following properties:<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video<br> * type - Mime type of track
 
 Platforms: Android ExoPlayer
-
 
 #### onProgress
 Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
