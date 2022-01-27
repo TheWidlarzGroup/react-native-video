@@ -1,7 +1,9 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
-
+// start/Dolby xCD change
+import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
+// end/Dolby xCD change
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
@@ -23,4 +25,15 @@ public class DefaultReactExoplayerConfig implements ReactExoplayerConfig {
     public DefaultBandwidthMeter getBandwidthMeter() {
         return bandwidthMeter;
     }
+    
+    // start/Dolby xCD change
+    @Override
+    public ExoTrackSelection.Factory getCustomTrackSelectionFactory() {
+        return null;
+    }
+
+    @Override
+    public void onPlayerInitialized() {
+    }
+    // end/Dolby xCD change
 }

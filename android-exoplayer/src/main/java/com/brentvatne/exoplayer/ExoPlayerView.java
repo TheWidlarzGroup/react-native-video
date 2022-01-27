@@ -34,7 +34,9 @@ public final class ExoPlayerView extends FrameLayout {
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
-    private SimpleExoPlayer player;
+    // start/Dolby xCD change
+    public SimpleExoPlayer player;
+    // end/Dolby xCD change
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
 
