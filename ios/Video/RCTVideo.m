@@ -389,6 +389,8 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
+  [self removeSpatialAudioRemoteCommandHandler];
+
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
     
     // perform on next run loop, otherwise other passed react-props may not be set
@@ -397,6 +399,8 @@ static int const RCTVideoUnset = -1;
       _playerItem = playerItem;
       [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
       [self addPlayerItemObservers];
+      [self addSpatialAudioRemoteCommandHandler];
+
       [self setFilter:self->_filterName];
       [self setMaxBitRate:self->_maxBitRate];
       
@@ -959,11 +963,9 @@ static int const RCTVideoUnset = -1;
   if (paused) {
     [_player pause];
     [_player setRate:0.0];
-    [self removeSpatialAudioRemoteCommandHandler];
   } else {
 
     [self configureAudio];
-    [self addSpatialAudioRemoteCommandHandler];
 
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
