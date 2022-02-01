@@ -68,6 +68,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -1269,5 +1270,13 @@ class ReactExoplayerView extends FrameLayout implements
         if (player != null) {
             Log.d("ExtensionMode", "set extension mode after player initialized doesn't have effect");
         }
+    }
+
+    public void setCaptionStyle(@Nullable CaptionStyleCompat style) {
+        exoPlayerView.setCaptionStyle(style);
+    }
+
+    public void setCaptionLinesRespected(boolean respected) {
+        exoPlayerView.setCaptionLinesRespected(respected);
     }
 }

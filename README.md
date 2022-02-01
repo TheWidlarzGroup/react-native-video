@@ -394,6 +394,27 @@ bufferConfig={{
 
 Platforms: Android ExoPlayer
 
+#### captionConfig
+Adjust caption appearance. This prop takes an object with one or more of the properties listed below.
+
+Property | Type | Description
+--- | --- | ---
+style | object (optional) | customize caption appearance<br>Properties:<br> * foregroundColor (string hex - required) - caption text color<br> * backgroundColor (string hex - required) - caption background color<br> * windowColor (string hex - required) - preferred window color
+linesRespected | boolean (optional) | specify if subtitle embedded lines should respected
+
+Example values:
+```
+captionConfig={{
+  style: {
+    foregroundColor: "#FFFFFF",
+    backgroundColor: "#40000000",
+    windowColor: "#00FFFFFF"
+  },
+  linesRespected: false
+}}
+```
+
+Platforms: Android ExoPlayer
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
 
