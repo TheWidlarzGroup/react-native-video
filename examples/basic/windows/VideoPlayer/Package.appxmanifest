@@ -6,16 +6,16 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   IgnorableNamespaces="uap mp">
 
- <Identity
-    Name="20164b9d-dedc-4b42-ac7a-27e45953166a"
-    Publisher="CN=react-native-video"
+  <Identity
+    Name="03e5ea38-79e9-4edf-b08f-ceebd0c5aaff"
+    Publisher="CN=nickf"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="20164b9d-dedc-4b42-ac7a-27e45953166a" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="03e5ea38-79e9-4edf-b08f-ceebd0c5aaff" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>VideoPlayer</DisplayName>
-    <PublisherDisplayName>react-native-video</PublisherDisplayName>
+    <DisplayName>videoplayer</DisplayName>
+    <PublisherDisplayName>nickf</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -28,14 +28,15 @@
   </Resources>
 
   <Applications>
-    <Application Id="App"
+    <Application
+      Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="VideoPlayer.App">
+      EntryPoint="videoplayer.App">
       <uap:VisualElements
-        DisplayName="VideoPlayer"
+        DisplayName="videoplayer"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="VideoPlayer"
+        Description="videoplayer"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
