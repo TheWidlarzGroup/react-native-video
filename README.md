@@ -31,6 +31,10 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
   * [Android](#android-installation)
   * [Windows](#windows-installation)
   * [react-native-dom](#react-native-dom-installation)
+* [Examples](#examples)
+  * [iOS](#ios-example)
+  * [Android](#android-example)
+  * [Windows](#windows-example)
 * [Usage](#usage)
 * [iOS App Transport Security](#ios-app-transport-security)
 * [Audio Mixing](#audio-mixing)
@@ -66,6 +70,12 @@ Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
 **React Native 0.59 and below**
 
 Run `react-native link react-native-video` to link the react-native-video library.
+
+#### Enable Static Linking for dependencies in your ios project Podfile
+
+Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios project Podfile.
+
+[See the example ios project for reference](examples/basic/ios/Podfile#L5)
 
 #### Using CocoaPods (required to enable caching)
 
@@ -254,6 +264,25 @@ const ReactNativeDomOptions = {
 };
 ```
 </details>
+
+## Examples
+
+Run `yarn install` before running any of the examples.
+
+### iOS Example
+```
+yarn xbuild ios
+```
+
+### Android Example
+```
+yarn xbuild android
+```
+
+### Windows Example
+```
+yarn xbuild windows
+```
 
 ## Usage
 
@@ -1386,6 +1415,16 @@ To enable audio to play in background on iOS the audio session needs to be set t
 - [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
 ## Updating
+
+### Version 6.0.0
+
+#### iOS
+
+In your project Podfile add support for static dependency linking. This is required to support the new Promises subdependency in the iOS swift conversion.
+
+Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios project Podfile.
+
+[See the example ios project for reference](examples/basic/ios/Podfile#L5)
 
 ### Version 5.0.0
 
