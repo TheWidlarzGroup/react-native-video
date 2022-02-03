@@ -43,7 +43,8 @@
         "shaka-player": "^2.5.9"
     },
     "scripts": {
-        "lint": "yarn eslint *.js"
+        "lint": "yarn eslint *.js",
+        "basic": "yarn --cwd examples/basic"
     },
     "files": [
         "android-exoplayer",

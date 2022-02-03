@@ -1,11 +1,7 @@
 'use strict';
 
-import React, {
-  Component
-} from 'react';
-
+import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +10,7 @@ import {
 
 import Video from 'react-native-video';
 
-class VideoPlayer extends Component {
+export default class VideoPlayer extends Component {
 
   state = {
     rate: 1,
@@ -226,5 +222,3 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
 });
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);

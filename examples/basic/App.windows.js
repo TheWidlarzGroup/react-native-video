@@ -1,11 +1,7 @@
 'use strict';
 
-import React, {
-  Component
-} from 'react';
-
+import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +10,7 @@ import {
 
 import Video from 'react-native-video';
 
-class VideoPlayer extends Component {
+export default class VideoPlayer extends Component {
   constructor(props) {
     super(props);
     this.onLoad = this.onLoad.bind(this);
@@ -51,7 +47,7 @@ class VideoPlayer extends Component {
 
     return (
       <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? 'bold' : 'normal'}]}>
           {rate}x
         </Text>
       </TouchableOpacity>
@@ -62,8 +58,8 @@ class VideoPlayer extends Component {
     const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}); }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? 'bold' : 'normal'}]}>
           {resizeMode}
         </Text>
       </TouchableOpacity>
@@ -73,9 +69,10 @@ class VideoPlayer extends Component {
   renderVolumeControl(volume) {
     const isSelected = (this.state.volume == volume);
 
+    const newLocal = 'bold';
     return (
       <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? newLocal : 'normal'}]}>
           {volume * 100}%
         </Text>
       </TouchableOpacity>
@@ -98,7 +95,7 @@ class VideoPlayer extends Component {
                  resizeMode={this.state.resizeMode}
                  onLoad={this.onLoad}
                  onProgress={this.onProgress}
-                 onEnd={() => { console.log('Done!') }}
+                 onEnd={() => { console.log('Done!'); }}
                  repeat={true} />
         </TouchableOpacity>
 
@@ -153,7 +150,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   controls: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderRadius: 5,
     position: 'absolute',
     bottom: 20,
@@ -200,11 +197,9 @@ const styles = StyleSheet.create({
   controlOption: {
     alignSelf: 'center',
     fontSize: 11,
-    color: "white",
+    color: 'white',
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
   },
 });
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);

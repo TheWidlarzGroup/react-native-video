@@ -1,6 +1,5 @@
 'use strict';
-import React, {Component} from 'react';
-
+import React, { Component } from 'react';
 import {
   Alert,
   Platform,
@@ -502,5 +501,3 @@ const styles = StyleSheet.create({
     height: 300,
   },
 });
-
-// AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
