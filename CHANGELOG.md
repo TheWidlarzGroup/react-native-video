@@ -1,9 +1,10 @@
 ## Changelog
 
-### Version 5.3.0-alpha1
+### Version 6.0.0-alpha1
 
 - Convert iOS implementation to Swift
 - Add iOS support for decoding offline sources
+- Update basic example applications (React Native 0.63.4)
 ### Version 5.2.1
 
 - Add Google's maven repository to avoid build error [#2552] (https://github.com/react-native-video/react-native-video/pull/2552) 
