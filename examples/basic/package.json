@@ -5,10 +5,12 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "windows": "react-native run-windows",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
     "lint": "eslint .",
-    "update": "./update.sh"
+    "update": "./update.sh",
+    "postinstall": "cd ios && pod install"
   },
   "dependencies": {
     "react": "16.13.1",
