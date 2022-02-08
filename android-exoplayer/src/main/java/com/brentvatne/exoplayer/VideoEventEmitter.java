@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import static com.brentvatne.exoplayer.LocaleUtils.getLanguageDisplayName;
 
+import android.net.Uri;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -17,6 +18,8 @@ import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.emsg.EventMessage;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
+import com.google.android.exoplayer2.source.dash.manifest.BaseUrl;
+import com.google.android.exoplayer2.source.dash.manifest.Representation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -182,7 +185,7 @@ class VideoEventEmitter {
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTrackArray);
         WritableArray audioTrackArray = Arguments.createArray();
         for (TrackInfo track : audioTracks) {
-            audioTrackArray.pushMap(createAudioTrackInfo(track));
+            audioTrackArray.pushMap(createAudioTrackInfo(track, null));
         }
         event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTrackArray);
         WritableArray textTrackArray = Arguments.createArray();
@@ -203,9 +206,9 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void tracksChange(TrackInfo audioTrack, TrackInfo textTrack, TrackInfo videoTrack) {
+    void tracksChange(Object manifest, TrackInfo audioTrack, TrackInfo textTrack, TrackInfo videoTrack) {
         WritableMap event = Arguments.createMap();
-        event.putMap(EVENT_PROP_AUDIO_TRACK, createAudioTrackInfo(audioTrack));
+        event.putMap(EVENT_PROP_AUDIO_TRACK, createAudioTrackInfo(audioTrack, manifest));
         event.putMap(EVENT_PROP_VIDEO_TRACK, createVideoTrackInfo(videoTrack));
         event.putMap(EVENT_PROP_TEXT_TRACK, createTextTrackInfo(textTrack));
 
@@ -344,7 +347,7 @@ class VideoEventEmitter {
     }
 
     @Nullable
-    private static WritableMap createAudioTrackInfo(TrackInfo track) {
+    private static WritableMap createAudioTrackInfo(TrackInfo track, Object manifest) {
         if (track == null) return null;
         long complexIndex = track.complexIndex;
         Format format = track.format;
@@ -356,6 +359,14 @@ class VideoEventEmitter {
         audioTrack.putString("language", format.language != null ? format.language : "");
         audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
                 : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
+        if (manifest != null) {
+            Representation representation = ManifestUtils.getRepresentationOf(manifest, track);
+            if (representation != null && representation.baseUrls.size() > 0) {
+                BaseUrl baseUrl = representation.baseUrls.get(0);
+                String file = Uri.parse(baseUrl.url).getLastPathSegment();
+                audioTrack.putString("file", file);
+            }
+        }
         return audioTrack;
     }
 

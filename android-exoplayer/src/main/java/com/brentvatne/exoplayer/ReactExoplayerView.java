@@ -875,11 +875,11 @@ class ReactExoplayerView extends FrameLayout implements
             lastSeenTrackGroupArray = trackGroups;
 
             MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-            eventEmitter.tracksChange(
-                    TracksUtil.getSelectedAudioTrack(info, trackSelections),
-                    TracksUtil.getSelectedTextTrack(info, trackSelections),
-                    TracksUtil.getSelectedVideoTrack(info, trackSelections)
-            );
+            Object manifest = player.getCurrentManifest();
+            TrackInfo audioTrack = TracksUtil.getSelectedAudioTrack(info, trackSelections);
+            TrackInfo textTrack = TracksUtil.getSelectedTextTrack(info, trackSelections);
+            TrackInfo videoTrack = TracksUtil.getSelectedVideoTrack(info, trackSelections);
+            eventEmitter.tracksChange(manifest, audioTrack, textTrack, videoTrack);
         }
     }
 
