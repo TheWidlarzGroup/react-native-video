@@ -1,16 +1,20 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.text.Cue.DIMEN_UNSET;
+import static com.google.android.exoplayer2.text.Cue.LINE_TYPE_NUMBER;
+
 import android.annotation.TargetApi;
 import android.content.Context;
-import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
@@ -21,9 +25,11 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.video.VideoSize;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TargetApi(16)
@@ -40,6 +46,7 @@ public final class ExoPlayerView extends FrameLayout {
 
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
+    private boolean captionLinesRespected = true;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -208,13 +215,31 @@ public final class ExoPlayerView extends FrameLayout {
         layout.invalidateAspectRatio();
     }
 
+    public void setCaptionStyle(@Nullable CaptionStyleCompat style) {
+        if (style != null) {
+            subtitleLayout.setStyle(style);
+        } else {
+            subtitleLayout.setUserDefaultStyle();
+        }
+    }
+
+    public void setCaptionLinesRespected(boolean respected) {
+        captionLinesRespected = respected;
+    }
+
     private final class ComponentListener implements Player.Listener {
 
         // TextRenderer.Output implementation
 
         @Override
         public void onCues(List<Cue> cues) {
-            subtitleLayout.onCues(cues);
+            if (!captionLinesRespected) {
+                ArrayList<Cue> noLineCues = new ArrayList<>();
+                for (Cue cue : cues) noLineCues.add(cue.buildUpon().setLine(DIMEN_UNSET, LINE_TYPE_NUMBER).build());
+                subtitleLayout.onCues(noLineCues);
+            } else {
+                subtitleLayout.onCues(cues);
+            }
         }
 
         // SimpleExoPlayer.VideoListener implementation

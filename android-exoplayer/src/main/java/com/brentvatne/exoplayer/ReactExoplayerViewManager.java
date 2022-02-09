@@ -1,11 +1,12 @@
 package com.brentvatne.exoplayer;
 
 import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
+import static com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_NONE;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -15,14 +16,13 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.bridge.ReactMethod;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.google.android.exoplayer2.util.Util;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -75,6 +75,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_EXTENSION_RENDER_MODE = "extensionRenderMode";
+    private static final String PROP_CAPTION_CONFIG = "captionConfig";
 
     private ReactExoplayerConfig config;
 
@@ -339,6 +340,29 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
+    }
+
+    @ReactProp(name = PROP_CAPTION_CONFIG)
+    public void setCaptionConfig(final ReactExoplayerView videoView, @Nullable ReadableMap captionConfig) {
+        if (captionConfig == null) {
+            videoView.setCaptionStyle(null);
+            videoView.setCaptionLinesRespected(true);
+        } else {
+            ReadableMap styleMap = captionConfig.getMap("style");
+            if (styleMap != null) {
+                CaptionStyleCompat style = new CaptionStyleCompat(
+                        Color.parseColor(styleMap.getString("foregroundColor")),
+                        Color.parseColor(styleMap.getString("backgroundColor")),
+                        Color.parseColor(styleMap.getString("windowColor")),
+                        EDGE_TYPE_NONE,
+                        Color.WHITE,
+                        null
+                );
+                videoView.setCaptionStyle(style);
+            }
+            videoView.setCaptionLinesRespected(captionConfig.hasKey("linesRespected") &&
+                    captionConfig.getBoolean("linesRespected"));
         }
     }
 

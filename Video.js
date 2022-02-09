@@ -468,6 +468,14 @@ Video.propTypes = {
     bufferForPlaybackMs: PropTypes.number,
     bufferForPlaybackAfterRebufferMs: PropTypes.number,
   }),
+  captionConfig: PropTypes.shape({
+    style: PropTypes.shape({
+      foregroundColor: PropTypes.string,
+      backgroundColor: PropTypes.string,
+      windowColor: PropTypes.string,
+    }),
+    linesRespected: PropTypes.bool
+  }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
   pictureInPicture: PropTypes.bool,
