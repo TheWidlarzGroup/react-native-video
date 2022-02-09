@@ -1,20 +1,30 @@
 package com.brentvatne.exoplayer;
 
-import androidx.annotation.StringDef;
+import static com.brentvatne.exoplayer.LocaleUtils.getLanguageDisplayName;
+
+import android.net.Uri;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.emsg.EventMessage;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
+import com.google.android.exoplayer2.source.dash.manifest.BaseUrl;
+import com.google.android.exoplayer2.source.dash.manifest.Representation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Locale;
 
 class VideoEventEmitter {
 
@@ -47,7 +57,7 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
-    private static final String EVENT_ON_UNSUPPORTED_TRACK = "onUnsupportedTrack";
+    private static final String EVENT_PLAYED_TRACKS_CHANGE = "onPlayedTracksChange";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -69,7 +79,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
-            EVENT_ON_UNSUPPORTED_TRACK,
+            EVENT_PLAYED_TRACKS_CHANGE,
             EVENT_BANDWIDTH,
     };
 
@@ -94,7 +104,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
-            EVENT_ON_UNSUPPORTED_TRACK,
+            EVENT_PLAYED_TRACKS_CHANGE,
             EVENT_BANDWIDTH,
     })
     @interface VideoEvents {
@@ -119,11 +129,13 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_HEIGHT = "height";
     private static final String EVENT_PROP_ORIENTATION = "orientation";
     private static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
+    private static final String EVENT_PROP_VIDEO_TRACK = "videoTrack";
     private static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
+    private static final String EVENT_PROP_AUDIO_TRACK = "audioTrack";
     private static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+    private static final String EVENT_PROP_TEXT_TRACK = "textTrack";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
-    private static final String EVENT_PROP_TRACK_TYPE = "trackType";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
 
     private static final String EVENT_PROP_ERROR = "error";
@@ -132,7 +144,7 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
-    private static final String EVENT_PROP_BITRATE = "bitrate";   
+    private static final String EVENT_PROP_BITRATE = "bitrate";
 
 
     void setViewId(int viewId) {
@@ -143,8 +155,15 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
+    void load(
+            double duration,
+            double currentPosition,
+            int videoWidth,
+            int videoHeight,
+            List<TrackInfo> audioTracks,
+            List<TrackInfo> textTracks,
+            List<TrackInfo> videoTracks,
+            String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -159,9 +178,21 @@ class VideoEventEmitter {
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
         event.putString(EVENT_PROP_TRACK_ID, trackId);
-        event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
-        event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
-        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
+        WritableArray videoTrackArray = Arguments.createArray();
+        for (TrackInfo track : videoTracks) {
+            videoTrackArray.pushMap(createVideoTrackInfo(track));
+        }
+        event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTrackArray);
+        WritableArray audioTrackArray = Arguments.createArray();
+        for (TrackInfo track : audioTracks) {
+            audioTrackArray.pushMap(createAudioTrackInfo(track, null));
+        }
+        event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTrackArray);
+        WritableArray textTrackArray = Arguments.createArray();
+        for (TrackInfo track : textTracks) {
+            textTrackArray.pushMap(createTextTrackInfo(track));
+        }
+        event.putArray(EVENT_PROP_TEXT_TRACKS, textTrackArray);
 
         // TODO: Actually check if you can.
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
@@ -173,6 +204,15 @@ class VideoEventEmitter {
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
 
         receiveEvent(EVENT_LOAD, event);
+    }
+
+    void tracksChange(Object manifest, TrackInfo audioTrack, TrackInfo textTrack, TrackInfo videoTrack) {
+        WritableMap event = Arguments.createMap();
+        event.putMap(EVENT_PROP_AUDIO_TRACK, createAudioTrackInfo(audioTrack, manifest));
+        event.putMap(EVENT_PROP_VIDEO_TRACK, createVideoTrackInfo(videoTrack));
+        event.putMap(EVENT_PROP_TEXT_TRACK, createTextTrackInfo(textTrack));
+
+        receiveEvent(EVENT_PLAYED_TRACKS_CHANGE, event);
     }
 
     void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
@@ -249,12 +289,6 @@ class VideoEventEmitter {
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
 
-    void unsupportedTrack(int type) {
-        WritableMap event = Arguments.createMap();
-        event.putInt(EVENT_PROP_TRACK_TYPE, type);
-        receiveEvent(EVENT_ON_UNSUPPORTED_TRACK, event);
-    }
-
     void timedMetadata(Metadata metadata) {
         WritableArray metadataArray = Arguments.createArray();
 
@@ -310,5 +344,58 @@ class VideoEventEmitter {
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
         eventEmitter.receiveEvent(viewId, type, event);
+    }
+
+    @Nullable
+    private static WritableMap createAudioTrackInfo(TrackInfo track, Object manifest) {
+        if (track == null) return null;
+        long complexIndex = track.complexIndex;
+        Format format = track.format;
+        WritableMap audioTrack = Arguments.createMap();
+        audioTrack.putDouble("index", complexIndex);
+        audioTrack.putString("trackId", format.id != null ? format.id : "");
+        audioTrack.putString("title", getLanguageDisplayName(format.language));
+        audioTrack.putString("type", format.sampleMimeType);
+        audioTrack.putString("language", format.language != null ? format.language : "");
+        audioTrack.putString("bitrate", format.bitrate == Format.NO_VALUE ? ""
+                : String.format(Locale.US, "%.2fMbps", format.bitrate / 1000000f));
+        if (manifest != null) {
+            Representation representation = ManifestUtils.getRepresentationOf(manifest, track);
+            if (representation != null && representation.baseUrls.size() > 0) {
+                BaseUrl baseUrl = representation.baseUrls.get(0);
+                String file = Uri.parse(baseUrl.url).getLastPathSegment();
+                audioTrack.putString("file", file);
+            }
+        }
+        return audioTrack;
+    }
+
+    @Nullable
+    private static WritableMap createVideoTrackInfo(TrackInfo track) {
+        if (track == null) return null;
+        long complexIndex = track.complexIndex;
+        Format format = track.format;
+        WritableMap videoTrack = Arguments.createMap();
+        videoTrack.putDouble("index", complexIndex);
+        videoTrack.putString("trackId", format.id != null ? format.id : "");
+        videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
+        videoTrack.putInt("height", format.height == Format.NO_VALUE ? 0 : format.height);
+        videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+        videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
+        return videoTrack;
+    }
+
+    @Nullable
+    private static WritableMap createTextTrackInfo(TrackInfo track) {
+        if (track == null) return null;
+        long complexIndex = track.complexIndex;
+        Format format = track.format;
+        WritableMap textTrack = Arguments.createMap();
+        textTrack.putDouble("index", complexIndex);
+        textTrack.putString("trackId", format.id != null ? format.id : "");
+        textTrack.putString("title", getLanguageDisplayName(format.language));
+        textTrack.putString("type", format.sampleMimeType);
+        textTrack.putString("language", format.language != null ? format.language : "");
+        return textTrack;
     }
 }

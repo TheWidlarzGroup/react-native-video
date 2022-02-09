@@ -1,7 +1,6 @@
 package com.brentvatne.exoplayer;
 
 import static com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
-import static com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -111,6 +110,8 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean playerNeedsSource;
     @Nullable
     private TrackGroupArray lastSeenTrackGroupArray;
+    @Nullable
+    private TrackSelectionArray lastSeenTrackSelectionArray;
 
     private int resumeWindow;
     private long resumePosition;
@@ -816,9 +817,9 @@ class ReactExoplayerView extends FrameLayout implements
                     player.getCurrentPosition(),
                     width,
                     height,
-                    TracksUtil.getAudioTrackInfo(info),
-                    TracksUtil.getTextTrackInfo(info),
-                    TracksUtil.getVideoTrackInfo(info),
+                    TracksUtil.getAudioTracks(info),
+                    TracksUtil.getTextTracks(info),
+                    TracksUtil.getVideoTracks(info),
                     trackId);
         }
     }
@@ -870,17 +871,15 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(@NonNull TrackGroupArray trackGroups, @NonNull TrackSelectionArray trackSelections) {
-        if (trackGroups != lastSeenTrackGroupArray) {
-            MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
-            if (mappedTrackInfo != null) {
-                if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    eventEmitter.unsupportedTrack(C.TRACK_TYPE_VIDEO);
-                }
-                if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    eventEmitter.unsupportedTrack(C.TRACK_TYPE_AUDIO);
-                }
-            }
+        if (trackGroups != lastSeenTrackGroupArray || TracksUtil.selectionChanged(lastSeenTrackSelectionArray, trackSelections)) {
             lastSeenTrackGroupArray = trackGroups;
+
+            MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+            Object manifest = player.getCurrentManifest();
+            TrackInfo audioTrack = TracksUtil.getSelectedAudioTrack(info, trackSelections);
+            TrackInfo textTrack = TracksUtil.getSelectedTextTrack(info, trackSelections);
+            TrackInfo videoTrack = TracksUtil.getSelectedVideoTrack(info, trackSelections);
+            eventEmitter.tracksChange(manifest, audioTrack, textTrack, videoTrack);
         }
     }
 
