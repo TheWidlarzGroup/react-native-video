@@ -1082,13 +1082,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
-<<<<<<< HEAD
-            boolean isOriginalSourceNull = srcUri == null;
-            boolean isSourceEqual = uri.equals(srcUri);
-=======
             isEncrypted = false;
             File srcFile = new File(uri.getPath());
->>>>>>> bec68fff (Reading Encrypted file support)
 
             if(!srcFile.getName().startsWith("encrypted_")){
                 File encryptedFile = new File(uri.getPath().replace(srcFile.getName(), "encrypted_"+srcFile.getName()));

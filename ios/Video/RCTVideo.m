@@ -39,6 +39,7 @@ static int const RCTVideoUnset = -1;
   ChromaImageFilter *chromaFilter;NSURL *_videoURL;
   BOOL _useGreenScreen;
   BOOL _shouldDrawImage;
+  int _frameRate;
   BOOL _requestingCertificate;
   BOOL _requestingCertificateErrored;
 
@@ -126,7 +127,8 @@ static int const RCTVideoUnset = -1;
     _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _mixWithOthers = @"inherit"; // inherit, mix, duck
-_shouldDrawImage = false;
+    _shouldDrawImage = false;
+
     [self setUpMTKViewUtils];
 
 #if TARGET_OS_IOS
@@ -177,7 +179,9 @@ _shouldDrawImage = false;
     self.device = MTLCreateSystemDefaultDevice();
     _ciContext = [CIContext contextWithMTLDevice: self.device];
     self.framebufferOnly = false;
+    [self setPaused:YES];
     self.enableSetNeedsDisplay = false;
+    _frameRate = 30;
 
     //Set backgroundcolor as clear
     self.backgroundColor = [UIColor clearColor];
@@ -393,6 +397,7 @@ _shouldDrawImage = false;
         _image = image;
         _shouldDrawImage = true;
         //        [self draw];
+        [self draw];
     }
 }
 
@@ -443,6 +448,11 @@ _shouldDrawImage = false;
 
 - (void)setUpDisplayLink {
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkUpdated:)];
+    if (@available(iOS 10.0, *)) {
+        _displayLink.preferredFramesPerSecond = _frameRate;
+    } else {
+        // Fallback on earlier versions
+    };
     [_displayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
 }
 
@@ -972,9 +982,13 @@ _shouldDrawImage = false;
 #pragma mark - Prop setters
 
 - (void)setUseGreenScreen:(BOOL)useGreenScreen {
-    if (_useGreenScreen != useGreenScreen) {
-        _useGreenScreen = useGreenScreen;
-    }
+        if (_useGreenScreen != useGreenScreen) {
+            _useGreenScreen = useGreenScreen;
+        }
+}
+
+- (void)setFrameRate:(int)frameRate {
+    _frameRate = frameRate;
 }
 
 - (void)setResizeMode:(NSString*)mode
@@ -1082,7 +1096,10 @@ _shouldDrawImage = false;
     }
 
     _paused = paused;
+<<<<<<< HEAD
 
+=======
+>>>>>>> a44c5243 (Used metal kit for green screen removal)
 }
 
 - (float)getCurrentTime
