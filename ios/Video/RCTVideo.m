@@ -26,6 +26,7 @@ static int const RCTVideoUnset = -1;
 {
   AVPlayer *_player;
   AVPlayerItem *_playerItem;
+  AVPlayerItemVideoOutput *_playerItemOutput;
   NSDictionary *_source;
   BOOL _playerItemObserversSet;
   BOOL _playerBufferEmpty;
@@ -97,7 +98,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+    _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -366,6 +367,11 @@ static int const RCTVideoUnset = -1;
     [self playerItemForSource:self->_source withCallback:^(AVPlayerItem * playerItem) {
       self->_playerItem = playerItem;
       _playerItem = playerItem;
+        
+      self->_playerItemOutput = [[AVPlayerItemVideoOutput alloc] initWithOutputSettings: nil];
+      
+      [self->_playerItem addOutput:_playerItemOutput];
+        
       [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
       [self addPlayerItemObservers];
       [self setFilter:self->_filterName];
@@ -1036,8 +1042,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
 {
-	_automaticallyWaitsToMinimizeStalling = waits;
-	_player.automaticallyWaitsToMinimizeStalling = waits;
+  _automaticallyWaitsToMinimizeStalling = waits;
+  _player.automaticallyWaitsToMinimizeStalling = waits;
 }
 
 
@@ -1644,6 +1650,44 @@ static int const RCTVideoUnset = -1;
 }
 
 #pragma mark - Export
+
+- (void)getFrame:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  
+  AVAsset *asset = _playerItem.asset;
+  
+  if (_playerItemOutput == nil) {
+    reject(@"ERROR_OUTPUT_NIL", @"Output is nil", nil);
+    
+    return;
+  }
+  
+  CMTime currentTime = [_playerItem currentTime];
+  CVPixelBufferRef buffer =  [_playerItemOutput copyPixelBufferForItemTime:currentTime itemTimeForDisplay: nil];
+  
+  if (buffer == nil) {
+    reject(@"ERROR_OUTPUT_BUFFER_NIL", @"Output buffer is nil", nil);
+    
+    return;
+  }
+  
+  CIImage* ciImage = [CIImage imageWithCVPixelBuffer:buffer];
+  CIContext* context = [[CIContext alloc] init];
+  
+  CGImageRef cgImage = [context createCGImage:ciImage fromRect:ciImage.extent];
+  
+  if (cgImage == nil) {
+    reject(@"ERROR_OUTPUT_CGIMAGE_NIL", @"CGImageRef from ciImage is nil", nil);
+    
+    return;
+  }
+  
+  UIImage* image = [UIImage imageWithCGImage: cgImage];
+  
+  NSData* jpegImageData = UIImageJPEGRepresentation(image, 0.8);
+  NSString* jpegImageBase64 = [jpegImageData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+  
+  resolve(jpegImageBase64);
+}
 
 - (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
   

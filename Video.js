@@ -25,6 +25,10 @@ export default class Video extends Component {
     };
   }
 
+  getFrame = async (options) => {
+    return await NativeModules.VideoManager.getFrame(options, findNodeHandle(this._root));
+  }
+
   setNativeProps(nativeProps) {
     this._root.setNativeProps(nativeProps);
   }
