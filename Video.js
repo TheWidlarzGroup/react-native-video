@@ -410,6 +410,7 @@ Video.propTypes = {
     base64Certificate: PropTypes.bool,
     certificateUrl: PropTypes.string,
     getLicense: PropTypes.func,
+    lookHost: PropTypes.bool
   }),
   minLoadRetryCount: PropTypes.number,
   maxBitRate: PropTypes.number,

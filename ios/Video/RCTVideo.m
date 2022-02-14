@@ -1785,9 +1785,13 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
   if (self->_drm != nil) {
     NSString *contentId;
     NSString *contentIdOverride = (NSString *)[self->_drm objectForKey:@"contentId"];
+    BOOL isHost = [self->_drm objectForKey:@"lookHost"];
+    if (isHost != nil) {
+        isHost = YES
+    }
     if (contentIdOverride != nil) {
       contentId = contentIdOverride;
-    } else if (self.onGetLicense) {
+    } else if (self.onGetLicense && isHost) {
       contentId = url.host;
     } else {
       contentId = [url.absoluteString stringByReplacingOccurrencesOfString:@"skd://" withString:@""];
