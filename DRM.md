@@ -16,10 +16,17 @@ DRM object allows this members:
 | [`certificateUrl`](#certificateurl) | string | undefined | iOS | Specifies the url to obtain your ios certificate for fairplay, Url to the .cer file |
 | [`base64Certificate`](#base64certificate) | bool | false | iOS | Specifies whether or not the certificate returned by the `certificateUrl` is on base64 |
 | [`getLicense`](#getlicense)| function | undefined | iOS | Rather than setting the `licenseServer` url to get the license, you can manually get the license on the JS part, and send the result to the native part to configure FairplayDRM for the stream |
+| [`fullUriString`](#fullUriString)| bool | false | iOS | if set `getLicense` propperty, choose `host` or `full uri` for `contentId` | 
 
 ### `base64Certificate`
 
 Whether or not the certificate url returns it on base64.
+
+Platforms: iOS
+
+### `fullUriString`
+
+whether get skd uri host or skd uri full string.
 
 Platforms: iOS
 
