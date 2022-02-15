@@ -72,6 +72,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
+    private static final String PROP_SECURE_VIEW = "useSecureView";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
@@ -329,6 +330,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
     public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
         videoView.setUseTextureView(useTextureView);
+    }
+
+    @ReactProp(name = PROP_SECURE_VIEW, defaultBoolean = true)
+    public void useSecureView(final ReactExoplayerView videoView, final boolean useSecureView) {
+        videoView.useSecureView(useSecureView);
     }
 
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
