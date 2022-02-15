@@ -316,6 +316,7 @@ var styles = StyleSheet.create({
 * [textTracks](#texttracks)
 * [trackId](#trackId)
 * [useTextureView](#usetextureview)
+* [useSecureView](#useSecureView)
 * [volume](#volume)
 * [localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)
 
@@ -908,6 +909,18 @@ useTextureView can only be set at same time you're setting the source.
 
 * **true (default)** - Use a TextureView
 * **false** - Use a SurfaceView
+
+Platforms: Android ExoPlayer
+
+#### useSecureView
+Force the output to a SurfaceView and enables the secure surface.
+
+This will override useTextureView flag.
+
+SurfaceView is is the only one that can be labeled as secure.
+
+* **true** - Use security
+* **false (default)** - Do not use security
 
 Platforms: Android ExoPlayer
 

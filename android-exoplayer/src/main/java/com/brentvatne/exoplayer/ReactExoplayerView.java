@@ -1696,6 +1696,10 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setUseTextureView(finallyUseTextureView);
     }
 
+    public void useSecureView(boolean useSecureView) {
+        exoPlayerView.useSecureView(useSecureView);
+    }
+
     public void setHideShutterView(boolean hideShutterView) {
         exoPlayerView.setHideShutterView(hideShutterView);
     }
