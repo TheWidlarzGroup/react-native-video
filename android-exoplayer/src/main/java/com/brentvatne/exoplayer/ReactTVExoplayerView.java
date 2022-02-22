@@ -81,6 +81,7 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
@@ -89,9 +90,9 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.MetadataOutput;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -109,21 +110,23 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED;
 import static com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED;
 
 @SuppressLint("ViewConstructor")
 class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener,
-        Player.EventListener,
+        Player.Listener,
         AnalyticsListener,
         BecomingNoisyListener,
         AudioManager.OnAudioFocusChangeListener,
-        MetadataOutput,
         ExoDorisPlayerViewListener,
         ExoDorisImaDaiWrapperListener {
 
@@ -152,6 +155,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private static final String KEY_START_DATE = "startDate";
     private static final String KEY_END_DATE = "endDate";
 
+    private static final int MAX_LOAD_BUFFER_MS = 30_000;
+
+    private static final long SEEK_POSITION_INVALID = C.POSITION_UNSET - 1;
+
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
@@ -167,8 +174,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ControlDispatcher controlDispatcher;
     private Source source;
     private boolean playerNeedsSource;
-    private int resumeWindow;
-    private long resumePosition;
+    private int resumeWindow = C.INDEX_UNSET;
+    private long resumePosition = C.POSITION_UNSET; // unit: millisecond
+    private boolean haveResumePosition = false;
     private boolean loadVideoStarted;
     private boolean isInBackground = false;
     private boolean fromBackground = false;
@@ -184,6 +192,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private int viewHeight = 0;
     private boolean hasReloadedCurrentSource = false;
     private boolean isMuted = false;
+    private UUID correlationId;
 
     // Props from React
     private RNSource src;
@@ -201,7 +210,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean hasStats;
     private float jsProgressUpdateInterval = 250.0f;
     private boolean useTextureView = false;
-    private boolean canSeekToLiveEdge = false;
     private Map<String, String> requestHeaders;
     private int accentColor;
     // \ End props
@@ -233,21 +241,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_JS_PROGRESS) {
-                if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                    long position = player.getCurrentPosition();
-                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                SimpleExoPlayer exoPlayer = (player == null ? null : player.getSimpleExoPlayer());
+                if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
+                    long position = exoPlayer.getCurrentPosition();
+                    long bufferedDuration = exoPlayer.getBufferedPercentage() * exoPlayer.getDuration() / 100;
 
                     if (isLive) {
-                        Timeline timeline = player.getCurrentTimeline();
+                        Timeline timeline = exoPlayer.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
-                            position -= timeline.getPeriod(player.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
+                            position -= timeline.getPeriod(exoPlayer.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
                         }
                     } else {
-                        boolean isAboutToEnd = player.getDuration() - position <= 10_000;
+                        boolean isAboutToEnd = exoPlayer.getDuration() - position <= 10_000;
                         eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
-                    eventEmitter.progressChanged(position, bufferedDuration, player.getDuration());
+                    eventEmitter.progressChanged(position, bufferedDuration, exoPlayer.getDuration());
 
                     jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);
@@ -262,13 +271,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_NATIVE_PROGRESS) {
-                if (player != null && player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady()) {
-                    long position = player.getCurrentPosition();
+                SimpleExoPlayer exoPlayer = (player == null ? null : player.getSimpleExoPlayer());
+                if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
+                    long position = exoPlayer.getCurrentPosition();
 
                     if (isLive && isImaDaiStream) {
-                        Timeline timeline = player.getCurrentTimeline();
+                        Timeline timeline = exoPlayer.getCurrentTimeline();
                         if (!timeline.isEmpty()) {
-                            long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
+                            long windowStartTimeMs = timeline.getWindow(exoPlayer.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
                             position = (windowStartTimeMs + position) / 1000L;
 
                             if (position < imaDaiSrc.getStartDate() || position > imaDaiSrc.getEndDate()) {
@@ -428,8 +438,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             isInBackground = false; // reset to false first
             if (isLive) {
                 // always seek to live edge when returning from background to a live event
-                canSeekToLiveEdge = true;
-                player.seekToDefaultPosition();
+                clearResumePosition();
+                player.getSimpleExoPlayer().seekToDefaultPosition();
             }
             activateMediaSession();
             setPlayWhenReady(true);
@@ -442,7 +452,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Log.d(TAG, "onHostPause()");
         setPlayInBackground(false);
         setPlayWhenReady(false);
-        player.pause();
+        if (player != null) {
+            player.getSimpleExoPlayer().pause();
+        }
         updateResumePosition();
         onStopPlayback();
         isInBackground = isInteractive();
@@ -479,39 +491,40 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
         if (player == null) {
             if (isImaDaiStream) {
-                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView, exoDorisPlayerView.getAdViewGroup());
+                exoDorisImaDaiPlayer = new ExoDorisImaDaiPlayer(getContext(), exoDorisPlayerView,
+                        exoDorisPlayerView.getAdViewGroup(), MAX_LOAD_BUFFER_MS);
                 player = exoDorisImaDaiPlayer.getExoDoris();
             } else if (isImaCsaiStream) {
-                exoDorisImaCsaiPlayer = new ExoDorisImaCsaiPlayer(getContext(), exoDorisPlayerView);
+                exoDorisImaCsaiPlayer = new ExoDorisImaCsaiPlayer(getContext(), exoDorisPlayerView, MAX_LOAD_BUFFER_MS);
                 player = exoDorisImaCsaiPlayer.getExoDoris();
             } else {
-                player = new ExoDorisBuilder(getContext()).build();
+                player = new ExoDorisBuilder(getContext()).setLoadBufferMs(MAX_LOAD_BUFFER_MS).build();
             }
             trackSelector = player.getTrackSelector();
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
 
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
                     .setContentType(C.CONTENT_TYPE_MOVIE)
                     .build();
 
-            player.setAudioAttributes(audioAttributes, false);
-            player.addListener(this);
-            player.addAnalyticsListener(this);
-            player.addMetadataOutput(this);
-            exoDorisPlayerView.setPlayer(player);
+            exoPlayer.setAudioAttributes(audioAttributes, false);
+            exoPlayer.addListener(this);
+            exoPlayer.addAnalyticsListener(this);
+            exoDorisPlayerView.setPlayer(exoPlayer);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
 
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
-            player.setPlaybackParameters(params);
-            player.setVolume(isMuted ? 0 : 1);
+            exoPlayer.setPlaybackParameters(params);
+            exoPlayer.setVolume(isMuted ? 0 : 1);
             Log.d(TAG, "initialisePlayer() new instance: " + force);
 
             activateMediaSession();
         }
         if (playerNeedsSource && src.getUrl() != null) {
-            boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+            haveResumePosition = resumeWindow != C.INDEX_UNSET;
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
 
             showOverlay();
@@ -522,7 +535,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             SourceBuilder sourceBuilder = new SourceBuilder()
                     .setMediaItemBuilder(mediaItemBuilder)
                     .setId(src.getId())
-                    .setMuxProperties(src.getMuxData(), exoDorisPlayerView.getVideoSurfaceView())
+                    .setMuxProperties(src.getMuxData(), String.valueOf(correlationId), exoDorisPlayerView.getVideoSurfaceView())
                     .setTextTracks(src.getTextTracks())
                     .setMaxVideoSize(viewWidth, viewHeight)
                     .setDrmParams(actionToken);
@@ -541,10 +554,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
 
             if (shouldSeekOnInit) {
+                sourceBuilder.setInitialWindowIndex(0);
                 sourceBuilder.setInitialPlaybackPosition(shouldSeekTo);
-            } else if (haveResumePosition && !force) {
-                sourceBuilder.setInitialWindowIndex(resumeWindow);
-                sourceBuilder.setInitialPlaybackPosition(resumePosition);
+            } else if (haveResumePosition && !force && !src.isLive()) {
+                // For CSAI playback, the seek action may be ignored while playing pre-roll ads.
+                // We can apply the resume position before load source.
+                // For live playback, we should switch the resume timestamp to seek position of the window.
+                // It need the timeline and it is not ready in here.
+                trySeekToResumePosition();
             }
 
             source = sourceBuilder.build();
@@ -595,7 +612,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         imaDaiProperties.setAdTagParametersValidFrom((long) imaDaiSrc.getStartDate());
         imaDaiProperties.setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate());
 
-        exoDorisImaDaiPlayer.load(source, true, ImaLanguage.SPANISH_UNITED_STATES);
+        exoDorisImaDaiPlayer.load(source, !haveResumePosition, ImaLanguage.SPANISH_UNITED_STATES);
         exoDorisImaDaiPlayer.getImaDaiWrapper().setExoDorisImaWrapperListener(this);
     }
 
@@ -688,7 +705,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     // MediaSession related functions.
     private void activateMediaSession() {
         Log.d(TAG, "activateMediaSession()");
-        mediaSessionConnector.setPlayer(player);
+        mediaSessionConnector.setPlayer(player.getSimpleExoPlayer());
         mediaSession.setActive(true);
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
@@ -744,9 +761,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         isInBackground = false;
 
         if (player != null) {
-            updateResumePosition();
-            player.removeListener(this);
-            player.removeMetadataOutput(this);
+            player.getSimpleExoPlayer().removeListener(this);
             player.release();
             player = null;
             trackSelector = null;
@@ -790,13 +805,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return;
         }
 
+        isPaused = !playWhenReady;
+        SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
         if (playWhenReady) {
             boolean hasAudioFocus = requestAudioFocus();
             if (hasAudioFocus) {
-                player.play();
+                exoPlayer.play();
             }
         } else {
-            player.pause();
+            exoPlayer.pause();
         }
 
         updateControlsState();
@@ -808,14 +825,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
 
         if (player != null) {
-            switch (player.getPlaybackState()) {
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
+            switch (exoPlayer.getPlaybackState()) {
                 case Player.STATE_IDLE:
                 case Player.STATE_ENDED:
                     initializePlayer(false);
                     break;
                 case Player.STATE_BUFFERING:
                 case Player.STATE_READY:
-                    if (!player.getPlayWhenReady() && !isInBackground) {
+                    if (!exoPlayer.getPlayWhenReady() && !isInBackground) {
                         setPlayWhenReady(true);
                     }
 
@@ -841,7 +859,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private void pausePlayback() {
         if (player != null) {
-            if (player.getPlayWhenReady()) {
+            if (player.getSimpleExoPlayer().getPlayWhenReady()) {
                 setPlayWhenReady(false);
             }
         }
@@ -860,14 +878,16 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void updateResumePosition() {
-        Log.d(TAG, "updateResumePosition()");
-        resumeWindow = player.getCurrentWindowIndex();
-        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition()) : C.TIME_UNSET;
+        SimpleExoPlayer exoPlayer = (player == null ? null : player.getSimpleExoPlayer());
+        if (exoPlayer != null && exoPlayer.isCurrentWindowSeekable()) {
+            resumeWindow = exoPlayer.getCurrentWindowIndex();
+            resumePosition = Math.max(0, exoPlayer.getCurrentPosition());
+        }
     }
 
     private void clearResumePosition() {
         resumeWindow = C.INDEX_UNSET;
-        resumePosition = C.TIME_UNSET;
+        resumePosition = C.POSITION_UNSET;
     }
 
     // AudioManager.OnAudioFocusChangeListener implementation
@@ -886,12 +906,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
 
         if (player != null) {
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 // Lower the volume
-                player.setVolume(0.8f);
+                exoPlayer.setVolume(0.8f);
             } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                 // Raise it back to normal
-                player.setVolume(1);
+                exoPlayer.setVolume(1);
             }
         }
     }
@@ -911,7 +932,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
+    public void onIsPlayingChanged(EventTime eventTime, boolean isPlaying) {
+        if (isPlaying) {
+            isPaused = false;
+            startProgressHandler();
+        }
+    }
+
+    @Override
     public void onPlaybackStateChanged(int state) {
+        if (state == Player.STATE_BUFFERING || state == Player.STATE_READY) {
+            trySeekToResumePosition();
+        }
+
         String text = "onStateChanged: playbackState = " + state;
         switch (state) {
             case Player.STATE_IDLE:
@@ -938,8 +971,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     Log.d(TAG, "IMA Stream ID = " + exoDorisImaDaiPlayer.getImaDaiWrapper().getStreamId());
                 }
 
-                // seek to edge of live window for live events
-                seekToDefaultPosition();
                 eventEmitter.ready();
                 onBuffering(false);
                 startProgressHandler();
@@ -949,14 +980,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 text += "ended";
                 eventEmitter.end();
                 onStopPlayback();
-                if (
-                        player.getRepeatMode() == Player.REPEAT_MODE_ONE
-                                || player.getRepeatMode() == Player.REPEAT_MODE_ALL
-                                || this.repeat
-                ) {
+                if (player.getSimpleExoPlayer().getRepeatMode() == Player.REPEAT_MODE_ONE
+                        || player.getSimpleExoPlayer().getRepeatMode() == Player.REPEAT_MODE_ALL
+                        || this.repeat) {
                     this.seekTo(0);
                 }
-
                 break;
             default:
                 text += "unknown";
@@ -968,19 +996,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Log.d(TAG, text);
     }
 
-    private void seekToDefaultPosition() {
-        Log.d(TAG, "seekToDefaultPosition() live: " + isLive + " canSeekToLiveEdge: " + canSeekToLiveEdge);
-        if (player != null && canSeekToLiveEdge && isLive) {
-            player.seekToDefaultPosition();
-            canSeekToLiveEdge = false; // reset needed otherwise falls into a loop when coming back from background
-        }
-    }
-
     private boolean isPlaying() {
-        return player != null
-                && player.getPlaybackState() != Player.STATE_ENDED
-                && player.getPlaybackState() != Player.STATE_IDLE
-                && player.getPlayWhenReady();
+        SimpleExoPlayer exoPlayer = (player == null ? null : player.getSimpleExoPlayer());
+        return exoPlayer != null
+                && exoPlayer.getPlaybackState() != Player.STATE_ENDED
+                && exoPlayer.getPlaybackState() != Player.STATE_IDLE
+                && exoPlayer.getPlayWhenReady();
     }
 
     private void startProgressHandler() {
@@ -1029,16 +1050,20 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             loadVideoStarted = false;
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
-            Format videoFormat = player.getVideoFormat();
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
+            Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_AUDIO, exoPlayer, trackSelector);
+            // MockStreamSource.logDceTracks(C.TRACK_TYPE_TEXT, exoPlayer, trackSelector);
+            eventEmitter.load(exoPlayer.getDuration(), exoPlayer.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
     }
 
     private WritableArray getAudioTrackInfo() {
         WritableArray audioTracks = Arguments.createArray();
+        final Set<String> addedLanguages = new HashSet<>();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
@@ -1050,17 +1075,25 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
             WritableMap audioTrack = Arguments.createMap();
-            audioTrack.putInt("index", i);
-            audioTrack.putString("title", format.id != null ? format.id : "");
-            audioTrack.putString("type", format.sampleMimeType);
-            audioTrack.putString("language", format.language != null ? format.language : "");
-            audioTracks.pushMap(audioTrack);
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
+                audioTrack.putInt("index", i);
+                audioTrack.putString("title", format.id != null ? format.id : "");
+                audioTrack.putString("type", format.sampleMimeType);
+                audioTrack.putString("language", format.language != null ? format.language : "");
+                audioTracks.pushMap(audioTrack);
+                addedLanguages.add(name);
+            }
         }
         return audioTracks;
     }
 
     private WritableArray getTextTrackInfo() {
         WritableArray textTracks = Arguments.createArray();
+        final Set<String> addedLanguages = new HashSet<>();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
@@ -1071,12 +1104,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
-            WritableMap textTrack = Arguments.createMap();
-            textTrack.putInt("index", i);
-            textTrack.putString("title", format.id != null ? format.id : "");
-            textTrack.putString("type", format.sampleMimeType);
-            textTrack.putString("language", format.language != null ? format.language : "");
-            textTracks.pushMap(textTrack);
+            String name = format.label != null ? format.label : format.language;
+            if (name == null) {
+                name = "";
+            }
+            if (!addedLanguages.contains(name)) {
+                WritableMap textTrack = Arguments.createMap();
+                textTrack.putInt("index", i);
+                textTrack.putString("title", format.id != null ? format.id : "");
+                textTrack.putString("type", format.sampleMimeType);
+                textTrack.putString("language", format.language != null ? format.language : "");
+                textTracks.pushMap(textTrack);
+                addedLanguages.add(name);
+            }
         }
         return textTracks;
     }
@@ -1095,26 +1135,40 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onPositionDiscontinuity(int reason) {
+    public void onCues(List<Cue> cues) {
+    }
+
+    @Override
+    public void onPositionDiscontinuity(
+            Player.PositionInfo oldPosition, Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
             // which they seeked.
             updateResumePosition();
         }
+
+        if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            clearResumePosition();
+        }
+
+        // While switching from ad period to content period, the onPlaybackStateChanged() event
+        // is not triggered sometimes, because the media file will be preloaded, so the buffer /
+        // ready state switching may not occur. We can try to handle the seek action in here.
+        if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
+            trySeekToResumePosition();
+        }
+
         // When repeat is turned on, reaching the end of the video will not cause a state change
         // so we need to explicitly detect it.
-        if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION
-                && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
+        if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
+                && player.getSimpleExoPlayer().getRepeatMode() == Player.REPEAT_MODE_ONE) {
             eventEmitter.end();
         }
     }
 
     @Override
     public void onTimelineChanged(Timeline timeline, int reason) {
-        if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED && isLive) {
-            canSeekToLiveEdge = true;
-        }
     }
 
     @Override
@@ -1142,12 +1196,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         String errorString = null;
         Exception ex = e;
         if (isBehindLiveWindow(e)) {
-            if (actionToken != null) {
-                resetSourceUrl();
-                eventEmitter.behindLiveWindowError();
-            } else {
+            SimpleExoPlayer exoPlayer = (player == null ? null : player.getSimpleExoPlayer());
+            if (exoPlayer != null) {
                 clearResumePosition();
-                initializePlayer(false);
+                exoPlayer.seekToDefaultPosition();
+                exoPlayer.prepare();
             }
         } else if (!hasReloadedCurrentSource && isUnauthorizedException(e)) {
             hasReloadedCurrentSource = true;
@@ -1226,9 +1279,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public int getTrackRendererIndex(int trackType) {
         if (player != null) {
-            int rendererCount = player.getRendererCount();
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
+            int rendererCount = exoPlayer.getRendererCount();
             for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++) {
-                if (player.getRendererType(rendererIndex) == trackType) {
+                if (exoPlayer.getRendererType(rendererIndex) == trackType) {
                     return rendererIndex;
                 }
             }
@@ -1266,6 +1320,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isOriginalSourceNull = srcUrl == null;
             boolean isSourceEqual = url.equals(srcUrl);
 
+            this.correlationId = UUID.randomUUID();
             this.isImaDaiStream = false;
             this.isImaDaiStreamLoaded = false;
             this.isImaCsaiStream = false;
@@ -1332,10 +1387,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void setRepeatModifier(boolean repeat) {
         if (player != null) {
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
             if (repeat) {
-                player.setRepeatMode(Player.REPEAT_MODE_ONE);
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
             } else {
-                player.setRepeatMode(Player.REPEAT_MODE_OFF);
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
             }
         }
         this.repeat = repeat;
@@ -1472,59 +1528,102 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         isMuted = muted;
 
         if (player != null) {
-            player.setVolume(muted ? 0 : 1);
+            player.getSimpleExoPlayer().setVolume(muted ? 0 : 1);
         }
     }
 
     public void setVolumeModifier(float volume) {
         if (player != null) {
-            player.setVolume(volume);
+            player.getSimpleExoPlayer().setVolume(volume);
         }
+    }
+
+    private void trySeekToResumePosition() {
+        // For CSAI playback, the seekTo() may be ignored while playing ads.
+        // We should suspend the seek action until we start playing the content period.
+        if (resumePosition != C.POSITION_UNSET && player != null && !player.getSimpleExoPlayer().isPlayingAd()) {
+            // For live playback, we should switch the timestamp to seek position of the window.
+            long seekPosition = getSeekPosition(resumePosition);
+            if (seekPosition == SEEK_POSITION_INVALID) {
+                // The provided timestamp is invalid: before the start or after the end of the window.
+                clearResumePosition();
+            } else if (seekPosition != C.POSITION_UNSET) {
+                // For live playback, the timeline is ready for seek in here.
+                seekTo(seekPosition);
+                clearResumePosition();
+            }
+        }
+    }
+
+    public void resumeTo(long positionMs) {
+        resumeWindow = 0;
+        resumePosition = positionMs;
+        haveResumePosition = true;
     }
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
-            controlDispatcher.dispatchSeekTo(player, player.getCurrentWindowIndex(), positionMs);
+            SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
+            eventEmitter.seek(exoPlayer.getCurrentPosition(), positionMs);
+            controlDispatcher.dispatchSeekTo(exoPlayer, exoPlayer.getCurrentWindowIndex(), positionMs);
         } else {
             shouldSeekTo = positionMs;
         }
     }
 
     public void seekTo(String timestamp) {
+        long positionMs = parseTimestamp(timestamp);
+        long seekPosition = (positionMs == C.POSITION_UNSET ? C.POSITION_UNSET : getSeekPosition(positionMs));
+        if (seekPosition != C.POSITION_UNSET && seekPosition != SEEK_POSITION_INVALID) {
+            seekTo(seekPosition);
+        }
+    }
+
+    public long parseTimestamp(String timestamp) {
         Locale currentLocale = getCurrentLocale();
-        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, currentLocale);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         try {
             Date seekPosition = simpleDateFormat.parse(timestamp);
-            long dateTimeSeekPositionMs = seekPosition.getTime();
-
-            Timeline timeline = player.getCurrentTimeline();
-
-            if (!timeline.isEmpty()) {
-                long windowStartTimeMs = timeline.getWindow(player.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
-                if (windowStartTimeMs != C.TIME_UNSET) {
-                    long seekPositionInWindowMs = dateTimeSeekPositionMs - windowStartTimeMs;
-                    long duration = player.getDuration();
-
-                    if (seekPositionInWindowMs > 0 && seekPositionInWindowMs <= duration) {
-                        seekTo(seekPositionInWindowMs);
-                    } else {
-                        Log.e(TAG, "The provided timestamp, " + timestamp + ", is either " +
-                                "before the start of the stream or the difference between the " +
-                                "current time and the provided timestamp is greater than the " +
-                                "duration of the content.");
-                    }
-                } else {
-                    Log.e(TAG, "HLS playlist doesn't have an EXT-X-PROGRAM-DATE-TIME tag.");
-                }
-            }
+            return seekPosition.getTime();
         } catch (ParseException e) {
             Log.e(TAG, "Unable to parse provided timestamp, " + timestamp +
-                    ". Timestamp should be of the format \"2020-01-01T00:00:00.000000Z\".");
+                    ". Timestamp should be of the format \"2020-01-01T00:00:00.000Z\".");
         }
+        return C.POSITION_UNSET;
+    }
+
+    private long getSeekPosition(long positionMs) {
+        if (src == null || !src.isLive() || positionMs == C.TIME_UNSET) {
+            return positionMs;
+        }
+
+        long seekPosition = C.POSITION_UNSET;
+        SimpleExoPlayer exoPlayer = player.getSimpleExoPlayer();
+        Timeline timeline = exoPlayer.getCurrentTimeline();
+
+        if (!timeline.isEmpty()) {
+            long windowStartTimeMs = timeline.getWindow(exoPlayer.getCurrentWindowIndex(), new Timeline.Window()).windowStartTimeMs;
+            if (windowStartTimeMs != C.TIME_UNSET) {
+                long seekPositionInWindowMs = positionMs - windowStartTimeMs;
+                long duration = exoPlayer.getDuration();
+
+                if (seekPositionInWindowMs > 0 && seekPositionInWindowMs <= duration) {
+                    seekPosition = seekPositionInWindowMs;
+                } else {
+                    seekPosition = SEEK_POSITION_INVALID;
+                    Log.e(TAG, "The provided timestamp, " + positionMs + ", is either " +
+                            "before the start of the stream or the difference between the " +
+                            "current time and the provided timestamp is greater than the " +
+                            "duration of the content.");
+                }
+            } else {
+                Log.e(TAG, "HLS playlist doesn't have an EXT-X-PROGRAM-DATE-TIME tag.");
+            }
+        }
+        return seekPosition;
     }
 
     @SuppressWarnings("deprecation")
@@ -1546,7 +1645,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
         if (player != null) {
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
-            player.setPlaybackParameters(params);
+            player.getSimpleExoPlayer().setPlaybackParameters(params);
         }
     }
 
@@ -1729,7 +1828,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return true;
         }
 
-        return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
+        return (exoDorisPlayerView.getPlayer() != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
     }
 
     public void showOverlay() {

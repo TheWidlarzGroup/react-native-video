@@ -142,9 +142,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             // Change the ip and port to your file upload server.
             DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
         }
+        ExoConfig.getInstance().setHttpTimeoutMs(6000);
         ExoConfig.getInstance().setObtainKeyIdsFromManifest(true);
 
-        Log.d(WebUtil.DEBUG, String.format("config player - keyIdsMode %s, debug %b",
+        Log.d(WebUtil.DEBUG, String.format("config player - httpTimeoutMs %d, keyIdsMode %s, debug %b",
+                ExoConfig.getInstance().getHttpTimeoutMs(),
                 ExoConfig.getInstance().isObtainKeyIdsFromManifest() ? "manifest" : "stream",
                 IS_DEBUG));
     }
@@ -191,6 +193,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactTVExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
+        // MockStreamSource.logRNParam(0, "src", ReadableType.Map, src);
 
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String id = src.hasKey(PROP_SRC_ID) ? src.getString(PROP_SRC_ID) : null;
@@ -575,13 +578,21 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         // This will be called whenever a command is sent from react-native.
         switch (commandId) {
             case COMMAND_SEEK_TO_NOW:
-                root.seekTo(C.TIME_UNSET);
+                Log.d(WebUtil.DEBUG, "resumeToNow");
+                root.resumeTo(C.TIME_UNSET);
                 break;
             case COMMAND_SEEK_TO_TIMESTAMP:
-                root.seekTo(args.getString(0));
+                String timestamp = args.getString(0);
+                Log.d(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
+                long positionMs = root.parseTimestamp(timestamp);
+                if (positionMs != C.POSITION_UNSET) {
+                    root.resumeTo(positionMs);
+                }
                 break;
             case COMMAND_SEEK_TO_POSITION:
-                root.seekTo(args.getInt(0) * 1000);
+                long resumeMs = args.getInt(0) * 1000;
+                Log.d(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
+                root.resumeTo(resumeMs);
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);

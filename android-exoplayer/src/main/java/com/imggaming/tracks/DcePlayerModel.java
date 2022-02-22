@@ -6,8 +6,8 @@ import android.util.Log;
 
 import com.brentvatne.react.R;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -18,17 +18,19 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class DcePlayerModel {
 
-    private final Player player;
+    private final ExoPlayer player;
     private final Context context;
     private DefaultTrackSelector trackSelector;
     private boolean areAnnotationsEnabled; //ToDo: this needs to come from player
 
-    public DcePlayerModel(Context context, Player player, DefaultTrackSelector selector) {
+    public DcePlayerModel(Context context, ExoPlayer player, DefaultTrackSelector selector) {
         this.context = context;
         this.player = player;
         this.trackSelector = selector;
@@ -156,6 +158,7 @@ public class DcePlayerModel {
 
     private ArrayList<DceTrack> getDceTracks(int trackType) {
         final ArrayList<DceTrack> ret = new ArrayList<>();
+        final Set<String> addedLanguages = new HashSet<>();
 
         int index = findTrackTypeAvailable(trackType);
 
@@ -198,7 +201,10 @@ public class DcePlayerModel {
 
                     Log.d(DcePlayerModel.class.getName(), " group =  " + languageLabel + " selected = " + isSelected);
 
-                    ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
+                    if(!addedLanguages.contains(languageLabel)){
+                        ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
+                        addedLanguages.add(languageLabel);
+                    }
                 }
             }
         }
