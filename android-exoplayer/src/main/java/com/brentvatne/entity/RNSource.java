@@ -28,6 +28,7 @@ public class RNSource {
     private final int duration;
     private final String channelName;
     private final boolean apsTestFlag;
+    private final String adTagUrl;
 
     public RNSource(
             @NonNull String url,
@@ -45,7 +46,8 @@ public class RNSource {
             @Nullable String playlistId,
             int duration,
             @Nullable String channelName,
-            boolean apsTestFlag) {
+            boolean apsTestFlag,
+            @Nullable String adTagUrl) {
         this.id = id;
         this.url = url;
         this.extension = extension;
@@ -62,6 +64,7 @@ public class RNSource {
         this.channelName = channelName;
         this.duration = duration;
         this.apsTestFlag = apsTestFlag;
+        this.adTagUrl = adTagUrl;
     }
 
     @NonNull
@@ -149,5 +152,9 @@ public class RNSource {
 
     public boolean getApsTestFlag() {
         return apsTestFlag;
+    }
+
+    public String getAdTagUrl() {
+        return adTagUrl;
     }
 }
