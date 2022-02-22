@@ -20,6 +20,7 @@ import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -77,6 +78,7 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -108,6 +110,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private final BroadcastReceiver pipReceiver;
     private final BroadcastReceiver leaveReceiver;
+    private final MediaSessionCompat mediaSession = new MediaSessionCompat(getContext(), "tag");
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
@@ -214,8 +217,6 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-<<<<<<< HEAD
-=======
 
         ReactExoplayerView self = this;
 
@@ -241,7 +242,6 @@ class ReactExoplayerView extends FrameLayout implements
         activity.registerReceiver(leaveReceiver, new IntentFilter("onUserLeaveHint"));
 
         initializePlayer();
->>>>>>> 11ff5f4cbd5009565f96a263c369a78b45b6db7f
     }
 
 
@@ -521,6 +521,11 @@ class ReactExoplayerView extends FrameLayout implements
                 initializePlayerControl();
                 setControls(controls);
                 applyModifiers();
+
+                //Use Media Session Connector from the ExoPlayer library to enable MediaSession Controls in PIP.
+                MediaSessionConnector mediaSessionConnector = new MediaSessionConnector(mediaSession);
+                mediaSessionConnector.setPlayer(player, null);
+                mediaSession.setActive(true);
             }
         }, 1);
     }
@@ -621,6 +626,7 @@ class ReactExoplayerView extends FrameLayout implements
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
+        mediaSession.release();
     }
 
     private boolean requestAudioFocus() {
@@ -809,6 +815,14 @@ class ReactExoplayerView extends FrameLayout implements
                     playerControlView.show();
                 }
                 setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
+
+                /*
+                 * If play is in playing state, but PAUSED prop is TRUE, report
+                 * external play/pause state change.
+                 */
+                if (playWhenReady == isPaused) {
+                   eventEmitter.externalPauseToggled(playWhenReady);
+                }
                 break;
             case Player.STATE_ENDED:
                 text += "ended";

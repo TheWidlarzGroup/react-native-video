@@ -57,6 +57,8 @@
 - Added support for full-screen functionality in Android Exoplayer [#1730](https://github.com/react-native-community/react-native-video/pull/1730)
 ### next
 * Added PictureInPicture support for AndroidExoplayer API >= 28. [#1776](https://github.com/react-native-community/react-native-video/pull/1776)
+#### next
+* Added media session for Android ExoPlayer allowing user to pause/play playback with headset HW buttons, or for example display player controls in PIP window. [#1780](https://github.com/react-native-community/react-native-video/pull/1780)
 
 ### Version 5.1.0-alpha1
 
