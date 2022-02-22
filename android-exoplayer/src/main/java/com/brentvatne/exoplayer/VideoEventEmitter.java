@@ -47,6 +47,7 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED = "onPictureInPictureStatusChanged";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -69,6 +70,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
+            EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -93,6 +95,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
+            EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED
     })
     @interface VideoEvents {
     }
@@ -121,6 +124,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
+    private static final String EVENT_PROP_PICTURE_IN_PICTURE_ACTIVE = "isActive";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -296,6 +300,12 @@ class VideoEventEmitter {
 
     void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
+    }
+
+    void pictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_PICTURE_IN_PICTURE_ACTIVE, isInPictureInPictureMode);
+        receiveEvent(EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
