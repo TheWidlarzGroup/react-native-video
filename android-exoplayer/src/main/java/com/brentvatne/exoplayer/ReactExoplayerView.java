@@ -297,6 +297,11 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
+
+        if(isInPictureInPictureMode) {
+            return;
+        }
+
         if (playInBackground || showPictureInPictureOnLeave) {
             return;
         }
