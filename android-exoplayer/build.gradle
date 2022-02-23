@@ -14,7 +14,7 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 29)
+    compileSdkVersion safeExtGet('compileSdkVersion', 31)
     buildToolsVersion safeExtGet('buildToolsVersion', '29.0.3')
 
     defaultConfig {
@@ -46,6 +46,11 @@ dependencies {
     }
     implementation("com.github.DiceTechnology.doris-android:extension-ima-csai:$exoDorisVersion") {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    }
+
+    // Mux
+    implementation ("com.mux.stats.sdk.muxstats:MuxExoPlayer_r2_16_1:2.6.0") {
+        exclude group: "com.google.android.exoplayer", module: "exoplayer"
     }
 
     // Google Guava
