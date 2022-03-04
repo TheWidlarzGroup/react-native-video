@@ -101,7 +101,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+      _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -116,7 +116,7 @@ static int const RCTVideoUnset = -1;
     _progressUpdateInterval = 250;
     _controls = NO;
     _playerBufferEmpty = YES;
-    _playInBackground = false;
+    _playInBackground = true;
     _preventsDisplaySleepDuringVideoPlayback = true;
     _preferredForwardBufferDuration = 0.0f;
     _allowsExternalPlayback = YES;
@@ -240,11 +240,21 @@ static int const RCTVideoUnset = -1;
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
+    if (_playInBackground) {
+        NSLog(@"RCTVideo applicationDidEnterBackground, _playInBackground?: YES");
+    } else {
+        NSLog(@"RCTVideo applicationDidEnterBackground, _playInBackground?: NO");
+    }
     [self disableVideoTracks];
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification
 {
+    if (_playInBackground) {
+        NSLog(@"RCTVideo applicationWillEnterForeground, _playInBackground?: YES");
+    } else {
+        NSLog(@"RCTVideo applicationWillEnterForeground, _playInBackground?: NO");
+    }
     [self applyModifiers];
     [self enableVideoTracks];
 }
@@ -410,8 +420,12 @@ static int const RCTVideoUnset = -1;
       }
     }];
   });
-    [self setupNowPlaying];
-    [self setupRemoteTransportControl];
+    
+    if (_playInBackground) {
+        [self setupNowPlaying];
+        [self setupRemoteTransportControl];
+    }
+
   _videoLoadStarted = YES;
 }
 
@@ -941,6 +955,11 @@ static int const RCTVideoUnset = -1;
 
 - (void)setPlayInBackground:(BOOL)playInBackground
 {
+    if (playInBackground) {
+        NSLog(@"RCTVideo setPlayInBackground YES");
+    } else {
+        NSLog(@"RCTVideo setPlayInBackground NO");
+    }
   _playInBackground = playInBackground;
 }
 
@@ -1123,8 +1142,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
 {
-	_automaticallyWaitsToMinimizeStalling = waits;
-	_player.automaticallyWaitsToMinimizeStalling = waits;
+    _automaticallyWaitsToMinimizeStalling = waits;
+    _player.automaticallyWaitsToMinimizeStalling = waits;
 }
 
 
