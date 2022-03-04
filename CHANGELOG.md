@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 5.2.2
+
+- Ensure we always use `hideShutterView` before showing the `shutterView` on Android
+
 ### Version 5.2.1
 
 - Add Google's maven repository to avoid build error [#2552] (https://github.com/react-native-video/react-native-video/pull/2552) 
