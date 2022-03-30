@@ -523,23 +523,24 @@ class ReactExoplayerView extends FrameLayout implements
                         es.execute(new Runnable() {
                             @Override
                             public void run() {
-
                                 // DRM initialization must run on a different thread
-                                initializePlayerDrm(self);
-
+                                DRMSessionManager drmSessionManager = initializePlayerDrm(self);
+                                if (drmSessionManager == null) {
+                                    // Failed to intialize DRM session manager - cannot continue
+                                    return;
+                                }
                                 // Initialize handler to run on the main thread
                                 new Handler(Looper.getMainLooper()).post(new Runnable () {
                                     @Override
                                     public void run () {
                                         // Source initialization must run on the main thread
-                                        initializePlayerSource(self);
+                                        initializePlayerSource(self, drmSessionManager);
                                     }
                                 });
-
                             }
                         });
                     } else {
-                        initializePlayerSource(self);
+                        initializePlayerSource(self, null);
                     }
                     
                 
@@ -592,27 +593,24 @@ class ReactExoplayerView extends FrameLayout implements
         player.setPlaybackParameters(params);
     }
 
-    private void initializePlayerDrm(ReactExoplayerView self) {
+    private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
         if (self.drmUUID != null) {
             try {
-                drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
                         self.drmLicenseHeader);
             } catch (UnsupportedDrmException e) {
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                         ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
-                return;
+                return null;
             }
         }
-        if (drmSessionManager == null) {
-            // DRM Session Manager failed to instantiate, no other work can be done - error has been handled by the instantiating method
-            return;
-        }
+        return drmSessionManager;
     }
 
-    private void initializePlayerSource(ReactExoplayerView self) {
+    private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
         MediaSource mediaSource;
@@ -666,10 +664,10 @@ class ReactExoplayerView extends FrameLayout implements
                 mediaDrm.setPropertyString("securityLevel", "L3");
             }
             return new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback, null, false, 3);
-        } catch(UnsupportedDrmException e) {
+        } catch(UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
-            throw e;
-        } catch (Exception e) {
+            throw ex;
+        } catch (Exception ex) {
             if (retryCount < 3) {
                 // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
                 return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, ++retryCount);
