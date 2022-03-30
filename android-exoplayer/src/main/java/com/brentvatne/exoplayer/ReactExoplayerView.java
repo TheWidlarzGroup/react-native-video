@@ -537,13 +537,13 @@ class ReactExoplayerView extends FrameLayout implements
                                     @Override
                                     public void run () {
                                         // Source initialization must run on the main thread
-                                        initializePlayerSource(self, drmSessionManager);
+                                        initializePlayerSource(self, drmSessionManager, srcUri);
                                     }
                                 });
                             }
                         });
                     } else {
-                        initializePlayerSource(self, null);
+                        initializePlayerSource(self, null, srcUri);
                     }
                     
                 
@@ -613,9 +613,9 @@ class ReactExoplayerView extends FrameLayout implements
         return drmSessionManager;
     }
 
-    private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
+    private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager, Uri srcUri) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
-        MediaSource videoSource = self.buildMediaSource(self.srcUri, self.extension, drmSessionManager);
+        MediaSource videoSource = self.buildMediaSource(srcUri, self.extension, drmSessionManager);
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
             mediaSource = videoSource;
