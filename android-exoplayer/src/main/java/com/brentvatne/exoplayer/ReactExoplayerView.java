@@ -524,7 +524,7 @@ class ReactExoplayerView extends FrameLayout implements
                             @Override
                             public void run() {
                                 // DRM initialization must run on a different thread
-                                DRMSessionManager drmSessionManager = initializePlayerDrm(self);
+                                DrmSessionManager drmSessionManager = initializePlayerDrm(self);
                                 if (drmSessionManager == null) {
                                     // Failed to intialize DRM session manager - cannot continue
                                     return;
@@ -644,6 +644,10 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
+    }
+
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
+        return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray, int retryCount) throws UnsupportedDrmException {
