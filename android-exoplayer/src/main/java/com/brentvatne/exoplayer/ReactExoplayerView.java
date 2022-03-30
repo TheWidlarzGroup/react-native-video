@@ -560,8 +560,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-        trackSelector.setParameters(trackSelector.buildUponParameters()
+        self.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        self.trackSelector.setParameters(self.trackSelector.buildUponParameters()
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
@@ -579,21 +579,21 @@ class ReactExoplayerView extends FrameLayout implements
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-        player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+        self.player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
                     .setTrackSelector​(trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
                     .build();
-        player.addListener(self);
-        player.addMetadataOutput(self);
-        exoPlayerView.setPlayer(player);
-        audioBecomingNoisyReceiver.setListener(self);
-        bandwidthMeter.addEventListener(new Handler(), self);
+        self.player.addListener(self);
+        self.player.addMetadataOutput(self);
+        self.exoPlayerView.setPlayer(player);
+        self.audioBecomingNoisyReceiver.setListener(self);
+        self.bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
-        playerNeedsSource = true;
+        self.playerNeedsSource = true;
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
-        player.setPlaybackParameters(params);
+        self.player.setPlaybackParameters(params);
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -615,7 +615,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
-        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+        MediaSource videoSource = self.buildMediaSource(self.srcUri, self.extension, drmSessionManager);
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
             mediaSource = videoSource;
