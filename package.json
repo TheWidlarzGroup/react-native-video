@@ -38,6 +38,7 @@
         "react-native-windows": "^0.61.0-0"
     },
     "dependencies": {
+        "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
         "prop-types": "^15.7.2",
         "shaka-player": "^2.5.9"
