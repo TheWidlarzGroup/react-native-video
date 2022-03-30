@@ -500,6 +500,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void stopBufferCheckTimer() {
+        if (this.bufferCheckTimer == null) {
+            return;
+        }
         this.bufferCheckTimer.cancel();
         this.bufferCheckTimer = null;
     }
