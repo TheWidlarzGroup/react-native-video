@@ -7,6 +7,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -547,59 +548,33 @@ class ReactExoplayerView extends FrameLayout implements
                         PlaybackParameters params = new PlaybackParameters(rate, 1f);
                         player.setPlaybackParameters(params);
                     }
+
                     if (playerNeedsSource && srcUri != null) {
                         exoPlayerView.invalidateAspectRatio();
+                        // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
+                        ExecutorService es = Executors.newSingleThreadExecutor();
+                        es.execute(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        // DRM
-                        DrmSessionManager drmSessionManager = null;
-                        if (self.drmUUID != null) {
-                            try {
-                                drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                                        self.drmLicenseHeader);
-                            } catch (UnsupportedDrmException e) {
-                                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                                eventEmitter.error(getResources().getString(errorStringId), e, "3003");
-                                return;
+                                // DRM initialization must run on a different thread
+                                initializePlayerDrm();
+
+                                // Initialize handler to run on the main thread
+                                new Handler(Looper.getMainLooper()).post(new Runnable () {
+                                    @Override
+                                    public void run () {
+                                        // Source initialization must run on the main thread
+                                        initializePlayerSource();
+                                    }
+                                });
+
                             }
-                        }
-                        if (drmSessionManager == null) {
-                            // DRM Session Manager failed to instantiate, no other work can be done - error has been handled by the instantiating method
-                            return;
-                        }
-                        // End DRM
-
-                        ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
-                        MediaSource mediaSource;
-                        if (mediaSourceList.size() == 0) {
-                            mediaSource = videoSource;
-                        } else {
-                            mediaSourceList.add(0, videoSource);
-                            MediaSource[] textSourceArray = mediaSourceList.toArray(
-                                    new MediaSource[mediaSourceList.size()]
-                            );
-                            mediaSource = new MergingMediaSource(textSourceArray);
-                        }
-
-                        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-                        if (haveResumePosition) {
-                            player.seekTo(resumeWindow, resumePosition);
-                        }
-                        player.prepare(mediaSource, !haveResumePosition, false);
-                        playerNeedsSource = false;
-
-                        reLayout(exoPlayerView);
-                        eventEmitter.loadStart();
-                        loadVideoStarted = true;
+                        });
+                    } else {
+                        finishPlayerInitialization();
                     }
-
-                    // Initializing the playerControlView
-                    initializePlayerControl();
-                    setControls(controls);
-                    applyModifiers();
-                    startBufferCheckTimer();
+                    
                 
                 } catch (Exception ex) {
                     self.playerNeedsSource = true;
@@ -610,6 +585,62 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }, 1);
         
+    }
+
+    private void initializePlayerDrm() {
+        DrmSessionManager drmSessionManager = null;
+        if (self.drmUUID != null) {
+            try {
+                drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                        self.drmLicenseHeader);
+            } catch (UnsupportedDrmException e) {
+                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                eventEmitter.error(getResources().getString(errorStringId), e, "3003");
+                return;
+            }
+        }
+        if (drmSessionManager == null) {
+            // DRM Session Manager failed to instantiate, no other work can be done - error has been handled by the instantiating method
+            return;
+        }
+    }
+
+    private void initializePlayerSource() {
+        ArrayList<MediaSource> mediaSourceList = buildTextSources();
+        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+        MediaSource mediaSource;
+        if (mediaSourceList.size() == 0) {
+            mediaSource = videoSource;
+        } else {
+            mediaSourceList.add(0, videoSource);
+            MediaSource[] textSourceArray = mediaSourceList.toArray(
+                    new MediaSource[mediaSourceList.size()]
+            );
+            mediaSource = new MergingMediaSource(textSourceArray);
+        }
+
+        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+        if (haveResumePosition) {
+            player.seekTo(resumeWindow, resumePosition);
+        }
+        player.prepare(mediaSource, !haveResumePosition, false);
+        playerNeedsSource = false;
+
+        reLayout(exoPlayerView);
+        eventEmitter.loadStart();
+        loadVideoStarted = true;
+
+        finishPlayerInitialization();
+    }
+
+    private void finishPlayerInitialization() {
+        // Initializing the playerControlView
+        initializePlayerControl();
+        setControls(controls);
+        applyModifiers();
+        startBufferCheckTimer();
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray, int retryCount) throws UnsupportedDrmException {
