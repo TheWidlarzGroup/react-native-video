@@ -100,6 +100,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.lang.Integer;
 
 @SuppressLint("ViewConstructor")
@@ -943,8 +944,24 @@ class ReactExoplayerView extends FrameLayout implements
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
-            eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
-                    getAudioTrackInfo(), getTextTrackInfo(), getVideoTrackInfo(), trackId);
+
+            // Properties that must be accessed on the main thread
+            long duration = player.getDuration();
+            long currentPosition = player.getCurrentPosition();
+            WritableArray audioTrackInfo = getAudioTrackInfo();
+            WritableArray textTrackInfo = getTextTrackInfo();
+            Timeline timelineRef = player.getCurrentTimeline();
+            int trackRendererIndex = getTrackRendererIndex(C.TRACK_TYPE_VIDEO);
+
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            es.execute(new Runnable() {
+                @Override
+                public void run() {
+                    // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
+                    eventEmitter.load(duration, currentPosition, width, height,
+                        audioTrackInfo, textTrackInfo, getVideoTrackInfo(timelineRef, trackRendererIndex), trackId);
+                }
+            });
         }
     }
 
@@ -971,9 +988,9 @@ class ReactExoplayerView extends FrameLayout implements
         }
         return audioTracks;
     }
-    private WritableArray getVideoTrackInfo() {
+    private WritableArray getVideoTrackInfo(Timeline timelineRef, int trackRendererIndex) {
 
-        WritableArray contentVideoTracks = this.getVideoTrackInfoFromManifest();
+        WritableArray contentVideoTracks = this.getVideoTrackInfoFromManifest(timelineRef);
         if (contentVideoTracks != null) {
             isUsingContentResolution = true;
             return contentVideoTracks;
@@ -982,12 +999,12 @@ class ReactExoplayerView extends FrameLayout implements
         WritableArray videoTracks = Arguments.createArray();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        int index = getTrackRendererIndex(C.TRACK_TYPE_VIDEO);
-        if (info == null || index == C.INDEX_UNSET) {
+        
+        if (info == null || trackRendererIndex == C.INDEX_UNSET) {
             return videoTracks;
         }
 
-        TrackGroupArray groups = info.getTrackGroups(index);
+        TrackGroupArray groups = info.getTrackGroups(trackRendererIndex);
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
 
@@ -998,8 +1015,7 @@ class ReactExoplayerView extends FrameLayout implements
                 videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
                 videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
                 videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
-                videoTrack.putString("trackId",
-                        format.id == null ? String.valueOf(trackIndex) : format.id);
+                videoTrack.putString("trackId", format.id == null ? String.valueOf(trackIndex) : format.id);
                 if (isFormatSupported(format)) {
                     videoTracks.pushMap(videoTrack);
                 }
@@ -1009,11 +1025,14 @@ class ReactExoplayerView extends FrameLayout implements
         return videoTracks;
     }
 
-    private WritableArray getVideoTrackInfoFromManifest() {
+    private WritableArray getVideoTrackInfoFromManifest(Timeline timeline) {
+        return this.getVideoTrackInfoFromManifest(timeline, 0);
+    }
+
+    private WritableArray getVideoTrackInfoFromManifest(Timeline timelineRef, int retryCount) {
         ExecutorService es = Executors.newSingleThreadExecutor();
         final DataSource dataSource = this.mediaDataSourceFactory.createDataSource();
         final Uri sourceUri = this.srcUri;
-        final Timeline timelineRef = this.player.getCurrentTimeline();
         final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
 
         Future<WritableArray> result = es.submit(new Callable<WritableArray>() {
@@ -1064,7 +1083,10 @@ class ReactExoplayerView extends FrameLayout implements
         });
 
         try {
-            WritableArray results = result.get();
+            WritableArray results = result.get(3000, TimeUnit.MILLISECONDS);
+            if (results == null && retryCount < 1) {
+                return this.getVideoTrackInfoFromManifest(timelineRef, ++retryCount);
+            }
             es.shutdown();
             return results;
         } catch (Exception e) {}
