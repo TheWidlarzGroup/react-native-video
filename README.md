@@ -162,6 +162,21 @@ android.useAndroidX=true
 android.enableJetifier=true
 ```
 
+#### **android/build.gradle**
+
+```java
+allprojects {
+    repositories {
+        // ...rest
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "android-scalablevideoview")
+            }
+        }
+    }
+}
+```
+
 #### **MainApplication.java**
 
 On top, where imports are:
@@ -174,12 +189,14 @@ Add the `ReactVideoPackage` class to your list of exported packages.
 
 ```java
 @Override
-protected List<ReactPackage> getPackages() {
-    return Arrays.asList(
-            new MainReactPackage(),
-            new ReactVideoPackage()
-    );
-}
+        protected List<ReactPackage> getPackages() {
+          @SuppressWarnings("UnnecessaryLocalVariable")
+          List<ReactPackage> packages = new PackageList(this).getPackages();
+          // Packages that cannot be autolinked yet can be added manually here, for example:
+          // packages.add(new MyReactNativePackage());
+          packages.add(new ReactVideoPackage()); // <--- add this line
+          return packages;
+        }
 ```
 </details>
 
