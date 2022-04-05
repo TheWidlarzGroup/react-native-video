@@ -7,6 +7,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -500,6 +501,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void stopBufferCheckTimer() {
+        if (this.bufferCheckTimer == null) {
+            return;
+        }
         this.bufferCheckTimer.cancel();
         this.bufferCheckTimer = null;
     }
@@ -512,91 +516,37 @@ class ReactExoplayerView extends FrameLayout implements
             public void run() {
                 try {
                     if (player == null) {
-                        ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-                        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-                        trackSelector.setParameters(trackSelector.buildUponParameters()
-                                .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
-
-                        DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-                        RNVLoadControl loadControl = new RNVLoadControl(
-                                allocator,
-                                minBufferMs,
-                                maxBufferMs,
-                                bufferForPlaybackMs,
-                                bufferForPlaybackAfterRebufferMs,
-                                -1,
-                                true,
-                                backBufferDurationMs,
-                                DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
-                        );
-                        DefaultRenderersFactory renderersFactory =
-                                new DefaultRenderersFactory(getContext())
-                                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-                        player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
-                                    .setTrackSelector​(trackSelector)
-                                    .setBandwidthMeter(bandwidthMeter)
-                                    .setLoadControl(loadControl)
-                                    .build();
-                        player.addListener(self);
-                        player.addMetadataOutput(self);
-                        exoPlayerView.setPlayer(player);
-                        audioBecomingNoisyReceiver.setListener(self);
-                        bandwidthMeter.addEventListener(new Handler(), self);
-                        setPlayWhenReady(!isPaused);
-                        playerNeedsSource = true;
-
-                        PlaybackParameters params = new PlaybackParameters(rate, 1f);
-                        player.setPlaybackParameters(params);
+                        // Initialize core configuration and listeners
+                        initializePlayerCore(self);
                     }
+
                     if (playerNeedsSource && srcUri != null) {
                         exoPlayerView.invalidateAspectRatio();
-
-                        // DRM
-                        DrmSessionManager drmSessionManager = null;
-                        if (self.drmUUID != null) {
-                            try {
-                                drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                                        self.drmLicenseHeader);
-                            } catch (UnsupportedDrmException e) {
-                                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                                eventEmitter.error(getResources().getString(errorStringId), e, "3003");
-                                return;
+                        // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
+                        ExecutorService es = Executors.newSingleThreadExecutor();
+                        es.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                // DRM initialization must run on a different thread
+                                DrmSessionManager drmSessionManager = initializePlayerDrm(self);
+                                if (drmSessionManager == null) {
+                                    // Failed to intialize DRM session manager - cannot continue
+                                    return;
+                                }
+                                // Initialize handler to run on the main thread
+                                new Handler(Looper.getMainLooper()).post(new Runnable () {
+                                    @Override
+                                    public void run () {
+                                        // Source initialization must run on the main thread
+                                        initializePlayerSource(self, drmSessionManager);
+                                    }
+                                });
                             }
-                        }
-                        // End DRM
-
-                        ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
-                        MediaSource mediaSource;
-                        if (mediaSourceList.size() == 0) {
-                            mediaSource = videoSource;
-                        } else {
-                            mediaSourceList.add(0, videoSource);
-                            MediaSource[] textSourceArray = mediaSourceList.toArray(
-                                    new MediaSource[mediaSourceList.size()]
-                            );
-                            mediaSource = new MergingMediaSource(textSourceArray);
-                        }
-
-                        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-                        if (haveResumePosition) {
-                            player.seekTo(resumeWindow, resumePosition);
-                        }
-                        player.prepare(mediaSource, !haveResumePosition, false);
-                        playerNeedsSource = false;
-
-                        reLayout(exoPlayerView);
-                        eventEmitter.loadStart();
-                        loadVideoStarted = true;
+                        });
+                    } else if (srcUri != null) {
+                        initializePlayerSource(self, null);
                     }
-
-                    // Initializing the playerControlView
-                    initializePlayerControl();
-                    setControls(controls);
-                    applyModifiers();
-                    startBufferCheckTimer();
+                    
                 
                 } catch (Exception ex) {
                     self.playerNeedsSource = true;
@@ -609,26 +559,131 @@ class ReactExoplayerView extends FrameLayout implements
         
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid,
-                                                                           String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
+    private void initializePlayerCore(ReactExoplayerView self) {
+        ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        trackSelector.setParameters(trackSelector.buildUponParameters()
+                .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
+
+        DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+        RNVLoadControl loadControl = new RNVLoadControl(
+                allocator,
+                minBufferMs,
+                maxBufferMs,
+                bufferForPlaybackMs,
+                bufferForPlaybackAfterRebufferMs,
+                -1,
+                true,
+                backBufferDurationMs,
+                DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
+        );
+        DefaultRenderersFactory renderersFactory =
+                new DefaultRenderersFactory(getContext())
+                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+        player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+                    .setTrackSelector​(trackSelector)
+                    .setBandwidthMeter(bandwidthMeter)
+                    .setLoadControl(loadControl)
+                    .build();
+        player.addListener(self);
+        player.addMetadataOutput(self);
+        exoPlayerView.setPlayer(player);
+        audioBecomingNoisyReceiver.setListener(self);
+        bandwidthMeter.addEventListener(new Handler(), self);
+        setPlayWhenReady(!isPaused);
+        playerNeedsSource = true;
+
+        PlaybackParameters params = new PlaybackParameters(rate, 1f);
+        player.setPlaybackParameters(params);
+    }
+
+    private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
+        DrmSessionManager drmSessionManager = null;
+        if (self.drmUUID != null) {
+            try {
+                drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                        self.drmLicenseHeader);
+            } catch (UnsupportedDrmException e) {
+                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                eventEmitter.error(getResources().getString(errorStringId), e, "3003");
+                return null;
+            }
+        }
+        return drmSessionManager;
+    }
+
+    private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
+        ArrayList<MediaSource> mediaSourceList = buildTextSources();
+        MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+        MediaSource mediaSource;
+        if (mediaSourceList.size() == 0) {
+            mediaSource = videoSource;
+        } else {
+            mediaSourceList.add(0, videoSource);
+            MediaSource[] textSourceArray = mediaSourceList.toArray(
+                    new MediaSource[mediaSourceList.size()]
+            );
+            mediaSource = new MergingMediaSource(textSourceArray);
+        }
+
+        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+        if (haveResumePosition) {
+            player.seekTo(resumeWindow, resumePosition);
+        }
+        player.prepare(mediaSource, !haveResumePosition, false);
+        playerNeedsSource = false;
+
+        reLayout(exoPlayerView);
+        eventEmitter.loadStart();
+        loadVideoStarted = true;
+
+        finishPlayerInitialization();
+    }
+
+    private void finishPlayerInitialization() {
+        // Initializing the playerControlView
+        initializePlayerControl();
+        setControls(controls);
+        applyModifiers();
+        startBufferCheckTimer();
+    }
+
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
+        return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
+    }
+
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray, int retryCount) throws UnsupportedDrmException {
         if (Util.SDK_INT < 18) {
             return null;
         }
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
-                buildHttpDataSourceFactory(false));
-        if (keyRequestPropertiesArray != null) {
-            for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
-                drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
-                        keyRequestPropertiesArray[i + 1]);
+        try {
+            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
+                    buildHttpDataSourceFactory(false));
+            if (keyRequestPropertiesArray != null) {
+                for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
+                    drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
+                }
             }
+            FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
+            if (hasDrmFailed) {
+                // When DRM fails using L1 we want to switch to L3
+                mediaDrm.setPropertyString("securityLevel", "L3");
+            }
+            return new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback, null, false, 3);
+        } catch(UnsupportedDrmException ex) {
+            // Unsupported DRM exceptions are handled by the calling method
+            throw ex;
+        } catch (Exception ex) {
+            if (retryCount < 3) {
+                // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
+                return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, ++retryCount);
+            }
+            // Handle the unknow exception and emit to JS
+            eventEmitter.error(ex.toString(), ex, "3006");
+            return null;
         }
-        FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
-        if (hasDrmFailed) {
-            // When DRM fails using L1 we want to switch to L3
-            mediaDrm.setPropertyString("securityLevel", "L3");
-        }
-        return new DefaultDrmSessionManager(uuid,
-                mediaDrm, drmCallback, null, false, 3);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
