@@ -510,6 +510,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         ReactExoplayerView self = this;
+        Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -519,7 +520,6 @@ class ReactExoplayerView extends FrameLayout implements
                         // Initialize core configuration and listeners
                         initializePlayerCore(self);
                     }
-
                     if (playerNeedsSource && srcUri != null) {
                         exoPlayerView.invalidateAspectRatio();
                         // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
@@ -529,14 +529,16 @@ class ReactExoplayerView extends FrameLayout implements
                             public void run() {
                                 // DRM initialization must run on a different thread
                                 DrmSessionManager drmSessionManager = initializePlayerDrm(self);
-                                if (drmSessionManager == null) {
+                                if (drmSessionManager == null && self.drmUUID != null) {
                                     // Failed to intialize DRM session manager - cannot continue
+                                    Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
+                                    eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
+
                                 // Initialize handler to run on the main thread
-                                new Handler(Looper.getMainLooper()).post(new Runnable () {
-                                    @Override
-                                    public void run () {
+                                activity.runOnUiThread(new Runnable() {
+                                    public void run() {
                                         // Source initialization must run on the main thread
                                         initializePlayerSource(self, drmSessionManager);
                                     }
@@ -595,6 +597,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -1283,6 +1286,14 @@ class ReactExoplayerView extends FrameLayout implements
             } else if(cause instanceof MediaDrmCallbackException) {
                 errorCode = "3005";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
+                if (!hasDrmFailed) {
+                    // When DRM fails to reach the app level certificate server it will fail with a source error so we assume that it is DRM related and try one more time
+                    hasDrmFailed = true;
+                    playerNeedsSource = true;
+                    updateResumePosition();
+                    initializePlayer();
+                    return;
+                }
             } else {
                 errorCode = "2021";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
