@@ -85,6 +85,19 @@ RCT_REMAP_METHOD(save,
         }
     }];
 };
+RCT_REMAP_METHOD(destroy,
+         reactTag:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+        RCTVideo *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[RCTVideo class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+        } else {
+            [view destroy];
+        }
+    }];
+};
+
 RCT_REMAP_METHOD(setLicenseResult,
          license:(NSString *)license
          reactTag:(nonnull NSNumber *)reactTag)
