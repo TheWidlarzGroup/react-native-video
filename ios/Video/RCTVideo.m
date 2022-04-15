@@ -5,6 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#import <Photos/Photos.h>
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -492,22 +493,22 @@ static int const RCTVideoUnset = -1;
   handler([AVPlayerItem playerItemWithAsset:mixComposition]);
 }
 
-- (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler
-{
+- (void)loadAssetFromSource:(NSDictionary *)source withCallback:(void(^)(AVURLAsset *asset, NSMutableDictionary *assetOptions)) handler {
   bool isNetwork = [RCTConvert BOOL:[source objectForKey:@"isNetwork"]];
   bool isAsset = [RCTConvert BOOL:[source objectForKey:@"isAsset"]];
   bool shouldCache = [RCTConvert BOOL:[source objectForKey:@"shouldCache"]];
+  
   NSString *uri = [source objectForKey:@"uri"];
   NSString *type = [source objectForKey:@"type"];
-  AVURLAsset *asset;
+
   if (!uri || [uri isEqualToString:@""]) {
     DebugLog(@"Could not find video URL in source '%@'", source);
     return;
   }
   
   NSURL *url = isNetwork || isAsset
-    ? [NSURL URLWithString:uri]
-    : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
+  ? [NSURL URLWithString:uri]
+  : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
   NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
   
   if (isNetwork) {
@@ -529,26 +530,43 @@ static int const RCTVideoUnset = -1;
       return;
     }
 #endif
-    
-    asset = [AVURLAsset URLAssetWithURL:url options:assetOptions];
+    handler([AVURLAsset URLAssetWithURL:url options:assetOptions], assetOptions);
   } else if (isAsset) {
-    asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    if ([uri hasPrefix:@"ph://"]) {
+      NSString *assetId = [uri substringFromIndex:@"ph://".length];
+      PHAsset *asset = [[PHAsset fetchAssetsWithLocalIdentifiers:@[assetId] options:nil] firstObject];
+      PHVideoRequestOptions *options = [PHVideoRequestOptions new];
+      options.networkAccessAllowed = YES;
+      
+      [[PHCachingImageManager new] requestAVAssetForVideo:asset options:options resultHandler:^(AVAsset * _Nullable asset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+        handler((AVURLAsset *)asset, assetOptions);
+      }];
+    } else {
+      handler([AVURLAsset URLAssetWithURL:url options:nil], assetOptions);
+    }
   } else {
-    asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]] options:nil];
+    handler(asset, assetOptions);
   }
-  // Reset _loadingRequest
-  if (_loadingRequest != nil) {
-    [_loadingRequest finishLoading];
-  }
-  _requestingCertificate = NO;
-  _requestingCertificateErrored = NO;
-  // End Reset _loadingRequest
-  if (self->_drm != nil) {
-    dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
-    [asset.resourceLoader setDelegate:self queue:queue];
-  }
-  
-  [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+}
+
+- (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler
+{
+  [self loadAssetFromSource:source withCallback:^(AVURLAsset *asset, NSMutableDictionary *assetOptions) {
+    // Reset _loadingRequest
+    if (self->_loadingRequest != nil) {
+      [self->_loadingRequest finishLoading];
+    }
+    self->_requestingCertificate = NO;
+    self->_requestingCertificateErrored = NO;
+    // End Reset _loadingRequest
+    if (self->_drm != nil) {
+      dispatch_queue_t queue = dispatch_queue_create("assetQueue", nil);
+      [asset.resourceLoader setDelegate:self queue:queue];
+    }
+    
+    [self playerItemPrepareText:asset assetOptions:assetOptions withCallback:handler];
+  }];
 }
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
