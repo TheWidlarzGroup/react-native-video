@@ -1,9 +1,10 @@
 ## Changelog
 
-### Version 5.2.1
+### Version 6.0.0
 
 - Add Google's maven repository to avoid build error [#2552] (https://github.com/react-native-video/react-native-video/pull/2552)
-- Fix iOS 15.4 HLS playback race condition [#2633](#https://github.com/react-native-video/react-native-video/pull/2633)
+- Fix iOS 15.4 HLS playback race condition [#2633](https://github.com/react-native-video/react-native-video/pull/2633)
+- Add fullscreen support on Android [#2073](https://github.com/react-native-video/react-native-video/pull/2073)
 
 ### Version 5.2.0
 
