@@ -99,6 +99,12 @@ export default class Video extends Component {
     }
   };
 
+  _onPlaybackStateChanged = (event) => {
+    if (this.props.onPlaybackStateChanged) {
+      this.props.onPlaybackStateChanged(event.nativeEvent);
+    }
+  };
+
   _onLoad = (event) => {
     // Need to hide poster here for windows as onReadyForDisplay is not implemented
     if (Platform.OS === 'windows') {
@@ -311,6 +317,7 @@ export default class Video extends Component {
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
       },
       onVideoLoadStart: this._onLoadStart,
+      onVideoPlaybackStateChanged: this._onPlaybackStateChanged,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
       onVideoProgress: this._onProgress,
@@ -491,6 +498,7 @@ Video.propTypes = {
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
   onLoadStart: PropTypes.func,
+  onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,
   onError: PropTypes.func,

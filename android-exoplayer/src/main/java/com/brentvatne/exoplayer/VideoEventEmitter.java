@@ -44,6 +44,7 @@ class VideoEventEmitter {
     private static final String EVENT_RESUME = "onPlaybackResume";
     private static final String EVENT_READY = "onReadyForDisplay";
     private static final String EVENT_BUFFER = "onVideoBuffer";
+    private static final String EVENT_PLAYBACK_STATE_CHANGED = "onVideoPlaybackStateChanged";
     private static final String EVENT_BUFFER_PROGRESS = "onVideoBufferProgress";
     private static final String EVENT_IDLE = "onVideoIdle";
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
@@ -66,6 +67,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_PLAYBACK_STATE_CHANGED,
             EVENT_BUFFER_PROGRESS,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
@@ -91,6 +93,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_PLAYBACK_STATE_CHANGED,
             EVENT_BUFFER_PROGRESS,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
@@ -137,8 +140,9 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
-    private static final String EVENT_PROP_BITRATE = "bitrate";   
+    private static final String EVENT_PROP_BITRATE = "bitrate";
 
+    private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -213,6 +217,12 @@ class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_BUFFERING, isBuffering);
         receiveEvent(EVENT_BUFFER, map);
+    }
+
+    void playbackStateChanged(boolean isPlaying) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
+        receiveEvent(EVENT_PLAYBACK_STATE_CHANGED, map);
     }
 
     void bufferProgress(double start, double end) {

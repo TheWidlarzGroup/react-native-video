@@ -332,6 +332,7 @@ var styles = StyleSheet.create({
 * [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
 * [onLoad](#onload)
 * [onLoadStart](#onloadstart)
+* [onPlaybackStateChanged]($onPlaybackStateChanged)
 * [onReadyForDisplay](#onreadyfordisplay)
 * [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
 * [onPlaybackRateChange](#onplaybackratechange)
@@ -1109,6 +1110,24 @@ Example:
 ```
 
 Platforms: all
+
+#### onPlaybackStateChanged
+Callback function that is called when the playback state changes.
+
+Payload:
+
+Property | Description
+--- | ---
+isPlaying | boolean | Boolean indicating if the media is playing or not
+
+Example:
+```
+{
+  isPlaying: true,
+}
+```
+
+Platforms: Android ExoPlayer
 
 #### onReadyForDisplay
 Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
