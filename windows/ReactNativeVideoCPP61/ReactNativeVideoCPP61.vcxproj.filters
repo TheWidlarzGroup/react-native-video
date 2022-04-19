@@ -10,27 +10,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="..\ReactNativeVideoCPP\pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="ReactPackageProvider.cpp" />
-    <ClCompile Include="ReactVideoView.cpp" />
-    <ClCompile Include="ReactVideoViewManager.cpp" />
+    <ClCompile Include="..\ReactNativeVideoCPP\ReactPackageProvider.cpp" />
+    <ClCompile Include="..\ReactNativeVideoCPP\ReactVideoView.cpp" />
+    <ClCompile Include="..\ReactNativeVideoCPP\ReactVideoViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="ReactPackageProvider.h" />
-    <ClInclude Include="ReactVideoView.h" />
-    <ClInclude Include="ReactVideoViewManager.h" />
+    <ClInclude Include="..\ReactNativeVideoCPP\pch.h" />
+    <ClInclude Include="..\ReactNativeVideoCPP\ReactPackageProvider.h" />
+    <ClInclude Include="..\ReactNativeVideoCPP\ReactVideoView.h" />
+    <ClInclude Include="..\ReactNativeVideoCPP\ReactVideoViewManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReactNativeVideoCPP.def" />
+    <None Include="..\ReactNativeVideoCPP\ReactNativeVideoCPP.def" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="ReactPackageProvider.idl" />
-    <Midl Include="ReactVideoView.idl" />
+    <Midl Include="..\ReactNativeVideoCPP\ReactPackageProvider.idl" />
+    <Midl Include="..\ReactNativeVideoCPP\ReactVideoView.idl" />
   </ItemGroup>
 </Project>

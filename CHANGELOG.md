@@ -1,9 +1,25 @@
 ## Changelog
 
+### Version 6.0.0-alpha1
+
+- Add Google's maven repository to avoid build error [#2552] (https://github.com/react-native-video/react-native-video/pull/2552)
+- Fix iOS 15.4 HLS playback race condition [#2633](https://github.com/react-native-video/react-native-video/pull/2633)
+- Add fullscreen support on Android [#2073](https://github.com/react-native-video/react-native-video/pull/2073)
+
+### Version 5.2.0
+
+- Fix for tvOS native audio menu language selector
+- Update ExoPlayer to allow pre-init and content clear [#2412] (https://github.com/react-native-video/react-native-video/pull/2412)
+- iOS rate is reset to 1.0 after play/pause [#2167] (https://github.com/react-native-video/react-native-video/pull/2167)
+- Upgrade ExoPlayer to 2.13.2 [#2317] (https://github.com/react-native-video/react-native-video/pull/2317)
+- Fix AudioFocus pausing video when attempting to play [#2311] (https://github.com/react-native-video/react-native-video/pull/2311)
+
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
 - Fix default closed captioning behavior for Android ExoPlayer [#2181](https://github.com/react-native-video/react-native-video/pull/2181)
+- Fix deprecated API bug for windows [#2119](https://github.com/react-native-video/react-native-video/pull/2119)
+- Added `rate` property and autolinking support for windows [#2206](https://github.com/react-native-video/react-native-video/pull/2206)
 
 ### Version 5.1.0-alpha8
 
