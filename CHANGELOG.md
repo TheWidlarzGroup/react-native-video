@@ -6,6 +6,7 @@
 - Fix iOS 15.4 HLS playback race condition [#2633](https://github.com/react-native-video/react-native-video/pull/2633)
 - Add fullscreen support on Android [#2073](https://github.com/react-native-video/react-native-video/pull/2073)
 - Fix app crash from NPE in Exoplayer error handler [#2575](https://github.com/react-native-video/react-native-video/pull/2575)
+- Fix default closed captioning behavior for Android ExoPlayer [#2181](https://github.com/react-native-video/react-native-video/pull/2181)
 
 ### Version 5.2.0
 
@@ -18,7 +19,6 @@
 ### Version 5.1.0-alpha9
 
 - Add ARM64 support for windows [#2137](https://github.com/react-native-community/react-native-video/pull/2137)
-- Fix default closed captioning behavior for Android ExoPlayer [#2181](https://github.com/react-native-video/react-native-video/pull/2181)
 - Fix deprecated API bug for windows [#2119](https://github.com/react-native-video/react-native-video/pull/2119)
 - Added `rate` property and autolinking support for windows [#2206](https://github.com/react-native-video/react-native-video/pull/2206)
 
