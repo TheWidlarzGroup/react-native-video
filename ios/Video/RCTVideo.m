@@ -1695,9 +1695,12 @@ static int const RCTVideoUnset = -1;
 
 - (void)destroy
 {
-  [_playerLayer.player pause];
-  _playerLayer.player = nil;
-  [_playerLayer removeFromSuperlayer];
+  if (_playerLayer.player)
+  {
+    [_playerLayer.player pause];
+    _playerLayer.player = nil;
+  }
+  [self removeFromSuperview];
 }
 
 - (void)setLicenseResult:(NSString *)license {
