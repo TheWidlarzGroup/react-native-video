@@ -1206,21 +1206,24 @@ class ReactExoplayerView extends FrameLayout implements
                 && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
             eventEmitter.end();
         }
+
+    }
+
+    @Override
+    public void onPlaybackStateChanged(int playbackState) {
+        if (playbackState == Player.STATE_READY && seekTime != C.TIME_UNSET) {
+            eventEmitter.seek(player.getCurrentPosition(), seekTime);
+            seekTime = C.TIME_UNSET;
+            if (isUsingContentResolution) {
+                // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
+                setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+            }
+        }
     }
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
         // Do nothing.
-    }
-
-    @Override
-    public void onSeekProcessed() {
-        eventEmitter.seek(player.getCurrentPosition(), seekTime);
-        seekTime = C.TIME_UNSET;
-        if (isUsingContentResolution) {
-            // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
-            setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
-        }
     }
 
     @Override
