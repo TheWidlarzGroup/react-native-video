@@ -10,6 +10,7 @@
 - Disable pipController init if pictureInPicture is false [#2645](https://github.com/react-native-video/react-native-video/pull/2645)
 - Make sure modifiers are applied before playing [#2395](https://github.com/react-native-video/react-native-video/pull/2395)
 - Better support newer versions of RNW (64 and newer) [#2535](https://github.com/react-native-video/react-native-video/pull/2535)
+- Fix nil string uri parameter error [#695](https://github.com/react-native-video/react-native-video/pull/695)
 
 ### Version 5.2.0
 
