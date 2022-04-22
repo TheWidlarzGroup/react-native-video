@@ -11,6 +11,7 @@
 - Make sure modifiers are applied before playing [#2395](https://github.com/react-native-video/react-native-video/pull/2395)
 - Better support newer versions of RNW (64 and newer) [#2535](https://github.com/react-native-video/react-native-video/pull/2535)
 - Fix nil string uri parameter error [#695](https://github.com/react-native-video/react-native-video/pull/695)
+- (Breaking) Bump shaka-player to 3.3.2 #2587
 
 ### Version 5.2.0
 
