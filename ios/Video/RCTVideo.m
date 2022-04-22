@@ -1094,8 +1094,8 @@ static int const RCTVideoUnset = -1;
   [self setSelectedTextTrack:_selectedTextTrack];
   [self setResizeMode:_resizeMode];
   [self setRepeat:_repeat];
-  [self setPaused:_paused];
   [self setControls:_controls];
+  [self setPaused:_paused];
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
 
