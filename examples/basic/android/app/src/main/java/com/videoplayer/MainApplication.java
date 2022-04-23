@@ -28,6 +28,11 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
         new ReactVideoPackage()
       );
     }
+
+    @Override
+    protected String getJSMainModuleName() {
+      return "index";
+    }
   };
 
   @Override
