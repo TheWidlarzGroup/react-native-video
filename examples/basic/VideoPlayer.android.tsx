@@ -22,7 +22,7 @@ class VideoPlayer extends Component {
     resizeMode: 'contain',
     duration: 0.0,
     currentTime: 0.0,
-    paused: true,
+    paused: false,
   };
 
   video: Video;
