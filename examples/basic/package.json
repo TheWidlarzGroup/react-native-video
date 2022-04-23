@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
+    "android": "react-native run-android",
     "postinstall": "rm -rf node_modules/react-native-video/{examples,node_modules}",
     "test": "jest",
     "lint": "eslint ."
