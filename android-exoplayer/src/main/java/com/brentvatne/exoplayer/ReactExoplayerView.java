@@ -34,6 +34,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
+import com.google.android.exoplayer2.drm.DrmSession.DrmSessionException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -1291,7 +1292,7 @@ class ReactExoplayerView extends FrameLayout implements
             if (cause instanceof DefaultDrmSessionManager.MissingSchemeDataException) {
                 errorCode = "3004";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
-            } else if(cause instanceof MediaDrmCallbackException) {
+            } else if(cause instanceof MediaDrmCallbackException || cause instanceof DrmSessionException) {
                 errorCode = "3005";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
                 if (!hasDrmFailed) {
@@ -1300,6 +1301,7 @@ class ReactExoplayerView extends FrameLayout implements
                     playerNeedsSource = true;
                     updateResumePosition();
                     initializePlayer();
+                    setPlayWhenReady(true);
                     return;
                 }
             } else {
@@ -1317,6 +1319,7 @@ class ReactExoplayerView extends FrameLayout implements
                         playerNeedsSource = true;
                         updateResumePosition();
                         initializePlayer();
+                        setPlayWhenReady(true);
                         return;
                     }
                 }
@@ -1373,7 +1376,8 @@ class ReactExoplayerView extends FrameLayout implements
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri);
-
+            
+            hasDrmFailed = false;
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
