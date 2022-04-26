@@ -18,7 +18,7 @@ App::App() noexcept
     MainComponentName(L"VideoPlayer");
 
 #if BUNDLE
-    JavaScriptBundleFile(L"index.windows");
+    JavaScriptBundleFile(L"index");
     InstanceSettings().UseWebDebugger(false);
     InstanceSettings().UseFastRefresh(false);
 #else
