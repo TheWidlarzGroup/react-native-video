@@ -10,6 +10,8 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
+import com.reactnativecommunity.picker.RNCPickerPackage;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +27,8 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     protected List<ReactPackage> getPackages() {
       return Arrays.asList(
         new MainReactPackage(),
-        new ReactVideoPackage()
+        new ReactVideoPackage(),
+        new RNCPickerPackage()
       );
     }
 
