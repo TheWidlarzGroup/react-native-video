@@ -632,6 +632,16 @@ class ReactExoplayerView extends FrameLayout implements
             mediaSource = new MergingMediaSource(textSourceArray);
         }
 
+        // wait for player to be set
+        while (player == null) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                Log.e("ExoPlayer Exception", ex.toString());
+            }
+        }
+
         boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
         if (haveResumePosition) {
             player.seekTo(resumeWindow, resumePosition);
