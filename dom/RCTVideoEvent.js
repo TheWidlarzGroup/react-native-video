@@ -4,10 +4,10 @@ interface RCTEvent {
     viewTag: number;
     eventName: string;
     coalescingKey: number;
-  
+
     canCoalesce(): boolean;
     coalesceWithEvent(event: RCTEvent): RCTEvent;
-  
+
     moduleDotMethod(): string;
     arguments(): Array<any>;
   }
@@ -38,14 +38,14 @@ export default class RCTVideoEvent implements RCTEvent {
   }
 
   moduleDotMethod(): string {
-    return "RCTEventEmitter.receiveEvent";
+    return 'RCTEventEmitter.receiveEvent';
   }
 
   arguments(): Array<any> {
     const args = [
       this.viewTag,
       this.eventName,
-      this.data
+      this.data,
     ];
     return args;
   }

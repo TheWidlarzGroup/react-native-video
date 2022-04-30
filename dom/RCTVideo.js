@@ -1,11 +1,13 @@
 // @flow
 
-import { RCTEvent, RCTView, type RCTBridge } from "react-native-dom";
-import shaka from "shaka-player";
+/* eslint-env browser */
 
-import resizeModes from "./resizeModes";
-import type { VideoSource } from "./types";
-import RCTVideoEvent from "./RCTVideoEvent";
+import { RCTView, type RCTBridge } from 'react-native-dom';
+import shaka from 'shaka-player';
+
+import resizeModes from './resizeModes';
+import type { VideoSource } from './types';
+import RCTVideoEvent from './RCTVideoEvent';
 
 class RCTVideo extends RCTView {
   playPromise: Promise<void> = Promise.resolve();
@@ -24,7 +26,7 @@ class RCTVideo extends RCTView {
   constructor(bridge: RCTBridge) {
     super(bridge);
 
-    this.eventDispatcher = bridge.getModuleByName("EventDispatcher");
+    this.eventDispatcher = bridge.getModuleByName('EventDispatcher');
 
     shaka.polyfill.installAll();
 
@@ -35,12 +37,12 @@ class RCTVideo extends RCTView {
     this.onProgress = this.onProgress.bind(this);
 
     this.videoElement = this.initializeVideoElement();
-    this.videoElement.addEventListener("ended", this.onEnd);
-    this.videoElement.addEventListener("loadeddata", this.onLoad);
-    this.videoElement.addEventListener("canplay", this.onReadyForDisplay);
-    this.videoElement.addEventListener("loadstart", this.onLoadStart);
-    this.videoElement.addEventListener("pause", this.onPause);
-    this.videoElement.addEventListener("play", this.onPlay);
+    this.videoElement.addEventListener('ended', this.onEnd);
+    this.videoElement.addEventListener('loadeddata', this.onLoad);
+    this.videoElement.addEventListener('canplay', this.onReadyForDisplay);
+    this.videoElement.addEventListener('loadstart', this.onLoadStart);
+    this.videoElement.addEventListener('pause', this.onPause);
+    this.videoElement.addEventListener('play', this.onPlay);
     this.player = new shaka.Player(this.videoElement);
 
     this.muted = false;
@@ -50,26 +52,26 @@ class RCTVideo extends RCTView {
   }
 
   detachFromView(view: UIView) {
-    this.videoElement.removeEventListener("ended", this.onEnd);
-    this.videoElement.removeEventListener("loadeddata", this.onLoad);
-    this.videoElement.removeEventListener("canplay", this.onReadyForDisplay);
-    this.videoElement.removeEventListener("loadstart", this.onLoadStart);
-    this.videoElement.removeEventListener("pause", this.onPause);
-    this.videoElement.removeEventListener("play", this.onPlay);
+    this.videoElement.removeEventListener('ended', this.onEnd);
+    this.videoElement.removeEventListener('loadeddata', this.onLoad);
+    this.videoElement.removeEventListener('canplay', this.onReadyForDisplay);
+    this.videoElement.removeEventListener('loadstart', this.onLoadStart);
+    this.videoElement.removeEventListener('pause', this.onPause);
+    this.videoElement.removeEventListener('play', this.onPlay);
 
     this.stopProgressTimer();
   }
 
   initializeVideoElement() {
-    const elem = document.createElement("video");
+    const elem = document.createElement('video');
 
     Object.assign(elem.style, {
-      display: "block",
-      position: "absolute",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "100%"
+      display: 'block',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
     });
 
     return elem;
@@ -81,7 +83,7 @@ class RCTVideo extends RCTView {
 
   set controls(value: boolean) {
     this.videoElement.controls = value;
-    this.videoElement.style.pointerEvents = value ? "auto" : "";
+    this.videoElement.style.pointerEvents = value ? 'auto' : '';
   }
 
   set id(value: string) {
@@ -121,19 +123,19 @@ class RCTVideo extends RCTView {
   set resizeMode(value: number) {
     switch (value) {
       case resizeModes.ScaleNone: {
-        this.videoElement.style.objectFit = "none";
+        this.videoElement.style.objectFit = 'none';
         break;
       }
       case resizeModes.ScaleToFill: {
-        this.videoElement.style.objectFit = "fill";
+        this.videoElement.style.objectFit = 'fill';
         break;
       }
       case resizeModes.ScaleAspectFit: {
-        this.videoElement.style.objectFit = "contain";
+        this.videoElement.style.objectFit = 'contain';
         break;
       }
       case resizeModes.ScaleAspectFill: {
-        this.videoElement.style.objectFit = "cover";
+        this.videoElement.style.objectFit = 'cover';
         break;
       }
     }
@@ -146,16 +148,16 @@ class RCTVideo extends RCTView {
   set source(value: VideoSource) {
     let uri = value.uri;
 
-    if (uri.startsWith("blob:")) {
+    if (uri.startsWith('blob:')) {
       let blob = this.bridge.blobManager.resolveURL(uri);
-      if (blob.type === "text/xml") {
-        blob = new Blob([blob], { type: "video/mp4" });
+      if (blob.type === 'text/xml') {
+        blob = new Blob([blob], { type: 'video/mp4' });
       }
       uri = URL.createObjectURL(blob);
     }
 
     if (!shaka.Player.isBrowserSupported()) { // primarily iOS WebKit
-      this.videoElement.setAttribute("src", uri);
+      this.videoElement.setAttribute('src', uri);
       if (!this._paused) {
         this.requestPlay();
       }
@@ -181,12 +183,12 @@ class RCTVideo extends RCTView {
 
   onEnd = () => {
     this.onProgress();
-    this.sendEvent("topVideoEnd", null);
-    this.stopProgressTimer();    
+    this.sendEvent('topVideoEnd', null);
+    this.stopProgressTimer();
   }
 
   onError = error => {
-    console.warn("topVideoError", error);
+    console.warn('topVideoError', error);
   }
 
   onLoad = () => {
@@ -199,23 +201,23 @@ class RCTVideo extends RCTView {
       naturalSize: {
         width,
         height,
-        orientation: width >= height ? "landscape" : "portrait"
-      }
+        orientation: width >= height ? 'landscape' : 'portrait',
+      },
     };
-    this.sendEvent("topVideoLoad", payload);
+    this.sendEvent('topVideoLoad', payload);
   }
 
   onReadyForDisplay = () => {
-    this.sendEvent("onReadyForDisplay");
+    this.sendEvent('onReadyForDisplay');
   }
 
   onLoadStart = () => {
     const src = this.videoElement.currentSrc;
     const payload = {
       isNetwork: !src.match(/^https?:\/\/localhost/), // require is served from localhost
-      uri: this.videoElement.currentSrc
+      uri: this.videoElement.currentSrc,
     };
-    this.sendEvent("topVideoLoadStart", payload);
+    this.sendEvent('topVideoLoadStart', payload);
   }
 
   onPause = () => {
@@ -229,13 +231,13 @@ class RCTVideo extends RCTView {
   onProgress = () => {
     const payload = {
       currentTime: this.videoElement.currentTime,
-      seekableDuration: this.videoElement.duration
+      seekableDuration: this.videoElement.duration,
     };
-    this.sendEvent("topVideoProgress", payload);
+    this.sendEvent('topVideoProgress', payload);
   }
 
   onRejectedAutoplay = () => {
-    this.sendEvent("topVideoRejectedAutoplay", null);
+    this.sendEvent('topVideoRejectedAutoplay', null);
   }
 
   requestPlay() {
@@ -273,6 +275,6 @@ class RCTVideo extends RCTView {
   }
 }
 
-customElements.define("rct-video", RCTVideo);
+customElements.define('rct-video', RCTVideo);
 
 export default RCTVideo;

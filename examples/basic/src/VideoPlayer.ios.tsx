@@ -5,7 +5,6 @@ import React, {
 
 import {
   AlertIOS,
-  AppRegistry,
   Platform,
   StyleSheet,
   Text,
@@ -35,7 +34,7 @@ const filterTypes = [
 ];
 
 class VideoPlayer extends Component {
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.onLoad = this.onLoad.bind(this);
     this.onProgress = this.onProgress.bind(this);
@@ -58,12 +57,12 @@ class VideoPlayer extends Component {
     filterEnabled: true
   };
 
-  onLoad(data) {
+  onLoad(data: any) {
     console.log('On load fired!');
     this.setState({duration: data.duration});
   }
 
-  onProgress(data) {
+  onProgress(data: any) {
     this.setState({currentTime: data.currentTime});
   }
 
@@ -72,14 +71,14 @@ class VideoPlayer extends Component {
   }
 
   getCurrentTimePercentage() {
-    if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+    if (this.state.currentTime > 0 && this.state.duration !== 0) {
+      return this.state.currentTime / this.state.duration;
     } else {
       return 0;
     }
   }
 
-  setFilter(step) {
+  setFilter(step: number) {
     let index = filterTypes.indexOf(this.state.filter) + step;
 
     if (index === filterTypes.length) {
@@ -108,7 +107,7 @@ class VideoPlayer extends Component {
     );
   }
 
-  renderRateControl(rate) {
+  renderRateControl(rate: number) {
     const isSelected = (this.state.rate == rate);
 
     return (
@@ -120,7 +119,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderResizeModeControl(resizeMode) {
+  renderResizeModeControl(resizeMode: string) {
     const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
@@ -132,7 +131,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderVolumeControl(volume) {
+  renderVolumeControl(volume: number) {
     const isSelected = (this.state.volume == volume);
 
     return (
@@ -144,7 +143,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderIgnoreSilentSwitchControl(ignoreSilentSwitch) {
+  renderIgnoreSilentSwitchControl(ignoreSilentSwitch: string) {
     const isSelected = (this.state.ignoreSilentSwitch == ignoreSilentSwitch);
 
     return (
@@ -156,7 +155,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderMixWithOthersControl(mixWithOthers) {
+  renderMixWithOthersControl(mixWithOthers: string) {
     const isSelected = (this.state.mixWithOthers == mixWithOthers);
 
     return (
@@ -442,8 +441,13 @@ const styles = StyleSheet.create({
   },
   nativeVideoControls: {
     top: 184,
-    height: 300
-  }
+    height: 300,
+  },
+  trackingControls: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
+export default VideoPlayer

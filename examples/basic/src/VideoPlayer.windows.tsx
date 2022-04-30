@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,7 +14,7 @@ import {
 import Video from 'react-native-video';
 
 class VideoPlayer extends Component {
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.onLoad = this.onLoad.bind(this);
     this.onProgress = this.onProgress.bind(this);
@@ -28,25 +27,26 @@ class VideoPlayer extends Component {
     resizeMode: 'contain',
     duration: 0.0,
     currentTime: 0.0,
+    paused: 0,
   };
 
-  onLoad(data) {
+  onLoad(data: any) {
     this.setState({duration: data.duration});
   }
 
-  onProgress(data) {
+  onProgress(data: any) {
     this.setState({currentTime: data.currentTime});
   }
 
   getCurrentTimePercentage() {
-    if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+    if (this.state.currentTime > 0 && this.state.duration !== 0) {
+      return this.state.currentTime / this.state.duration;
     } else {
       return 0;
     }
   }
 
-  renderRateControl(rate) {
+  renderRateControl(rate: number) {
     const isSelected = (this.state.rate == rate);
 
     return (
@@ -58,7 +58,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderResizeModeControl(resizeMode) {
+  renderResizeModeControl(resizeMode: string) {
     const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
@@ -70,7 +70,7 @@ class VideoPlayer extends Component {
     )
   }
 
-  renderVolumeControl(volume) {
+  renderVolumeControl(volume: number) {
     const isSelected = (this.state.volume == volume);
 
     return (
@@ -205,6 +205,11 @@ const styles = StyleSheet.create({
     paddingRight: 2,
     lineHeight: 12,
   },
+  trackingControls: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
+export default VideoPlayer

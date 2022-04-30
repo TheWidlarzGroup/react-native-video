@@ -1,3 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.brentvatne.react">
+    <application>
+        <activity
+            android:name="com.brentvatne.exoplayer.ExoPlayerFullscreenVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTop" />
+    </application>
 </manifest>

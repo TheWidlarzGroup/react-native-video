@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,16 +22,16 @@ class VideoPlayer extends Component {
     resizeMode: 'contain',
     duration: 0.0,
     currentTime: 0.0,
-    paused: true,
+    paused: false,
   };
 
   video: Video;
 
-  onLoad = (data) => {
+  onLoad = (data: any) => {
     this.setState({ duration: data.duration });
   };
 
-  onProgress = (data) => {
+  onProgress = (data: any) => {
     this.setState({ currentTime: data.currentTime });
   };
 
@@ -50,25 +49,25 @@ class VideoPlayer extends Component {
   };
 
   getCurrentTimePercentage() {
-    if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+    if (this.state.currentTime > 0 && this.state.duration !== 0) {
+      return this.state.currentTime / this.state.duration;
     }
     return 0;
   };
 
-  renderRateControl(rate) {
+  renderRateControl(rate: number) {
     const isSelected = (this.state.rate === rate);
 
     return (
       <TouchableOpacity onPress={() => { this.setState({ rate }) }}>
         <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
-          {rate}x
+          {rate}
         </Text>
       </TouchableOpacity>
     );
   }
 
-  renderResizeModeControl(resizeMode) {
+  renderResizeModeControl(resizeMode: string) {
     const isSelected = (this.state.resizeMode === resizeMode);
 
     return (
@@ -77,10 +76,10 @@ class VideoPlayer extends Component {
           {resizeMode}
         </Text>
       </TouchableOpacity>
-    )
+   )
   }
 
-  renderVolumeControl(volume) {
+  renderVolumeControl(volume: number) {
     const isSelected = (this.state.volume === volume);
 
     return (
@@ -121,7 +120,6 @@ class VideoPlayer extends Component {
             repeat={false}
           />
         </TouchableOpacity>
-
         <View style={styles.controls}>
           <View style={styles.generalControls}>
             <View style={styles.rateControl}>
@@ -225,6 +223,12 @@ const styles = StyleSheet.create({
     paddingRight: 2,
     lineHeight: 12,
   },
+  trackingControls: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
+export default VideoPlayer
