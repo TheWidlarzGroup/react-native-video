@@ -2,6 +2,7 @@
 
 ### Version 6.0.0-alpha1
 
+- Ensure we always use `hideShutterView` before showing the `shutterView` on Android
 - Add Google's maven repository to avoid build error [#2552](https://github.com/react-native-video/react-native-video/pull/2552)
 - Fix iOS 15.4 HLS playback race condition [#2633](https://github.com/react-native-video/react-native-video/pull/2633)
 - Add fullscreen support on Android [#2073](https://github.com/react-native-video/react-native-video/pull/2073)
@@ -12,14 +13,6 @@
 - Better support newer versions of RNW (64 and newer) [#2535](https://github.com/react-native-video/react-native-video/pull/2535)
 - Fix nil string uri parameter error [#695](https://github.com/react-native-video/react-native-video/pull/695)
 - (Breaking) Bump shaka-player to 3.3.2 [#2587](https://github.com/react-native-video/react-native-video/pull/2587)
-
-### Version 5.2.2
-
-- Ensure we always use `hideShutterView` before showing the `shutterView` on Android
-
-### Version 5.2.1
-
-- Add Google's maven repository to avoid build error [#2552] (https://github.com/react-native-video/react-native-video/pull/2552) 
 
 ### Version 5.2.0
 
