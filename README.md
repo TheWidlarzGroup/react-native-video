@@ -1124,7 +1124,7 @@ Platforms: all
 
 
 #### onProgress
-Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
+Callback function that is called every progressUpdateInterval milliseconds with info about which position the media is currently playing.
 
 Property | Type | Description
 --- | --- | ---
