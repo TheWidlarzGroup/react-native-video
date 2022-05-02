@@ -136,7 +136,7 @@ public final class ExoPlayerView extends FrameLayout {
             clearVideoView();
         }
         this.player = player;
-        shutterView.setVisibility(VISIBLE);
+        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
         if (player != null) {
             setVideoView();
             player.addVideoListener(componentListener);
@@ -203,7 +203,7 @@ public final class ExoPlayerView extends FrameLayout {
             }
         }
         // Video disabled so the shutter must be closed.
-        shutterView.setVisibility(VISIBLE);
+        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void invalidateAspectRatio() {
