@@ -13,6 +13,7 @@
 - Fix nil string uri parameter error [#695](https://github.com/react-native-video/react-native-video/pull/695)
 - (Breaking) Bump shaka-player to 3.3.2 [#2587](https://github.com/react-native-video/react-native-video/pull/2587)
 - Improve basic player example on android [#2662](https://github.com/react-native-video/react-native-video/pull/2662)
+- Upgrade ExoPlayer to 2.17.1 [#2498](https://github.com/react-native-video/react-native-video/pull/2498)
 
 ### Version 5.2.0
 
