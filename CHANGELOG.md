@@ -1,9 +1,5 @@
 ## Changelog
 
-### Version 6.0.0-alpha2
-
-- Ensure we always use `hideShutterView` before showing the `shutterView` on Android [#2609](https://github.com/react-native-video/react-native-video/pull/2609)
-
 ### Version 6.0.0-alpha1
 
 - Add Google's maven repository to avoid build error [#2552](https://github.com/react-native-video/react-native-video/pull/2552)
@@ -17,6 +13,7 @@
 - Fix nil string uri parameter error [#695](https://github.com/react-native-video/react-native-video/pull/695)
 - (Breaking) Bump shaka-player to 3.3.2 [#2587](https://github.com/react-native-video/react-native-video/pull/2587)
 - Improve basic player example on android [#2662](https://github.com/react-native-video/react-native-video/pull/2662)
+- Ensure we always use `hideShutterView` before showing the `shutterView` on Android [#2609](https://github.com/react-native-video/react-native-video/pull/2609)
 
 ### Version 5.2.0
 
