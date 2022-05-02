@@ -16,9 +16,9 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.TracksInfo;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
@@ -34,7 +34,7 @@ public final class ExoPlayerView extends FrameLayout {
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
-    private SimpleExoPlayer player;
+    private ExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
 
@@ -120,13 +120,13 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     /**
-     * Set the {@link SimpleExoPlayer} to use. The {@link SimpleExoPlayer#addListener} method of the
+     * Set the {@link ExoPlayer} to use. The {@link ExoPlayer#addListener} method of the
      * player will be called and previous
      * assignments are overridden.
      *
-     * @param player The {@link SimpleExoPlayer} to use.
+     * @param player The {@link ExoPlayer} to use.
      */
-    public void setPlayer(SimpleExoPlayer player) {
+    public void setPlayer(ExoPlayer player) {
         if (this.player != null) {
             this.player.removeListener(componentListener);
             clearVideoView();
@@ -214,7 +214,7 @@ public final class ExoPlayerView extends FrameLayout {
             subtitleLayout.onCues(cues);
         }
 
-        // SimpleExoPlayer.VideoListener implementation
+        // ExoPlayer.VideoListener implementation
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
@@ -255,7 +255,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onPositionDiscontinuity(int reason) {
+        public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
             // Do nothing.
         }
 
@@ -265,7 +265,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+        public void onTracksInfoChanged(TracksInfo tracksInfo) {
             updateForCurrentTrackSelections();
         }
 

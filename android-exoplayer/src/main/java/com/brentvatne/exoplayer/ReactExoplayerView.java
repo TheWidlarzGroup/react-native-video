@@ -35,11 +35,13 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.TracksInfo;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.ExoMediaDrm;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
@@ -63,7 +65,8 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides.TrackSelectionOverride;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -77,6 +80,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -113,7 +117,7 @@ class ReactExoplayerView extends FrameLayout implements
     private ExoPlayerView exoPlayerView;
 
     private DataSource.Factory mediaDataSourceFactory;
-    private SimpleExoPlayer player;
+    private ExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
@@ -189,7 +193,7 @@ class ReactExoplayerView extends FrameLayout implements
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
         if(!player.getCurrentTimeline().isEmpty()) {
-            player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
+            player.getCurrentTimeline().getWindow(player.getCurrentMediaItemIndex(), window);
         }
         return window.windowStartTimeMs + currentPosition;
     }
@@ -302,7 +306,7 @@ class ReactExoplayerView extends FrameLayout implements
         return instances.get(uid);
     }
 
-    public SimpleExoPlayer getPlayer() {
+    public ExoPlayer getPlayer() {
         return player;
     }
 
@@ -459,7 +463,7 @@ class ReactExoplayerView extends FrameLayout implements
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
                                     .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-                    player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+                    player = new ExoPlayer.Builder(getContext(), renderersFactory)
                                 .setTrackSelector(trackSelector)
                                 .setBandwidthMeter(bandwidthMeter)
                                 .setLoadControl(defaultLoadControl)
@@ -551,12 +555,21 @@ class ReactExoplayerView extends FrameLayout implements
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         MediaItem mediaItem = new MediaItem.Builder().setUri(uri).build();
+        DrmSessionManagerProvider drmProvider = null;
+        if (drmSessionManager != null) {
+            drmProvider = new DrmSessionManagerProvider() {
+                @Override
+                public DrmSessionManager get(MediaItem mediaItem) {
+                    return drmSessionManager;
+                }
+            };
+        }
         switch (type) {
             case C.TYPE_SS:
                 return new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManager(drmSessionManager)
+                ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
@@ -564,21 +577,21 @@ class ReactExoplayerView extends FrameLayout implements
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManager(drmSessionManager)
+                ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
             case C.TYPE_HLS:
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManager(drmSessionManager)
+                ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
             case C.TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManager(drmSessionManager)
+                ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
@@ -610,9 +623,15 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
-        MediaItem.Subtitle subtitle = new MediaItem.Subtitle(uri, mimeType, language, C.SELECTION_FLAG_DEFAULT, C.ROLE_FLAG_SUBTITLE, title);
+        MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(uri)
+                .setMimeType(mimeType)
+                .setLanguage(language)
+                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
+                .setLabel(title)
+                .build();
         return new SingleSampleMediaSource.Factory(mediaDataSourceFactory)
-                .createMediaSource(subtitle, C.TIME_UNSET);
+                .createMediaSource(subtitleConfiguration, C.TIME_UNSET);
     }
 
     private void releasePlayer() {
@@ -698,8 +717,8 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void updateResumePosition() {
-        resumeWindow = player.getCurrentWindowIndex();
-        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition())
+        resumeWindow = player.getCurrentMediaItemIndex();
+        resumePosition = player.isCurrentMediaItemSeekable() ? Math.max(0, player.getCurrentPosition())
                 : C.TIME_UNSET;
     }
 
@@ -976,8 +995,8 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-        // Do Nothing.
+    public void onTracksInfoChanged(TracksInfo tracksInfo) {
+        // Do nothing.
     }
 
     @Override
@@ -1082,7 +1101,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
-            player.stop(true);
+            player.stop();
+            player.clearMediaItems();
             this.srcUri = null;
             this.extension = null;
             this.requestHeaders = null;
@@ -1160,7 +1180,8 @@ class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(rendererIndex);
         int groupIndex = C.INDEX_UNSET;
-        int[] tracks = {0} ;
+        List<Integer> tracks = new ArrayList<>();
+        tracks.add(0);
 
         if (TextUtils.isEmpty(type)) {
             type = "default";
@@ -1202,7 +1223,7 @@ class ReactExoplayerView extends FrameLayout implements
                     Format format = group.getFormat(j);
                     if (format.height == height) {
                         groupIndex = i;
-                        tracks[0] = j;
+                        tracks.set(0, j);
                         break;
                     }
                 }
@@ -1221,10 +1242,10 @@ class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new int[group.length];
+            tracks = new ArrayList<>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
-                tracks[j] = j;
+                tracks.add(j, j);
             }
         }
 
@@ -1233,11 +1254,12 @@ class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        TrackSelectionOverride selectionOverride = new TrackSelectionOverride(groups.get(groupIndex), tracks);
+
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(groupIndex, tracks))
+                .setTrackSelectionOverrides(new TrackSelectionOverrides.Builder().addOverride(selectionOverride).build())
                 .build();
         trackSelector.setParameters(selectionParameters);
     }

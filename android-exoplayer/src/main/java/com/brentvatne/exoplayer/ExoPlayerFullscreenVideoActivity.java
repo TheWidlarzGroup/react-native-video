@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.brentvatne.react.R;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 
 public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implements ReactExoplayerView.FullScreenDelegate {
@@ -20,7 +20,7 @@ public class ExoPlayerFullscreenVideoActivity extends AppCompatActivity implemen
 
     private ReactExoplayerView exoplayerView;
     private PlayerControlView playerControlView;
-    private SimpleExoPlayer player;
+    private ExoPlayer player;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
