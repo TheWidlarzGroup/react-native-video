@@ -817,7 +817,6 @@ class ReactExoplayerView extends FrameLayout implements
                 case Player.STATE_IDLE:
                 case Player.STATE_ENDED:
                     initializePlayer();
-                    break;
                 case Player.STATE_BUFFERING:
                 case Player.STATE_READY:
                     if (!player.getPlayWhenReady()) {
@@ -827,7 +826,6 @@ class ReactExoplayerView extends FrameLayout implements
                 default:
                     break;
             }
-
         } else {
             initializePlayer();
         }
@@ -1314,6 +1312,12 @@ class ReactExoplayerView extends FrameLayout implements
                     setPlayWhenReady(true);
                     return;
                 }
+            } else if (cause instanceof HttpDataSource.HttpDataSourceException) {
+                // this exception happens when connectivity is lost
+                updateResumePosition();
+                initializePlayer();
+                setPlayWhenReady(true);
+                return;
             } else {
                 errorCode = "2021";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
