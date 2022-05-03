@@ -1020,10 +1020,10 @@ class ReactExoplayerView extends FrameLayout implements
             if (audioTrackType != null) {
 				setSelectedAudioTrack(audioTrackType, audioTrackValue);
 			}
-			if (videoTrackType != null) {
+		    if (videoTrackType != null) {
 				setSelectedVideoTrack(videoTrackType, videoTrackValue);
 			}
-			if (textTrackType != null) {
+		    if (textTrackType != null) {
 				setSelectedTextTrack(textTrackType, textTrackValue);
 			}
             Format videoFormat = player.getVideoFormat();
