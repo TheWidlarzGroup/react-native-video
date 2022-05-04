@@ -66,7 +66,7 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    entryFile: "index.android.js",
+    entryFile: "index.js",
     enableHermes: false,
 ]
 apply from: "../../node_modules/react-native/react.gradle"
@@ -97,6 +97,7 @@ android {
         applicationId "com.videoplayer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         ndk {
@@ -136,6 +137,7 @@ android {
 
 dependencies {
     implementation project(':react-native-video')
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'org.webkit:android-jsc:+'
 }
@@ -146,3 +148,5 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
 }
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

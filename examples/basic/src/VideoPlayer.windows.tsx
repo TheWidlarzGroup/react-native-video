@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +14,11 @@ import {
 import Video from 'react-native-video';
 
 class VideoPlayer extends Component {
+  constructor(props: any) {
+    super(props);
+    this.onLoad = this.onLoad.bind(this);
+    this.onProgress = this.onProgress.bind(this);
+  }
 
   state = {
     rate: 1,
@@ -23,69 +27,55 @@ class VideoPlayer extends Component {
     resizeMode: 'contain',
     duration: 0.0,
     currentTime: 0.0,
-    paused: true,
+    paused: 0,
   };
 
-  video: Video;
+  onLoad(data: any) {
+    this.setState({duration: data.duration});
+  }
 
-  onLoad = (data) => {
-    this.setState({ duration: data.duration });
-  };
-
-  onProgress = (data) => {
-    this.setState({ currentTime: data.currentTime });
-  };
-
-  onEnd = () => {
-    this.setState({ paused: true })
-    this.video.seek(0)
-  };
-
-  onAudioBecomingNoisy = () => {
-    this.setState({ paused: true })
-  };
-
-  onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
-    this.setState({ paused: !event.hasAudioFocus })
-  };
+  onProgress(data: any) {
+    this.setState({currentTime: data.currentTime});
+  }
 
   getCurrentTimePercentage() {
-    if (this.state.currentTime > 0) {
-      return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+    if (this.state.currentTime > 0 && this.state.duration !== 0) {
+      return this.state.currentTime / this.state.duration;
+    } else {
+      return 0;
     }
-    return 0;
-  };
+  }
 
-  renderRateControl(rate) {
-    const isSelected = (this.state.rate === rate);
+  renderRateControl(rate: number) {
+    const isSelected = (this.state.rate == rate);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ rate }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {rate}x
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
-  renderResizeModeControl(resizeMode) {
-    const isSelected = (this.state.resizeMode === resizeMode);
+  renderResizeModeControl(resizeMode: string) {
+    const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ resizeMode }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {resizeMode}
         </Text>
       </TouchableOpacity>
     )
   }
 
-  renderVolumeControl(volume) {
-    const isSelected = (this.state.volume === volume);
+  renderVolumeControl(volume: number) {
+    const isSelected = (this.state.volume == volume);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({ volume }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
+      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {volume * 100}%
         </Text>
       </TouchableOpacity>
@@ -98,28 +88,18 @@ class VideoPlayer extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.fullScreen}
-          onPress={() => this.setState({ paused: !this.state.paused })}
-        >
-          <Video
-            ref={(ref: Video) => { this.video = ref }}
-            /* For ExoPlayer */
-            /* source={{ uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0', type: 'mpd' }} */
-            source={require('./broadchurch.mp4')}
-            style={styles.fullScreen}
-            rate={this.state.rate}
-            paused={this.state.paused}
-            volume={this.state.volume}
-            muted={this.state.muted}
-            resizeMode={this.state.resizeMode}
-            onLoad={this.onLoad}
-            onProgress={this.onProgress}
-            onEnd={this.onEnd}
-            onAudioBecomingNoisy={this.onAudioBecomingNoisy}
-            onAudioFocusChanged={this.onAudioFocusChanged}
-            repeat={false}
-          />
+        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
+          <Video source={require('./broadchurch.mp4')}
+                 style={styles.fullScreen}
+                 rate={this.state.rate}
+                 paused={this.state.paused}
+                 volume={this.state.volume}
+                 muted={this.state.muted}
+                 resizeMode={this.state.resizeMode}
+                 onLoad={this.onLoad}
+                 onProgress={this.onProgress}
+                 onEnd={() => { console.log('Done!') }}
+                 repeat={true} />
         </TouchableOpacity>
 
         <View style={styles.controls}>
@@ -147,8 +127,8 @@ class VideoPlayer extends Component {
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
-              <View style={[styles.innerProgressCompleted, { flex: flexCompleted }]} />
-              <View style={[styles.innerProgressRemaining, { flex: flexRemaining }]} />
+              <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
+              <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
             </View>
           </View>
         </View>
@@ -173,7 +153,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   controls: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderRadius: 5,
     position: 'absolute',
     bottom: 20,
@@ -220,11 +200,16 @@ const styles = StyleSheet.create({
   controlOption: {
     alignSelf: 'center',
     fontSize: 11,
-    color: 'white',
+    color: "white",
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
   },
+  trackingControls: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
+export default VideoPlayer

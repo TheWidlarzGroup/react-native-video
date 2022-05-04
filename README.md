@@ -1,5 +1,7 @@
 ## react-native-video
 
+[![ci][4]][5]
+
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
@@ -101,11 +103,11 @@ First select your project in Xcode.
 
 <img src="./docs/tvOS-step-1.jpg" width="40%">
 
-After that, select the tvOS target of your application and select « General » tab
+After that, select the tvOS target of your application and select « General » tab
 
 <img src="./docs/tvOS-step-2.jpg" width="40%">
 
-Scroll to « Linked Frameworks and Libraries » and tap on the + button
+Scroll to « Linked Frameworks and Libraries » and tap on the + button
 
 <img src="./docs/tvOS-step-3.jpg" width="40%">
 
@@ -287,74 +289,84 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-* [allowsExternalPlayback](#allowsexternalplayback)
-* [audioOnly](#audioonly)
-* [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
-* [bufferConfig](#bufferconfig)
-* [controls](#controls)
-* [currentPlaybackTime](#currentPlaybackTime)
-* [disableFocus](#disableFocus)
-* [filter](#filter)
-* [filterEnabled](#filterEnabled)
-* [fullscreen](#fullscreen)
-* [fullscreenAutorotate](#fullscreenautorotate)
-* [fullscreenOrientation](#fullscreenorientation)
-* [headers](#headers)
-* [hideShutterView](#hideshutterview)
-* [id](#id)
-* [ignoreSilentSwitch](#ignoresilentswitch)
-* [maxBitRate](#maxbitrate)
-* [minLoadRetryCount](#minLoadRetryCount)
-* [mixWithOthers](#mixWithOthers)
-* [muted](#muted)
-* [paused](#paused)
-* [pictureInPicture](#pictureinpicture)
-* [playInBackground](#playinbackground)
-* [playWhenInactive](#playwheninactive)
-* [poster](#poster)
-* [posterResizeMode](#posterresizemode)
-* [preferredForwardBufferDuration](#preferredForwardBufferDuration)
-* [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)
-* [progressUpdateInterval](#progressupdateinterval)
-* [rate](#rate)
-* [repeat](#repeat)
-* [reportBandwidth](#reportbandwidth)
-* [resizeMode](#resizemode)
-* [selectedAudioTrack](#selectedaudiotrack)
-* [selectedTextTrack](#selectedtexttrack)
-* [selectedVideoTrack](#selectedvideotrack)
-* [source](#source)
-* [stereoPan](#stereopan)
-* [textTracks](#texttracks)
-* [trackId](#trackId)
-* [useTextureView](#usetextureview)
-* [volume](#volume)
+| Name |Plateforms Support  | 
+|--|--|
+|[allowsExternalPlayback](#allowsexternalplayback) |iOS |
+|[audioOnly](#audioonly)|All |
+|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|
+|[bufferConfig](#bufferconfig)|Android ExoPlayer|
+|[controls](#controls)|Android ExoPlayer, iOS, react-native-dom|
+|[currentPlaybackTime](#currentPlaybackTime)|Android Exoplayer|
+|[disableFocus](#disableFocus)|Android Exoplayer, iOS|
+|[filter](#filter)|iOS|
+|[filterEnabled](#filterEnabled)|iOS|
+|[fullscreen](#fullscreen)|iOS|
+|[fullscreenAutorotate](#fullscreenautorotate)|iOS|
+|[fullscreenOrientation](#fullscreenorientation)|iOS|
+|[headers](#headers)|Android ExoPlayer|
+|[hideShutterView](#hideshutterview)|Android ExoPlayer|
+|[id](#id)|react-native-dom|
+|[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
+|[maxBitRate](#maxbitrate)|Android ExoPlayer, iOS|
+|[minLoadRetryCount](#minLoadRetryCount)|Android ExoPlayer|
+|[mixWithOthers](#mixWithOthers)|iOS|
+|[muted](#muted)|All|
+|[paused](#paused)|All|
+|[pictureInPicture](#pictureinpicture)|iOS|
+|[playInBackground](#playinbackground)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[playWhenInactive](#playwheninactive)|iOS|
+|[poster](#poster)|All|
+|[posterResizeMode](#posterresizemode)|All|
+|[preferredForwardBufferDuration](#preferredForwardBufferDuration)|iOS|
+| [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
+|[progressUpdateInterval](#progressupdateinterval)|All|
+|[rate](#rate)|All|
+|[repeat](#repeat)|All|
+|[reportBandwidth](#reportbandwidth)|Android ExoPlayer|
+|[resizeMode](#resizemode)|Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP|
+|[selectedAudioTrack](#selectedaudiotrack)|Android ExoPlayer, iOS|
+|[selectedTextTrack](#selectedtexttrack)|Android ExoPlayer, iOS|
+|[selectedVideoTrack](#selectedvideotrack)|Android ExoPlayer|
+|[source](#source)|All|
+|[stereoPan](#stereopan)|Android MediaPlayer|
+|[textTracks](#texttracks)|Android ExoPlayer, iOS|
+|[trackId](#trackId)|Android ExoPlayer|
+|[useTextureView](#usetextureview)|Android ExoPlayer|
+|[volume](#volume)|All|
+
 
 ### Event props
-* [onAudioBecomingNoisy](#onaudiobecomingnoisy)
-* [onBandwidthUpdate](#onbandwidthupdate)
-* [onEnd](#onend)
-* [onExternalPlaybackChange](#onexternalplaybackchange)
-* [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
-* [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)
-* [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)
-* [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)
-* [onLoad](#onload)
-* [onLoadStart](#onloadstart)
-* [onReadyForDisplay](#onreadyfordisplay)
-* [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)
-* [onPlaybackRateChange](#onplaybackratechange)
-* [onProgress](#onprogress)
-* [onSeek](#onseek)
-* [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)
-* [onTimedMetadata](#ontimedmetadata)
+| Name |Plateforms Support  | 
+|--|--|
+|[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android ExoPlayer, iOS|
+|[onBandwidthUpdate](#onbandwidthupdate)|Android ExoPlayer|
+|[onBuffer](#onbuffer)|Android ExoPlayer, iOS|
+|[onEnd](#onend)|All|
+|[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
+|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[onLoad](#onload)|All|
+|[onLoadStart](#onloadstart)|All|
+|[onReadyForDisplay](#onreadyfordisplay)|Android ExoPlayer, Android MediaPlayer, iOS, Web|
+|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)|iOS|
+|[onPlaybackRateChange](#onplaybackratechange)|All|
+|[onProgress](#onprogress)|All|
+|[onSeek](#onseek)|Android ExoPlayer, Android MediaPlayer, iOS, Windows UWP|
+|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)|iOS|
+|[onTimedMetadata](#ontimedmetadata)|Android ExoPlayer, Android MediaPlayer, iOS|
+
 
 ### Methods
-* [dismissFullscreenPlayer](#dismissfullscreenplayer)
-* [presentFullscreenPlayer](#presentfullscreenplayer)
-* [save](#save)
-* [restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)
-* [seek](#seek)
+| Name |Plateforms Support  | 
+|--|--|
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[presentFullscreenPlayer](#presentfullscreenplayer)|Android ExoPlayer, Android MediaPlayer, iOS|
+|[save](#save)|iOS|
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
+|[seek](#seek)|All|
+
 
 ### Configurable props
 
@@ -489,7 +501,7 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Platforms: iOS
+Platforms: Android ExoPlayer, iOS
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
@@ -944,6 +956,24 @@ Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth)
 
 Platforms: Android ExoPlayer
 
+#### onBuffer
+Callback function that is called when the player buffers.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+isBuffering | boolean | Boolean indicating whether buffering is active
+
+Example:
+```
+{
+  isBuffering: true
+}
+```
+
+Platforms: Android ExoPlayer, iOS
+
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
 
@@ -1113,7 +1143,7 @@ Platforms: all
 
 
 #### onProgress
-Callback function that is called every progressUpdateInterval seconds with info about which position the media is currently playing.
+Callback function that is called every progressUpdateInterval milliseconds with info about which position the media is currently playing.
 
 Property | Type | Description
 --- | --- | ---
@@ -1480,8 +1510,10 @@ If you encounter an error `Could not find com.android.support:support-annotation
 - [ ] Bring API closer to HTML5 `<Video>` [reference](http://devdocs.io/html/element/video)
 
 [1]: https://github.com/brentvatne/react-native-login/blob/56c47a5d1e23781e86e19b27e10427fd6391f666/App/Screens/UserInfoScreen.js#L32-L35
-[2]: https://github.com/react-native-community/react-native-video/tree/master/example
+[2]: https://github.com/react-native-video/react-native-video/tree/master/examples
 [3]: https://developer.apple.com/library/ios/qa/qa1668/_index.html
+[4]: https://github.com/react-native-video/react-native-video/workflows/ci/badge.svg
+[5]: https://github.com/react-native-video/react-native-video/actions
 
 ---
 

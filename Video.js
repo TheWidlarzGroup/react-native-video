@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, requireNativeComponent, NativeModules, View, Image, Platform, findNodeHandle } from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, UIManager, View, Image, Platform, findNodeHandle } from 'react-native';
 import { ViewPropTypes } from "deprecated-react-native-prop-types";
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
@@ -250,15 +250,15 @@ export default class Video extends Component {
           NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError(error, findNodeHandle(this._root));
         });
       } else {
-        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError("No spc received", findNodeHandle(this._root));
+        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('No spc received', findNodeHandle(this._root));
       }
     }
   }
   getViewManagerConfig = viewManagerName => {
-    if (!NativeModules.UIManager.getViewManagerConfig) {
-      return NativeModules.UIManager[viewManagerName];
+    if (!UIManager.getViewManagerConfig) {
+      return UIManager[viewManagerName];
     }
-    return NativeModules.UIManager.getViewManagerConfig(viewManagerName);
+    return UIManager.getViewManagerConfig(viewManagerName);
   };
 
   render() {
@@ -269,6 +269,8 @@ export default class Video extends Component {
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
+    } else if (uri === '') {
+      return null;
     }
 
     if (!uri) {
@@ -404,7 +406,7 @@ Video.propTypes = {
   ]),
   drm: PropTypes.shape({
     type: PropTypes.oneOf([
-      DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY
+      DRMType.CLEARKEY, DRMType.FAIRPLAY, DRMType.WIDEVINE, DRMType.PLAYREADY,
     ]),
     licenseServer: PropTypes.string,
     headers: PropTypes.shape({}),
