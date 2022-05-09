@@ -571,8 +571,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-        trackSelector.setParameters(trackSelector.buildUponParameters()
+        self.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        self.trackSelector.setParameters(trackSelector.buildUponParameters()
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
@@ -591,7 +591,7 @@ class ReactExoplayerView extends FrameLayout implements
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
         player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
-                    .setTrackSelector​(trackSelector)
+                    .setTrackSelector​(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
                     .build();
@@ -1041,6 +1041,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     private WritableArray getAudioTrackInfo() {
         WritableArray audioTracks = Arguments.createArray();
+
+        if (trackSelector == null) {
+            // Likely player is unmounting so no audio tracks are available anymore
+            return audioTracks;
+        }
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
