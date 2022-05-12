@@ -278,6 +278,7 @@ var styles = StyleSheet.create({
 * [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)
 * [backBufferDurationMs](#backBufferDurationMs)
 * [bufferConfig](#bufferconfig)
+* [contentStartTime](#contentStartTime)
 * [controls](#controls)
 * [currentPlaybackTime](#currentPlaybackTime)
 * [disableFocus](#disableFocus)
@@ -412,10 +413,13 @@ Platforms: Android ExoPlayer, iOS
 
 #### controls
 Determines whether to show player controls.
-* ** false (default)** - Don't show player controls
+* **false (default)** - Don't show player controls
 * **true** - Show player controls
 
 Note on iOS, controls are always shown when in fullscreen mode.
+
+### contentStartTime
+The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
 For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
