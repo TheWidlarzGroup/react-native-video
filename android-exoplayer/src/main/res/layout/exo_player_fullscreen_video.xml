@@ -3,7 +3,7 @@
     android:id="@+id/enclosing_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@android:color/transparent">
 
     <com.brentvatne.exoplayer.ExoPlayerView
         android:id="@+id/player_view"
