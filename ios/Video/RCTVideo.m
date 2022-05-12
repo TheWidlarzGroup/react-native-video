@@ -65,7 +65,7 @@ static int const RCTVideoUnset = -1;
   BOOL _paused;
   BOOL _repeat;
   BOOL _allowsExternalPlayback;
-  NSArray * _textTracks;
+  NSMutableArray * _textTracks;
   NSDictionary * _selectedTextTrack;
   NSDictionary * _selectedAudioTrack;
   BOOL _playbackStalled;
@@ -97,7 +97,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+    _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -418,16 +418,18 @@ static int const RCTVideoUnset = -1;
   _drm = drm;
 }
 
-- (NSURL*) urlFilePath:(NSString*) filepath {
+- (NSURL*) urlFilePath:(NSString*) filepath searchPath:(enum NSSearchPathDirectory) searchPath {
   if ([filepath containsString:@"file://"]) {
     return [NSURL URLWithString:filepath];
   }
   
-  // if no file found, check if the file exists in the Document directory
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  // if no file found, check if the file exists in the given searchPath
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(searchPath, NSUserDomainMask, YES);
   NSString* relativeFilePath = [filepath lastPathComponent];
-  // the file may be multiple levels below the documents directory
-  NSArray* fileComponents = [filepath componentsSeparatedByString:@"Documents/"];
+  
+  // the file may be multiple levels below the in the given searchPath
+  NSString *directoryString = searchPath == NSCachesDirectory ? @"Library/Caches/" : @"Documents/";
+  NSArray *fileComponents = [filepath componentsSeparatedByString:directoryString];
   if (fileComponents.count > 1) {
     relativeFilePath = [fileComponents objectAtIndex:1];
   }
@@ -467,13 +469,22 @@ static int const RCTVideoUnset = -1;
                             error:nil];
   
   NSMutableArray* validTextTracks = [NSMutableArray array];
+  
+  NSMutableDictionary *emptyVttTrack = [self createDisabledVttFile];
+  if (emptyVttTrack) [_textTracks addObject:emptyVttTrack];
+  
   for (int i = 0; i < _textTracks.count; ++i) {
     AVURLAsset *textURLAsset;
     NSString *textUri = [_textTracks objectAtIndex:i][@"uri"];
     if ([[textUri lowercaseString] hasPrefix:@"http"]) {
       textURLAsset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:textUri] options:assetOptions];
     } else {
-      textURLAsset = [AVURLAsset URLAssetWithURL:[self urlFilePath:textUri] options:nil];
+      BOOL isDisabledTrack = [[_textTracks objectAtIndex:i][@"language"] isEqualToString:@"disabled"];
+
+      // Search the track to disabled subtitles in the Caches directory, search every other local file in the Documents directory
+      NSSearchPathDirectory searchPath = isDisabledTrack ? NSCachesDirectory : NSDocumentDirectory;
+      NSURL *assetUrl = [self urlFilePath:textUri searchPath:searchPath];
+      textURLAsset = [AVURLAsset URLAssetWithURL:assetUrl options:nil];
     }
     AVAssetTrack *textTrackAsset = [textURLAsset tracksWithMediaType:AVMediaTypeText].firstObject;
     if (!textTrackAsset) continue; // fix when there's no textTrackAsset
@@ -491,6 +502,36 @@ static int const RCTVideoUnset = -1;
   }
   
   handler([AVPlayerItem playerItemWithAsset:mixComposition]);
+}
+
+/*
+ * Create an useless / almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
+ * This is needed because there is a bug where sideloaded texttracks cannot be disabled in the AVPlayer. Loading this VTT file instead solves that problem.
+ * For more info see: https://github.com/react-native-community/react-native-video/issues/1144
+ */
+- (NSMutableDictionary*)createDisabledVttFile {
+  NSError *error;
+  NSMutableDictionary *emptyVTTDictionary = nil;
+
+  // Write the file into the Caches directory because that directory is available on iOS and tvOS
+  NSString *filePath = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"empty.vtt"];
+
+  if (![[NSFileManager defaultManager] isReadableFileAtPath:filePath]){
+    // WebVTT should have at least 1 cue to be valid. That's why a small dot is visible for 1 ms at the 99:59:59.000 timestamp
+    NSString *stringToWrite = @"WEBVTT\n\n1\n99:59:59.000 --> 99:59:59.001\n.";
+
+    [stringToWrite writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:&error];
+  }
+
+  if (!error){
+    emptyVTTDictionary = [[NSMutableDictionary alloc] init];
+    emptyVTTDictionary[@"language"] = @"disabled";
+    emptyVTTDictionary[@"title"] = @"EmptyVttFile";
+    emptyVTTDictionary[@"uri"] = filePath;
+    emptyVTTDictionary[@"type"] = @"text/vtt";
+  }
+
+  return emptyVTTDictionary;
 }
 
 - (void)playerItemForSource:(NSDictionary *)source withCallback:(void(^)(AVPlayerItem *))handler
@@ -1037,8 +1078,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
 {
-	_automaticallyWaitsToMinimizeStalling = waits;
-	_player.automaticallyWaitsToMinimizeStalling = waits;
+  _automaticallyWaitsToMinimizeStalling = waits;
+  _player.automaticallyWaitsToMinimizeStalling = waits;
 }
 
 
@@ -1183,9 +1224,10 @@ static int const RCTVideoUnset = -1;
   }
   
   int selectedTrackIndex = RCTVideoUnset;
-  
+
   if ([type isEqualToString:@"disabled"]) {
-    // Do nothing. We want to ensure option is nil
+    // Enable the empty texttrack
+    [_player.currentItem.tracks[_player.currentItem.tracks.count - 1] setEnabled:YES];
   } else if ([type isEqualToString:@"language"]) {
     NSString *selectedValue = _selectedTextTrack[@"value"];
     for (int i = 0; i < textTracks.count; ++i) {
@@ -1324,17 +1366,22 @@ static int const RCTVideoUnset = -1;
                                   mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
   for (int i = 0; i < group.options.count; ++i) {
     AVMediaSelectionOption *currentOption = [group.options objectAtIndex:i];
+    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
+    
+    // Ignore the texttrack with language disabled. This is not a real texttrack and can be ignored
+    if ([language isEqualToString:@"disabled"]) continue;
+    
     NSString *title = @"";
     NSArray *values = [[currentOption commonMetadata] valueForKey:@"value"];
     if (values.count > 0) {
       title = [values objectAtIndex:0];
     }
-    NSString *language = [currentOption extendedLanguageTag] ? [currentOption extendedLanguageTag] : @"";
     NSDictionary *textTrack = @{
                                 @"index": [NSNumber numberWithInt:i],
                                 @"title": title,
                                 @"language": language
                                 };
+    
     [textTracks addObject:textTrack];
   }
   return textTracks;
