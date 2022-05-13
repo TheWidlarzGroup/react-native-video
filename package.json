@@ -44,8 +44,7 @@
     },
     "scripts": {
         "lint": "yarn eslint *.js",
-        "xbasic": "yarn --cwd examples/basic",
-        "postinstall": "yarn xbasic install"
+        "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
         "android-exoplayer",
