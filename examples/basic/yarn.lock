@@ -5693,8 +5693,8 @@ react-is@^16.12.0, react-is@^16.13.1, react-is@^16.8.4, react-is@^16.8.6:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-"react-native-video@file:../..":
-  version "5.3.0-alpha1"
+react-native-video@../..:
+  version "6.0.0-alpha1"
   dependencies:
     keymirror "^0.1.1"
     prop-types "^15.7.2"

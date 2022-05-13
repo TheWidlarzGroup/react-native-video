@@ -15,7 +15,7 @@
   "dependencies": {
     "react": "16.13.1",
     "react-native": "0.63.4",
-    "react-native-video": "file:../..",
+    "react-native-video": "../..",
     "react-native-windows": "0.63.41"
   },
   "devDependencies": {
