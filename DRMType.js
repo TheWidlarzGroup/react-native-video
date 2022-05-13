@@ -2,5 +2,5 @@ export default {
     WIDEVINE: 'widevine',
     PLAYREADY: 'playready',
     CLEARKEY: 'clearkey',
-    FAIRPLAY: 'fairplay'
+    FAIRPLAY: 'fairplay',
 };

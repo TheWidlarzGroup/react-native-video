@@ -266,7 +266,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 
                 self._player = AVPlayer(playerItem: self._playerItem)
                 self._playerObserver.player = self._player
-                
+                self.applyModifiers()
                 self._player?.actionAtItemEnd = .none
                 
                 if #available(iOS 10.0, *) {
@@ -510,8 +510,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         setSelectedTextTrack(_selectedTextTrackCriteria)
         setResizeMode(_resizeMode)
         setRepeat(_repeat)
-        setPaused(_paused)
         setControls(_controls)
+        setPaused(_paused)
         setAllowsExternalPlayback(_allowsExternalPlayback)
     }
     
