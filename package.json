@@ -46,7 +46,6 @@
         "lint": "eslint ."
     },
     "files": [
-        "android-exoplayer",
         "android",
         "dom",
         "ios",

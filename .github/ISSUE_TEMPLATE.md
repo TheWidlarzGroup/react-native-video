@@ -11,7 +11,6 @@ Describe what you wanted to happen
 Which player are you experiencing the problem on:
 * iOS
 * Android ExoPlayer
-* Android MediaPlayer
 * Windows UWP
 * Windows WPF
 
