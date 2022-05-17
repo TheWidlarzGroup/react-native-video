@@ -48,7 +48,7 @@ class VideoPlayer extends Component {
   seekerWidth = 0
 
   srcList = [
-    // {...require('./broadchurch.mp4'), description: 'local file'},
+    require('./broadchurch.mp4'),
     {
       description: 'subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
@@ -522,7 +522,7 @@ class VideoPlayer extends Component {
         {this.IndicatorLoadingView()}
         <View style={styles.topControls}>
           <Text style={[styles.controlOption]}>
-            {this.srcList[this.state.srcListId]?.description}
+            {this.srcList[this.state.srcListId]?.description || 'local file'}
           </Text>
         </View>
         <View style={styles.leftControls}>
