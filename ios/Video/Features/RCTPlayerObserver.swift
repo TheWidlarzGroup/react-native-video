@@ -197,15 +197,6 @@ class RCTPlayerObserver: NSObject {
                                                selector:#selector(RCTPlayerObserverHandler.handleDidFailToFinishPlaying(notification:)),
                                                name: NSNotification.Name.AVPlayerItemFailedToPlayToEndTime,
                                                object:nil)
-        // Unused
-//        NotificationCenter.default.removeObserver(_handlers,
-//                                                  name:NSNotification.Name.AVPlayerItemNewAccessLogEntry,
-//                                                  object:nil)
-//        NotificationCenter.default.addObserver(_handlers,
-//                                               selector: #selector(RCTPlayerObserverHandler.handleAVPlayerAccess(notification:)),
-//                                               name:NSNotification.Name.AVPlayerItemNewAccessLogEntry,
-//                                               object:nil)
-        
     }
     
     func clearPlayer() {
