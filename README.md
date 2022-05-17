@@ -269,21 +269,21 @@ const ReactNativeDomOptions = {
 
 ## Examples
 
-Run `yarn install` before running any of the examples.
+Run `yarn xbasic install` before running any of the examples.
 
 ### iOS Example
 ```
-yarn xbuild ios
+yarn xbasic ios
 ```
 
 ### Android Example
 ```
-yarn xbuild android
+yarn xbasic android
 ```
 
 ### Windows Example
 ```
-yarn xbuild windows
+yarn xbasic windows
 ```
 
 ## Usage
