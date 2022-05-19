@@ -1,13 +1,10 @@
 #include "pch.h"
 #include "ReactPackageProvider.h"
-
 #include "NativeModules.h"
-
-
 
 using namespace winrt::Microsoft::ReactNative;
 
-namespace winrt::VideoPlayer::implementation
+namespace winrt::videoplayer::implementation
 {
 
 void ReactPackageProvider::CreatePackage(IReactPackageBuilder const &packageBuilder) noexcept
@@ -15,6 +12,4 @@ void ReactPackageProvider::CreatePackage(IReactPackageBuilder const &packageBuil
     AddAttributedModules(packageBuilder);
 }
 
-} // namespace winrt::VideoPlayer::implementation
-
-
+} // namespace winrt::videoplayer::implementation

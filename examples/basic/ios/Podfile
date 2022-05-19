@@ -1,0 +1,26 @@
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+
+platform :ios, '10.0'
+use_frameworks! :linkage => :static
+
+target 'VideoPlayer' do
+  config = use_native_modules!
+
+  use_react_native!(:path => config["reactNativePath"])
+
+  target 'VideoPlayerTests' do
+    inherit! :complete
+    # Pods for testing
+  end
+
+end
+
+target 'VideoPlayer-tvOS' do
+  # Pods for VideoPlayer-tvOS
+
+  target 'VideoPlayer-tvOSTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+end
