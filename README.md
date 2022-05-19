@@ -176,6 +176,11 @@ android.enableJetifier=true
 
 #### **MainApplication.java**
 
+If using com.facebook.react.PackageList to auto import native dependencies, there are no updates required here. Please see the android example project for more details.
+/examples/basic/android/app/src/main/java/com/videoplayer/MainApplication.java
+
+##### For manual linking
+
 On top, where imports are:
 
 ```java
