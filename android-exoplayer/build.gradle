@@ -41,6 +41,5 @@ dependencies {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
-    implementation 'com.google.android.exoplayer:extension-cronet:2.13.2'
-    compileOnly 'org.checkerframework:checker-qual:3.8.0'
+
 }
