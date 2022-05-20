@@ -273,7 +273,7 @@ import AVFoundation
             var index = 0
             // adding subtitle tracks
             for sub in subs {
-                let l = "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\(subtitleGroupID),LANGUAGE=\"\(sub.isoCode)\",NAME=\"\(sub.name)\",AUTOSELECT=YES,DEFAULT=YES,FORCED=NO,URI=\"subtitlesm3u8://foo.com/\(index)\""
+                let l = "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\(subtitleGroupID),LANGUAGE=\"\(sub.isoCode)\",NAME=\"\(sub.name)\",AUTOSELECT=YES,DEFAULT=NO,FORCED=NO,URI=\"subtitlesm3u8://foo.com/\(index)\""
                 index += 1
                 finalLines.append(l)
             }
