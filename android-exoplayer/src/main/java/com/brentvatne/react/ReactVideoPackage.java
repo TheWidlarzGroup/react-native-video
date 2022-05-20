@@ -1,6 +1,7 @@
 package com.brentvatne.react;
 
 import com.brentvatne.exoplayer.DefaultReactExoplayerConfig;
+import com.brentvatne.exoplayer.MediaDownloaderModule;
 import com.brentvatne.exoplayer.ReactExoplayerConfig;
 import com.brentvatne.exoplayer.ReactExoplayerViewManager;
 import com.facebook.react.ReactPackage;
@@ -25,7 +26,11 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        List<NativeModule> modules = new ArrayList<>();
+
+        modules.add(MediaDownloaderModule.newInstance(reactContext));
+
+        return modules;
     }
 
     // Deprecated RN 0.47

@@ -6,6 +6,8 @@ import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
 import DRMType from './DRMType';
 import VideoResizeMode from './VideoResizeMode.js';
+import DownloadManager from './download-manager';
+import Download, { DOWNLOAD_STATES, EVENT_LISTENER_TYPES } from './download';
 
 const styles = StyleSheet.create({
   base: {
@@ -13,7 +15,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export { TextTrackType, FilterType, DRMType };
+export { TextTrackType, FilterType, DRMType, DownloadManager, Download, DOWNLOAD_STATES, EVENT_LISTENER_TYPES };
 
 export default class Video extends Component {
 
