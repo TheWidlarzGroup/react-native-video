@@ -1556,8 +1556,16 @@ allprojects {
     }
 }
 ```
-
 If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
+ 
+## Black Screen on Release build (Android)
+If your video work on Debug mode, but on Release you see only black screen, please, check the link to your video. If you use 'http' protocol there, you will need to add next string to your AndroidManifest.xml file.
+```
+<application
+ ...
+ android:usesCleartextTraffic="true"
+>
+```
 
 ## TODOS
 
