@@ -9,7 +9,7 @@ https://github.com/google/ExoPlayer
 ## Benefits over `react-native-video@0.9.0`:
 
 - Android Video library built by Google, with a lot of support
-- Supports DASH, HlS, & SmoothStreaming adaptive streams
+- Supports DASH, HLS, & SmoothStreaming adaptive streams
 - Supports formats such as MP4, M4A, FMP4, WebM, MKV, MP3, Ogg, WAV, MPEG-TS, MPEG-PS, FLV and ADTS (AAC).
 - Fewer device specific issues
 - Highly customisable

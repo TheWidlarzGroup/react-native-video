@@ -48,15 +48,16 @@ class VideoPlayer extends Component {
   seekerWidth = 0
 
   srcList = [
+    require('./broadchurch.mp4'),
+    {
+      description: 'subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
+    },
     {
       description: 'demo with sintel Subtitles',
       uri:
         'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
       type: 'mpd',
-    },
-    {
-      description: 'subtitles',
-      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
     },
     { description: 'Stopped playback', uri: undefined },
     {
@@ -521,7 +522,7 @@ class VideoPlayer extends Component {
         {this.IndicatorLoadingView()}
         <View style={styles.topControls}>
           <Text style={[styles.controlOption]}>
-            {this.srcList[this.state.srcListId]?.description}
+            {this.srcList[this.state.srcListId]?.description || 'local file'}
           </Text>
         </View>
         <View style={styles.leftControls}>
