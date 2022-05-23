@@ -3,24 +3,34 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "android": "react-native run-android",
+    "ios": "cd ios && pod install && cd .. && react-native run-ios",
+    "windows": "react-native run-windows",
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "postinstall": "rm -rf node_modules/react-native-video/{examples,node_modules}",
     "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
-    "react": "16.9.0",
-    "react-native": "0.60.5",
-    "react-native-video": "file:../.."
+    "@react-native-picker/picker": "^1.9.11",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "react": "16.13.1",
+    "react-native": "0.63.4",
+    "react-native-video": "../..",
+    "react-native-windows": "0.63.41"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.0",
-    "@babel/runtime": "^7.6.0",
-    "@react-native-community/eslint-config": "^0.0.5",
-    "babel-jest": "^24.9.0",
-    "eslint": "^6.4.0",
-    "jest": "^24.9.0",
-    "metro-react-native-babel-preset": "^0.56.0",
-    "react-test-renderer": "16.8.6"
+    "@babel/core": "^7.8.4",
+    "@babel/runtime": "^7.8.4",
+    "@react-native-community/eslint-config": "^1.1.0",
+    "@types/react": "^18.0.6",
+    "@types/react-native": "^0.67.6",
+    "babel-jest": "^25.1.0",
+    "eslint": "^6.5.1",
+    "jest": "^25.1.0",
+    "metro-react-native-babel-preset": "^0.59.0",
+    "react-test-renderer": "16.13.1"
+  },
+  "jest": {
+    "preset": "react-native"
   }
 }

@@ -30,9 +30,6 @@
     <None Include="PropertySheet.props" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Midl Include="ReactPackageProvider.idl" />
     <Midl Include="ReactVideoView.idl" />
   </ItemGroup>

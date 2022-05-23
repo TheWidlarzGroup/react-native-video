@@ -1,14 +1,14 @@
 // @flow
 
-import { RCTViewManager } from "react-native-dom";
+import { RCTViewManager } from 'react-native-dom';
 
-import RCTVideo from "./RCTVideo";
-import resizeModes from "./resizeModes";
+import RCTVideo from './RCTVideo';
+import resizeModes from './resizeModes';
 
-import type { VideoSource } from "./types";
+import type { VideoSource } from './types';
 
 class RCTVideoManager extends RCTViewManager {
-  static moduleName = "RCTVideoManager";
+  static moduleName = 'RCTVideoManager';
 
   view() {
     return new RCTVideo(this.bridge);
@@ -17,22 +17,22 @@ class RCTVideoManager extends RCTViewManager {
   describeProps() {
     return super
       .describeProps()
-      .addBooleanProp("controls", this.setControls)
-      .addStringProp("id", this.setId)
-      .addBooleanProp("muted", this.setMuted)
-      .addBooleanProp("paused", this.setPaused)
-      .addNumberProp("progressUpdateInterval", this.setProgressUpdateInterval)
-      .addBooleanProp("rate", this.setRate)
-      .addBooleanProp("repeat", this.setRepeat)
-      .addNumberProp("resizeMode", this.setResizeMode)
-      .addNumberProp("seek", this.setSeek)
-      .addObjectProp("src", this.setSource)
-      .addNumberProp("volume", this.setVolume)
-      .addDirectEvent("onVideoEnd")
-      .addDirectEvent("onVideoError")
-      .addDirectEvent("onVideoLoad")
-      .addDirectEvent("onVideoLoadStart")
-      .addDirectEvent("onVideoProgress");
+      .addBooleanProp('controls', this.setControls)
+      .addStringProp('id', this.setId)
+      .addBooleanProp('muted', this.setMuted)
+      .addBooleanProp('paused', this.setPaused)
+      .addNumberProp('progressUpdateInterval', this.setProgressUpdateInterval)
+      .addBooleanProp('rate', this.setRate)
+      .addBooleanProp('repeat', this.setRepeat)
+      .addNumberProp('resizeMode', this.setResizeMode)
+      .addNumberProp('seek', this.setSeek)
+      .addObjectProp('src', this.setSource)
+      .addNumberProp('volume', this.setVolume)
+      .addDirectEvent('onVideoEnd')
+      .addDirectEvent('onVideoError')
+      .addDirectEvent('onVideoLoad')
+      .addDirectEvent('onVideoLoadStart')
+      .addDirectEvent('onVideoProgress');
   }
 
   dismissFullscreenPlayer() {
