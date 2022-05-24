@@ -3,7 +3,9 @@
 #### A `<Video>` component for react-native.
 
 Version 5.x recommends react-native >= 0.60.0 for Android 64bit builds and Android X support.
+
 Version 4.x requires react-native >= 0.57.0
+
 Version 3.x requires react-native >= 0.40.0
 
 ## Useful resources
