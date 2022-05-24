@@ -823,6 +823,7 @@ class ReactExoplayerView extends FrameLayout implements
                 case Player.STATE_IDLE:
                 case Player.STATE_ENDED:
                     initializePlayer();
+                    break;
                 case Player.STATE_BUFFERING:
                 case Player.STATE_READY:
                     if (!player.getPlayWhenReady()) {
