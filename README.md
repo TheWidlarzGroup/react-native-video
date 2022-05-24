@@ -11,6 +11,8 @@ Version 4.x requires react-native >= 0.57.0
 
 Version 3.x requires react-native >= 0.40.0
 
+**react-native-video** was created by [Brent Vatne](https://github.com/brentvatne)
+
 ### Version 5.0.0 breaking changes
 
 Version 5 introduces breaking changes on Android, please check carefully the steps described there: [Android Installation](#Android-installation)
