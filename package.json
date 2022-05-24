@@ -4,25 +4,6 @@
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
-    "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
-    "contributors": [
-        {
-            "name": "Isaiah Grey",
-            "email": "isaiahgrey@gmail.com"
-        },
-        {
-            "name": "Johannes Lumpe",
-            "email": "johannes@lum.pe"
-        },
-        {
-            "name": "Baris Sencan",
-            "email": "baris.sncn@gmail.com"
-        },
-        {
-            "name": "Hampton Maxwell",
-            "email": "me@hamptonmaxwell.com"
-        }
-    ],
     "repository": {
         "type": "git",
         "url": "git@github.com:react-native-video/react-native-video.git"
