@@ -1315,7 +1315,8 @@ class ReactExoplayerView extends FrameLayout implements
             } else if(cause instanceof MediaDrmCallbackException || cause instanceof DrmSessionException) {
                 errorCode = "3005";
                 errorString = getResources().getString(R.string.unrecognized_media_format);
-                if (!hasDrmFailed) {
+                // DrmSessionExceptions can be caused by a lot internal reasons for failure, in most cases they can be safely retried and playback will recover
+                if (!hasDrmFailed || cause instanceof DrmSessionException) {
                     // When DRM fails to reach the app level certificate server it will fail with a source error so we assume that it is DRM related and try one more time
                     hasDrmFailed = true;
                     playerNeedsSource = true;
@@ -1402,7 +1403,6 @@ class ReactExoplayerView extends FrameLayout implements
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri);
-            
             hasDrmFailed = false;
             this.srcUri = uri;
             this.extension = extension;
@@ -1439,7 +1439,6 @@ class ReactExoplayerView extends FrameLayout implements
     public void setRawSrc(final Uri uri, final String extension) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri);
-
             this.srcUri = uri;
             this.extension = extension;
             this.mediaDataSourceFactory = buildDataSourceFactory(true);
