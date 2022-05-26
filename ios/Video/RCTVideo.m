@@ -14,6 +14,8 @@
 
 #import <ReactVideoSubtitleSideloader_tvOS/ReactVideoSubtitleSideloader_tvOS-Swift.h>
 #import <dice_shield_ios/dice_shield_ios-Swift.h>
+#import <react_native_video-Swift.h>
+
 @import AVDoris;
 
 static NSString *const playerVersion = @"react-native-video/3.3.1";
@@ -22,8 +24,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     NSNumber* _Nullable _startPlayingAt;
     NSNumber* _Nullable _itemDuration;
     NSNumber* _Nullable _appId;
+    UIImageView* _waterMarkImageView;
     
     bool _controls;
+    NSDictionary* _Nullable _source;
     NSDictionary* _Nullable _theme;
     NSDictionary* _Nullable _translations;
     NSDictionary* _Nullable _relatedVideos;
@@ -42,6 +46,12 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         _diceBeaconRequestOngoing = NO;
         _controls = YES;
         _playerName = @"DicePlayer";
+        
+        _waterMarkImageView = [UIImageView new];
+        _waterMarkImageView.contentMode = UIViewContentModeScaleAspectFit;
+        _waterMarkImageView.alpha = 0.75;
+        _waterMarkImageView.translatesAutoresizingMaskIntoConstraints = false;
+        _waterMarkImageView.clipsToBounds = true;
     }
     
     return self;
@@ -136,9 +146,11 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)setSrc:(NSDictionary *)source {
+    _source = source;
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
-        
+
         [self updateRelatedVideos];
         
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
@@ -316,7 +328,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     ? [NSURL URLWithString:uri]
     : [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:uri ofType:type]];
     NSMutableDictionary *assetOptions = [[NSMutableDictionary alloc] init];
-        
+    
     [self setupMuxDataFromSource:source];
     
     if (isNetwork) {
@@ -379,8 +391,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 
 
-
-
 #pragma mark - DorisExternalOutputProtocol
 
 - (void)didRequestAdTagParametersFor:(NSTimeInterval)timeInterval isBlocking:(BOOL)isBlocking {
@@ -422,6 +432,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)didLoadVideo {
+    [WatermarkManager setupWatermarkFromSourceWithSource:_source watermarkView:_waterMarkImageView parent:_dorisUI.view];
+    
     if(self.onVideoLoad) {
         self.onVideoLoad(@{@"target": self.reactTag});
     }
