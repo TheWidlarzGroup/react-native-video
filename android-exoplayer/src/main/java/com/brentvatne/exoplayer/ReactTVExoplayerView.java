@@ -20,6 +20,7 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -38,6 +39,7 @@ import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RNTranslations;
 import com.brentvatne.entity.RelatedVideo;
+import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -99,6 +101,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.imggaming.widgets.DceWatermarkWidget;
 import com.previewseekbar.base.PreviewView;
 
 import java.net.CookieHandler;
@@ -164,6 +167,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final VideoEventEmitter eventEmitter;
 
     private ExoDorisPlayerView exoDorisPlayerView;
+    private DceWatermarkWidget watermarkWidget;
     private ExoDoris player;
     private ExoDorisImaDaiPlayer exoDorisImaDaiPlayer;
     private ExoDorisImaCsaiPlayer exoDorisImaCsaiPlayer;
@@ -375,6 +379,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         exoDorisPlayerView.setExoDorisPlayerViewListener(this);
         exoDorisPlayerView.setUseController(false);
 
+        // Watermark view.
+        if (exoDorisPlayerView.getChildCount() > 1) {
+            watermarkWidget = new DceWatermarkWidget(themedReactContext);
+            ViewGroup.LayoutParams params =
+                    new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            exoDorisPlayerView.addView(watermarkWidget, 1, params);
+        }
+
         setEpg(false); // default value
         setStats(false);
 
@@ -523,6 +536,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean shouldSeekOnInit = shouldSeekTo > C.TIME_UNSET;
 
             showOverlay();
+            showWatermark();
 
             MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(src.getUrl());
             if (src.getAdTagUrl() != null) {
@@ -863,6 +877,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void stopPlayback() {
+        hideWatermark();
         onStopPlayback();
         releasePlayer();
     }
@@ -1323,13 +1338,16 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
-    public void setMetadata(RNMetadata metadata) {
+    public void setMetadata(RNMetadata metadata, Watermark watermark) {
         this.metadata = metadata;
 
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setTitle(metadata.getTitle());
             exoDorisPlayerView.setDescription(metadata.getDescription());
             exoDorisPlayerView.setChannelLogo(metadata.getChannelLogoUrl());
+        }
+        if (watermarkWidget != null) {
+            watermarkWidget.setWatermark(watermark);
         }
     }
 
@@ -1797,6 +1815,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
 
         return (exoDorisPlayerView.getPlayer() != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
+    }
+
+    public void showWatermark(){
+        if (watermarkWidget != null) {
+            watermarkWidget.show();
+        }
+    }
+
+    public void hideWatermark() {
+        if (watermarkWidget != null) {
+            watermarkWidget.hide();
+        }
     }
 
     public void showOverlay() {
