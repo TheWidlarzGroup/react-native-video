@@ -72,6 +72,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
+import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -215,7 +216,12 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void createViews() {
         clearResumePosition();
-        mediaDataSourceFactory = buildDataSourceFactory(true);
+        mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
+                this.themedReactContext,
+                buildDataSourceFactory(true),
+                new File(getContext().getCacheDir(), "media"),
+                100000000
+        );
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
@@ -1019,9 +1025,12 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory =
-                    DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
-                            this.requestHeaders);
+            this.mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
+                this.themedReactContext,
+                DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter, this.requestHeaders),
+                new File(getContext().getCacheDir(), "media"),
+                100000000
+            );
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1054,7 +1063,12 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = buildDataSourceFactory(true);
+            this.mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
+                    this.themedReactContext,
+                    buildDataSourceFactory(true),
+                    new File(getContext().getCacheDir(), "media"),
+                    100000000
+            );
 
             if (!isSourceEqual) {
                 reloadSource();
