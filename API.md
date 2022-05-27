@@ -1419,8 +1419,6 @@ To enable audio to play in background on iOS the audio session needs to be set t
 
    Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
 
-- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
-
 ## Updating
 
 ### Version 6.0.0
