@@ -4,8 +4,6 @@ import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReadableMap;
 
-import java.util.Map;
-
 /**
  * Entity that represents a watermark image.
  */
@@ -129,26 +127,13 @@ public class Watermark {
     }
 
     @Nullable
-    public static Watermark fromMap(Map map) {
-        try {
-            return new Watermark(
-                    (String) map.get("logoUrl"),
-                    (String) map.get("logoPosition"),
-                    (String) map.get("logoStaticDimension"),
-                    Float.parseFloat((String) map.get("logoPlayerSizeRatio")));
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    @Nullable
     public static Watermark fromMap(ReadableMap metadata) {
         try {
             return new Watermark(
                     metadata.getString("logoUrl"),
                     metadata.getString("logoPosition"),
                     metadata.getString("logoStaticDimension"),
-                    Float.parseFloat(metadata.getString("logoPlayerSizeRatio")));
+                    (float) metadata.getDouble("logoPlayerSizeRatio"));
         } catch (Exception e) {
             return null;
         }

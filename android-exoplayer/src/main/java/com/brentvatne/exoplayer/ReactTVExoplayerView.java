@@ -20,7 +20,6 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -382,10 +381,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         // Watermark view.
         if (exoDorisPlayerView.getChildCount() > 1) {
             watermarkWidget = new DceWatermarkWidget(themedReactContext);
-            ViewGroup.LayoutParams params =
-                    new ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            exoDorisPlayerView.addView(watermarkWidget, 1, params);
+            exoDorisPlayerView.addView(watermarkWidget, 1);
         }
 
         setEpg(false); // default value

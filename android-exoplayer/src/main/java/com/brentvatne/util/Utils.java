@@ -9,8 +9,6 @@ import android.view.WindowManager;
 
 public class Utils {
 
-    private static final String TAG = Utils.class.getCanonicalName();
-
     /**
      * This method converts dp unit to equivalent pixels, depending on device density.
      *
