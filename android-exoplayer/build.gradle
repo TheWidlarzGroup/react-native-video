@@ -73,4 +73,7 @@ dependencies {
         exclude group: "com.google.android.exoplayer", module: "exoplayer-hls"
         exclude group: "com.google.android.exoplayer", module: "exoplayer-ui"
     }
+
+    implementation 'com.github.bumptech.glide:glide:4.13.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
 }

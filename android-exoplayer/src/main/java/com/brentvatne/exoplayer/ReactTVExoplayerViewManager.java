@@ -8,6 +8,7 @@ import android.view.ContextThemeWrapper;
 
 import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RelatedVideo;
+import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
 import com.facebook.react.bridge.Dynamic;
@@ -291,7 +292,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     description,
                     thumbnailUrl,
                     title,
-                    type));
+                    type),
+                    Watermark.fromMap(metadata));
         }
     }
 
