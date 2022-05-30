@@ -4,4 +4,8 @@ export interface IVideoPlayerMetadata {
   thumbnailUrl: string;
   title: string;
   type: string;
+  logoUrl?: string;
+  logoPosition?: string;
+  logoStaticDimension?: string;
+  logoPlayerSizeRatio?: number;
 }

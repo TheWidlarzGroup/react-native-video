@@ -26,4 +26,5 @@ export interface IVideoPlayerSource {
   seasonId?: string;
   playlistId?: string;
   channelName?: string;
+  adTagUrl?: string;
 }
