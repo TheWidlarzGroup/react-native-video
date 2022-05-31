@@ -48,11 +48,6 @@ dependencies {
         exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
     }
 
-    // Mux
-    implementation ("com.mux.stats.sdk.muxstats:MuxExoPlayer_r2_16_1:2.6.0") {
-        exclude group: "com.google.android.exoplayer", module: "exoplayer"
-    }
-
     // Google Guava
     implementation "com.google.guava:guava:30.1-android"
 
