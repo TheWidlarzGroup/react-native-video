@@ -431,6 +431,7 @@ _shouldDrawImage = false;
             }
             [chromaFilter setValue:baseImage forKey:kCIInputImageKey];
             self.image = chromaFilter.outputImage;
+            CVBufferRelease(pixBuf);
         } else {
             self.image = baseImage;
         }
@@ -440,9 +441,6 @@ _shouldDrawImage = false;
 
 - (void)setUpDisplayLink {
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkUpdated:)];
-    if (@available(iOS 10.0, *)) {
-        _displayLink.preferredFramesPerSecond = 30;
-    }
     [_displayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
 }
 
