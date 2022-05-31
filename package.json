@@ -4,6 +4,7 @@
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
+    "author": "Community Contributors",
     "repository": {
         "type": "git",
         "url": "git@github.com:react-native-video/react-native-video.git"
