@@ -292,6 +292,7 @@ var styles = StyleSheet.create({
 * [hideShutterView](#hideshutterview)
 * [id](#id)
 * [ignoreSilentSwitch](#ignoresilentswitch)
+* [limitMaxResolution](#limitMaxResolution)
 * [maxBitRate](#maxbitrate)
 * [minLoadRetryCount](#minLoadRetryCount)
 * [mixWithOthers](#mixWithOthers)
@@ -543,6 +544,13 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### limitMaxResolution
+Limit video tracks to only include tracks that are lower or equal to device screen resolution
+* **true** - Limit video tracks to screen resolution
+* **false** - Video tracks will not be limited to screen resolution
+
+Platforms: Android
 
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
