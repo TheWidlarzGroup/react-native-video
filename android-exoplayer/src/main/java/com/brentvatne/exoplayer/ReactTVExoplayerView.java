@@ -1293,7 +1293,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             int duration,
             String channelName,
             boolean apsTestFlag,
-            @Nullable String adTagUrl) {
+            @Nullable String adTagUrl,
+            Watermark watermark) {
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1329,21 +1330,20 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     apsTestFlag,
                     adTagUrl);
             this.actionToken = actionToken;
-
+            if (watermarkWidget != null) {
+                watermarkWidget.setWatermark(watermark);
+            }
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
 
-    public void setMetadata(RNMetadata metadata, Watermark watermark) {
+    public void setMetadata(RNMetadata metadata) {
         this.metadata = metadata;
 
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setTitle(metadata.getTitle());
             exoDorisPlayerView.setDescription(metadata.getDescription());
             exoDorisPlayerView.setChannelLogo(metadata.getChannelLogoUrl());
-        }
-        if (watermarkWidget != null) {
-            watermarkWidget.setWatermark(watermark);
         }
     }
 
