@@ -295,7 +295,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     description,
                     thumbnailUrl,
                     title,
-                    type);
+                    type));
         }
     }
 

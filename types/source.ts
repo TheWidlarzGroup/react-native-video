@@ -6,6 +6,13 @@ import { IVideoPlayerAPS } from './aps';
 
 type SourceType = 'mpd' | 'm3u8';
 
+export interface IVideoPlayerSourceMetadata {
+  logoUrl?: string;
+  logoPosition?: string;
+  logoStaticDimension?: string;
+  logoPlayerSizeRatio?: number;
+}
+
 export interface IVideoPlayerSource {
   uri: string;
   id?: string;
@@ -27,4 +34,5 @@ export interface IVideoPlayerSource {
   playlistId?: string;
   channelName?: string;
   adTagUrl?: string;
+  metadata?: IVideoPlayerSourceMetadata;
 }
