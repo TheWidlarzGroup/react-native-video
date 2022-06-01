@@ -59,6 +59,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_SRC_APS = "aps";
     private static final String PROP_SRC_APS_TEST_MODE = "testMode";
+    private static final String PROP_SRC_METADATA = "metadata";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -213,6 +214,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
+        ReadableMap metadata = src.hasKey(PROP_SRC_METADATA) ? src.getMap(PROP_SRC_METADATA) : null;
 
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
@@ -256,7 +258,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     duration != null ? Integer.parseInt(duration) : 0,
                     channelName,
                     apsTestMode,
-                    adTagUrl);
+                    adTagUrl,
+                    Watermark.fromMap(metadata));
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -292,8 +295,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     description,
                     thumbnailUrl,
                     title,
-                    type),
-                    Watermark.fromMap(metadata));
+                    type);
         }
     }
 
