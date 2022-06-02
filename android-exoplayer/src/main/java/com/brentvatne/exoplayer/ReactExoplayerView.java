@@ -1090,13 +1090,13 @@ class ReactExoplayerView extends FrameLayout implements
 
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
-                WritableMap videoTrack = Arguments.createMap();
-                videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
-                videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
-                videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-                videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
-                videoTrack.putString("trackId", format.id == null ? String.valueOf(trackIndex) : format.id);
                 if (isFormatSupported(format)) {
+                    WritableMap videoTrack = Arguments.createMap();
+                    videoTrack.putInt("width", format.width == Format.NO_VALUE ? 0 : format.width);
+                    videoTrack.putInt("height",format.height == Format.NO_VALUE ? 0 : format.height);
+                    videoTrack.putInt("bitrate", format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+                    videoTrack.putString("codecs", format.codecs != null ? format.codecs : "");
+                    videoTrack.putString("trackId", format.id == null ? String.valueOf(trackIndex) : format.id);
                     videoTracks.pushMap(videoTrack);
                 }
             }
