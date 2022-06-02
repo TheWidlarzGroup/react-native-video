@@ -185,7 +185,7 @@ class ReactExoplayerView extends FrameLayout implements
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean disableBuffering;
-    private long contentStartTime;
+    private long contentStartTime = -1L;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
@@ -1068,10 +1068,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
     private WritableArray getVideoTrackInfo(int trackRendererIndex) {
 
-        WritableArray contentVideoTracks = this.getVideoTrackInfoFromManifest();
-        if (contentVideoTracks != null) {
-            isUsingContentResolution = true;
-            return contentVideoTracks;
+        if (this.contentStartTime != -1L) {
+            WritableArray contentVideoTracks = this.getVideoTrackInfoFromManifest();
+            if (contentVideoTracks != null) {
+                isUsingContentResolution = true;
+                return contentVideoTracks;
+            }
         }
 
         WritableArray videoTracks = Arguments.createArray();
@@ -1107,6 +1109,7 @@ class ReactExoplayerView extends FrameLayout implements
         return this.getVideoTrackInfoFromManifest(0);
     }
 
+    // We need retry count to in case where minefest request fails from poor network conditions
     private WritableArray getVideoTrackInfoFromManifest(int retryCount) {
         ExecutorService es = Executors.newSingleThreadExecutor();
         final DataSource dataSource = this.mediaDataSourceFactory.createDataSource();
