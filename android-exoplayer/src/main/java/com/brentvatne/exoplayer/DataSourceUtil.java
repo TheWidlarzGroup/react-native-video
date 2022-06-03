@@ -28,7 +28,6 @@ public class DataSourceUtil {
 
     private static DataSource.Factory rawDataSourceFactory = null;
     private static DataSource.Factory defaultDataSourceFactory = null;
-    private static DataSource.Factory cachedDataSourceFactory = null;
     private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
     private static SimpleCache cache = null;
     private static String userAgent = null;
@@ -62,27 +61,15 @@ public class DataSourceUtil {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
 
-
-    public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+    public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders, File cacheDir, CacheEvictor cacheEvictor) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
-            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
+            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders, cacheDir, cacheEvictor);
         }
         return defaultDataSourceFactory;
     }
 
     public static void setDefaultDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.defaultDataSourceFactory = factory;
-    }
-
-    public static DataSource.Factory getCachedDataSourceFactory(ReactContext context, DataSource.Factory upstreamDataSourceFactory, File cacheDir, CacheEvictor cacheEvictor) {
-        if (cachedDataSourceFactory == null) {
-            cachedDataSourceFactory = buildCachedDataSourceFactory(context, upstreamDataSourceFactory, cacheDir, cacheEvictor);
-        }
-        return cachedDataSourceFactory;
-    }
-
-    public static void SetCachedDataSourceFactory(DataSource.Factory factory) {
-        DataSourceUtil.cachedDataSourceFactory = factory;
     }
 
     public static HttpDataSource.Factory getDefaultHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
@@ -100,15 +87,17 @@ public class DataSourceUtil {
         return new RawResourceDataSourceFactory(context.getApplicationContext());
     }
 
-    private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        return new DefaultDataSourceFactory(context, bandwidthMeter,
+    private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders, File cacheDir, CacheEvictor cacheEvictor) {
+        DataSource.Factory dataSource = new DefaultDataSourceFactory(context, bandwidthMeter,
                 buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
-    }
 
-    private static DataSource.Factory buildCachedDataSourceFactory(ReactContext context, DataSource.Factory upstreamDataSourceFactory, File cacheDir, CacheEvictor cacheEvictor) {
-        return new CacheDataSource.Factory()
-                .setCache(getCache(context, cacheDir, cacheEvictor))
-                .setUpstreamDataSourceFactory(upstreamDataSourceFactory);
+        if (cacheDir != null && cacheEvictor != null) {
+            return new CacheDataSource.Factory()
+                    .setCache(getCache(context, cacheDir, cacheEvictor))
+                    .setUpstreamDataSourceFactory(dataSource);
+        } else {
+            return dataSource;
+        }
     }
 
     private static SimpleCache buildCache(ReactContext context, File cacheDir, CacheEvictor cacheEvictor) {
