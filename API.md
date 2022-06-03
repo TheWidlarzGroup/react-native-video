@@ -302,6 +302,7 @@ var styles = StyleSheet.create({
 |[audioOnly](#audioonly)|All |
 |[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|
 |[bufferConfig](#bufferconfig)|Android ExoPlayer|
+|[cache](#cache)|Android ExoPlayer|
 |[controls](#controls)|Android ExoPlayer, iOS, react-native-dom|
 |[currentPlaybackTime](#currentPlaybackTime)|Android Exoplayer|
 |[disableFocus](#disableFocus)|Android Exoplayer, iOS|
@@ -419,6 +420,24 @@ bufferConfig={{
   maxBufferMs: 50000,
   bufferForPlaybackMs: 2500,
   bufferForPlaybackAfterRebufferMs: 5000
+}}
+```
+
+Platforms: Android ExoPlayer
+
+#### cache
+Download videos to given cache directory when playing and consume videos again from this directory when (offline) replaying. When the cache maximum size is reached, the least recent used video files are removed first. 
+
+Property | Type | Description
+--- | --- | ---
+dir | string | Absolute system path where cache should be stored.
+maxSizeBytes | number | Maximum allowed size of cache in bytes.
+
+Example with default values:
+```
+cache={{
+    dir: `${cacheDirectory}/videos`,
+    maxSizeBytes: 100 * 1024 * 1024 // 100 MB
 }}
 ```
 

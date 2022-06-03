@@ -11,7 +11,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.CacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
 
@@ -30,6 +30,7 @@ public class DataSourceUtil {
     private static DataSource.Factory defaultDataSourceFactory = null;
     private static DataSource.Factory cachedDataSourceFactory = null;
     private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
+    private static SimpleCache cache = null;
     private static String userAgent = null;
 
     public static void setUserAgent(String userAgent) {
@@ -50,6 +51,13 @@ public class DataSourceUtil {
         return rawDataSourceFactory;
     }
 
+    public static SimpleCache getCache(ReactContext context, File cacheDir, CacheEvictor cacheEvictor) {
+        if (cache == null) {
+            cache = buildCache(context, cacheDir, cacheEvictor);
+        }
+        return cache;
+    }
+
     public static void setRawDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
@@ -66,9 +74,9 @@ public class DataSourceUtil {
         DataSourceUtil.defaultDataSourceFactory = factory;
     }
 
-    public static DataSource.Factory getCachedDataSourceFactory(ReactContext context, DataSource.Factory dataSourceFactory, File cacheDir, long cacheMaxBytes) {
+    public static DataSource.Factory getCachedDataSourceFactory(ReactContext context, DataSource.Factory upstreamDataSourceFactory, File cacheDir, CacheEvictor cacheEvictor) {
         if (cachedDataSourceFactory == null) {
-            cachedDataSourceFactory = buildCachedDataSourceFactory(context, dataSourceFactory, cacheDir, cacheMaxBytes);
+            cachedDataSourceFactory = buildCachedDataSourceFactory(context, upstreamDataSourceFactory, cacheDir, cacheEvictor);
         }
         return cachedDataSourceFactory;
     }
@@ -97,13 +105,15 @@ public class DataSourceUtil {
                 buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
     }
 
-    private static DataSource.Factory buildCachedDataSourceFactory(ReactContext context, DataSource.Factory dataSourceFactory, File cacheDir, long cacheMaxBytes) {
-        LeastRecentlyUsedCacheEvictor cacheEvictor = new LeastRecentlyUsedCacheEvictor(cacheMaxBytes);
-        ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
-        SimpleCache cache = new SimpleCache(cacheDir, cacheEvictor, databaseProvider);
+    private static DataSource.Factory buildCachedDataSourceFactory(ReactContext context, DataSource.Factory upstreamDataSourceFactory, File cacheDir, CacheEvictor cacheEvictor) {
         return new CacheDataSource.Factory()
-                .setCache(cache)
-                .setUpstreamDataSourceFactory(dataSourceFactory);
+                .setCache(getCache(context, cacheDir, cacheEvictor))
+                .setUpstreamDataSourceFactory(upstreamDataSourceFactory);
+    }
+
+    private static SimpleCache buildCache(ReactContext context, File cacheDir, CacheEvictor cacheEvictor) {
+        ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
+        return new SimpleCache(cacheDir, cacheEvictor, databaseProvider);
     }
 
     private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {

@@ -18,6 +18,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Map;
@@ -70,6 +71,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_CACHE = "cache";
+    private static final String PROP_CACHE_CONFIG_DIR = "dir";
+    private static final String PROP_CACHE_CONFIG_MAX_SIZE_BYTES = "maxSizeBytes";
 
     private ReactExoplayerConfig config;
 
@@ -330,6 +334,18 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             bufferForPlaybackAfterRebufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                     ? bufferConfig.getInt(PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS) : bufferForPlaybackAfterRebufferMs;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        }
+    }
+
+    @ReactProp(name = PROP_CACHE)
+    public void setCache(final ReactExoplayerView videoView, @Nullable ReadableMap cacheConfig) {
+        if (cacheConfig != null) {
+            String cacheDir = cacheConfig.hasKey(PROP_CACHE_CONFIG_DIR) ? cacheConfig.getString(PROP_CACHE_CONFIG_DIR) : null;
+            int cacheMaxSizeBytes = cacheConfig.hasKey(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) ? cacheConfig.getInt(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) : -1;
+
+            if (cacheDir != null && cacheMaxSizeBytes > 0) {
+                videoView.setCache(cacheDir, cacheMaxSizeBytes);
+            }
         }
     }
 

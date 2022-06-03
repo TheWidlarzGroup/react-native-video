@@ -481,6 +481,10 @@ Video.propTypes = {
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
+  cache: PropTypes.shape({
+    dir: PropTypes.string,
+    maxSizeBytes: PropTypes.number,
+  }),
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,

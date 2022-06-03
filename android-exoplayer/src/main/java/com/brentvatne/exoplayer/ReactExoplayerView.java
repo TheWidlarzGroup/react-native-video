@@ -70,6 +70,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
@@ -134,6 +135,9 @@ class ReactExoplayerView extends FrameLayout implements
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+
+    private File cacheDir;
+    private int cacheMaxSizeBytes = -1;
 
     private Handler mainHandler;
 
@@ -216,12 +220,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void createViews() {
         clearResumePosition();
-        mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
-                this.themedReactContext,
-                buildDataSourceFactory(true),
-                new File(getContext().getCacheDir(), "media"),
-                100000000
-        );
+        mediaDataSourceFactory = buildCachedDataSourceFactory(buildDataSourceFactory(true));
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
@@ -687,6 +686,24 @@ class ReactExoplayerView extends FrameLayout implements
         return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
+    /**
+     * Returns a new DataSource.Factory that uses the upstreamDataSourceFactory on cache miss
+     *
+     * @param upstreamDataSourceFactory
+     * @return A new DataSource.Factory that wraps DataSource.Factory upstreamDataSourceFactory
+     */
+    private DataSource.Factory buildCachedDataSourceFactory(DataSource.Factory upstreamDataSourceFactory) {
+        if (this.cacheDir == null || this.cacheMaxSizeBytes <= 0) {
+            return upstreamDataSourceFactory;
+        }
+
+        return DataSourceUtil.getCachedDataSourceFactory(
+                this.themedReactContext,
+                upstreamDataSourceFactory,
+                this.cacheDir,
+                new LeastRecentlyUsedCacheEvictor(this.cacheMaxSizeBytes)
+        );
+    }
 
     // AudioManager.OnAudioFocusChangeListener implementation
 
@@ -1025,12 +1042,7 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
-                this.themedReactContext,
-                DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter, this.requestHeaders),
-                new File(getContext().getCacheDir(), "media"),
-                100000000
-            );
+            this.mediaDataSourceFactory = buildCachedDataSourceFactory(DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter, this.requestHeaders));
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1063,12 +1075,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             this.srcUri = uri;
             this.extension = extension;
-            this.mediaDataSourceFactory = DataSourceUtil.getCachedDataSourceFactory(
-                    this.themedReactContext,
-                    buildDataSourceFactory(true),
-                    new File(getContext().getCacheDir(), "media"),
-                    100000000
-            );
+            this.mediaDataSourceFactory = buildCachedDataSourceFactory(buildDataSourceFactory(true));
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1354,6 +1361,11 @@ class ReactExoplayerView extends FrameLayout implements
         bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
         releasePlayer();
         initializePlayer();
+    }
+
+    public void setCache(String dir, int maxSizeBytes) {
+        cacheDir = new File(dir);
+        cacheMaxSizeBytes = maxSizeBytes;
     }
 
     public void setDrmType(UUID drmType) {
