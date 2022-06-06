@@ -25,6 +25,7 @@ class WatermarkManager: NSObject {
     private static var widthConstraint: NSLayoutConstraint?
     private static var heightConstraint: NSLayoutConstraint?
     private static var imageLoadingTask: URLSessionDataTask?
+    private static var sideInset: CGFloat = 50
     
     static func add(watermarkView: UIImageView,
                     imageURLString: String?,
@@ -80,23 +81,23 @@ class WatermarkManager: NSObject {
         switch position {
         case .topLeft:
             constraints.append(contentsOf: [
-                watermarkView.leftAnchor.constraint(equalTo: parent.leftAnchor, constant: 16),
-                watermarkView.topAnchor.constraint(equalTo: parent.topAnchor, constant: 16),
+                watermarkView.leftAnchor.constraint(equalTo: parent.leftAnchor, constant: sideInset),
+                watermarkView.topAnchor.constraint(equalTo: parent.topAnchor, constant: sideInset),
             ])
         case .topRight:
             constraints.append(contentsOf: [
-                watermarkView.rightAnchor.constraint(equalTo: parent.rightAnchor, constant: -16),
-                watermarkView.topAnchor.constraint(equalTo: parent.topAnchor, constant: 16),
+                watermarkView.rightAnchor.constraint(equalTo: parent.rightAnchor, constant: -sideInset),
+                watermarkView.topAnchor.constraint(equalTo: parent.topAnchor, constant: sideInset),
             ])
         case .bottomLeft:
             constraints.append(contentsOf: [
-                watermarkView.leftAnchor.constraint(equalTo: parent.leftAnchor, constant: 16),
-                watermarkView.bottomAnchor.constraint(equalTo: parent.bottomAnchor, constant: -16),
+                watermarkView.leftAnchor.constraint(equalTo: parent.leftAnchor, constant: sideInset),
+                watermarkView.bottomAnchor.constraint(equalTo: parent.bottomAnchor, constant: -sideInset),
             ])
         case .bottomRight:
             constraints.append(contentsOf: [
-                watermarkView.rightAnchor.constraint(equalTo: parent.rightAnchor, constant: -16),
-                watermarkView.bottomAnchor.constraint(equalTo: parent.bottomAnchor, constant: -16),
+                watermarkView.rightAnchor.constraint(equalTo: parent.rightAnchor, constant: -sideInset),
+                watermarkView.bottomAnchor.constraint(equalTo: parent.bottomAnchor, constant: -sideInset),
             ])
         }
         

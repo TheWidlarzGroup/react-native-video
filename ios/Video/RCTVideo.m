@@ -388,6 +388,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     handler([AVPlayerItem playerItemWithAsset:asset]);
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if(_waterMarkImageView.image == nil){
+        [WatermarkManager setupWatermarkFromSourceWithSource:_source watermarkView:_waterMarkImageView parent:_dorisUI.view];
+    }
+}
+
 
 
 
@@ -432,8 +439,6 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)didLoadVideo {
-    [WatermarkManager setupWatermarkFromSourceWithSource:_source watermarkView:_waterMarkImageView parent:_dorisUI.view];
-    
     if(self.onVideoLoad) {
         self.onVideoLoad(@{@"target": self.reactTag});
     }
