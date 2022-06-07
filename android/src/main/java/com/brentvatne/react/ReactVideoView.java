@@ -637,7 +637,7 @@ public class ReactVideoView extends ScalableVideoView implements
     public void seekTo(int msec) {
         if (mMediaPlayerValid) {
             mSeekTime = msec;
-            super.seekTo(msec);
+            mMediaPlayer.seekTo(msec,3);
             if (isCompleted && mVideoDuration != 0 && msec < mVideoDuration) {
                 isCompleted = false;
             }
