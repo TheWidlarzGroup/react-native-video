@@ -71,7 +71,6 @@ import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheEvictor;
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
@@ -1345,9 +1344,9 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setCache(String dir, int maxSizeBytes) {
-        cacheDir = new File(dir);
-        cacheEvictor = new LeastRecentlyUsedCacheEvictor(maxSizeBytes);
+    public void setCache(File dir, CacheEvictor evictor) {
+        cacheDir = dir;
+        cacheEvictor = evictor;
     }
 
     public void setDrmType(UUID drmType) {

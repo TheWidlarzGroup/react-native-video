@@ -14,6 +14,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.bridge.ReactMethod;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
@@ -340,12 +341,23 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_CACHE)
     public void setCache(final ReactExoplayerView videoView, @Nullable ReadableMap cacheConfig) {
         if (cacheConfig != null) {
-            String cacheDir = cacheConfig.hasKey(PROP_CACHE_CONFIG_DIR) ? cacheConfig.getString(PROP_CACHE_CONFIG_DIR) : null;
-            int cacheMaxSizeBytes = cacheConfig.hasKey(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) ? cacheConfig.getInt(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) : -1;
+            Context context = videoView.getContext();
 
-            if (cacheDir != null && cacheMaxSizeBytes > 0) {
-                videoView.setCache(cacheDir, cacheMaxSizeBytes);
-            }
+            String configDir = cacheConfig.getString(PROP_CACHE_CONFIG_DIR);
+            int configMaxSizeBytes = cacheConfig.getInt(PROP_CACHE_CONFIG_MAX_SIZE_BYTES);
+
+            String defaultCacheDir = "videos"; // Use videos subdirectory in application cache dir
+            int defaultMaxSizeBytes = 100 * 1024 * 1024; // 100MB
+
+            String cacheDir = configDir != null ? configDir : defaultCacheDir;
+            int cacheMaxSizeBytes = configMaxSizeBytes > 0 ? configMaxSizeBytes : defaultMaxSizeBytes;
+
+            videoView.setCache(
+                cacheDir.startsWith("/") ? new File(cacheDir) : new File(context.getCacheDir(), cacheDir),
+                new LeastRecentlyUsedCacheEvictor(cacheMaxSizeBytes)
+            );
+        } else {
+            videoView.setCache(null, null);
         }
     }
 

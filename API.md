@@ -430,14 +430,14 @@ Download videos to given cache directory when playing and consume videos again f
 
 Property | Type | Description
 --- | --- | ---
-dir | string | Absolute system path where cache should be stored.
-maxSizeBytes | number | Maximum allowed size of cache in bytes.
+dir | string | Absolute or relative path where cache should be stored. When relative path is given, the path will be relative to the default application cache directory. Default: Subdirectory "videos" inside the default app cache directory (example: `/data/user/0/<app name>/cache/videos`)
+maxSizeBytes | number | Maximum allowed size of cache in bytes. Default: 100 MB.
 
 Example with default values:
 ```
 cache={{
-    dir: `${cacheDirectory}/videos`,
-    maxSizeBytes: 100 * 1024 * 1024 // 100 MB
+    dir: "videos",
+    maxSizeBytes: 100 * 1024 * 1024
 }}
 ```
 
