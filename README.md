@@ -376,7 +376,6 @@ var styles = StyleSheet.create({
 |--|--|
 |[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android ExoPlayer, iOS|
 |[onBandwidthUpdate](#onbandwidthupdate)|Android ExoPlayer|
-|[onBufferProgress](#onbufferprogress)|Android ExopPlater|
 |[onBuffer](#onbuffer)|Android ExoPlayer, iOS|
 |[onEnd](#onend)|All|
 |[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
@@ -1032,17 +1031,6 @@ Example:
 ```
 
 Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
-
-Platforms: Android ExoPlayer
-
-#### onBufferProgress
-Callback function that is called on a set interval which contains the buffer start and end position in ms.
-
-Payload:
-Property | Type | Description
---- | --- | ---
-start | number | The buffer start (ms)
-end | number | The buffer end (ms)
 
 Platforms: Android ExoPlayer
 

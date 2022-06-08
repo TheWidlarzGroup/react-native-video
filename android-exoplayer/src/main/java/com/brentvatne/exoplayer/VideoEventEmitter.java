@@ -45,7 +45,6 @@ class VideoEventEmitter {
     private static final String EVENT_READY = "onReadyForDisplay";
     private static final String EVENT_BUFFER = "onVideoBuffer";
     private static final String EVENT_PLAYBACK_STATE_CHANGED = "onVideoPlaybackStateChanged";
-    private static final String EVENT_BUFFER_PROGRESS = "onVideoBufferProgress";
     private static final String EVENT_IDLE = "onVideoIdle";
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
@@ -223,13 +222,6 @@ class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
         receiveEvent(EVENT_PLAYBACK_STATE_CHANGED, map);
-    }
-
-    void bufferProgress(double start, double end) {
-        WritableMap map = Arguments.createMap();
-        map.putDouble(EVENT_PROP_BUFFER_START, start);
-        map.putDouble(EVENT_PROP_BUFFER_END, end);
-        receiveEvent(EVENT_BUFFER_PROGRESS, map);
     }
 
     void idle() {

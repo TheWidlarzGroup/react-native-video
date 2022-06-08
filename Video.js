@@ -239,12 +239,6 @@ export default class Video extends Component {
     }
   };
 
-  _onBufferProgress = (event) => {
-    if (this.props.onBufferProgress) {
-      this.props.onBufferProgress(event.nativeEvent);
-    }
-  };
-
   _onGetLicense = (event) => {
     if (this.props.drm && this.props.drm.getLicense instanceof Function) {
       const data = event.nativeEvent;
@@ -326,7 +320,6 @@ export default class Video extends Component {
       onVideoSeek: this._onSeek,
       onVideoEnd: this._onEnd,
       onVideoBuffer: this._onBuffer,
-      onVideoBufferProgress: this._onBufferProgress,
       onVideoBandwidthUpdate: this._onBandwidthUpdate,
       onTimedMetadata: this._onTimedMetadata,
       onVideoAudioBecomingNoisy: this._onAudioBecomingNoisy,
