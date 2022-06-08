@@ -39,6 +39,7 @@ dependencies {
     implementation('com.google.android.exoplayer:exoplayer:2.13.3') {
         exclude group: 'com.android.support'
     }
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation(name: "mux", ext: "aar")
 //    implementation files('libs/mux.aar')
     implementation ('com.google.guava:guava:27.1-android') {
