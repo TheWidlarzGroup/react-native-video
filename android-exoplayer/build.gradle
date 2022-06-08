@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', 16)
+        targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        versionCode 1
+        versionName "1.0"
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.customview:customview:1.0.0'
+            force 'androidx.core:core:1.1.0'
+        }
+    }
+}
+
+dependencies {
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation('com.google.android.exoplayer:exoplayer:2.13.3') {
+        exclude group: 'com.android.support'
+    }
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
+    implementation(name: "mux", ext: "aar")
+//    implementation files('libs/mux.aar')
+    implementation ('com.google.guava:guava:27.1-android') {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'org.checkerframework', module: 'checker-compat-qual'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
+        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
+    }
+
+    // All support libs must use the same version
+    implementation "androidx.annotation:annotation:1.1.0"
+    implementation "androidx.core:core:1.1.0"
+    implementation "androidx.media:media:1.1.0"
+
+    implementation('com.google.android.exoplayer:extension-okhttp:2.13.3') {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
+    implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
+
+}

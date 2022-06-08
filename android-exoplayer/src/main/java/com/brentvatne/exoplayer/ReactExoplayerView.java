@@ -550,9 +550,15 @@ class ReactExoplayerView extends FrameLayout implements
                 if (key != null && ivParam != null) {
                     this.mediaDataSourceFactory = DataSourceUtil.getEncryptedDataSourceFactory(key, ivParam, !areKeysInitialised);
                     areKeysInitialised = true;
+<<<<<<< HEAD
                 } else if (isEncrypted) {
                     this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
                 }
+=======
+                } else if(isEncrypted){
+                  this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
+              }
+>>>>>>> 426a0632 (Reading Encrypted file support)
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
@@ -1095,21 +1101,18 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
         if (uri != null) {
-            Uri updatedUri = uri;
-            if (uri.getScheme().startsWith("file")) {
-                isEncrypted = false;
-                File srcFile = new File(uri.getPath());
+            isEncrypted = false;
+            File srcFile = new File(uri.getPath());
 
-                if (!srcFile.getName().startsWith("encrypted_")) {
-                    File encryptedFile = new File(uri.getPath().replace(srcFile.getName(), "encrypted_" + srcFile.getName()));
-                    if (encryptedFile.exists()) {
-                        srcFile = encryptedFile;
-                    }
+            if(!srcFile.getName().startsWith("encrypted_")){
+                File encryptedFile = new File(uri.getPath().replace(srcFile.getName(), "encrypted_"+srcFile.getName()));
+                if(encryptedFile.exists()){
+                    srcFile = encryptedFile;
                 }
-                updatedUri = Uri.parse(srcFile.getAbsolutePath());
-                if (updatedUri.getLastPathSegment().startsWith("encrypted_")) {
-                    isEncrypted = true;
-                }
+            }
+            Uri updatedUri = Uri.parse(srcFile.getAbsolutePath());
+            if(updatedUri.getLastPathSegment().startsWith("encrypted_")){
+                isEncrypted = true;
             }
             boolean isOriginalSourceNull = srcUri == null;
             boolean isSourceEqual = updatedUri.equals(srcUri);

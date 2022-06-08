@@ -134,11 +134,11 @@ public final class EncryptedFileDataSource implements DataSource {
     }
 }
 
-public class EncryptedFileDataSourceFactory implements DataSource.Factory {
+class EncryptedFileDataSourceFactory implements DataSource.Factory {
 
     Context mContext;
 
-    public EncryptedFileDataSourceFactory(Context context) {
+    EncryptedFileDataSourceFactory(Context context) {
         mContext = context;
     }
 
