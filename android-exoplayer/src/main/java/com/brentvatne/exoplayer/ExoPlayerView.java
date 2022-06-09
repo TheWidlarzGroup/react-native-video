@@ -41,6 +41,7 @@ public final class ExoPlayerView extends FrameLayout {
     private ViewGroup.LayoutParams layoutParams;
 
     private boolean useTextureView = true;
+    private boolean useSecureView = false;
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
@@ -103,7 +104,15 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void updateSurfaceView() {
-        View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
+        View view;
+        if (!useTextureView || useSecureView) {
+            view = new SurfaceView(context);
+            if (useSecureView) {
+                ((SurfaceView)view).setSecure(true);
+            }
+        } else {
+            view = new TextureView(context);
+        }
         view.setLayoutParams(layoutParams);
 
         surfaceView = view;
@@ -174,6 +183,13 @@ public final class ExoPlayerView extends FrameLayout {
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
+            updateSurfaceView();
+        }
+    }
+
+    public void useSecureView(boolean useSecureView) {
+        if (useSecureView != this.useSecureView) {
+            this.useSecureView = useSecureView;
             updateSurfaceView();
         }
     }
