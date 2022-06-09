@@ -34,6 +34,7 @@
 - Update basic example applications (React Native 0.63.4) [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
 - Fix volume reset issue in exoPlayer [#2371](https://github.com/react-native-video/react-native-video/pull/2371)
 - Change WindowsTargetPlatformVersion to 10.0 [#2706](https://github.com/react-native-video/react-native-video/pull/2706)
+- Fixed Android seeking bug [#2712](https://github.com/react-native-video/react-native-video/pull/2712)
 
 ### Version 5.2.0
 
