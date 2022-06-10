@@ -4,21 +4,18 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
 import com.facebook.react.modules.network.OkHttpClientProvider;
-import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
-import com.google.android.exoplayer2.upstream.cache.CacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 
-import java.io.File;
 import java.util.Map;
 
 public class DataSourceUtil {
@@ -30,6 +27,7 @@ public class DataSourceUtil {
     private static DataSource.Factory defaultDataSourceFactory = null;
     private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
     private static SimpleCache cache = null;
+    private static boolean cacheChanged = false;
     private static String userAgent = null;
 
     public static void setUserAgent(String userAgent) {
@@ -50,20 +48,13 @@ public class DataSourceUtil {
         return rawDataSourceFactory;
     }
 
-    public static SimpleCache getCache(ReactContext context, File cacheDir, CacheEvictor cacheEvictor) {
-        if (cache == null) {
-            cache = buildCache(context, cacheDir, cacheEvictor);
-        }
-        return cache;
-    }
-
     public static void setRawDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.rawDataSourceFactory = factory;
     }
 
-    public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders, File cacheDir, CacheEvictor cacheEvictor) {
-        if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
-            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders, cacheDir, cacheEvictor);
+    public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
+        if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty()) || cacheChanged) {
+            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
         }
         return defaultDataSourceFactory;
     }
@@ -87,22 +78,18 @@ public class DataSourceUtil {
         return new RawResourceDataSourceFactory(context.getApplicationContext());
     }
 
-    private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders, File cacheDir, CacheEvictor cacheEvictor) {
+    private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         DataSource.Factory dataSource = new DefaultDataSourceFactory(context, bandwidthMeter,
                 buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
 
-        if (cacheDir != null && cacheEvictor != null) {
+        if (cache != null) {
+            cacheChanged = false;
             return new CacheDataSource.Factory()
-                    .setCache(getCache(context, cacheDir, cacheEvictor))
+                    .setCache(cache)
                     .setUpstreamDataSourceFactory(dataSource);
         } else {
             return dataSource;
         }
-    }
-
-    private static SimpleCache buildCache(ReactContext context, File cacheDir, CacheEvictor cacheEvictor) {
-        ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
-        return new SimpleCache(cacheDir, cacheEvictor, databaseProvider);
     }
 
     private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
@@ -116,5 +103,14 @@ public class DataSourceUtil {
             okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders);
 
         return okHttpDataSourceFactory;
+    }
+
+    public static SimpleCache getCache() {
+        return DataSourceUtil.cache;
+    }
+
+    public static void setCache(SimpleCache cache) {
+        DataSourceUtil.cache = cache;
+        DataSourceUtil.cacheChanged = true;
     }
 }

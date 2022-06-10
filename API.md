@@ -428,6 +428,11 @@ Platforms: Android ExoPlayer
 #### cache
 Download videos to given cache directory when playing and consume videos again from this directory when (offline) replaying. When the cache maximum size is reached, the least recent used video files are removed first. 
 
+Property value: 
+* `undefined` - Cache is not configured and thus disabled.
+* `object` - Cache is enabled, eventually with default values, see below.
+* `null` - Disable cache, you need this if you want to disable caching on the fly.
+
 Property | Type | Description
 --- | --- | ---
 dir | string | Absolute or relative path where cache should be stored. When relative path is given, the path will be relative to the default application cache directory. Default: Subdirectory "videos" inside the default app cache directory (example: `/data/user/0/<app name>/cache/videos`)

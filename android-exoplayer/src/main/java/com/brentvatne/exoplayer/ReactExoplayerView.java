@@ -36,6 +36,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
@@ -70,7 +71,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
-import com.google.android.exoplayer2.upstream.cache.CacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
@@ -81,6 +83,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -136,8 +140,8 @@ class ReactExoplayerView extends FrameLayout implements
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
-    private File cacheDir;
-    private CacheEvictor cacheEvictor;
+    private String cacheDir = null;
+    private Integer cacheMaxSizeBytes = null;
 
     private Handler mainHandler;
 
@@ -672,7 +676,7 @@ class ReactExoplayerView extends FrameLayout implements
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
         return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
-                useBandwidthMeter ? bandwidthMeter : null, requestHeaders, this.cacheDir, this.cacheEvictor);
+                useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
     /**
@@ -1023,7 +1027,7 @@ class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter, this.requestHeaders, this.cacheDir, this.cacheEvictor);
+            this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter, this.requestHeaders);
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1344,9 +1348,38 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setCache(File dir, CacheEvictor evictor) {
+    public void setCache(@Nullable String dir, @Nullable Integer maxSizeBytes) {
+        SimpleCache cache = DataSourceUtil.getCache();
+
+        if (dir == null || maxSizeBytes == null) {
+            if (cache != null) {
+                cache.release();
+                DataSourceUtil.setCache(null);
+            }
+            cacheDir = null;
+            cacheMaxSizeBytes = null;
+            return;
+        }
+
+        if (dir.equals(cacheDir) && maxSizeBytes.equals(cacheMaxSizeBytes)) {
+            return;
+        }
+
         cacheDir = dir;
-        cacheEvictor = evictor;
+        cacheMaxSizeBytes = maxSizeBytes;
+
+        if (cache != null) {
+            cache.release();
+            DataSourceUtil.setCache(null);
+        }
+
+        DataSourceUtil.setCache(
+            new SimpleCache(
+                new File(dir),
+                new LeastRecentlyUsedCacheEvictor(maxSizeBytes),
+                new ExoDatabaseProvider(themedReactContext)
+            )
+        );
     }
 
     public void setDrmType(UUID drmType) {

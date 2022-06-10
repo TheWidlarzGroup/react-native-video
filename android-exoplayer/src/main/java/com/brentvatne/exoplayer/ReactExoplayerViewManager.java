@@ -14,7 +14,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.bridge.ReactMethod;
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
@@ -343,18 +342,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (cacheConfig != null) {
             Context context = videoView.getContext();
 
-            String configDir = cacheConfig.getString(PROP_CACHE_CONFIG_DIR);
-            int configMaxSizeBytes = cacheConfig.getInt(PROP_CACHE_CONFIG_MAX_SIZE_BYTES);
+            String configDir = cacheConfig.hasKey(PROP_CACHE_CONFIG_DIR) ? cacheConfig.getString(PROP_CACHE_CONFIG_DIR) : null;
+            int configMaxSizeBytes = cacheConfig.hasKey(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) ? cacheConfig.getInt(PROP_CACHE_CONFIG_MAX_SIZE_BYTES) : 0;
 
-            String defaultCacheDir = "videos"; // Use videos subdirectory in application cache dir
-            int defaultMaxSizeBytes = 100 * 1024 * 1024; // 100MB
-
-            String cacheDir = configDir != null ? configDir : defaultCacheDir;
-            int cacheMaxSizeBytes = configMaxSizeBytes > 0 ? configMaxSizeBytes : defaultMaxSizeBytes;
+            String cacheDir = configDir != null ? configDir : "videos"; // Default: use videos subdirectory in app cache dir
+            int cacheMaxSizeBytes = configMaxSizeBytes > 0 ? configMaxSizeBytes : 100 * 1024 * 1024; // Default: 100MB
 
             videoView.setCache(
-                cacheDir.startsWith("/") ? new File(cacheDir) : new File(context.getCacheDir(), cacheDir),
-                new LeastRecentlyUsedCacheEvictor(cacheMaxSizeBytes)
+                cacheDir.startsWith("/") ? cacheDir : new File(context.getCacheDir(), cacheDir).getAbsolutePath(),
+                cacheMaxSizeBytes
             );
         } else {
             videoView.setCache(null, null);
