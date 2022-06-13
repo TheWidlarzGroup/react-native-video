@@ -236,7 +236,7 @@ enum RCTVideoUtils {
     static func createEmptyVttFile() -> TextTrack? {
         let fileManager = FileManager.default
         let cachesDirectoryUrl = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let filePath = cachesDirectoryUrl.appendingPathComponent("kaas.vtt").path
+        let filePath = cachesDirectoryUrl.appendingPathComponent("empty.vtt").path
         
         if !fileManager.fileExists(atPath: filePath) {
             let stringToWrite = "WEBVTT\n\n1\n99:59:59.000 --> 99:59:59.001\n."
