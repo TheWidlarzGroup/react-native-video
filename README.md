@@ -412,6 +412,7 @@ Platforms: Android ExoPlayer, iOS
 
 #### controls
 Determines whether to show player controls.
+* ** false (default)** - Don't show player controls
 * **true** - Show player controls
 
 Note on iOS, controls are always shown when in fullscreen mode.
