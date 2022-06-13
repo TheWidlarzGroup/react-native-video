@@ -5,7 +5,7 @@
 
 ## Cleanup
 
-* Given the history of this project, we are going to be more aggressive than usual in keeping things clean. We are working with limited resources and do not want to return to the 1000+ open issues state. This is meant to be disrespectful or hostile. It is just a way to keep the limited resources we have focused. If your issue was closed prematurely, just chime in and engage!
+* Given the history of this project, we are going to be more aggressive than usual in keeping things clean. We are working with limited resources and do not want to return to the 1000+ open issues state. This is not meant to be disrespectful or hostile. It is just a way to keep the limited resources we have focused. If your issue was closed prematurely, just chime in and engage!
 * Issues and pull requests that become stale (60 days of inactivity) will be closed unless assigned and show progress.
 * If the issue creator fails to provide additional information within a week when asked, we may close the issue to keep things tidy (but you can always comment back and we can reopen).
 
