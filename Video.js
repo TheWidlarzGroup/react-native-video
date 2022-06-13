@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, requireNativeComponent, NativeModules, UIManager, View, ViewPropTypes, Image, Platform, findNodeHandle } from 'react-native';
+import { StyleSheet, requireNativeComponent, NativeModules, UIManager, View, Image, Platform, findNodeHandle } from 'react-native';
+import { ViewPropTypes } from 'deprecated-react-native-prop-types';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
@@ -96,6 +97,12 @@ export default class Video extends Component {
   _onLoadStart = (event) => {
     if (this.props.onLoadStart) {
       this.props.onLoadStart(event.nativeEvent);
+    }
+  };
+
+  _onPlaybackStateChanged = (event) => {
+    if (this.props.onPlaybackStateChanged) {
+      this.props.onPlaybackStateChanged(event.nativeEvent);
     }
   };
 
@@ -307,6 +314,7 @@ export default class Video extends Component {
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
       },
       onVideoLoadStart: this._onLoadStart,
+      onVideoPlaybackStateChanged: this._onPlaybackStateChanged,
       onVideoLoad: this._onLoad,
       onVideoError: this._onError,
       onVideoProgress: this._onProgress,
@@ -463,6 +471,7 @@ Video.propTypes = {
     maxBufferMs: PropTypes.number,
     bufferForPlaybackMs: PropTypes.number,
     bufferForPlaybackAfterRebufferMs: PropTypes.number,
+    maxHeapAllocationPercent: PropTypes.number,
   }),
   stereoPan: PropTypes.number,
   rate: PropTypes.number,
@@ -472,7 +481,9 @@ Video.propTypes = {
   playWhenInactive: PropTypes.bool,
   ignoreSilentSwitch: PropTypes.oneOf(['ignore', 'obey']),
   reportBandwidth: PropTypes.bool,
+  contentStartTime: PropTypes.number,
   disableFocus: PropTypes.bool,
+  disableBuffering: PropTypes.bool,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
@@ -480,8 +491,10 @@ Video.propTypes = {
   fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
   useTextureView: PropTypes.bool,
+  useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
   onLoadStart: PropTypes.func,
+  onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,
   onBuffer: PropTypes.func,
   onError: PropTypes.func,
