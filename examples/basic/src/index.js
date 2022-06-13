@@ -1,5 +1,5 @@
+import {AppRegistry} from 'react-native';
 import VideoPlayer from './VideoPlayer';
+import {name as appName} from '../app.json';
 
-import { AppRegistry } from 'react-native';
-
-AppRegistry.registerComponent('VideoPlayer', () => VideoPlayer);
+AppRegistry.registerComponent(appName, () => VideoPlayer);
