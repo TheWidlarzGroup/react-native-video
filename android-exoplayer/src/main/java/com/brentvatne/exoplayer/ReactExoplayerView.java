@@ -977,6 +977,7 @@ class ReactExoplayerView extends FrameLayout implements
             default:
                 text += "unknown";
                 break;
+            }
         }
     }
 
@@ -1606,7 +1607,7 @@ class ReactExoplayerView extends FrameLayout implements
                 // With only one tracks we can't remove any tracks so attempt to play it anyway
                 tracks = allTracks;
             } else {
-                tracks =  new ArrayList<>(supportedFormatLength + 1)
+                tracks =  new ArrayList<>(supportedFormatLength + 1);
                 int o = 0;
                 for (int k = 0; k < allTracks.size(); k++) {
                     Format format = group.getFormat(k);
