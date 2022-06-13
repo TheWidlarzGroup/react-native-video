@@ -35,7 +35,6 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
 import com.google.android.exoplayer2.drm.DrmSession.DrmSessionException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
@@ -483,7 +482,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void startBufferCheckTimer() {
-        SimpleExoPlayer player = this.player;
+        Player player = this.player;
         VideoEventEmitter eventEmitter = this.eventEmitter;
         Handler mainHandler = this.mainHandler;
 
@@ -568,13 +567,12 @@ class ReactExoplayerView extends FrameLayout implements
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-        player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+        player = new ExoPlayer.Builder(getContext(), renderersFactory)
                     .setTrackSelector​(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
                     .build();
         player.addListener(self);
-        player.addMetadataOutput(self);
         exoPlayerView.setPlayer(player);
         audioBecomingNoisyReceiver.setListener(self);
         bandwidthMeter.addEventListener(new Handler(), self);
@@ -691,6 +689,16 @@ class ReactExoplayerView extends FrameLayout implements
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
+        MediaItem mediaItem = new MediaItem.Builder().setUri(uri).build();
+        DrmSessionManagerProvider drmProvider = null;
+        if (drmSessionManager != null) {
+            drmProvider = new DrmSessionManagerProvider() {
+                @Override
+                public DrmSessionManager get(MediaItem mediaItem) {
+                    return drmSessionManager;
+                }
+            };
+        }
         switch (type) {
             case C.TYPE_SS:
                 return new SsMediaSource.Factory(
@@ -1261,53 +1269,19 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onPlayerError(PlaybackException e) {
-        if (!(error instanceof ExoPlaybackException)) {
+        if (e == null) {
             return;
         }
-        String errorString = "ExoPlaybackException type : " + e.type;
-        String errorCode = "2001"; // Playback error code 2xxx (2001 - unknown playback exception)
+        String errorString = "ExoPlaybackException: " + PlaybackException.getErrorCodeName(e.errorCode);
+        String errorCode = "2" + String.valueOf(e.errorCode);
         boolean needsReInitialization = false;
-        Exception ex = e;
-        if (e.type == ExoPlaybackException.TYPE_RENDERER) {
-            Exception cause = e.getRendererException();
-            if (cause instanceof MediaCodecRenderer.DecoderInitializationException) {
-                // Special case for decoder initialization failures.
-                MediaCodecRenderer.DecoderInitializationException decoderInitializationException =
-                        (MediaCodecRenderer.DecoderInitializationException) cause;
-                if (decoderInitializationException.codecInfo == null
-                        || decoderInitializationException.codecInfo.name == null) {
-                    if (decoderInitializationException.getCause() instanceof MediaCodecUtil.DecoderQueryException) {
-                        errorCode = "2011"; 
-                        errorString = getResources().getString(R.string.error_querying_decoders);
-                    } else if (decoderInitializationException.secureDecoderRequired) {
-                        errorCode = "2012";
-                        errorString = getResources().getString(R.string.error_no_secure_decoder,
-                                decoderInitializationException.mimeType);
-                    } else {
-                        errorCode = "2013";
-                        errorString = getResources().getString(R.string.error_no_decoder,
-                                decoderInitializationException.mimeType);
-                    }
-                } else {
-                    errorCode = "2014";
-                    errorString = getResources().getString(R.string.error_instantiating_decoder,
-                            decoderInitializationException.codecInfo.name);
-                }
-            }
-        }
-        else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
-            // Re-initialization improves recovery speed and properly resumes
-            needsReInitialization = true;
-            errorString = getResources().getString(R.string.unrecognized_media_format);
-            Exception cause = e.getSourceException();
-            if (cause instanceof DefaultDrmSessionManager.MissingSchemeDataException) {
-                errorCode = "3004";
-                errorString = getResources().getString(R.string.unrecognized_media_format);
-            } else if(cause instanceof MediaDrmCallbackException || cause instanceof DrmSessionException) {
-                errorCode = "3005";
-                errorString = getResources().getString(R.string.unrecognized_media_format);
-                // DrmSessionExceptions can be caused by a lot internal reasons for failure, in most cases they can be safely retried and playback will recover
-                if (!hasDrmFailed || cause instanceof DrmSessionException) {
+        switch(e.errorCode) {
+            case PlaybackException.ERROR_CODE_DRM_DEVICE_REVOKED:
+            case PlaybackException.ERROR_CODE_DRM_LICENSE_ACQUISITION_FAILED:
+            case PlaybackException.ERROR_CODE_DRM_PROVISIONING_FAILED:
+            case PlaybackException.ERROR_CODE_DRM_SYSTEM_ERROR:
+            case PlaybackException.ERROR_CODE_DRM_UNSPECIFIED:
+                if (!hasDrmFailed) {
                     // When DRM fails to reach the app level certificate server it will fail with a source error so we assume that it is DRM related and try one more time
                     hasDrmFailed = true;
                     playerNeedsSource = true;
@@ -1316,34 +1290,11 @@ class ReactExoplayerView extends FrameLayout implements
                     setPlayWhenReady(true);
                     return;
                 }
-            } else if (cause instanceof HttpDataSource.HttpDataSourceException) {
-                // this exception happens when connectivity is lost
-                updateResumePosition();
-                initializePlayer();
-                setPlayWhenReady(true);
-                return;
-            } else {
-                errorCode = "2021";
-                errorString = getResources().getString(R.string.unrecognized_media_format);
-            }
-            if (cause != null) {
-                Throwable rootCause = cause.getCause();
-                if (rootCause instanceof MediaDrmCallbackException) {
-                    errorCode = "3005";
-                    errorString = getResources().getString(R.string.unrecognized_media_format);
-                    if (!hasDrmFailed) {
-                        // When DRM fails to reach the app level certificate server it will fail with a source error so we assume that it is DRM related and try one more time
-                        hasDrmFailed = true;
-                        playerNeedsSource = true;
-                        updateResumePosition();
-                        initializePlayer();
-                        setPlayWhenReady(true);
-                        return;
-                    }
-                }
-            }
+                break;
+            default:
+                break;
         }
-        eventEmitter.error(errorString, ex, errorCode);
+        eventEmitter.error(errorString, e, errorCode);
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
@@ -1356,20 +1307,8 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private static boolean isBehindLiveWindow(ExoPlaybackException e) {
-        Log.e("ExoPlayer Exception", e.toString());
-        if (e.type != ExoPlaybackException.TYPE_SOURCE) {
-            return false;
-        }
-        Throwable cause = e.getSourceException();
-        while (cause != null) {
-            if (cause instanceof BehindLiveWindowException ||
-                    cause instanceof HttpDataSource.HttpDataSourceException) {
-                return true;
-            }
-            cause = cause.getCause();
-        }
-        return false;
+    private static boolean isBehindLiveWindow(PlaybackException e) {
+        return e.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW;
     }
 
     public int getTrackRendererIndex(int trackType) {
@@ -1562,7 +1501,7 @@ class ReactExoplayerView extends FrameLayout implements
                         if (format.height < minHeight) {
                             minHeight = format.height;
                             groupIndex = i;
-                            tracks[0] = j;
+                            tracks.set(0, j);
                         }
                     }
                 }
@@ -1570,7 +1509,7 @@ class ReactExoplayerView extends FrameLayout implements
                 if (closestFormat != null && closestTrackIndex != -1) {
                     // We found the closest match instead of an exact one
                     groupIndex = i;
-                    tracks[0] = closestTrackIndex;
+                    tracks.set(0, closestTrackIndex);
                 }
             }
         } else if (trackType == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default
@@ -1587,11 +1526,11 @@ class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new ArrayList<>(group.length);
-            ArrayList allTracks = new ArrayList<>(group.length);
+            tracks = new ArrayList<Integer>(group.length);
+            ArrayList<Integer> allTracks = new ArrayList<Integer>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
-                allTracks.add(j, j);
+                allTracks.add(j);
             }
             
             // Valiate list of all tracks and add only supported formats
@@ -1608,13 +1547,11 @@ class ReactExoplayerView extends FrameLayout implements
                 tracks = allTracks;
             } else {
                 tracks =  new ArrayList<>(supportedFormatLength + 1);
-                int o = 0;
                 for (int k = 0; k < allTracks.size(); k++) {
                     Format format = group.getFormat(k);
                     if (isFormatSupported(format)) {
-                        tracks.set(o, allTracks.get(k));
+                        tracks.add(allTracks.get(k));
                         supportedTrackList.add(allTracks.get(k));
-                        o++;
                     }
                 }
             }

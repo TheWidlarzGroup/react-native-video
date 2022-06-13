@@ -1519,10 +1519,10 @@ allprojects {
     ... // Various other settings go here
 
     project.ext {
-        compileSdkVersion = 23
-        buildToolsVersion = "23.0.1"
+        compileSdkVersion = 31
+        buildToolsVersion = "30.0.2"
 
-        minSdkVersion = 16
+        minSdkVersion = 21
         targetSdkVersion = 22
     }
 }
