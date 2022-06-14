@@ -21,7 +21,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _localSourceEncryptionKeyScheme:String?
     
     /* Required to publish events */
-    private var _eventDispatcher:RCTEventDispatcher?
+    private var _eventDispatcher:RCTEventDispatcherProtocol?
     private var _videoLoadStarted:Bool = false
     
     private var _pendingSeek:Bool = false
@@ -95,7 +95,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     
-    init(eventDispatcher:RCTEventDispatcher!) {
+    init(eventDispatcher:RCTEventDispatcherProtocol!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         
         _eventDispatcher = eventDispatcher
