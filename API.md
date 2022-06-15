@@ -15,6 +15,7 @@
 * [Audio Mixing](#audio-mixing)
 * [Android Expansion File Usage](#android-expansion-file-usage)
 * [Updating](#updating)
+* [Contributing](#contributing)
 
 ## Installation
 
@@ -300,11 +301,14 @@ var styles = StyleSheet.create({
 |--|--|
 |[allowsExternalPlayback](#allowsexternalplayback) |iOS |
 |[audioOnly](#audioonly)|All |
-|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|
+|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|\
+|[backBufferDurationMs](#backBufferDurationMs)| Android Exoplayer|
 |[bufferConfig](#bufferconfig)|Android ExoPlayer|
+|[contentStartTime](#contentStartTime)| Android Exoplayer|
 |[controls](#controls)|Android ExoPlayer, iOS, react-native-dom|
 |[currentPlaybackTime](#currentPlaybackTime)|Android Exoplayer|
 |[disableFocus](#disableFocus)|Android Exoplayer, iOS|
+|[disableDisconnectError](#disableDisconnectError)|Android Exoplayer|
 |[filter](#filter)|iOS|
 |[filterEnabled](#filterEnabled)|iOS|
 |[fullscreen](#fullscreen)|iOS|
@@ -325,7 +329,7 @@ var styles = StyleSheet.create({
 |[poster](#poster)|All|
 |[posterResizeMode](#posterresizemode)|All|
 |[preferredForwardBufferDuration](#preferredForwardBufferDuration)|iOS|
-| [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
+|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
 |[progressUpdateInterval](#progressupdateinterval)|All|
 |[rate](#rate)|All|
 |[repeat](#repeat)|All|
@@ -339,7 +343,9 @@ var styles = StyleSheet.create({
 |[textTracks](#texttracks)|Android ExoPlayer, iOS|
 |[trackId](#trackId)|Android ExoPlayer|
 |[useTextureView](#usetextureview)|Android ExoPlayer|
+|[useSecureView](#useSecureView)|Android Exoplayer|
 |[volume](#volume)|All|
+|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)|All|
 
 
 ### Event props
@@ -400,6 +406,11 @@ A Boolean value that indicates whether the player should automatically delay pla
 
 Platforms: iOS
 
+#### backBufferDurationMs
+The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.
+
+Platforms: Android ExoPlayer
+
 #### bufferConfig
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
@@ -409,6 +420,9 @@ minBufferMs | number | The default minimum duration of media that the player wil
 maxBufferMs | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.
 bufferForPlaybackMs | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.
 bufferForPlaybackAfterRebufferMs | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action.
+maxHeapAllocationPercent | number | The percentage of available heap that the video can use to buffer, between 0 and 1
+minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1
+minBufferMemoryReservePercent | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1
 
 This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 
@@ -431,10 +445,13 @@ Platforms: Android ExoPlayer, iOS
 
 #### controls
 Determines whether to show player controls.
-* ** false (default)** - Don't show player controls
+* **false (default)** - Don't show player controls
 * **true** - Show player controls
 
 Note on iOS, controls are always shown when in fullscreen mode.
+
+### contentStartTime
+The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
 For Android MediaPlayer, you will need to build your own controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-video-player](https://github.com/cornedor/react-native-video-player).
 
@@ -446,6 +463,13 @@ Platforms: Android ExoPlayer, iOS, react-native-dom
 Determines whether video audio should override background music/audio in Android devices.
 * ** false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
+
+Platforms: Android Exoplayer
+
+#### disableDisconnectError
+Determines if the player needs to throw an error when connection is lost or not
+* **false (default)** - Player will throw an error when connection is lost
+* **true** - Player will keep trying to buffer when network connect is lost
 
 Platforms: Android Exoplayer
 
@@ -925,6 +949,18 @@ useTextureView can only be set at same time you're setting the source.
 
 Platforms: Android ExoPlayer
 
+#### useSecureView
+Force the output to a SurfaceView and enables the secure surface.
+
+This will override useTextureView flag.
+
+SurfaceView is is the only one that can be labeled as secure.
+
+* **true** - Use security
+* **false (default)** - Do not use security
+
+Platforms: Android ExoPlayer
+
 #### volume
 Adjust the volume.
 * **1.0 (default)** - Play at full volume
@@ -1116,6 +1152,24 @@ Example:
 ```
 
 Platforms: all
+
+#### onPlaybackStateChanged
+Callback function that is called when the playback state changes.
+
+Payload:
+
+Property | Description
+--- | ---
+isPlaying | boolean | Boolean indicating if the media is playing or not
+
+Example:
+```
+{
+  isPlaying: true,
+}
+```
+
+Platforms: Android ExoPlayer
 
 #### onReadyForDisplay
 Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
@@ -1418,6 +1472,8 @@ To enable audio to play in background on iOS the audio session needs to be set t
    ```
 
    Then `Cmd+R` to start the React Packager, build and run the project in the simulator.
+
+- [Lumpen Radio](https://github.com/jhabdas/lumpen-radio) contains another example integration using local files and full screen background video.
 
 ## Updating
 
