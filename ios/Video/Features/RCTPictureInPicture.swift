@@ -47,7 +47,7 @@ class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
     }
     
     func setupPipController(_ playerLayer: AVPlayerLayer?) {
-        guard playerLayer != nil && AVPictureInPictureController.isPictureInPictureSupported() else { return }
+        guard playerLayer != nil && AVPictureInPictureController.isPictureInPictureSupported() && _isActive else { return }
         // Create new controller passing reference to the AVPlayerLayer
         _pipController = AVPictureInPictureController(playerLayer:playerLayer!)
         _pipController?.delegate = self

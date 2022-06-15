@@ -109,12 +109,20 @@ enum RCTPlayerOperations {
                 }
             }
         } else { // default. invalid type or "system"
-            player?.currentItem?.selectMediaOptionAutomatically(in: group)
-            return
+            #if TARGET_OS_TV
+                // Do noting. Fix for tvOS native audio menu language selector
+            #else
+                player?.currentItem?.selectMediaOptionAutomatically(in: group)
+                return
+            #endif
         }
         
-        // If a match isn't found, option will be nil and text tracks will be disabled
-        player?.currentItem?.select(mediaOption, in:group)
+        #if TARGET_OS_TV
+            // Do noting. Fix for tvOS native audio menu language selector
+        #else
+            // If a match isn't found, option will be nil and text tracks will be disabled
+            player?.currentItem?.select(mediaOption, in:group)
+        #endif
     }
     
     static func setMediaSelectionTrackForCharacteristic(player:AVPlayer?, characteristic:AVMediaCharacteristic, criteria:SelectedTrackCriteria?) {
@@ -175,6 +183,41 @@ enum RCTPlayerOperations {
             player.seek(to: cmSeekTime, toleranceBefore:tolerance, toleranceAfter:tolerance, completionHandler:{ (finished:Bool) in
                 fulfill(finished)
             })
+        }
+    }
+    
+    static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String) {
+        let session:AVAudioSession! = AVAudioSession.sharedInstance()
+        var category:AVAudioSession.Category? = nil
+        var options:AVAudioSession.CategoryOptions? = nil
+        
+        if (ignoreSilentSwitch == "ignore") {
+            category = AVAudioSession.Category.playback
+        } else if (ignoreSilentSwitch == "obey") {
+            category = AVAudioSession.Category.ambient
+        }
+        
+        if (mixWithOthers == "mix") {
+            options = .mixWithOthers
+        } else if (mixWithOthers == "duck") {
+            options = .duckOthers
+        }
+        
+        if let category = category, let options = options {
+            do {
+                try session.setCategory(category, options: options)
+            } catch {
+            }
+        } else if let category = category, options == nil {
+            do {
+                try session.setCategory(category)
+            } catch {
+            }
+        } else if category == nil, let options = options {
+            do {
+                try session.setCategory(session.category, options: options)
+            } catch {
+            }
         }
     }
 }
