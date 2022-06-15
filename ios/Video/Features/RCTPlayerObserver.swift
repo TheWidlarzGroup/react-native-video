@@ -64,7 +64,7 @@ class RCTPlayerObserver: NSObject {
             removePlayerLayerObserver()
         }
         didSet {
-            if playerLayer == nil {
+            if playerLayer != nil {
                 addPlayerLayerObserver()
             }
         }

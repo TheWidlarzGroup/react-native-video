@@ -32,9 +32,11 @@
 - Convert iOS implementation to Swift [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
 - Add iOS support for decoding offline sources [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
 - Update basic example applications (React Native 0.63.4) [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
+- Upgrade ExoPlayer to 2.17.1 [#2498](https://github.com/react-native-video/react-native-video/pull/2498)
 - Fix volume reset issue in exoPlayer [#2371](https://github.com/react-native-video/react-native-video/pull/2371)
 - Change WindowsTargetPlatformVersion to 10.0 [#2706](https://github.com/react-native-video/react-native-video/pull/2706)
 - Fixed Android seeking bug [#2712](https://github.com/react-native-video/react-native-video/pull/2712)
+- Fixed `onReadyForDisplay` not being called [#2721](https://github.com/react-native-video/react-native-video/pull/2721)
 - Fix type of `_eventDispatcher` on iOS target to match `bridge.eventDispatcher()` [#2720](https://github.com/react-native-video/react-native-video/pull/2720)
 
 ### Version 5.2.0

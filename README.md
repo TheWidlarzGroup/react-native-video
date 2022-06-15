@@ -39,6 +39,7 @@ Version 3.0 features a number of changes to existing behavior. See [Updating](#u
 * [Audio Mixing](#audio-mixing)
 * [Android Expansion File Usage](#android-expansion-file-usage)
 * [Updating](#updating)
+* [Contributing](#contributing)
 
 ## Installation
 
@@ -1598,10 +1599,10 @@ allprojects {
     ... // Various other settings go here
 
     project.ext {
-        compileSdkVersion = 23
-        buildToolsVersion = "23.0.1"
+        compileSdkVersion = 31
+        buildToolsVersion = "30.0.2"
 
-        minSdkVersion = 16
+        minSdkVersion = 21
         targetSdkVersion = 22
     }
 }
@@ -1616,6 +1617,9 @@ If your video work on Debug mode, but on Release you see only black screen, plea
  android:usesCleartextTraffic="true"
 >
 ```
+
+## Contributing
+You can find our contribution guidelines [here](CONTRIBUTING.md)
 
 ## TODOS
 
