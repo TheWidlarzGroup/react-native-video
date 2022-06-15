@@ -215,20 +215,22 @@ class ReactExoplayerView extends FrameLayout implements
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW_PROGRESS:
-                    long pos = player.getCurrentPosition();
-                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                    long duration = player.getDuration();
+                    if (player != null) {
+                        long pos = player.getCurrentPosition();
+                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                        long duration = player.getDuration();
 
-                    if (lastPos != pos
-                            || lastBufferDuration != bufferedDuration
-                            || lastDuration != duration) {
-                        lastPos = pos;
-                        lastBufferDuration = bufferedDuration;
-                        lastDuration = duration;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                        if (lastPos != pos
+                                || lastBufferDuration != bufferedDuration
+                                || lastDuration != duration) {
+                            lastPos = pos;
+                            lastBufferDuration = bufferedDuration;
+                            lastDuration = duration;
+                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                        }
+                        msg = obtainMessage(SHOW_PROGRESS);
+                        sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
-                    msg = obtainMessage(SHOW_PROGRESS);
-                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     break;
             }
         }
