@@ -1,6 +1,7 @@
 ## Changelog
 
 ### Version 6.0.0-alpha1
+- Remove Android MediaPlayer support [#2724](https://github.com/react-native-video/react-native-video/pull/2724)
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix AudioFocus bug that could cause the player to stop responding to play/pause in some instances. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix player crashing when it is being cleared. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
