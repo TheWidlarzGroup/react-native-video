@@ -13,10 +13,10 @@
 
 * Please open an issue before opening a PR to make sure the proposed change is wanted and is likely to be merged. We don't want you to waste your time!
 * Pull requests require 1-3 approved reviews to be merged.
-* The number of reviews depends on the complexity by adding up:
-    * `1` if less than 3 files and 30 lines of code changed
-    * `1` if there are native code changes
-    * If there are multiple platforms affected (iOS, Android, Windows), `1` reviewer per additional platform 
+* The number of reviews depends on the complexity by adding up (max of 3):
+    * `1` reviewer for each PR 
+    * `1` if more than 3 files and/or 30 lines of code changed
+    * `1` for each native platform code changes involved
 
 For example, a single file JS code change requires 1 review while a 3 files iOS code change requires 3 reviews. As soon as the reviews show up as approved without any requested changes, the PR will be merged into the next milestone.
 
