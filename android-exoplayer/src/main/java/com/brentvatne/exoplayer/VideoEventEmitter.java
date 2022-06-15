@@ -15,6 +15,8 @@ import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 class VideoEventEmitter {
 
@@ -42,6 +44,7 @@ class VideoEventEmitter {
     private static final String EVENT_RESUME = "onPlaybackResume";
     private static final String EVENT_READY = "onReadyForDisplay";
     private static final String EVENT_BUFFER = "onVideoBuffer";
+    private static final String EVENT_PLAYBACK_STATE_CHANGED = "onVideoPlaybackStateChanged";
     private static final String EVENT_IDLE = "onVideoIdle";
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
@@ -63,6 +66,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_PLAYBACK_STATE_CHANGED,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
@@ -87,6 +91,7 @@ class VideoEventEmitter {
             EVENT_RESUME,
             EVENT_READY,
             EVENT_BUFFER,
+            EVENT_PLAYBACK_STATE_CHANGED,
             EVENT_IDLE,
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
@@ -104,6 +109,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
+    private static final String EVENT_PROP_BUFFER_START = "bufferStart";
+    private static final String EVENT_PROP_BUFFER_END = "bufferEnd";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -125,11 +132,14 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
     private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
+    private static final String EVENT_PROP_ERROR_TRACE = "errorStackTrace";
+    private static final String EVENT_PROP_ERROR_CODE = "errorCode";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
-    private static final String EVENT_PROP_BITRATE = "bitrate";   
+    private static final String EVENT_PROP_BITRATE = "bitrate";
 
+    private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -206,6 +216,12 @@ class VideoEventEmitter {
         receiveEvent(EVENT_BUFFER, map);
     }
 
+    void playbackStateChanged(boolean isPlaying) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
+        receiveEvent(EVENT_PLAYBACK_STATE_CHANGED, map);
+    }
+
     void idle() {
         receiveEvent(EVENT_IDLE, null);
     }
@@ -231,9 +247,25 @@ class VideoEventEmitter {
     }
 
     void error(String errorString, Exception exception) {
+        _error(errorString, exception, "0001");
+    }
+
+    void error(String errorString, Exception exception, String errorCode) {
+        _error(errorString, exception, errorCode);
+    }
+
+    void _error(String errorString, Exception exception, String errorCode) {
+        // Prepare stack trace
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        exception.printStackTrace(pw);
+        String stackTrace = sw.toString();
+
         WritableMap error = Arguments.createMap();
         error.putString(EVENT_PROP_ERROR_STRING, errorString);
         error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.toString());
+        error.putString(EVENT_PROP_ERROR_CODE, errorCode);
+        error.putString(EVENT_PROP_ERROR_TRACE, stackTrace);
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);

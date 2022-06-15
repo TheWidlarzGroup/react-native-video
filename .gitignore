@@ -21,6 +21,7 @@ DerivedData
 *.ipa
 *.xcuserstate
 project.xcworkspace
+Pods
 
 # Android/IJ
 #
@@ -29,6 +30,9 @@ project.xcworkspace
 .gradle
 local.properties
 *.hprof
+.project
+.settings
+.classpath
 
 # node.js
 #
@@ -46,3 +50,7 @@ buck-out/
 \.buckd/
 android/app/libs
 android/keystores/debug.keystore
+
+# windows
+Deploy.binlog
+msbuild.binlog
