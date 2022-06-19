@@ -473,7 +473,6 @@ Video.propTypes = {
     bufferForPlaybackAfterRebufferMs: PropTypes.number,
     maxHeapAllocationPercent: PropTypes.number,
   }),
-  stereoPan: PropTypes.number,
   rate: PropTypes.number,
   pictureInPicture: PropTypes.bool,
   playInBackground: PropTypes.bool,

@@ -30,7 +30,6 @@
         "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
-        "android-exoplayer",
         "android",
         "dom",
         "ios",

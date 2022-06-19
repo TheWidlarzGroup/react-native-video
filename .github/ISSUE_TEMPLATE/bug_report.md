@@ -18,12 +18,11 @@ assignees: ''
 
 ## Platform
 <!--
-  Platform where your bug is happening. If Android, report if using Android or Android Exoplayer
+  Platform where your bug is happening.
 -->
 Which player are you experiencing the problem on:
 * iOS
-* Android ExoPlayer
-* Android MediaPlayer
+* Android
 * Windows UWP
 * Windows WPF
 
