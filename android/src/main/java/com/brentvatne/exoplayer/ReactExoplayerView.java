@@ -1627,16 +1627,20 @@ class ReactExoplayerView extends FrameLayout implements
         textTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
     }
-
-    public void setPausedModifier(boolean paused) {
-        isPaused = paused;
+                
+    private void notifyPlaybackState() {
         if (player != null) {
-            if (!paused) {
+            if (!isPaused) {
                 startPlayback();
             } else {
                 pausePlayback();
             }
         }
+    }
+
+    public void setPausedModifier(boolean paused) {
+        isPaused = paused;
+        notifyPlaybackState()
     }
 
     public void setMutedModifier(boolean muted) {
@@ -1656,6 +1660,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void seekTo(long positionMs) {
         if (player != null) {
             player.seekTo(positionMs);
+            notifyPlaybackState();
             eventEmitter.seek(player.getCurrentPosition(), positionMs);
         }
     }
