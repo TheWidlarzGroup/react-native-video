@@ -1640,7 +1640,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setPausedModifier(boolean paused) {
         isPaused = paused;
-        notifyPlaybackState()
+        notifyPlaybackState();
     }
 
     public void setMutedModifier(boolean muted) {
