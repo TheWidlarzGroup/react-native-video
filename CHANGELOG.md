@@ -1,6 +1,11 @@
 ## Changelog
 
 ### Version 6.0.0-alpha1
+
+- Remove Android MediaPlayer support [#2724](https://github.com/react-native-video/react-native-video/pull/2724)
+- Replace Image.propTypes with ImagePropTypes. [#2718](https://github.com/react-native-video/react-native-video/pull/2718)
+
+### Version 6.0.0-alpha.0
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix AudioFocus bug that could cause the player to stop responding to play/pause in some instances. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix player crashing when it is being cleared. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
@@ -32,9 +37,12 @@
 - Convert iOS implementation to Swift [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
 - Add iOS support for decoding offline sources [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
 - Update basic example applications (React Native 0.63.4) [#2527](https://github.com/react-native-video/react-native-video/pull/2527)
+- Upgrade ExoPlayer to 2.17.1 [#2498](https://github.com/react-native-video/react-native-video/pull/2498)
 - Fix volume reset issue in exoPlayer [#2371](https://github.com/react-native-video/react-native-video/pull/2371)
 - Change WindowsTargetPlatformVersion to 10.0 [#2706](https://github.com/react-native-video/react-native-video/pull/2706)
 - Fixed Android seeking bug [#2712](https://github.com/react-native-video/react-native-video/pull/2712)
+- Fixed `onReadyForDisplay` not being called [#2721](https://github.com/react-native-video/react-native-video/pull/2721)
+- Fix type of `_eventDispatcher` on iOS target to match `bridge.eventDispatcher()` [#2720](https://github.com/react-native-video/react-native-video/pull/2720)
 
 ### Version 5.2.0
 

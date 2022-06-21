@@ -10,8 +10,7 @@ Describe what you wanted to happen
 ### Platform
 Which player are you experiencing the problem on:
 * iOS
-* Android ExoPlayer
-* Android MediaPlayer
+* Android
 * Windows UWP
 * Windows WPF
 

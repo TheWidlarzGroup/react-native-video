@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-alpha1",
+    "version": "6.0.0-alpha.0",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -30,7 +30,6 @@
         "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
-        "android-exoplayer",
         "android",
         "dom",
         "ios",
