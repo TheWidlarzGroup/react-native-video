@@ -36,7 +36,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DRM_TYPE = "type";
     private static final String PROP_DRM_LICENSESERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
-    private static final String PROP_LIMIT_MAX_RESOLUTION = "limitMaxResolution";
+    private static final String PROP_LIMIT_MAX_RESOLUTION = "limitMaxResolutionToScreenSize";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -147,8 +147,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_LIMIT_MAX_RESOLUTION)
-    public void setLimitMaxResolution(final ReactExoplayerView videoView, final boolean limitMaxResolution) {
-        videoView.setLimitMaxResolution(limitMaxResolution);
+    public void setLimitMaxResolutionToScreenSize(final ReactExoplayerView videoView, final boolean limitMaxResolutionToScreenSize) {
+        videoView.setLimitMaxResolutionToScreenSize(limitMaxResolutionToScreenSize);
     }
 
     @ReactProp(name = PROP_SRC)

@@ -167,7 +167,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-    private boolean limitMaxResolution = false;
+    private boolean limitMaxResolutionToScreenSize = false;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -1108,7 +1108,7 @@ class ReactExoplayerView extends FrameLayout implements
 
                 int shortestFormatSide = format.height < format.width ? format.height : format.width;
                 int shortestScreenSize = this.getScreenShortestSide(this.themedReactContext);
-                if (this.limitMaxResolution && shortestFormatSide > shortestScreenSize) {
+                if (this.limitMaxResolutionToScreenSize && shortestFormatSide > shortestScreenSize) {
                     // This video track is larger than screen resolution so we do not include it in the list of video tracks
                     continue;
                 }
@@ -1178,14 +1178,14 @@ class ReactExoplayerView extends FrameLayout implements
         final Uri sourceUri = this.srcUri;
         final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
         int shortestScreenSide = this.getScreenShortestSide(this.themedReactContext);
-        boolean limitMaxRes = this.limitMaxResolution;
+        boolean limitMaxRes = this.limitMaxResolutionToScreenSize;
 
         Future<WritableArray> result = es.submit(new Callable<WritableArray>() {
             DataSource ds = dataSource;
             Uri uri = sourceUri;
             long startTimeUs = startTime * 1000; // ms -> us
             int shortestScreenSize = shortestScreenSide;
-            boolean limitMaxResolution = limitMaxRes;
+            boolean limitMaxResolutionToScreenSize = limitMaxRes;
 
             public WritableArray call() throws Exception {
                 WritableArray videoTracks = Arguments.createArray();
@@ -1212,7 +1212,7 @@ class ReactExoplayerView extends FrameLayout implements
 
                                 int shortestFormatSide = format.height < format.width ? format.height : format.width;
                                 
-                                if (limitMaxResolution && shortestFormatSide > shortestScreenSize) {
+                                if (limitMaxResolutionToScreenSize && shortestFormatSide > shortestScreenSize) {
                                     // This video track is larger than screen resolution so we do not include it in the list of video tracks
                                     continue;
                                 }
@@ -1475,8 +1475,8 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setResizeMode(resizeMode);
     }
 
-    public void setLimitMaxResolution(boolean limitMaxResolution) {
-        this.limitMaxResolution = limitMaxResolution;
+    public void setLimitMaxResolutionToScreenSize(boolean limitMaxResolutionToScreenSize) {
+        this.limitMaxResolutionToScreenSize = limitMaxResolutionToScreenSize;
     }
 
     private void applyModifiers() {

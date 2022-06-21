@@ -311,6 +311,7 @@ var styles = StyleSheet.create({
 |[hideShutterView](#hideshutterview)|Android|
 |[id](#id)|react-native-dom|
 |[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
+|[limitMaxResolutionToScreenSize](#limitMaxResolutionToScreenSize)|Android|
 |[maxBitRate](#maxbitrate)|Android, iOS|
 |[minLoadRetryCount](#minLoadRetryCount)|Android|
 |[mixWithOthers](#mixWithOthers)|iOS|
@@ -565,6 +566,17 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### limitMaxResolutionToScreenSize
+Controls whether to limit the available videotracks to not exceed device screen resolution. If enabled the video track list will be limited to resolutions that are smaller or equal to the screen resolution of the device (this also affects automatic video track selection).
+
+Default: false. Don't limit the video track resolution.
+
+Example:
+```
+limitMaxResolutionToScreenSize={true}
+```
+Platforms: Android
 
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
