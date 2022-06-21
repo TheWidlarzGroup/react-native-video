@@ -4,6 +4,7 @@
 
 - Remove Android MediaPlayer support [#2724](https://github.com/react-native-video/react-native-video/pull/2724)
 - Replace Image.propTypes with ImagePropTypes. [#2718](https://github.com/react-native-video/react-native-video/pull/2718)
+- Improve Android memory management and add support for limiting resolution to screen size [#2722](https://github.com/react-native-video/react-native-video/pull/2722)
 
 ### Version 6.0.0-alpha.0
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
