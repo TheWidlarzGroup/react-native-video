@@ -1105,7 +1105,7 @@ class ReactExoplayerView extends FrameLayout implements
     private int getScreenShortestSide(ThemedReactContext context) {
         if (context == null) {
             // No context so we fallback to max int
-            return 2147483647;
+            return (int)Integer.MAX_INT;
         }
         Display display = context.getCurrentActivity().getWindowManager().getDefaultDisplay();
         int realWidth;
