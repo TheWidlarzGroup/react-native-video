@@ -13,7 +13,6 @@
         "@react-native-community/eslint-config": "^0.0.5",
         "eslint": "^6.5.1",
         "react": "16.9.0",
-        "react-hot-loader": "^4.12.19",
         "react-native": "0.61.5",
         "react-native-windows": "^0.61.0-0"
     },
