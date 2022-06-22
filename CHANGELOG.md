@@ -1,9 +1,13 @@
 ## Changelog
 
+### Version 6.0.0-alpha2
+
 ### Version 6.0.0-alpha1
 
 - Remove Android MediaPlayer support [#2724](https://github.com/react-native-video/react-native-video/pull/2724)
 - Replace Image.propTypes with ImagePropTypes. [#2718](https://github.com/react-native-video/react-native-video/pull/2718)
+- Fix iOS build caused by type mismatch [#2720](https://github.com/react-native-video/react-native-video/pull/2720)
+- ERROR TypeError: undefined is not an object (evaluating '_reactNative.Image.propTypes.resizeMode') [#2714](https://github.com/react-native-video/react-native-video/pull/2714)
 
 ### Version 6.0.0-alpha.0
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
