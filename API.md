@@ -5,7 +5,6 @@
   * [tvOS](#tvos-installation)
   * [Android](#android-installation)
   * [Windows](#windows-installation)
-  * [react-native-dom](#react-native-dom-installation)
 * [Examples](#examples)
   * [iOS](#ios-example)
   * [Android](#android-example)
@@ -211,34 +210,6 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 
 Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
-</details>
-
-### react-native-dom installation
-<details>
-  <summary>react-native-dom details</summary>
-
-Make the following additions to the given files manually:
-
-#### **dom/bootstrap.js**
-
-Import RCTVideoManager and add it to the list of nativeModules:
-
-```javascript
-import { RNDomInstance } from "react-native-dom";
-import { name as appName } from "../app.json";
-import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
-
-// Path to RN Bundle Entrypoint ================================================
-const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
-
-// React Native DOM Runtime Options =============================================
-const ReactNativeDomOptions = {
-  enableHotReload: false,
-  nativeModules: [RCTVideoManager] // Add this
-};
-```
-</details>
-
 ## Examples
 
 Run `yarn xbasic install` before running any of the examples.
@@ -298,7 +269,7 @@ var styles = StyleSheet.create({
 |[backBufferDurationMs](#backBufferDurationMs)| Android |
 |[bufferConfig](#bufferconfig)|Android|
 |[contentStartTime](#contentStartTime)| Android |
-|[controls](#controls)|Android, iOS, react-native-dom|
+|[controls](#controls)|Android, iOS|
 |[currentPlaybackTime](#currentPlaybackTime)|Android|
 |[disableFocus](#disableFocus)|Android, iOS|
 |[disableDisconnectError](#disableDisconnectError)|Android|
@@ -309,7 +280,6 @@ var styles = StyleSheet.create({
 |[fullscreenOrientation](#fullscreenorientation)|iOS|
 |[headers](#headers)|Android|
 |[hideShutterView](#hideshutterview)|Android|
-|[id](#id)|react-native-dom|
 |[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
 |[maxBitRate](#maxbitrate)|Android, iOS|
 |[minLoadRetryCount](#minLoadRetryCount)|Android|
@@ -447,7 +417,7 @@ The start time in ms for SSAI content. This determines at what time to load the 
 
 Note on Android, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
 
-Platforms: Android, iOS, react-native-dom
+Platforms: Android, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
@@ -547,16 +517,6 @@ Controls whether the ExoPlayer shutter view (black screen while loading) is enab
 * **true** - Hide shutter view
 
 Platforms: Android
-
-#### id
-Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
-
-Example:
-```
-id="video"
-```
-
-Platforms: react-native-dom
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
