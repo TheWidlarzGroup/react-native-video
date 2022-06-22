@@ -8,7 +8,7 @@
 - Replace Image.propTypes with ImagePropTypes. [#2718](https://github.com/react-native-video/react-native-video/pull/2718)
 - Fix iOS build caused by type mismatch [#2720](https://github.com/react-native-video/react-native-video/pull/2720)
 - ERROR TypeError: undefined is not an object (evaluating '_reactNative.Image.propTypes.resizeMode') [#2714](https://github.com/react-native-video/react-native-video/pull/2714)
-- Fix video endless loop when repeat set to false or not specified. #2329
+- Fix video endless loop when repeat set to false or not specified. [#2329](https://github.com/react-native-video/react-native-video/pull/2329)
 
 ### Version 6.0.0-alpha.0
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
