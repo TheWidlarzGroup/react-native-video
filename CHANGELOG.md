@@ -2,7 +2,7 @@
 
 ### Version 6.0.0-alpha.2
 
--
+- Fix Exoplayer progress not reported when paused [#2664](https://github.com/react-native-video/react-native-video/pull/2664)
 
 ### Version 6.0.0-alpha.1
 
