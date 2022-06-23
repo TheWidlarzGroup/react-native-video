@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-alpha.0",
+    "version": "6.0.0-alpha.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
@@ -13,26 +13,20 @@
         "@react-native-community/eslint-config": "^0.0.5",
         "eslint": "^6.5.1",
         "react": "16.9.0",
-        "react-dom": "16.9.0",
-        "react-hot-loader": "^4.12.19",
         "react-native": "0.61.5",
-        "react-native-dom": "^0.5.0",
         "react-native-windows": "^0.61.0-0"
     },
     "dependencies": {
         "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
-        "prop-types": "^15.7.2",
-        "shaka-player": "^3.3.2"
+        "prop-types": "^15.7.2"
     },
     "scripts": {
         "lint": "yarn eslint .",
         "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
-        "android-exoplayer",
         "android",
-        "dom",
         "ios",
         "windows",
         "FilterType.js",
