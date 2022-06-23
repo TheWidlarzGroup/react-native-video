@@ -344,6 +344,13 @@ var styles = StyleSheet.create({
 |[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
 |[seek](#seek)|All|
 
+### Static methods
+
+| Name |Plateforms Support  |
+|--|--|
+|[getWidevineLevel](#getWidevineLevel)|Android|
+|[isCodecSupported](#isCodecSupported)|Android|
+|[isHEVCSupported](#isHEVCSupported)|Android|
 
 ### Configurable props
 
@@ -1333,8 +1340,67 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
+#### Static methods
 
+### Video Decoding capabilities
 
+A module embed in ReactNativeVideo allow to query device supported feature.
+To use it include the module as following:
+```javascript
+import { VideoDecoderProperties } from '@ifs/react-native-video-enhanced'
+```
+
+Platforms: Android
+
+#### getWidevineLevel
+
+Indicates whether the widevine level supported by device.
+
+Possible results:
+-   **0** - unable to determine widevine support (typically not supported)
+-   **1**, **2**, **3** - Widevine level supported
+
+Platforms: Android
+
+Example:
+
+```
+VideoDecoderProperties.getWidevineLevel().then((widevineLevel) => {
+    ...
+}
+```
+
+#### isCodecSupported
+
+Indicates whether the provided codec is supported level supported by device.
+
+parameters:
+- **mimetype**: mime type of codec to query
+- **width**, **height**: resolution to query
+
+Possible results:
+-   **true** - codec supported
+-   **false** - codec is not supported
+
+Example:
+```
+VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+    ...
+}
+```
+Platforms: Android
+
+#### isHEVCSupported
+
+Helper which Indicates whether the provided HEVC/1920*1080 is supported level supported by device.
+It uses isCodecSupported internally.
+
+Example:
+```
+VideoDecoderProperties.isHEVCSupported().then((hevcSupported) => {
+    ...
+}
+```
 
 ### iOS App Transport Security
 
