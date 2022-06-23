@@ -956,6 +956,7 @@ class ReactExoplayerView extends FrameLayout implements
             int playbackState = player.getPlaybackState();
             boolean playWhenReady = player.getPlayWhenReady();
             String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
+            eventEmitter.playbackRateChange(playWhenReady && playbackState == ExoPlayer.STATE_READY ? 1.0f : 0.0f);
             switch (playbackState) {
                 case Player.STATE_IDLE:
                     text += "idle";
