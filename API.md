@@ -210,6 +210,8 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 
 Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
+</details>
+ 
 ## Examples
 
 Run `yarn xbasic install` before running any of the examples.
