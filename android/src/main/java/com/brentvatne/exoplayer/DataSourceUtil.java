@@ -81,7 +81,7 @@ public class DataSourceUtil {
 
     private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         DataSource.Factory dataSource = new DefaultDataSource.Factory(context,
-                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders))
+                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
 
         if (cache != null) {
             cacheChanged = false;
