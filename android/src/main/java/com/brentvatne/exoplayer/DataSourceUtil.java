@@ -4,15 +4,16 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
 import com.facebook.react.modules.network.OkHttpClientProvider;
-import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
 
+import okhttp3.Call;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 
@@ -79,8 +80,8 @@ public class DataSourceUtil {
     }
 
     private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        DataSource.Factory dataSource = new DefaultDataSourceFactory(context, bandwidthMeter,
-                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
+        DataSource.Factory dataSource = new DefaultDataSource.Factory(context,
+                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders))
 
         if (cache != null) {
             cacheChanged = false;
@@ -97,10 +98,12 @@ public class DataSourceUtil {
         CookieJarContainer container = (CookieJarContainer) client.cookieJar();
         ForwardingCookieHandler handler = new ForwardingCookieHandler(context);
         container.setCookieJar(new JavaNetCookieJar(handler));
-        OkHttpDataSourceFactory okHttpDataSourceFactory = new OkHttpDataSourceFactory(client, getUserAgent(context), bandwidthMeter);
+        OkHttpDataSource.Factory okHttpDataSourceFactory = new OkHttpDataSource.Factory((Call.Factory) client)
+                .setUserAgent(getUserAgent(context))
+                .setTransferListener(bandwidthMeter);
 
         if (requestHeaders != null)
-            okHttpDataSourceFactory.getDefaultRequestProperties().set(requestHeaders);
+            okHttpDataSourceFactory.setDefaultRequestProperties(requestHeaders);
 
         return okHttpDataSourceFactory;
     }
