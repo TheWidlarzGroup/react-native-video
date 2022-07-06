@@ -93,7 +93,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)setFullscreen:(BOOL)fullscreen {}
 - (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {}
 - (void)setProgressUpdateInterval:(float)progressUpdateInterval {}
-- (void)setPaused:(BOOL)paused {}
+
+- (void)setPaused:(BOOL)paused {
+    [_dorisUI.input setPausedWithIsPaused:paused];
+}
 
 - (void)setMuted:(BOOL)muted {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
@@ -154,6 +157,9 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         [self updateRelatedVideos];
         
         [self playerItemForSource:source withCallback:^(AVPlayerItem * playerItem) {
+            NSDictionary* __nullable limitedSeekableRange = [source objectForKey:@"limitedSeekableRange"];
+            [self limitSeekableRanges:limitedSeekableRange];
+
             id imaObject = [source objectForKey:@"ima"];
             
             if ([imaObject isKindOfClass:NSDictionary.class]) {
@@ -390,11 +396,44 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    if(_waterMarkImageView.image == nil){
+    if(_waterMarkImageView.image == nil) {
         [WatermarkManager setupWatermarkFromSourceWithSource:_source watermarkView:_waterMarkImageView parent:_dorisUI.view];
     }
 }
 
+- (void)limitSeekableRanges:(NSDictionary * _Nullable)ranges {
+    if (ranges == nil) {
+        return;
+    }
+    
+    NSNumber *_Nullable _start;
+    NSNumber *_Nullable _end;
+    BOOL _seekToStart;
+    
+    id start = [ranges objectForKey:@"start"];
+    id end = [ranges objectForKey:@"end"];
+    id seekToStart = [ranges objectForKey:@"seekToStart"];
+    
+    if (start && [start isKindOfClass:NSNumber.class]) {
+        NSNumber *startNumber = start;
+        NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:startNumber.doubleValue/1000.0];
+        _start = [[NSNumber alloc] initWithDouble:date.timeIntervalSinceNow];
+    }
+    
+    if (end && [end isKindOfClass:NSNumber.class]) {
+        NSNumber *endNumber = end;
+        NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:endNumber.doubleValue/1000.0];
+        _end = [[NSNumber alloc] initWithDouble:date.timeIntervalSinceNow];
+    }
+    
+    if ([seekToStart boolValue]) {
+        _seekToStart = [seekToStart boolValue];
+    } else {
+        _seekToStart = NO;
+    }
+    
+    [_dorisUI.input limitSeekableRangeWithStart:_start end:_end seekToStart:_seekToStart];
+}
 
 
 
@@ -432,9 +471,11 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     }
 }
 
-- (void)didFinishPlayingWithEndTime:(double)endTime {
+- (void)didFinishPlayingWithStartTime:(double)startTime endTime:(double)endTime streamType:(NSString *)streamType {
+    [_dorisUI.input seekTo:startTime];
     if(self.onVideoEnd) {
-        self.onVideoEnd(@{@"target": self.reactTag});
+        self.onVideoEnd(@{@"target": self.reactTag,
+                          @"type": streamType});
     }
 }
 

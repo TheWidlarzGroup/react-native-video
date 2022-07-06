@@ -160,6 +160,15 @@ RCT_EXPORT_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDic
     }];
 };
 
+RCT_EXPORT_METHOD(limitSeekableRange:(nonnull NSNumber *)node payload:(NSDictionary *)payload) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        if ([viewRegistry[node] isKindOfClass:[RCTVideo class]]) {
+            RCTVideo *view = (RCTVideo *)viewRegistry[node];
+            [view limitSeekableRanges:payload];
+        }
+    }];
+};
+
 - (NSDictionary *)constantsToExport
 {
     return @{

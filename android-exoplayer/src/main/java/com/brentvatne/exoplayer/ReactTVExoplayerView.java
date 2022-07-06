@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -17,6 +19,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Choreographer;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,6 +90,7 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSession;
+import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -100,6 +104,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.imggaming.widgets.DceWatchFromWidget;
 import com.imggaming.widgets.DceWatermarkWidget;
 import com.previewseekbar.base.PreviewView;
 
@@ -167,6 +172,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private ExoDorisPlayerView exoDorisPlayerView;
     private DceWatermarkWidget watermarkWidget;
+    private DceWatchFromWidget watchFromWidget;
     private ExoDoris player;
     private ExoDorisImaDaiPlayer exoDorisImaDaiPlayer;
     private ExoDorisImaCsaiPlayer exoDorisImaCsaiPlayer;
@@ -242,16 +248,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (msg.what == SHOW_JS_PROGRESS) {
                 ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
                 if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
-                    long position = exoPlayer.getCurrentPosition();
-                    long bufferedDuration = exoPlayer.getBufferedPercentage() * exoPlayer.getDuration() / 100;
+                    long position = player.getCurrentPosition();
+                    long bufferedDuration = player.getBufferedPosition();
+                    long duration = player.getDuration();
 
-                    if (isLive) {
-                        Timeline timeline = exoPlayer.getCurrentTimeline();
-                        if (!timeline.isEmpty()) {
-                            position -= timeline.getPeriod(exoPlayer.getCurrentPeriodIndex(), new Timeline.Period()).getPositionInWindowMs();
-                        }
-                    } else {
-                        boolean isAboutToEnd = exoPlayer.getDuration() - position <= 10_000;
+                    if (!isLive) {
+                        boolean isAboutToEnd = duration - position <= 10_000;
                         eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
@@ -272,16 +274,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (msg.what == SHOW_NATIVE_PROGRESS) {
                 ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
                 if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
-                    long position = exoPlayer.getCurrentPosition();
-
                     if (isLive && isImaDaiStream) {
-                        Timeline timeline = exoPlayer.getCurrentTimeline();
-                        if (!timeline.isEmpty()) {
-                            long windowStartTimeMs = timeline.getWindow(exoPlayer.getCurrentMediaItemIndex(), new Timeline.Window()).windowStartTimeMs;
-                            position = (windowStartTimeMs + position) / 1000L;
-
-                            if (position < imaDaiSrc.getStartDate() || position > imaDaiSrc.getEndDate()) {
-                                eventEmitter.requireAdParameters((double) position, false);
+                        long windowStartTimeMs = player.getWindowStartTime();
+                        if (windowStartTimeMs != C.TIME_UNSET) {
+                            long positionMs = player.getCurrentPosition();
+                            long playingDate = (windowStartTimeMs + positionMs) / 1000L;
+                            if (playingDate < imaDaiSrc.getStartDate() || playingDate > imaDaiSrc.getEndDate()) {
+                                eventEmitter.requireAdParameters((double) playingDate, false);
                             }
                         }
                     }
@@ -383,6 +382,23 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             watermarkWidget = new DceWatermarkWidget(themedReactContext);
             exoDorisPlayerView.addView(watermarkWidget, 1);
         }
+
+        // Watch from beginning/live.
+        watchFromWidget = new DceWatchFromWidget(themedReactContext);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        layoutParams.leftMargin = 30;
+        layoutParams.bottomMargin = 40;
+        layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        exoDorisPlayerView.addView(watchFromWidget, layoutParams);
+        watchFromWidget.setOnClickListener(v -> {
+            if (watchFromWidget.isWatchFromBeginning()) {
+                player.seekTo(0);
+            } else {
+                player.seekTo(C.TIME_UNSET);
+            }
+            watchFromWidget.hide();
+        });
+        watchFromWidget.setVisibility(GONE);
 
         setEpg(false); // default value
         setStats(false);
@@ -560,8 +576,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
 
             if (shouldSeekOnInit) {
-                sourceBuilder.setInitialWindowIndex(0);
-                sourceBuilder.setInitialPlaybackPosition(shouldSeekTo);
+                sourceBuilder.setResumePosition(shouldSeekTo);
             } else if (haveResumePosition && !force && !src.isLive()) {
                 // For CSAI playback, the seek action may be ignored while playing pre-roll ads.
                 // We can apply the resume position before load source.
@@ -570,6 +585,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 trySeekToResumePosition();
             }
 
+            if (isLive) {
+                sourceBuilder.setLimitedSeekRange(src.getLimitedSeekRange());
+            }
             source = sourceBuilder.build();
 
             playerInitTime = new Date().getTime();
@@ -583,6 +601,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             } else {
                 player.load(source, !haveResumePosition);
             }
+
+            watchFromWidget.setLimitedSeekRange(player.getLimitedSeekRange());
+            exoDorisPlayerView.setLimitedSeekRange(player.getLimitedSeekRange());
 
             playerNeedsSource = false;
             eventEmitter.loadStart();
@@ -943,6 +964,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (isPlaying) {
             isPaused = false;
             startProgressHandler();
+        } else if (player != null) {
+            // When reach the endTime of limited seek range, we need to notify the JS side to show the restart layout.
+            // We will seek to start position at first, and then play() when user click the restart button.
+            if (LimitedSeekRange.isUseAsVod(player.getLimitedSeekRange()) && player.getPlaybackState() == Player.STATE_ENDED) {
+                player.seekTo(0);
+                eventEmitter.endLiveChannelAsVod();
+            }
         }
     }
 
@@ -951,6 +979,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (state == Player.STATE_BUFFERING || state == Player.STATE_READY) {
             trySeekToResumePosition();
         }
+        updateWatchFrom();
 
         String text = "onStateChanged: playbackState = " + state;
         switch (state) {
@@ -1242,6 +1271,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
         if (errorString != null) {
             resetSourceUrl();
+            watchFromWidget.hide();
             eventEmitter.error(errorString, ex);
         }
         playerNeedsSource = true;
@@ -1294,7 +1324,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             String channelName,
             boolean apsTestFlag,
             @Nullable String adTagUrl,
-            Watermark watermark) {
+            Watermark watermark,
+            LimitedSeekRange limitedSeekRange) {
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1328,7 +1359,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     duration,
                     channelName,
                     apsTestFlag,
-                    adTagUrl);
+                    adTagUrl,
+                    limitedSeekRange);
             this.actionToken = actionToken;
             if (watermarkWidget != null) {
                 watermarkWidget.setWatermark(watermark);
@@ -1344,6 +1376,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoDorisPlayerView.setTitle(metadata.getTitle());
             exoDorisPlayerView.setDescription(metadata.getDescription());
             exoDorisPlayerView.setChannelLogo(metadata.getChannelLogoUrl());
+        }
+    }
+
+    public void setLimitedSeekRange(LimitedSeekRange limitedSeekRange) {
+        if (isLive) {
+            player.limitSeekRange(limitedSeekRange);
+            watchFromWidget.setLimitedSeekRange(player.getLimitedSeekRange());
+            exoDorisPlayerView.setLimitedSeekRange(player.getLimitedSeekRange());
         }
     }
 
@@ -1822,6 +1862,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void hideWatermark() {
         if (watermarkWidget != null) {
             watermarkWidget.hide();
+        }
+    }
+
+    private void updateWatchFrom() {
+        if (player != null && player.getPlaybackState() == Player.STATE_READY) {
+            watchFromWidget.show();
         }
     }
 

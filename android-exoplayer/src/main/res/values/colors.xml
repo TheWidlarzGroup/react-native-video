@@ -3,4 +3,6 @@
     <color name="dce_player_main_accent_color">#0076c0</color>
     <color name="dce_tracks_dialog_bg">#f0000000</color>
     <color name="dce_tv_player_seek_bar_bg">#ff9d9d9d</color>
+
+    <color name="dce_player_main_text_color">#ffffff</color>
 </resources>

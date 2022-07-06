@@ -13,6 +13,12 @@ export interface IVideoPlayerSourceMetadata {
   logoPlayerSizeRatio?: number;
 }
 
+export interface IVideoPlayerSourceLimitedSeekableRange {
+  start?: number;
+  end?: number;
+  seekToStart?: boolean;
+}
+
 export interface IVideoPlayerSource {
   uri: string;
   id?: string;
@@ -24,6 +30,7 @@ export interface IVideoPlayerSource {
   config?: {
     muxData: IMuxData
   },
+  limitedSeekableRange?: IVideoPlayerSourceLimitedSeekableRange,
   mainVer?: number;
   patchVer?: number;
   requestHeaders?: Record<string, any>;

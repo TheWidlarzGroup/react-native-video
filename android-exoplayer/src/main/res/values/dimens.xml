@@ -16,6 +16,7 @@
     <dimen name="previewseekbar_progress_height">5dp</dimen>
     <dimen name="previewseekbar_progress_width">5dp</dimen>
     <dimen name="previewseekbar_progress_corner_radius">10dp</dimen>
+    <dimen name="dce_player_watch_from_text_size">20sp</dimen>
 
     <bool name="landscape">false</bool>
 </resources>

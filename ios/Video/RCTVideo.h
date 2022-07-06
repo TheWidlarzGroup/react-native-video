@@ -40,6 +40,8 @@
 @property (nonatomic, strong) DorisUIModule *dorisUI;
 
 - (void)prepareAdTagParameters:(NSDictionary * _Nullable)adTagParameters withCallback:(void(^_Nonnull)(NSDictionary * _Nullable))handler;
+- (void)limitSeekableRanges:(NSDictionary *)ranges;
+
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 - (void)setSeek:(NSDictionary *)info;
 

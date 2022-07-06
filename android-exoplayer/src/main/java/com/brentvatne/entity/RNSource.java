@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.diceplatform.doris.entity.TextTrack;
+import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public class RNSource {
     private final String channelName;
     private final boolean apsTestFlag;
     private final String adTagUrl;
+    private final LimitedSeekRange limitedSeekRange;
 
     public RNSource(
             @NonNull String url,
@@ -47,7 +49,8 @@ public class RNSource {
             int duration,
             @Nullable String channelName,
             boolean apsTestFlag,
-            @Nullable String adTagUrl) {
+            @Nullable String adTagUrl,
+            @Nullable LimitedSeekRange limitedSeekRange) {
         this.id = id;
         this.url = url;
         this.extension = extension;
@@ -65,6 +68,7 @@ public class RNSource {
         this.duration = duration;
         this.apsTestFlag = apsTestFlag;
         this.adTagUrl = adTagUrl;
+        this.limitedSeekRange = limitedSeekRange;
     }
 
     @NonNull
@@ -156,5 +160,9 @@ public class RNSource {
 
     public String getAdTagUrl() {
         return adTagUrl;
+    }
+
+    public LimitedSeekRange getLimitedSeekRange() {
+        return limitedSeekRange;
     }
 }

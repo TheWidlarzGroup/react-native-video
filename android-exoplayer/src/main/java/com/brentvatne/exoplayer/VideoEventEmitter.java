@@ -242,6 +242,12 @@ class VideoEventEmitter {
         receiveEvent(EVENT_END, null);
     }
 
+    void endLiveChannelAsVod() {
+        WritableMap map = Arguments.createMap();
+        map.putString(EVENT_PROP_TYPE, "VOD");
+        receiveEvent(EVENT_END, map);
+    }
+
     void fullscreenWillPresent() {
         receiveEvent(EVENT_FULLSCREEN_WILL_PRESENT, null);
     }

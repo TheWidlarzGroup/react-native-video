@@ -11,6 +11,8 @@ public class DiceLocalizedStrings {
         put(StringId.player_audio_and_subtitles_button.name(), "Audio & Subtitles");
         put(StringId.player_epg_button.name(), "Schedule");
         put(StringId.player_stats_button.name(), "Stats");
+        put(StringId.epgProgrammeStartBeginning.name(), "Watch from Beginning");
+        put(StringId.epgProgrammeStartLive.name(), "Watch from Live");
     }};
 
     private static DiceLocalizedStrings sInstance;
@@ -53,7 +55,9 @@ public class DiceLocalizedStrings {
         player_pause_button,
         player_audio_and_subtitles_button,
         player_epg_button,
-        player_stats_button
+        player_stats_button,
+        epgProgrammeStartBeginning, // Watch from beginning
+        epgProgrammeStartLive, // Watch from live
     }
 
 }

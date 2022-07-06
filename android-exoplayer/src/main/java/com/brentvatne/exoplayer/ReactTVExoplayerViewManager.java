@@ -23,6 +23,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.endeavor.DebugUtil;
 import com.google.android.exoplayer2.endeavor.ExoConfig;
+import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 import com.google.android.exoplayer2.endeavor.WebUtil;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.google.gson.Gson;
@@ -60,6 +61,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_APS = "aps";
     private static final String PROP_SRC_APS_TEST_MODE = "testMode";
     private static final String PROP_SRC_METADATA = "metadata";
+    private static final String PROP_SRC_LIMIT_RANGE = "limitedSeekableRange";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -126,6 +128,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
     private static final int COMMAND_SEEK_TO_POSITION = 3;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
+    private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 5;
 
     private static final boolean IS_DEBUG = false;
 
@@ -221,6 +224,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         ReadableMap aps = src.hasKey(PROP_SRC_APS) ? src.getMap(PROP_SRC_APS) : null;
         boolean apsTestMode = (aps != null && aps.hasKey(PROP_SRC_APS_TEST_MODE)) && aps.getBoolean(PROP_SRC_APS_TEST_MODE);
 
+        LimitedSeekRange limitedSeekRange = generateRange(src.hasKey(PROP_SRC_LIMIT_RANGE) ? src.getMap(PROP_SRC_LIMIT_RANGE) : null);
+
         if (TextUtils.isEmpty(uriString)) {
             return;
         }
@@ -259,7 +264,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     channelName,
                     apsTestMode,
                     adTagUrl,
-                    Watermark.fromMap(metadata));
+                    Watermark.fromMap(metadata),
+                    limitedSeekRange);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -573,7 +579,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 "seekToPosition",
                 COMMAND_SEEK_TO_POSITION,
                 "replaceAdTagParameters",
-                COMMAND_REPLACE_AD_TAG_PARAMETERS
+                COMMAND_REPLACE_AD_TAG_PARAMETERS,
+                "limitSeekableRange",
+                COMMAND_LIMIT_SEEKABLE_RANGE
         );
     }
 
@@ -601,6 +609,20 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
                 break;
+            case COMMAND_LIMIT_SEEKABLE_RANGE:
+                root.setLimitedSeekRange(generateRange(args.getMap(0)));
+                break;
         }
+    }
+
+    private LimitedSeekRange generateRange(ReadableMap map) {
+        LimitedSeekRange limitedSeekRange = null;
+        if (map != null) {
+            long start = (map.hasKey("start") ? Math.round(map.getDouble("start")) : C.TIME_UNSET);
+            long end = (map.hasKey("end") ? Math.round(map.getDouble("end")) : C.TIME_UNSET);
+            boolean seekToStart = (map.hasKey("seekToStart") && map.getBoolean("seekToStart"));
+            limitedSeekRange = LimitedSeekRange.from(start, end, seekToStart);
+        }
+        return limitedSeekRange;
     }
 }
