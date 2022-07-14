@@ -53,6 +53,7 @@
 - Fixed Android seeking bug [#2712](https://github.com/react-native-video/react-native-video/pull/2712)
 - Fixed `onReadyForDisplay` not being called [#2721](https://github.com/react-native-video/react-native-video/pull/2721)
 - Fix type of `_eventDispatcher` on iOS target to match `bridge.eventDispatcher()` [#2720](https://github.com/react-native-video/react-native-video/pull/2720)
+- Fix maxBitRate property being ignored on Android [#2670](https://github.com/react-native-video/react-native-video/pull/2670)
 
 ### Version 5.2.0
 
