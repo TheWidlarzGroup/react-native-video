@@ -140,6 +140,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Player.Listener eventListener;
 
     private ExoPlayerView exoPlayerView;
+    private FullScreenPlayerView fullScreenPlayerView;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -398,6 +399,10 @@ class ReactExoplayerView extends FrameLayout implements
                 setPausedModifier(true);
             }
         });
+
+        //Handling the fullScreenButton click event
+        ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -664,6 +669,7 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
+        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView);
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -1770,14 +1776,15 @@ class ReactExoplayerView extends FrameLayout implements
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
             eventEmitter.fullscreenWillPresent();
-            decorView.setSystemUiVisibility(uiOptions);
+            fullScreenPlayerView.show();
             eventEmitter.fullscreenDidPresent();
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
             eventEmitter.fullscreenWillDismiss();
-            decorView.setSystemUiVisibility(uiOptions);
+            fullScreenPlayerView.dismiss();
             eventEmitter.fullscreenDidDismiss();
         }
+        post(() -> decorView.setSystemUiVisibility(uiOptions));
     }
 
     public void setUseTextureView(boolean useTextureView) {
