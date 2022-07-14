@@ -403,6 +403,15 @@ class ReactExoplayerView extends FrameLayout implements
         eventListener = new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
+                View playButton = playerControlView.findViewById(R.id.exo_play);
+                View pauseButton = playerControlView.findViewById(R.id.exo_pause);
+                if (playButton != null && playButton.getVisibility() == GONE) {
+                    playButton.setVisibility(INVISIBLE);
+                }
+                if (pauseButton != null && pauseButton.getVisibility() == GONE) {
+                    pauseButton.setVisibility(INVISIBLE);
+                }
+
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
