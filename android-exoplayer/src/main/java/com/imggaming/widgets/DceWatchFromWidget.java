@@ -101,8 +101,8 @@ public class DceWatchFromWidget extends LinearLayoutCompat {
         });
         fadeIn.start();
 
-        // Hide it automatically after 10s.
-        postDelayed(hideRunnable, 10_000);
+        // Hide it automatically after 20s.
+        postDelayed(hideRunnable, 20_000);
     }
 
     /**
