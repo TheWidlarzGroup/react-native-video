@@ -21,6 +21,11 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+// start/Exoplayer 2.15.1 change
+import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+// end/Exoplayer 2.15.1 change
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.video.VideoSize;
 
@@ -33,10 +38,8 @@ public final class ExoPlayerView extends FrameLayout {
     private final View shutterView;
     private final SubtitleView subtitleLayout;
     private final AspectRatioFrameLayout layout;
-    private final ComponentListener componentListener;
-    // start/Dolby xCD change
-    public SimpleExoPlayer player;
-    // end/Dolby xCD change
+    private final ComponentListener componentListener;   
+    private SimpleExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
 
@@ -254,20 +257,24 @@ public final class ExoPlayerView extends FrameLayout {
             // Do nothing.
         }
 
+        // start/Exoplayer 2.15.1 change
         @Override
         public void onPlayerError(PlaybackException e) {
             // Do nothing.
         }
+         // end/Exoplayer 2.15.1 change
 
         @Override
         public void onPositionDiscontinuity(int reason) {
             // Do nothing.
         }
 
+        // start/Exoplayer 2.15.1 change
         @Override
         public void onTimelineChanged(Timeline timeline, int reason) {
             // Do nothing.
         }
+        // end/Exoplayer 2.15.1 change
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {

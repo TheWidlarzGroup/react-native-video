@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 // start/Dolby xCD change
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 // end/Dolby xCD change
 
@@ -36,8 +37,11 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
+
+// start/Exoplayer 2.15.1 change
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
+// end/Exoplayer 2.15.1 change
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -85,10 +89,10 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
 
-// start/Dolby xCD change
+
 @SuppressLint("ViewConstructor")
-public class ReactExoplayerView extends FrameLayout implements
-// end/Dolby xCD change
+class ReactExoplayerView extends FrameLayout implements
+
         LifecycleEventListener,
         Player.Listener,
         BandwidthMeter.EventListener,
@@ -108,9 +112,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
-    // start/Dolby xCD change
-    private final BandwidthMeter bandwidthMeter;
-    // end/Dolby xCD change
+   
+    private final DefaultBandwidthMeter bandwidthMeter;
+   
     private PlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.Listener eventListener;
@@ -406,18 +410,12 @@ public class ReactExoplayerView extends FrameLayout implements
             @Override
             public void run() {
                 if (player == null) {
-                    // start/Dolby xCD change
-                    Context context = getContext();
-                    ExoTrackSelection.Factory customTrackSelectionFactory = config.getCustomTrackSelectionFactory();
-                    if (customTrackSelectionFactory != null) {
-                        trackSelector = new DefaultTrackSelector(context, customTrackSelectionFactory);
-                    } else {
+                  
                         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                         trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);
                         trackSelector.setParameters(trackSelector.buildUponParameters()
                                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
-                    }
-                    // end/Dolby xCD change
+            
                     DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
                     DefaultLoadControl.Builder defaultLoadControlBuilder = new DefaultLoadControl.Builder();
                     defaultLoadControlBuilder.setAllocator(allocator);
@@ -428,17 +426,20 @@ public class ReactExoplayerView extends FrameLayout implements
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
                                     .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-                    player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
-                                .setTrackSelector​(trackSelector)
-                                .setBandwidthMeter(bandwidthMeter)
-                                .setLoadControl(defaultLoadControl)
-                                .build();
+                    // start/Dolby xCD change
+                    SimpleExoPlayer.Builder builder = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
+                            .setTrackSelector(trackSelector)
+                            .setLoadControl(defaultLoadControl);
+                    config.onPlayerBuilderAvailable(builder);
+                    player = builder.build();
+                    config.onPlayerAvailable(player);
+                    // end/Dolby xCD change
+
                     player.addListener(self);
                     exoPlayerView.setPlayer(player);
                     audioBecomingNoisyReceiver.setListener(self);
-                    bandwidthMeter.addEventListener(new Handler(), self);
-                    // start/Dolby xCD change
-                    config.onPlayerInitialized();
+                     // start/Dolby xCD change
+                    config.addEventListener(new Handler(), self);
                     // end/Dolby xCD change
                     setPlayWhenReady(!isPaused);
                     playerNeedsSource = true;
@@ -598,7 +599,9 @@ public class ReactExoplayerView extends FrameLayout implements
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
-        bandwidthMeter.removeEventListener(this);
+        // start/Dolby xCD change
+        config.removeEventListener(this);
+        // end/Dolby xCD change
     }
 
     private boolean requestAudioFocus() {
@@ -691,12 +694,10 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        // start/Dolby xCD change
-        return DataSourceUtil.getDefaultDataSourceFactory(
-                this.themedReactContext,
-                useBandwidthMeter ? getBandwidthMeterAsDefaultBandwidthMeter() : null, 
-                requestHeaders);
-        // end/Dolby xCD change
+        
+          return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
+                useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
+        
     }
 
     /**
@@ -707,12 +708,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return A new HttpDataSource factory.
      */
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        // start/Dolby xCD change
-        return DataSourceUtil.getDefaultHttpDataSourceFactory(
-                this.themedReactContext, 
-                useBandwidthMeter ? getBandwidthMeterAsDefaultBandwidthMeter() : null, 
-                requestHeaders);
-        // end/Dolby xCD change
+        return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
 
@@ -1054,11 +1050,7 @@ public class ReactExoplayerView extends FrameLayout implements
             this.srcUri = uri;
             this.extension = extension;
             this.requestHeaders = headers;
-                // start/Dolby xCD change
-                this.mediaDataSourceFactory =
-                        DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, getBandwidthMeterAsDefaultBandwidthMeter(),
-                                this.requestHeaders);
-                // end/Dolby xCD change
+                 this.mediaDataSourceFactory = DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,this.requestHeaders);
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1433,19 +1425,4 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         }
     }
-
-    // start/Dolby xCD change
-    /**
-     * If the bandwidthMeter is DefaultBandwidthMeter, return that. Otherwise return null
-     *
-     * @return DefaultBandwidthMeter or null
-     */
-    private DefaultBandwidthMeter getBandwidthMeterAsDefaultBandwidthMeter() {
-        if (bandwidthMeter instanceof DefaultBandwidthMeter) {
-            return (DefaultBandwidthMeter)bandwidthMeter;
-        } else {
-            return null;
-        }
-    }
-    // end/Dolby xCD change
 }

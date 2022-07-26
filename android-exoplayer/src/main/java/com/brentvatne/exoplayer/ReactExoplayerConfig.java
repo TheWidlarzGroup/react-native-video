@@ -1,24 +1,32 @@
 package com.brentvatne.exoplayer;
 
 // start/Dolby xCD change
-import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
-import com.google.android.exoplayer2.trackselection.ExoTrackSelection.Factory;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import android.os.Handler;
 // end/Dolby xCD change
+
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 
-import javax.annotation.Nullable;
+// start/Dolby xCD change
+import com.google.android.exoplayer2.SimpleExoPlayer;
+// end/Dolby xCD change
 
 /**
  * Extension points to configure the Exoplayer instance
  */
 public interface ReactExoplayerConfig {
     LoadErrorHandlingPolicy buildLoadErrorHandlingPolicy(int minLoadRetryCount);
-    // start/Dolby xCD change
-    BandwidthMeter getBandwidthMeter();
+	
+	DefaultBandwidthMeter getBandwidthMeter();
+	
+	// start/Dolby xCD change
+	void onPlayerBuilderAvailable(SimpleExoPlayer.Builder builder);
+	
+	void onPlayerAvailable(SimpleExoPlayer player);
 
-    @Nullable ExoTrackSelection.Factory getCustomTrackSelectionFactory();
+    void addEventListener(Handler eventHandler, BandwidthMeter.EventListener eventListener);
 
-    void onPlayerInitialized();
+    void removeEventListener(BandwidthMeter.EventListener eventListener);
     // end/Dolby xCD change
 }

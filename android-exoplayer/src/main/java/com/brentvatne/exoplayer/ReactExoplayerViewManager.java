@@ -71,9 +71,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
 
-    // start/Dolby xCD change
-    public @Nullable ReactExoplayerView view;
-    // end/Dolby xCD change
+
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -87,11 +85,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @Override
     protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        // start/Dolby xCD change
-        ReactExoplayerView view = new ReactExoplayerView(themedReactContext, config);
-        this.view = view;
-        return view;
-        // end/Dolby xCD change
+        return new ReactExoplayerView(themedReactContext, config);
     }
 
     @Override
