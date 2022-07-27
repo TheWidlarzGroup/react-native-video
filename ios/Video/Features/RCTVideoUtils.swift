@@ -268,10 +268,13 @@ enum RCTVideoUtils {
     static func preparePHAsset(uri: String) -> Promise<AVAsset?> {
         return Promise<AVAsset?>(on: .global()) { fulfill, reject in
             let assetId = String(uri[uri.index(uri.startIndex, offsetBy: "ph://".count)...])
-            let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject
+            guard let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject else {
+                reject(NSError(domain: "", code: 0, userInfo: nil))
+                return
+            }
             let options = PHVideoRequestOptions()
             options.isNetworkAccessAllowed = true
-            PHCachingImageManager().requestAVAsset(forVideo: phAsset!, options: options) { data, _, _ in
+            PHCachingImageManager().requestAVAsset(forVideo: phAsset, options: options) { data, _, _ in
                 fulfill(data)
             }
         }
