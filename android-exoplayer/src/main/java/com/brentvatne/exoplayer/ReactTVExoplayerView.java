@@ -376,6 +376,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         exoDorisPlayerView = findViewById(R.id.playerView);
         exoDorisPlayerView.setExoDorisPlayerViewListener(this);
         exoDorisPlayerView.setUseController(false);
+        exoDorisPlayerView.setShowBuffering(ExoDorisPlayerView.SHOW_BUFFERING_WHEN_PLAYING);
 
         // Watermark view.
         if (exoDorisPlayerView.getChildCount() > 1) {
