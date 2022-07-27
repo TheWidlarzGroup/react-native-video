@@ -1,5 +1,6 @@
 import AVFoundation
 import Promises
+import Photos
 
 /*!
  * Collection of pure functions
@@ -264,8 +265,20 @@ enum RCTVideoUtils {
         }
     }
     
+    static func preparePHAsset(uri: String) -> Promise<AVAsset?> {
+        return Promise<AVAsset?>(on: .global()) { fulfill, reject in
+            let assetId = String(uri[uri.index(uri.startIndex, offsetBy: "ph://".count)...])
+            let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject
+            let options = PHVideoRequestOptions()
+            options.isNetworkAccessAllowed = true
+            PHCachingImageManager().requestAVAsset(forVideo: phAsset!, options: options) { data, _, _ in
+                fulfill(data)
+            }
+        }
+    }
+    
     static func prepareAsset(source:VideoSource) -> (asset:AVURLAsset?, assetOptions:NSMutableDictionary?)? {
-        guard source.uri != nil && source.uri != "" else { return nil }
+        guard let sourceUri = source.uri, sourceUri != "" else { return nil }
         var asset:AVURLAsset!
         let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
         let url = source.isNetwork || source.isAsset
