@@ -1,54 +1,32 @@
 {
     "name": "react-native-video",
-    "version": "5.2.0",
+    "version": "6.0.0-alpha.1",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
-    "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
-    "contributors": [
-        {
-            "name": "Isaiah Grey",
-            "email": "isaiahgrey@gmail.com"
-        },
-        {
-            "name": "Johannes Lumpe",
-            "email": "johannes@lum.pe"
-        },
-        {
-            "name": "Baris Sencan",
-            "email": "baris.sncn@gmail.com"
-        },
-        {
-            "name": "Hampton Maxwell",
-            "email": "me@hamptonmaxwell.com"
-        }
-    ],
+    "author": "Community Contributors",
     "repository": {
         "type": "git",
-        "url": "git@github.com:react-native-community/react-native-video.git"
+        "url": "git@github.com:react-native-video/react-native-video.git"
     },
     "devDependencies": {
-        "@react-native-community/eslint-config": "0.0.7",
-        "babel-eslint": "10.0.3",
-        "eslint": "6.8.0",
-        "react": "^16.12.0",
-        "react-dom": "^16.12.0",
-        "react-hot-loader": "^4.12.19",
-        "react-native": "^0.61.5",
+        "@react-native-community/eslint-config": "^0.0.5",
+        "eslint": "^6.5.1",
+        "react": "16.9.0",
+        "react-native": "0.61.5",
         "react-native-windows": "^0.61.0-0"
     },
     "dependencies": {
+        "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
-        "prop-types": "^15.7.2",
-        "shaka-player": "^2.5.9"
+        "prop-types": "^15.7.2"
     },
     "scripts": {
-        "lint": "yarn eslint *.js"
+        "lint": "yarn eslint .",
+        "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
-        "android-exoplayer",
         "android",
-        "dom",
         "ios",
         "windows",
         "FilterType.js",
