@@ -3,12 +3,12 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 
 import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
+import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
 import com.facebook.react.bridge.Dynamic;
@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.endeavor.ExoConfig;
 import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 import com.google.android.exoplayer2.endeavor.WebUtil;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.google.android.exoplayer2.util.Log;
 import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
 
@@ -136,6 +137,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
         this.reactApplicationContext = reactApplicationContext;
+        if (BuildConfig.DEBUG) {
+            Log.setLogLevel(Log.LOG_LEVEL_ALL);
+        }
         setPlayerConfig();
     }
 
