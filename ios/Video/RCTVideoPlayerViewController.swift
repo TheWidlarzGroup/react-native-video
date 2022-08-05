@@ -19,8 +19,11 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        rctDelegate.videoPlayerViewControllerWillDismiss(playerViewController: self)
-        rctDelegate.videoPlayerViewControllerDidDismiss(playerViewController: self)
+
+        if rctDelegate != nil {
+            rctDelegate.videoPlayerViewControllerWillDismiss(playerViewController: self)
+            rctDelegate.videoPlayerViewControllerDidDismiss(playerViewController: self)
+        }
     }
 
     #if !TARGET_OS_TV
