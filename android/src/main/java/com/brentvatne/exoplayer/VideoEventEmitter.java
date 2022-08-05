@@ -160,8 +160,11 @@ class VideoEventEmitter {
         naturalSize.putInt(EVENT_PROP_HEIGHT, videoHeight);
         if (videoWidth > videoHeight) {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "landscape");
-        } else {
+        } else if (videoWidth < videoHeight) {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
+        } else {
+            naturalSize.putString(EVENT_PROP_ORIENTATION, "square");
+        }
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
         event.putString(EVENT_PROP_TRACK_ID, trackId);
