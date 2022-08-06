@@ -588,7 +588,7 @@ class ReactExoplayerView extends FrameLayout implements
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
-                    .setTrackSelector​(self.trackSelector)
+                    .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
                     .build();
