@@ -1,38 +1,95 @@
 {
-    "name": "react-native-video",
-    "version": "6.0.0-alpha.1",
-    "description": "A <Video /> element for react-native",
-    "main": "Video.js",
-    "license": "MIT",
-    "author": "Community Contributors",
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:react-native-video/react-native-video.git"
-    },
-    "devDependencies": {
-        "@react-native-community/eslint-config": "^0.0.5",
-        "eslint": "^6.5.1",
-        "react": "16.9.0",
-        "react-native": "0.61.5",
-        "react-native-windows": "^0.61.0-0"
-    },
-    "dependencies": {
-        "deprecated-react-native-prop-types": "^2.2.0",
-        "keymirror": "^0.1.1",
-        "prop-types": "^15.7.2"
-    },
-    "scripts": {
-        "lint": "yarn eslint .",
-        "xbasic": "yarn --cwd examples/basic"
-    },
-    "files": [
-        "android",
-        "ios",
-        "windows",
-        "FilterType.js",
-        "DRMType.js",
-        "TextTrackType.js",
-        "VideoResizeMode.js",
-        "react-native-video.podspec"
-    ]
+  "name": "react-native-video",
+  "version": "6.0.0-alpha.1",
+  "description": "A <Video /> element for react-native",
+  "main": "Video.js",
+  "license": "MIT",
+  "author": "Community Contributors",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:react-native-video/react-native-video.git"
+  },
+  "devDependencies": {
+    "@react-native-community/eslint-config": "^0.0.5",
+    "eslint": "^6.5.1",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-hot-loader": "^4.12.19",
+    "react-native": "0.61.5",
+    "react-native-dom": "^0.5.0",
+    "react-native-windows": "^0.61.0-0"
+  },
+  "dependencies": {
+    "deprecated-react-native-prop-types": "^2.2.0",
+    "keymirror": "^0.1.1",
+    "prop-types": "^15.7.2",
+    "shaka-player": "^3.3.2"
+  },
+  "scripts": {
+    "lint": "yarn eslint .",
+    "xbasic": "yarn --cwd examples/basic"
+  },
+  "files": [
+    "android",
+    "dom",
+    "ios",
+    "windows",
+    "FilterType.js",
+    "DRMType.js",
+    "TextTrackType.js",
+    "VideoResizeMode.js",
+    "react-native-video.podspec"
+  ],
+  "react-native": {
+    "zlib": "browserify-zlib",
+    "console": "console-browserify",
+    "constants": "constants-browserify",
+    "crypto": "react-native-crypto",
+    "dns": "dns.js",
+    "net": "react-native-tcp",
+    "domain": "domain-browser",
+    "http": "@tradle/react-native-http",
+    "https": "https-browserify",
+    "os": "react-native-os",
+    "path": "path-browserify",
+    "querystring": "querystring-es3",
+    "fs": "react-native-level-fs",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_writable": "readable-stream/writable",
+    "_stream_duplex": "readable-stream/duplex",
+    "_stream_passthrough": "readable-stream/passthrough",
+    "dgram": "react-native-udp",
+    "stream": "stream-browserify",
+    "timers": "timers-browserify",
+    "tty": "tty-browserify",
+    "vm": "vm-browserify",
+    "tls": false
+  },
+  "browser": {
+    "zlib": "browserify-zlib",
+    "console": "console-browserify",
+    "constants": "constants-browserify",
+    "crypto": "react-native-crypto",
+    "dns": "dns.js",
+    "net": "react-native-tcp",
+    "domain": "domain-browser",
+    "http": "@tradle/react-native-http",
+    "https": "https-browserify",
+    "os": "react-native-os",
+    "path": "path-browserify",
+    "querystring": "querystring-es3",
+    "fs": "react-native-level-fs",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_writable": "readable-stream/writable",
+    "_stream_duplex": "readable-stream/duplex",
+    "_stream_passthrough": "readable-stream/passthrough",
+    "dgram": "react-native-udp",
+    "stream": "stream-browserify",
+    "timers": "timers-browserify",
+    "tty": "tty-browserify",
+    "vm": "vm-browserify",
+    "tls": false
+  }
 }

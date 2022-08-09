@@ -1,6 +1,5 @@
 import AVFoundation
 import Promises
-import Photos
 
 /*!
  * Collection of pure functions
@@ -38,17 +37,16 @@ enum RCTVideoUtils {
         return 0
     }
 
-    static func urlFilePath(filepath:NSString!, searchPath:FileManager.SearchPathDirectory) -> NSURL! {
+    static func urlFilePath(filepath:NSString!) -> NSURL! {
         if filepath.contains("file://") {
             return NSURL(string: filepath as String)
         }
         
         // if no file found, check if the file exists in the Document directory
-        let paths:[String]! = NSSearchPathForDirectoriesInDomains(searchPath, .userDomainMask, true)
+        let paths:[String]! = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         var relativeFilePath:String! = filepath.lastPathComponent
         // the file may be multiple levels below the documents directory
-        let directoryString:String! = searchPath == .cachesDirectory ? "Library/Caches/" : "Documents";
-        let fileComponents:[String]! = filepath.components(separatedBy: directoryString)
+        let fileComponents:[String]! = filepath.components(separatedBy: "Documents/")
         if fileComponents.count > 1 {
             relativeFilePath = fileComponents[1]
         }
@@ -194,7 +192,6 @@ enum RCTVideoUtils {
     static func getValidTextTracks(asset:AVAsset, assetOptions:NSDictionary?, mixComposition:AVMutableComposition, textTracks:[TextTrack]?) -> [TextTrack] {
         let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
         var validTextTracks:[TextTrack] = []
-        
         if let textTracks = textTracks, textTracks.count > 0 {
             for i in 0..<textTracks.count {
                 var textURLAsset:AVURLAsset!
@@ -202,9 +199,7 @@ enum RCTVideoUtils {
                 if textUri.lowercased().hasPrefix("http") {
                     textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options:(assetOptions as! [String : Any]))
                 } else {
-                    let isDisabledTrack:Bool! = textTracks[i].type == "disabled"
-                    let searchPath:FileManager.SearchPathDirectory = isDisabledTrack ? .cachesDirectory : .documentDirectory;
-                    textURLAsset = AVURLAsset(url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?, searchPath: searchPath) as URL, options:nil)
+                    textURLAsset = AVURLAsset(url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?) as URL, options:nil)
                 }
                 let textTrackAsset:AVAssetTrack! = textURLAsset.tracks(withMediaType: AVMediaType.text).first
                 if (textTrackAsset == nil) {continue} // fix when there's no textTrackAsset
@@ -220,43 +215,9 @@ enum RCTVideoUtils {
                 }
             }
         }
-        
-        let emptyVttFile:TextTrack? = self.createEmptyVttFile()
-        if (emptyVttFile != nil) {
-            validTextTracks.append(emptyVttFile!)
-        }
-        
         return validTextTracks
     }
 
-    /*
-     * Create an useless / almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
-     * This is needed because there is a bug where sideloaded texttracks cannot be disabled in the AVPlayer. Loading this VTT file instead solves that problem.
-     * For more info see: https://github.com/react-native-community/react-native-video/issues/1144
-     */
-    static func createEmptyVttFile() -> TextTrack? {
-        let fileManager = FileManager.default
-        let cachesDirectoryUrl = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let filePath = cachesDirectoryUrl.appendingPathComponent("empty.vtt").path
-        
-        if !fileManager.fileExists(atPath: filePath) {
-            let stringToWrite = "WEBVTT\n\n1\n99:59:59.000 --> 99:59:59.001\n."
-
-            do {
-                try stringToWrite.write(to: URL(fileURLWithPath: filePath), atomically: true, encoding: String.Encoding.utf8)
-            } catch {
-                return nil
-            }
-        }
-        
-        return TextTrack([
-            "language": "disabled",
-            "title": "EmptyVttFile",
-            "type": "text/vtt",
-            "uri": filePath,
-        ])
-    }
-    
     static func delay(seconds: Int = 0) -> Promise<Void> {
         return Promise<Void>(on: .global()) { fulfill, reject in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(seconds)) / Double(NSEC_PER_SEC), execute: {
@@ -265,23 +226,8 @@ enum RCTVideoUtils {
         }
     }
     
-    static func preparePHAsset(uri: String) -> Promise<AVAsset?> {
-        return Promise<AVAsset?>(on: .global()) { fulfill, reject in
-            let assetId = String(uri[uri.index(uri.startIndex, offsetBy: "ph://".count)...])
-            guard let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject else {
-                reject(NSError(domain: "", code: 0, userInfo: nil))
-                return
-            }
-            let options = PHVideoRequestOptions()
-            options.isNetworkAccessAllowed = true
-            PHCachingImageManager().requestAVAsset(forVideo: phAsset, options: options) { data, _, _ in
-                fulfill(data)
-            }
-        }
-    }
-    
     static func prepareAsset(source:VideoSource) -> (asset:AVURLAsset?, assetOptions:NSMutableDictionary?)? {
-        guard let sourceUri = source.uri, sourceUri != "" else { return nil }
+        guard source.uri != nil && source.uri != "" else { return nil }
         var asset:AVURLAsset!
         let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
         let url = source.isNetwork || source.isAsset
