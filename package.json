@@ -7,7 +7,7 @@
   "author": "Community Contributors",
   "repository": {
     "type": "git",
-    "url": "git@github.com:react-native-video/react-native-video.git"
+    "url": "git@github.com:jafar-jabr/react-native-video.git"
   },
   "devDependencies": {
     "@react-native-community/eslint-config": "^0.0.5",
