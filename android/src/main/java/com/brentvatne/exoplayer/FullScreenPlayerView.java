@@ -35,7 +35,6 @@ public class FullScreenPlayerView extends Dialog {
       imageButton.setContentDescription(getContext().getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_exit_description));
       parent.removeView(playerControlView);
       containerView.addView(playerControlView, generateDefaultLayoutParams());
-
     }
 
     super.onStart();
