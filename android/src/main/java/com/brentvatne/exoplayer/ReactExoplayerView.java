@@ -17,6 +17,8 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -669,7 +671,12 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
-        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView);
+        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                setFullscreen(false);
+            }
+        });
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {

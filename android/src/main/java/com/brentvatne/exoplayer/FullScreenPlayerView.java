@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.google.android.exoplayer2.ui.PlayerControlView;
 
 public class FullScreenPlayerView extends Dialog {
@@ -13,13 +15,21 @@ public class FullScreenPlayerView extends Dialog {
   private final ExoPlayerView exoPlayerView;
   private ViewGroup parent;
   private final FrameLayout containerView;
+  private final OnBackPressedCallback onBackPressedCallback;
 
-  public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, PlayerControlView playerControlView) {
+  public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, PlayerControlView playerControlView, OnBackPressedCallback onBackPressedCallback) {
     super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
     this.playerControlView = playerControlView;
     this.exoPlayerView = exoPlayerView;
+    this.onBackPressedCallback = onBackPressedCallback;
     containerView = new FrameLayout(context);
     setContentView(containerView, generateDefaultLayoutParams());
+  }
+
+  @Override
+  public void onBackPressed() {
+    super.onBackPressed();
+    onBackPressedCallback.handleOnBackPressed();
   }
 
   @Override
