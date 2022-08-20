@@ -205,18 +205,29 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
+    // store last progress event values to avoid sending unnecessary messages
+    private long lastPos = -1;
+    private long lastBufferDuration = -1;
+    private long lastDuration = -1;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW_PROGRESS:
-                    if (player != null
-                            && player.getPlaybackState() == Player.STATE_READY
-                            && player.getPlayWhenReady()
-                            ) {
+                    if (player != null) {
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                        long duration = player.getDuration();
+
+                        if (lastPos != pos
+                                || lastBufferDuration != bufferedDuration
+                                || lastDuration != duration) {
+                            lastPos = pos;
+                            lastBufferDuration = bufferedDuration;
+                            lastDuration = duration;
+                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                        }
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
@@ -392,6 +403,15 @@ class ReactExoplayerView extends FrameLayout implements
         eventListener = new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
+                View playButton = playerControlView.findViewById(R.id.exo_play);
+                View pauseButton = playerControlView.findViewById(R.id.exo_pause);
+                if (playButton != null && playButton.getVisibility() == GONE) {
+                    playButton.setVisibility(INVISIBLE);
+                }
+                if (pauseButton != null && pauseButton.getVisibility() == GONE) {
+                    pauseButton.setVisibility(INVISIBLE);
+                }
+
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
@@ -804,7 +824,10 @@ class ReactExoplayerView extends FrameLayout implements
                 player.setPlayWhenReady(true);
             }
         } else {
-            player.setPlayWhenReady(false);
+            // ensure playback is not ENDED, else it will trigger another ended event
+            if (player.getPlaybackState() != Player.STATE_ENDED) {
+                player.setPlayWhenReady(false);
+            }
         }
     }
 
@@ -945,6 +968,7 @@ class ReactExoplayerView extends FrameLayout implements
             int playbackState = player.getPlaybackState();
             boolean playWhenReady = player.getPlayWhenReady();
             String text = "onStateChanged: playWhenReady=" + playWhenReady + ", playbackState=";
+            eventEmitter.playbackRateChange(playWhenReady && playbackState == ExoPlayer.STATE_READY ? 1.0f : 0.0f);
             switch (playbackState) {
                 case Player.STATE_IDLE:
                     text += "idle";
@@ -1005,9 +1029,15 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
-            setSelectedAudioTrack(audioTrackType, audioTrackValue);
-            setSelectedVideoTrack(videoTrackType, videoTrackValue);
-            setSelectedTextTrack(textTrackType, textTrackValue);
+            if (audioTrackType != null) {
+                setSelectedAudioTrack(audioTrackType, audioTrackValue);
+            }
+            if (videoTrackType != null) {
+                setSelectedVideoTrack(videoTrackType, videoTrackValue);
+            }
+            if (textTrackType != null) {
+                setSelectedTextTrack(textTrackType, textTrackValue);
+            }
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -1825,5 +1855,9 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
+    }
+
+    public void setSubtitleStyle(SubtitleStyle style) {
+        exoPlayerView.setSubtitleStyle(style);
     }
 }

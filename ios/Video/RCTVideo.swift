@@ -227,10 +227,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         RCTVideoUtils.delay()
             .then{ [weak self] in
                 guard let self = self else {throw NSError(domain: "", code: 0, userInfo: nil)}
-                guard let source = self._source,
-                let assetResult = RCTVideoUtils.prepareAsset(source: source),
-                let asset = assetResult.asset,
-                let assetOptions = assetResult.assetOptions else {
+                guard let source = self._source else {
+                    DebugLog("The source not exist")
+                    throw NSError(domain: "", code: 0, userInfo: nil)
+                }
+                if let uri = source.uri, uri.starts(with: "ph://") {
+                    return Promise {
+                        RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
+                            return self.playerItemPrepareText(asset:asset, assetOptions:nil)
+                        }
+                    }
+                }
+                guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
+                      let asset = assetResult.asset,
+                      let assetOptions = assetResult.assetOptions else {
                       DebugLog("Could not find video URL in source '\(self._source)'")
                       throw NSError(domain: "", code: 0, userInfo: nil)
                   }
