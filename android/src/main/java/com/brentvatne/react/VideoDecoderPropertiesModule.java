@@ -33,42 +33,44 @@ public class VideoDecoderPropertiesModule extends ReactContextBaseJavaModule {
     public void getWidevineLevel(Promise p) {
         int widevineLevel = 0;
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            final UUID WIDEVINE_UUID = new UUID(0xEDEF8BA979D64ACEL, 0xA3C827DCD51D21EDL);
-            final String WIDEVINE_SECURITY_LEVEL_1 = "L1";
-            final String WIDEVINE_SECURITY_LEVEL_2 = "L2";
-            final String WIDEVINE_SECURITY_LEVEL_3 = "L3";
-            final String SECURITY_LEVEL_PROPERTY = "securityLevel";
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            p.resolve(widevineLevel);
+            return;
+        }
+        final UUID WIDEVINE_UUID = new UUID(0xEDEF8BA979D64ACEL, 0xA3C827DCD51D21EDL);
+        final String WIDEVINE_SECURITY_LEVEL_1 = "L1";
+        final String WIDEVINE_SECURITY_LEVEL_2 = "L2";
+        final String WIDEVINE_SECURITY_LEVEL_3 = "L3";
+        final String SECURITY_LEVEL_PROPERTY = "securityLevel";
 
-            String securityProperty = null;
-            try {
-                MediaDrm mediaDrm = new MediaDrm(WIDEVINE_UUID);
-                securityProperty = mediaDrm.getPropertyString(SECURITY_LEVEL_PROPERTY);
-            } catch (UnsupportedSchemeException e) {
-                e.printStackTrace();
-            }
-            if (securityProperty == null) {
-                p.resolve(widevineLevel);
-                return;
-            }
+        String securityProperty = null;
+        try {
+            MediaDrm mediaDrm = new MediaDrm(WIDEVINE_UUID);
+            securityProperty = mediaDrm.getPropertyString(SECURITY_LEVEL_PROPERTY);
+        } catch (UnsupportedSchemeException e) {
+            e.printStackTrace();
+        }
+        if (securityProperty == null) {
+            p.resolve(widevineLevel);
+            return;
+        }
 
-            switch (securityProperty) {
-                case WIDEVINE_SECURITY_LEVEL_1: {
-                    widevineLevel = 1;
-                    break;
-                }
-                case WIDEVINE_SECURITY_LEVEL_2: {
-                    widevineLevel = 2;
-                    break;
-                }
-                case WIDEVINE_SECURITY_LEVEL_3: {
-                    widevineLevel = 3;
-                    break;
-                }
-                default: {
-                    // widevineLevel 0
-                    break;
-                }
+        switch (securityProperty) {
+            case WIDEVINE_SECURITY_LEVEL_1: {
+                widevineLevel = 1;
+                break;
+            }
+            case WIDEVINE_SECURITY_LEVEL_2: {
+                widevineLevel = 2;
+                break;
+            }
+            case WIDEVINE_SECURITY_LEVEL_3: {
+                widevineLevel = 3;
+                break;
+            }
+            default: {
+                // widevineLevel 0
+                break;
             }
         }
         p.resolve(widevineLevel);
@@ -77,17 +79,17 @@ public class VideoDecoderPropertiesModule extends ReactContextBaseJavaModule {
     @SuppressLint("ObsoleteSdkInt")
     @ReactMethod
     public void isCodecSupported(String mimeType, int width, int height, Promise p) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            MediaCodecList mRegularCodecs = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-            MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
-            String codecName = mRegularCodecs.findDecoderForFormat(format);
-            if (codecName == null) {
-                p.resolve(false);
-            } else {
-                p.resolve(true);
-            }
-        } else {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             p.resolve(false);
+            return;
+        }
+        MediaCodecList mRegularCodecs = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
+        String codecName = mRegularCodecs.findDecoderForFormat(format);
+        if (codecName == null) {
+            p.resolve(false);
+        } else {
+            p.resolve(true);
         }
     }
 
