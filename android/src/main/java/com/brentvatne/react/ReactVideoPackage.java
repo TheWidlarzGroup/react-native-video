@@ -25,7 +25,9 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        return Collections.singletonList(
+                new VideoDecoderPropertiesModule(reactContext)
+        );
     }
 
     // Deprecated RN 0.47

@@ -16,7 +16,7 @@ import {
 
 import { Picker } from '@react-native-picker/picker'
 
-import Video, { TextTrackType } from 'react-native-video';
+import Video, { VideoDecoderProperties, TextTrackType } from 'react-native-video';
 
 class VideoPlayer extends Component {
 
@@ -76,6 +76,28 @@ class VideoPlayer extends Component {
 
   video: Video;
   seekPanResponder: PanResponder | undefined;
+
+  popupInfo = () => {
+    VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
+      VideoDecoderProperties.isHEVCSupported().then((hevcSupported: boolean) => {
+        VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+          (avcSupported: boolean) => {
+            this.toast(
+              true,
+              'Widevine level: ' +
+              widevineLevel +
+              '\n hevc: ' +
+              (hevcSupported ? '' : 'NOT') +
+              'supported' +
+              '\n avc: ' +
+              (avcSupported ? '' : 'NOT') +
+              'supported',
+            )
+          },
+        )
+      })
+    })
+  }
 
   onLoad = (data: any) => {
     this.setState({ duration: data.duration, loading: false, });
@@ -284,6 +306,18 @@ class VideoPlayer extends Component {
         }}
       >
         <Text style={[styles.controlOption]}>{'decoration'}</Text>
+      </TouchableOpacity>
+    )
+  }
+
+  renderInfoControl() {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          this.popupInfo()
+        }}
+      >
+        <Text style={[styles.controlOption]}>{'decoderInfo'}</Text>
       </TouchableOpacity>
     )
   }
@@ -541,6 +575,9 @@ class VideoPlayer extends Component {
         </View>
         <View style={styles.bottomControls}>
           <View style={styles.generalControls}>
+            <View style={styles.generalControls}>
+              <View style={styles.resizeModeControl}>{this.renderInfoControl()}</View>
+            </View>
             <View style={styles.resizeModeControl}>{this.renderPause()}</View>
             <View style={styles.resizeModeControl}>
               {this.renderRepeatModeControl()}
