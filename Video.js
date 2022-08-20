@@ -489,6 +489,13 @@ Video.propTypes = {
   fullscreenAutorotate: PropTypes.bool,
   fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
+  subtitleStyle: PropTypes.shape({
+    paddingTop: PropTypes.number,
+    paddingBottom: PropTypes.number,
+    paddingLeft: PropTypes.number,
+    paddingRight: PropTypes.number,
+    fontSize: PropTypes.number,
+  }),
   useTextureView: PropTypes.bool,
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,

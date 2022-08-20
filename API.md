@@ -304,6 +304,7 @@ var styles = StyleSheet.create({
 |[selectedTextTrack](#selectedtexttrack)|Android, iOS|
 |[selectedVideoTrack](#selectedvideotrack)|Android|
 |[source](#source)|All|
+|[subtitleStyle](#subtitleStyle)|Android|
 |[textTracks](#texttracks)|Android, iOS|
 |[trackId](#trackId)|Android|
 |[useTextureView](#usetextureview)|Android|
@@ -834,6 +835,23 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+
+#### subtitleStyle
+
+Property | Description | Platforms
+--- | --- | ---
+fontSizeTrack | Adjust the font size of the subtitles. Default: font size of the device | Android
+paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
+paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
+paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
+paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
+
+
+Example:
+
+```
+subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+```
 
 #### textTracks
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
