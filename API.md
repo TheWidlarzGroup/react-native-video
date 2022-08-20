@@ -437,7 +437,7 @@ Determines if the player needs to throw an error when connection is lost or not
 Platforms: Android
 
 ### DRM
-To setup DRM please follow [this guide](./DRM.md)
+To setup DRM please follow [this guide](./docs/DRM.md)
 
 Platforms: Android, iOS
 

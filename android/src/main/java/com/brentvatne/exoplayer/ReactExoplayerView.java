@@ -403,6 +403,15 @@ class ReactExoplayerView extends FrameLayout implements
         eventListener = new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
+                View playButton = playerControlView.findViewById(R.id.exo_play);
+                View pauseButton = playerControlView.findViewById(R.id.exo_pause);
+                if (playButton != null && playButton.getVisibility() == GONE) {
+                    playButton.setVisibility(INVISIBLE);
+                }
+                if (pauseButton != null && pauseButton.getVisibility() == GONE) {
+                    pauseButton.setVisibility(INVISIBLE);
+                }
+
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
@@ -815,7 +824,10 @@ class ReactExoplayerView extends FrameLayout implements
                 player.setPlayWhenReady(true);
             }
         } else {
-            player.setPlayWhenReady(false);
+            // ensure playback is not ENDED, else it will trigger another ended event
+            if (player.getPlaybackState() != Player.STATE_ENDED) {
+                player.setPlayWhenReady(false);
+            }
         }
     }
 
@@ -1017,9 +1029,15 @@ class ReactExoplayerView extends FrameLayout implements
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
-            setSelectedAudioTrack(audioTrackType, audioTrackValue);
-            setSelectedVideoTrack(videoTrackType, videoTrackValue);
-            setSelectedTextTrack(textTrackType, textTrackValue);
+            if (audioTrackType != null) {
+                setSelectedAudioTrack(audioTrackType, audioTrackValue);
+            }
+            if (videoTrackType != null) {
+                setSelectedVideoTrack(videoTrackType, videoTrackValue);
+            }
+            if (textTrackType != null) {
+                setSelectedTextTrack(textTrackType, textTrackValue);
+            }
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
