@@ -431,7 +431,7 @@ Platforms: Android, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
-* ** false (default)** - Override background audio/music
+* **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
 
 Platforms: Android
