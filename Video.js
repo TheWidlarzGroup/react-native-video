@@ -277,14 +277,10 @@ export default class Video extends Component {
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
     } else if (uri === '') {
-      return null;
+      uri = undefined;
     }
 
-    if (!uri) {
-      console.warn('Trying to load empty source.');
-    }
-
-    const isNetwork = !!(uri && uri.match(/^https?:/));
+    const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
     const isAsset = !!(uri && uri.match(/^(assets-library|ph|ipod-library|file|content|ms-appx|ms-appdata):/));
 
     let nativeResizeMode;

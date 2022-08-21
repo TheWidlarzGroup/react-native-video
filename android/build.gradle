@@ -45,6 +45,8 @@ dependencies {
     implementation('com.google.android.exoplayer:extension-okhttp:2.17.1') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
+    implementation 'com.google.android.exoplayer:exoplayer-rtsp:2.17.1'
+
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
 
 }
