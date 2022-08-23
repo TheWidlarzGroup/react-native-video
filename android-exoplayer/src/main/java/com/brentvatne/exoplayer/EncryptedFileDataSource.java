@@ -133,3 +133,20 @@ public final class EncryptedFileDataSource implements DataSource {
         return bytesToRead;
     }
 }
+<<<<<<< HEAD
+=======
+
+public class EncryptedFileDataSourceFactory implements DataSource.Factory {
+
+    Context mContext;
+
+    public EncryptedFileDataSourceFactory(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    public DataSource createDataSource() {
+        return new EncryptedFileDataSource(mContext);
+    }
+}
+>>>>>>> 4c0efb62 (Update EncryptedFileDataSource.java)
