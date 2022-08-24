@@ -71,6 +71,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
 
+
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -338,7 +339,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 || uriString.startsWith("https://")
                 || uriString.startsWith("content://")
                 || uriString.startsWith("file://")
-                || uriString.startsWith("asset://");
+                // start/Dolby xCD change
+                || uriString.startsWith("asset://")
+                || uriString.startsWith("clrifex://");
+                // end/Dolby xCD change
     }
 
     private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {

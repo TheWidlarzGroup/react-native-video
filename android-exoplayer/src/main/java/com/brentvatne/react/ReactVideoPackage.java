@@ -14,7 +14,9 @@ import java.util.List;
 
 public class ReactVideoPackage implements ReactPackage {
 
-    private ReactExoplayerConfig config;
+   // start/Dolby xCD change
+    public ReactExoplayerConfig config;
+    // end/Dolby xCD change
 
     public ReactVideoPackage() {
     }
