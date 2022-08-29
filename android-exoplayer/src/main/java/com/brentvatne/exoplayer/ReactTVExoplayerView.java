@@ -391,14 +391,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         layoutParams.bottomMargin = 40;
         layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
         exoDorisPlayerView.addView(watchFromWidget, layoutParams);
-        watchFromWidget.setOnClickListener(v -> {
-            if (watchFromWidget.isWatchFromBeginning()) {
-                player.seekTo(0);
-            } else {
-                player.seekTo(C.TIME_UNSET);
-            }
-            watchFromWidget.hide();
-        });
+        watchFromWidget.setOnClickListener(v -> performWatchFrom());
         watchFromWidget.setVisibility(GONE);
 
         setEpg(false); // default value
@@ -1851,6 +1844,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return true;
         }
 
+        if (watchFromWidget.isFocused() &&
+                (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER ||
+                        event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+            performWatchFrom();
+            return true;
+        }
+
         return (exoDorisPlayerView.getPlayer() != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
     }
 
@@ -1870,6 +1870,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player != null && player.getPlaybackState() == Player.STATE_READY) {
             watchFromWidget.show();
         }
+    }
+
+    public void performWatchFrom() {
+        if (watchFromWidget.isWatchFromBeginning()) {
+            player.seekTo(0);
+        } else {
+            player.seekTo(C.TIME_UNSET);
+        }
+        watchFromWidget.hide();
     }
 
     public void showOverlay() {
