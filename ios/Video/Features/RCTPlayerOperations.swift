@@ -92,9 +92,11 @@ enum RCTPlayerOperations {
                 var optionValue:String!
                 if (type == "language") {
                     optionValue = currentOption.extendedLanguageTag
-                } else {
+                }
+               else {
                     optionValue = currentOption.commonMetadata.map(\.value)[0] as! String
                 }
+            
                 if (value == optionValue) {
                     mediaOption = currentOption
                     break
@@ -103,11 +105,15 @@ enum RCTPlayerOperations {
             //} else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
         } else if (type == "index") {
-            if let value = criteria?.value, let index = value as? Int {
-                if group.options.count > index {
-                    mediaOption = group.options[index]
+            if let value = criteria?.value, let index = value as? NSNumber {
+                if(group != nil){
+                    if(index.intValue >= 0 ){
+                        if group.options.count > index.intValue {
+                            mediaOption = group.options[index.intValue]
+                       }
+                    }
                 }
-            }
+           }
         } else { // default. invalid type or "system"
             #if TARGET_OS_TV
                 // Do noting. Fix for tvOS native audio menu language selector
@@ -139,7 +145,8 @@ enum RCTPlayerOperations {
                 var optionValue:String!
                 if (type == "language") {
                     optionValue = currentOption.extendedLanguageTag
-                } else {
+                }
+                else {
                     optionValue = currentOption.commonMetadata.map(\.value)[0] as? String
                 }
                 if (value == optionValue) {
@@ -149,12 +156,16 @@ enum RCTPlayerOperations {
             }
             //} else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
-//         } else if type == "index" {
-//             if let value = criteria?.value, let index = value as? Int {
-//                 if group.options.count > index {
-//                     mediaOption = group.options[index]
-//                 }
-//             }
+        } else if type == "index" {
+             if let value = criteria?.value, let index = value as? NSNumber {
+                 if(group != nil){
+                     if(index.intValue >= 0 ){
+                         if group.options.count > index.intValue {
+                             mediaOption = group.options[index.intValue]
+                        }
+                     }
+                 }
+            }
         } else if let group = group { // default. invalid type or "system"
             player?.currentItem?.selectMediaOptionAutomatically(in: group)
             return
