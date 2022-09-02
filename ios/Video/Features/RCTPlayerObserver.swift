@@ -144,7 +144,7 @@ class RCTPlayerObserver: NSObject {
         // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
         // of https://developer.apple.com/library/ios/samplecode/AVPlayerDemo/Introduction/Intro.html
         _timeObserver = player?.addPeriodicTimeObserver(
-            forInterval: CMTimeMakeWithSeconds(progressUpdateIntervalMS, preferredTimescale: Int32(NSEC_PER_SEC)),
+            forInterval: CMTimeMakeWithSeconds(progressUpdateIntervalMS, Int32(NSEC_PER_SEC)),
             queue:nil,
             using:_handlers.handleTimeUpdate
         )

@@ -103,28 +103,28 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationWillResignActive(notification:)),
-            name: UIApplication.willResignActiveNotification,
+            name: NSNotification.Name.UIApplicationWillResignActive,
             object: nil
         )
         
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationDidEnterBackground(notification:)),
-            name: UIApplication.didEnterBackgroundNotification,
+            name: NSNotification.Name.UIApplicationDidEnterBackground,
             object: nil
         )
         
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationWillEnterForeground(notification:)),
-            name: UIApplication.willEnterForegroundNotification,
+            name: NSNotification.Name.UIApplicationWillEnterForeground,
             object: nil
         )
         
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(audioRouteChanged(notification:)),
-            name: AVAudioSession.routeChangeNotification,
+            name: NSNotification.Name.AVAudioSessionRouteChange,
             object: nil
         )
         _playerObserver._handlers = self
@@ -196,7 +196,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let currentTime = _player?.currentTime()
         let currentPlaybackTime = _player?.currentItem?.currentDate()
         let duration = CMTimeGetSeconds(playerDuration)
-        let currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
+        let currentTimeSecs = CMTimeGetSeconds(currentTime ?? kCMTimeZero)
         
         NotificationCenter.default.post(name: NSNotification.Name("RCTVideo_progress"), object: nil, userInfo: [
             "progress": NSNumber(value: currentTimeSecs / duration)
@@ -332,9 +332,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setResizeMode(_ mode: String?) {
         if _controls {
-            _playerViewController?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
+            _playerViewController?.videoGravity = mode ?? ""
         } else {
-            _playerLayer?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
+            _playerLayer?.videoGravity = AVLayerVideoGravity.init(rawValue: mode ?? "")
         }
         _resizeMode = mode
     }
@@ -586,9 +586,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if (viewController == nil) {
                 let keyWindow:UIWindow! = UIApplication.shared.keyWindow
                 viewController = keyWindow.rootViewController
-                if viewController.children.count > 0
+                if viewController.childViewControllers.count > 0
                 {
-                    viewController = viewController.children.last
+                    viewController = viewController.childViewControllers.last
                 }
             }
             if viewController != nil {
@@ -643,7 +643,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         
         if _controls {
             let viewController:UIViewController! = self.reactViewController()
-            viewController.addChild(_playerViewController)
+            viewController.addChildViewController(_playerViewController)
             self.addSubview(_playerViewController.view)
         }
         
@@ -1050,7 +1050,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         
         if _repeat {
             let item:AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero)
+            item.seek(to: kCMTimeZero)
             self.applyModifiers()
         } else {
             self.setPaused(true);

@@ -22,7 +22,7 @@ enum RCTVideoUtils {
         var effectiveTimeRange:CMTimeRange?
         for (_, value) in video.loadedTimeRanges.enumerated() {
             let timeRange:CMTimeRange = value.timeRangeValue
-            if CMTimeRangeContainsTime(timeRange, time: video.currentTime()) {
+            if CMTimeRangeContainsTime(timeRange, video.currentTime()) {
                 effectiveTimeRange = timeRange
                 break
             }
@@ -67,7 +67,7 @@ enum RCTVideoUtils {
             return firstItem.timeRangeValue
         }
         
-        return (CMTimeRange.zero)
+        return kCMTimeRangeZero
     }
     
     static func playerItemDuration(_ player:AVPlayer?) -> CMTime {
@@ -76,7 +76,7 @@ enum RCTVideoUtils {
             return(playerItem.duration)
         }
         
-        return(CMTime.invalid)
+        return kCMTimeInvalid
     }
     
     static func calculateSeekableDuration(_ player:AVPlayer?) -> NSNumber {
@@ -141,7 +141,7 @@ enum RCTVideoUtils {
     
     // UNUSED
     static func getCurrentTime(playerItem:AVPlayerItem?) -> Float {
-        return Float(CMTimeGetSeconds(playerItem?.currentTime() ?? .zero))
+        return Float(CMTimeGetSeconds(playerItem?.currentTime() ?? kCMTimeZero))
     }
     
     static func base64DataFromBase64String(base64String:String?) -> Data? {
@@ -172,9 +172,9 @@ enum RCTVideoUtils {
         let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
         do {
             try videoCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration),
                 of: videoAsset,
-                at: .zero)
+                at: kCMTimeZero)
         } catch {
         }
         
@@ -182,9 +182,9 @@ enum RCTVideoUtils {
         let audioCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID:kCMPersistentTrackID_Invalid)
         do {
             try audioCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration),
                 of: audioAsset,
-                at: .zero)
+                at: kCMTimeZero)
         } catch {
         }
         
@@ -213,9 +213,9 @@ enum RCTVideoUtils {
                                                                                               preferredTrackID:kCMPersistentTrackID_Invalid)
                 do {
                     try textCompTrack.insertTimeRange(
-                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                        CMTimeRangeMake(kCMTimeZero, videoAsset.timeRange.duration),
                         of: textTrackAsset,
-                        at: .zero)
+                        at: kCMTimeZero)
                 } catch {
                 }
             }

@@ -17,7 +17,7 @@ enum RCTPlayerOperations {
         // The first few tracks will be audio & video track
         var firstTextIndex:Int = 0
         for i in 0..<(trackCount) {
-            if player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
+            if player?.currentItem?.tracks[i].assetTrack.hasMediaCharacteristic(.legible) ?? false {
                 firstTextIndex = i
                 break
             }
@@ -172,9 +172,9 @@ enum RCTPlayerOperations {
 
     static func seek(player: AVPlayer, playerItem:AVPlayerItem, paused:Bool, seekTime:Float, seekTolerance:Float) -> Promise<Bool> {
         let timeScale:Int = 1000
-        let cmSeekTime:CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
+        let cmSeekTime:CMTime = CMTimeMakeWithSeconds(Float64(seekTime), Int32(timeScale))
         let current:CMTime = playerItem.currentTime()
-        let tolerance:CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
+        let tolerance:CMTime = CMTimeMake(Int64(seekTolerance), Int32(timeScale))
         
         return Promise<Bool>(on: .global()) { fulfill, reject in
             guard CMTimeCompare(current, cmSeekTime) != 0 else {
@@ -190,37 +190,20 @@ enum RCTPlayerOperations {
     }
     
     static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String) {
-        let session:AVAudioSession! = AVAudioSession.sharedInstance()
-        var category:AVAudioSession.Category? = nil
-        var options:AVAudioSession.CategoryOptions? = nil
-        
-        if (ignoreSilentSwitch == "ignore") {
-            category = AVAudioSession.Category.playback
-        } else if (ignoreSilentSwitch == "obey") {
-            category = AVAudioSession.Category.ambient
-        }
-        
-        if (mixWithOthers == "mix") {
-            options = .mixWithOthers
-        } else if (mixWithOthers == "duck") {
-            options = .duckOthers
-        }
-        
-        if let category = category, let options = options {
-            do {
-                try session.setCategory(category, options: options)
-            } catch {
+        do {
+            let session:AVAudioSession! = AVAudioSession.sharedInstance()
+            var options:AVAudioSession.CategoryOptions = .mixWithOthers
+            
+            if (mixWithOthers == "duck") {
+                options = .duckOthers
             }
-        } else if let category = category, options == nil {
-            do {
-                try session.setCategory(category)
-            } catch {
+            
+            if (ignoreSilentSwitch == "ignore") {
+                try session.setCategory(AVAudioSessionCategoryPlayback, with: options)
+            } else if (ignoreSilentSwitch == "obey") {
+                try session.setCategory(AVAudioSessionCategoryAmbient, with: options)
             }
-        } else if category == nil, let options = options {
-            do {
-                try session.setCategory(session.category, options: options)
-            } catch {
-            }
+        } catch {
         }
     }
 }
