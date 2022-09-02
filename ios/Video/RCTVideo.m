@@ -149,6 +149,10 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 }
 
 - (void)setSrc:(NSDictionary *)source {
+    if ([[source valueForKey:@"uri"] isEqualToString:[_source valueForKey:@"uri"]]) {
+        return;
+    }
+    
     _source = source;
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
