@@ -214,7 +214,7 @@ Follow the manual linking instuctions for React Native Windows 0.62 above, but s
  
 ## Examples
 
-Run `yarn xbasic install` before running any of the examples.
+Run `yarn xbasic install` in the root directory before running any of the examples.
 
 ### iOS Example
 ```
