@@ -529,8 +529,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     
     func setSelectedAudioTrack(_ selectedAudioTrack:SelectedTrackCriteria?) {
         _selectedAudioTrackCriteria = selectedAudioTrack
-        RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player:_player, characteristic: AVMediaCharacteristic.audible,
-                                                                    criteria:_selectedAudioTrackCriteria)
+        RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player:_player, characteristic: AVMediaCharacteristic.audible,criteria:_selectedAudioTrackCriteria)
     }
     
     @objc
@@ -541,7 +540,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setSelectedTextTrack(_ selectedTextTrack:SelectedTrackCriteria?) {
         _selectedTextTrackCriteria = selectedTextTrack
         if (_textTracks != nil) { // sideloaded text tracks
-            RCTPlayerOperations.setSideloadedText(player:_player, textTracks:_textTracks, criteria:_selectedTextTrackCriteria)
+            /*RCTPlayerOperations.setSideloadedText(player:_player, textTracks:_textTracks as? [AnyObject], criteria:_selectedTextTrackCriteria)*/
         } else { // text tracks included in the HLS playlist
             RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player:_player, characteristic: AVMediaCharacteristic.legible,
                                                                         criteria:_selectedTextTrackCriteria)

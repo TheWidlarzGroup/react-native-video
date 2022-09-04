@@ -111,13 +111,13 @@ enum RCTVideoUtils {
         return audioTracks as [AnyObject]?
     }
     
-    static func getTextTrackInfo(_ player:AVPlayer?) -> [TextTrack]! {
+    static func getTextTrackInfo(_ player:AVPlayer?) -> [AnyObject]! {
         guard let player = player else {
             return []
         }
 
         // if streaming video, we extract the text tracks
-        var textTracks:[TextTrack] = []
+        let textTracks:NSMutableArray! = NSMutableArray()
         let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .legible)
         for i in 0..<(group?.options.count ?? 0) {
             let currentOption = group?.options[i]
@@ -127,14 +127,15 @@ enum RCTVideoUtils {
                 title = value as! String
             }
             let language:String! = currentOption?.extendedLanguageTag ?? ""
-            let textTrack = TextTrack([
+             
+            let textTrack = [
                 "index": NSNumber(value: i),
                 "title": title,
                 "language": language
-            ])
-            textTracks.append(textTrack)
+            ] as [String : Any]
+            textTracks.add(textTrack)
         }
-        return textTracks
+        return textTracks as [AnyObject]?
     }
     
     // UNUSED
@@ -195,7 +196,7 @@ enum RCTVideoUtils {
         if let textTracks = textTracks, textTracks.count > 0 {
             for i in 0..<textTracks.count {
                 var textURLAsset:AVURLAsset!
-                let textUri:String = textTracks[i].uri
+                let textUri:String = textTracks[i].uri ?? ""
                 if textUri.lowercased().hasPrefix("http") {
                     textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options:(assetOptions as! [String : Any]))
                 } else {
@@ -203,7 +204,7 @@ enum RCTVideoUtils {
                 }
                 let textTrackAsset:AVAssetTrack! = textURLAsset.tracks(withMediaType: AVMediaType.text).first
                 if (textTrackAsset == nil) {continue} // fix when there's no textTrackAsset
-                validTextTracks.append(textTracks[i])
+                validTextTracks.append(textTracks[i]  as! TextTrack)
                 let textCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                               preferredTrackID:kCMPersistentTrackID_Invalid)
                 do {
@@ -215,7 +216,7 @@ enum RCTVideoUtils {
                 }
             }
         }
-        return validTextTracks
+        return (validTextTracks as? [TextTrack])!
     }
 
     static func delay(seconds: Int = 0) -> Promise<Void> {

@@ -9,9 +9,9 @@ let RCTVideoUnset = -1
  */
 enum RCTPlayerOperations {
 
-    static func setSideloadedText(player:AVPlayer?, textTracks:[TextTrack]?, criteria:SelectedTrackCriteria?) {
+    static func setSideloadedText(player:AVPlayer?, textTracks:[AnyObject]?, criteria:SelectedTrackCriteria?) {
         let type = criteria?.type
-        let textTracks:[TextTrack]! = textTracks ?? RCTVideoUtils.getTextTrackInfo(player)
+        let textTracks:[AnyObject]! = textTracks ?? RCTVideoUtils.getTextTrackInfo(player)
 
         // The first few tracks will be audio & video track
         let firstTextIndex:Int = 0
