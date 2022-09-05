@@ -10,19 +10,20 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.video.VideoSize;
 
 import java.util.List;
+
 
 @TargetApi(16)
 public final class ExoPlayerView extends FrameLayout {
@@ -201,16 +202,25 @@ public final class ExoPlayerView extends FrameLayout {
         }
     };
 
-    private void updateForCurrentTrackSelections() {
+    private void updateForCurrentTrackSelections(Tracks tracks) {
         if (player == null) {
             return;
         }
-        TrackSelectionArray selections = player.getCurrentTrackSelections();
-        for (int i = 0; i < selections.length; i++) {
-            if (player.getRendererType(i) == C.TRACK_TYPE_VIDEO && selections.get(i) != null) {
-                // Video enabled so artwork must be hidden. If the shutter is closed, it will be opened in
-                // onRenderedFirstFrame().
-                return;
+        for (Tracks.Group trackGroup : tracks.getGroups()) {
+            // Group level information.
+            @C.TrackType int trackType = trackGroup.getType();
+            boolean trackInGroupIsSelected = trackGroup.isSelected();
+            boolean trackInGroupIsSupported = trackGroup.isSupported();
+            for (int i = 0; i < trackGroup.length; i++) {
+                // Individual track information.
+                boolean isSupported = trackGroup.isTrackSupported(i);
+                boolean isSelected = trackGroup.isTrackSelected(i);
+                Format trackFormat = trackGroup.getTrackFormat(i);
+                if (player.getRendererType(i) == C.TRACK_TYPE_VIDEO) {
+                    // Video enabled so artwork must be hidden. If the shutter is closed, it will be opened in
+                    // onRenderedFirstFrame().
+                    return;
+                }
             }
         }
         // Video disabled so the shutter must be closed.
@@ -226,13 +236,12 @@ public final class ExoPlayerView extends FrameLayout {
 
         // TextRenderer.Output implementation
 
-//        @Override
-//        public void onCues(List<Cue> cues) {
-//            subtitleLayout.onCues(cues);
-//        }
-
         // ExoPlayer.VideoListener implementation
 
+        @Override
+        public void onCues(List<Cue> cues) {
+            subtitleLayout.setCues(cues);
+        }
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
             boolean isInitialRatio = layout.getAspectRatio() == 0;
@@ -281,10 +290,10 @@ public final class ExoPlayerView extends FrameLayout {
             // Do nothing.
         }
 
-//        @Override
-//        public void onTracksInfoChanged(TracksInfo tracksInfo) {
-//            updateForCurrentTrackSelections();
-//        }
+        @Override
+        public void onTracksChanged(Tracks tracks) {
+            updateForCurrentTrackSelections(tracks);
+        }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters params) {

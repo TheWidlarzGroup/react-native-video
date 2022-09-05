@@ -16,4 +16,9 @@
   <string name="error_drm_unsupported_scheme">This device does not support the required DRM scheme</string>
 
   <string name="error_drm_unknown">An unknown DRM error occurred</string>
+  <string name="error_drm_license">Unable to get DRM license</string>
+  <string name="error_general">Something went wrong</string>
+  <string name="err_code_player">ERR_PLAYER</string>
+  <string name="err_code_drm_scheme">ERR_DRM_SCHEME</string>
+  <string name="err_code_drm_license">ERR_DRM_LICENSE</string>
 </resources>
