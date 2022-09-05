@@ -1,4 +1,28 @@
 {
   "name": "VideoCaching",
-  "displayName": "VideoCaching"
+  "displayName": "VideoCaching",
+  "components": [
+    {
+      "appKey": "VideoCaching",
+      "displayName": "VideoCaching"
+    }
+  ],
+  "resources": {
+    "android": [
+      "dist/res",
+      "dist/main.android.jsbundle"
+    ],
+    "ios": [
+      "dist/assets",
+      "dist/main.ios.jsbundle"
+    ],
+    "macos": [
+      "dist/assets",
+      "dist/main.macos.jsbundle"
+    ],
+    "windows": [
+      "dist/assets",
+      "dist/main.windows.bundle"
+    ]
+  }
 }

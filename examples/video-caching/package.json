@@ -3,20 +3,31 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "android": "react-native run-android",
+    "build:ios": "mkdirp dist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
     "test": "jest"
   },
   "dependencies": {
-    "react": "16.4.1",
-    "react-native": "0.56.0",
-    "react-native-video": "file:../.."
+    "react": "18.0.0",
+    "react-native": "0.69.5",
+    "react-native-video": "../.."
   },
   "devDependencies": {
-    "babel-jest": "22.4.1",
-    "babel-preset-react-native": "5.0.2",
-    "express": "^4.16.2",
-    "jest": "22.4.2",
-    "react-test-renderer": "16.2.0"
+    "@babel/core": "^7.12.9",
+    "@babel/runtime": "^7.12.5",
+    "@react-native-community/eslint-config": "^2.0.0",
+    "@types/react": "^18.0.18",
+    "@types/react-native": "^0.69.6",
+    "babel-jest": "^26.6.3",
+    "eslint": "^7.32.0",
+    "jest": "^26.6.3",
+    "metro-react-native-babel-preset": "^0.70.3",
+    "mkdirp": "^1.0.0",
+    "react-native-test-app": "^1.6.13",
+    "react-test-renderer": "18.0.0"
   },
   "jest": {
     "preset": "react-native"

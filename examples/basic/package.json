@@ -1,34 +1,38 @@
 {
   "name": "VideoPlayer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "cd ios && pod install && cd .. && react-native run-ios",
-    "windows": "react-native run-windows",
-    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "build:android": "mkdirp dist/res && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res",
+    "build:ios": "mkdirp dist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
+    "build:windows": "mkdirp dist && react-native bundle --entry-file index.js --platform windows --dev true --bundle-output dist/main.windows.bundle --assets-dest dist",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "windows": "react-native run-windows --sln windows/VideoPlayer.sln"
   },
   "dependencies": {
-    "@react-native-picker/picker": "^1.9.11",
-    "babel-plugin-module-resolver": "^4.1.0",
+    "@react-native-picker/picker": "^2.4.4",
     "react": "18.0.0",
     "react-native": "0.69.5",
-    "react-native-video": "../..",
-    "react-native-windows": "0.63.41"
+    "react-native-video": "../../",
+    "react-native-windows": "^0.69.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^2.0.0",
+    "@types/react": "^18.0.18",
+    "@types/react-native": "^0.69.6",
     "babel-jest": "^26.6.3",
     "eslint": "^7.32.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "^0.70.3",
-    "react-test-renderer": "18.0.0",
-    "@types/react": "^18.0.6",
-    "@types/react-native": "0.69.6"
+    "mkdirp": "^1.0.0",
+    "react-native-test-app": "^1.6.13",
+    "react-test-renderer": "18.0.0"
   },
   "jest": {
     "preset": "react-native"

@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:VideoPlayer.xcodeproj">
+      location = "group:../node_modules/.generated/ios/ReactTestApp.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
