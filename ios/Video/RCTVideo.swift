@@ -274,7 +274,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                 }
                 
-                self._player = AVPlayer(playerItem: self._playerItem)
+                 self._player = AVPlayer()
+                DispatchQueue.global(qos: .default).async {
+                    self._player?.replaceCurrentItem(with: playerItem)
+                }
                 self._playerObserver.player = self._player
                 self.applyModifiers()
                 self._player?.actionAtItemEnd = .none
