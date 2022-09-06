@@ -274,7 +274,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                 }
                 
-                 self._player = AVPlayer()
+                self._player = AVPlayer()
                 DispatchQueue.global(qos: .default).async {
                     self._player?.replaceCurrentItem(with: playerItem)
                 }
