@@ -1,4 +1,6 @@
 ## Changelog
+### Version 6.0.0-alpha3
+- Upgrade ExoPlayer to 2.18.1 [#2846](https://github.com/react-native-video/react-native-video/pull/2846)
 
 ### Version 6.0.0-alpha2
 
