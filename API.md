@@ -5,7 +5,6 @@
   * [tvOS](#tvos-installation)
   * [Android](#android-installation)
   * [Windows](#windows-installation)
-  * [react-native-dom](#react-native-dom-installation)
 * [Examples](#examples)
   * [iOS](#ios-example)
   * [Android](#android-example)
@@ -212,36 +211,10 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
 </details>
-
-### react-native-dom installation
-<details>
-  <summary>react-native-dom details</summary>
-
-Make the following additions to the given files manually:
-
-#### **dom/bootstrap.js**
-
-Import RCTVideoManager and add it to the list of nativeModules:
-
-```javascript
-import { RNDomInstance } from "react-native-dom";
-import { name as appName } from "../app.json";
-import RCTVideoManager from 'react-native-video/dom/RCTVideoManager'; // Add this
-
-// Path to RN Bundle Entrypoint ================================================
-const rnBundlePath = "./entry.bundle?platform=dom&dev=true";
-
-// React Native DOM Runtime Options =============================================
-const ReactNativeDomOptions = {
-  enableHotReload: false,
-  nativeModules: [RCTVideoManager] // Add this
-};
-```
-</details>
-
+ 
 ## Examples
 
-Run `yarn xbasic install` before running any of the examples.
+Run `yarn xbasic install` in the root directory before running any of the examples.
 
 ### iOS Example
 ```
@@ -298,7 +271,7 @@ var styles = StyleSheet.create({
 |[backBufferDurationMs](#backBufferDurationMs)| Android |
 |[bufferConfig](#bufferconfig)|Android|
 |[contentStartTime](#contentStartTime)| Android |
-|[controls](#controls)|Android, iOS, react-native-dom|
+|[controls](#controls)|Android, iOS|
 |[currentPlaybackTime](#currentPlaybackTime)|Android|
 |[disableFocus](#disableFocus)|Android, iOS|
 |[disableDisconnectError](#disableDisconnectError)|Android|
@@ -309,7 +282,6 @@ var styles = StyleSheet.create({
 |[fullscreenOrientation](#fullscreenorientation)|iOS|
 |[headers](#headers)|Android|
 |[hideShutterView](#hideshutterview)|Android|
-|[id](#id)|react-native-dom|
 |[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
 |[maxBitRate](#maxbitrate)|Android, iOS|
 |[minLoadRetryCount](#minLoadRetryCount)|Android|
@@ -332,6 +304,7 @@ var styles = StyleSheet.create({
 |[selectedTextTrack](#selectedtexttrack)|Android, iOS|
 |[selectedVideoTrack](#selectedvideotrack)|Android|
 |[source](#source)|All|
+|[subtitleStyle](#subtitleStyle)|Android|
 |[textTracks](#texttracks)|Android, iOS|
 |[trackId](#trackId)|Android|
 |[useTextureView](#usetextureview)|Android|
@@ -372,6 +345,13 @@ var styles = StyleSheet.create({
 |[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
 |[seek](#seek)|All|
 
+### Static methods
+
+| Name |Plateforms Support  |
+|--|--|
+|[getWidevineLevel](#getWidevineLevel)|Android|
+|[isCodecSupported](#isCodecSupported)|Android|
+|[isHEVCSupported](#isHEVCSupported)|Android|
 
 ### Configurable props
 
@@ -447,11 +427,11 @@ The start time in ms for SSAI content. This determines at what time to load the 
 
 Note on Android, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
 
-Platforms: Android, iOS, react-native-dom
+Platforms: Android, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
-* ** false (default)** - Override background audio/music
+* **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
 
 Platforms: Android
@@ -464,7 +444,7 @@ Determines if the player needs to throw an error when connection is lost or not
 Platforms: Android
 
 ### DRM
-To setup DRM please follow [this guide](./DRM.md)
+To setup DRM please follow [this guide](./docs/DRM.md)
 
 Platforms: Android, iOS
 
@@ -547,16 +527,6 @@ Controls whether the ExoPlayer shutter view (black screen while loading) is enab
 * **true** - Hide shutter view
 
 Platforms: Android
-
-#### id
-Set the DOM id element so you can use document.getElementById on web platforms. Accepts string values.
-
-Example:
-```
-id="video"
-```
-
-Platforms: react-native-dom
 
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
@@ -872,6 +842,23 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+
+#### subtitleStyle
+
+Property | Description | Platforms
+--- | --- | ---
+fontSizeTrack | Adjust the font size of the subtitles. Default: font size of the device | Android
+paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
+paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
+paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
+paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
+
+
+Example:
+
+```
+subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+```
 
 #### textTracks
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
@@ -1371,8 +1358,67 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
+#### Static methods
 
+### Video Decoding capabilities
 
+A module embed in ReactNativeVideo allow to query device supported feature.
+To use it include the module as following:
+```javascript
+import { VideoDecoderProperties } from '@ifs/react-native-video-enhanced'
+```
+
+Platforms: Android
+
+#### getWidevineLevel
+
+Indicates whether the widevine level supported by device.
+
+Possible results:
+-   **0** - unable to determine widevine support (typically not supported)
+-   **1**, **2**, **3** - Widevine level supported
+
+Platforms: Android
+
+Example:
+
+```
+VideoDecoderProperties.getWidevineLevel().then((widevineLevel) => {
+    ...
+}
+```
+
+#### isCodecSupported
+
+Indicates whether the provided codec is supported level supported by device.
+
+parameters:
+- **mimetype**: mime type of codec to query
+- **width**, **height**: resolution to query
+
+Possible results:
+-   **true** - codec supported
+-   **false** - codec is not supported
+
+Example:
+```
+VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+    ...
+}
+```
+Platforms: Android
+
+#### isHEVCSupported
+
+Helper which Indicates whether the provided HEVC/1920*1080 is supported level supported by device.
+It uses isCodecSupported internally.
+
+Example:
+```
+VideoDecoderProperties.isHEVCSupported().then((hevcSupported) => {
+    ...
+}
+```
 
 ### iOS App Transport Security
 
