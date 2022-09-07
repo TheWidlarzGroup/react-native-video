@@ -134,6 +134,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final boolean IS_DEBUG = false;
 
     private final ReactApplicationContext reactApplicationContext;
+    private String currentSrcUrl;
 
     public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
         this.reactApplicationContext = reactApplicationContext;
@@ -168,6 +169,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @Override
     protected ReactTVExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
 
+        currentSrcUrl = null;
         ThemedReactContext context = new ThemedReactContext(reactApplicationContext, new ContextThemeWrapper(themedReactContext, R.style.DceTVPlayerTheme));
 
         return new ReactTVExoplayerView(context);
@@ -206,6 +208,14 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String id = src.hasKey(PROP_SRC_ID) ? src.getString(PROP_SRC_ID) : null;
+
+        if (TextUtils.equals(uriString, currentSrcUrl)) {
+            Log.d(REACT_CLASS, "Same source URL, skip initialization.");
+            return;
+        } else {
+            currentSrcUrl = uriString;
+        }
+
         ReadableArray textTracks = src.hasKey(PROP_SRC_SUBTITLES) ? src.getArray(PROP_SRC_SUBTITLES) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         ReadableMap drm = src.hasKey(PROP_SRC_DRM) ? src.getMap(PROP_SRC_DRM) : null;
