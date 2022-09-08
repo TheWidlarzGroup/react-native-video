@@ -1770,6 +1770,16 @@ class ReactExoplayerView extends FrameLayout implements
         if (activity == null) {
             return;
         }
+
+        if (fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
+
         Window window = activity.getWindow();
         View decorView = window.getDecorView();
         int uiOptions;
