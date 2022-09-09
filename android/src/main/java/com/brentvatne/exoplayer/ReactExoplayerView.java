@@ -44,8 +44,9 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.TracksInfo;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
+import com.google.android.exoplayer2.drm.DefaultDrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
@@ -74,8 +75,8 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides;
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides.TrackSelectionOverride;
+import com.google.android.exoplayer2.trackselection.TrackSelectionParameters;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -575,7 +576,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-        self.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        self.trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);
         self.trackSelector.setParameters(trackSelector.buildUponParameters()
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
@@ -731,6 +732,8 @@ class ReactExoplayerView extends FrameLayout implements
                     return drmSessionManager;
                 }
             };
+        } else {
+            drmProvider = new DefaultDrmSessionManagerProvider();
         }
         switch (type) {
             case C.TYPE_SS:
@@ -1296,7 +1299,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTracksInfoChanged(TracksInfo tracksInfo) {
+    public void onTracksChanged(Tracks tracks) {
         // Do nothing.
     }
 
@@ -1608,10 +1611,10 @@ class ReactExoplayerView extends FrameLayout implements
         TrackSelectionOverride selectionOverride = new TrackSelectionOverride(groups.get(groupIndex), tracks);
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setTrackSelectionOverrides(new TrackSelectionOverrides.Builder().addOverride(selectionOverride).build())
-                .build();
+            .buildUpon()
+            .setRendererDisabled(rendererIndex, false)
+            .addOverride(selectionOverride)
+            .build();
         trackSelector.setParameters(selectionParameters);
     }
 

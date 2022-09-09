@@ -214,7 +214,7 @@ Follow the manual linking instuctions for React Native Windows 0.62 above, but s
  
 ## Examples
 
-Run `yarn xbasic install` before running any of the examples.
+Run `yarn xbasic install` in the root directory before running any of the examples.
 
 ### iOS Example
 ```
@@ -433,7 +433,9 @@ Platforms: Android, iOS
 Determines whether video audio should override background music/audio in Android devices.
 * **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
-
+ 
+Note: Allows multiple videos to play if set to `true`. If `false`, when one video is playing and another is started, the first video will be paused.
+ 
 Platforms: Android
 
 #### disableDisconnectError

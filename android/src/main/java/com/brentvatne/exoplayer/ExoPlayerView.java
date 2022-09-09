@@ -19,7 +19,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.TracksInfo;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
@@ -241,7 +241,7 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-            subtitleLayout.onCues(cues);
+            subtitleLayout.setCues(cues);
         }
 
         // ExoPlayer.VideoListener implementation
@@ -295,7 +295,7 @@ public final class ExoPlayerView extends FrameLayout {
         }
 
         @Override
-        public void onTracksInfoChanged(TracksInfo tracksInfo) {
+        public void onTracksChanged(Tracks tracks) {
             updateForCurrentTrackSelections();
         }
 
