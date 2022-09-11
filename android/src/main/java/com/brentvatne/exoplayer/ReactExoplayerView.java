@@ -17,6 +17,8 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -141,6 +143,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Player.Listener eventListener;
 
     private ExoPlayerView exoPlayerView;
+    private FullScreenPlayerView fullScreenPlayerView;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -368,7 +371,6 @@ class ReactExoplayerView extends FrameLayout implements
 
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
-        playerControlView.show();
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
         // Invoking onClick event for exoplayerView
@@ -399,6 +401,10 @@ class ReactExoplayerView extends FrameLayout implements
                 setPausedModifier(true);
             }
         });
+
+        //Handling the fullScreenButton click event
+        ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -442,6 +448,7 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+        reLayout(playerControlView);
     }
 
     /**
@@ -589,7 +596,7 @@ class ReactExoplayerView extends FrameLayout implements
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
-                    .setTrackSelector​(self.trackSelector)
+                    .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
                     .build();
@@ -665,6 +672,12 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
+        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                setFullscreen(false);
+            }
+        });
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -1760,6 +1773,16 @@ class ReactExoplayerView extends FrameLayout implements
         if (activity == null) {
             return;
         }
+
+        if (fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
+
         Window window = activity.getWindow();
         View decorView = window.getDecorView();
         int uiOptions;
@@ -1773,13 +1796,24 @@ class ReactExoplayerView extends FrameLayout implements
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
             eventEmitter.fullscreenWillPresent();
-            decorView.setSystemUiVisibility(uiOptions);
-            eventEmitter.fullscreenDidPresent();
+            post(() -> {
+                decorView.setSystemUiVisibility(uiOptions);
+                if (controls) {
+                    fullScreenPlayerView.show();
+                }
+                eventEmitter.fullscreenDidPresent();
+            });
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
             eventEmitter.fullscreenWillDismiss();
-            decorView.setSystemUiVisibility(uiOptions);
-            eventEmitter.fullscreenDidDismiss();
+            post(() -> {
+                decorView.setSystemUiVisibility(uiOptions);
+                if (controls) {
+                    fullScreenPlayerView.dismiss();
+                    reLayout(exoPlayerView);
+                }
+                eventEmitter.fullscreenDidDismiss();
+            });
         }
     }
 

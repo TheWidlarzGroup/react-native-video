@@ -71,6 +71,14 @@
             android:paddingRight="4dp"
             android:includeFontPadding="false"
             android:textColor="#FFBEBEBE"/>
+
+        <ImageButton
+            android:id="@id/exo_fullscreen"
+            style="@style/ExoMediaButton.FullScreen"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="4dp"
+            android:scaleType="fitCenter" />
     </LinearLayout>
 
 </LinearLayout>
