@@ -1,6 +1,7 @@
 ## Changelog
 ### Version 6.0.0-alpha3
 - Upgrade ExoPlayer to 2.18.1 [#2846](https://github.com/react-native-video/react-native-video/pull/2846)
+- Upgrade Example app to use RNTA [#2845](https://github.com/react-native-video/react-native-video/pull/2845)
 
 ### Version 6.0.0-alpha.2
 
