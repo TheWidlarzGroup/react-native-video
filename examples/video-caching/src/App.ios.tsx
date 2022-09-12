@@ -1,20 +1,8 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
-import React, { Component } from "react";
-import { Alert, StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
+import React, { useRef, useState } from "react";
+import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Video from "react-native-video";
 
 const { height, width } = Dimensions.get("screen");
-
-type Props = {};
-
-type State = {
-  showLocal: boolean
-};
 
 function Button({ text, onPress }: { text: string, onPress: () => void }) {
   return (
@@ -27,26 +15,23 @@ function Button({ text, onPress }: { text: string, onPress: () => void }) {
   )
 }
 
-export default class App extends Component<Props, State> {
-  state = {
-    showLocal: false
-  }
-  render() {
-    return (
+export default () => {
+  const [showLocal, setShowLocal] = useState(true);
+  const player = useRef<Video>(null);
+
+  return(
       <View style={styles.container}>
         <Video
           source={
-            this.state.showLocal ?
+            showLocal ?
               require('./broadchurch.mp4') :
               {
                 uri:  "https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4"
               }
           }
-          ref={player => {
-            this.player = player;
-          }}
+          ref={player}
           onEnd={() => {
-            this.player.seek(0);
+            player.current.seek(0);
           }}
           onError={(err) => {
             Alert.alert(JSON.stringify(err))
@@ -56,22 +41,20 @@ export default class App extends Component<Props, State> {
         <View style={styles.absoluteOverlay}>
           <Button
             onPress={async () => {
-              let response = await this.player.save();
-              let uri = response.uri;
+              let {uri} = await player.current.save()
               console.warn("Download URI", uri);
             }}
             text="Save"
           />
           <Button
             onPress={() => {
-              this.setState(state => ({ showLocal: !state.showLocal }))
+              setShowLocal(!showLocal)
             }}
-            text={this.state.showLocal ? "Show Remote" : "Show Local"}
+            text={showLocal ? "Show Remote" : "Show Local"}
           />
         </View>
       </View>
-    );
-  }
+  )
 }
 
 const styles = StyleSheet.create({
