@@ -375,6 +375,7 @@ PODS:
 DEPENDENCIES:
   - boost (from `node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - DVAssetLoaderDelegate
   - FBLazyVector (from `node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `node_modules/react-native/React/FBReactNativeSpec`)
   - Flipper (= 0.125.0)
@@ -430,6 +431,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `node_modules/react-native/ReactCommon`)
   - ReactTestApp-DevSupport (from `node_modules/react-native-test-app`)
   - ReactTestApp-Resources (from `.`)
+  - SPTPersistentCache
   - Yoga (from `node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -582,6 +584,6 @@ SPEC CHECKSUMS:
   Yoga: c2b1f2494060865ac1f27e49639e72371b1205fa
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 9f1a11fe40438613d17f125ba4a717dcb235196d
+PODFILE CHECKSUM: 4e0fd6f172c9ee62897452d2188397e1e882c308
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3
