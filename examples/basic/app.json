@@ -11,6 +11,12 @@
       "displayName": "EmbedFullScreen"
     }
   ],
+  "android": {
+    "package": "com.react.video.sample"
+  },
+  "ios": {
+    "bundleIdentifier": "com.react.video.sample"
+  },
   "resources": {
     "android": [
       "dist/res",
