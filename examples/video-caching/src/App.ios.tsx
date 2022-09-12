@@ -37,7 +37,7 @@ export default class App extends Component<Props, State> {
         <Video
           source={
             this.state.showLocal ?
-              require('../basic/broadchurch.mp4') :
+              require('./broadchurch.mp4') :
               {
                 uri:  "https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4"
               }
@@ -79,14 +79,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5FCFF"
+    backgroundColor: "#F5FCFF",
   },
   absoluteOverlay: {
     flexDirection: 'row',
     position: 'absolute',
     top: 0,
     width: '100%',
-    marginTop: 50,
+    marginTop: 128
   },
   button: {
     padding: 10,
