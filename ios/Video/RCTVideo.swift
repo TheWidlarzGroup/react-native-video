@@ -227,10 +227,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         RCTVideoUtils.delay()
             .then{ [weak self] in
                 guard let self = self else {throw NSError(domain: "", code: 0, userInfo: nil)}
-                guard let source = self._source,
-                let assetResult = RCTVideoUtils.prepareAsset(source: source),
-                let asset = assetResult.asset,
-                let assetOptions = assetResult.assetOptions else {
+                guard let source = self._source else {
+                    DebugLog("The source not exist")
+                    throw NSError(domain: "", code: 0, userInfo: nil)
+                }
+                if let uri = source.uri, uri.starts(with: "ph://") {
+                    return Promise {
+                        RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
+                            return self.playerItemPrepareText(asset:asset, assetOptions:nil)
+                        }
+                    }
+                }
+                guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
+                      let asset = assetResult.asset,
+                      let assetOptions = assetResult.assetOptions else {
                       DebugLog("Could not find video URL in source '\(self._source)'")
                       throw NSError(domain: "", code: 0, userInfo: nil)
                   }
@@ -264,7 +274,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                 }
                 
-                self._player = AVPlayer(playerItem: self._playerItem)
+                self._player = AVPlayer()
+                DispatchQueue.global(qos: .default).async {
+                    self._player?.replaceCurrentItem(with: playerItem)
+                }
                 self._playerObserver.player = self._player
                 self.applyModifiers()
                 self._player?.actionAtItemEnd = .none

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ExoMediaButton.FullScreen">
+        <item name="android:src">@drawable/exo_icon_fullscreen_enter</item>
+        <item name="android:contentDescription">@string/exo_controls_fullscreen_enter_description</item>
+    </style>
+</resources>

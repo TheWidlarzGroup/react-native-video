@@ -214,7 +214,7 @@ Follow the manual linking instuctions for React Native Windows 0.62 above, but s
  
 ## Examples
 
-Run `yarn xbasic install` before running any of the examples.
+Run `yarn xbasic install` in the root directory before running any of the examples.
 
 ### iOS Example
 ```
@@ -304,6 +304,7 @@ var styles = StyleSheet.create({
 |[selectedTextTrack](#selectedtexttrack)|Android, iOS|
 |[selectedVideoTrack](#selectedvideotrack)|Android|
 |[source](#source)|All|
+|[subtitleStyle](#subtitleStyle)|Android|
 |[textTracks](#texttracks)|Android, iOS|
 |[trackId](#trackId)|Android|
 |[useTextureView](#usetextureview)|Android|
@@ -347,6 +348,13 @@ var styles = StyleSheet.create({
 |[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
 |[seek](#seek)|All|
 
+### Static methods
+
+| Name |Plateforms Support  |
+|--|--|
+|[getWidevineLevel](#getWidevineLevel)|Android|
+|[isCodecSupported](#isCodecSupported)|Android|
+|[isHEVCSupported](#isHEVCSupported)|Android|
 
 ### Configurable props
 
@@ -426,9 +434,11 @@ Platforms: Android, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
-* ** false (default)** - Override background audio/music
+* **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
-
+ 
+Note: Allows multiple videos to play if set to `true`. If `false`, when one video is playing and another is started, the first video will be paused.
+ 
 Platforms: Android
 
 #### disableDisconnectError
@@ -439,7 +449,7 @@ Determines if the player needs to throw an error when connection is lost or not
 Platforms: Android
 
 ### DRM
-To setup DRM please follow [this guide](./DRM.md)
+To setup DRM please follow [this guide](./docs/DRM.md)
 
 Platforms: Android, iOS
 
@@ -865,6 +875,23 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+
+#### subtitleStyle
+
+Property | Description | Platforms
+--- | --- | ---
+fontSizeTrack | Adjust the font size of the subtitles. Default: font size of the device | Android
+paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
+paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
+paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
+paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
+
+
+Example:
+
+```
+subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+```
 
 #### textTracks
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
@@ -1427,8 +1454,67 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
+#### Static methods
 
+### Video Decoding capabilities
 
+A module embed in ReactNativeVideo allow to query device supported feature.
+To use it include the module as following:
+```javascript
+import { VideoDecoderProperties } from '@ifs/react-native-video-enhanced'
+```
+
+Platforms: Android
+
+#### getWidevineLevel
+
+Indicates whether the widevine level supported by device.
+
+Possible results:
+-   **0** - unable to determine widevine support (typically not supported)
+-   **1**, **2**, **3** - Widevine level supported
+
+Platforms: Android
+
+Example:
+
+```
+VideoDecoderProperties.getWidevineLevel().then((widevineLevel) => {
+    ...
+}
+```
+
+#### isCodecSupported
+
+Indicates whether the provided codec is supported level supported by device.
+
+parameters:
+- **mimetype**: mime type of codec to query
+- **width**, **height**: resolution to query
+
+Possible results:
+-   **true** - codec supported
+-   **false** - codec is not supported
+
+Example:
+```
+VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+    ...
+}
+```
+Platforms: Android
+
+#### isHEVCSupported
+
+Helper which Indicates whether the provided HEVC/1920*1080 is supported level supported by device.
+It uses isCodecSupported internally.
+
+Example:
+```
+VideoDecoderProperties.isHEVCSupported().then((hevcSupported) => {
+    ...
+}
+```
 
 ### iOS App Transport Security
 
