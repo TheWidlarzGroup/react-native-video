@@ -240,7 +240,6 @@ class ReactExoplayerView extends FrameLayout implements
         this.eventEmitter = new VideoEventEmitter(context);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
-
         createViews();
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -1074,9 +1073,13 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         WritableArray videoTracks = Arguments.createArray();
+        if (trackSelector == null) {
+            // player is unmounting so no video tracks are available anymore
+            return videoTracks;
+        }
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        
+
         if (info == null || trackRendererIndex == C.INDEX_UNSET) {
             return videoTracks;
         }
