@@ -1,5 +1,9 @@
 ## Changelog
-### Version 6.0.0-alpha3
+
+### Version 6.0.0-alpha.4
+- ensure src is always provided to native player even if it is invalid [#2857](https://github.com/react-native-video/react-native-video/pull/2857)
+
+### Version 6.0.0-alpha.3
 - fix ios build [#2854](https://gthub.com/react-native-video/react-native-video/pull/2854)
 
 ### Version 6.0.0-alpha.2
