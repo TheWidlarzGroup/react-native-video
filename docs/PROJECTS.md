@@ -6,4 +6,4 @@ This page links other open source projects which can be usefull for your player 
  - [react-native-corner-video](https://github.com/Lg0gs/react-native-corner-video): A floating video player
 
 # Other tools
- - [react-native-corner-video](https://github.com/tanguyantoine/react-native-music-control): A toolbox to control player over media session
+ - [react-native-music-control](https://github.com/tanguyantoine/react-native-music-control): A toolbox to control player over media session
