@@ -386,11 +386,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     private boolean startsWithValidScheme(String uriString) {
-        return uriString.startsWith("http://")
-                || uriString.startsWith("https://")
-                || uriString.startsWith("content://")
-                || uriString.startsWith("file://")
-                || uriString.startsWith("asset://");
+        String lowerCaseUri = uriString.toLowerCase();
+        return lowerCaseUri.startsWith("http://")
+                || lowerCaseUri.startsWith("https://")
+                || lowerCaseUri.startsWith("content://")
+                || lowerCaseUri.startsWith("file://")
+                || lowerCaseUri.startsWith("asset://");
     }
 
     private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
