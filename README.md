@@ -14,6 +14,6 @@ Version 6.0.0 is introducing dozens of breaking changes, mostly through updated 
 - [Changelog](CHANGELOG.md)
 - [Contribution guide](CONTRIBUTING.md)
 - [Usefull Side Project](./docs/PROJECTS.md)
-- [Adanced debugging](./docs/DEBUGGING.md)
+- [Advanced debugging](./docs/DEBUGGING.md)
 
 **react-native-video** was originally created by [Brent Vatne](https://github.com/brentvatne)
