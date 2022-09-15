@@ -244,6 +244,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             currentSrcUrls.put(uriHash, uriString);
         }
 
+        if (videoView.isInBackground()) {
+            return;
+        }
+
         if (startsWithValidScheme(uriString)) {
             Map<String, String> drmMap = toStringMap(drm);
             ActionToken actionToken = null;

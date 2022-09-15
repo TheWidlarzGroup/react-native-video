@@ -466,10 +466,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Log.d(TAG, "onHostPause()");
         setPlayInBackground(false);
         setPlayWhenReady(false);
-        if (player != null) {
-            player.getExoPlayer().pause();
-        }
-        updateResumePosition();
         onStopPlayback();
         isInBackground = isInteractive();
         deactivateMediaSession();
@@ -484,6 +480,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         stopPlayback();
     }
 
+    protected boolean isInBackground() {
+        return isInBackground;
+    }
 
     private void initializePlayer(final boolean force) {
         if (initRunnable != null) {
