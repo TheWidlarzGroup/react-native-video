@@ -333,6 +333,7 @@ var styles = StyleSheet.create({
 ### Event props
 * [onAudioBecomingNoisy](#onaudiobecomingnoisy)
 * [onBandwidthUpdate](#onbandwidthupdate)
+* [onStreamBandwidthUpdate](#onstreambandwidthupdate)
 * [onEnd](#onend)
 * [onExternalPlaybackChange](#onexternalplaybackchange)
 * [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)
