@@ -660,10 +660,10 @@ Determine whether to repeat the video when the end is reached
 Platforms: all
 
 #### reportBandwidth
-Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
+Determine whether to generate onBandwidthUpdate and onStreamBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
 
-* **false (default)** - Don't generate onBandwidthUpdate events
-* **true** - Generate onBandwidthUpdate events
+* **false (default)** - Don't generate onBandwidthUpdate and onStreamBandwidthUpdate events
+* **true** - Generate onBandwidthUpdate and onStreamBandwidthUpdate events
 
 Platforms: Android ExoPlayer
 
@@ -926,6 +926,26 @@ Platforms: Android ExoPlayer, iOS
 
 #### onBandwidthUpdate
 Callback function that is called when the available bandwidth changes.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+bitrate | number | The estimated bitrate in bits/sec
+
+Example:
+```
+{
+  bitrate: 1000000
+}
+```
+
+Note: On Android ExoPlayer, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event.
+
+Platforms: Android ExoPlayer
+
+#### onStreamBandwidthUpdate
+Callback function that is called when the bandwidth required for the current stream changes.
 
 Payload:
 

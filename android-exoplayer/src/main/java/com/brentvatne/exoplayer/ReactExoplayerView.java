@@ -46,6 +46,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
@@ -57,6 +58,8 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
+import com.google.android.exoplayer2.source.LoadEventInfo;
+import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -118,6 +121,7 @@ class ReactExoplayerView extends FrameLayout implements
     private PlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.Listener eventListener;
+    private AnalyticsListener analyticsListener;
 
     private ExoPlayerView exoPlayerView;
 
@@ -372,6 +376,52 @@ class ReactExoplayerView extends FrameLayout implements
             }
         };
         player.addListener(eventListener);
+
+        analyticsListener = new AnalyticsListener() {
+            protected int videoBitrate = -1;
+            protected int audioBitrate = -1;
+            protected int bitrate = -1;
+
+            public void onDownstreamFormatChanged(@NonNull EventTime eventTime, @NonNull MediaLoadData mediaLoadData) {
+                if (mediaLoadData != null && mReportBandwidth) {
+                    this.trackBitrate(mediaLoadData);
+                }
+            }
+
+            public void onLoadCompleted(@NonNull EventTime eventTime, @NonNull LoadEventInfo loadEventInfo, @NonNull MediaLoadData mediaLoadData) {
+                if (null != mediaLoadData && null != mediaLoadData.trackFormat) {
+                    if (-1 == this.bitrate && mediaLoadData.trackFormat.peakBitrate >= 0 && mReportBandwidth) {
+                        this.trackBitrate(mediaLoadData);
+                    }
+                }
+
+            }
+
+            private void trackBitrate(MediaLoadData mediaLoadData) {
+                if (mediaLoadData != null && mediaLoadData.trackFormat != null) {
+                    int bitrate = mediaLoadData.trackFormat.peakBitrate;
+                    if (bitrate != -1) {
+                        if (mediaLoadData.trackType == C.TRACK_TYPE_DEFAULT) {
+                            this.videoBitrate = mediaLoadData.trackFormat.peakBitrate;
+                            this.audioBitrate = 0;
+                        } else if (mediaLoadData.trackType == C.TRACK_TYPE_AUDIO) {
+                            this.audioBitrate = mediaLoadData.trackFormat.peakBitrate;
+                        } else if (mediaLoadData.trackType == C.TRACK_TYPE_VIDEO) {
+                            this.videoBitrate = mediaLoadData.trackFormat.peakBitrate;
+                        }
+
+                        if (this.audioBitrate >= 0 && this.videoBitrate >= 0) {
+                            this.bitrate = this.audioBitrate + this.videoBitrate;
+                            eventEmitter.streamBandwidthReport(this.bitrate);
+
+                        }
+                    }
+
+                }
+            }
+        };
+
+        player.addAnalyticsListener(analyticsListener);
     }
 
     /**
@@ -593,6 +643,7 @@ class ReactExoplayerView extends FrameLayout implements
             updateResumePosition();
             player.release();
             player.removeListener(this);
+            player.removeAnalyticsListener(analyticsListener);
             trackSelector = null;
             player = null;
         }
