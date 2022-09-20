@@ -855,7 +855,7 @@ Platforms: Android MediaPlayer
 
 Property | Description | Platforms
 --- | --- | ---
-fontSizeTrack | Adjust the font size of the subtitles. Default: font size of the device | Android
+fontSize | Adjust the font size of the subtitles. Default: font size of the device | Android
 paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
 paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
 paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
