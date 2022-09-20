@@ -325,6 +325,7 @@ var styles = StyleSheet.create({
 * [selectedVideoTrack](#selectedvideotrack)
 * [source](#source)
 * [stereoPan](#stereopan)
+* [subtitleStyle](#subtitleStyle)|Android|
 * [textTracks](#texttracks)
 * [trackId](#trackId)
 * [useTextureView](#usetextureview)
@@ -849,6 +850,23 @@ Adjust the balance of the left and right audio channels.  Any value between –1
 * **1.0** - Full right
 
 Platforms: Android MediaPlayer
+
+#### subtitleStyle
+
+Property | Description | Platforms
+--- | --- | ---
+fontSizeTrack | Adjust the font size of the subtitles. Default: font size of the device | Android
+paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
+paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
+paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
+paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
+
+
+Example:
+
+```
+subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+```
 
 #### textTracks
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
