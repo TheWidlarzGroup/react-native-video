@@ -571,7 +571,7 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }, 1);
-        
+
     }
 
     private void initializePlayerCore(ReactExoplayerView self) {
@@ -588,7 +588,7 @@ class ReactExoplayerView extends FrameLayout implements
                 bufferForPlaybackMs,
                 bufferForPlaybackAfterRebufferMs,
                 -1,
-                true,
+                false,
                 backBufferDurationMs,
                 DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
         );
@@ -1119,7 +1119,7 @@ class ReactExoplayerView extends FrameLayout implements
         WritableArray videoTracks = Arguments.createArray();
 
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        
+
         if (info == null || trackRendererIndex == C.INDEX_UNSET) {
             return videoTracks;
         }
@@ -1578,7 +1578,7 @@ class ReactExoplayerView extends FrameLayout implements
             for (int j = 0; j < group.length; j++) {
                 allTracks.add(j);
             }
-            
+
             // Valiate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
             ArrayList<Integer> supportedTrackList = new ArrayList<Integer>();
@@ -1743,7 +1743,7 @@ class ReactExoplayerView extends FrameLayout implements
         long freeMemory = runtime.maxMemory() - usedMemory;
         long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
         if (reserveMemory > freeMemory) {
-            // We don't have enough memory in reserve so we will 
+            // We don't have enough memory in reserve so we will
             Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
             this.backBufferDurationMs = 0;
             return;
