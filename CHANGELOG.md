@@ -1,6 +1,9 @@
 ## Changelog
+### Version 6.0.0-alpha4
+- Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
+
 ### Version 6.0.0-alpha3
-- fix ios build [#2854](https://gthub.com/react-native-video/react-native-video/pull/2854)
+- Fix ios build [#2854](https://github.com/react-native-video/react-native-video/pull/2854)
 
 ### Version 6.0.0-alpha.2
 
