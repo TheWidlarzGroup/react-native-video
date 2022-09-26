@@ -1,11 +1,10 @@
 ## Changelog
 
-### Version 6.0.0-alpha.4
-
+### Version 6.0.0-alpha4
+- Android: Switch Google's maven repository to default `google()` [#2860](https://github.com/react-native-video/react-native-video/pull/2860)
 - Upgrade example app to use RNTA [#2845](https://github.com/react-native-video/react-native-video/pull/2845)
 
-### Version 6.0.0-alpha.3
-
+### Version 6.0.0-alpha3
 - fix ios build [#2854](https://gthub.com/react-native-video/react-native-video/pull/2854)
 
 ### Version 6.0.0-alpha.2

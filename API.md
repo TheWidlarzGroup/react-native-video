@@ -421,11 +421,11 @@ Determines whether to show player controls.
 * **true** - Show player controls
 
 Note on iOS, controls are always shown when in fullscreen mode.
+Note on Android, native controls are available by default.
+If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Usefull Side Project](./docs/PROJECTS.md).
 
 ### contentStartTime
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
-
-Note on Android, native controls are available by default. If needed, you can also add your controls or use a package like [react-native-video-controls].
 
 Platforms: Android, iOS
 
@@ -1610,11 +1610,3 @@ allprojects {
 ```
 If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
  
-## Black Screen on Release build (Android)
-If your video work on Debug mode, but on Release you see only black screen, please, check the link to your video. If you use 'http' protocol there, you will need to add next string to your AndroidManifest.xml file.
-```
-<application
- ...
- android:usesCleartextTraffic="true"
->
-```
