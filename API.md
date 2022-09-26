@@ -277,6 +277,7 @@ var styles = StyleSheet.create({
 |[disableDisconnectError](#disableDisconnectError)|Android|
 |[filter](#filter)|iOS|
 |[filterEnabled](#filterEnabled)|iOS|
+|[focusable](#focusable)|Android|
 |[fullscreen](#fullscreen)|iOS|
 |[fullscreenAutorotate](#fullscreenautorotate)|iOS|
 |[fullscreenOrientation](#fullscreenorientation)|iOS|
@@ -485,6 +486,14 @@ Enable video filter.
 * **true** - Enable filter
 
 Platforms: iOS
+
+#### Focusable
+Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.
+* **false** - Makes view unfocusable
+* **true (default)** - Makes view focusable
+ 
+Platforms: Android
+
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
