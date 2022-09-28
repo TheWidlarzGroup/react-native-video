@@ -70,6 +70,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
+    private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_SECURE_VIEW = "useSecureView";
@@ -302,6 +303,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
     public void setDisableFocus(final ReactExoplayerView videoView, final boolean disableFocus) {
         videoView.setDisableFocus(disableFocus);
+    }
+
+    @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)
+    public void setFocusable(final ReactExoplayerView videoView, final boolean focusable) {
+        videoView.setFocusable(focusable);
     }
 
     @ReactProp(name = PROP_BACK_BUFFER_DURATION_MS, defaultInt = 0)
