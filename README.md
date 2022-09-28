@@ -11,7 +11,7 @@ Version 6.x recommends react-native >= 0.68.2.
 Version 6.0.0 is introducing dozens of breaking changes, mostly through updated dependecies and significant refactoring. While the API remains compatible, the significant internal changes require full testing with your app to ensure all functionality remains operational. Please view the [Changelog](CHANGELOG.md) for specific breaking changes.
 
 ### Installing Version 6.0.0 Alphas
-Whilst we finalise version 6.0.0 you can installed the latest alpha from npm
+Whilst we finalise version 6.0.0 you can install the latest alpha from npm
 Using npm:
 ```
 npm install --save react-native-video@alpha
