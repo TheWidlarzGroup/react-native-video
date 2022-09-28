@@ -2,7 +2,6 @@
 
 ### Version 6.0.0-alpha.4
 - Sample: Add react-native-video controls support [#2852](https://github.com/react-native-video/react-native-video/pull/2852)
-- Android: Add full screen button in default android controls [#2763](https://github.com/react-native-video/react-native-video/pull/2763)
 - Android: Switch Google's maven repository to default `google()` [#2860](https://github.com/react-native-video/react-native-video/pull/2860)
 - Android: Implement focusable prop so the video view can toggle whether it is focusable for non-touch devices [#2819](https://github.com/react-native-video/react-native-video/issues/2819)
 
