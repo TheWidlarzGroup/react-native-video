@@ -267,7 +267,7 @@ class VideoEventEmitter {
     void error(String errorString, Exception exception) {
         WritableMap error = Arguments.createMap();
         error.putString(EVENT_PROP_ERROR_STRING, errorString);
-        error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.getMessage());
+        error.putString(EVENT_PROP_ERROR_EXCEPTION, android.util.Log.getStackTraceString(exception));
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);

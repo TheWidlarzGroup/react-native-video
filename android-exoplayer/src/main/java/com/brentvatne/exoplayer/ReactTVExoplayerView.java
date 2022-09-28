@@ -769,7 +769,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private void handleDrmSessionManagerError(Exception exception) {
         final int errorStringId = R.string.error_drm_session_manager;
         final String errorString = getContext().getString(errorStringId);
-        eventEmitter.error(errorString, exception);
+        eventEmitter.error("DRM exception: " + errorString, exception);
     }
 
     private void releasePlayer() {
@@ -1265,7 +1265,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (errorString != null) {
             resetSourceUrl();
             watchFromWidget.hide();
-            eventEmitter.error(errorString, ex);
+            eventEmitter.error("Playback exception: " + errorString, ex);
         }
         playerNeedsSource = true;
         if (!DorisExceptionUtil.isBehindLiveWindow(error)) {
@@ -2011,7 +2011,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             hasReloadedCurrentSource = true;
             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
         } else {
-            eventEmitter.error(error.getMessage(), error);
+            eventEmitter.error("Ad exception", error);
         }
 
         // Reset imaDaiSrc and isImaDaiStream to allow a new source to be loaded
