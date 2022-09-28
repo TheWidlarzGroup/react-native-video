@@ -43,6 +43,7 @@ class VideoPlayer extends Component {
     selectedTextTrack: undefined,
     srcListId: 0,
     loop: false,
+    showRNVControls: false,
   };
 
   seekerWidth = 0
@@ -257,6 +258,9 @@ class VideoPlayer extends Component {
 
   toggleFullscreen() {
     this.setState({ fullscreen: !this.state.fullscreen })
+  }
+  toggleControls() {
+    this.setState({ showRNVControls: !this.state.showRNVControls })
   }
 
   toggleDecoration() {
@@ -558,118 +562,134 @@ class VideoPlayer extends Component {
     else return <View />
   }
 
+  renderTopControl() {
+    return (<>
+      <Text style={[styles.controlOption]}>
+        {this.srcList[this.state.srcListId]?.description || 'local file'}
+      </Text>
+      <View >
+        <TouchableOpacity
+          onPress={() => {
+            this.toggleControls()
+          }}
+        >
+          <Text style={[styles.leftRightControlOption]}>{this.state.showRNVControls ? 'Hide controls' : 'Show controls'}</Text>
+        </TouchableOpacity>
+      </View>
+    </>)
+  }
+
+
   renderOverlay() {
     return (
       <>
         {this.IndicatorLoadingView()}
         <View style={styles.topControls}>
-          <Text style={[styles.controlOption]}>
-            {this.srcList[this.state.srcListId]?.description || 'local file'}
-          </Text>
+          <View style={styles.resizeModeControl}>{this.renderTopControl()}</View>
         </View>
-        <View style={styles.leftControls}>
-          <View style={styles.resizeModeControl}>{this.renderLeftControl()}</View>
-        </View>
-        <View style={styles.rightControls}>
-          <View style={styles.resizeModeControl}>{this.renderRightControl()}</View>
-        </View>
-        <View style={styles.bottomControls}>
-          <View style={styles.generalControls}>
-            <View style={styles.generalControls}>
-              <View style={styles.resizeModeControl}>{this.renderInfoControl()}</View>
-            </View>
-            <View style={styles.resizeModeControl}>{this.renderPause()}</View>
-            <View style={styles.resizeModeControl}>
-              {this.renderRepeatModeControl()}
-            </View>
-            <View style={styles.resizeModeControl}>
-              {this.renderFullScreenControl()}
-            </View>
-            <View style={styles.resizeModeControl}>
-              {this.renderDecorationsControl()}
-            </View>
-          </View>
-          <View style={styles.generalControls}>
-            <View style={styles.rateControl}>
-              {this.renderRateControl(0.25)}
-              {this.renderRateControl(0.5)}
-              {this.renderRateControl(1.0)}
-              {this.renderRateControl(1.5)}
-              {this.renderRateControl(2.0)}
-            </View>
+        {!this.state.showRNVControls ? (
+          <>
+            <View style={styles.leftControls}>
+              <View style={styles.resizeModeControl}>{this.renderLeftControl()}</View>
+            </View><View style={styles.rightControls}>
+              <View style={styles.resizeModeControl}>{this.renderRightControl()}</View>
+            </View><View style={styles.bottomControls}>
+              <View style={styles.generalControls}>
+                <View style={styles.generalControls}>
+                  <View style={styles.resizeModeControl}>{this.renderInfoControl()}</View>
+                </View>
+                <View style={styles.resizeModeControl}>{this.renderPause()}</View>
+                <View style={styles.resizeModeControl}>
+                  {this.renderRepeatModeControl()}
+                </View>
+                <View style={styles.resizeModeControl}>
+                  {this.renderFullScreenControl()}
+                </View>
+                <View style={styles.resizeModeControl}>
+                  {this.renderDecorationsControl()}
+                </View>
+              </View>
+              <View style={styles.generalControls}>
+                <View style={styles.rateControl}>
+                  {this.renderRateControl(0.25)}
+                  {this.renderRateControl(0.5)}
+                  {this.renderRateControl(1.0)}
+                  {this.renderRateControl(1.5)}
+                  {this.renderRateControl(2.0)}
+                </View>
 
-            <View style={styles.volumeControl}>
-              {this.renderVolumeControl(0.5)}
-              {this.renderVolumeControl(1)}
-              {this.renderVolumeControl(1.5)}
-            </View>
+                <View style={styles.volumeControl}>
+                  {this.renderVolumeControl(0.5)}
+                  {this.renderVolumeControl(1)}
+                  {this.renderVolumeControl(1.5)}
+                </View>
 
-            <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl('cover')}
-              {this.renderResizeModeControl('contain')}
-              {this.renderResizeModeControl('stretch')}
-            </View>
-          </View>
-          {this.renderSeekBar()}
-          <View style={styles.generalControls}>
-            <Text style={styles.controlOption}>AudioTrack</Text>
-            {this.state.audioTracks?.length <= 0 ? (
-              <Text style={styles.controlOption}>empty</Text>
-            ) : (
-              <Picker
-                style={styles.picker}
-                selectedValue={this.state.selectedAudioTrack?.value}
-                onValueChange={(itemValue, itemIndex) => {
-                  console.log('on audio value change ' + itemValue)
-                  this.setState({
-                    selectedAudioTrack: {
-                      type: 'language',
-                      value: itemValue,
-                    },
-                  })
-                }}
-              >
-                {this.state.audioTracks.map((track) => {
-                  return (
-                    <Picker.Item
-                      label={track.language}
-                      value={track.language}
-                      key={track.language}
-                    />
-                  )
-                })}
-              </Picker>
-            )}
-            <Text style={styles.controlOption}>TextTrack</Text>
-            {this.state.textTracks?.length <= 0 ? (
-              <Text style={styles.controlOption}>empty</Text>
-            ) : (
-              <Picker
-                style={styles.picker}
-                selectedValue={this.state.selectedTextTrack?.value}
-                onValueChange={(itemValue, itemIndex) => {
-                  console.log('on value change ' + itemValue)
-                  this.setState({
-                    selectedTextTrack: {
-                      type: 'language',
-                      value: itemValue,
-                    },
-                  })
-                }}
-              >
-                <Picker.Item label={'none'} value={'none'} key={'none'} />
+                <View style={styles.resizeModeControl}>
+                  {this.renderResizeModeControl('cover')}
+                  {this.renderResizeModeControl('contain')}
+                  {this.renderResizeModeControl('stretch')}
+                </View>
+              </View>
+              {this.renderSeekBar()}
+              <View style={styles.generalControls}>
+                <Text style={styles.controlOption}>AudioTrack</Text>
+                {this.state.audioTracks?.length <= 0 ? (
+                  <Text style={styles.controlOption}>empty</Text>
+                ) : (
+                  <Picker
+                    style={styles.picker}
+                    selectedValue={this.state.selectedAudioTrack?.value}
+                    onValueChange={(itemValue, itemIndex) => {
+                      console.log('on audio value change ' + itemValue);
+                      this.setState({
+                        selectedAudioTrack: {
+                          type: 'language',
+                          value: itemValue,
+                        },
+                      });
+                    }}
+                  >
+                    {this.state.audioTracks.map((track) => {
+                      return (
+                        <Picker.Item
+                          label={track.language}
+                          value={track.language}
+                          key={track.language} />
+                      );
+                    })}
+                  </Picker>
+                )}
+                <Text style={styles.controlOption}>TextTrack</Text>
+                {this.state.textTracks?.length <= 0 ? (
+                  <Text style={styles.controlOption}>empty</Text>
+                ) : (
+                  <Picker
+                    style={styles.picker}
+                    selectedValue={this.state.selectedTextTrack?.value}
+                    onValueChange={(itemValue, itemIndex) => {
+                      console.log('on value change ' + itemValue);
+                      this.setState({
+                        selectedTextTrack: {
+                          type: 'language',
+                          value: itemValue,
+                        },
+                      });
+                    }}
+                  >
+                    <Picker.Item label={'none'} value={'none'} key={'none'} />
 
-                {this.state.textTracks.map((track) => (
-                  <Picker.Item
-                    label={track.language}
-                    value={track.language}
-                    key={track.language}
-                  />
-                ))}
-              </Picker>
-            )}
-          </View>
-        </View>
+                    {this.state.textTracks.map((track) => (
+                      <Picker.Item
+                        label={track.language}
+                        value={track.language}
+                        key={track.language} />
+                    ))}
+                  </Picker>
+                )}
+              </View>
+            </View></>
+        ) : null
+        }
       </>
     )
   }
@@ -689,6 +709,7 @@ class VideoPlayer extends Component {
           paused={this.state.paused}
           volume={this.state.volume}
           muted={this.state.muted}
+          controls={this.state.showRNVControls}
           resizeMode={this.state.resizeMode}
           onLoad={this.onLoad}
           onProgress={this.onProgress}

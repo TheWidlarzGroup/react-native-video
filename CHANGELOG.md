@@ -1,11 +1,14 @@
 ## Changelog
-### Version 6.0.0-alpha4
+
+### Version 6.0.0-alpha.4
+
+- Sample: Add react-native-video controls support [#2852](https://github.com/react-native-video/react-native-video/pull/2852)
 - Android: Switch Google's maven repository to default `google()` [#2860](https://github.com/react-native-video/react-native-video/pull/2860)
 - Android: Implement focusable prop so the video view can toggle whether it is focusable for non-touch devices [#2819](https://github.com/react-native-video/react-native-video/issues/2819)
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 
-
 ### Version 6.0.0-alpha3
+
 - Fix ios build [#2854](https://github.com/react-native-video/react-native-video/pull/2854)
 
 ### Version 6.0.0-alpha.2
@@ -33,6 +36,7 @@
 - Fix video endless loop when repeat set to false or not specified. [#2329](https://github.com/react-native-video/react-native-video/pull/2329)
 
 ### Version 6.0.0-alpha.0
+
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix AudioFocus bug that could cause the player to stop responding to play/pause in some instances. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix player crashing when it is being cleared. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
