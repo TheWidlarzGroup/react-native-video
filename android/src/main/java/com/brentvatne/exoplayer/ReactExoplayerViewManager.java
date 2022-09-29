@@ -36,6 +36,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DRM_TYPE = "type";
     private static final String PROP_DRM_LICENSESERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
+    private static final String PROP_LIMIT_MAX_RESOLUTION = "limitMaxResolution";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -59,6 +60,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent";
     private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent";
     private static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
+    private static final String PROP_MIN_AVAILABLE_MEMORY_TO_ENABLE_BACK_BUFFER = "minAvailableMemoryToEnableBackBuffer";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
@@ -142,6 +144,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 videoView.setUseTextureView(false);
             }
         }
+    }
+
+    @ReactProp(name = PROP_LIMIT_MAX_RESOLUTION)
+    public void setLimitMaxResolution(final ReactExoplayerView videoView, final boolean limitMaxResolution) {
+        videoView.setLimitMaxResolution(limitMaxResolution);
     }
 
     @ReactProp(name = PROP_SRC)
@@ -356,6 +363,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
         double minBackBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE;
         double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
+        double minAvailableMemoryToEnableBackBuffer = -1d;
 
         if (bufferConfig != null) {
             minBufferMs = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MS)
@@ -372,7 +380,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                     ? bufferConfig.getDouble(PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT) : minBackBufferMemoryReservePercent;
             minBufferMemoryReservePercent = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT)
                     ? bufferConfig.getDouble(PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT) : minBufferMemoryReservePercent;
-            videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, maxHeapAllocationPercent, minBackBufferMemoryReservePercent, minBufferMemoryReservePercent);
+            minAvailableMemoryToEnableBackBuffer = bufferConfig.hasKey(PROP_MIN_AVAILABLE_MEMORY_TO_ENABLE_BACK_BUFFER)
+                    ? bufferConfig.getDouble(PROP_MIN_AVAILABLE_MEMORY_TO_ENABLE_BACK_BUFFER) : minAvailableMemoryToEnableBackBuffer;
+            videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, maxHeapAllocationPercent, minBackBufferMemoryReservePercent, minBufferMemoryReservePercent, minAvailableMemoryToEnableBackBuffer);
         }
     }
 

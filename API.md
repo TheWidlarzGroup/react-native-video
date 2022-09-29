@@ -415,6 +415,7 @@ bufferForPlaybackAfterRebufferMs | number | The default duration of media that m
 maxHeapAllocationPercent | number | The percentage of available heap that the video can use to buffer, between 0 and 1
 minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1
 minBufferMemoryReservePercent | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1
+minAvailableMemoryToEnableBackBuffer | number | The amount of memory the device must have to allow the usage of back-buffer
 
 This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 
@@ -565,6 +566,17 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+#### limitMaxResolution
+Allows the player to ignore resolutions that are higher of the current device resolution
+Default: false. Do not limit the max resolution
+
+Example:
+```
+limitMaxResolution={true}
+```
+
+Platforms: Android
 
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
