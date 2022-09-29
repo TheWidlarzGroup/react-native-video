@@ -61,7 +61,11 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
+import com.google.android.exoplayer2.source.LoadEventInfo;
+import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSource.MediaPeriodId;
+import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
@@ -94,6 +98,7 @@ import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
 import com.google.android.exoplayer2.source.dash.manifest.Representation;
 import com.google.android.exoplayer2.source.dash.manifest.Descriptor;
 
+import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -143,6 +148,7 @@ class ReactExoplayerView extends FrameLayout implements
     private PlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.Listener eventListener;
+    private MediaSourceEventListener mediaSourceEventListener;
 
     private ExoPlayerView exoPlayerView;
 
@@ -179,6 +185,7 @@ class ReactExoplayerView extends FrameLayout implements
     private double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
     private double enableBackBufferAvailableMemory = -1f;
     private Handler mainHandler;
+    public List<Segment> segments;
 
     // Props from React
     private int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
@@ -251,6 +258,8 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+        this.mediaSourceEventListener = new MediaSourceListener();
+        this.segments = new ArrayList<Segment>();
     }
 
 
@@ -490,6 +499,39 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    /**
+     * class that holds the data of a segment loaded
+     */
+    private final class Segment {
+        public long mediaStartTimeMs;
+        public long mediaEndTimeMs;
+        public Uri uri;
+        Segment(long mediaEndTimeMs, long mediaStartTimeMs, Uri uri){
+            this.mediaEndTimeMs = mediaEndTimeMs;
+            this.mediaStartTimeMs = mediaStartTimeMs;
+            this.uri = uri;
+        }
+    }
+
+    /**
+     * class that listens the events of segments being loaded
+     */
+    private final class MediaSourceListener implements MediaSourceEventListener {
+        @Override
+        public void onLoadCompleted​(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
+            segments.add(new Segment(mediaLoadData.mediaEndTimeMs, mediaLoadData.mediaStartTimeMs, loadEventInfo.uri));
+            removePassedSegments();
+        }
+
+        @Override
+        public void onLoadError​(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData, IOException error, boolean wasCanceled) {
+            eventEmitter.error("Failed loading a segment", error, "20001", loadEventInfo.uri.toString());
+            Log.e("ExoPlayer Exception", "Failed loading a segment" + error.toString());
+            segments.add(new Segment(mediaLoadData.mediaEndTimeMs, mediaLoadData.mediaStartTimeMs, loadEventInfo.uri));
+            removePassedSegments();
+        }
+    }
+
     private void startBufferCheckTimer() {
         Player player = this.player;
         VideoEventEmitter eventEmitter = this.eventEmitter;
@@ -555,7 +597,27 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }, 1);
-        
+    }
+
+    private String getUriOfCurrentSegment() {
+        long currentPosition = player.getCurrentPosition();
+        for (int i = 0; i < segments.size(); i++) {
+            Segment segment = segments.get(i);
+            if (segment.mediaStartTimeMs < currentPosition && currentPosition < segment.mediaEndTimeMs) {
+                return segment.uri.toString();
+            }
+        }
+        return "";
+    }
+
+    private void removePassedSegments() {
+        long currentPosition = player.getCurrentPosition();
+        for (int i = 0; i < segments.size(); i++) {
+            Segment segment = segments.get(i);
+            if (segment.mediaEndTimeMs < currentPosition) {
+                segments.remove(i);
+            }
+        }
     }
 
     private void initializePlayerCore(ReactExoplayerView self) {
@@ -623,6 +685,9 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(self.srcUri, self.extension, drmSessionManager);
+
+        videoSource.addEventListener​(this.mainHandler, this.mediaSourceEventListener);
+
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
             mediaSource = videoSource;
@@ -806,6 +871,7 @@ class ReactExoplayerView extends FrameLayout implements
                 playerControlView.setPlayer(null);
             }
         }
+        segments.clear();
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
@@ -1401,7 +1467,7 @@ class ReactExoplayerView extends FrameLayout implements
             default:
                 break;
         }
-        eventEmitter.error(errorString, e, errorCode);
+        eventEmitter.error(errorString, e, errorCode, getUriOfCurrentSegment());
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
@@ -1912,6 +1978,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
+        // this method will be invoked if the http request for the license fails
         Log.d("DRM Info", "onDrmSessionManagerError");
         eventEmitter.error("onDrmSessionManagerError", e, "3002");
     }

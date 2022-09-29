@@ -134,6 +134,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
     private static final String EVENT_PROP_ERROR_TRACE = "errorStackTrace";
     private static final String EVENT_PROP_ERROR_CODE = "errorCode";
+    private static final String EVENT_PROP_ERROR_SEGMENT = "errorSegment";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
 
@@ -247,14 +248,18 @@ class VideoEventEmitter {
     }
 
     void error(String errorString, Exception exception) {
-        _error(errorString, exception, "0001");
+        _error(errorString, exception, "0001", "");
     }
 
     void error(String errorString, Exception exception, String errorCode) {
-        _error(errorString, exception, errorCode);
+        _error(errorString, exception, errorCode, "");
     }
 
-    void _error(String errorString, Exception exception, String errorCode) {
+    void error(String errorString, Exception exception, String errorCode, String segmentUri) {
+        _error(errorString, exception, errorCode, segmentUri);
+    }
+
+    void _error(String errorString, Exception exception, String errorCode, String segmentUri) {
         // Prepare stack trace
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -266,6 +271,7 @@ class VideoEventEmitter {
         error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.toString());
         error.putString(EVENT_PROP_ERROR_CODE, errorCode);
         error.putString(EVENT_PROP_ERROR_TRACE, stackTrace);
+        error.putString(EVENT_PROP_ERROR_SEGMENT, segmentUri);
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);
