@@ -27,8 +27,7 @@ android {
 }
 
 repositories {
-    // Remove this repository line after google releases to google() or mavenCentral()
-    maven { url "https://dl.google.com/android/maven2" }
+    google()
 }
 
 dependencies {
