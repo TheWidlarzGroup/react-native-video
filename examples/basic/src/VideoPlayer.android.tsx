@@ -52,7 +52,7 @@ class VideoPlayer extends Component {
     require('./broadchurch.mp4'),
     {
       description: '(dash) sintel subtitles',
-      uri: 'Https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
     },
     {
       description: '(mp4) big buck bunny',
