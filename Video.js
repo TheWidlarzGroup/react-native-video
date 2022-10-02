@@ -285,7 +285,7 @@ export default class Video extends Component {
     const isNetwork = !!(uri && uri.match(/^https?:/i));
     const isAsset = !!(uri && uri.match(/^(assets-library|ph|ipod-library|file|content|ms-appx|ms-appdata):/i));
 
-    if (uri && !isNetwork && !isAsset) {
+    if ((uri || uri === '') && !isNetwork && !isAsset) {
       if (this.props.onError) {
         this.props.onError({error: {errorString: 'invalid url, player will stop', errorCode: 'INVALID_URL'}});
       }
