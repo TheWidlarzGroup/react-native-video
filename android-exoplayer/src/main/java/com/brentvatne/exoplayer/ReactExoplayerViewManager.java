@@ -72,6 +72,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
+    private static final String PROP_ANDROID_TV = "androidTV";
+    private static final String PROP_ATV_ACTIVE_APP = "androidTVActiveApp";
 
     private ReactExoplayerConfig config;
 
@@ -321,6 +323,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactExoplayerView videoView, final boolean controls) {
         videoView.setControls(controls);
+    }
+
+    @ReactProp(name = PROP_ANDROID_TV, defaultBoolean = false)
+    public void setAndroidTV(final ReactExoplayerView videoView, final boolean androidTV) {
+        videoView.setAndroidTV(androidTV);
+    }
+
+    @ReactProp(name = PROP_ATV_ACTIVE_APP, defaultBoolean = false)
+    public void setATVActiveApp(final ReactExoplayerView videoView, final boolean activeApp) {
+        videoView.setATVActiveApp(activeApp);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
