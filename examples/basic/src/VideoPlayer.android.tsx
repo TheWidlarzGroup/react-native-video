@@ -68,6 +68,12 @@ class VideoPlayer extends Component {
         'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
       type: 'mpd',
     },
+    {
+      description: 'invalid URL',
+      uri:
+        'mmt://www.youtube.com',
+      type: 'mpd',
+    },
     { description: '(no url) Stopped playback', uri: undefined },
     {
       description: '(no view) no View',
@@ -247,8 +253,8 @@ class VideoPlayer extends Component {
   }
 
   onError = (err: any) => {
-    console.log(JSON.stringify(err))
-    this.toast(true, 'error: ' + err?.error?.code)
+    console.log(JSON.stringify(err?.error.errorCode))
+    this.toast(true, 'error: ' + err?.error.errorCode)
   }
 
   onEnd = () => {
