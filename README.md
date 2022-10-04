@@ -4,7 +4,7 @@
     <img src="./docs/logo.svg" width="460" height="225" alt="React Native Video" />
   </picture>
   <br><br>
-  <p>A <code>&lt;Video/></code> component for iOS, tvOS, Android, Android TV, and Windows.</p>
+  <p>A <code>&lt;Video/></code> component for iOS, tvOS, Android, Android TV, and Windows UWP.</p>
 
 
 ---
