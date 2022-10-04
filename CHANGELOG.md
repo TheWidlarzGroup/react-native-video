@@ -1,5 +1,17 @@
 ## Changelog
 
+### Version 5.x 2022/10/04.
+
+- Fix Android TV AudioFocus specific case
+  Android-TV has a specific use-case not related to the “Play-Pause” button (intention) 
+  forwarded to all apps even the ones in background.
+  So if App is active we must capture back the AudioFocus to any “concurrent” sound App.
+
+  Test with music App (e.g. TuneIn) VS video player,
+  on play-pause the music App sound should not come to foreground
+
+### Version 
+
 - Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
 
 ### Version 5.1.0-alpha9
