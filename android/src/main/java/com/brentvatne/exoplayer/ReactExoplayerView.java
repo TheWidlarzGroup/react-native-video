@@ -611,6 +611,10 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void removePassedSegments() {
+        if (player == null) {
+            // Cannot remove segment if player is already destroyed
+            return;
+        }
         long currentPosition = player.getCurrentPosition();
         for (int i = 0; i < segments.size(); i++) {
             Segment segment = segments.get(i);
