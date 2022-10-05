@@ -264,97 +264,98 @@ var styles = StyleSheet.create({
 });
 ```
 
+
 ### Configurable props
-| Name |Platform Support  | 
-|--|--|
-|[allowsExternalPlayback](#allowsexternalplayback) |iOS |
-|[audioOnly](#audioonly)|All |
-|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|\
-|[backBufferDurationMs](#backBufferDurationMs)| Android |
-|[bufferConfig](#bufferconfig)|Android|
-|[contentStartTime](#contentStartTime)| Android |
-|[controls](#controls)|Android, iOS|
-|[currentPlaybackTime](#currentPlaybackTime)|Android|
-|[disableFocus](#disableFocus)|Android, iOS|
-|[disableDisconnectError](#disableDisconnectError)|Android|
-|[filter](#filter)|iOS|
-|[filterEnabled](#filterEnabled)|iOS|
-|[focusable](#focusable)|Android|
-|[fullscreen](#fullscreen)|iOS|
-|[fullscreenAutorotate](#fullscreenautorotate)|iOS|
-|[fullscreenOrientation](#fullscreenorientation)|iOS|
-|[headers](#headers)|Android|
-|[hideShutterView](#hideshutterview)|Android|
-|[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
-|[maxBitRate](#maxbitrate)|Android, iOS|
-|[minLoadRetryCount](#minLoadRetryCount)|Android|
-|[mixWithOthers](#mixWithOthers)|iOS|
-|[muted](#muted)|All|
-|[paused](#paused)|All|
-|[pictureInPicture](#pictureinpicture)|iOS|
-|[playInBackground](#playinbackground)|Android, iOS|
-|[playWhenInactive](#playwheninactive)|iOS|
-|[poster](#poster)|All|
-|[posterResizeMode](#posterresizemode)|All|
-|[preferredForwardBufferDuration](#preferredForwardBufferDuration)|iOS|
-|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
-|[progressUpdateInterval](#progressupdateinterval)|All|
-|[rate](#rate)|All|
-|[repeat](#repeat)|All|
-|[reportBandwidth](#reportbandwidth)|Android|
-|[resizeMode](#resizemode)|Android, iOS, Windows UWP|
-|[selectedAudioTrack](#selectedaudiotrack)|Android, iOS|
-|[selectedTextTrack](#selectedtexttrack)|Android, iOS|
-|[selectedVideoTrack](#selectedvideotrack)|Android|
-|[source](#source)|All|
-|[subtitleStyle](#subtitleStyle)|Android|
-|[textTracks](#texttracks)|Android, iOS|
-|[trackId](#trackId)|Android|
-|[useTextureView](#usetextureview)|Android|
-|[useSecureView](#useSecureView)|Android|
-|[volume](#volume)|All|
-|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)|All|
+| Name |Summary| iOS | Android | UWP |
+|------|-----|---------|-------------|--|
+|[allowsExternalPlayback](#allowsexternalplayback)|Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI. | ❎ | | |
+|[audioOnly](#audioonly)|Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.| ❎ | ❎ | ❎ |
+|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)|A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later | ❎ | | |
+|[backBufferDurationMs](#backBufferDurationMs)|The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.| | ❎ | |
+|[bufferConfig](#bufferconfig)|Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.| | ❎ | |
+|[contentStartTime](#contentStartTime)|The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.| | ❎ | |
+|[controls](#controls)|Determines whether to show native player controls.| ❎ | ❎ | |
+|[currentPlaybackTime](#currentPlaybackTime)|When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.| | ❎ | |
+|[disableFocus](#disableFocus)|Determines whether video audio should override background music/audio in Android devices.| ❎ | ❎ | |
+|[disableDisconnectError](#disableDisconnectError)|Determines if the player needs to throw an error when connection is lost or not| | ❎ | |
+|[filter](#filter)|Add video filter| ❎ | | |
+|[filterEnabled](#filterEnabled)|Enable video filter| ❎ | | |
+|[focusable](#focusable)|Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.| | ❎ | |
+|[fullscreen](#fullscreen)|Controls whether the player enters fullscreen on play.| ❎ | | |
+|[fullscreenAutorotate](#fullscreenautorotate)|If a preferred fullscreenOrientation is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.| ❎ | | |
+|[fullscreenOrientation](#fullscreenorientation)|Desc| ❎ | | |
+|[headers](#headers)|Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.| | ❎ | |
+|[hideShutterView](#hideshutterview)|Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.| | ❎ | |
+|[ignoreSilentSwitch](#ignoresilentswitch)|Controls the iOS silent switch behavior| ❎ | | |
+|[maxBitRate](#maxbitrate)|Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.| ❎ | ❎ | |
+|[minLoadRetryCount](#minLoadRetryCount)|Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.| | ❎ | |
+|[mixWithOthers](#mixWithOthers)|Controls how Audio mix with other apps.| ❎ | | |
+|[muted](#muted)|Controls whether the audio is muted| ❎ | ❎ | ❎ |
+|[paused](#paused)|Controls whether the media is paused| ❎ | ❎ | ❎ |
+|[pictureInPicture](#pictureinpicture)|Determine whether the media should played as picture in picture.| ❎ | | |
+|[playInBackground](#playinbackground)|Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.| ❎ | ❎ | |
+|[playWhenInactive](#playwheninactive)|Determine whether the media should continue playing when notifications or the Control Center are in front of the video.| ❎ | | |
+|[poster](#poster)|An image to display while the video is loading | ❎ | ❎ | ❎ |
+|[posterResizeMode](#posterresizemode)|Determines how to resize the poster image when the frame doesn't match the raw video dimensions.| ❎ | ❎ | ❎ |
+|[preferredForwardBufferDuration](#preferredForwardBufferDuration)|The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the preferredForwardBufferDuration instance property on AVPlayerItem.| ❎ | | |
+|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.| ❎ | ❎ | |
+|[progressUpdateInterval](#progressupdateinterval)|Delay in milliseconds between onProgress events in milliseconds.| ❎ | ❎ | ❎ |
+|[rate](#rate)|Speed at which the media should play.| ❎ | ❎ | ❎ |
+|[repeat](#repeat)|Determine whether to repeat the video when the end is reached| ❎ | ❎ | ❎ |
+|[reportBandwidth](#reportbandwidth)|Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.| | ❎ | |
+|[resizeMode](#resizemode)|Determines how to resize the video when the frame doesn't match the raw video dimensions.| ❎ | ❎ | ❎ |
+|[selectedAudioTrack](#selectedaudiotrack)|Configure which audio track, if any, is played.| ❎ | ❎ | |
+|[selectedTextTrack](#selectedtexttrack)|DeConfigure which text track (caption or subtitle), if any, is shown.sc| ❎ | ❎ | |
+|[selectedVideoTrack](#selectedvideotrack)|Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.| | ❎ | |
+|[source](#source)|Sets the media source. You can pass an asset loaded via require or an object with a uri.| ❎ | ❎ | ❎ |
+|[subtitleStyle](#subtitleStyle)|Desc| | ❎ | |
+|[textTracks](#texttracks)|Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:| ❎ | ❎ | |
+|[trackId](#trackId)|Configure an identifier for the video stream to link the playback context to the events emitted.| | ❎ | |
+|[useTextureView](#usetextureview)|Controls whether to output to a TextureView or SurfaceView.| | ❎ | |
+|[useSecureView](#useSecureView)|Force the output to a SurfaceView and enables the secure surface.| | ❎ | |
+|[volume](#volume)|Adjust the volume.| ❎ | ❎ | ❎ |
+|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)|Set the url scheme for stream encryption key for local assets| ❎ | ❎ | ❎ |
 
 
 ### Event props
-| Name |Platform Support  | 
-|--|--|
-|[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android, iOS|
-|[onBandwidthUpdate](#onbandwidthupdate)|Android|
-|[onBuffer](#onbuffer)|Android, iOS|
-|[onEnd](#onend)|All|
-|[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
-|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)|Android, iOS|
-|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)|Android, iOS|
-|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)|Android, iOS|
-|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)|Android, iOS|
-|[onLoad](#onload)|All|
-|[onLoadStart](#onloadstart)|All|
-|[onReadyForDisplay](#onreadyfordisplay)|Android, iOS, Web|
-|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)|iOS|
-|[onPlaybackRateChange](#onplaybackratechange)|All|
-|[onProgress](#onprogress)|All|
-|[onSeek](#onseek)|Android, iOS, Windows UWP|
-|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)|iOS|
-|[onTimedMetadata](#ontimedmetadata)|Android, iOS|
+| Name |iOS|Android|UWP|
+|------|-----|---------|-------------|
+|[onAudioBecomingNoisy](#onaudiobecomingnoisy)| ❎ | ❎ | |
+|[onBandwidthUpdate](#onbandwidthupdate)| | ❎ | |
+|[onBuffer](#onbuffer)| ❎ | ❎ | |
+|[onEnd](#onend)| ❎ | ❎ | ❎ |
+|[onExternalPlaybackChange](#onexternalplaybackchange)| ❎ | | |
+|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)| ❎ | ❎ | |
+|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)| ❎ | ❎ | |
+|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)| ❎ | ❎ | |
+|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)| ❎ | ❎ | |
+|[onLoad](#onload)| ❎ | ❎ | ❎ |
+|[onLoadStart](#onloadstart)| ❎ | ❎ | ❎ |
+|[onReadyForDisplay](#onreadyfordisplay)| ❎ | ❎ | |
+|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)| ❎ | | |
+|[onPlaybackRateChange](#onplaybackratechange)| ❎ | ❎ | ❎ |
+|[onProgress](#onprogress)| ❎ | ❎ | ❎ |
+|[onSeek](#onseek)| ❎ | ❎ | ❎ |
+|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)| ❎ | | |
+|[onTimedMetadata](#ontimedmetadata)| ❎ | ❎ | |
 
 
 ### Methods
-| Name |Platform Support  | 
-|--|--|
-|[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android, iOS|
-|[presentFullscreenPlayer](#presentfullscreenplayer)|Android, iOS|
-|[save](#save)|iOS|
-|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS|
-|[seek](#seek)|All|
+| Name |iOS|Android|UWP|
+|------|-----|---------|-------------|
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)| ❎ | ❎ | |
+|[presentFullscreenPlayer](#presentfullscreenplayer)| ❎ | ❎ | |
+|[save](#save)| ❎ | | |
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)| ❎ | | |
+|[seek](#seek)| ❎ | ❎ | ❎ |
 
 ### Static methods
 
-| Name |Platform Support  |
-|--|--|
-|[getWidevineLevel](#getWidevineLevel)|Android|
-|[isCodecSupported](#isCodecSupported)|Android|
-|[isHEVCSupported](#isHEVCSupported)|Android|
+| Name |iOS|Android|UWP|
+|------|-----|---------|-------------|
+|[getWidevineLevel](#getWidevineLevel)| | ❎ | |
+|[isCodecSupported](#isCodecSupported)| | ❎ | |
+|[isHEVCSupported](#isHEVCSupported)| | ❎ | |
 
 ### Configurable props
 
@@ -416,7 +417,7 @@ Platforms: Android
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### controls
 Determines whether to show player controls.
@@ -430,9 +431,9 @@ If needed, you can also add your controls or use a package like [react-native-vi
 ### contentStartTime
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
-#### disableFocus
+### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
 * **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
@@ -441,7 +442,7 @@ Note: Allows multiple videos to play if set to `true`. If `false`, when one vide
  
 Platforms: Android
 
-#### disableDisconnectError
+### disableDisconnectError
 Determines if the player needs to throw an error when connection is lost or not
 * **false (default)** - Player will throw an error when connection is lost
 * **true** - Player will keep trying to buffer when network connect is lost
@@ -451,7 +452,7 @@ Platforms: Android
 ### DRM
 To setup DRM please follow [this guide](./docs/DRM.md)
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### filter
 Add video filter
@@ -559,7 +560,7 @@ Example:
 maxBitRate={2000000} // 2 megabits
 ```
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### minLoadRetryCount
 Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
@@ -611,7 +612,7 @@ To use this feature on iOS, you must:
 * [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3) in your Xcode project
 * Set the ignoreSilentSwitch prop to "ignore"
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### playWhenInactive
 Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
@@ -688,7 +689,7 @@ Determines how to resize the video when the frame doesn't match the raw video di
 * **"cover"** - Scale the video uniformly (maintain the video's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
-Platforms: Android, iOS, Windows UWP
+Platforms: iOS, Android, Windows UWP
 
 #### selectedAudioTrack
 Configure which audio track, if any, is played.
@@ -718,7 +719,7 @@ Type | Value | Description
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### selectedTextTrack
 Configure which text track (caption or subtitle), if any, is shown.
@@ -750,7 +751,7 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### selectedVideoTrack
 Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
@@ -908,7 +909,7 @@ textTracks={[
 ```
 
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### trackId
 Configure an identifier for the video stream to link the playback context to the events emitted.
@@ -969,7 +970,7 @@ Callback function that is called when the audio is about to become 'noisy' due t
 
 Payload: none
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onBandwidthUpdate
 Callback function that is called when the available bandwidth changes.
@@ -1007,7 +1008,7 @@ Example:
 }
 ```
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
@@ -1039,28 +1040,28 @@ Callback function that is called when the player is about to enter fullscreen mo
 
 Payload: none
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onFullscreenPlayerDidPresent
 Callback function that is called when the player has entered fullscreen mode.
 
 Payload: none
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onFullscreenPlayerWillDismiss
 Callback function that is called when the player is about to exit fullscreen mode.
 
 Payload: none
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onFullscreenPlayerDidDismiss
 Callback function that is called when the player has exited fullscreen mode.
 
 Payload: none
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
@@ -1159,7 +1160,7 @@ Payload: none
 * iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
 * Android [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
 
-Platforms: Android, iOS, Web
+Platforms: iOS, Android
 
 #### onPictureInPictureStatusChanged
 Callback function that is called when picture in picture becomes active or inactive.
@@ -1235,7 +1236,7 @@ Example:
 Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
 
 
-Platforms: Android, iOS, Windows UWP
+Platforms: iOS, Android, Windows UWP
 
 #### onRestoreUserInterfaceForPictureInPictureStop
 Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
@@ -1264,7 +1265,7 @@ Example:
 }
 ```
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
@@ -1285,7 +1286,7 @@ Example:
 this.player.dismissFullscreenPlayer();
 ```
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### presentFullscreenPlayer
 `presentFullscreenPlayer()`
@@ -1301,7 +1302,7 @@ Example:
 this.player.presentFullscreenPlayer();
 ```
 
-Platforms: Android, iOS
+Platforms: iOS, Android
 
 #### save
 `save(): Promise`
