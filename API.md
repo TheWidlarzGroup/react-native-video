@@ -210,7 +210,7 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 
 **React Native Windows 0.61 and below**
 
-Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
+Follow the manual linking instructions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
 </details>
  
@@ -265,7 +265,7 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-| Name |Plateforms Support  | 
+| Name |Platform Support  | 
 |--|--|
 |[allowsExternalPlayback](#allowsexternalplayback) |iOS |
 |[audioOnly](#audioonly)|All |
@@ -317,7 +317,7 @@ var styles = StyleSheet.create({
 
 
 ### Event props
-| Name |Plateforms Support  | 
+| Name |Platform Support  | 
 |--|--|
 |[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android, iOS|
 |[onBandwidthUpdate](#onbandwidthupdate)|Android|
@@ -340,7 +340,7 @@ var styles = StyleSheet.create({
 
 
 ### Methods
-| Name |Plateforms Support  | 
+| Name |Platform Support  | 
 |--|--|
 |[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android, iOS|
 |[presentFullscreenPlayer](#presentfullscreenplayer)|Android, iOS|
@@ -350,7 +350,7 @@ var styles = StyleSheet.create({
 
 ### Static methods
 
-| Name |Plateforms Support  |
+| Name |Platform Support  |
 |--|--|
 |[getWidevineLevel](#getWidevineLevel)|Android|
 |[isCodecSupported](#isCodecSupported)|Android|
@@ -425,7 +425,7 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 Note on Android, native controls are available by default.
-If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Usefull Side Project](./docs/PROJECTS.md).
+If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Projects](./docs/PROJECTS.md).
 
 ### contentStartTime
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
@@ -489,7 +489,7 @@ Enable video filter.
 
 Platforms: iOS
 
-#### Focusable
+#### focusable
 Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.
 * **false** - Makes view unfocusable
 * **true (default)** - Makes view focusable
@@ -881,7 +881,7 @@ Property | Description
 title | Descriptive name for the track
 language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
 type | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>iOS only supports VTT, Android supports all 3
-uri | URL for the text track. Currently, only tracks hosted on a webserver are supported
+uri | URL for the text track. Currently, only tracks hosted on a web server are supported
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
@@ -1594,9 +1594,9 @@ Previously, on Android MediaPlayer if you setup an AppState event when the app w
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
 #### Use Android target SDK 27 by default
-Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
+Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switching over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
-You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
+You will either need to install the version 27 SDK and version 27.0.3 build tools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
 
 ##### Using app build settings
 You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
