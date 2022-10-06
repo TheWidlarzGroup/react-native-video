@@ -40,7 +40,8 @@
     "dependencies": {
         "keymirror": "^0.1.1",
         "prop-types": "^15.5.10",
-        "shaka-player": "^2.4.4"
+        "shaka-player": "^2.4.4",
+        "deprecated-react-native-prop-types": "^2.3.0",
     },
     "scripts": {
         "test": "node_modules/.bin/eslint *.js"
