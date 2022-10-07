@@ -8,6 +8,7 @@
 - Android: Implement focusable prop so the video view can toggle whether it is focusable for non-touch devices [#2819](https://github.com/react-native-video/react-native-video/issues/2819)
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 - Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
+- Feature: playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
 
 ### Version 6.0.0-alpha.3
 
