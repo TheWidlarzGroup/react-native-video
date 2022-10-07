@@ -310,6 +310,7 @@ var styles = StyleSheet.create({
 |[trackId](#trackId)|Android|
 |[useTextureView](#usetextureview)|Android|
 |[useSecureView](#useSecureView)|Android|
+|[audioOutput](#audioOutput)|Android, iOS|
 |[volume](#volume)|All|
 |[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)|All|
 
@@ -938,6 +939,13 @@ SurfaceView is is the only one that can be labeled as secure.
 * **false (default)** - Do not use security
 
 Platforms: Android
+
+#### audioOutput
+Changes the audio output.
+* **speaker (default)** - plays through speaker
+* **earpiece** - plays through earpiece
+
+Platforms: Android, iOS
 
 #### volume
 Adjust the volume.
