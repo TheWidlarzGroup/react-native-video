@@ -470,6 +470,7 @@ Video.propTypes = {
   ),
   paused: PropTypes.bool,
   muted: PropTypes.bool,
+  audioOutput: PropTypes.oneOf(['earpiece', 'speaker']),
   volume: PropTypes.number,
   bufferConfig: PropTypes.shape({
     minBufferMs: PropTypes.number,
