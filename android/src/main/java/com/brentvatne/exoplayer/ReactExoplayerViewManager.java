@@ -48,6 +48,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
+    private static final String PROP_AUDIO_OUTPUT = "audioOutput";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BACK_BUFFER_DURATION_MS = "backBufferDurationMs";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
@@ -260,6 +261,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_MUTED, defaultBoolean = false)
     public void setMuted(final ReactExoplayerView videoView, final boolean muted) {
         videoView.setMutedModifier(muted);
+    }
+
+    @ReactProp(name = PROP_AUDIO_OUTPUT)
+    public void setAudioOutput(final ReactExoplayerView videoView, final String audioOutput) {
+        videoView.setAudioOutput(ReactExoplayerView.AudioOutput.get(audioOutput));
     }
 
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)

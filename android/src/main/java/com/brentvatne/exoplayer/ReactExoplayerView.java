@@ -34,6 +34,7 @@ import com.facebook.react.util.RNLog;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
 import com.google.android.exoplayer2.drm.DrmSession.DrmSessionException;
@@ -130,6 +131,32 @@ class ReactExoplayerView extends FrameLayout implements
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
     private static final int SHOW_PROGRESS = 1;
 
+    @SuppressLint("InlinedApi")
+    public enum AudioOutput {
+        SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
+        EARPIECE("earpiece",  C.STREAM_TYPE_VOICE_CALL);
+
+        private final int streamType;
+        private final String mName;
+
+        AudioOutput(final String name, int stream) {
+            mName = name;
+            streamType = stream;
+        }
+
+        public static AudioOutput get(String name) {
+            for (AudioOutput d : values()) {
+                if (d.mName.equalsIgnoreCase(name)) return d;
+            }
+            return SPEAKER;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "(" + this.mName + ", " + streamType + ")";
+        }
+    }
+
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
@@ -160,6 +187,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean muted = false;
     private boolean hasAudioFocus = false;
     private float rate = 1f;
+    private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
@@ -1692,6 +1720,19 @@ class ReactExoplayerView extends FrameLayout implements
         this.muted = muted;
         if (player != null) {
             player.setVolume(muted ? 0.f : audioVolume);
+        }
+    }
+
+    public void setAudioOutput(AudioOutput output) {
+        if (audioOutput != output && player != null) {
+            this.audioOutput = output;
+            int usage = Util.getAudioUsageForStreamType(audioOutput.streamType);
+            int contentType = Util.getAudioContentTypeForStreamType(audioOutput.streamType);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(usage).setContentType(contentType).build();
+            player.setAudioAttributes(audioAttributes, false);
+            AudioManager audioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setMode(audioOutput == AudioOutput.SPEAKER ? AudioManager.MODE_NORMAL : AudioManager.MODE_IN_COMMUNICATION);
+            audioManager.setSpeakerphoneOn(audioOutput == AudioOutput.SPEAKER);
         }
     }
 
