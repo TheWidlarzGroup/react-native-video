@@ -268,94 +268,94 @@ var styles = StyleSheet.create({
 ### Configurable props
 | Name | | | | <div style="width: 50%">Summary</div> |
 |------|-|-|-|---------|
-|[allowsExternalPlayback](#allowsexternalplayback)| <img width="24" height="24" src="./docs/ios.svg" /> | | |Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI. |
-|[audioOnly](#audioonly)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="24" height="24" src="./docs/windows.svg" /> |Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.|
-|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)| <img width="24" height="24" src="./docs/ios.svg" />  | | |A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later |
-|[backBufferDurationMs](#backBufferDurationMs)| | <img width="24" height="24" src="./docs/android.svg" />  | |The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.|
-|[bufferConfig](#bufferconfig)| | <img width="24" height="24" src="./docs/android.svg" />  | |Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.|
-|[contentStartTime](#contentStartTime)| | <img width="24" height="24" src="./docs/android.svg" />  | |The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.|
-|[controls](#controls)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Determines whether to show native player controls.|
-|[currentPlaybackTime](#currentPlaybackTime)| | <img width="24" height="24" src="./docs/android.svg" />  | |When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.|
-|[disableFocus](#disableFocus)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Determines whether video audio should override background music/audio in Android devices.|
-|[disableDisconnectError](#disableDisconnectError)| | <img width="24" height="24" src="./docs/android.svg" />  | |Determines if the player needs to throw an error when connection is lost or not|
-|[filter](#filter)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Add video filter|
-|[filterEnabled](#filterEnabled)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Enable video filter|
-|[focusable](#focusable)| | <img width="24" height="24" src="./docs/android.svg" />  | |Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.|
-|[fullscreen](#fullscreen)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Controls whether the player enters fullscreen on play.|
-|[fullscreenAutorotate](#fullscreenautorotate)| <img width="24" height="24" src="./docs/ios.svg" />  | | |If a preferred fullscreenOrientation is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.|
-|[fullscreenOrientation](#fullscreenorientation)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Desc|
-|[headers](#headers)| | <img width="24" height="24" src="./docs/android.svg" />  | |Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.|
-|[hideShutterView](#hideshutterview)| | <img width="24" height="24" src="./docs/android.svg" />  | |Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.|
-|[ignoreSilentSwitch](#ignoresilentswitch)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Controls the iOS silent switch behavior|
-|[maxBitRate](#maxbitrate)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.|
-|[minLoadRetryCount](#minLoadRetryCount)| | <img width="24" height="24" src="./docs/android.svg" />  | |Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.|
-|[mixWithOthers](#mixWithOthers)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Controls how Audio mix with other apps.|
-|[muted](#muted)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Controls whether the audio is muted|
-|[paused](#paused)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Controls whether the media is paused|
-|[pictureInPicture](#pictureinpicture)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Determine whether the media should played as picture in picture.|
-|[playInBackground](#playinbackground)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.|
-|[playWhenInactive](#playwheninactive)| <img width="24" height="24" src="./docs/ios.svg" />  | | |Determine whether the media should continue playing when notifications or the Control Center are in front of the video.|
-|[poster](#poster)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |An image to display while the video is loading |
-|[posterResizeMode](#posterresizemode)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determines how to resize the poster image when the frame doesn't match the raw video dimensions.|
-|[preferredForwardBufferDuration](#preferredForwardBufferDuration)| <img width="24" height="24" src="./docs/ios.svg" />  | | |The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the preferredForwardBufferDuration instance property on AVPlayerItem.|
-|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.|
-|[progressUpdateInterval](#progressupdateinterval)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Delay in milliseconds between onProgress events in milliseconds.|
-|[rate](#rate)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Speed at which the media should play.|
-|[repeat](#repeat)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determine whether to repeat the video when the end is reached|
-|[reportBandwidth](#reportbandwidth)| | <img width="24" height="24" src="./docs/android.svg" />  | |Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.|
-|[resizeMode](#resizemode)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determines how to resize the video when the frame doesn't match the raw video dimensions.|
-|[selectedAudioTrack](#selectedaudiotrack)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Configure which audio track, if any, is played.|
-|[selectedTextTrack](#selectedtexttrack)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |DeConfigure which text track (caption or subtitle), if any, is shown.sc|
-|[selectedVideoTrack](#selectedvideotrack)| | <img width="24" height="24" src="./docs/android.svg" />  | |Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.|
-|[source](#source)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Sets the media source. You can pass an asset loaded via require or an object with a uri.|
-|[subtitleStyle](#subtitleStyle)| | <img width="24" height="24" src="./docs/android.svg" />  | |Desc|
-|[textTracks](#texttracks)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:|
-|[trackId](#trackId)| | <img width="24" height="24" src="./docs/android.svg" />  | |Configure an identifier for the video stream to link the playback context to the events emitted.|
-|[useTextureView](#usetextureview)| | <img width="24" height="24" src="./docs/android.svg" />  | |Controls whether to output to a TextureView or SurfaceView.|
-|[useSecureView](#useSecureView)| | <img width="24" height="24" src="./docs/android.svg" />  | |Force the output to a SurfaceView and enables the secure surface.|
-|[volume](#volume)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Adjust the volume.|
-|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Set the url scheme for stream encryption key for local assets|
+|[allowsExternalPlayback](#allowsexternalplayback)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | | |Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI. |
+|[audioOnly](#audioonly)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/windows.svg" /> |Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.|
+|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later |
+|[backBufferDurationMs](#backBufferDurationMs)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.|
+|[bufferConfig](#bufferconfig)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.|
+|[contentStartTime](#contentStartTime)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.|
+|[controls](#controls)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Determines whether to show native player controls.|
+|[currentPlaybackTime](#currentPlaybackTime)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.|
+|[disableFocus](#disableFocus)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Determines whether video audio should override background music/audio in Android devices.|
+|[disableDisconnectError](#disableDisconnectError)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Determines if the player needs to throw an error when connection is lost or not|
+|[filter](#filter)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Add video filter|
+|[filterEnabled](#filterEnabled)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Enable video filter|
+|[focusable](#focusable)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.|
+|[fullscreen](#fullscreen)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Controls whether the player enters fullscreen on play.|
+|[fullscreenAutorotate](#fullscreenautorotate)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |If a preferred fullscreenOrientation is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.|
+|[fullscreenOrientation](#fullscreenorientation)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Desc|
+|[headers](#headers)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.|
+|[hideShutterView](#hideshutterview)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.|
+|[ignoreSilentSwitch](#ignoresilentswitch)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Controls the iOS silent switch behavior|
+|[maxBitRate](#maxbitrate)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.|
+|[minLoadRetryCount](#minLoadRetryCount)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.|
+|[mixWithOthers](#mixWithOthers)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Controls how Audio mix with other apps.|
+|[muted](#muted)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Controls whether the audio is muted|
+|[paused](#paused)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Controls whether the media is paused|
+|[pictureInPicture](#pictureinpicture)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Determine whether the media should played as picture in picture.|
+|[playInBackground](#playinbackground)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.|
+|[playWhenInactive](#playwheninactive)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |Determine whether the media should continue playing when notifications or the Control Center are in front of the video.|
+|[poster](#poster)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |An image to display while the video is loading |
+|[posterResizeMode](#posterresizemode)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determines how to resize the poster image when the frame doesn't match the raw video dimensions.|
+|[preferredForwardBufferDuration](#preferredForwardBufferDuration)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the preferredForwardBufferDuration instance property on AVPlayerItem.|
+|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.|
+|[progressUpdateInterval](#progressupdateinterval)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Delay in milliseconds between onProgress events in milliseconds.|
+|[rate](#rate)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Speed at which the media should play.|
+|[repeat](#repeat)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determine whether to repeat the video when the end is reached|
+|[reportBandwidth](#reportbandwidth)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.|
+|[resizeMode](#resizemode)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Determines how to resize the video when the frame doesn't match the raw video dimensions.|
+|[selectedAudioTrack](#selectedaudiotrack)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Configure which audio track, if any, is played.|
+|[selectedTextTrack](#selectedtexttrack)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |DeConfigure which text track (caption or subtitle), if any, is shown.sc|
+|[selectedVideoTrack](#selectedvideotrack)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.|
+|[source](#source)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Sets the media source. You can pass an asset loaded via require or an object with a uri.|
+|[subtitleStyle](#subtitleStyle)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Desc|
+|[textTracks](#texttracks)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:|
+|[trackId](#trackId)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Configure an identifier for the video stream to link the playback context to the events emitted.|
+|[useTextureView](#usetextureview)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Controls whether to output to a TextureView or SurfaceView.|
+|[useSecureView](#useSecureView)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |Force the output to a SurfaceView and enables the secure surface.|
+|[volume](#volume)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Adjust the volume.|
+|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |Set the url scheme for stream encryption key for local assets|
 
 
 ### Event props
 | Name | | | |
 |------|-----|---------|-------------|
-|[onAudioBecomingNoisy](#onaudiobecomingnoisy)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onBandwidthUpdate](#onbandwidthupdate)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onBuffer](#onbuffer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onEnd](#onend)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onExternalPlaybackChange](#onexternalplaybackchange)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onLoad](#onload)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onLoadStart](#onloadstart)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onReadyForDisplay](#onreadyfordisplay)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onPlaybackRateChange](#onplaybackratechange)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onProgress](#onprogress)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onSeek](#onseek)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onTimedMetadata](#ontimedmetadata)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
+|[onAudioBecomingNoisy](#onaudiobecomingnoisy)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onBandwidthUpdate](#onbandwidthupdate)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onBuffer](#onbuffer)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onEnd](#onend)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onExternalPlaybackChange](#onexternalplaybackchange)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |
+|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onLoad](#onload)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onLoadStart](#onloadstart)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onReadyForDisplay](#onreadyfordisplay)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |
+|[onPlaybackRateChange](#onplaybackratechange)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onProgress](#onprogress)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onSeek](#onseek)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |
+|[onTimedMetadata](#ontimedmetadata)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
 
 
 ### Methods
 | Name | | | |
 |------|-----|---------|-------------|
-|[dismissFullscreenPlayer](#dismissfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[presentFullscreenPlayer](#presentfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[save](#save)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[seek](#seek)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[presentFullscreenPlayer](#presentfullscreenplayer)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[save](#save)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" />  | | |
+|[seek](#seek)| <img width="24" height="24" style="min-width:24px;" src="./docs/ios.svg" /> | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
 
 ### Static methods
 
 | Name | | | |
 |------|-----|---------|-------------|
-|[getWidevineLevel](#getWidevineLevel)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[isCodecSupported](#isCodecSupported)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[isHEVCSupported](#isHEVCSupported)| | <img width="24" height="24" src="./docs/android.svg" />  | |
+|[getWidevineLevel](#getWidevineLevel)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[isCodecSupported](#isCodecSupported)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
+|[isHEVCSupported](#isHEVCSupported)| | <img width="24" height="24" style="min-width:24px;" src="./docs/android.svg" />  | |
 
 ### Configurable props
 
