@@ -270,10 +270,8 @@ var styles = StyleSheet.create({
   <thead>
     <tr>
       <th width="10px">Name</th>
-      <th width="24px"></th>
-      <th width="24px"></th>
-      <th width="24px"></th>
-      <th style="width: 50%">Summary</th>
+      <th colspan="3" width="300px">Platforms</th>
+      <th>Summary</th>
     </tr>
   </thead>
   <tbody>
