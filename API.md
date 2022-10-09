@@ -1019,6 +1019,7 @@ To setup DRM please follow [this guide](./docs/DRM.md)
 
 Platforms: iOS, Android
 
+---
 #### filter
 Add video filter
 * **FilterType.NONE (default)** - No Filter
