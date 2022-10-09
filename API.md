@@ -280,7 +280,7 @@ var styles = StyleSheet.create({
         <a href="#allowsexternalplayback">allowsExternalPlayback</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -291,13 +291,13 @@ var styles = StyleSheet.create({
         <a href="#audioonly">audioOnly</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.</td>
     </tr>
@@ -306,7 +306,7 @@ var styles = StyleSheet.create({
         <a href="#automaticallyWaitsToMinimizeStalling">automaticallyWaitsToMinimizeStalling</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -318,7 +318,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.</td>
@@ -329,7 +329,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.</td>
@@ -340,7 +340,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.</td>
@@ -350,10 +350,10 @@ var styles = StyleSheet.create({
         <a href="#controls">controls</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Determines whether to show native player controls.</td>
@@ -364,7 +364,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>When playing an HLS live stream with a <code>EXT-X-PROGRAM-DATE-TIME</code> tag configured, then this property will contain the epoch value in msec. </td>
@@ -374,10 +374,10 @@ var styles = StyleSheet.create({
         <a href="#disableFocus">disableFocus</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Determines whether video audio should override background music/audio in Android devices.</td>
@@ -388,7 +388,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Determines if the player needs to throw an error when connection is lost or not</td>
@@ -398,7 +398,7 @@ var styles = StyleSheet.create({
         <a href="#filter">filter</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -409,7 +409,7 @@ var styles = StyleSheet.create({
         <a href="#filterEnabled">filterEnabled</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -421,7 +421,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.</td>
@@ -431,7 +431,7 @@ var styles = StyleSheet.create({
         <a href="#fullscreen">fullscreen</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -442,7 +442,7 @@ var styles = StyleSheet.create({
         <a href="#fullscreenautorotate">fullscreenAutorotate</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -453,7 +453,7 @@ var styles = StyleSheet.create({
         <a href="#fullscreenorientation">fullscreenOrientation</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -465,7 +465,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.</td>
@@ -476,7 +476,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.</td>
@@ -486,7 +486,7 @@ var styles = StyleSheet.create({
         <a href="#ignoresilentswitch">ignoreSilentSwitch</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -497,10 +497,10 @@ var styles = StyleSheet.create({
         <a href="#maxbitrate">maxBitRate</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.</td>
@@ -511,7 +511,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.</td>
@@ -521,7 +521,7 @@ var styles = StyleSheet.create({
         <a href="#mixWithOthers">mixWithOthers</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -532,13 +532,13 @@ var styles = StyleSheet.create({
         <a href="#muted">muted</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Controls whether the audio is muted</td>
     </tr>
@@ -547,13 +547,13 @@ var styles = StyleSheet.create({
         <a href="#paused">paused</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Controls whether the media is paused</td>
     </tr>
@@ -562,7 +562,7 @@ var styles = StyleSheet.create({
         <a href="#pictureinpicture">pictureInPicture</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -573,10 +573,10 @@ var styles = StyleSheet.create({
         <a href="#playinbackground">playInBackground</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.</td>
@@ -586,7 +586,7 @@ var styles = StyleSheet.create({
         <a href="#playwheninactive">playWhenInactive</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -597,13 +597,13 @@ var styles = StyleSheet.create({
         <a href="#poster">poster</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>An image to display while the video is loading</td>
     </tr>
@@ -612,13 +612,13 @@ var styles = StyleSheet.create({
         <a href="#posterresizemode">posterResizeMode</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Determines how to resize the poster image when the frame doesn&#39;t match the raw video dimensions.</td>
     </tr>
@@ -627,7 +627,7 @@ var styles = StyleSheet.create({
         <a href="#preferredForwardBufferDuration">preferredForwardBufferDuration</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td></td>
       <td></td>
@@ -638,10 +638,10 @@ var styles = StyleSheet.create({
         <a href="#preventsDisplaySleepDuringVideoPlayback">preventsDisplaySleepDuringVideoPlayback</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.</td>
@@ -651,13 +651,13 @@ var styles = StyleSheet.create({
         <a href="#progressupdateinterval">progressUpdateInterval</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Delay in milliseconds between onProgress events in milliseconds.</td>
     </tr>
@@ -666,13 +666,13 @@ var styles = StyleSheet.create({
         <a href="#rate">rate</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Speed at which the media should play.</td>
     </tr>
@@ -681,13 +681,13 @@ var styles = StyleSheet.create({
         <a href="#repeat">repeat</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Determine whether to repeat the video when the end is reached</td>
     </tr>
@@ -697,7 +697,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.</td>
@@ -707,13 +707,13 @@ var styles = StyleSheet.create({
         <a href="#resizemode">resizeMode</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Determines how to resize the video when the frame doesn&#39;t match the raw video dimensions.</td>
     </tr>
@@ -722,10 +722,10 @@ var styles = StyleSheet.create({
         <a href="#selectedaudiotrack">selectedAudioTrack</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Configure which audio track, if any, is played.</td>
@@ -735,10 +735,10 @@ var styles = StyleSheet.create({
         <a href="#selectedtexttrack">selectedTextTrack</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>DeConfigure which text track (caption or subtitle), if any, is shown.sc</td>
@@ -749,7 +749,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.</td>
@@ -759,13 +759,13 @@ var styles = StyleSheet.create({
         <a href="#source">source</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Sets the media source. You can pass an asset loaded via require or an object with a uri.</td>
     </tr>
@@ -775,7 +775,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Desc</td>
@@ -785,10 +785,10 @@ var styles = StyleSheet.create({
         <a href="#texttracks">textTracks</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Load one or more &quot;sidecar&quot; text tracks. This takes an array of objects representing each track. Each object should have the format:</td>
@@ -799,7 +799,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Configure an identifier for the video stream to link the playback context to the events emitted.</td>
@@ -810,7 +810,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Controls whether to output to a TextureView or SurfaceView.</td>
@@ -821,7 +821,7 @@ var styles = StyleSheet.create({
       </td>
       <td></td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td></td>
       <td>Force the output to a SurfaceView and enables the secure surface.</td>
@@ -831,13 +831,13 @@ var styles = StyleSheet.create({
         <a href="#volume">volume</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Adjust the volume.</td>
     </tr>
@@ -846,13 +846,13 @@ var styles = StyleSheet.create({
         <a href="#localSourceEncryptionKeyScheme">localSourceEncryptionKeyScheme</a>
       </td>
       <td>
-        <img width="24" height="24" src="./docs/ios.svg" />
+        <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />
       </td>
       <td>
-        <img width="24" height="24" src="./docs/android.svg" />
+        <img width="24" height="24" src="./docs/android.svg" alt="Android" />
       </td>
       <td>
-        <img width="13" height="13" src="./docs/windows.svg" />
+        <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" />
       </td>
       <td>Set the url scheme for stream encryption key for local assets</td>
     </tr>
@@ -862,42 +862,42 @@ var styles = StyleSheet.create({
 ### Event props
 | Name | | | |
 |------|-----|---------|-------------|
-|[onAudioBecomingNoisy](#onaudiobecomingnoisy)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onBandwidthUpdate](#onbandwidthupdate)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onBuffer](#onbuffer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onEnd](#onend)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onExternalPlaybackChange](#onexternalplaybackchange)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onLoad](#onload)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onLoadStart](#onloadstart)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onReadyForDisplay](#onreadyfordisplay)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onPlaybackRateChange](#onplaybackratechange)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onProgress](#onprogress)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onSeek](#onseek)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
-|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[onTimedMetadata](#ontimedmetadata)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
+|[onAudioBecomingNoisy](#onaudiobecomingnoisy)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onBandwidthUpdate](#onbandwidthupdate)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onBuffer](#onbuffer)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onEnd](#onend)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onExternalPlaybackChange](#onexternalplaybackchange)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | | |
+|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onLoad](#onload)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onLoadStart](#onloadstart)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onReadyForDisplay](#onreadyfordisplay)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | | |
+|[onPlaybackRateChange](#onplaybackratechange)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onProgress](#onprogress)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onSeek](#onseek)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
+|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | | |
+|[onTimedMetadata](#ontimedmetadata)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
 
 
 ### Methods
 | Name | | | |
 |------|-----|---------|-------------|
-|[dismissFullscreenPlayer](#dismissfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[presentFullscreenPlayer](#presentfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" />  | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[save](#save)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" />  | | |
-|[seek](#seek)| <img width="24" height="24" src="./docs/ios.svg" /> | <img width="24" height="24" src="./docs/android.svg" /> | <img width="13" height="13" src="./docs/windows.svg" /> |
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[presentFullscreenPlayer](#presentfullscreenplayer)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[save](#save)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | | |
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" />  | | |
+|[seek](#seek)| <img width="24" height="24" src="./docs/ios.svg" alt="iOS" /> | <img width="24" height="24" src="./docs/android.svg" alt="Android" /> | <img width="13" height="13" src="./docs/windows.svg" alt="Windows UWP" /> |
 
 ### Static methods
 
 | Name | | | |
 |------|-----|---------|-------------|
-|[getWidevineLevel](#getWidevineLevel)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[isCodecSupported](#isCodecSupported)| | <img width="24" height="24" src="./docs/android.svg" />  | |
-|[isHEVCSupported](#isHEVCSupported)| | <img width="24" height="24" src="./docs/android.svg" />  | |
+|[getWidevineLevel](#getWidevineLevel)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[isCodecSupported](#isCodecSupported)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
+|[isHEVCSupported](#isHEVCSupported)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
 
 ### Configurable props
 
