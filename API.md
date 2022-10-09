@@ -235,7 +235,7 @@ yarn xbasic windows
 
 ## Usage
 
-```javascript
+```jsx
 // Load the module
 
 import Video from 'react-native-video';
@@ -956,7 +956,7 @@ minBufferMemoryReservePercent | number | The percentage of available app memory 
 This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 
 Example with default values:
-```
+```jsx
 bufferConfig={{
   minBufferMs: 15000,
   maxBufferMs: 50000,
@@ -1099,7 +1099,7 @@ Platforms: iOS
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
 
 Example:
-```
+```jsx
 source={{
   uri: "https://www.example.com/video.mp4",
   headers: {
@@ -1139,7 +1139,7 @@ Sets the desired limit, in bits per second, of network bandwidth consumption whe
 Default: 0. Don't limit the maxBitRate.
 
 Example:
-```
+```jsx
 maxBitRate={2000000} // 2 megabits
 ```
 
@@ -1153,7 +1153,7 @@ Sets the minimum number of times to retry loading data before failing and report
 Default: 3. Retry 3 times.
 
 Example:
-```
+```jsx
 minLoadRetryCount={5} // retry 5 times
 ```
 
@@ -1311,7 +1311,7 @@ Platforms: iOS, Android, Windows UWP
 #### selectedAudioTrack
 Configure which audio track, if any, is played.
 
-```
+```jsx
 selectedAudioTrack={{
   type: Type,
   value: Value
@@ -1319,7 +1319,7 @@ selectedAudioTrack={{
 ```
 
 Example:
-```
+```jsx
 selectedAudioTrack={{
   type: "title",
   value: "Dubbing"
@@ -1343,7 +1343,7 @@ Platforms: iOS, Android
 #### selectedTextTrack
 Configure which text track (caption or subtitle), if any, is shown.
 
-```
+```jsx
 selectedTextTrack={{
   type: Type,
   value: Value
@@ -1351,7 +1351,7 @@ selectedTextTrack={{
 ```
 
 Example:
-```
+```jsx
 selectedTextTrack={{
   type: "title",
   value: "English Subtitles"
@@ -1377,7 +1377,7 @@ Platforms: iOS, Android
 #### selectedVideoTrack
 Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
 
-```javascript
+```jsx
 selectedVideoTrack={{
   type: Type,
   value: Value
@@ -1385,7 +1385,7 @@ selectedVideoTrack={{
 ```
 
 Example:
-```javascript
+```jsx
 selectedVideoTrack={{
   type: "resolution",
   value: 480
@@ -1419,7 +1419,7 @@ The docs for this prop are incomplete and will be updated as each option is inve
 ##### Asset loaded via require
 
 Example: 
-```javascript
+```jsx
 const sintel = require('./sintel.mp4');
 
 source={sintel}
@@ -1432,7 +1432,7 @@ A number of URI schemes are supported by passing an object with a `uri` attribut
 ###### Web address (http://, https://)
 
 Example:
-```
+```jsx
 source={{uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }}
 ```
 
@@ -1441,7 +1441,7 @@ Platforms: all
 ###### File path (file://)
 
 Example:
-```
+```jsx
 source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 ```
 
@@ -1454,7 +1454,7 @@ Platforms: Android, possibly others
 Path to a sound file in your iTunes library. Typically shared from iTunes to your app.
 
 Example:
-```
+```jsx
 source={{ uri: 'ipod-library:///path/to/music.mp3' }}
 ```
 
@@ -1468,7 +1468,7 @@ Provide a member `type` with value (`mpd`/`m3u8`/`ism`) inside the source object
 Sometimes is needed when URL extension does not match with the mimetype that you are expecting, as seen on the next example. (Extension is .ism -smooth streaming- but file served is on format mpd -mpeg dash-)
 
 Example:
-```
+```jsx
 source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
 type: 'mpd' }}
 ```
@@ -1494,7 +1494,7 @@ paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
 
 Example:
 
-```
+```jsx
 subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
 ```
 
@@ -1515,7 +1515,7 @@ On iOS, sidecar text tracks are only supported for individual files, not HLS pla
 Note: Due to iOS limitations, sidecar text tracks are not compatible with Airplay. If textTracks are specified, AirPlay support will be automatically disabled.
 
 Example:
-```
+```jsx
 import { TextTrackType }, Video from 'react-native-video';
 
 textTracks={[
@@ -1592,7 +1592,7 @@ Set the url scheme for stream encryption key for local assets
 Type: String
 
 Example:
-```
+```jsx
 localSourceEncryptionKeyScheme="my-offline-key"
 ```
 
@@ -1622,7 +1622,7 @@ Property | Type | Description
 bitrate | number | The estimated bitrate in bits/sec
 
 Example:
-```javascript
+```jsx
 {
   bitrate: 1000000
 }
@@ -1644,7 +1644,7 @@ Property | Type | Description
 isBuffering | boolean | Boolean indicating whether buffering is active
 
 Example:
-```javascript
+```jsx
 {
   isBuffering: true
 }
@@ -1673,7 +1673,7 @@ Property | Type | Description
 isExternalPlaybackActive | boolean | Boolean indicating whether external playback mode is active
 
 Example:
-```javascript
+```jsx
 {
   isExternalPlaybackActive: true
 }
@@ -1734,7 +1734,7 @@ textTracks | array | An array of text track info objects with the following prop
 videoTracks | array | An array of video track info objects with the following properties:<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video
 
 Example:
-```javascript
+```jsx
 { 
   canPlaySlowForward: true,
   canPlayReverse: false,
@@ -1782,7 +1782,7 @@ type | string | Type of the media. Not available on Windows
 uri | string | URI for the media source. Not available on Windows
 
 Example:
-```javascript
+```jsx
 {
   isNetwork: true,
   type: '',
@@ -1804,7 +1804,7 @@ Property | Description
 isPlaying | boolean | Boolean indicating if the media is playing or not
 
 Example:
-```javascript
+```jsx
 {
   isPlaying: true,
 }
@@ -1834,7 +1834,7 @@ Property | Type | Description
 isActive | boolean | Boolean indicating whether picture in picture is active
 
 Example:
-```javascript
+```jsx
 {
 isActive: true
 }
@@ -1852,7 +1852,7 @@ Property | Type | Description
 playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up
 
 Example:
-```javascript
+```jsx
 {
   playbackRate: 0, // indicates paused
 }
@@ -1873,7 +1873,7 @@ playableDuration | number | Position to where the media can be played to using j
 seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
 
 Example:
-```javascript
+```jsx
 {
   currentTime: 5.2,
   playableDuration: 34.6,
@@ -1896,7 +1896,7 @@ currentTime | number | The current time after the seek
 seekTime | number | The requested time
 
 Example:
-```javascript
+```jsx
 {
   currentTime: 100.5
   seekTime: 100
@@ -1929,7 +1929,7 @@ Property | Type | Description
 metadata | array | Array of metadata objects
 
 Example:
-```javascript
+```jsx
 {
   metadata: [
     { value: 'Streaming Encoder', identifier: 'TRSN' },
@@ -1945,7 +1945,7 @@ Platforms: iOS, Android
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
-```javascript
+```jsx
 return (
   <Video source={...}
     ref={ref => (this.player = ref)} />
@@ -1960,7 +1960,7 @@ return (
 Take the player out of fullscreen mode.
 
 Example:
-```javascript
+```jsx
 this.player.dismissFullscreenPlayer();
 ```
 
@@ -1978,7 +1978,7 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
 Example:
-```javascript
+```jsx
 this.player.presentFullscreenPlayer();
 ```
 
@@ -1992,7 +1992,7 @@ Platforms: iOS, Android
 Save video to your Photos with current filter prop. Returns promise.
 
 Example:
-```javascript
+```jsx
 const response = await this.player.save();
 const path = response.uri;
 ```
@@ -2021,7 +2021,7 @@ Platforms: iOS
 This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
 
 Example:
-```javascript
+```jsx
 this.player.restoreUserInterfaceForPictureInPictureStopCompleted(true);
 ```
 
@@ -2037,7 +2037,7 @@ Seek to the specified position represented by seconds. seconds is a float value.
 `seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
-```javascript
+```jsx
 this.player.seek(200); // Seek to 3 minutes, 20 seconds
 ```
 
@@ -2054,7 +2054,7 @@ By default iOS seeks within 100 milliseconds of the target position. If you need
 tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
 
 Example:
-```javascript
+```jsx
 this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
 ```
 
@@ -2068,7 +2068,7 @@ Platforms: iOS
 
 A module embed in ReactNativeVideo allow to query device supported feature.
 To use it include the module as following:
-```javascript
+```jsx
 import { VideoDecoderProperties } from '@ifs/react-native-video-enhanced'
 ```
 
@@ -2088,7 +2088,7 @@ Platforms: Android
 
 Example:
 
-```javascript
+```jsx
 VideoDecoderProperties.getWidevineLevel().then((widevineLevel) => {
     ...
 }
@@ -2109,7 +2109,7 @@ Possible results:
 -   **false** - codec is not supported
 
 Example:
-```javascript
+```jsx
 VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
     ...
 }
@@ -2124,7 +2124,7 @@ Helper which Indicates whether the provided HEVC/1920*1080 is supported level su
 It uses isCodecSupported internally.
 
 Example:
-```javascript
+```jsx
 VideoDecoderProperties.isHEVCSupported().then((hevcSupported) => {
     ...
 }
@@ -2171,7 +2171,7 @@ This only supports mp4 files and they must not be compressed. Example command li
 zip -r -n .mp4 *.mp4 player.video.example.com
 ```
 
-```javascript
+```jsx
 // Within your render function, assuming you have a file called
 // "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
 <Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
@@ -2183,7 +2183,7 @@ zip -r -n .mp4 *.mp4 player.video.example.com
 
 The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
 
-```javascript
+```jsx
 <Video
   source={require('../assets/video/turntable.mp4')}
 />
