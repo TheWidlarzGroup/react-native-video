@@ -899,14 +899,19 @@ var styles = StyleSheet.create({
 |[isCodecSupported](#isCodecSupported)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
 |[isHEVCSupported](#isHEVCSupported)| | <img width="24" height="24" src="./docs/android.svg" alt="Android" />  | |
 
+---
+
 ### Configurable props
 
+---
 #### allowsExternalPlayback
 Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
 * **true (default)** - allow switching to external playback mode
 * **false** -  Don't allow switching to external playback mode
 
 Platforms: iOS
+
+---
 
 #### audioOnly
 Indicates whether the player should only play the audio track and instead of displaying the video track, show the poster instead.
@@ -917,6 +922,8 @@ For this to work, the poster prop must be set.
 
 Platforms: all
 
+---
+
 #### automaticallyWaitsToMinimizeStalling
 A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
 * **false** - Immediately starts playback
@@ -924,10 +931,14 @@ A Boolean value that indicates whether the player should automatically delay pla
 
 Platforms: iOS
 
+---
+
 #### backBufferDurationMs
 The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.
 
 Platforms: Android
+
+---
 
 #### bufferConfig
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
@@ -956,10 +967,14 @@ bufferConfig={{
 
 Platforms: Android
 
+---
+
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
 
 Platforms: iOS, Android
+
+---
 
 #### controls
 Determines whether to show player controls.
@@ -970,12 +985,16 @@ Note on iOS, controls are always shown when in fullscreen mode.
 Note on Android, native controls are available by default.
 If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Projects](./docs/PROJECTS.md).
 
-### contentStartTime
+---
+
+#### contentStartTime
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
 Platforms: iOS, Android
 
-### disableFocus
+---
+
+#### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
 * **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
@@ -984,14 +1003,18 @@ Note: Allows multiple videos to play if set to `true`. If `false`, when one vide
  
 Platforms: Android
 
-### disableDisconnectError
+---
+
+#### disableDisconnectError
 Determines if the player needs to throw an error when connection is lost or not
 * **false (default)** - Player will throw an error when connection is lost
 * **true** - Player will keep trying to buffer when network connect is lost
 
 Platforms: Android
 
-### DRM
+---
+
+#### DRM
 To setup DRM please follow [this guide](./docs/DRM.md)
 
 Platforms: iOS, Android
@@ -1024,6 +1047,8 @@ Notes:
 
 Platforms: iOS
 
+---
+
 #### filterEnabled
 Enable video filter. 
 
@@ -1031,6 +1056,8 @@ Enable video filter.
 * **true** - Enable filter
 
 Platforms: iOS
+
+---
 
 #### focusable
 Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.
@@ -1040,6 +1067,8 @@ Whether this video view should be focusable with a non-touch input device, eg. r
 Platforms: Android
 
 
+---
+
 #### fullscreen
 Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
@@ -1047,10 +1076,14 @@ Controls whether the player enters fullscreen on play.
 
 Platforms: iOS
 
+---
+
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
 
 Platforms: iOS
+
+---
 
 #### fullscreenOrientation
 
@@ -1059,6 +1092,8 @@ Platforms: iOS
 * **portrait**
 
 Platforms: iOS
+
+---
 
 #### headers
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
@@ -1076,6 +1111,8 @@ source={{
 
 Platforms: Android
 
+---
+
 #### hideShutterView
 Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
 
@@ -1084,6 +1121,8 @@ Controls whether the ExoPlayer shutter view (black screen while loading) is enab
 
 Platforms: Android
 
+---
+
 #### ignoreSilentSwitch
 Controls the iOS silent switch behavior
 * **"inherit" (default)** - Use the default AVPlayer behavior
@@ -1091,6 +1130,8 @@ Controls the iOS silent switch behavior
 * **"obey"** - Don't play audio if the silent switch is set
 
 Platforms: iOS
+
+---
 
 #### maxBitRate
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
@@ -1104,6 +1145,8 @@ maxBitRate={2000000} // 2 megabits
 
 Platforms: iOS, Android
 
+---
+
 #### minLoadRetryCount
 Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
 
@@ -1116,6 +1159,8 @@ minLoadRetryCount={5} // retry 5 times
 
 Platforms: Android
 
+---
+
 #### mixWithOthers
 Controls how Audio mix with other apps.
 * **"inherit" (default)** - Use the default AVPlayer behavior
@@ -1124,12 +1169,16 @@ Controls how Audio mix with other apps.
 
 Platforms: iOS
 
+---
+
 #### muted
 Controls whether the audio is muted
 * **false (default)** - Don't mute audio
 * **true** - Mute audio
 
 Platforms: all
+
+---
 
 #### paused
 Controls whether the media is paused
@@ -1138,12 +1187,16 @@ Controls whether the media is paused
 
 Platforms: all
 
+---
+
 #### pictureInPicture
 Determine whether the media should played as picture in picture.
 * **false (default)** - Don't not play as picture in picture
 * **true** - Play the media as picture in picture
 
 Platforms: iOS
+
+---
 
 #### playInBackground
 Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
@@ -1156,6 +1209,8 @@ To use this feature on iOS, you must:
 
 Platforms: iOS, Android
 
+---
+
 #### playWhenInactive
 Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
 * **false (default)** - Don't continue playing the media
@@ -1163,11 +1218,15 @@ Determine whether the media should continue playing when notifications or the Co
 
 Platforms: iOS
 
+---
+
 #### poster
 An image to display while the video is loading
 <br>Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
 
 Platforms: all
+
+---
 
 #### posterResizeMode
 Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
@@ -1180,12 +1239,16 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 
 Platforms: all
 
+---
+
 #### preferredForwardBufferDuration
 The duration the player should buffer media from the network ahead of the playhead to guard against playback disruption. Sets the [preferredForwardBufferDuration](https://developer.apple.com/documentation/avfoundation/avplayeritem/1643630-preferredforwardbufferduration) instance property on AVPlayerItem.
 
 Default: 0
 
 Platforms: iOS
+
+---
 
 #### preventsDisplaySleepDuringVideoPlayback
 Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
@@ -1194,12 +1257,16 @@ Default: true
 
 Platforms: iOS, Android
 
+---
+
 #### progressUpdateInterval
 Delay in milliseconds between onProgress events in milliseconds.
 
 Default: 250.0
 
 Platforms: all
+
+---
 
 ### rate
 Speed at which the media should play. 
@@ -1209,12 +1276,16 @@ Speed at which the media should play.
 
 Platforms: all
 
+---
+
 #### repeat
 Determine whether to repeat the video when the end is reached
 * **false (default)** - Don't repeat the video
 * **true** - Repeat the video
 
 Platforms: all
+
+---
 
 #### reportBandwidth
 Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
@@ -1224,6 +1295,8 @@ Determine whether to generate onBandwidthUpdate events. This is needed due to th
 
 Platforms: Android
 
+---
+
 #### resizeMode
 Determines how to resize the video when the frame doesn't match the raw video dimensions.
 * **"none" (default)** - Don't apply resize
@@ -1232,6 +1305,8 @@ Determines how to resize the video when the frame doesn't match the raw video di
 * **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 Platforms: iOS, Android, Windows UWP
+
+---
 
 #### selectedAudioTrack
 Configure which audio track, if any, is played.
@@ -1262,6 +1337,8 @@ Type | Value | Description
 If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
 
 Platforms: iOS, Android
+
+---
 
 #### selectedTextTrack
 Configure which text track (caption or subtitle), if any, is shown.
@@ -1295,10 +1372,12 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: iOS, Android
 
+---
+
 #### selectedVideoTrack
 Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
 
-```
+```javascript
 selectedVideoTrack={{
   type: Type,
   value: Value
@@ -1306,7 +1385,7 @@ selectedVideoTrack={{
 ```
 
 Example:
-```
+```javascript
 selectedVideoTrack={{
   type: "resolution",
   value: 480
@@ -1324,6 +1403,8 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: Android
 
+---
+
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
 
@@ -1335,11 +1416,10 @@ Providing a null source value after loading a previous source will stop playback
 
 The docs for this prop are incomplete and will be updated as each option is investigated and tested.
 
-
 ##### Asset loaded via require
 
 Example: 
-```
+```javascript
 const sintel = require('./sintel.mp4');
 
 source={sintel}
@@ -1399,6 +1479,8 @@ The following other types are supported on some platforms, but aren't fully docu
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
 
+---
+
 #### subtitleStyle
 
 Property | Description | Platforms
@@ -1415,6 +1497,8 @@ Example:
 ```
 subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
 ```
+
+---
 
 #### textTracks
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
@@ -1453,10 +1537,14 @@ textTracks={[
 
 Platforms: iOS, Android
 
+---
+
 #### trackId
 Configure an identifier for the video stream to link the playback context to the events emitted.
 
 Platforms: Android
+
+---
 
 #### useTextureView
 Controls whether to output to a TextureView or SurfaceView.
@@ -1472,6 +1560,8 @@ useTextureView can only be set at same time you're setting the source.
 
 Platforms: Android
 
+---
+
 #### useSecureView
 Force the output to a SurfaceView and enables the secure surface.
 
@@ -1484,6 +1574,8 @@ SurfaceView is is the only one that can be labeled as secure.
 
 Platforms: Android
 
+---
+
 #### volume
 Adjust the volume.
 * **1.0 (default)** - Play at full volume
@@ -1491,6 +1583,8 @@ Adjust the volume.
 * **Other values** - Reduce volume
 
 Platforms: all
+
+---
 
 #### localSourceEncryptionKeyScheme
 Set the url scheme for stream encryption key for local assets
@@ -1504,6 +1598,8 @@ localSourceEncryptionKeyScheme="my-offline-key"
 
 Platforms: iOS
 
+---
+
 
 ### Event props
 
@@ -1513,6 +1609,8 @@ Callback function that is called when the audio is about to become 'noisy' due t
 Payload: none
 
 Platforms: iOS, Android
+
+---
 
 #### onBandwidthUpdate
 Callback function that is called when the available bandwidth changes.
@@ -1524,7 +1622,7 @@ Property | Type | Description
 bitrate | number | The estimated bitrate in bits/sec
 
 Example:
-```
+```javascript
 {
   bitrate: 1000000
 }
@@ -1533,6 +1631,8 @@ Example:
 Note: On Android, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
 
 Platforms: Android
+
+---
 
 #### onBuffer
 Callback function that is called when the player buffers.
@@ -1544,7 +1644,7 @@ Property | Type | Description
 isBuffering | boolean | Boolean indicating whether buffering is active
 
 Example:
-```
+```javascript
 {
   isBuffering: true
 }
@@ -1552,12 +1652,16 @@ Example:
 
 Platforms: iOS, Android
 
+---
+
 #### onEnd
 Callback function that is called when the player reaches the end of the media.
 
 Payload: none
 
 Platforms: all
+
+---
 
 #### onExternalPlaybackChange
 Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
@@ -1569,13 +1673,15 @@ Property | Type | Description
 isExternalPlaybackActive | boolean | Boolean indicating whether external playback mode is active
 
 Example:
-```
+```javascript
 {
   isExternalPlaybackActive: true
 }
 ```
 
 Platforms: iOS
+
+---
 
 #### onFullscreenPlayerWillPresent
 Callback function that is called when the player is about to enter fullscreen mode.
@@ -1584,12 +1690,16 @@ Payload: none
 
 Platforms: iOS, Android
 
+---
+
 #### onFullscreenPlayerDidPresent
 Callback function that is called when the player has entered fullscreen mode.
 
 Payload: none
 
 Platforms: iOS, Android
+
+---
 
 #### onFullscreenPlayerWillDismiss
 Callback function that is called when the player is about to exit fullscreen mode.
@@ -1598,12 +1708,16 @@ Payload: none
 
 Platforms: iOS, Android
 
+---
+
 #### onFullscreenPlayerDidDismiss
 Callback function that is called when the player has exited fullscreen mode.
 
 Payload: none
 
 Platforms: iOS, Android
+
+---
 
 #### onLoad
 Callback function that is called when the media is loaded and ready to play.
@@ -1620,7 +1734,7 @@ textTracks | array | An array of text track info objects with the following prop
 videoTracks | array | An array of video track info objects with the following properties:<br> * trackId - ID for the track<br> * bitrate - Bit rate in bits per second<br> * codecs - Comma separated list of codecs<br> * height - Height of the video<br> * width - Width of the video
 
 Example:
-```
+```javascript
 { 
   canPlaySlowForward: true,
   canPlayReverse: false,
@@ -1654,6 +1768,8 @@ Example:
 
 Platforms: all
 
+---
+
 #### onLoadStart
 Callback function that is called when the media starts loading.
 
@@ -1666,7 +1782,7 @@ type | string | Type of the media. Not available on Windows
 uri | string | URI for the media source. Not available on Windows
 
 Example:
-```
+```javascript
 {
   isNetwork: true,
   type: '',
@@ -1675,6 +1791,8 @@ Example:
 ```
 
 Platforms: all
+
+---
 
 #### onPlaybackStateChanged
 Callback function that is called when the playback state changes.
@@ -1686,13 +1804,15 @@ Property | Description
 isPlaying | boolean | Boolean indicating if the media is playing or not
 
 Example:
-```
+```javascript
 {
   isPlaying: true,
 }
 ```
 
 Platforms: Android
+
+---
 
 #### onReadyForDisplay
 Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
@@ -1704,6 +1824,8 @@ Payload: none
 
 Platforms: iOS, Android
 
+---
+
 #### onPictureInPictureStatusChanged
 Callback function that is called when picture in picture becomes active or inactive.
 
@@ -1712,13 +1834,15 @@ Property | Type | Description
 isActive | boolean | Boolean indicating whether picture in picture is active
 
 Example:
-```
+```javascript
 {
 isActive: true
 }
 ```
 
 Platforms:  iOS
+
+---
 
 #### onPlaybackRateChange
 Callback function that is called when the rate of playback changes - either paused or starts/resumes.
@@ -1728,13 +1852,15 @@ Property | Type | Description
 playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up
 
 Example:
-```
+```javascript
 {
   playbackRate: 0, // indicates paused
 }
 ```
 
 Platforms: all
+
+---
 
 
 #### onProgress
@@ -1747,7 +1873,7 @@ playableDuration | number | Position to where the media can be played to using j
 seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media
 
 Example:
-```
+```javascript
 {
   currentTime: 5.2,
   playableDuration: 34.6,
@@ -1756,6 +1882,8 @@ Example:
 ```
 
 Platforms: all
+
+---
 
 #### onSeek
 Callback function that is called when a seek completes.
@@ -1768,7 +1896,7 @@ currentTime | number | The current time after the seek
 seekTime | number | The requested time
 
 Example:
-```
+```javascript
 {
   currentTime: 100.5
   seekTime: 100
@@ -1780,12 +1908,16 @@ Both the currentTime & seekTime are reported because the video player may not se
 
 Platforms: iOS, Android, Windows UWP
 
+---
+
 #### onRestoreUserInterfaceForPictureInPictureStop
 Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
 
 Payload: none
 
 Platforms: iOS
+
+---
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -1797,7 +1929,7 @@ Property | Type | Description
 metadata | array | Array of metadata objects
 
 Example:
-```
+```javascript
 {
   metadata: [
     { value: 'Streaming Encoder', identifier: 'TRSN' },
@@ -1809,14 +1941,18 @@ Example:
 
 Platforms: iOS, Android
 
+---
+
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:
-```
+```javascript
 return (
   <Video source={...}
     ref={ref => (this.player = ref)} />
 );
 ```
+
+---
 
 #### dismissFullscreenPlayer
 `dismissFullscreenPlayer()`
@@ -1824,11 +1960,13 @@ return (
 Take the player out of fullscreen mode.
 
 Example:
-```
+```javascript
 this.player.dismissFullscreenPlayer();
 ```
 
 Platforms: iOS, Android
+
+---
 
 #### presentFullscreenPlayer
 `presentFullscreenPlayer()`
@@ -1840,11 +1978,13 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
 Example:
-```
+```javascript
 this.player.presentFullscreenPlayer();
 ```
 
 Platforms: iOS, Android
+
+---
 
 #### save
 `save(): Promise`
@@ -1852,9 +1992,9 @@ Platforms: iOS, Android
 Save video to your Photos with current filter prop. Returns promise.
 
 Example:
-```
-let response = await this.player.save();
-let path = response.uri;
+```javascript
+const response = await this.player.save();
+const path = response.uri;
 ```
 
 Notes:
@@ -1873,17 +2013,21 @@ Future:
 
 Platforms: iOS
 
+---
+
 #### restoreUserInterfaceForPictureInPictureStopCompleted
 `restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
 
 This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called. 
 
 Example:
-```
+```javascript
 this.player.restoreUserInterfaceForPictureInPictureStopCompleted(true);
 ```
 
 Platforms: iOS
+
+---
 
 #### seek()
 `seek(seconds)`
@@ -1893,11 +2037,13 @@ Seek to the specified position represented by seconds. seconds is a float value.
 `seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
 
 Example:
-```
+```javascript
 this.player.seek(200); // Seek to 3 minutes, 20 seconds
 ```
 
 Platforms: all
+
+---
 
 ##### Exact seek
 
@@ -1908,11 +2054,13 @@ By default iOS seeks within 100 milliseconds of the target position. If you need
 tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
 
 Example:
-```
+```javascript
 this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accuracy
 ```
 
 Platforms: iOS
+
+---
 
 #### Static methods
 
@@ -1926,6 +2074,8 @@ import { VideoDecoderProperties } from '@ifs/react-native-video-enhanced'
 
 Platforms: Android
 
+---
+
 #### getWidevineLevel
 
 Indicates whether the widevine level supported by device.
@@ -1938,11 +2088,13 @@ Platforms: Android
 
 Example:
 
-```
+```javascript
 VideoDecoderProperties.getWidevineLevel().then((widevineLevel) => {
     ...
 }
 ```
+
+---
 
 #### isCodecSupported
 
@@ -1957,12 +2109,14 @@ Possible results:
 -   **false** - codec is not supported
 
 Example:
-```
+```javascript
 VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
     ...
 }
 ```
 Platforms: Android
+
+---
 
 #### isHEVCSupported
 
@@ -1970,11 +2124,13 @@ Helper which Indicates whether the provided HEVC/1920*1080 is supported level su
 It uses isCodecSupported internally.
 
 Example:
-```
+```javascript
 VideoDecoderProperties.isHEVCSupported().then((hevcSupported) => {
     ...
 }
 ```
+
+---
 
 ### iOS App Transport Security
 
