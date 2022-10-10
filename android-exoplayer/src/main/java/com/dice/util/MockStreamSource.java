@@ -1,7 +1,5 @@
 package com.dice.util;
 
-import android.util.Log;
-
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -10,6 +8,7 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.google.android.exoplayer2.endeavor.WebUtil;
+import com.google.android.exoplayer2.util.Log;
 
 public class MockStreamSource {
 
@@ -95,6 +94,68 @@ public class MockStreamSource {
         src.putString("channelName", "Test VLL DRM + SSAI - Big Buck Bunny");
         src.putString("uri", "https://dai.google.com/linear/hls/event/OJjJsVn4QYuWjxDW3i5WKw/master.m3u8");
         src.putString("type", "m3u8");
+
+        return src;
+    }
+
+    public static ReadableMap getCsaiVodStream() {
+        WritableMap src = Arguments.createMap();
+
+        src.putBoolean("isAudioOnly", false);
+        src.putString("id", "182784");
+        src.putString("title", "Test CSAI VOD - VMAP pre-roll single ad, mid-roll standard pod with 3 ads, post-roll single ad");
+        src.putString("type", "VOD");
+        src.putBoolean("live", false);
+        src.putDouble("progressUpdateInterval", 6.0);
+        src.putDouble("retryTimes", 0.0);
+        src.putString("adTagUrl", "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=");
+        src.putString("imageUri", "https://img.dge-prod.dicelaboratory.com/thumbnails/182788/original/latest.jpg");
+        src.putString("uri", "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8");
+
+        return src;
+    }
+
+    public static ReadableMap getSsaiVodStream() {
+        WritableMap src = Arguments.createMap();
+
+        WritableMap ima = Arguments.createMap();
+        ima.putString("contentSourceId", "2528370");
+        ima.putString("videoId", "tears-of-steel");
+
+        src.putMap("ima", ima);
+        src.putBoolean("isAudioOnly", false);
+        src.putString("id", "182786");
+        src.putString("title", "Test SSAI VOD - Tears of Steel (pre/mid/mid/mid/post), single ads [10s]");
+        src.putString("type", "VOD");
+        src.putBoolean("live", false);
+        src.putDouble("progressUpdateInterval", 6.0);
+        src.putDouble("retryTimes", 0.0);
+        src.putString("imageUri", "https://img.dge-prod.dicelaboratory.com/thumbnails/182788/original/latest.jpg");
+        src.putString("uri", "https://dai.google.com/linear/hls/event/OJjJsVn4QYuWjxDW3i5WKw/master.m3u8");
+
+        return src;
+    }
+
+    public static ReadableMap getSsaiLiveStream() {
+        WritableMap src = Arguments.createMap();
+
+        WritableMap ima = Arguments.createMap();
+        int startDate = (int) (System.currentTimeMillis() / 1000);
+        int endDate = startDate + 6000;
+        ima.putString("assetKey", "sN_IYUG8STe1ZzhIIE_ksA");
+        ima.putInt("startDate", startDate);
+        ima.putInt("endDate", endDate);
+
+        src.putMap("ima", ima);
+        src.putBoolean("isAudioOnly", false);
+        src.putString("id", "182788");
+        src.putString("title", "Test SSAI Live - Big Buck Bunny (mid), 3 ads each [10 s]");
+        src.putString("type", "LIVE");
+        src.putBoolean("live", true);
+        src.putDouble("progressUpdateInterval", 6.0);
+        src.putDouble("retryTimes", 0.0);
+        src.putString("imageUri", "https://img.dge-prod.dicelaboratory.com/thumbnails/182788/original/latest.jpg");
+        src.putString("uri", "https://dai.google.com/linear/hls/event/OJjJsVn4QYuWjxDW3i5WKw/master.m3u8");
 
         return src;
     }
