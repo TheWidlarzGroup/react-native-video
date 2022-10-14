@@ -466,7 +466,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     
     if (self.onVideoAboutToEnd && _itemDuration) {
         bool isAboutToEnd;
-        if (currentTime >= _itemDuration.doubleValue - 10) {
+        if (currentTime >= _itemDuration.doubleValue - 5) {
             isAboutToEnd = YES;
         } else {
             isAboutToEnd = NO;

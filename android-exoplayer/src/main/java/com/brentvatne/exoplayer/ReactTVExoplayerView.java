@@ -242,7 +242,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     long duration = player.getDuration();
 
                     if (!isLive) {
-                        boolean isAboutToEnd = duration - position <= 10_000;
+                        boolean isAboutToEnd = duration - position <= 5_000;
                         eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
