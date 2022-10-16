@@ -5,6 +5,7 @@
     "main": "Video.js",
     "license": "MIT",
     "author": "Community Contributors",
+    "homepage": "https://github.com/react-native-video/react-native-video#readme",
     "repository": {
         "type": "git",
         "url": "git@github.com:react-native-video/react-native-video.git"

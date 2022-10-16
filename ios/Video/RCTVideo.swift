@@ -219,6 +219,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setSrc(_ source:NSDictionary!) {
         _source = VideoSource(source)
+        if (_source?.uri == nil || _source?.uri == "") {
+            DispatchQueue.global(qos: .default).async {
+                self._player?.replaceCurrentItem(with: nil)
+            }
+            return;
+        }
         removePlayerLayer()
         _playerObserver.player = nil
         _playerObserver.playerItem = nil
