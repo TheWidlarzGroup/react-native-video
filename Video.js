@@ -267,6 +267,17 @@ export default class Video extends Component {
     return UIManager.getViewManagerConfig(viewManagerName);
   };
 
+  setNativePause(paused = this.props.paused) {
+    this.setNativeProps({ paused })
+  }
+  componentDidMount() {
+    this.setNativePause()
+  }
+  componentWillUnmount() {
+    // ensures video will stop playing on React-Component unmount
+    this.setNativePause(true)
+  }
+
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
