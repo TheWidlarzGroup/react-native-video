@@ -178,6 +178,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Dynamic textTrackValue;
     private ReadableArray textTracks;
     private boolean disableFocus;
+    private boolean focusable = true;
     private boolean disableBuffering;
     private long contentStartTime = -1L;
     private boolean disableDisconnectError;
@@ -271,6 +272,8 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
+
+        exoPlayerView.setFocusable(this.focusable);
 
         mainHandler = new Handler();
     }
@@ -559,7 +562,7 @@ class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }, 1);
-        
+
     }
 
     private void initializePlayerCore(ReactExoplayerView self) {
@@ -1589,7 +1592,7 @@ class ReactExoplayerView extends FrameLayout implements
             for (int j = 0; j < group.length; j++) {
                 allTracks.add(j);
             }
-            
+
             // Valiate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
             ArrayList<Integer> supportedTrackList = new ArrayList<Integer>();
@@ -1748,13 +1751,18 @@ class ReactExoplayerView extends FrameLayout implements
         this.disableFocus = disableFocus;
     }
 
+    public void setFocusable(boolean focusable) {
+        this.focusable = focusable;
+        exoPlayerView.setFocusable(this.focusable);
+    }
+
     public void setBackBufferDurationMs(int backBufferDurationMs) {
         Runtime runtime = Runtime.getRuntime();
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         long freeMemory = runtime.maxMemory() - usedMemory;
         long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
         if (reserveMemory > freeMemory) {
-            // We don't have enough memory in reserve so we will 
+            // We don't have enough memory in reserve so we will
             Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
             this.backBufferDurationMs = 0;
             return;
