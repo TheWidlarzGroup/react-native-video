@@ -542,6 +542,10 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayer() {
         ReactExoplayerView self = this;
         Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) {
+            // if there is no activity, the player is most likely getting destroyed, in that case we don't need to initialize it
+            return;
+        }
         // This ensures all props have been settled, to avoid async racing conditions.
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -1219,8 +1223,12 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private int getScreenShortestSide(ThemedReactContext context) {
-        if (context == null) {
-            // No context so we fallback to max int
+        if (
+          context == null ||
+          context.getCurrentActivity() == null ||
+          context.getCurrentActivity().getWindowManager() == null
+        ) {
+            // No context, activity or window manager, we'll return the max int
             return 2147483647;
         }
         Display display = context.getCurrentActivity().getWindowManager().getDefaultDisplay();
