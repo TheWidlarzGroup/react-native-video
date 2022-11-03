@@ -406,7 +406,12 @@ class ReactExoplayerView extends FrameLayout implements
         });
 
         //Handling the fullScreenButton click event
-        ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        if (isFullscreen && !fullScreenPlayerView.isShowing()) {
+            fullScreenButton.setVisibility(GONE);
+        } else {
+            fullScreenButton.setVisibility(VISIBLE);
+        }
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
@@ -421,7 +426,6 @@ class ReactExoplayerView extends FrameLayout implements
                 if (pauseButton != null && pauseButton.getVisibility() == GONE) {
                     pauseButton.setVisibility(INVISIBLE);
                 }
-
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
