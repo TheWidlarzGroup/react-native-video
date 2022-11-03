@@ -416,12 +416,8 @@ class ReactExoplayerView extends FrameLayout implements
 
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-        if (isFullscreen && !fullScreenPlayerView.isShowing()) {
-            fullScreenButton.setVisibility(GONE);
-        } else {
-            fullScreenButton.setVisibility(VISIBLE);
-        }
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
+        updateFullScreenButtonVisbility();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -1774,6 +1770,22 @@ class ReactExoplayerView extends FrameLayout implements
         this.disableBuffering = disableBuffering;
     }
 
+    private void updateFullScreenButtonVisbility() {
+        if (playerControlView != null) {
+            final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+            if (controls) {
+                //Handling the fullScreenButton click event
+                if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
+                    fullScreenButton.setVisibility(GONE);
+                } else {
+                    fullScreenButton.setVisibility(VISIBLE);
+                }
+            } else {
+                fullScreenButton.setVisibility(GONE);
+            }
+        }
+    }
+
     public void setDisableDisconnectError(boolean disableDisconnectError) {
         this.disableDisconnectError = disableDisconnectError;
     }
@@ -1821,6 +1833,8 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.fullscreenDidDismiss();
             });
         }
+        // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
+        updateFullScreenButtonVisbility();
     }
 
     public void setUseTextureView(boolean useTextureView) {
@@ -1891,6 +1905,7 @@ class ReactExoplayerView extends FrameLayout implements
         this.controls = controls;
         if (controls) {
             addPlayerControl();
+            updateFullScreenButtonVisbility();
         } else {
             int indexOfPC = indexOfChild(playerControlView);
             if (indexOfPC != -1) {
