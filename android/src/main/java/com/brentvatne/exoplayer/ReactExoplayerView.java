@@ -372,6 +372,15 @@ class ReactExoplayerView extends FrameLayout implements
             playerControlView = new PlayerControlView(getContext());
         }
 
+        if (fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
+
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
@@ -679,12 +688,6 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
-        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                setFullscreen(false);
-            }
-        });
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -1784,15 +1787,6 @@ class ReactExoplayerView extends FrameLayout implements
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity == null) {
             return;
-        }
-
-        if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    setFullscreen(false);
-                }
-            });
         }
 
         Window window = activity.getWindow();
