@@ -454,7 +454,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Adding Player control to the frame layout
      */
     private void addPlayerControl() {
-        if(player == null) return;
+        if(playerControlView == null) return;
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -1802,7 +1802,7 @@ class ReactExoplayerView extends FrameLayout implements
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
             eventEmitter.fullscreenWillPresent();
-            if (controls) {
+            if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
             }
             post(() -> {
@@ -1812,7 +1812,7 @@ class ReactExoplayerView extends FrameLayout implements
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
             eventEmitter.fullscreenWillDismiss();
-            if (controls) {
+            if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayout(exoPlayerView);
             }
@@ -1889,7 +1889,6 @@ class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (player == null || exoPlayerView == null) return;
         if (controls) {
             addPlayerControl();
         } else {
