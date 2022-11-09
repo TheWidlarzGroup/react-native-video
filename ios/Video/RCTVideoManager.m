@@ -1,24 +1,10 @@
-#import "RCTVideoManager.h"
-#import "RCTVideo.h"
 #import <React/RCTBridge.h>
-#import <React/RCTUIManager.h>
-#import <AVFoundation/AVFoundation.h>
+#import "React/RCTViewManager.h"
 
-@implementation RCTVideoManager
-
-RCT_EXPORT_MODULE();
-
-- (UIView *)view
-{
-  return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
-}
-
-- (dispatch_queue_t)methodQueue
-{
-    return self.bridge.uiManager.methodQueue;
-}
+@interface RCT_EXTERN_MODULE(RCTVideoManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(drm, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(maxBitRate, float);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
@@ -32,9 +18,12 @@ RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(controls, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(playInBackground, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(preventsDisplaySleepDuringVideoPlayback, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(preferredForwardBufferDuration, float);
 RCT_EXPORT_VIEW_PROPERTY(playWhenInactive, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(pictureInPicture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(ignoreSilentSwitch, NSString);
+RCT_EXPORT_VIEW_PROPERTY(mixWithOthers, NSString);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
 RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
@@ -45,6 +34,8 @@ RCT_EXPORT_VIEW_PROPERTY(filter, NSString);
 RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(localSourceEncryptionKeyScheme, NSString);
+
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
@@ -65,37 +56,19 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
-RCT_REMAP_METHOD(save,
-        options:(NSDictionary *)options
-        reactTag:(nonnull NSNumber *)reactTag
-        resolver:(RCTPromiseResolveBlock)resolve
-        rejecter:(RCTPromiseRejectBlock)reject)
-{
-    [self.bridge.uiManager prependUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
-        RCTVideo *view = viewRegistry[reactTag];
-        if (![view isKindOfClass:[RCTVideo class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
-        } else {
-            [view save:options resolve:resolve reject:reject];
-        }
-    }];
-}
+RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 
-- (NSDictionary *)constantsToExport
-{
-  return @{
-    @"ScaleNone": AVLayerVideoGravityResizeAspect,
-    @"ScaleToFill": AVLayerVideoGravityResize,
-    @"ScaleAspectFit": AVLayerVideoGravityResizeAspect,
-    @"ScaleAspectFill": AVLayerVideoGravityResizeAspectFill
-  };
-}
+RCT_EXTERN_METHOD(save:(NSDictionary *)options
+        reactTag:(nonnull NSNumber *)reactTag
+        resolver:(RCTPromiseResolveBlock)resolve
+        rejecter:(RCTPromiseRejectBlock)reject)
 
-+ (BOOL)requiresMainQueueSetup
-{
-    return YES;
-}
+RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
+         reactTag:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
+                 reactTag:(nonnull NSNumber *)reactTag)
 
 @end

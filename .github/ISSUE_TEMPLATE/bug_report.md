@@ -10,20 +10,21 @@ assignees: ''
 # Bug
 
 <!--
-  Please provide a clear and concise description of what the bug is.
-  Include screenshots if needed.
-  Please test using the latest release of the library, as maybe said bug has been already fixed.
-  If the library has multiple install methods, describe installation method (e.g., pod, not pod, with jetifier etc)
+  Before opening a ticket
+    * Ensure the issue has not been already reported
+    * Please test using the latest release of the library, as maybe said bug has been already fixed.
+    * Provide a clear and concise description of what the bug is.
+    * If the library has multiple install methods, describe installation method (e.g., pod, not pod, with jetifier etc)
+    * Include screenshots if needed.
 -->
 
 ## Platform
 <!--
-  Platform where your bug is happening. If Android, report if using Android or Android Exoplayer
+  Platform where your bug is happening.
 -->
 Which player are you experiencing the problem on:
 * iOS
-* Android ExoPlayer
-* Android MediaPlayer
+* Android
 * Windows UWP
 * Windows WPF
 

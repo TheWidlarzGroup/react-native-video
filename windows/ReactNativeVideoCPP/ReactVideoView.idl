@@ -1,0 +1,20 @@
+namespace ReactNativeVideoCPP
+{
+    [webhosthidden]
+    [default_interface]
+    runtimeclass ReactVideoView : Windows.UI.Xaml.Controls.MediaPlayerElement
+    {
+        ReactVideoView(Microsoft.ReactNative.IReactContext context);
+        void Set_UriString(String uri);
+        void Set_IsLoopingEnabled(Boolean isLoopingEnabled);
+        void Set_Paused(Boolean isPaused);
+        void Set_Muted(Boolean isMuted);
+        void Set_Volume(Double volume);
+        void Set_Position(Double position);
+        void Set_Controls(Boolean useControls);
+        void Set_FullScreen(Boolean fullScreen);
+        void Set_ProgressUpdateInterval(Int64 interval);
+        void Set_AutoPlay(Boolean autoPlay);
+        void Set_PlaybackRate(Double rate);
+    };
+}

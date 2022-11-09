@@ -1,21 +1,33 @@
 package com.brentvatne.react;
 
-import android.app.Activity;
+import com.brentvatne.exoplayer.DefaultReactExoplayerConfig;
+import com.brentvatne.exoplayer.ReactExoplayerConfig;
+import com.brentvatne.exoplayer.ReactExoplayerViewManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class ReactVideoPackage implements ReactPackage {
 
+    private ReactExoplayerConfig config;
+
+    public ReactVideoPackage() {
+    }
+
+    public ReactVideoPackage(ReactExoplayerConfig config) {
+        this.config = config;
+    }
+
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        return Collections.singletonList(
+                new VideoDecoderPropertiesModule(reactContext)
+        );
     }
 
     // Deprecated RN 0.47
@@ -23,8 +35,12 @@ public class ReactVideoPackage implements ReactPackage {
         return Collections.emptyList();
     }
 
+
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(new ReactVideoViewManager());
+        if (config == null) {
+            config = new DefaultReactExoplayerConfig(reactContext);
+        }
+        return Collections.singletonList(new ReactExoplayerViewManager(config));
     }
 }

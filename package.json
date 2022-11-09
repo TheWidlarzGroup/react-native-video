@@ -1,57 +1,37 @@
 {
     "name": "react-native-video",
-    "version": "5.1.0-alpha1",
+    "version": "6.0.0-alpha.3",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
     "license": "MIT",
-    "author": "Brent Vatne <brentvatne@gmail.com> (https://github.com/brentvatne)",
-    "contributors": [
-        {
-            "name": "Isaiah Grey",
-            "email": "isaiahgrey@gmail.com"
-        },
-        {
-            "name": "Johannes Lumpe",
-            "email": "johannes@lum.pe"
-        },
-        {
-            "name": "Baris Sencan",
-            "email": "baris.sncn@gmail.com"
-        },
-        {
-            "name": "Hampton Maxwell",
-            "email": "me@hamptonmaxwell.com"
-        }
-    ],
+    "author": "Community Contributors",
+    "homepage": "https://github.com/react-native-video/react-native-video#readme",
     "repository": {
         "type": "git",
-        "url": "git@github.com:react-native-community/react-native-video.git"
+        "url": "git@github.com:react-native-video/react-native-video.git"
     },
     "devDependencies": {
-        "babel-eslint": "5.0.0-beta8",
-        "eslint": "1.10.3",
-        "eslint-config-airbnb": "4.0.0",
-        "eslint-plugin-react": "3.16.1",
-        "react": "^16.7.0",
-        "react-dom": "^16.7.0",
-        "react-hot-loader": "^4.6.3",
-        "react-native": "^0.57.8"
+        "@react-native-community/eslint-config": "^0.0.5",
+        "eslint": "^6.5.1",
+        "react": "16.9.0",
+        "react-native": "0.61.5",
+        "react-native-windows": "^0.61.0-0"
     },
     "dependencies": {
+        "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
-        "prop-types": "^15.5.10",
-        "shaka-player": "^2.4.4"
+        "prop-types": "^15.7.2"
     },
     "scripts": {
-        "test": "node_modules/.bin/eslint *.js"
+        "lint": "yarn eslint .",
+        "xbasic": "yarn --cwd examples/basic"
     },
     "files": [
-        "android-exoplayer",
         "android",
-        "dom",
         "ios",
         "windows",
         "FilterType.js",
+        "DRMType.js",
         "TextTrackType.js",
         "VideoResizeMode.js",
         "react-native-video.podspec"
