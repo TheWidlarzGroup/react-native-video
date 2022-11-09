@@ -50,6 +50,7 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -73,6 +74,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
+            EVENT_ON_RECEIVE_AD_EVENT
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -98,6 +100,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_BANDWIDTH,
+            EVENT_ON_RECEIVE_AD_EVENT
     })
     @interface VideoEvents {
     }
@@ -328,6 +331,13 @@ class VideoEventEmitter {
 
     void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
+    }
+
+    void receiveAdEvent(String event) {
+        WritableMap map = Arguments.createMap();
+        map.putString("event", event);
+
+        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
