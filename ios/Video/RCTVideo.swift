@@ -7,6 +7,7 @@ import Promises
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
     private var _player:AVPlayer?
+    private var _playerLooper:NSObject? // Since AVPlayerLooper is only available from 10.0
     private var _playerItem:AVPlayerItem?
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
@@ -272,18 +273,26 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
                 
                 self._player?.pause()
-                self._playerItem = playerItem
-                self._playerObserver.playerItem = self._playerItem
                 self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                 self.setFilter(self._filterName)
                 if let maxBitRate = self._maxBitRate {
                     self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                 }
                 
-                self._player = self._player ?? AVPlayer()
-                DispatchQueue.global(qos: .default).async {
-                    self._player?.replaceCurrentItem(with: playerItem)
+                if #available(iOS 10.0, *) {
+                    self._player = self._player ?? AVQueuePlayer(playerItem: playerItem!)
+                    if self._repeat {
+                        self._playerLooper = self._playerLooper ?? AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
+                    } 
+                } else {
+                    self._player = self._player ?? AVPlayer()
+                    DispatchQueue.global(qos: .default).async {
+                        self._player?.replaceCurrentItem(with: playerItem)
+                    }
                 }
+                
+                self._playerItem = playerItem
+                self._playerObserver.playerItem = self._playerItem
                 self._playerObserver.player = self._player
                 self.applyModifiers()
                 self._player?.actionAtItemEnd = .none
@@ -1060,9 +1069,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onVideoEnd?(["target": reactTag as Any])
         
         if _repeat {
-            let item:AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero)
-            self.applyModifiers()
+            if self._playerLooper == nil {
+                let item:AVPlayerItem! = notification.object as? AVPlayerItem
+                item.seek(to: CMTime.zero)
+                self.applyModifiers()
+            }
         } else {
             self.setPaused(true);
             _playerObserver.removePlayerTimeObserver()
