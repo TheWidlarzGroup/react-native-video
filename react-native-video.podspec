@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = "9.0"
 
   s.subspec "Video" do |ss|
-    ss.dependency "GoogleAds-IMA-iOS-SDK", "~> 3.9"
+    ss.dependency "GoogleAds-IMA-iOS-SDK", "~> 3.18.1"
 
     ss.source_files  = "ios/Video/**/*.{h,m,swift}"
     ss.dependency "PromisesSwift"

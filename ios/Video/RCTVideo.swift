@@ -1,10 +1,11 @@
 import AVFoundation
 import AVKit
 import Foundation
+import GoogleInteractiveMediaAds
 import React
 import Promises
 
-class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
+class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
 
     private var _player:AVPlayer?
     private var _playerItem:AVPlayerItem?
@@ -58,10 +59,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _fullscreenPlayerPresented:Bool = false
     private var _filterName:String!
     private var _filterEnabled:Bool = false
+    private var _adTagUrl:String?
     private var _presentingViewController:UIViewController?
+    private var _didRequestedAds:Bool = false
 
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
+
+    /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
+    private var contentPlayhead: IMAAVPlayerContentPlayhead?
+    /* Entry point for the SDK. Used to make ad requests. */
+    private var adsLoader: IMAAdsLoader!
+    /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
+    private var adsManager: IMAAdsManager!
 
 #if canImport(RCTVideoCache)
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
@@ -94,6 +104,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onPictureInPictureStatusChanged: RCTDirectEventBlock?
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
+    @objc var onReceiveAdEvent: RCTDirectEventBlock?
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -203,6 +214,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if currentTimeSecs >= 0 {
+            if !_didRequestedAds && currentTimeSecs >= 0.0001 {
+                requestAds()
+                _didRequestedAds = true
+            }
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player),
@@ -291,6 +306,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if #available(iOS 10.0, *) {
                     self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
                 }
+
+                // Set up your content playhead and contentComplete callback.
+                self.contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
+
+                self.setUpAdsLoader()
 
                 //Perform on next run loop, otherwise onVideoLoadStart is nil
                 self.onVideoLoadStart?([
@@ -782,6 +802,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _filterEnabled = filterEnabled
     }
 
+    @objc
+    func setAdTagUrl(_ adTagUrl:String!) {
+        _adTagUrl = adTagUrl
+    }
+
     // MARK: - React View Management
 
     func insertReactSubview(view:UIView!, atIndex:Int) {
@@ -1059,9 +1084,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
         onVideoEnd?(["target": reactTag as Any])
 
+        if notification.object as? AVPlayerItem == _player?.currentItem {
+            adsLoader.contentComplete()
+        }
+
         if _repeat {
             let item:AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero)
+            item.seek(to: CMTime.zero, completionHandler: nil)
             self.applyModifiers()
         } else {
             self.setPaused(true);
@@ -1080,4 +1109,159 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     //         }
     //         */
     //    }
+
+    func setUpAdsLoader() {
+        adsLoader = IMAAdsLoader(settings: nil)
+        adsLoader.delegate = self
+    }
+
+    func requestAds() {
+        if self._playerViewController != nil {
+            // Create ad display container for ad rendering.
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: self, viewController: self.reactViewController())
+
+            if _adTagUrl != nil {
+                // Create an ad request with our ad tag, display container, and optional user context.
+                let request = IMAAdsRequest(
+                    adTagUrl: _adTagUrl!,
+                    adDisplayContainer: adDisplayContainer,
+                    contentPlayhead: contentPlayhead,
+                    userContext: nil)
+
+                adsLoader.requestAds(with: request)
+            }
+        }
+    }
+
+    // MARK: - IMAAdsLoaderDelegate
+
+    func adsLoader(_ loader: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
+        // Grab the instance of the IMAAdsManager and set yourself as the delegate.
+        adsManager = adsLoadedData.adsManager
+        adsManager.delegate = self
+
+        // Create ads rendering settings and tell the SDK to use the in-app browser.
+        let adsRenderingSettings: IMAAdsRenderingSettings = IMAAdsRenderingSettings();
+        adsRenderingSettings.linkOpenerPresentingController = self._playerViewController;
+
+        adsManager.initialize(with: adsRenderingSettings)
+    }
+
+    func adsLoader(_ loader: IMAAdsLoader, failedWith adErrorData: IMAAdLoadingErrorData) {
+        if adErrorData.adError.message != nil {
+            print("Error loading ads: " + adErrorData.adError.message!)
+        }
+
+        _player?.play()
+    }
+
+    // MARK: - IMAAdsManagerDelegate
+
+    func adsManager(_ adsManager: IMAAdsManager, didReceive event: IMAAdEvent) {
+        // Play each ad once it has been loaded
+        if event.type == IMAAdEventType.LOADED {
+            adsManager.start()
+        }
+
+        if onReceiveAdEvent != nil {
+            let type = convertEventToString(event: event.type)
+
+            onReceiveAdEvent?([
+                "event": type,
+                "target": self.reactTag!
+            ]);
+        }
+    }
+
+    func adsManager(_ adsManager: IMAAdsManager, didReceive error: IMAAdError) {
+        if error.message != nil {
+            print("AdsManager error: " + error.message!)
+        }
+
+        // Fall back to playing content
+        _player?.play()
+    }
+
+    func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
+        // Pause the content for the SDK to play ads.
+        setPaused(true)
+    }
+
+    func adsManagerDidRequestContentResume(_ adsManager: IMAAdsManager) {
+        // Resume the content since the SDK is done playing ads (at least for now).
+        setPaused(false)
+    }
+
+    // MARK: - Helpers
+
+    func convertEventToString(event: IMAAdEventType!) -> String {
+        var result = "UNKNOWN";
+
+        switch(event) {
+            case .AD_BREAK_READY:
+                result = "AD_BREAK_READY";
+                break;
+            case .AD_BREAK_ENDED:
+                result = "AD_BREAK_ENDED";
+                break;
+            case .AD_BREAK_STARTED:
+                result = "AD_BREAK_STARTED";
+                break;
+            case .AD_PERIOD_ENDED:
+                result = "AD_PERIOD_ENDED";
+                break;
+            case .AD_PERIOD_STARTED:
+                result = "AD_PERIOD_STARTED";
+                break;
+            case .ALL_ADS_COMPLETED:
+                result = "ALL_ADS_COMPLETED";
+                break;
+            case .CLICKED:
+                result = "CLICKED";
+                break;
+            case .COMPLETE:
+                result = "COMPLETE";
+                break;
+            case .CUEPOINTS_CHANGED:
+                result = "CUEPOINTS_CHANGED";
+                break;
+            case .FIRST_QUARTILE:
+                result = "FIRST_QUARTILE";
+                break;
+            case .LOADED:
+                result = "LOADED";
+                break;
+            case .LOG:
+                result = "LOG";
+                break;
+            case .MIDPOINT:
+                result = "MIDPOINT";
+                break;
+            case .PAUSE:
+                result = "PAUSE";
+                break;
+            case .RESUME:
+                result = "RESUME";
+                break;
+            case .SKIPPED:
+                result = "SKIPPED";
+                break;
+            case .STARTED:
+                result = "STARTED";
+                break;
+            case .STREAM_LOADED:
+                result = "STREAM_LOADED";
+                break;
+            case .TAPPED:
+                result = "TAPPED";
+                break;
+            case .THIRD_QUARTILE:
+                result = "THIRD_QUARTILE";
+                break;
+            default:
+                result = "UNKNOWN";
+        }
+
+        return result;
+    }
 }
