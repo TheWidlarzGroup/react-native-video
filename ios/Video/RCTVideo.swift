@@ -651,9 +651,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard let _playerViewController = _playerViewController else { return }
         
         if _controls {
-            let viewController:UIViewController! = self.reactViewController()
-            viewController.addChild(_playerViewController)
-            self.addSubview(_playerViewController.view)
+            if let viewController = self.reactViewController() {  
+                viewController.addChild(_playerViewController)
+                self.addSubview(_playerViewController.view)
+            }
         }
         
         _playerObserver.playerViewController = _playerViewController
