@@ -847,6 +847,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     override func removeFromSuperview() {
         _player?.pause()
         _player = nil
+        _playerLooper = nil
         _playerObserver.clearPlayer()
         
         self.removePlayerLayer()
