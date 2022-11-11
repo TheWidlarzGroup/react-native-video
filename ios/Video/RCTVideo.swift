@@ -280,10 +280,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
                 
                 if #available(iOS 10.0, *) {
-                    self._player = self._player ?? AVQueuePlayer(playerItem: playerItem!)
+                    self._player = AVQueuePlayer(playerItem: playerItem!)
                     if self._repeat {
-                        self._playerLooper = self._playerLooper ?? AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
-                    } 
+                        self._playerLooper = AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
+                    }
                 } else {
                     self._player = self._player ?? AVPlayer()
                     DispatchQueue.global(qos: .default).async {
