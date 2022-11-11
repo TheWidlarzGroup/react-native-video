@@ -546,6 +546,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setRepeat(_ `repeat`: Bool) {
         _repeat = `repeat`
+        if #available(iOS 10, *) {
+            if _repeat && _player != nil && _playerItem != nil {
+                _playerLooper = _playerLooper ?? AVPlayerLooper(player: _player as! AVQueuePlayer, templateItem: _playerItem!)
+            } else {
+                _playerLooper = nil
+            }
+        }
     }
     
     
