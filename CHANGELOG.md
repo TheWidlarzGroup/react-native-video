@@ -10,6 +10,7 @@
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 - Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
 - Fix: memory leak issue on iOS [#2907](https://github.com/react-native-video/react-native-video/pull/2907)
+- Fix: improve looping on iOS [#2922](https://github.com/react-native-video/react-native-video/pull/2922)
 
 ### Version 6.0.0-alpha.3
 
