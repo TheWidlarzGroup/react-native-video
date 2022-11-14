@@ -61,7 +61,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _adTagUrl:String?
     private var _presentingViewController:UIViewController?
-    private var _didRequestedAds:Bool = false
+    private var _didRequestAds:Bool = false
+    private var _adPlaying:Bool = false
 
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
@@ -214,9 +215,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if currentTimeSecs >= 0 {
-            if !_didRequestedAds && currentTimeSecs >= 0.0001 {
+            if !_didRequestAds && currentTimeSecs >= 0.0001 {
                 requestAds()
-                _didRequestedAds = true
+                _didRequestAds = true
             }
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
@@ -420,18 +421,26 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setPaused(_ paused:Bool) {
         if paused {
-            _player?.pause()
-            _player?.rate = 0.0
+            if _adPlaying {
+                adsManager?.pause()
+            } else {
+                _player?.pause()
+                _player?.rate = 0.0
+            }
         } else {
             RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
 
-            if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
-                _player?.playImmediately(atRate: _rate)
+            if _adPlaying {
+                adsManager?.resume()
             } else {
-                _player?.play()
+                if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
+                    _player?.playImmediately(atRate: _rate)
+                } else {
+                    _player?.play()
+                    _player?.rate = _rate
+                }
                 _player?.rate = _rate
             }
-            _player?.rate = _rate
         }
 
         _paused = paused
@@ -1150,7 +1159,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             print("Error loading ads: " + adErrorData.adError.message!)
         }
 
-        _player?.play()
+        setPaused(false)
     }
 
     // MARK: - IMAAdsManagerDelegate
@@ -1177,16 +1186,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         // Fall back to playing content
-        _player?.play()
+        setPaused(false)
     }
 
     func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
         // Pause the content for the SDK to play ads.
         setPaused(true)
+        _adPlaying = true
     }
 
     func adsManagerDidRequestContentResume(_ adsManager: IMAAdsManager) {
         // Resume the content since the SDK is done playing ads (at least for now).
+        _adPlaying = false
         setPaused(false)
     }
 
