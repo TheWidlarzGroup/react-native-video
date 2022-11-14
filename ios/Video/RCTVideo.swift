@@ -1116,20 +1116,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func requestAds() {
-        if self._playerViewController != nil {
-            // Create ad display container for ad rendering.
-            let adDisplayContainer = IMAAdDisplayContainer(adContainer: self, viewController: self.reactViewController())
+        // Create ad display container for ad rendering.
+        let adDisplayContainer = IMAAdDisplayContainer(adContainer: self, viewController: self.reactViewController())
 
-            if _adTagUrl != nil {
-                // Create an ad request with our ad tag, display container, and optional user context.
-                let request = IMAAdsRequest(
-                    adTagUrl: _adTagUrl!,
-                    adDisplayContainer: adDisplayContainer,
-                    contentPlayhead: contentPlayhead,
-                    userContext: nil)
+        if _adTagUrl != nil {
+            // Create an ad request with our ad tag, display container, and optional user context.
+            let request = IMAAdsRequest(
+                adTagUrl: _adTagUrl!,
+                adDisplayContainer: adDisplayContainer,
+                contentPlayhead: contentPlayhead,
+                userContext: nil)
 
-                adsLoader.requestAds(with: request)
-            }
+            adsLoader.requestAds(with: request)
         }
     }
 
@@ -1142,7 +1140,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         // Create ads rendering settings and tell the SDK to use the in-app browser.
         let adsRenderingSettings: IMAAdsRenderingSettings = IMAAdsRenderingSettings();
-        adsRenderingSettings.linkOpenerPresentingController = self._playerViewController;
+        adsRenderingSettings.linkOpenerPresentingController = self.reactViewController();
 
         adsManager.initialize(with: adsRenderingSettings)
     }
