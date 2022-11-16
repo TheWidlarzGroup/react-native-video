@@ -372,6 +372,15 @@ class ReactExoplayerView extends FrameLayout implements
             playerControlView = new PlayerControlView(getContext());
         }
 
+        if (fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
+
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
@@ -406,8 +415,9 @@ class ReactExoplayerView extends FrameLayout implements
         });
 
         //Handling the fullScreenButton click event
-        ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
+        updateFullScreenButtonVisbility();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -421,7 +431,6 @@ class ReactExoplayerView extends FrameLayout implements
                 if (pauseButton != null && pauseButton.getVisibility() == GONE) {
                     pauseButton.setVisibility(INVISIBLE);
                 }
-
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
@@ -441,7 +450,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Adding Player control to the frame layout
      */
     private void addPlayerControl() {
-        if(player == null) return;
+        if(playerControlView == null) return;
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -675,12 +684,6 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
-        fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                setFullscreen(false);
-            }
-        });
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -1767,6 +1770,22 @@ class ReactExoplayerView extends FrameLayout implements
         this.disableBuffering = disableBuffering;
     }
 
+    private void updateFullScreenButtonVisbility() {
+        if (playerControlView != null) {
+            final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+            if (controls) {
+                //Handling the fullScreenButton click event
+                if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
+                    fullScreenButton.setVisibility(GONE);
+                } else {
+                    fullScreenButton.setVisibility(VISIBLE);
+                }
+            } else {
+                fullScreenButton.setVisibility(GONE);
+            }
+        }
+    }
+
     public void setDisableDisconnectError(boolean disableDisconnectError) {
         this.disableDisconnectError = disableDisconnectError;
     }
@@ -1782,15 +1801,6 @@ class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
-        if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    setFullscreen(false);
-                }
-            });
-        }
-
         Window window = activity.getWindow();
         View decorView = window.getDecorView();
         int uiOptions;
@@ -1804,7 +1814,7 @@ class ReactExoplayerView extends FrameLayout implements
                         | SYSTEM_UI_FLAG_FULLSCREEN;
             }
             eventEmitter.fullscreenWillPresent();
-            if (controls) {
+            if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
             }
             post(() -> {
@@ -1814,7 +1824,7 @@ class ReactExoplayerView extends FrameLayout implements
         } else {
             uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
             eventEmitter.fullscreenWillDismiss();
-            if (controls) {
+            if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayout(exoPlayerView);
             }
@@ -1823,6 +1833,8 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.fullscreenDidDismiss();
             });
         }
+        // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
+        updateFullScreenButtonVisbility();
     }
 
     public void setUseTextureView(boolean useTextureView) {
@@ -1891,9 +1903,9 @@ class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (player == null || exoPlayerView == null) return;
         if (controls) {
             addPlayerControl();
+            updateFullScreenButtonVisbility();
         } else {
             int indexOfPC = indexOfChild(playerControlView);
             if (indexOfPC != -1) {
