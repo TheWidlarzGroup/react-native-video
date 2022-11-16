@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.multidex.MultiDex;
 
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -76,11 +77,11 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionParameters;
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
@@ -96,7 +97,9 @@ import com.google.android.exoplayer2.source.dash.manifest.Descriptor;
 
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 
+import com.google.common.collect.ImmutableList;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -150,7 +153,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
-    private ImaAdsLoader adsLoader;
+    private final ImaAdsLoader adsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -267,13 +270,13 @@ class ReactExoplayerView extends FrameLayout implements
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
-        adsLoader = new ImaAdsLoader(this.themedReactContext, Uri.EMPTY);
-
         createViews();
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+        // Create an AdsLoader.
+        adsLoader = new ImaAdsLoader.Builder(themedReactContext).setAdEventListener(this).build();
     }
 
     private boolean isPlayingAd() {
@@ -292,6 +295,8 @@ class ReactExoplayerView extends FrameLayout implements
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
+
+        MultiDex.install(getContext());
 
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -616,18 +621,24 @@ class ReactExoplayerView extends FrameLayout implements
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+
+        Log.d("MEDIAAA", mediaDataSourceFactory.toString());
+        MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
+            .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
+
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
                     .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
+                    .setMediaSourceFactory(mediaSourceFactory)
                     .build();
         player.addListener(self);
-        adsLoader.setPlayer(player);
         exoPlayerView.setPlayer(player);
+        adsLoader.setPlayer(player);
         audioBecomingNoisyReceiver.setListener(self);
         bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
-        playerNeedsSource = true;
+        playerNeedsSource = false;
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
@@ -653,7 +664,10 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(self.srcUri, self.extension, drmSessionManager);
-        MediaSource mediaSourceWithAds = new AdsMediaSource(videoSource, mediaDataSourceFactory, adsLoader, exoPlayerView);
+        MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
+                .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
+        DataSpec adTagDataSpec = new DataSpec(adTagUrl);
+        MediaSource mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
             mediaSource = mediaSourceWithAds;
@@ -746,7 +760,11 @@ class ReactExoplayerView extends FrameLayout implements
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
-        MediaItem mediaItem = new MediaItem.Builder().setUri(uri).build();
+
+        MediaItem mediaItem = new MediaItem.Builder()
+            .setUri(uri)
+            .setAdsConfiguration(new MediaItem.AdsConfiguration.Builder(adTagUrl).build())
+            .build();
         DrmSessionManagerProvider drmProvider = null;
         if (drmSessionManager != null) {
             drmProvider = new DrmSessionManagerProvider() {
@@ -763,32 +781,40 @@ class ReactExoplayerView extends FrameLayout implements
                 return new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
+                )
+                .setDrmSessionManagerProvider(drmProvider)
+                .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                )
+                .createMediaSource(mediaItem);
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
+                )
+                .setDrmSessionManagerProvider(drmProvider)
+                .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                )
+                .createMediaSource(mediaItem);
             case C.TYPE_HLS:
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
+                )
+                .setDrmSessionManagerProvider(drmProvider)
+                .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                )
+                .createMediaSource(mediaItem);
             case C.TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
+                )
+                .setDrmSessionManagerProvider(drmProvider)
+                .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                )
+                .createMediaSource(mediaItem);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
@@ -830,6 +856,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
+            adsLoader.setPlayer(null);
             updateResumePosition();
             player.release();
             player.removeListener(this);
@@ -1438,8 +1465,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAdTagUrl(final Uri uri) {
         adTagUrl = uri;
-        adsLoader = new ImaAdsLoader(this.themedReactContext, adTagUrl);
-        adsLoader = new ImaAdsLoader.Builder(this.themedReactContext).setAdEventListener(this).buildForAdTag(adTagUrl);
     }
 
     public void setRawSrc(final Uri uri, final String extension) {
