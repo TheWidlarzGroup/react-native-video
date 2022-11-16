@@ -536,7 +536,7 @@ Video.propTypes = {
   needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
   adTagUrl: PropTypes.string,
-  onReceiveAdEvents: PropTypes.func,
+  onReceiveAdEvent: PropTypes.func,
 
   /* Required by react-native */
   scaleX: PropTypes.number,
