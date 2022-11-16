@@ -16,7 +16,6 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
-        multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
@@ -36,8 +35,6 @@ dependencies {
     implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
         exclude group: 'com.android.support'
     }
-
-    implementation 'androidx.multidex:multidex:2.0.1'
 
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"

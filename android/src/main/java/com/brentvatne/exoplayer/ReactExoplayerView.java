@@ -18,7 +18,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.multidex.MultiDex;
 
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -294,8 +293,6 @@ class ReactExoplayerView extends FrameLayout implements
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
-
-        MultiDex.install(getContext());
 
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
