@@ -83,13 +83,13 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         updateSurfaceView();
 
-        layout.addView(shutterView, 1, layoutParams);
-        layout.addView(subtitleLayout, 2, layoutParams);
-
         adOverlayFrameLayout = new FrameLayout(context);
 
+        layout.addView(shutterView, 1, layoutParams);
+        layout.addView(subtitleLayout, 2, layoutParams);
+        layout.addView(adOverlayFrameLayout, 3, layoutParams);
+
         addViewInLayout(layout, 0, aspectRatioParams);
-        addViewInLayout(adOverlayFrameLayout, 1, layoutParams);
     }
 
     private void clearVideoView() {
