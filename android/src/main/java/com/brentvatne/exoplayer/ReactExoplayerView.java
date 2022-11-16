@@ -790,40 +790,32 @@ class ReactExoplayerView extends FrameLayout implements
                 return new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                )
-                .setDrmSessionManagerProvider(drmProvider)
-                .setLoadErrorHandlingPolicy(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                )
-                .createMediaSource(mediaItem);
+                ).createMediaSource(mediaItem);
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                )
-                .setDrmSessionManagerProvider(drmProvider)
-                .setLoadErrorHandlingPolicy(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                )
-                .createMediaSource(mediaItem);
+                ).createMediaSource(mediaItem);
             case C.TYPE_HLS:
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                )
-                .setDrmSessionManagerProvider(drmProvider)
-                .setLoadErrorHandlingPolicy(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                )
-                .createMediaSource(mediaItem);
+                ).createMediaSource(mediaItem);
             case C.TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                )
-                .setDrmSessionManagerProvider(drmProvider)
-                .setLoadErrorHandlingPolicy(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                )
-                .createMediaSource(mediaItem);
+                ).createMediaSource(mediaItem);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
