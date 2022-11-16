@@ -1,4 +1,4 @@
-## react-native-video
+# react-native-video
 
 > :warning: **Version 6 Alpha**: The following documentation may refer to features only available through the v6.0.0 alpha releases, [please see version 5.2.x](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md) for the current documentation!
 
