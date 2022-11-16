@@ -103,7 +103,6 @@ import com.google.common.collect.ImmutableList;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -622,7 +621,6 @@ class ReactExoplayerView extends FrameLayout implements
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
-        Log.d("MEDIAAA", mediaDataSourceFactory.toString());
         MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
             .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
 
@@ -638,7 +636,7 @@ class ReactExoplayerView extends FrameLayout implements
         audioBecomingNoisyReceiver.setListener(self);
         bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
-        playerNeedsSource = false;
+        playerNeedsSource = true;
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
@@ -986,6 +984,7 @@ class ReactExoplayerView extends FrameLayout implements
             case AudioManager.AUDIOFOCUS_LOSS:
                 this.hasAudioFocus = false;
                 eventEmitter.audioFocusChanged(false);
+                pausePlayback();
                 audioManager.abandonAudioFocus(this);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
