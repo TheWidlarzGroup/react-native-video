@@ -662,15 +662,26 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(self.srcUri, self.extension, drmSessionManager);
-        MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
-                .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
-        DataSpec adTagDataSpec = new DataSpec(adTagUrl);
-        MediaSource mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
+        MediaSource mediaSourceWithAds = null;
+        if (adTagUrl != null) {
+            MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
+                    .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
+            DataSpec adTagDataSpec = new DataSpec(adTagUrl);
+            mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
+        }
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
-            mediaSource = mediaSourceWithAds;
+            if (mediaSourceWithAds != null) {
+                mediaSource = mediaSourceWithAds;
+            } else {
+                mediaSource = videoSource;
+            }
         } else {
-            mediaSourceList.add(0, mediaSourceWithAds);
+            if (mediaSourceWithAds != null) {
+                mediaSourceList.add(0, mediaSourceWithAds);
+            } else {
+                mediaSourceList.add(0, videoSource);
+            }
             MediaSource[] textSourceArray = mediaSourceList.toArray(
                     new MediaSource[mediaSourceList.size()]
             );
