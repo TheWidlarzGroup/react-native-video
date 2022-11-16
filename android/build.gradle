@@ -16,6 +16,7 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
@@ -36,6 +37,8 @@ dependencies {
         exclude group: 'com.android.support'
     }
 
+    implementation 'androidx.multidex:multidex:2.0.1'
+
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.core:core:1.1.0"
@@ -45,7 +48,7 @@ dependencies {
     implementation('com.google.android.exoplayer:extension-okhttp:2.18.1') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    implementation 'com.google.android.exoplayer:extension-ima:2.11.4'
+    implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
 
     implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
 }
