@@ -10,6 +10,7 @@
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 - Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
 - Fix regression when fullscreen prop is used combined with controls [#2911](https://github.com/react-native-video/react-native-video/pull/2911)
+- Fix: memory leak issue on iOS [#2907](https://github.com/react-native-video/react-native-video/pull/2907)
 
 ### Version 6.0.0-alpha.3
 
@@ -101,7 +102,7 @@
 
 - Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
 
-### Version 5.1.0-alpha6 
+### Version 5.1.0-alpha6
 
 - Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
 - Fix video dimensions being undefined when playing HLS in ios. [#1992](https://github.com/react-native-community/react-native-video/pull/1992)
