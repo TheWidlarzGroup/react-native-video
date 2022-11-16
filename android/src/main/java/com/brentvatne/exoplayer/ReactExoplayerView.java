@@ -151,7 +151,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
-    private final ImaAdsLoader adsLoader;
+    private ImaAdsLoader adsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -230,7 +230,7 @@ class ReactExoplayerView extends FrameLayout implements
             switch (msg.what) {
                 case SHOW_PROGRESS:
                     if (player != null) {
-                        if (isPlayingAd()) {
+                        if (playerControlView != null && isPlayingAd() && controls) {
                             playerControlView.hide();
                         }
                         long pos = player.getCurrentPosition();
@@ -273,12 +273,10 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-        // Create an AdsLoader.
-        adsLoader = new ImaAdsLoader.Builder(themedReactContext).setAdEventListener(this).build();
     }
 
     private boolean isPlayingAd() {
-        return player != null && player.isPlayingAd() && player.getPlayWhenReady();
+        return player != null && player.isPlayingAd();
     }
 
     @Override
@@ -618,6 +616,9 @@ class ReactExoplayerView extends FrameLayout implements
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
+        // Create an AdsLoader.
+        adsLoader = new ImaAdsLoader.Builder(themedReactContext).setAdEventListener(this).build();
+
         MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
             .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
 
@@ -767,10 +768,16 @@ class ReactExoplayerView extends FrameLayout implements
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
 
-        MediaItem mediaItem = new MediaItem.Builder()
-            .setUri(uri)
-            .setAdsConfiguration(new MediaItem.AdsConfiguration.Builder(adTagUrl).build())
-            .build();
+        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
+
+        if (adTagUrl != null) {
+            mediaItemBuilder.setAdsConfiguration(
+                    new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+            );
+        }
+
+        MediaItem mediaItem = mediaItemBuilder.build();
+
         DrmSessionManagerProvider drmProvider = null;
         if (drmSessionManager != null) {
             drmProvider = new DrmSessionManagerProvider() {
@@ -862,6 +869,7 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
         }
         adsLoader.release();
+        adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
