@@ -263,78 +263,80 @@ var styles = StyleSheet.create({
 ```
 
 ### Configurable props
-| Name |Plateforms Support  | 
-|--|--|
-|[allowsExternalPlayback](#allowsexternalplayback) |iOS |
-|[audioOnly](#audioonly)|All |
-|[automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling) | iOS|\
-|[backBufferDurationMs](#backBufferDurationMs)| Android |
-|[bufferConfig](#bufferconfig)|Android|
-|[contentStartTime](#contentStartTime)| Android |
-|[controls](#controls)|Android, iOS|
-|[currentPlaybackTime](#currentPlaybackTime)|Android|
-|[disableFocus](#disableFocus)|Android, iOS|
-|[disableDisconnectError](#disableDisconnectError)|Android|
-|[filter](#filter)|iOS|
-|[filterEnabled](#filterEnabled)|iOS|
-|[focusable](#focusable)|Android|
-|[fullscreen](#fullscreen)|iOS|
-|[fullscreenAutorotate](#fullscreenautorotate)|iOS|
-|[fullscreenOrientation](#fullscreenorientation)|iOS|
-|[headers](#headers)|Android|
-|[hideShutterView](#hideshutterview)|Android|
-|[ignoreSilentSwitch](#ignoresilentswitch)|iOS|
-|[maxBitRate](#maxbitrate)|Android, iOS|
-|[minLoadRetryCount](#minLoadRetryCount)|Android|
-|[mixWithOthers](#mixWithOthers)|iOS|
-|[muted](#muted)|All|
-|[paused](#paused)|All|
-|[pictureInPicture](#pictureinpicture)|iOS|
-|[playInBackground](#playinbackground)|Android, iOS|
-|[playWhenInactive](#playwheninactive)|iOS|
-|[poster](#poster)|All|
-|[posterResizeMode](#posterresizemode)|All|
-|[preferredForwardBufferDuration](#preferredForwardBufferDuration)|iOS|
-|[preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback)|iOS, Android|
-|[progressUpdateInterval](#progressupdateinterval)|All|
-|[rate](#rate)|All|
-|[repeat](#repeat)|All|
-|[reportBandwidth](#reportbandwidth)|Android|
-|[resizeMode](#resizemode)|Android, iOS, Windows UWP|
-|[selectedAudioTrack](#selectedaudiotrack)|Android, iOS|
-|[selectedTextTrack](#selectedtexttrack)|Android, iOS|
-|[selectedVideoTrack](#selectedvideotrack)|Android|
-|[source](#source)|All|
-|[subtitleStyle](#subtitleStyle)|Android|
-|[textTracks](#texttracks)|Android, iOS|
-|[trackId](#trackId)|Android|
-|[useTextureView](#usetextureview)|Android|
-|[useSecureView](#useSecureView)|Android|
-|[volume](#volume)|All|
-|[localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)|All|
+| Name                                                                                | Platforms Support         |
+|-------------------------------------------------------------------------------------|---------------------------|
+| [adTagUrl](#adTagUrl)                                                               | Android, iOS              |
+| [allowsExternalPlayback](#allowsexternalplayback)                                   | iOS                       |
+| [audioOnly](#audioonly)                                                             | All                       |
+| [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)       | iOS                       |
+| [backBufferDurationMs](#backBufferDurationMs)                                       | Android                   |
+| [bufferConfig](#bufferconfig)                                                       | Android                   |
+| [contentStartTime](#contentStartTime)                                               | Android                   |
+| [controls](#controls)                                                               | Android, iOS              |
+| [currentPlaybackTime](#currentPlaybackTime)                                         | Android                   |
+| [disableFocus](#disableFocus)                                                       | Android, iOS              |
+| [disableDisconnectError](#disableDisconnectError)                                   | Android                   |
+| [filter](#filter)                                                                   | iOS                       |
+| [filterEnabled](#filterEnabled)                                                     | iOS                       |
+| [focusable](#focusable)                                                             | Android                   |
+| [fullscreen](#fullscreen)                                                           | iOS                       |
+| [fullscreenAutorotate](#fullscreenautorotate)                                       | iOS                       |
+| [fullscreenOrientation](#fullscreenorientation)                                     | iOS                       |
+| [headers](#headers)                                                                 | Android                   |
+| [hideShutterView](#hideshutterview)                                                 | Android                   |
+| [ignoreSilentSwitch](#ignoresilentswitch)                                           | iOS                       |
+| [maxBitRate](#maxbitrate)                                                           | Android, iOS              |
+| [minLoadRetryCount](#minLoadRetryCount)                                             | Android                   |
+| [mixWithOthers](#mixWithOthers)                                                     | iOS                       |
+| [muted](#muted)                                                                     | All                       |
+| [paused](#paused)                                                                   | All                       |
+| [pictureInPicture](#pictureinpicture)                                               | iOS                       |
+| [playInBackground](#playinbackground)                                               | Android, iOS              |
+| [playWhenInactive](#playwheninactive)                                               | iOS                       |
+| [poster](#poster)                                                                   | All                       |
+| [posterResizeMode](#posterresizemode)                                               | All                       |
+| [preferredForwardBufferDuration](#preferredForwardBufferDuration)                   | iOS                       |
+| [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback) | iOS, Android              |
+| [progressUpdateInterval](#progressupdateinterval)                                   | All                       |
+| [rate](#rate)                                                                       | All                       |
+| [repeat](#repeat)                                                                   | All                       |
+| [reportBandwidth](#reportbandwidth)                                                 | Android                   |
+| [resizeMode](#resizemode)                                                           | Android, iOS, Windows UWP |
+| [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS              |
+| [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS              |
+| [selectedVideoTrack](#selectedvideotrack)                                           | Android                   |
+| [source](#source)                                                                   | All                       |
+| [subtitleStyle](#subtitleStyle)                                                     | Android                   |
+| [textTracks](#texttracks)                                                           | Android, iOS              |
+| [trackId](#trackId)                                                                 | Android                   |
+| [useTextureView](#usetextureview)                                                   | Android                   |
+| [useSecureView](#useSecureView)                                                     | Android                   |
+| [volume](#volume)                                                                   | All                       |
+| [localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)                   | All                       |
 
 
 ### Event props
-| Name |Plateforms Support  | 
-|--|--|
-|[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android, iOS|
-|[onBandwidthUpdate](#onbandwidthupdate)|Android|
-|[onBuffer](#onbuffer)|Android, iOS|
-|[onEnd](#onend)|All|
-|[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
-|[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)|Android, iOS|
-|[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)|Android, iOS|
-|[onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)|Android, iOS|
-|[onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)|Android, iOS|
-|[onLoad](#onload)|All|
-|[onLoadStart](#onloadstart)|All|
-|[onReadyForDisplay](#onreadyfordisplay)|Android, iOS, Web|
-|[onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)|iOS|
-|[onPlaybackRateChange](#onplaybackratechange)|All|
-|[onProgress](#onprogress)|All|
-|[onSeek](#onseek)|Android, iOS, Windows UWP|
-|[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)|iOS|
-|[onTimedMetadata](#ontimedmetadata)|Android, iOS|
+| Name                                                                                            | Platforms Support         | 
+|-------------------------------------------------------------------------------------------------|---------------------------|
+| [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
+| [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
+| [onBuffer](#onbuffer)                                                                           | Android, iOS              |
+| [onEnd](#onend)                                                                                 | All                       |
+| [onExternalPlaybackChange](#onexternalplaybackchange)                                           | iOS                       |
+| [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS              |
+| [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS              |
+| [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)                                 | Android, iOS              |
+| [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)                                   | Android, iOS              |
+| [onLoad](#onload)                                                                               | All                       |
+| [onLoadStart](#onloadstart)                                                                     | All                       |
+| [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)                             | iOS                       |
+| [onPlaybackRateChange](#onplaybackratechange)                                                   | All                       |
+| [onProgress](#onprogress)                                                                       | All                       |
+| [onReadyForDisplay](#onreadyfordisplay)                                                         | Android, iOS, Web         |
+| [onReceiveAdEvent](#onReceiveAdEvent)                                                           | Android, iOS              |
+| [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS                       |
+| [onSeek](#onseek)                                                                               | Android, iOS, Windows UWP |
+| [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
 
 
 ### Methods
@@ -355,6 +357,16 @@ var styles = StyleSheet.create({
 |[isHEVCSupported](#isHEVCSupported)|Android|
 
 ### Configurable props
+
+#### adTagUrl
+Sets the VAST uri to play AVOD ads.
+
+Example:
+```
+adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
+```
+
+Platforms: Android, iOS
 
 #### allowsExternalPlayback
 Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
@@ -1149,16 +1161,6 @@ Example:
 
 Platforms: Android
 
-#### onReadyForDisplay
-Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
-
-Payload: none
-
-* iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
-* Android [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
-
-Platforms: Android, iOS, Web
-
 #### onPictureInPictureStatusChanged
 Callback function that is called when picture in picture becomes active or inactive.
 
@@ -1191,7 +1193,6 @@ Example:
 
 Platforms: all
 
-
 #### onProgress
 Callback function that is called every progressUpdateInterval milliseconds with info about which position the media is currently playing.
 
@@ -1211,6 +1212,41 @@ Example:
 ```
 
 Platforms: all
+
+#### onReadyForDisplay
+Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
+
+Payload: none
+
+* iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
+* Android [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+
+Platforms: Android, iOS, Web
+
+#### onReceiveAdEvent
+Callback function that is called when an AdEvent is received from the IMA's SDK.
+
+Payload:
+
+| Property | Type   | Description           |
+|----------|--------|-----------------------|
+|  event   | string | The ad event received |
+
+Example:
+```
+{
+  "event": "LOADED"
+}
+```
+
+Platforms: Android, iOS
+
+#### onRestoreUserInterfaceForPictureInPictureStop
+Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface.
+
+Payload: none
+
+Platforms: iOS
 
 #### onSeek
 Callback function that is called when a seek completes.
@@ -1234,13 +1270,6 @@ Both the currentTime & seekTime are reported because the video player may not se
 
 
 Platforms: Android, iOS, Windows UWP
-
-#### onRestoreUserInterfaceForPictureInPictureStop
-Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface. 
-
-Payload: none
-
-Platforms: iOS
 
 #### onTimedMetadata
 Callback function that is called when timed metadata becomes available
@@ -1618,4 +1647,3 @@ allprojects {
 }
 ```
 If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
- 
