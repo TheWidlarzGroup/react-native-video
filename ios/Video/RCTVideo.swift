@@ -310,7 +310,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
                 }
 
-                if _adTagUrl != nil {
+                if self._adTagUrl != nil {
                     // Set up your content playhead and contentComplete callback.
                     self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
 
