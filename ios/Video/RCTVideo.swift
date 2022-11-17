@@ -216,6 +216,44 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
     
     // MARK: - Player and source
+
+    @objc
+    func setUpPlayer(_ playerItem:AVPlayerItem!) {
+        _playerObserver.player = nil
+        _playerObserver.playerItem = nil
+        self._playerItem = nil
+
+        self._player?.pause()
+
+        if #available(iOS 10.0, *) {
+            self._player = self._player ?? AVQueuePlayer(playerItem: playerItem)
+            self._playerItem = playerItem
+            self._playerObserver.playerItem = self._playerItem
+            self._playerObserver.player = self._player
+        } else {
+            self._playerItem = playerItem
+            self._playerObserver.playerItem = self._playerItem
+            self._playerObserver.player = self._player
+            self._player = self._player ?? AVPlayer()
+            DispatchQueue.global(qos: .default).async {
+                self._player?.replaceCurrentItem(with: playerItem)
+            }
+        }
+
+        self._player?.actionAtItemEnd = .none
+        self._playerObserver.attachPlayerEventListeners()
+    }
+
+    @objc
+    func setUpLooper(_ playerItem:AVPlayerItem!) {
+        _playerObserver.playerLooper = nil
+        self._playerLooper = nil
+
+        if #available(iOS 10.0, *) {
+            self._playerLooper = AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
+            self._playerObserver.playerLooper = self._playerLooper
+        }
+    }
     
     @objc
     func setSrc(_ source:NSDictionary!) {
@@ -229,6 +267,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         removePlayerLayer()
         _playerObserver.player = nil
         _playerObserver.playerItem = nil
+        _playerObserver.playerLooper = nil
         
         // perform on next run loop, otherwise other passed react-props may not be set
         RCTVideoUtils.delay()
@@ -279,23 +318,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                 }
                 
-                if #available(iOS 10.0, *) {
-                    self._player = AVQueuePlayer(playerItem: playerItem!)
-                    if self._repeat {
-                        self._playerLooper = AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
-                    }
-                } else {
-                    self._player = self._player ?? AVPlayer()
-                    DispatchQueue.global(qos: .default).async {
-                        self._player?.replaceCurrentItem(with: playerItem)
-                    }
-                }
-                
-                self._playerItem = playerItem
-                self._playerObserver.playerItem = self._playerItem
-                self._playerObserver.player = self._player
+                self.setUpPlayer(playerItem)
                 self.applyModifiers()
-                self._player?.actionAtItemEnd = .none
                 
                 if #available(iOS 10.0, *) {
                     self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
@@ -546,12 +570,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setRepeat(_ `repeat`: Bool) {
         _repeat = `repeat`
-        if #available(iOS 10, *) {
-            if _repeat && _player != nil && _playerItem != nil {
-                _playerLooper = _playerLooper ?? AVPlayerLooper(player: _player as! AVQueuePlayer, templateItem: _playerItem!)
-            } else {
-                _playerLooper = nil
-            }
+        if _repeat {
+            setUpLooper(_playerItem)
+        } else {
+            _playerObserver.playerLooper = nil
+            self._playerLooper = nil
+            _playerItem?.seek(to: CMTime.zero)
         }
     }
     
@@ -898,6 +922,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             "target": reactTag
         ])
     }
+
+    func handleLoopCountChange(changeObject: Any, change:NSKeyValueObservedChange<Int>) {
+        onVideoEnd?(["target": reactTag as Any])
+    }
     
     // When timeMetadata is read the event onTimedMetadata is triggered
     func handleTimeMetadataChange(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<[AVMetadataItem]?>) {
@@ -1074,7 +1102,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
     
     @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
-        onVideoEnd?(["target": reactTag as Any])
+        if self._playerLooper == nil {
+            onVideoEnd?(["target": reactTag as Any])
+        }
         
         if _repeat {
             if self._playerLooper == nil {

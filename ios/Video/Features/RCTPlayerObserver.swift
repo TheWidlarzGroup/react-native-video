@@ -14,6 +14,7 @@ protocol RCTPlayerObserverHandlerObjc {
 protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleTimeUpdate(time:CMTime)
     func handleReadyForDisplay(changeObject: Any, change:NSKeyValueObservedChange<Bool>)
+    func handleLoopCountChange(changeObject: Any, change:NSKeyValueObservedChange<Int>)
     func handleTimeMetadataChange(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<[AVMetadataItem]?>)
     func handlePlayerItemStatusChange(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<AVPlayerItem.Status>)
     func handlePlaybackBufferKeyEmpty(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>)
@@ -69,6 +70,17 @@ class RCTPlayerObserver: NSObject {
             }
         }
     }
+    var playerLooper:NSObject? {
+        willSet {
+            removePlayerLooperObserver()
+        }
+        didSet {
+            if playerLooper != nil {
+                addPlayerLooperObserver()
+            }
+        }
+    }
+
     
     private var _progressUpdateInterval:TimeInterval = 250
     private var _timeObserver:Any?
@@ -76,6 +88,7 @@ class RCTPlayerObserver: NSObject {
     private var _playerRateChangeObserver:NSKeyValueObservation?
     private var _playerExpernalPlaybackActiveObserver:NSKeyValueObservation?
     private var _playerItemStatusObserver:NSKeyValueObservation?
+    private var _playerLooperLoopCountObserver:NSKeyValueObservation?
     private var _playerPlaybackBufferEmptyObserver:NSKeyValueObservation?
     private var _playerPlaybackLikelyToKeepUpObserver:NSKeyValueObservation?
     private var _playerTimedMetadataObserver:NSKeyValueObservation?
@@ -136,6 +149,17 @@ class RCTPlayerObserver: NSObject {
     
     func removePlayerLayerObserver() {
         _playerLayerReadyForDisplayObserver?.invalidate()
+    }
+
+    func addPlayerLooperObserver() {
+        if #available(iOS 10.0, *) {
+            let looper = playerLooper as! AVPlayerLooper
+            _playerLooperLoopCountObserver = looper.observe(\.loopCount, options:  [.new], changeHandler: _handlers.handleLoopCountChange)
+        }
+    }
+    
+    func removePlayerLooperObserver() {
+        _playerLooperLoopCountObserver?.invalidate()
     }
     
     func addPlayerTimeObserver() {
@@ -202,6 +226,7 @@ class RCTPlayerObserver: NSObject {
     func clearPlayer() {
         player = nil
         playerItem = nil
+        playerLooper = nil
         NotificationCenter.default.removeObserver(_handlers)
     }
 }
