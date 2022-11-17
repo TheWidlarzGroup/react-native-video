@@ -9,7 +9,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     private var adsLoader: IMAAdsLoader!
     /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
     private var adsManager: IMAAdsManager!
-    
+
     init(video:RCTVideo!) {
         _video = video
 
@@ -24,7 +24,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     func requestAds() {
         // Create ad display container for ad rendering.
         let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video, viewController: _video.reactViewController())
-        
+
         let adTagUrl = _video.getAdTagUrl()
         let contentPlayhead = _video.getContentPlayhead()
 
@@ -35,11 +35,11 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
                 adDisplayContainer: adDisplayContainer,
                 contentPlayhead: contentPlayhead,
                 userContext: nil)
-            
+
             adsLoader.requestAds(with: request)
         }
     }
-    
+
     // MARK: - Getters
 
     func getAdsLoader() -> IMAAdsLoader? {
@@ -56,7 +56,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         // Grab the instance of the IMAAdsManager and set yourself as the delegate.
         adsManager = adsLoadedData.adsManager
         adsManager?.delegate = self
-        
+
 
         // Create ads rendering settings and tell the SDK to use the in-app browser.
         let adsRenderingSettings: IMAAdsRenderingSettings = IMAAdsRenderingSettings();

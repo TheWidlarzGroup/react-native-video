@@ -217,7 +217,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if currentTimeSecs >= 0 {
-            if !_didRequestAds && currentTimeSecs >= 0.0001 {
+            if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
                 _imaAdsManager.requestAds()
                 _didRequestAds = true
             }
@@ -310,10 +310,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
                 }
 
-                // Set up your content playhead and contentComplete callback.
-                self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
+                if _adTagUrl != nil {
+                    // Set up your content playhead and contentComplete callback.
+                    self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
 
-                self._imaAdsManager.setUpAdsLoader()
+                    self._imaAdsManager.setUpAdsLoader()
+                }
 
                 //Perform on next run loop, otherwise onVideoLoadStart is nil
                 self.onVideoLoadStart?([
@@ -814,7 +816,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - RCTIMAAdsManager
-    
+
     func getAdTagUrl() -> String? {
         return _adTagUrl
     }
@@ -823,11 +825,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setAdTagUrl(_ adTagUrl:String!) {
         _adTagUrl = adTagUrl
     }
-    
+
     func getContentPlayhead() -> IMAAVPlayerContentPlayhead? {
         return _contentPlayhead
     }
-    
+
     func setAdPlaying(_ adPlaying:Bool) {
         _adPlaying = adPlaying
     }
