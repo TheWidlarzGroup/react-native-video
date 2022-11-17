@@ -5,7 +5,7 @@ import GoogleInteractiveMediaAds
 import React
 import Promises
 
-class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
+class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
     private var _player:AVPlayer?
     private var _playerItem:AVPlayerItem?
@@ -59,20 +59,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _fullscreenPlayerPresented:Bool = false
     private var _filterName:String!
     private var _filterEnabled:Bool = false
-    private var _adTagUrl:String?
     private var _presentingViewController:UIViewController?
+
+    /* IMA Ads */
+    private var _adTagUrl:String?
+    private var _imaAdsManager: RCTIMAAdsManager!
     private var _didRequestAds:Bool = false
     private var _adPlaying:Bool = false
+    /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
+    private var _contentPlayhead: IMAAVPlayerContentPlayhead?
 
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
-
-    /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
-    private var contentPlayhead: IMAAVPlayerContentPlayhead?
-    /* Entry point for the SDK. Used to make ad requests. */
-    private var adsLoader: IMAAdsLoader!
-    /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
-    private var adsManager: IMAAdsManager!
 
 #if canImport(RCTVideoCache)
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
@@ -109,6 +107,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        _imaAdsManager = RCTIMAAdsManager(video: self)
 
         _eventDispatcher = eventDispatcher
 
@@ -147,6 +147,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+
+        _imaAdsManager = RCTIMAAdsManager(video: self)
     }
 
     deinit {
@@ -216,7 +218,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if currentTimeSecs >= 0 {
             if !_didRequestAds && currentTimeSecs >= 0.0001 {
-                requestAds()
+                _imaAdsManager.requestAds()
                 _didRequestAds = true
             }
             onVideoProgress?([
@@ -309,9 +311,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
 
                 // Set up your content playhead and contentComplete callback.
-                self.contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
+                self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
 
-                self.setUpAdsLoader()
+                self._imaAdsManager.setUpAdsLoader()
 
                 //Perform on next run loop, otherwise onVideoLoadStart is nil
                 self.onVideoLoadStart?([
@@ -422,7 +424,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setPaused(_ paused:Bool) {
         if paused {
             if _adPlaying {
-                adsManager?.pause()
+                _imaAdsManager.getAdsManager()?.pause()
             } else {
                 _player?.pause()
                 _player?.rate = 0.0
@@ -431,7 +433,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
 
             if _adPlaying {
-                adsManager?.resume()
+                _imaAdsManager.getAdsManager()?.resume()
             } else {
                 if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
                     _player?.playImmediately(atRate: _rate)
@@ -811,9 +813,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _filterEnabled = filterEnabled
     }
 
+    // MARK: - RCTIMAAdsManager
+    
+    func getAdTagUrl() -> String? {
+        return _adTagUrl
+    }
+
     @objc
     func setAdTagUrl(_ adTagUrl:String!) {
         _adTagUrl = adTagUrl
+    }
+    
+    func getContentPlayhead() -> IMAAVPlayerContentPlayhead? {
+        return _contentPlayhead
+    }
+    
+    func setAdPlaying(_ adPlaying:Bool) {
+        _adPlaying = adPlaying
     }
 
     // MARK: - React View Management
@@ -1094,7 +1110,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onVideoEnd?(["target": reactTag as Any])
 
         if notification.object as? AVPlayerItem == _player?.currentItem {
-            adsLoader.contentComplete()
+            _imaAdsManager.getAdsLoader()?.contentComplete()
         }
 
         if _repeat {
@@ -1118,159 +1134,4 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     //         }
     //         */
     //    }
-
-    func setUpAdsLoader() {
-        adsLoader = IMAAdsLoader(settings: nil)
-        adsLoader.delegate = self
-    }
-
-    func requestAds() {
-        // Create ad display container for ad rendering.
-        let adDisplayContainer = IMAAdDisplayContainer(adContainer: self, viewController: self.reactViewController())
-
-        if _adTagUrl != nil {
-            // Create an ad request with our ad tag, display container, and optional user context.
-            let request = IMAAdsRequest(
-                adTagUrl: _adTagUrl!,
-                adDisplayContainer: adDisplayContainer,
-                contentPlayhead: contentPlayhead,
-                userContext: nil)
-
-            adsLoader.requestAds(with: request)
-        }
-    }
-
-    // MARK: - IMAAdsLoaderDelegate
-
-    func adsLoader(_ loader: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
-        // Grab the instance of the IMAAdsManager and set yourself as the delegate.
-        adsManager = adsLoadedData.adsManager
-        adsManager.delegate = self
-
-        // Create ads rendering settings and tell the SDK to use the in-app browser.
-        let adsRenderingSettings: IMAAdsRenderingSettings = IMAAdsRenderingSettings();
-        adsRenderingSettings.linkOpenerPresentingController = self.reactViewController();
-
-        adsManager.initialize(with: adsRenderingSettings)
-    }
-
-    func adsLoader(_ loader: IMAAdsLoader, failedWith adErrorData: IMAAdLoadingErrorData) {
-        if adErrorData.adError.message != nil {
-            print("Error loading ads: " + adErrorData.adError.message!)
-        }
-
-        setPaused(false)
-    }
-
-    // MARK: - IMAAdsManagerDelegate
-
-    func adsManager(_ adsManager: IMAAdsManager, didReceive event: IMAAdEvent) {
-        // Play each ad once it has been loaded
-        if event.type == IMAAdEventType.LOADED {
-            adsManager.start()
-        }
-
-        if onReceiveAdEvent != nil {
-            let type = convertEventToString(event: event.type)
-
-            onReceiveAdEvent?([
-                "event": type,
-                "target": self.reactTag!
-            ]);
-        }
-    }
-
-    func adsManager(_ adsManager: IMAAdsManager, didReceive error: IMAAdError) {
-        if error.message != nil {
-            print("AdsManager error: " + error.message!)
-        }
-
-        // Fall back to playing content
-        setPaused(false)
-    }
-
-    func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
-        // Pause the content for the SDK to play ads.
-        setPaused(true)
-        _adPlaying = true
-    }
-
-    func adsManagerDidRequestContentResume(_ adsManager: IMAAdsManager) {
-        // Resume the content since the SDK is done playing ads (at least for now).
-        _adPlaying = false
-        setPaused(false)
-    }
-
-    // MARK: - Helpers
-
-    func convertEventToString(event: IMAAdEventType!) -> String {
-        var result = "UNKNOWN";
-
-        switch(event) {
-            case .AD_BREAK_READY:
-                result = "AD_BREAK_READY";
-                break;
-            case .AD_BREAK_ENDED:
-                result = "AD_BREAK_ENDED";
-                break;
-            case .AD_BREAK_STARTED:
-                result = "AD_BREAK_STARTED";
-                break;
-            case .AD_PERIOD_ENDED:
-                result = "AD_PERIOD_ENDED";
-                break;
-            case .AD_PERIOD_STARTED:
-                result = "AD_PERIOD_STARTED";
-                break;
-            case .ALL_ADS_COMPLETED:
-                result = "ALL_ADS_COMPLETED";
-                break;
-            case .CLICKED:
-                result = "CLICKED";
-                break;
-            case .COMPLETE:
-                result = "COMPLETE";
-                break;
-            case .CUEPOINTS_CHANGED:
-                result = "CUEPOINTS_CHANGED";
-                break;
-            case .FIRST_QUARTILE:
-                result = "FIRST_QUARTILE";
-                break;
-            case .LOADED:
-                result = "LOADED";
-                break;
-            case .LOG:
-                result = "LOG";
-                break;
-            case .MIDPOINT:
-                result = "MIDPOINT";
-                break;
-            case .PAUSE:
-                result = "PAUSE";
-                break;
-            case .RESUME:
-                result = "RESUME";
-                break;
-            case .SKIPPED:
-                result = "SKIPPED";
-                break;
-            case .STARTED:
-                result = "STARTED";
-                break;
-            case .STREAM_LOADED:
-                result = "STREAM_LOADED";
-                break;
-            case .TAPPED:
-                result = "TAPPED";
-                break;
-            case .THIRD_QUARTILE:
-                result = "THIRD_QUARTILE";
-                break;
-            default:
-                result = "UNKNOWN";
-        }
-
-        return result;
-    }
 }
