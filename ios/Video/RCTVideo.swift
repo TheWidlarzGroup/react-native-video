@@ -228,6 +228,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if #available(iOS 10.0, *) {
             self._player = self._player ?? AVQueuePlayer(playerItem: playerItem)
             self._playerItem = playerItem
+
+            if (self._repeat) {
+                self.setUpLooper(playerItem)
+            }
+
             self._playerObserver.playerItem = self._playerItem
             self._playerObserver.player = self._player
         } else {
@@ -250,8 +255,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self._playerLooper = nil
 
         if #available(iOS 10.0, *) {
-            self._playerLooper = AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
-            self._playerObserver.playerLooper = self._playerLooper
+            if self._player != nil && playerItem != nil {
+                self._playerLooper = AVPlayerLooper(player: self._player as! AVQueuePlayer, templateItem: playerItem!)
+                self._playerObserver.playerLooper = self._playerLooper
+            }
         }
     }
     
@@ -571,7 +578,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setRepeat(_ `repeat`: Bool) {
         _repeat = `repeat`
         if _repeat {
-            setUpLooper(_playerItem)
+            if _playerLooper == nil {
+                setUpLooper(_playerItem)
+            }
         } else {
             _playerObserver.playerLooper = nil
             self._playerLooper = nil
@@ -1104,17 +1113,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
         if self._playerLooper == nil {
             onVideoEnd?(["target": reactTag as Any])
-        }
-        
-        if _repeat {
-            if self._playerLooper == nil {
+            if _repeat {
                 let item:AVPlayerItem! = notification.object as? AVPlayerItem
                 item.seek(to: CMTime.zero)
                 self.applyModifiers()
+            } else {
+                self.setPaused(true);
             }
-        } else {
-            self.setPaused(true);
-            _playerObserver.removePlayerTimeObserver()
         }
     }
     
