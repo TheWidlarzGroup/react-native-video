@@ -221,38 +221,29 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setUpPlayer(_ playerItem:AVPlayerItem!) {
         _playerObserver.player = nil
         _playerObserver.playerItem = nil
-        self._playerItem = nil
-
-        self._player?.pause()
 
         if #available(iOS 10.0, *) {
-            self._player = self._player ?? AVQueuePlayer(playerItem: playerItem)
+            self._player = AVQueuePlayer(playerItem: playerItem)
             self._playerItem = playerItem
-
-            if (self._repeat) {
-                self.setUpLooper(playerItem)
-            }
-
+            self.setUpLooper(playerItem)
             self._playerObserver.playerItem = self._playerItem
             self._playerObserver.player = self._player
         } else {
             self._playerItem = playerItem
             self._playerObserver.playerItem = self._playerItem
-            self._playerObserver.player = self._player
             self._player = self._player ?? AVPlayer()
+            self._playerObserver.player = self._player
             DispatchQueue.global(qos: .default).async {
                 self._player?.replaceCurrentItem(with: playerItem)
             }
         }
 
         self._player?.actionAtItemEnd = .none
-        self._playerObserver.attachPlayerEventListeners()
     }
 
     @objc
     func setUpLooper(_ playerItem:AVPlayerItem!) {
         _playerObserver.playerLooper = nil
-        self._playerLooper = nil
 
         if #available(iOS 10.0, *) {
             if self._player != nil && playerItem != nil {
@@ -318,7 +309,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }.then{[weak self] (playerItem:AVPlayerItem!) in
                 guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
                 
-                self._player?.pause()
                 self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                 self.setFilter(self._filterName)
                 if let maxBitRate = self._maxBitRate {
@@ -577,14 +567,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setRepeat(_ `repeat`: Bool) {
         _repeat = `repeat`
-        if _repeat {
-            if _playerLooper == nil {
-                setUpLooper(_playerItem)
+
+        if _playerLooper != nil {
+            if _repeat {
+                if _player?.actionAtItemEnd == .pause {
+                    _player?.actionAtItemEnd = .advance
+                }
+            } else {
+                _player?.actionAtItemEnd = .pause
             }
-        } else {
-            _playerObserver.playerLooper = nil
-            self._playerLooper = nil
-            _playerItem?.seek(to: CMTime.zero)
         }
     }
     
@@ -932,8 +923,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
     }
 
-    func handleLoopCountChange(changeObject: Any, change:NSKeyValueObservedChange<Int>) {
-        onVideoEnd?(["target": reactTag as Any])
+    @available(iOS 10.0, *)
+    func handleLoopStatusChange(changeObject: Any, change:NSKeyValueObservedChange<AVPlayerLooper.Status>) {
+        let looper = _playerLooper as! AVPlayerLooper
+        if looper.status == .ready {
+            _playerObserver.addPlayerLooperItemsObserver()
+        }
     }
     
     // When timeMetadata is read the event onTimedMetadata is triggered
@@ -1109,17 +1104,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onPlaybackStalled?(["target": reactTag as Any])
         _playbackStalled = true
     }
+
+    @objc func handleLooperItemDidReachEnd(notification:NSNotification!) {
+        onVideoEnd?(["target": reactTag as Any])
+    }
     
     @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
-        if self._playerLooper == nil {
-            onVideoEnd?(["target": reactTag as Any])
-            if _repeat {
-                let item:AVPlayerItem! = notification.object as? AVPlayerItem
-                item.seek(to: CMTime.zero)
-                self.applyModifiers()
-            } else {
-                self.setPaused(true);
-            }
+        onVideoEnd?(["target": reactTag as Any])
+        if _repeat && self._playerLooper == nil {
+            let item:AVPlayerItem! = notification.object as? AVPlayerItem
+            item.seek(to: CMTime.zero)
+            self.applyModifiers()
         }
     }
     
