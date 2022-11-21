@@ -5,6 +5,8 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
+#import "PlaybackBitrateEmitter.h"
+
 
 static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
@@ -120,6 +122,8 @@ static int const RCTVideoUnset = -1;
     _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _mixWithOthers = @"inherit"; // inherit, mix, duck
+    _player = [[AVPlayer alloc] init];
+
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
 #endif
@@ -144,6 +148,11 @@ static int const RCTVideoUnset = -1;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(audioRouteChanged:)
                                                  name:AVAudioSessionRouteChangeNotification
+                                               object:nil];
+                                               
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(bandwidthUpdated:)
+                                                 name:AVPlayerItemNewAccessLogEntryNotification
                                                object:nil];
   }
   
@@ -186,6 +195,21 @@ static int const RCTVideoUnset = -1;
   }
   
   return (kCMTimeRangeZero);
+}
+
+-(void)bandwidthUpdated:(NSNotification *)notification
+{
+  AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+  AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+
+  double bitrate = lastEvent.indicatedBitrate;
+  if (bitrate == -1) {
+    double bitsTransferred = lastEvent.numberOfBytesTransferred * 8;
+    bitrate = bitsTransferred / lastEvent.segmentsDownloadedDuration;
+  }
+
+  [playbackBitrateEmitter emitBitrateEvent:bitrate];
+
 }
 
 -(void)addPlayerTimeObserver
@@ -397,7 +421,10 @@ static int const RCTVideoUnset = -1;
         self->_isExternalPlaybackActiveObserverRegistered = NO;
       }
       
-      self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
+      [self->_player replaceCurrentItemWithPlayerItem:self->_playerItem];
+      NSNotification *notification = [[NSNotification alloc] initWithName:@"XCD_PLAYER_AVAILABLE" object:self->_player userInfo:nil];
+      [[NSNotificationCenter defaultCenter] postNotification:notification];
+
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
       
       [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
@@ -1639,6 +1666,7 @@ static int const RCTVideoUnset = -1;
     [_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
+  [_player replaceCurrentItemWithPlayerItem:nil];
   _player = nil;
   
   [self removePlayerLayer];
