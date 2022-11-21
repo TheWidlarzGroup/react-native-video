@@ -7,6 +7,7 @@ protocol RCTPlayerObserverHandlerObjc {
     func handleDidFailToFinishPlaying(notification:NSNotification!)
     func handlePlaybackStalled(notification:NSNotification!)
     func handlePlayerItemDidReachEnd(notification:NSNotification!)
+    func handleLooperItemDidReachEnd(notification:NSNotification!)
     // unused
 //    func handleAVPlayerAccess(notification:NSNotification!)
 }
@@ -14,6 +15,8 @@ protocol RCTPlayerObserverHandlerObjc {
 protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleTimeUpdate(time:CMTime)
     func handleReadyForDisplay(changeObject: Any, change:NSKeyValueObservedChange<Bool>)
+    @available(iOS 10.0, *)
+    func handleLoopStatusChange(changeObject: Any, change:NSKeyValueObservedChange<AVPlayerLooper.Status>)
     func handleTimeMetadataChange(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<[AVMetadataItem]?>)
     func handlePlayerItemStatusChange(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<AVPlayerItem.Status>)
     func handlePlaybackBufferKeyEmpty(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>)
@@ -69,6 +72,17 @@ class RCTPlayerObserver: NSObject {
             }
         }
     }
+    var playerLooper:NSObject? {
+        willSet {
+            removePlayerLooperObserver()
+        }
+        didSet {
+            if playerLooper != nil {
+                addPlayerLooperObserver()
+            }
+        }
+    }
+
     
     private var _progressUpdateInterval:TimeInterval = 250
     private var _timeObserver:Any?
@@ -76,6 +90,7 @@ class RCTPlayerObserver: NSObject {
     private var _playerRateChangeObserver:NSKeyValueObservation?
     private var _playerExpernalPlaybackActiveObserver:NSKeyValueObservation?
     private var _playerItemStatusObserver:NSKeyValueObservation?
+    private var _playerLooperStatusObserver:NSKeyValueObservation?
     private var _playerPlaybackBufferEmptyObserver:NSKeyValueObservation?
     private var _playerPlaybackLikelyToKeepUpObserver:NSKeyValueObservation?
     private var _playerTimedMetadataObserver:NSKeyValueObservation?
@@ -136,6 +151,40 @@ class RCTPlayerObserver: NSObject {
     
     func removePlayerLayerObserver() {
         _playerLayerReadyForDisplayObserver?.invalidate()
+    }
+
+    func addPlayerLooperItemsObserver() {
+        if #available(iOS 10.0, *) {
+            let looper = playerLooper as! AVPlayerLooper
+            for item in looper.loopingPlayerItems {
+                NotificationCenter.default.addObserver(_handlers,
+                                                       selector:#selector(RCTPlayerObserverHandler.handleLooperItemDidReachEnd(notification:)),
+                                                       name:NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                       object:item)
+            }
+        }
+    }
+
+    func addPlayerLooperObserver() {
+        if #available(iOS 10.0, *) {
+            let looper = playerLooper as! AVPlayerLooper
+            _playerLooperStatusObserver = looper.observe(\.status, options:  [.new], changeHandler: _handlers.handleLoopStatusChange)
+        }
+    }
+    
+    func removePlayerLooperObserver() {
+        if #available(iOS 10.0, *) {
+            _playerLooperStatusObserver?.invalidate()
+            if playerLooper != nil {
+                let looper = playerLooper as! AVPlayerLooper
+                for item in looper.loopingPlayerItems {
+                    NotificationCenter.default.removeObserver(_handlers,
+                                                              name:NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                              object:item)
+                }
+            }
+
+        }
     }
     
     func addPlayerTimeObserver() {
@@ -202,6 +251,7 @@ class RCTPlayerObserver: NSObject {
     func clearPlayer() {
         player = nil
         playerItem = nil
+        playerLooper = nil
         NotificationCenter.default.removeObserver(_handlers)
     }
 }
