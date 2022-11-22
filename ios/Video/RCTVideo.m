@@ -10,6 +10,7 @@ static NSString *const statusKeyPath = @"status";
 static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp";
 static NSString *const playbackBufferEmptyKeyPath = @"playbackBufferEmpty";
 static NSString *const readyForDisplayKeyPath = @"readyForDisplay";
+static NSString *const loopStatusKeyPath = @"status";
 static NSString *const playbackRate = @"rate";
 static NSString *const timedMetadata = @"timedMetadata";
 static NSString *const externalPlaybackActive = @"externalPlaybackActive";
@@ -25,6 +26,7 @@ static int const RCTVideoUnset = -1;
 @implementation RCTVideo
 {
   AVPlayer *_player;
+  NSObject *_playerLooper;
   AVPlayerItem *_playerItem;
   NSDictionary *_source;
   BOOL _playerItemObserversSet;
@@ -329,6 +331,28 @@ static int const RCTVideoUnset = -1;
   return [NSNumber numberWithInteger:0];
 }
 
+- (void)addPlayerObservers
+{
+  [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
+  self->_playbackRateObserverRegistered = YES;
+  
+  [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
+  self->_isExternalPlaybackActiveObserverRegistered = YES;
+
+}
+
+- (void)removePlayerObservers
+{
+    if (self->_playbackRateObserverRegistered) {
+      [self->_player removeObserver:self forKeyPath:playbackRate context:nil];
+      self->_playbackRateObserverRegistered = NO;
+    }
+    if (self->_isExternalPlaybackActiveObserverRegistered) {
+      [self->_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
+      self->_isExternalPlaybackActiveObserverRegistered = NO;
+    }
+}
+
 - (void)addPlayerItemObservers
 {
   [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
@@ -352,7 +376,86 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+- (void)addPlayerLooperItemsObserver
+{
+  if (@available(iOS 10.0, *)) {
+    if (_playerLooper != nil) {
+      AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
+      NSArray *items = [looper loopingPlayerItems];
+        
+      for (AVPlayerItem* item in [looper loopingPlayerItems]) {
+        
+          [[NSNotificationCenter defaultCenter] addObserver:self
+                                                   selector:@selector(playerLooperItemDidReachEnd:)
+                                                       name:AVPlayerItemDidPlayToEndTimeNotification
+                                                     object:item];
+      }
+    }
+  }
+
+}
+- (void)addPlayerLooperObservers
+{
+  if (@available(iOS 10.0, *)) {
+    if (_playerLooper != nil) {
+      [_playerLooper addObserver:self forKeyPath:loopStatusKeyPath options:0 context:nil];
+    }
+  }
+}
+
+- (void)removePlayerLooperObservers
+{
+  if (@available(iOS 10.0, *)) {
+    if (_playerLooper != nil) {
+      @try{
+        [_playerLooper removeObserver:self forKeyPath:loopStatusKeyPath];
+      }@catch(id anException){}
+      AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
+      for (AVPlayerItem* item in [looper loopingPlayerItems]) {
+          [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                          name:AVPlayerItemDidPlayToEndTimeNotification
+                                                        object:item];
+      }
+    }
+  }
+}
+
 #pragma mark - Player and source
+
+- (void)setUpPlayer:(AVPlayerItem*)playerItem
+{
+  [self removePlayerObservers];
+  [self removePlayerItemObservers];
+  
+  if (@available(iOS 10.0, *)) {
+    self->_player = [AVQueuePlayer playerWithPlayerItem:playerItem];
+    [self setUpLooper:playerItem];
+    self->_playerItem = playerItem;
+    _playerItem = playerItem;
+    [self addPlayerItemObservers];
+  } else {
+    self->_playerItem = playerItem;
+    _playerItem = playerItem;
+    [self addPlayerItemObservers];
+    self->_player = [AVPlayer playerWithPlayerItem:playerItem];
+  }
+  
+  self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+  [self addPlayerObservers];
+}
+
+- (void)setUpLooper:(AVPlayerItem*)playerItem
+{
+  [self removePlayerLooperObservers];
+
+  if (@available(iOS 10.0, *)) {
+    if (self->_player != nil && playerItem != nil) {
+      AVPlayerLooper* looper = [AVPlayerLooper playerLooperWithPlayer:(AVQueuePlayer *)self->_player templateItem:playerItem]; 
+      self->_playerLooper = looper;
+      [self addPlayerLooperObservers];
+    }
+  }   
+}
 
 - (void)setSrc:(NSDictionary *)source
 {
@@ -360,36 +463,17 @@ static int const RCTVideoUnset = -1;
   [self removePlayerLayer];
   [self removePlayerTimeObserver];
   [self removePlayerItemObservers];
+  [self removePlayerLooperObservers];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
     
     // perform on next run loop, otherwise other passed react-props may not be set
     [self playerItemForSource:self->_source withCallback:^(AVPlayerItem * playerItem) {
-      self->_playerItem = playerItem;
-      _playerItem = playerItem;
       [self setPreferredForwardBufferDuration:_preferredForwardBufferDuration];
-      [self addPlayerItemObservers];
       [self setFilter:self->_filterName];
       [self setMaxBitRate:self->_maxBitRate];
       
-      [_player pause];
-        
-      if (_playbackRateObserverRegistered) {
-        [_player removeObserver:self forKeyPath:playbackRate context:nil];
-        _playbackRateObserverRegistered = NO;
-      }
-      if (self->_isExternalPlaybackActiveObserverRegistered) {
-        [self->_player removeObserver:self forKeyPath:externalPlaybackActive context:nil];
-        self->_isExternalPlaybackActiveObserverRegistered = NO;
-      }
-      
-      self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
-      self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-      
-      [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
-      self->_playbackRateObserverRegistered = YES;
-      
-      [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
-      self->_isExternalPlaybackActiveObserverRegistered = YES;
+      [self setUpPlayer:playerItem];
+      [self applyModifiers];
       
       [self addPlayerTimeObserver];
       if (@available(iOS 10.0, *)) {
@@ -757,6 +841,15 @@ static int const RCTVideoUnset = -1;
 
         return;
       }
+  } else if (object == _playerLooper) {
+    if([keyPath isEqualToString:loopStatusKeyPath]) {
+      if (@available(iOS 10.0, *)) {
+        AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
+        if (looper.status == AVPlayerLooperStatusReady) {
+          [self addPlayerLooperItemsObserver];
+        }
+      }
+    }
   }
 }
 
@@ -825,18 +918,23 @@ static int const RCTVideoUnset = -1;
   _playbackStalled = YES;
 }
 
+- (void)playerLooperItemDidReachEnd:(NSNotification *)notification
+{
+  if(self.onVideoEnd) {
+    self.onVideoEnd(@{@"target": self.reactTag});
+  }
+}
+
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
   if(self.onVideoEnd) {
     self.onVideoEnd(@{@"target": self.reactTag});
   }
-  
-  if (_repeat) {
+
+  if (_repeat && self->_playerLooper == nil) {
     AVPlayerItem *item = [notification object];
     [item seekToTime:kCMTimeZero];
     [self applyModifiers];
-  } else {
-    [self removePlayerTimeObserver];
   }
 }
 
@@ -1098,6 +1196,21 @@ static int const RCTVideoUnset = -1;
 
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
+
+  if (@available(iOS 10.0, *)) {
+    AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
+    if (looper != nil) {
+      if (_repeat) {
+        if (_player != nil && _player.actionAtItemEnd == AVPlayerActionAtItemEndPause) {
+          _player.actionAtItemEnd = AVPlayerActionAtItemEndAdvance;
+        }
+      } else {
+          if (_player != nil) {
+            _player.actionAtItemEnd = AVPlayerActionAtItemEndPause;
+          }
+      }
+    }
+  }
 }
 
 - (void)setMediaSelectionTrackForCharacteristic:(AVMediaCharacteristic)characteristic
@@ -1624,6 +1737,7 @@ static int const RCTVideoUnset = -1;
     _isExternalPlaybackActiveObserverRegistered = NO;
   }
   _player = nil;
+  _playerLooper = nil;
   
   [self removePlayerLayer];
   
