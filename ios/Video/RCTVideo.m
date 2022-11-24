@@ -1218,7 +1218,6 @@ static int const RCTVideoUnset = -1;
       }
     }
   }
-}
 
 - (void)setMediaSelectionTrackForCharacteristic:(AVMediaCharacteristic)characteristic
                                    withCriteria:(NSDictionary *)criteria
