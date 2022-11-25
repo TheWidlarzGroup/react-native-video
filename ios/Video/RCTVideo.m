@@ -30,6 +30,8 @@ static int const RCTVideoUnset = -1;
   AVPlayerItem *_playerItem;
   NSDictionary *_source;
   BOOL _playerItemObserversSet;
+  BOOL _playerLooperObserversSet;
+  BOOL _platerLooperItemsObserversSet;
   BOOL _playerBufferEmpty;
   AVPlayerLayer *_playerLayer;
   BOOL _playerLayerObserverSet;
@@ -357,10 +359,11 @@ static int const RCTVideoUnset = -1;
 - (void)addPlayerItemObservers
 {
   if (!@available(iOS 10.0, *)) {
-  [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
-  [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
-  [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
-  [_playerItem addObserver:self forKeyPath:timedMetadata options:NSKeyValueObservingOptionNew context:nil];
+    [_playerItem addObserver:self forKeyPath:statusKeyPath options:0 context:nil];
+    [_playerItem addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
+    [_playerItem addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
+    [_playerItem addObserver:self forKeyPath:timedMetadata options:NSKeyValueObservingOptionNew context:nil];
+    _playerItemObserversSet = YES;
   }
 }
 
@@ -369,15 +372,16 @@ static int const RCTVideoUnset = -1;
  * observer set */
 - (void)removePlayerItemObservers
 {
-  @try{
+  if (_playerItemObserversSet) {
     [_playerItem removeObserver:self forKeyPath:statusKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
     [_playerItem removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
     [_playerItem removeObserver:self forKeyPath:timedMetadata];
-  }@catch(id anException){}
+    _playerItemObserversSet = NO;
+  }
 }
 
-- (void)addPlayerLooperItemsObserver
+- (void)addPlayerLooperItemsObservers
 {
   if (@available(iOS 10.0, *)) {
     if (_playerLooper != nil) {
@@ -392,6 +396,7 @@ static int const RCTVideoUnset = -1;
         [item addObserver:self forKeyPath:playbackBufferEmptyKeyPath options:0 context:nil];
         [item addObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath options:0 context:nil];
         [item addObserver:self forKeyPath:timedMetadata options:NSKeyValueObservingOptionNew context:nil];
+        _platerLooperItemsObserversSet = YES;
       }
     }
   }
@@ -402,6 +407,7 @@ static int const RCTVideoUnset = -1;
   if (@available(iOS 10.0, *)) {
     if (_playerLooper != nil) {
       [_playerLooper addObserver:self forKeyPath:loopStatusKeyPath options:0 context:nil];
+      _playerLooperObserversSet = YES;
     }
   }
 }
@@ -410,20 +416,25 @@ static int const RCTVideoUnset = -1;
 {
   if (@available(iOS 10.0, *)) {
     if (_playerLooper != nil) {
-      @try{
+      if (_playerLooperObserversSet) {
         [_playerLooper removeObserver:self forKeyPath:loopStatusKeyPath];
-      AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
-      for (AVPlayerItem* item in [looper loopingPlayerItems]) {
-          [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                          name:AVPlayerItemDidPlayToEndTimeNotification
-                                                        object:item];
-
-          [item removeObserver:self forKeyPath:statusKeyPath];
-          [item removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
-          [item removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
-          [item removeObserver:self forKeyPath:timedMetadata];
+        _playerLooperObserversSet = NO;
       }
-      }@catch(id anException){}
+      
+      if (_platerLooperItemsObserversSet) {
+        AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
+          for (AVPlayerItem* item in [looper loopingPlayerItems]) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                            name:AVPlayerItemDidPlayToEndTimeNotification
+                                                          object:item];
+
+            [item removeObserver:self forKeyPath:statusKeyPath];
+            [item removeObserver:self forKeyPath:playbackBufferEmptyKeyPath];
+            [item removeObserver:self forKeyPath:playbackLikelyToKeepUpKeyPath];
+            [item removeObserver:self forKeyPath:timedMetadata];
+            _platerLooperItemsObserversSet = NO;
+        }
+      }
     }
   }
 }
@@ -855,7 +866,7 @@ static int const RCTVideoUnset = -1;
       if (@available(iOS 10.0, *)) {
         AVPlayerLooper* looper = (AVPlayerLooper *)_playerLooper;
         if (looper.status == AVPlayerLooperStatusReady) {
-          [self addPlayerLooperItemsObserver];
+          [self addPlayerLooperItemsObservers];
         }
       }
     }
