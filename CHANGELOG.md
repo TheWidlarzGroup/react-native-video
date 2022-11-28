@@ -1,5 +1,7 @@
 ## Changelog
 
+## Version 5.2.x
+- Fix example basic so the example can be run [#2933] (https://github.com/react-native-video/react-native-video/pull/2933)
 ### Version 5.2.0
 
 - Fix for tvOS native audio menu language selector
