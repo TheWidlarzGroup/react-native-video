@@ -6,7 +6,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const blacklist = require('metro-config/src/defaults/blacklist');
+const blacklist = require('metro-config/src/defaults/exclusionList');
 
 const rnPath = fs.realpathSync(
   path.resolve(require.resolve('react-native/package.json'), '..'),
@@ -37,11 +37,15 @@ module.exports = {
       ),
       // Prevent recursive node_modules from local react-native-video
       new RegExp(
-        `${path.resolve(__dirname, 'node_modules/react-native-video/node_modules').replace(/[/\\]/g, '/')}.*`,
+        `${path
+          .resolve(__dirname, 'node_modules/react-native-video/node_modules')
+          .replace(/[/\\]/g, '/')}.*`,
       ),
       // Prevent recursive examples from local react-native-video
       new RegExp(
-        `${path.resolve(__dirname, 'node_modules/react-native-video/examples').replace(/[/\\]/g, '/')}.*`,
+        `${path
+          .resolve(__dirname, 'node_modules/react-native-video/examples')
+          .replace(/[/\\]/g, '/')}.*`,
       ),
     ]),
   },
