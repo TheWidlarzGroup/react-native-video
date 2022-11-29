@@ -27,6 +27,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     UIImageView* _waterMarkImageView;
     
     bool _controls;
+    bool _shouldSaveSubtitleSelection;
+    
     NSDictionary* _Nullable _source;
     NSDictionary* _Nullable _theme;
     NSDictionary* _Nullable _translations;
@@ -45,6 +47,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     if ((self = [super init])) {
         _diceBeaconRequestOngoing = NO;
         _controls = YES;
+        _shouldSaveSubtitleSelection = NO;
         _playerName = @"DicePlayer";
         
         _waterMarkImageView = [UIImageView new];
@@ -155,6 +158,8 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     
     _source = source;
     
+    self->_shouldSaveSubtitleSelection = [[source objectForKey:@"shouldSaveSubtitleSelection"] boolValue];
+
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) 0), dispatch_get_main_queue(), ^{
         // perform on next run loop, otherwise other passed react-props may not be set
 
@@ -175,7 +180,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
                     [self.dorisUI.input loadWithPlayerItemSource:source startPlayingAt:self->_startPlayingAt];
                 });
             }
-            
+                        
             if (self.onVideoLoadStart) {
                 id uri = [source objectForKey:@"uri"];
                 id type = [source objectForKey:@"type"];
@@ -487,6 +492,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     if(self.onVideoLoad) {
         self.onVideoLoad(@{@"target": self.reactTag});
     }
+    
+    NSString* _Nullable selectedSubtitleCode = [[NSUserDefaults standardUserDefaults]
+        stringForKey:@"selectedSubtitle"];
+    
+    if (_shouldSaveSubtitleSelection && selectedSubtitleCode != nil) {
+        [self.dorisUI.input selectSubtitleWithCode:selectedSubtitleCode];
+    }
 }
 
 - (void)didResumePlayback:(BOOL)isPlaying {
@@ -546,6 +558,13 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 - (void)didTapScheduleButton {
     if (self.onEpgIconClick) {
         self.onEpgIconClick(@{@"target": self.reactTag});
+    }
+}
+
+- (void)didSelectSubtitleWithCode:(NSString *)code title:(NSString *)title {
+    if (_shouldSaveSubtitleSelection) {
+        [[NSUserDefaults standardUserDefaults] setObject:code forKey:@"selectedSubtitle"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
