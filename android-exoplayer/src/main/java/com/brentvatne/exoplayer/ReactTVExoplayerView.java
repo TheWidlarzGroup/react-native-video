@@ -98,6 +98,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.imggaming.tracks.TrackPreferenceStorage;
 import com.imggaming.widgets.DceWatchFromWidget;
 import com.imggaming.widgets.DceWatermarkWidget;
 import com.previewseekbar.base.PreviewView;
@@ -494,6 +495,16 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             DefaultTrackSelector.ParametersBuilder parametersBuilder =
                     new DefaultTrackSelector.ParametersBuilder(getContext())
                     .setMaxVideoSize(viewWidth, viewHeight);
+
+            TrackPreferenceStorage trackPreferenceStorage = TrackPreferenceStorage.getInstance(getContext());
+            if (trackPreferenceStorage.isEnabled()) {
+                if (trackPreferenceStorage.isNoSubtitlePreferred()) {
+                    parametersBuilder.setDisabledTextTrackSelectionFlags(C.SELECTION_FLAG_DEFAULT);
+                } else {
+                    parametersBuilder.setPreferredTextLanguage(trackPreferenceStorage.getPreferredSubtitleLanguage());
+                }
+            }
+
             player = exoDorisFactory.createPlayer(
                     getContext(),
                     adType,
@@ -502,6 +513,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     exoDorisPlayerView.getRewindIncrementMs(),
                     parametersBuilder,
                     exoDorisPlayerView);
+
             player.setDorisListener(dorisListener);
             trackSelector = player.getTrackSelector();
             ExoPlayer exoPlayer = player.getExoPlayer();
@@ -1053,8 +1065,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
-            setSelectedAudioTrack(audioTrackType, audioTrackValue);
-            setSelectedTextTrack(textTrackType, textTrackValue);
+            if (audioTrackType != null && audioTrackValue != null) {
+                setSelectedAudioTrack(audioTrackType, audioTrackValue);
+            }
+            if (textTrackType != null && textTrackValue != null) {
+                setSelectedTextTrack(textTrackType, textTrackValue);
+            }
             ExoPlayer exoPlayer = player.getExoPlayer();
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
@@ -1294,7 +1310,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean apsTestFlag,
             @Nullable String adTagUrl,
             Watermark watermark,
-            LimitedSeekRange limitedSeekRange) {
+            LimitedSeekRange limitedSeekRange,
+            boolean shouldSaveSubtitleSelection) {
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1334,6 +1351,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (watermarkWidget != null) {
                 watermarkWidget.setWatermark(watermark);
             }
+            TrackPreferenceStorage.getInstance(getContext()).setEnabled(shouldSaveSubtitleSelection);
             initializePlayer(!isOriginalSourceNull && !isSourceEqual);
         }
     }
@@ -2000,6 +2018,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     @Override
     public void onStatsButtonClicked() {
         eventEmitter.statsIconClick();
+    }
+
+    @Override
+    public void onSubtitleSelected(String language) {
+        TrackPreferenceStorage storage = TrackPreferenceStorage.getInstance(getContext());
+        storage.storePreferredSubtitleLanguage(language == null
+                ? TrackPreferenceStorage.NONE
+                : language);
+    }
+
+    @Override
+    public void onAudioSelected(String language) {
+        // Do nothing.
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {

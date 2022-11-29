@@ -42,4 +42,5 @@ export interface IVideoPlayerSource {
   channelName?: string;
   adTagUrl?: string;
   metadata?: IVideoPlayerSourceMetadata;
+  shouldSaveSubtitleSelection?: boolean;
 }

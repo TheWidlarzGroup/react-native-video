@@ -64,6 +64,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_APS_TEST_MODE = "testMode";
     private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_SRC_LIMIT_RANGE = "limitedSeekableRange";
+    private static final String PROP_SRC_SAVE_SUBTITLE_SELECTION = "shouldSaveSubtitleSelection";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -231,6 +232,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         boolean apsTestMode = (aps != null && aps.hasKey(PROP_SRC_APS_TEST_MODE)) && aps.getBoolean(PROP_SRC_APS_TEST_MODE);
 
         LimitedSeekRange limitedSeekRange = generateRange(src.hasKey(PROP_SRC_LIMIT_RANGE) ? src.getMap(PROP_SRC_LIMIT_RANGE) : null);
+        boolean shouldSaveSubtitleSelection = src.hasKey(PROP_SRC_SAVE_SUBTITLE_SELECTION) && src.getBoolean(PROP_SRC_SAVE_SUBTITLE_SELECTION);
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -283,7 +285,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     apsTestMode,
                     adTagUrl,
                     Watermark.fromMap(metadata),
-                    limitedSeekRange);
+                    limitedSeekRange,
+                    shouldSaveSubtitleSelection);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
