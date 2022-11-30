@@ -9,7 +9,9 @@
 - Android: fix linter warning [#2891] (https://github.com/react-native-video/react-native-video/pull/2891)
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 - Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
+- Fix regression when fullscreen prop is used combined with controls [#2911](https://github.com/react-native-video/react-native-video/pull/2911)
 - Fix: memory leak issue on iOS [#2907](https://github.com/react-native-video/react-native-video/pull/2907)
+- Fix setting text tracks before player is initialized on iOS [#2935](https://github.com/react-native-video/react-native-video/pull/2935)
 - Feature: Add VAST support for AVOD [#2923](https://github.com/react-native-video/react-native-video/pull/2923)
 
 ### Version 6.0.0-alpha.3
