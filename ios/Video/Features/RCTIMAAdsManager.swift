@@ -137,7 +137,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
                 result = "ALL_ADS_COMPLETED";
                 break;
             case .CLICKED:
-                result = "CLICKED";
+                result = "CLICK";
                 break;
             case .COMPLETE:
                 result = "COMPLETE";
@@ -158,10 +158,10 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
                 result = "MIDPOINT";
                 break;
             case .PAUSE:
-                result = "PAUSE";
+                result = "PAUSED";
                 break;
             case .RESUME:
-                result = "RESUME";
+                result = "RESUMED";
                 break;
             case .SKIPPED:
                 result = "SKIPPED";
