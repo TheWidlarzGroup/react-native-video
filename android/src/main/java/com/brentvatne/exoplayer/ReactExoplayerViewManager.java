@@ -196,14 +196,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             return;
         }
 
-        if (startsWithValidScheme(uriString)) {
-            Uri adTagUrl = Uri.parse(uriString);
+        Uri adTagUrl = Uri.parse(uriString);
 
-            if (adTagUrl != null) {
-                videoView.setAdTagUrl(adTagUrl);
-            }
-        }
-        return;
+        videoView.setAdTagUrl(adTagUrl);
     }
 
 
