@@ -321,6 +321,7 @@ var styles = StyleSheet.create({
 |[onBandwidthUpdate](#onbandwidthupdate)|Android|
 |[onBuffer](#onbuffer)|Android, iOS|
 |[onEnd](#onend)|All|
+|[onError](#onerror)|Android, iOS|
 |[onExternalPlaybackChange](#onexternalplaybackchange)|iOS|
 |[onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)|Android, iOS|
 |[onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)|Android, iOS|
@@ -1011,6 +1012,17 @@ Platforms: Android, iOS
 Callback function that is called when the player reaches the end of the media.
 
 Payload: none
+
+Platforms: all
+
+#### onError
+Callback function that is called when the player experiences a playback error.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+error | object | Object containing properties with information about the error
 
 Platforms: all
 
