@@ -199,15 +199,21 @@ static int const RCTVideoUnset = -1;
 
 -(void)bandwidthUpdated:(NSNotification *)notification
 {
-  AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
-  AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
-
-  double bitrate = lastEvent.indicatedBitrate;
-  if (bitrate == -1) {
-    double bitsTransferred = lastEvent.numberOfBytesTransferred * 8;
-    bitrate = bitsTransferred / lastEvent.segmentsDownloadedDuration;
-  }
-
+    AVPlayerItemAccessLog *accessLog = [((AVPlayerItem *)notification.object) accessLog];
+    if (!accessLog){return;}
+    AVPlayerItemAccessLogEvent *lastEvent = accessLog.events.lastObject;
+    if (!lastEvent){return;}
+    double bitrate = lastEvent.indicatedBitrate;
+    if (bitrate == -1) {
+        // NOTE: The indicated bitrate will only be -1 if it's not provided in the HLS manifest.
+        if (!lastEvent.segmentsDownloadedDuration){return;}
+        if (lastEvent.segmentsDownloadedDuration <= 0){return;}
+        double bitsTransferred = lastEvent.numberOfBytesTransferred * 8;
+        bitrate = bitsTransferred / lastEvent.segmentsDownloadedDuration;
+    }
+    
+  if (isinf(bitrate) || isnan(bitrate)){return;}
+    
   [playbackBitrateEmitter emitBitrateEvent:bitrate];
 
 }
