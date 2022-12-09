@@ -31,6 +31,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
+    private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
@@ -188,6 +189,18 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         }
     }
+
+    @ReactProp(name = PROP_AD_TAG_URL)
+    public void setAdTagUrl(final ReactExoplayerView videoView, final String uriString) {
+        if (TextUtils.isEmpty(uriString)) {
+            return;
+        }
+
+        Uri adTagUrl = Uri.parse(uriString);
+
+        videoView.setAdTagUrl(adTagUrl);
+    }
+
 
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
