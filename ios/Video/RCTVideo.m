@@ -122,7 +122,6 @@ static int const RCTVideoUnset = -1;
     _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
     _mixWithOthers = @"inherit"; // inherit, mix, duck
-    _player = [[AVPlayer alloc] init];
 
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
@@ -427,7 +426,7 @@ static int const RCTVideoUnset = -1;
         self->_isExternalPlaybackActiveObserverRegistered = NO;
       }
       
-      [self->_player replaceCurrentItemWithPlayerItem:self->_playerItem];
+      self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
       NSNotification *notification = [[NSNotification alloc] initWithName:@"XCD_PLAYER_AVAILABLE" object:self->_player userInfo:nil];
       [[NSNotificationCenter defaultCenter] postNotification:notification];
 
