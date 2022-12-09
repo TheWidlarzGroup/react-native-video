@@ -316,12 +316,14 @@ var styles = StyleSheet.create({
 
 
 ### Event props
+
 | Name                                                                                            | Platforms Support         | 
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
+| [onError](#onerror)                                                                             | Android, iOS              |
 | [onExternalPlaybackChange](#onexternalplaybackchange)                                           | iOS                       |
 | [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS              |
 | [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS              |
@@ -337,7 +339,6 @@ var styles = StyleSheet.create({
 | [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS                       |
 | [onSeek](#onseek)                                                                               | Android, iOS, Windows UWP |
 | [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
-
 
 ### Methods
 | Name |Plateforms Support  | 
@@ -1026,6 +1027,17 @@ Payload: none
 
 Platforms: all
 
+#### onError
+Callback function that is called when the player experiences a playback error.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+error | object | Object containing properties with information about the error
+
+Platforms: all
+
 #### onExternalPlaybackChange
 Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
 
@@ -1689,3 +1701,4 @@ allprojects {
 }
 ```
 If you encounter an error `Could not find com.android.support:support-annotations:27.0.0.` reinstall your Android Support Repository.
+
