@@ -5,7 +5,7 @@
 #import <React/UIView+React.h>
 #include <MediaAccessibility/MediaAccessibility.h>
 #include <AVFoundation/AVFoundation.h>
-#import "PlaybackBitrateEmitter.h"
+#import "RCTPlaybackBitrateEmitter.h"
 
 
 static NSString *const statusKeyPath = @"status";

@@ -1,12 +1,12 @@
 //
-//  TraditionalPlaybackBitrateEmitter.m
+//  playbackBitrateEmitter.m
 //  labs2020mobile
 //
 //  Created by Farales, Ron on 11/4/22.
 //
 
 #import <Foundation/Foundation.h>
-#import "PlaybackBitrateEmitter.h"
+#import "RCTPlaybackBitrateEmitter.h"
 #import <React/RCTLog.h>
 #import <React/RCTUIManager.h>
 
