@@ -52,6 +52,7 @@ import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
+import com.diceplatform.doris.entity.DorisPlayerEvent;
 import com.diceplatform.doris.entity.ImaDaiProperties;
 import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
@@ -2053,6 +2054,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private final DorisPlayerOutput dorisListener = new DorisPlayerOutput() {
+        @Override
+        public void onPlayerEvent(DorisPlayerEvent playerEvent) {
+            switch (playerEvent.details.state){
+                case PLAYING:
+                    eventEmitter.playbackRateChange(1f);
+                    break;
+                case PAUSED:
+                case ENDED:
+                    eventEmitter.playbackRateChange(0f);
+                    break;
+            }
+        }
+
         @Override
         public void onAdEvent(DorisAdEvent adEvent) {
             Log.d(TAG, "onAdEvent: " + adEvent);
