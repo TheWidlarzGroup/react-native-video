@@ -306,6 +306,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
                     }
 
+                    if self._adTagUrl != nil {
+                        // Set up your content playhead and contentComplete callback.
+                        self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
+
+                        self._imaAdsManager.setUpAdsLoader()
+                    }
+
                     //Perform on next run loop, otherwise onVideoLoadStart is nil
                     self.onVideoLoadStart?([
                         "src": [
