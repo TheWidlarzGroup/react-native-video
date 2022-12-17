@@ -233,102 +233,92 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - Player and source
-
     @objc
     func setSrc(_ source:NSDictionary!) {
-        _source = VideoSource(source)
-        if (_source?.uri == nil || _source?.uri == "") {
-            DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: .default).async {
+            _source = VideoSource(source)
+            if (_source?.uri == nil || _source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
+                return;
             }
-            return;
-        }
-        removePlayerLayer()
-        _playerObserver.player = nil
-        _playerObserver.playerItem = nil
+            removePlayerLayer()
+            _playerObserver.player = nil
+            _playerObserver.playerItem = nil
 
-        // perform on next run loop, otherwise other passed react-props may not be set
-        RCTVideoUtils.delay()
-            .then{ [weak self] in
-                guard let self = self else {throw NSError(domain: "", code: 0, userInfo: nil)}
-                guard let source = self._source else {
-                    DebugLog("The source not exist")
-                    throw NSError(domain: "", code: 0, userInfo: nil)
-                }
-                if let uri = source.uri, uri.starts(with: "ph://") {
-                    return Promise {
-                        RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
-                            return self.playerItemPrepareText(asset:asset, assetOptions:nil)
+            // perform on next run loop, otherwise other passed react-props may not be set
+            RCTVideoUtils.delay()
+                .then{ [weak self] in
+                    guard let self = self else {throw NSError(domain: "", code: 0, userInfo: nil)}
+                    guard let source = self._source else {
+                        DebugLog("The source not exist")
+                        throw NSError(domain: "", code: 0, userInfo: nil)
+                    }
+                    if let uri = source.uri, uri.starts(with: "ph://") {
+                        return Promise {
+                            RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
+                                return self.playerItemPrepareText(asset:asset, assetOptions:nil)
+                            }
                         }
                     }
-                }
-                guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
-                      let asset = assetResult.asset,
-                      let assetOptions = assetResult.assetOptions else {
-                      DebugLog("Could not find video URL in source '\(self._source)'")
-                      throw NSError(domain: "", code: 0, userInfo: nil)
-                  }
+                    guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
+                        let asset = assetResult.asset,
+                        let assetOptions = assetResult.assetOptions else {
+                        DebugLog("Could not find video URL in source '\(self._source)'")
+                        throw NSError(domain: "", code: 0, userInfo: nil)
+                    }
 
-#if canImport(RCTVideoCache)
-                if self._videoCache.shouldCache(source:source, textTracks:self._textTracks) {
-                    return self._videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions:assetOptions)
-                }
-#endif
+    #if canImport(RCTVideoCache)
+                    if self._videoCache.shouldCache(source:source, textTracks:self._textTracks) {
+                        return self._videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions:assetOptions)
+                    }
+    #endif
 
-                if self._drm != nil || self._localSourceEncryptionKeyScheme != nil {
-                    self._resouceLoaderDelegate = RCTResourceLoaderDelegate(
-                        asset: asset,
-                        drm: self._drm,
-                        localSourceEncryptionKeyScheme: self._localSourceEncryptionKeyScheme,
-                        onVideoError: self.onVideoError,
-                        onGetLicense: self.onGetLicense,
-                        reactTag: self.reactTag
-                    )
-                }
-                return Promise{self.playerItemPrepareText(asset: asset, assetOptions:assetOptions)}
-            }.then{[weak self] (playerItem:AVPlayerItem!) in
-                guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
+                    if self._drm != nil || self._localSourceEncryptionKeyScheme != nil {
+                        self._resouceLoaderDelegate = RCTResourceLoaderDelegate(
+                            asset: asset,
+                            drm: self._drm,
+                            localSourceEncryptionKeyScheme: self._localSourceEncryptionKeyScheme,
+                            onVideoError: self.onVideoError,
+                            onGetLicense: self.onGetLicense,
+                            reactTag: self.reactTag
+                        )
+                    }
+                    return Promise{self.playerItemPrepareText(asset: asset, assetOptions:assetOptions)}
+                }.then{[weak self] (playerItem:AVPlayerItem!) in
+                    guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
 
-                self._player?.pause()
-                self._playerItem = playerItem
-                self._playerObserver.playerItem = self._playerItem
-                self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
-                self.setFilter(self._filterName)
-                if let maxBitRate = self._maxBitRate {
-                    self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
-                }
+                    self._player?.pause()
+                    self._playerItem = playerItem
+                    self._playerObserver.playerItem = self._playerItem
+                    self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
+                    self.setFilter(self._filterName)
+                    if let maxBitRate = self._maxBitRate {
+                        self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
+                    }
 
-                self._player = self._player ?? AVPlayer()
-                DispatchQueue.global(qos: .default).async {
-                    self._player?.replaceCurrentItem(with: playerItem)
-                }
-                self._playerObserver.player = self._player
-                self.applyModifiers()
-                self._player?.actionAtItemEnd = .none
+                    self._player = self._player ?? AVPlayer()
+                    self._player.replaceCurrentItem(with: playerItem)
+                    self._playerObserver.player = self._player
+                    self.applyModifiers()
+                    self._player?.actionAtItemEnd = .none
 
-                if #available(iOS 10.0, *) {
-                    self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
-                }
+                    if #available(iOS 10.0, *) {
+                        self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
+                    }
 
-                if self._adTagUrl != nil {
-                    // Set up your content playhead and contentComplete callback.
-                    self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
-
-                    self._imaAdsManager.setUpAdsLoader()
-                }
-
-                //Perform on next run loop, otherwise onVideoLoadStart is nil
-                self.onVideoLoadStart?([
-                    "src": [
-                        "uri": self._source?.uri ?? NSNull(),
-                        "type": self._source?.type ?? NSNull(),
-                        "isNetwork": NSNumber(value: self._source?.isNetwork ?? false)
-                    ],
-                    "drm": self._drm?.json ?? NSNull(),
-                    "target": self.reactTag
-                ])
-            }.catch{_ in }
-        _videoLoadStarted = true
+                    //Perform on next run loop, otherwise onVideoLoadStart is nil
+                    self.onVideoLoadStart?([
+                        "src": [
+                            "uri": self._source?.uri ?? NSNull(),
+                            "type": self._source?.type ?? NSNull(),
+                            "isNetwork": NSNumber(value: self._source?.isNetwork ?? false)
+                        ],
+                        "drm": self._drm?.json ?? NSNull(),
+                        "target": self.reactTag
+                    ])
+                }.catch{_ in }
+            _videoLoadStarted = true
+        }
     }
 
     @objc
