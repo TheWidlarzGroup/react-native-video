@@ -236,14 +236,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setSrc(_ source:NSDictionary!) {
         DispatchQueue.global(qos: .default).async {
-            _source = VideoSource(source)
-            if (_source?.uri == nil || _source?.uri == "") {
+            self._source = VideoSource(source)
+            if (self._source?.uri == nil || self._source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
                 return;
             }
-            removePlayerLayer()
-            _playerObserver.player = nil
-            _playerObserver.playerItem = nil
+            self.removePlayerLayer()
+            self._playerObserver.player = nil
+            self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
             RCTVideoUtils.delay()
