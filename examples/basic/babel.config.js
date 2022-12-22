@@ -3,14 +3,14 @@ module.exports = {
   plugins: [
     [
       'module-resolver',
-        {
-            extensions: ['.js', '.tsx', '.ts'],
-            root: ['./src'],
+      {
+        extensions: ['.js', '.tsx', '.ts'],
+        root: ['./src'],
 
-            alias: {
-              src: './src',
-          },
+        alias: {
+          src: './src',
         },
+      },
     ],
   ],
 };
