@@ -324,7 +324,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         "target": self.reactTag
                     ])
                 }.catch{_ in }
-            _videoLoadStarted = true
+            self._videoLoadStarted = true
         }
     }
 
