@@ -1531,6 +1531,14 @@ class ReactExoplayerView extends FrameLayout implements
         this.preventsDisplaySleepDuringVideoPlayback = preventsDisplaySleepDuringVideoPlayback;
     }
 
+    public void disableTrack(int rendererIndex) {
+        DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
+                .buildUpon()
+                .setRendererDisabled(rendererIndex, true)
+                .build();
+        trackSelector.setParameters(disableParameters);
+    }
+
     public void setSelectedTrack(int trackType, String type, Dynamic value) {
         if (player == null) return;
         int rendererIndex = getTrackRendererIndex(trackType);
@@ -1551,13 +1559,8 @@ class ReactExoplayerView extends FrameLayout implements
             type = "default";
         }
 
-        DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
-
         if (type.equals("disabled")) {
-            trackSelector.setParameters(disableParameters);
+            disableTrack(rendererIndex);
             return;
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
@@ -1675,7 +1678,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
 
         if (groupIndex == C.INDEX_UNSET) {
-            trackSelector.setParameters(disableParameters);
+            disableTrack(rendererIndex);
             return;
         }
 
@@ -1684,6 +1687,7 @@ class ReactExoplayerView extends FrameLayout implements
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
             .buildUpon()
             .setRendererDisabled(rendererIndex, false)
+            .clearOverridesOfType(selectionOverride.getType())
             .addOverride(selectionOverride)
             .build();
         trackSelector.setParameters(selectionParameters);
