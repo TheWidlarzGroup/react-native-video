@@ -320,7 +320,7 @@ var styles = StyleSheet.create({
 | Name                                                                                            | Platforms Support         | 
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
-| [onAudioTracks](#onAudioTracks)                                                                 |Android                   |
+| [onAudioTracks](#onAudioTracks)                                                                 | Android                   |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
@@ -340,8 +340,8 @@ var styles = StyleSheet.create({
 | [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS                       |
 | [onSeek](#onseek)                                                                               | Android, iOS, Windows UWP |
 | [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
-| [onTextTracks](#onTextTracks)                                                                   |Android                   |
-| [onVideoTracks](#onVideoTracks)                                                                 |Android                   |
+| [onTextTracks](#onTextTracks)                                                                   | Android                   |
+| [onVideoTracks](#onVideoTracks)                                                                 | Android                   |
 
 ### Methods
 | Name |Plateforms Support  | 
