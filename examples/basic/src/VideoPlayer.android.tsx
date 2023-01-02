@@ -714,6 +714,7 @@ class VideoPlayer extends Component {
           paused={this.state.paused}
           volume={this.state.volume}
           muted={this.state.muted}
+          fullscreen={this.state.fullscreen}
           controls={this.state.showRNVControls}
           resizeMode={this.state.resizeMode}
           onLoad={this.onLoad}

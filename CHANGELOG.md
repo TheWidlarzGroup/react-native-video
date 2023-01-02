@@ -1,8 +1,15 @@
 ## Changelog
 
+### Version 6.0.0-alpha.5
+
+ - Android: add new events on tracks changed to be notified of audio/text/video Tracks update during playback [2806](https://github.com/react-native-video/react-native-video/pull/2806)
+ - iOS: app crashes on call to presentFullScreenPlayer [#2808](https://github.com/react-native-video/react-native-video/pull/2971)
+ - Android: Fix publicated progress handler causing duplicated progress event [#2972](https://github.com/react-native-video/react-native-video/pull/2972)
+ - Feature: Add VAST support for AVOD [#2923](https://github.com/react-native-video/react-native-video/pull/2923)
+ - Sample: Upgrade react-native version of basic sample [#2960](https://github.com/react-native-video/react-native-video/pull/2960)
+
 ### Version 6.0.0-alpha.4
 
-- Exoplayer: add new events on tracks changed to be notified of audio/text/video Tracks update during playback [2806](https://github.com/react-native-video/react-native-video/pull/2806)
 - ensure src is always provided to native player even if it is invalid [#2857](https://github.com/react-native-video/react-native-video/pull/2857)
 - Sample: Add react-native-video controls support [#2852](https://github.com/react-native-video/react-native-video/pull/2852)
 - Android: Switch Google's maven repository to default `google()` [#2860](https://github.com/react-native-video/react-native-video/pull/2860)
@@ -10,6 +17,9 @@
 - Android: fix linter warning [#2891] (https://github.com/react-native-video/react-native-video/pull/2891)
 - Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
 - Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
+- Fix regression when fullscreen prop is used combined with controls [#2911](https://github.com/react-native-video/react-native-video/pull/2911)
+- Fix: memory leak issue on iOS [#2907](https://github.com/react-native-video/react-native-video/pull/2907)
+- Fix setting text tracks before player is initialized on iOS [#2935](https://github.com/react-native-video/react-native-video/pull/2935)
 
 ### Version 6.0.0-alpha.3
 
@@ -101,7 +111,7 @@
 
 - Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
 
-### Version 5.1.0-alpha6 
+### Version 5.1.0-alpha6
 
 - Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
 - Fix video dimensions being undefined when playing HLS in ios. [#1992](https://github.com/react-native-community/react-native-video/pull/1992)
