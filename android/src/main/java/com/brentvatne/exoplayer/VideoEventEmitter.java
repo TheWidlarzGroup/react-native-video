@@ -3,6 +3,8 @@ package com.brentvatne.exoplayer;
 import androidx.annotation.StringDef;
 import android.view.View;
 
+import com.brentvatne.common.Track;
+import com.brentvatne.common.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
@@ -17,6 +19,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 class VideoEventEmitter {
 
@@ -50,6 +53,9 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
+    private static final String EVENT_TEXT_TRACKS = "onTextTracks";
+    private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -72,6 +78,9 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_AUDIO_TRACKS,
+            EVENT_TEXT_TRACKS,
+            EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
     };
 
@@ -97,6 +106,9 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_AUDIO_TRACKS,
+            EVENT_TEXT_TRACKS,
+            EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
     })
     @interface VideoEvents {
@@ -149,20 +161,90 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
-    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
-        WritableMap event = Arguments.createMap();
-        event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
-        event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
-
+    WritableMap aspectRatioToNaturalSize(int videoWidth, int videoHeight) {
         WritableMap naturalSize = Arguments.createMap();
         naturalSize.putInt(EVENT_PROP_WIDTH, videoWidth);
         naturalSize.putInt(EVENT_PROP_HEIGHT, videoHeight);
         if (videoWidth > videoHeight) {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "landscape");
-        } else {
+        } else if (videoWidth < videoHeight) {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
+        } else {
+            naturalSize.putString(EVENT_PROP_ORIENTATION, "square");
         }
+        return naturalSize;
+    }
+
+    WritableArray audioTracksToArray(ArrayList<Track> audioTracks) {
+        WritableArray waAudioTracks = Arguments.createArray();
+        if( audioTracks != null ){
+            for (int i = 0; i < audioTracks.size(); ++i) {
+                Track format = audioTracks.get(i);
+                WritableMap audioTrack = Arguments.createMap();
+                audioTrack.putInt("index", i);
+                audioTrack.putString("title", format.m_title != null ? format.m_title : "");
+                audioTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
+                audioTrack.putString("language", format.m_language != null ? format.m_language : "");
+                audioTrack.putInt("bitrate", format.m_bitrate);
+                audioTrack.putBoolean("selected", format.m_isSelected);
+                waAudioTracks.pushMap(audioTrack);
+            }
+        }
+        return waAudioTracks;
+    }
+
+    WritableArray videoTracksToArray(ArrayList<VideoTrack> videoTracks) {
+        WritableArray waVideoTracks = Arguments.createArray();
+        if( videoTracks != null ){
+            for (int i = 0; i < videoTracks.size(); ++i) {
+                VideoTrack vTrack = videoTracks.get(i);
+                WritableMap videoTrack = Arguments.createMap();
+                videoTrack.putInt("width", vTrack.m_width);
+                videoTrack.putInt("height",vTrack.m_height);
+                videoTrack.putInt("bitrate", vTrack.m_bitrate);
+                videoTrack.putString("codecs", vTrack.m_codecs);
+                videoTrack.putInt("trackId",vTrack.m_id);
+                videoTrack.putBoolean("selected", vTrack.m_isSelected);
+                waVideoTracks.pushMap(videoTrack);
+            }
+        }
+        return waVideoTracks;
+    }
+
+    WritableArray textTracksToArray(ArrayList<Track> textTracks) {
+        WritableArray waTextTracks = Arguments.createArray();
+        if (textTracks != null) {
+            for (int i = 0; i < textTracks.size(); ++i) {
+                Track format = textTracks.get(i);
+                WritableMap textTrack = Arguments.createMap();
+                textTrack.putInt("index", i);
+                textTrack.putString("title", format.m_title != null ? format.m_title : "");
+                textTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
+                textTrack.putString("language", format.m_language != null ? format.m_language : "");
+                textTrack.putBoolean("selected", format.m_isSelected);
+                waTextTracks.pushMap(textTrack);
+            }
+        }
+        return waTextTracks;
+    }
+
+    public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+                     ArrayList<Track> audioTracks, ArrayList<Track> textTracks, ArrayList<VideoTrack> videoTracks, String trackId){
+        WritableArray waAudioTracks = audioTracksToArray(audioTracks);
+        WritableArray waVideoTracks = videoTracksToArray(videoTracks);
+        WritableArray waTextTracks = textTracksToArray(textTracks);
+
+        load( duration,  currentPosition,  videoWidth,  videoHeight, waAudioTracks,  waTextTracks,  waVideoTracks, trackId);
+    }
+
+
+    private void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
+        WritableMap event = Arguments.createMap();
+        event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
+        event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
+
+        WritableMap naturalSize = aspectRatioToNaturalSize(videoWidth, videoHeight);
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
         event.putString(EVENT_PROP_TRACK_ID, trackId);
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
@@ -179,6 +261,26 @@ class VideoEventEmitter {
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
 
         receiveEvent(EVENT_LOAD, event);
+    }
+
+
+
+    WritableMap arrayToObject(String field, WritableArray array) {
+        WritableMap event = Arguments.createMap();
+        event.putArray(field, array);
+        return event;
+    }
+
+    public void audioTracks(ArrayList<Track> audioTracks){
+        receiveEvent(EVENT_AUDIO_TRACKS, arrayToObject(EVENT_PROP_AUDIO_TRACKS, audioTracksToArray(audioTracks)));
+    }
+
+    public void textTracks(ArrayList<Track> textTracks){
+        receiveEvent(EVENT_TEXT_TRACKS, arrayToObject(EVENT_PROP_TEXT_TRACKS, textTracksToArray(textTracks)));
+    }
+
+    public void videoTracks(ArrayList<VideoTrack> videoTracks){
+        receiveEvent(EVENT_VIDEO_TRACKS, arrayToObject(EVENT_PROP_VIDEO_TRACKS, videoTracksToArray(videoTracks)));
     }
 
     void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {

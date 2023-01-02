@@ -214,7 +214,7 @@ Follow the manual linking instuctions for React Native Windows 0.62 above, but s
  
 ## Examples
 
-Run `yarn xbasic install` before running any of the examples.
+Run `yarn xbasic install` in the root directory before running any of the examples.
 
 ### iOS Example
 ```
@@ -317,6 +317,7 @@ var styles = StyleSheet.create({
 | Name |Plateforms Support  | 
 |--|--|
 |[onAudioBecomingNoisy](#onaudiobecomingnoisy)|Android, iOS|
+|[onAudioTracks](#onAudioTracks)|Android|
 |[onBandwidthUpdate](#onbandwidthupdate)|Android|
 |[onBuffer](#onbuffer)|Android, iOS|
 |[onEnd](#onend)|All|
@@ -334,6 +335,8 @@ var styles = StyleSheet.create({
 |[onSeek](#onseek)|Android, iOS, Windows UWP|
 |[onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop)|iOS|
 |[onTimedMetadata](#ontimedmetadata)|Android, iOS|
+|[onTextTracks](#onTextTracks)|Android|
+|[onVideoTracks](#onVideoTracks)|Android|
 
 
 ### Methods
@@ -431,9 +434,11 @@ Platforms: Android, iOS
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.
-* ** false (default)** - Override background audio/music
+* **false (default)** - Override background audio/music
 * **true** - Let background audio/music from other apps play
-
+ 
+Note: Allows multiple videos to play if set to `true`. If `false`, when one video is playing and another is started, the first video will be paused.
+ 
 Platforms: Android
 
 #### disableDisconnectError
@@ -659,6 +664,34 @@ Determine whether to repeat the video when the end is reached
 * **true** - Repeat the video
 
 Platforms: all
+
+
+#### onAudioTracks
+Callback function that is called when audio tracks change
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+index | number | Internal track ID
+title | string | Descriptive name for the track
+language | string | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
+bitrate | number | bitrate of track
+type | string | Mime type of track
+selected | boolean | true if track is playing
+
+Example:
+```
+{
+  audioTracks: [
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0, selected: true },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
+  ],
+}
+```
+
+
+Platforms: Android
 
 #### reportBandwidth
 Determine whether to generate onBandwidthUpdate events. This is needed due to the high frequency of these events on ExoPlayer.
@@ -1252,6 +1285,69 @@ Example:
 ```
 
 Platforms: Android, iOS
+
+#### onTextTracks
+Callback function that is called when text tracks change
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+index | number | Internal track ID
+title | string | Descriptive name for the track
+language | string | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language
+type | string | Mime type of the track<br> * TextTrackType.SRT - SubRip (.srt)<br> * TextTrackType.TTML - TTML (.ttml)<br> * TextTrackType.VTT - WebVTT (.vtt)<br>iOS only supports VTT, Android supports all 3
+selected | boolean | true if track is playing
+
+
+Example:
+```
+{
+  textTracks: [
+    {
+      index: 0,
+      title: 'Any Time You Like',
+      type: 'srt',
+      selected: true
+    }
+  ]
+}
+```
+
+Platforms: Android
+
+#### onVideoTracks
+Callback function that is called when video tracks change
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+trackId | number | Internal track ID
+codecs | string | MimeType of codec used for this track
+width | number | Track width
+height | number | Track height
+bitrate | number | Bitrate in bps
+selected | boolean | true if track is selected for playing
+
+
+Example:
+```
+{
+  videoTracks: [
+    {
+      trackId: 0,
+      codecs: 'video/mp4',
+      width: 1920,
+      height: 1080,
+      bitrate: 10000,
+      selected: true
+    }
+  ]
+}
+```
+
+Platforms: Android
 
 ### Methods
 Methods operate on a ref to the Video element. You can create a ref using code like:

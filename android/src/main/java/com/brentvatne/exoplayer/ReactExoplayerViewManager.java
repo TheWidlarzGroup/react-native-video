@@ -309,7 +309,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setBackBufferDurationMs(backBufferDurationMs);
     }
 
-    @ReactProp(name = PROP_CONTENT_START_TIME, defaultInt = 0)
+    @ReactProp(name = PROP_CONTENT_START_TIME, defaultInt = -1)
     public void setContentStartTime(final ReactExoplayerView videoView, final int contentStartTime) {
         videoView.setContentStartTime(contentStartTime);
     }
