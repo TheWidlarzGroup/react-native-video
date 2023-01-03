@@ -279,6 +279,13 @@ export default class Video extends Component {
       }
     }
   }
+
+  _onReceiveAdEvent = (event) => {
+    if (this.props.onReceiveAdEvent) {
+      this.props.onReceiveAdEvent(event.nativeEvent);
+    }
+  };
+
   getViewManagerConfig = viewManagerName => {
     if (!UIManager.getViewManagerConfig) {
       return UIManager[viewManagerName];
@@ -298,8 +305,18 @@ export default class Video extends Component {
       uri = undefined;
     }
 
+    if (!uri) {
+      console.log('Trying to load empty source.');
+    }
+
     const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
-    const isAsset = !!(uri && uri.match(/^(assets-library|ph|ipod-library|file|content|ms-appx|ms-appdata):/));
+    const isAsset = !!(uri && uri.match(/^(assets-library|ph|ipod-library|file|content|ms-appx|ms-appdata):/i));
+
+    if ((uri || uri === '') && !isNetwork && !isAsset) {
+      if (this.props.onError) {
+        this.props.onError({error: {errorString: 'invalid url, player will stop', errorCode: 'INVALID_URL'}});
+      }
+    }
 
     let nativeResizeMode;
     const RCTVideoInstance = this.getViewManagerConfig('RCTVideo');
@@ -356,6 +373,7 @@ export default class Video extends Component {
       onGetLicense: nativeProps.drm && nativeProps.drm.getLicense && this._onGetLicense,
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
+      onReceiveAdEvent: this._onReceiveAdEvent,
     });
 
     const posterStyle = {
@@ -500,6 +518,7 @@ Video.propTypes = {
   reportBandwidth: PropTypes.bool,
   contentStartTime: PropTypes.number,
   disableFocus: PropTypes.bool,
+  focusable: PropTypes.bool,
   disableBuffering: PropTypes.bool,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
@@ -542,6 +561,8 @@ Video.propTypes = {
   onPictureInPictureStatusChanged: PropTypes.func,
   needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
+  adTagUrl: PropTypes.string,
+  onReceiveAdEvent: PropTypes.func,
 
   /* Required by react-native */
   scaleX: PropTypes.number,

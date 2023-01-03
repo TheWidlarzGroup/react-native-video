@@ -1,9 +1,34 @@
 ## Changelog
-### Version 6.0.0-alpha3
-- Upgrade ExoPlayer to 2.18.1 [#2846](https://github.com/react-native-video/react-native-video/pull/2846)
+
+### Version 6.0.0-alpha.5
+
+ - Android: add new events on tracks changed to be notified of audio/text/video Tracks update during playback [2806](https://github.com/react-native-video/react-native-video/pull/2806)
+ - iOS: app crashes on call to presentFullScreenPlayer [#2808](https://github.com/react-native-video/react-native-video/pull/2971)
+ - Android: Fix publicated progress handler causing duplicated progress event [#2972](https://github.com/react-native-video/react-native-video/pull/2972)
+ - Android: Fix audio/Subtitle tracks selection [#2979](https://github.com/react-native-video/react-native-video/pull/2979)
+ - Feature: Add VAST support for AVOD [#2923](https://github.com/react-native-video/react-native-video/pull/2923)
+ - Sample: Upgrade react-native version of basic sample [#2960](https://github.com/react-native-video/react-native-video/pull/2960)
+
+### Version 6.0.0-alpha.4
+
+- ensure src is always provided to native player even if it is invalid [#2857](https://github.com/react-native-video/react-native-video/pull/2857)
+- Sample: Add react-native-video controls support [#2852](https://github.com/react-native-video/react-native-video/pull/2852)
+- Android: Switch Google's maven repository to default `google()` [#2860](https://github.com/react-native-video/react-native-video/pull/2860)
+- Android: Implement focusable prop so the video view can toggle whether it is focusable for non-touch devices [#2819](https://github.com/react-native-video/react-native-video/issues/2819)
+- Android: fix linter warning [#2891] (https://github.com/react-native-video/react-native-video/pull/2891)
+- Fix iOS RCTSwiftLog naming collision [#2868](https://github.com/react-native-video/react-native-video/issues/2868)
+- Added "homepage" to package.json [#2882](https://github.com/react-native-video/react-native-video/pull/2882)
+- Fix regression when fullscreen prop is used combined with controls [#2911](https://github.com/react-native-video/react-native-video/pull/2911)
+- Fix: memory leak issue on iOS [#2907](https://github.com/react-native-video/react-native-video/pull/2907)
+- Fix setting text tracks before player is initialized on iOS [#2935](https://github.com/react-native-video/react-native-video/pull/2935)
+
+### Version 6.0.0-alpha.3
+
+- Fix ios build [#2854](https://github.com/react-native-video/react-native-video/pull/2854)
 
 ### Version 6.0.0-alpha.2
 
+- Upgrade ExoPlayer to 2.18.1 [#2846](https://github.com/react-native-video/react-native-video/pull/2846)
 - Feature add new APIs to query supported features of device decoder (widevine level & codec capabilities) on android [#2740](https://github.com/react-native-video/react-native-video/pull/2740)
 - Feature add support of subtitle styling on android [#2759](https://github.com/react-native-video/react-native-video/pull/2759)
 - Fix Android #2690 ensure onEnd is not sent twice [#2690](https://github.com/react-native-video/react-native-video/issues/2690)
@@ -26,6 +51,7 @@
 - Fix video endless loop when repeat set to false or not specified. [#2329](https://github.com/react-native-video/react-native-video/pull/2329)
 
 ### Version 6.0.0-alpha.0
+
 - Support disabling buffering [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix AudioFocus bug that could cause the player to stop responding to play/pause in some instances. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
 - Fix player crashing when it is being cleared. [#2689](https://github.com/react-native-video/react-native-video/pull/2689)
@@ -86,7 +112,7 @@
 
 - Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
 
-### Version 5.1.0-alpha6 
+### Version 5.1.0-alpha6
 
 - Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
 - Fix video dimensions being undefined when playing HLS in ios. [#1992](https://github.com/react-native-community/react-native-video/pull/1992)

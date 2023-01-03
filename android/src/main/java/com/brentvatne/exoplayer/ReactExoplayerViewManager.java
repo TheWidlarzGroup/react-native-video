@@ -31,6 +31,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
+    private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
@@ -70,6 +71,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
+    private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_SECURE_VIEW = "useSecureView";
@@ -182,9 +184,23 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 if (srcUri != null) {
                     videoView.setRawSrc(srcUri, extension);
                 }
+            } else {
+                videoView.clearSrc();
             }
         }
     }
+
+    @ReactProp(name = PROP_AD_TAG_URL)
+    public void setAdTagUrl(final ReactExoplayerView videoView, final String uriString) {
+        if (TextUtils.isEmpty(uriString)) {
+            return;
+        }
+
+        Uri adTagUrl = Uri.parse(uriString);
+
+        videoView.setAdTagUrl(adTagUrl);
+    }
+
 
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
@@ -304,6 +320,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setDisableFocus(disableFocus);
     }
 
+    @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)
+    public void setFocusable(final ReactExoplayerView videoView, final boolean focusable) {
+        videoView.setFocusable(focusable);
+    }
+
     @ReactProp(name = PROP_BACK_BUFFER_DURATION_MS, defaultInt = 0)
     public void setBackBufferDurationMs(final ReactExoplayerView videoView, final int backBufferDurationMs) {
         videoView.setBackBufferDurationMs(backBufferDurationMs);
@@ -384,12 +405,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     private boolean startsWithValidScheme(String uriString) {
-        return uriString.startsWith("http://")
-                || uriString.startsWith("https://")
-                || uriString.startsWith("content://")
-                || uriString.startsWith("file://")
-                || uriString.startsWith("rtsp://")
-                || uriString.startsWith("asset://");
+        String lowerCaseUri = uriString.toLowerCase();
+        return lowerCaseUri.startsWith("http://")
+                || lowerCaseUri.startsWith("https://")
+                || lowerCaseUri.startsWith("content://")
+                || lowerCaseUri.startsWith("file://")
+                || lowerCaseUri.startsWith("rtsp://")
+                || lowerCaseUri.startsWith("asset://");
     }
 
     private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {

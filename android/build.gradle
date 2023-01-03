@@ -27,8 +27,7 @@ android {
 }
 
 repositories {
-    // Remove this repository line after google releases to google() or mavenCentral()
-    maven { url "https://dl.google.com/android/maven2" }
+    google()
 }
 
 dependencies {
@@ -41,13 +40,13 @@ dependencies {
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.core:core:1.1.0"
     implementation "androidx.media:media:1.1.0"
-    implementation 'androidx.activity:activity:1.4.0'
+    implementation "androidx.activity:activity:1.4.0"
 
     implementation('com.google.android.exoplayer:extension-okhttp:2.18.1') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation 'com.google.android.exoplayer:exoplayer-rtsp:2.18.1'
+    implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
 
-    implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
-
+    implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
 }
