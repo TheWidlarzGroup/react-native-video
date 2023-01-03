@@ -68,7 +68,11 @@ class VideoPlayer extends Component {
       type: 'mpd',
     },
     { description: '(no url) Stopped playback', uri: undefined },
-    { description: 'rtsp', uri: 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4' },
+    {
+      description: 'rtsp',
+      uri: 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4',
+      type: 'rtsp'
+    },
     {
       description: '(no view) no View',
       noView: true,
