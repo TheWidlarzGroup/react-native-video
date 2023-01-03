@@ -1,5 +1,11 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_DASH;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_HLS;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_OTHER;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_RTSP;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_SS;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -61,6 +67,7 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.source.rtsp.RtspMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -68,8 +75,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides;
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides.TrackSelectionOverride;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -708,8 +714,13 @@ class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
-                : uri.getLastPathSegment());
+        int type;
+        if ("rtsp".equals(overrideExtension)) {
+            type = C.TYPE_RTSP;
+        } else {
+            type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+                    : uri.getLastPathSegment());
+        }
         config.setDisableDisconnectError(this.disableDisconnectError);
         MediaItem mediaItem = new MediaItem.Builder().setUri(uri).build();
         DrmSessionManagerProvider drmProvider = null;
@@ -724,7 +735,7 @@ class ReactExoplayerView extends FrameLayout implements
             drmProvider = new DefaultDrmSessionManagerProvider();
         }
         switch (type) {
-            case C.TYPE_SS:
+            case CONTENT_TYPE_SS:
                 return new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
@@ -732,7 +743,7 @@ class ReactExoplayerView extends FrameLayout implements
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
-            case C.TYPE_DASH:
+            case CONTENT_TYPE_DASH:
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
@@ -740,20 +751,26 @@ class ReactExoplayerView extends FrameLayout implements
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
-            case C.TYPE_HLS:
+            case CONTENT_TYPE_HLS:
                 return new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
-            case C.TYPE_OTHER:
+            case CONTENT_TYPE_OTHER:
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(mediaItem);
+            case CONTENT_TYPE_RTSP:
+                return new RtspMediaSource.Factory(
+                ).setDrmSessionManagerProvider(drmProvider)
+                        .setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(mediaItem);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
