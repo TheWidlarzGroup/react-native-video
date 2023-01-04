@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -205,6 +206,8 @@ class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
+    private boolean beforeFullscreenControlsState;;
+    private int beforeFullScreenScreenOrientation;;
     // \ End props
 
     // React
@@ -1886,6 +1889,20 @@ class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        if (isFullscreen) {
+            this.beforeFullscreenControlsState = controls;
+
+            // Enable controls if we didn't have them
+            if (!controls) {
+                setControls(true);
+            }
+
+            // Switch to landscape
+            this.beforeFullScreenScreenOrientation = activity.getRequestedOrientation();
+
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+
         Window window = activity.getWindow();
         View decorView = window.getDecorView();
         int uiOptions;
@@ -1917,6 +1934,14 @@ class ReactExoplayerView extends FrameLayout implements
                 decorView.setSystemUiVisibility(uiOptions);
                 eventEmitter.fullscreenDidDismiss();
             });
+        }
+
+        if (!fullscreen) {
+           if (!this.beforeFullscreenControlsState) {
+               setControls(false);
+           }
+
+           activity.setRequestedOrientation(this.beforeFullScreenScreenOrientation);
         }
         // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
         updateFullScreenButtonVisbility();
