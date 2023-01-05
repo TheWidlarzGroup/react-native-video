@@ -70,6 +70,9 @@ RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onStreamBandwidthUpdate, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoStreamBandwidthUpdate, RCTDirectEventBlock);
+
 RCT_REMAP_METHOD(save,
         options:(NSDictionary *)options
         reactTag:(nonnull NSNumber *)reactTag

@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3999CFB42948073600D55946 /* RCTPlaybackBitrateEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3999CFB32948073600D55946 /* RCTPlaybackBitrateEmitter.m */; };
-		3999CFB52948073700D55946 /* RCTPlaybackBitrateEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3999CFB32948073600D55946 /* RCTPlaybackBitrateEmitter.m */; };
 		D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C032110259000073188 /* UIView+FindUIViewController.m */; };
 		D1107C0C2110259000073188 /* RCTVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = D1107C052110259000073188 /* RCTVideo.m */; };
@@ -42,8 +40,6 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		3999CFB22948073600D55946 /* RCTPlaybackBitrateEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTPlaybackBitrateEmitter.h; path = Video/RCTPlaybackBitrateEmitter.h; sourceTree = "<group>"; };
-		3999CFB32948073600D55946 /* RCTPlaybackBitrateEmitter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTPlaybackBitrateEmitter.m; path = Video/RCTPlaybackBitrateEmitter.m; sourceTree = "<group>"; };
 		641E28441F0EEC8500443AF6 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1107C012110259000073188 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewController.h; path = Video/RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
 		D1107C022110259000073188 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTVideoPlayerViewControllerDelegate.h; path = Video/RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
@@ -92,8 +88,6 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				3999CFB22948073600D55946 /* RCTPlaybackBitrateEmitter.h */,
-				3999CFB32948073600D55946 /* RCTPlaybackBitrateEmitter.m */,
 				D1107C072110259000073188 /* RCTVideo.h */,
 				D1107C052110259000073188 /* RCTVideo.m */,
 				D1107C092110259000073188 /* RCTVideoManager.h */,
@@ -188,7 +182,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3999CFB42948073600D55946 /* RCTPlaybackBitrateEmitter.m in Sources */,
 				D1107C0A2110259000073188 /* UIView+FindUIViewController.m in Sources */,
 				D1107C102110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
 				D1107C0E2110259000073188 /* RCTVideoManager.m in Sources */,
@@ -200,7 +193,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3999CFB52948073700D55946 /* RCTPlaybackBitrateEmitter.m in Sources */,
 				D1107C0B2110259000073188 /* UIView+FindUIViewController.m in Sources */,
 				D1107C112110259000073188 /* RCTVideoPlayerViewController.m in Sources */,
 				D1107C0F2110259000073188 /* RCTVideoManager.m in Sources */,
