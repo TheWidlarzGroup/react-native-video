@@ -56,7 +56,7 @@ public class MainApplicationReactNativeHost extends ReactNativeHost {
 
   @Override
   protected String getJSMainModuleName() {
-    return "src/index";
+    return "index";
   }
 
   @NonNull
