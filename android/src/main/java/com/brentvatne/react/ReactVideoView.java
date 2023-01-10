@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.media.TimedMetaData;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
@@ -52,7 +53,7 @@ public class ReactVideoView extends ScalableVideoView implements
     MediaPlayer.OnInfoListener,
     LifecycleEventListener,
     MediaController.MediaPlayerControl {
-
+    final static String TAG = "ReactVideoView";
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
         EVENT_LOAD("onVideoLoad"),
@@ -67,7 +68,8 @@ public class ReactVideoView extends ScalableVideoView implements
         EVENT_FULLSCREEN_WILL_PRESENT("onVideoFullscreenPlayerWillPresent"),
         EVENT_FULLSCREEN_DID_PRESENT("onVideoFullscreenPlayerDidPresent"),
         EVENT_FULLSCREEN_WILL_DISMISS("onVideoFullscreenPlayerWillDismiss"),
-        EVENT_FULLSCREEN_DID_DISMISS("onVideoFullscreenPlayerDidDismiss");
+        EVENT_FULLSCREEN_DID_DISMISS("onVideoFullscreenPlayerDidDismiss"),
+        EVENT_PLAYBACK_RATE_CHANGE("onPlaybackRateChange");
 
         private final String mName;
 
@@ -388,6 +390,7 @@ public class ReactVideoView extends ScalableVideoView implements
     }
 
     public void setPausedModifier(final boolean paused) {
+        Log.d("setPausedModifier" , "flag"+paused);
         mPaused = paused;
 
         if (!mMediaPlayerValid) {
@@ -603,6 +606,7 @@ public class ReactVideoView extends ScalableVideoView implements
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        System.out.println("React Video View what" + what);
         switch (what) {
             case MediaPlayer.MEDIA_INFO_BUFFERING_START:
                 mEventEmitter.receiveEvent(getId(), Events.EVENT_STALLED.toString(), Arguments.createMap());
@@ -613,7 +617,6 @@ public class ReactVideoView extends ScalableVideoView implements
             case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                 mEventEmitter.receiveEvent(getId(), Events.EVENT_READY_FOR_DISPLAY.toString(), Arguments.createMap());
                 break;
-
             default:
         }
         return false;
@@ -642,6 +645,14 @@ public class ReactVideoView extends ScalableVideoView implements
                 isCompleted = false;
             }
         }
+    }
+
+    @Override
+    public void start() {
+        WritableMap event = Arguments.createMap();
+        event.putInt("playbackRate", 1);
+        mEventEmitter.receiveEvent(getId(), Events.EVENT_PLAYBACK_RATE_CHANGE.toString(), event);
+        super.start();
     }
 
     @Override
@@ -712,6 +723,14 @@ public class ReactVideoView extends ScalableVideoView implements
         mMediaPlayerValid = false;
         super.onDetachedFromWindow();
         setKeepScreenOn(false);
+    }
+
+    @Override
+    public void pause() {
+        WritableMap event = Arguments.createMap();
+        event.putInt("playbackRate", 0);
+        mEventEmitter.receiveEvent(getId(), Events.EVENT_PLAYBACK_RATE_CHANGE.toString(), event);
+        super.pause();
     }
 
     @Override
