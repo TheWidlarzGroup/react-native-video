@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.media.TimedMetaData;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
@@ -53,7 +52,6 @@ public class ReactVideoView extends ScalableVideoView implements
     MediaPlayer.OnInfoListener,
     LifecycleEventListener,
     MediaController.MediaPlayerControl {
-    final static String TAG = "ReactVideoView";
     public enum Events {
         EVENT_LOAD_START("onVideoLoadStart"),
         EVENT_LOAD("onVideoLoad"),
@@ -390,7 +388,6 @@ public class ReactVideoView extends ScalableVideoView implements
     }
 
     public void setPausedModifier(final boolean paused) {
-        Log.d("setPausedModifier" , "flag"+paused);
         mPaused = paused;
 
         if (!mMediaPlayerValid) {
@@ -606,7 +603,6 @@ public class ReactVideoView extends ScalableVideoView implements
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        System.out.println("React Video View what" + what);
         switch (what) {
             case MediaPlayer.MEDIA_INFO_BUFFERING_START:
                 mEventEmitter.receiveEvent(getId(), Events.EVENT_STALLED.toString(), Arguments.createMap());
