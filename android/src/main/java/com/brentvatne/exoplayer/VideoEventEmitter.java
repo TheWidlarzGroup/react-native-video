@@ -83,7 +83,6 @@ class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -112,7 +111,6 @@ class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
     })
     @interface VideoEvents {
     }
@@ -433,13 +431,6 @@ class VideoEventEmitter {
 
     void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
-    }
-
-    void receiveAdEvent(String event) {
-        WritableMap map = Arguments.createMap();
-        map.putString("event", event);
-
-        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
