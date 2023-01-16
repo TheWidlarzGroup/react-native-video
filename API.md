@@ -344,7 +344,7 @@ var styles = StyleSheet.create({
 | [onVideoTracks](#onVideoTracks)                                                                 | Android                   |
 
 ### Methods
-| Name |Plateforms Support  | 
+| Name |Platforms Support  | 
 |--|--|
 |[dismissFullscreenPlayer](#dismissfullscreenplayer)|Android, iOS|
 |[presentFullscreenPlayer](#presentfullscreenplayer)|Android, iOS|
@@ -354,7 +354,7 @@ var styles = StyleSheet.create({
 
 ### Static methods
 
-| Name |Plateforms Support  |
+| Name |Platforms Support  |
 |--|--|
 |[getWidevineLevel](#getWidevineLevel)|Android|
 |[isCodecSupported](#isCodecSupported)|Android|
