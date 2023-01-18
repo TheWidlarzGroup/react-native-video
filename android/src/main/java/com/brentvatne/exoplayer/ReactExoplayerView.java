@@ -638,7 +638,7 @@ class ReactExoplayerView extends FrameLayout implements
                     .build();
         player.addListener(self);
         exoPlayerView.setPlayer(player);
-        adsLoader.setPlayer(player);
+        adsLoader?.setPlayer(player);
         audioBecomingNoisyReceiver.setListener(self);
         bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
@@ -863,14 +863,14 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
-            adsLoader.setPlayer(null);
+            adsLoader?.setPlayer(null);
             updateResumePosition();
             player.release();
             player.removeListener(this);
             trackSelector = null;
             player = null;
         }
-        adsLoader.release();
+        adsLoader?.release();
         adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
