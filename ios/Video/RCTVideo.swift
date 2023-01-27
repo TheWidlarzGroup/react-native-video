@@ -243,6 +243,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.removePlayerLayer()
             self._playerObserver.player = nil
+            self._resouceLoaderDelegate = nil
             self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
@@ -750,7 +751,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func removePlayerLayer() {
-        _resouceLoaderDelegate = nil
         _playerLayer?.removeFromSuperlayer()
         _playerLayer = nil
         _playerObserver.playerLayer = nil
@@ -882,6 +882,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     override func removeFromSuperview() {
         _player?.pause()
         _player = nil
+        _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
