@@ -44,7 +44,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
     }
     
     func resourceLoader(_ resourceLoader:AVAssetResourceLoader, didCancel loadingRequest:AVAssetResourceLoadingRequest) {
-        NSLog("didCancelLoadingRequest")
+        RCTLog("didCancelLoadingRequest")
     }
 
     func setLicenseResult(_ license:String!) {
