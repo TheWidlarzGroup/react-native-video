@@ -4,15 +4,15 @@ import MediaAccessibility
 import React
 import Foundation
 
-#if TARGET_OS_IOS
+#if os(iOS)
 class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
     private var _onPictureInPictureStatusChanged: RCTDirectEventBlock?
     private var _onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     private var _restoreUserInterfaceForPIPStopCompletionHandler:((Bool) -> Void)? = nil
     private var _pipController:AVPictureInPictureController?
     private var _isActive:Bool = false
-    
-    init(_ onPictureInPictureStatusChanged: @escaping RCTDirectEventBlock, _ onRestoreUserInterfaceForPictureInPictureStop: @escaping RCTDirectEventBlock) {
+
+    init(_ onPictureInPictureStatusChanged: RCTDirectEventBlock?, _ onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?) {
         _onPictureInPictureStatusChanged = onPictureInPictureStatusChanged
         _onRestoreUserInterfaceForPictureInPictureStop = onRestoreUserInterfaceForPictureInPictureStop
     }

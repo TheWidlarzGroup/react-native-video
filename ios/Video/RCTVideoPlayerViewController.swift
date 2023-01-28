@@ -26,7 +26,7 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
         }
     }
 
-    #if !TARGET_OS_TV
+    #if os(iOS)
 
     func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
         return .all
