@@ -430,6 +430,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         viewWidth = width;
         viewHeight = height;
+        if (trackSelector != null && width > 0 && height > 0) {
+            trackSelector.setParameters(trackSelector.buildUponParameters().setMaxVideoSize(viewWidth, viewHeight));
+        }
     }
 
     // LifecycleEventListener implementation
@@ -494,9 +497,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player == null) {
             AdType adType = (isImaDaiStream ? AdType.IMA_DAI : (isImaCsaiStream ? AdType.IMA_CSAI : null));
             DefaultTrackSelector.ParametersBuilder parametersBuilder =
-                    new DefaultTrackSelector.ParametersBuilder(getContext())
-                    .setMaxVideoSize(viewWidth, viewHeight);
-
+                    new DefaultTrackSelector.ParametersBuilder(getContext());
             TrackPreferenceStorage trackPreferenceStorage = TrackPreferenceStorage.getInstance(getContext());
             if (trackPreferenceStorage.isEnabled()) {
                 if (trackPreferenceStorage.isNoSubtitlePreferred()) {
