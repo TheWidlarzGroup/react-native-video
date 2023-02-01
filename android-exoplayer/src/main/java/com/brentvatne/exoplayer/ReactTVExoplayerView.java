@@ -81,6 +81,7 @@ import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSession;
@@ -90,10 +91,11 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.text.Cue;
+import com.google.android.exoplayer2.text.CueGroup;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Parameters;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
@@ -496,8 +498,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
         if (player == null) {
             AdType adType = (isImaDaiStream ? AdType.IMA_DAI : (isImaCsaiStream ? AdType.IMA_CSAI : null));
-            DefaultTrackSelector.ParametersBuilder parametersBuilder =
-                    new DefaultTrackSelector.ParametersBuilder(getContext());
+            Parameters.Builder parametersBuilder = new Parameters.Builder(getContext());
             TrackPreferenceStorage trackPreferenceStorage = TrackPreferenceStorage.getInstance(getContext());
             if (trackPreferenceStorage.isEnabled()) {
                 if (trackPreferenceStorage.isNoSubtitlePreferred()) {
@@ -522,7 +523,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
-                    .setContentType(C.CONTENT_TYPE_MOVIE)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                     .build();
 
             exoPlayer.setAudioAttributes(audioAttributes, false);
@@ -1158,7 +1159,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onCues(List<Cue> cues) {
+    public void onCues(@NonNull CueGroup cueGroup) {
     }
 
     @Override
@@ -1205,7 +1206,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+    public void onTracksChanged(@NonNull Tracks tracksInfo) {
         // Do Nothing.
     }
 
@@ -1428,7 +1429,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             type = "default";
         }
 
-        DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
+        Parameters disableParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setRendererDisabled(rendererIndex, true)
                 .build();
@@ -1474,11 +1475,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             return;
         }
 
-        DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
+        Parameters selectionParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setRendererDisabled(rendererIndex, false)
-                .setSelectionOverride(rendererIndex, groups,
-                        new DefaultTrackSelector.SelectionOverride(trackIndex, 0))
+                .setOverrideForType(new TrackSelectionOverride(groups.get(trackIndex), 0))
                 .build();
         trackSelector.setParameters(selectionParameters);
     }

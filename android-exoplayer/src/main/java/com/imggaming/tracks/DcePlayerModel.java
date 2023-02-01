@@ -8,14 +8,14 @@ import com.brentvatne.react.R;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.ParametersBuilder;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Parameters;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -166,43 +166,23 @@ public class DcePlayerModel {
 
             final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
             if (mappedTrackInfo != null) {
-                final TrackGroupArray tracks = mappedTrackInfo.getTrackGroups(index);
-
-                TrackSelectionArray selections = player.getCurrentTrackSelections();
-
-                TrackSelection selected = null;
-
-                for (int i = 0; i < selections.length; i++) {
-                    if (player.getRendererType(i) == trackType && selections.get(i) != null) {
-
-                        selected = selections.get(i);
+                Tracks tracks = player.getCurrentTracks();
+                for (int i = 0; i < tracks.getGroups().size(); i++) {
+                    Tracks.Group groupInfo = tracks.getGroups().get(i);
+                    if (groupInfo.getType() != trackType) {
+                        continue;
                     }
-                }
-
-                final List<TrackGroup> filtered = new ArrayList<>();
-                final List<Integer> indexes = new ArrayList<>();
-
-                for (int i = 0; i < tracks.length; i++) {
-                    TrackGroup group = tracks.get(i);
-                    if (!filtered.contains(group) && !TextUtils.isEmpty(getLabel(group))) {
-                        filtered.add(group);
-                        indexes.add(i);
-                    }
-                }
-
-                //Log.e(DcePlayerModel.class.getName(), "filtered = " + filtered.size() + " indexes = " + indexes);
-
-                for (int i = 0; i < filtered.size(); i++) {
-                    TrackGroup group = filtered.get(i);
-
-                    boolean isSelected = selected != null && tracks.indexOf(selected.getTrackGroup()) == indexes.get(i);
-
+                    TrackGroup group = groupInfo.getMediaTrackGroup();
                     String languageLabel = getLabel(group);
+                    if (TextUtils.isEmpty(languageLabel)) {
+                        continue;
+                    }
+                    boolean isSelected = groupInfo.isSelected();
 
                     Log.d(DcePlayerModel.class.getName(), " group =  " + languageLabel + " selected = " + isSelected);
 
                     if(!addedLanguages.contains(languageLabel)){
-                        ret.add(new DceTrack(languageLabel, indexes.get(i), isSelected));
+                        ret.add(new DceTrack(languageLabel, i, isSelected));
                         addedLanguages.add(languageLabel);
                     }
                 }
@@ -231,11 +211,9 @@ public class DcePlayerModel {
         final int index = findTrackTypeAvailable(trackType);
 
         if (index >= 0) {
-            ParametersBuilder parametersBuilder = trackSelector.buildUponParameters();
+            Parameters.Builder parametersBuilder = trackSelector.buildUponParameters();
 
-            final TrackGroupArray groups = trackSelector.getCurrentMappedTrackInfo().getTrackGroups(index);
-
-            ArrayList<Integer> trackIndexes = new ArrayList<>();
+            ImmutableList<Tracks.Group> groups = player.getCurrentTracks().getGroups();
 
             int selected = -1;
 
@@ -247,9 +225,9 @@ public class DcePlayerModel {
             }
 
             if (selected >= 0) {
-                parametersBuilder.setSelectionOverride(index, groups, new SelectionOverride(selected, 0));
+                parametersBuilder.setOverrideForType(new TrackSelectionOverride(groups.get(selected).getMediaTrackGroup(), 0));
             } else {
-                parametersBuilder.clearSelectionOverrides(index);
+                parametersBuilder.clearOverridesOfType(trackType);
             }
 
             if (trackType == C.TRACK_TYPE_TEXT) { // enable/disable subtitles renderer

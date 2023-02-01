@@ -14,7 +14,7 @@ import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
 import com.diceplatform.doris.plugin.Plugin;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Parameters;
 import com.google.android.exoplayer2.ui.AdViewProvider;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public final class ReactTVExoDorisFactory {
             int loadBufferMs,
             long forwardIncrementMs,
             long rewindIncrementMs,
-            @Nullable DefaultTrackSelector.ParametersBuilder parametersBuilder,
+            @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider) {
         return createPlayer(
                 context,
@@ -53,7 +53,7 @@ public final class ReactTVExoDorisFactory {
             long rewindIncrementMs,
             @Nullable List<Plugin> plugins,
             @Nullable SurfaceView surfaceView,
-            @Nullable DefaultTrackSelector.ParametersBuilder parametersBuilder,
+            @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider) {
         final ExoDorisBuilder builder;
         if (adType == AdType.IMA_DAI) {

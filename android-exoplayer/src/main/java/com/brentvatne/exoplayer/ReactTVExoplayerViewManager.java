@@ -22,7 +22,6 @@ import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.endeavor.DebugUtil;
 import com.google.android.exoplayer2.endeavor.ExoConfig;
 import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 import com.google.android.exoplayer2.endeavor.WebUtil;
@@ -133,8 +132,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
     private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 5;
 
-    private static final boolean IS_DEBUG = false;
-
     private final ReactApplicationContext reactApplicationContext;
     private LruCache<Integer, String> currentSrcUrls;
 
@@ -148,20 +145,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     }
 
     private void setPlayerConfig() {
-        if (IS_DEBUG) {
-            DebugUtil.debug_drm = true;
-            DebugUtil.debug_media = true;
-            DebugUtil.debug_manifest = true;
-            // Change the ip and port to your file upload server.
-            DebugUtil.upload_server = "http://172.16.2.142:4660/file/manifest/";
-        }
-        ExoConfig.getInstance().setHttpTimeoutMs(6000);
         ExoConfig.getInstance().setObtainKeyIdsFromManifest(true);
 
-        Log.d(WebUtil.DEBUG, String.format("config player - httpTimeoutMs %d, keyIdsMode %s, debug %b",
-                ExoConfig.getInstance().getHttpTimeoutMs(),
+        Log.i(WebUtil.DEBUG, String.format("config player - keyIdsMode %s, debug %b",
                 ExoConfig.getInstance().isObtainKeyIdsFromManifest() ? "manifest" : "stream",
-                IS_DEBUG));
+                BuildConfig.DEBUG));
     }
 
     @Override
