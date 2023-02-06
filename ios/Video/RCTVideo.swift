@@ -537,7 +537,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     
     func setPlaybackRange(_ item:AVPlayerItem!, withVideoStart videoStart:Int64?, withVideoEnd videoEnd:Int64?) {
         if (videoStart != nil) {
-            item.reversePlaybackEndTime = CMTimeMake(value: videoStart!, timescale: 1000)
+            let start = CMTimeMake(value: videoStart!, timescale: 1000)
+            item.reversePlaybackEndTime = start
+            _pendingSeekTime = Float(CMTimeGetSeconds(start))
+            _pendingSeek = true
         }
         if (videoEnd != nil) {
             item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
