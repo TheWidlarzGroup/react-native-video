@@ -12,11 +12,15 @@ enum RCTVideoUtils {
      *
      * \returns The playable duration of the current player item in seconds.
      */
-    static func calculatePlayableDuration(_ player:AVPlayer?) -> NSNumber {
+    static func calculatePlayableDuration(_ player:AVPlayer?, withSource source:VideoSource?) -> NSNumber {
         guard let player = player,
               let video:AVPlayerItem = player.currentItem,
               video.status == AVPlayerItem.Status.readyToPlay else {
             return 0
+        }
+        
+        if (source?.startTime != nil && source?.endTime != nil) {
+            return NSNumber(value: (Float64(source?.endTime ?? 0) - Float64(source?.startTime ?? 0)) / 1000)
         }
         
         var effectiveTimeRange:CMTimeRange?
@@ -31,6 +35,10 @@ enum RCTVideoUtils {
         if let effectiveTimeRange = effectiveTimeRange {
             let playableDuration:Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))
             if playableDuration > 0 {
+                if (source?.startTime != nil) {
+                    return NSNumber(value: (playableDuration - Float64(source?.startTime ?? 0) / 1000))
+                }
+                
                 return playableDuration as NSNumber
             }
         }
