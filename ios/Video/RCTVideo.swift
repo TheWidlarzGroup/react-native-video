@@ -883,7 +883,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player?.pause()
         _player = nil
         _playerObserver.clearPlayer()
-
+        _imaAdsManager.getAdsManager()?.destroy()
         self.removePlayerLayer()
 
         if let _playerViewController = _playerViewController {
