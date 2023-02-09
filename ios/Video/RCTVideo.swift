@@ -1001,6 +1001,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if _videoLoadStarted {
+            let audioTracks = RCTVideoUtils.getAudioTrackInfo(_player)
+            let textTracks = RCTVideoUtils.getTextTrackInfo(_player).map(\.json)
             onVideoLoad?(["duration": NSNumber(value: duration),
                           "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
                           "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
@@ -1014,8 +1016,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                             "height": width != nil ? NSNumber(value: height!) : "undefinded",
                             "orientation": orientation
                           ],
-                          "audioTracks": RCTVideoUtils.getAudioTrackInfo(_player),
-                          "textTracks": _textTracks ?? RCTVideoUtils.getTextTrackInfo(_player),
+                          "audioTracks": audioTracks,
+                          "textTracks": textTracks,
                           "target": reactTag as Any])
         }
         _videoLoadStarted = false
