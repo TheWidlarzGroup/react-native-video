@@ -243,6 +243,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.removePlayerLayer()
             self._playerObserver.player = nil
+            self._resouceLoaderDelegate = nil
             self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
@@ -613,7 +614,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setFullscreen(_ fullscreen:Bool) {
         if fullscreen && !_fullscreenPlayerPresented && _player != nil {
             // Ensure player view controller is not null
-            if _playerViewController == nil {
+            if _playerViewController == nil && _controls {
                 self.usePlayerViewController()
             }
 
@@ -637,7 +638,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                 if let playerViewController = _playerViewController {
                     viewController.present(playerViewController, animated:true, completion:{
-                        self._playerViewController?.showsPlaybackControls = true
+                        self._playerViewController?.showsPlaybackControls = self._controls
                         self._fullscreenPlayerPresented = fullscreen
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
 
@@ -693,7 +694,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
-        viewController.showsPlaybackControls = true
+        viewController.showsPlaybackControls = self._controls
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
@@ -750,7 +751,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func removePlayerLayer() {
-        _resouceLoaderDelegate = nil
         _playerLayer?.removeFromSuperlayer()
         _playerLayer = nil
         _playerObserver.playerLayer = nil
@@ -836,12 +836,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - React View Management
 
     func insertReactSubview(view:UIView!, atIndex:Int) {
-        // We are early in the game and somebody wants to set a subview.
-        // That can only be in the context of playerViewController.
-        if !_controls && (_playerLayer == nil) && (_playerViewController == nil) {
-            setControls(true)
-        }
-
         if _controls {
             view.frame = self.bounds
             _playerViewController?.contentOverlayView?.insertSubview(view, at:atIndex)
@@ -882,6 +876,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     override func removeFromSuperview() {
         _player?.pause()
         _player = nil
+        _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
@@ -1006,6 +1001,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if _videoLoadStarted {
+            let audioTracks = RCTVideoUtils.getAudioTrackInfo(_player)
+            let textTracks = RCTVideoUtils.getTextTrackInfo(_player).map(\.json)
             onVideoLoad?(["duration": NSNumber(value: duration),
                           "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
                           "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
@@ -1019,8 +1016,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                             "height": width != nil ? NSNumber(value: height!) : "undefinded",
                             "orientation": orientation
                           ],
-                          "audioTracks": RCTVideoUtils.getAudioTrackInfo(_player),
-                          "textTracks": _textTracks ?? RCTVideoUtils.getTextTrackInfo(_player),
+                          "audioTracks": audioTracks,
+                          "textTracks": textTracks,
                           "target": reactTag as Any])
         }
         _videoLoadStarted = false
