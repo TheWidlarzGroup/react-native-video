@@ -1076,7 +1076,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let newRect = change.newValue
         if !oldRect!.equalTo(newRect!) {
             if newRect!.equalTo(UIScreen.main.bounds) {
-                NSLog("in fullscreen")
+                RCTLog("in fullscreen")
 
                 self.reactViewController().view.frame = UIScreen.main.bounds
                 self.reactViewController().view.setNeedsLayout()
