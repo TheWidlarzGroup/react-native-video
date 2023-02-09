@@ -44,7 +44,7 @@ android {
             java {
                 if (useExoplayerIMA) {
                     exclude 'com/google/ads/interactivemedia/v3/api'
-                    exclude 'com/android/exoplayer2/ext/ima'
+                    exclude 'com/google/android/exoplayer2/ext/ima'
                 }
             }
         }
