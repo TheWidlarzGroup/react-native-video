@@ -806,7 +806,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         switch (type) {
             case CONTENT_TYPE_SS:
-                mediaSource = SsMediaSource.Factory(
+                mediaSource = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 ).setDrmSessionManagerProvider(drmProvider)
@@ -815,7 +815,7 @@ class ReactExoplayerView extends FrameLayout implements
                 ).createMediaSource(mediaItem);
                 break;
             case CONTENT_TYPE_DASH:
-                mediaSource = DashMediaSource.Factory(
+                mediaSource = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 ).setDrmSessionManagerProvider(drmProvider)
@@ -824,7 +824,7 @@ class ReactExoplayerView extends FrameLayout implements
                 ).createMediaSource(mediaItem);
                 break;
             case CONTENT_TYPE_HLS:
-                mediaSource = HlsMediaSource.Factory(
+                mediaSource = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
@@ -832,7 +832,7 @@ class ReactExoplayerView extends FrameLayout implements
                 ).createMediaSource(mediaItem);
                 break;
             case CONTENT_TYPE_OTHER:
-                mediaSource = ProgressiveMediaSource.Factory(
+                mediaSource = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManagerProvider(drmProvider)
                  .setLoadErrorHandlingPolicy(
