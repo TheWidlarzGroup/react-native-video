@@ -111,10 +111,14 @@ enum RCTVideoUtils {
                 title = value as! String
             }
             let language:String! = currentOption?.extendedLanguageTag ?? ""
+
+            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+
             let audioTrack = [
                 "index": NSNumber(value: i),
                 "title": title,
-                "language": language
+                "language": language ?? "",
+                "selected": currentOption?.displayName == selectedOption?.displayName
             ] as [String : Any]
             audioTracks.add(audioTrack)
         }
@@ -137,10 +141,13 @@ enum RCTVideoUtils {
                 title = value as! String
             }
             let language:String! = currentOption?.extendedLanguageTag ?? ""
+            let selectedOpt = player.currentItem?.currentMediaSelection
+            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
             let textTrack = TextTrack([
                 "index": NSNumber(value: i),
                 "title": title,
-                "language": language
+                "language": language,
+                "selected": currentOption?.displayName == selectedOption?.displayName
             ])
             textTracks.append(textTrack)
         }
