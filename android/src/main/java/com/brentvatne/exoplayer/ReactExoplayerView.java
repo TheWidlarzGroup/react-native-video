@@ -182,9 +182,7 @@ class ReactExoplayerView extends FrameLayout implements
     // Props from React
     private int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
     private Uri srcUri;
-
     private long startTimeMs = -1;
-
     private long endTimeMs = -1;
     private String extension;
     private boolean repeat;
@@ -769,13 +767,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private MediaSource buildMediaSource(
-            Uri uri,
-            String overrideExtension,
-            DrmSessionManager drmSessionManager,
-            long startTimeMs,
-            long endTimeMs) {
-
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager, long startTimeMs, long endTimeMs) {
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
@@ -1487,13 +1479,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(
-            final Uri uri,
-            final long startTimeMs,
-            final long endTimeMs,
-            final String extension,
-            Map<String, String> headers) {
-
+    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
             hasDrmFailed = false;
