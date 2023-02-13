@@ -922,7 +922,11 @@ Provide an optional `startTime` and/or `endTime` for the video. Value is in mill
 
 Example
 ```
-source={{ startTime: 36012, endTime: 48500 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012, endTime: 48500 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', endTime: 48500 }}
 ```
 
 Platforms: iOS, Android
