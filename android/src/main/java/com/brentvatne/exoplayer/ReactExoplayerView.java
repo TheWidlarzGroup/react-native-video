@@ -4,6 +4,7 @@ import static com.google.android.exoplayer2.C.CONTENT_TYPE_DASH;
 import static com.google.android.exoplayer2.C.CONTENT_TYPE_HLS;
 import static com.google.android.exoplayer2.C.CONTENT_TYPE_OTHER;
 import static com.google.android.exoplayer2.C.CONTENT_TYPE_SS;
+import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -836,9 +837,13 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
 
-        if(startTimeMs >= 0 && endTimeMs >= 0)
+        if (startTimeMs >= 0 && endTimeMs >= 0)
         {
             return new ClippingMediaSource(mediaSource, startTimeMs * 1000, endTimeMs * 1000);
+        } else if (startTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, startTimeMs * 1000, TIME_END_OF_SOURCE);
+        } else if (endTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, 0, endTimeMs * 1000);
         }
 
         return mediaSource;
