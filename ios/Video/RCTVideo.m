@@ -883,7 +883,9 @@ static int const RCTVideoUnset = -1;
   if (_pictureInPicture == pictureInPicture) {
     return;
   }
-  
+
+  [self setupPipController];
+
   _pictureInPicture = pictureInPicture;
   if (_pipController && _pictureInPicture && ![_pipController isPictureInPictureActive]) {
     dispatch_async(dispatch_get_main_queue(), ^{
