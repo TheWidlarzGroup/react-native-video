@@ -82,6 +82,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_FAVOURITE_BUTTON = "favourite";
     private static final String PROP_EPG_BUTTON = "epg";
     private static final String PROP_STATS_BUTTON = "stats";
+    private static final String PROP_ANNOTATIONS_BUTTON = "annotations";
 
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -128,9 +129,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
-    private static final int COMMAND_SEEK_TO_POSITION = 3;
-    private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 4;
-    private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 5;
+    private static final int COMMAND_SEEK_TO_RESUME_POSITION = 3;
+    private static final int COMMAND_SEEK_TO_POSITION = 4;
+    private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
+    private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 6;
 
     private final ReactApplicationContext reactApplicationContext;
     private LruCache<Integer, String> currentSrcUrls;
@@ -524,7 +526,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         boolean showFavouriteButton = (buttons != null && buttons.hasKey(PROP_FAVOURITE_BUTTON)) && buttons.getBoolean(PROP_FAVOURITE_BUTTON);
         boolean showEpgButton = (buttons != null && buttons.hasKey(PROP_EPG_BUTTON)) && buttons.getBoolean(PROP_EPG_BUTTON);
         boolean showStatsButton = (buttons != null && buttons.hasKey(PROP_STATS_BUTTON)) && buttons.getBoolean(PROP_STATS_BUTTON);
-        videoView.setButtons(showWatchlistButton, showFavouriteButton, showEpgButton, showStatsButton);
+        boolean showAnnotationsButton = (buttons != null && buttons.hasKey(PROP_ANNOTATIONS_BUTTON)) && buttons.getBoolean(PROP_ANNOTATIONS_BUTTON);
+        videoView.setButtons(showWatchlistButton, showFavouriteButton, showEpgButton, showStatsButton, showAnnotationsButton);
     }
 
     @ReactProp(name = PROP_IS_FAVOURITE)
@@ -585,6 +588,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 COMMAND_SEEK_TO_NOW,
                 "seekToTimestamp",
                 COMMAND_SEEK_TO_TIMESTAMP,
+                "seekToResumePosition",
+                COMMAND_SEEK_TO_RESUME_POSITION,
                 "seekToPosition",
                 COMMAND_SEEK_TO_POSITION,
                 "replaceAdTagParameters",
@@ -610,10 +615,14 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     root.resumeTo(positionMs);
                 }
                 break;
-            case COMMAND_SEEK_TO_POSITION:
+            case COMMAND_SEEK_TO_RESUME_POSITION:
                 long resumeMs = args.getInt(0) * 1000;
                 Log.d(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
                 root.resumeTo(resumeMs);
+                break;
+            case COMMAND_SEEK_TO_POSITION:
+                long seekToMs = args.getInt(0) * 1000;
+                root.seekTo(seekToMs);
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);

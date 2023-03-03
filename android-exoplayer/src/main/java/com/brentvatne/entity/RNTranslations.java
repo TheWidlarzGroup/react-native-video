@@ -19,6 +19,7 @@ public class RNTranslations {
     private static final String KEY_FAST_FORWARD_LABEL = "fastForward";
     private static final String KEY_AUDIO_TRACKS_LABEL = "audioTracks";
     private static final String KEY_INFO_LABEL = "info";
+    private static final String KEY_ANNOTATIONS_LABEL = "annotations";
     private static final String KEY_ADS_COUNTDOWN_AD_LABEL = "adsCountdownAd";
     private static final String KEY_ADS_COUNTDOWN_OF_LABEL = "adsCountdownOf";
 
@@ -35,6 +36,7 @@ public class RNTranslations {
     private static final String DEFAULT_FAST_FORWARD_LABEL = "Fast Forward";
     private static final String DEFAULT_AUDIO_TRACKS_LABEL = "Audio Languages";
     private static final String DEFAULT_INFO_LABEL = "Information";
+    private static final String DEFAULT_ANNOTATIONS_LABEL = "Annotations";
     private static final String DEFAULT_ADS_COUNTDOWN_AD_LABEL = "Ad";
     private static final String DEFAULT_ADS_COUNTDOWN_OF_LABEL = "Of";
 
@@ -52,6 +54,7 @@ public class RNTranslations {
     private final String fastForwardLabel;
     private final String audioTracksLabel;
     private final String infoLabel;
+    private final String annotationsLabel;
     private final String adsCountdownAdLabel;
     private final String adsCountdownOfLabel;
 
@@ -71,6 +74,7 @@ public class RNTranslations {
         this.fastForwardLabel = getStringFromMap(KEY_FAST_FORWARD_LABEL, DEFAULT_FAST_FORWARD_LABEL);
         this.audioTracksLabel = getStringFromMap(KEY_AUDIO_TRACKS_LABEL, DEFAULT_AUDIO_TRACKS_LABEL);
         this.infoLabel = getStringFromMap(KEY_INFO_LABEL, DEFAULT_INFO_LABEL);
+        this.annotationsLabel = getStringFromMap(KEY_ANNOTATIONS_LABEL, DEFAULT_ANNOTATIONS_LABEL);
         this.adsCountdownAdLabel = getStringFromMap(KEY_ADS_COUNTDOWN_AD_LABEL, DEFAULT_ADS_COUNTDOWN_AD_LABEL);
         this.adsCountdownOfLabel = getStringFromMap(KEY_ADS_COUNTDOWN_OF_LABEL, DEFAULT_ADS_COUNTDOWN_OF_LABEL);
     }
@@ -129,6 +133,10 @@ public class RNTranslations {
 
     public String getInfoLabel() {
         return infoLabel;
+    }
+
+    public String getAnnotationsLabel() {
+        return annotationsLabel;
     }
 
     public String getAdsCountdownAdLabel() {

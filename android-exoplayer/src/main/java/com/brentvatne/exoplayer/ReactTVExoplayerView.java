@@ -1743,12 +1743,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean showWatchlistButton,
             boolean showFavouriteButton,
             boolean showEpgButton,
-            boolean showStatsButton) {
+            boolean showStatsButton,
+            boolean showAnnotationsButton) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setShowWatchlistButton(showWatchlistButton);
             exoDorisPlayerView.setShowFavoriteButton(showFavouriteButton);
             exoDorisPlayerView.setShowEpgButton(showEpgButton);
             exoDorisPlayerView.setShowStatsButton(showStatsButton);
+            exoDorisPlayerView.setShowAnnotationsButton(showAnnotationsButton);
         }
     }
 
@@ -1976,6 +1978,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setFastForwardLabel(translations.getFastForwardLabel())
                     .setAudioLanguagesLabel(translations.getAudioTracksLabel())
                     .setInfoLabel(translations.getInfoLabel())
+                    .setAnnotationsLabel(translations.getAnnotationsLabel())
                     .setAdsCountdownAdLabel(translations.getAdsCountdownAdLabel())
                     .setAdsCountdownOfLabel(translations.getAdsCountdownOfLabel())
                     .build();
@@ -2005,6 +2008,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     @Override
     public void onFavoriteButtonClicked() {
         eventEmitter.favouriteButtonClick();
+    }
+
+    @Override
+    public void onAnnotationsButtonClicked() {
+        eventEmitter.annotationsButtonClick();
     }
 
     @Override

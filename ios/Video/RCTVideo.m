@@ -561,6 +561,12 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
     }
 }
 
+- (void)didTapAnnotationsButton {
+    if (self.onAnnotationsButtonClick) {
+        self.onAnnotationsButtonClickcd (@{@"target": self.reactTag});
+    }
+}
+
 - (void)didSelectSubtitleWithCode:(NSString *)code title:(NSString *)title {
     if (_shouldSaveSubtitleSelection) {
         [[NSUserDefaults standardUserDefaults] setObject:code forKey:@"selectedSubtitle"];

@@ -1,6 +1,7 @@
-import { IVideoPlayerOnRequireAdParametersPayload } from './ima';
+import { IVideoPlayerOnRequireAdParametersPayload } from "./ima";
 
 export interface IVideoPlayerCallbacks {
+  onAnnotationsButtonClick?: (e: any) => void;
   onBuffer?: (e: any) => void;
   onEnd?: (e: any) => void;
   onEpgIconClick?: (e: any) => void;
@@ -8,7 +9,7 @@ export interface IVideoPlayerCallbacks {
   onFavouriteButtonClick?: (e: any) => void;
   onLoad?: (e: any) => void;
   onLoadStart?: (e: any) => void;
-  onPlaybackRateChange?: ({ playbackRate: number }) => void;
+  onPlaybackRateChange?: ({ playbackRate }: { playbackRate: number }) => void;
   onPlaybackResume?: (e: any) => void;
   onPlaybackStalled?: (e: any) => void;
   onProgress?: (e: any) => void;

@@ -59,6 +59,7 @@ class VideoEventEmitter {
     private static final String EVENT_RELATED_VIDEO_CLICKED = "onRelatedVideoClicked";
     private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
     private static final String EVENT_FAVOURITE_BUTTON_CLICK = "onFavouriteButtonClick";
+    private static final String EVENT_ANNOTATIONS_BUTTON_CLICK = "onAnnotationsButtonClick";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -90,6 +91,7 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_ANNOTATIONS_BUTTON_CLICK,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR
@@ -126,6 +128,7 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_ANNOTATIONS_BUTTON_CLICK,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR
@@ -371,6 +374,10 @@ class VideoEventEmitter {
 
     void favouriteButtonClick() {
         receiveEvent(EVENT_FAVOURITE_BUTTON_CLICK, null);
+    }
+
+    void annotationsButtonClick() {
+        receiveEvent(EVENT_ANNOTATIONS_BUTTON_CLICK, null);
     }
 
     void requireAdParameters(double date, boolean isBlocking) {

@@ -3,4 +3,5 @@ export interface IVideoPlayerButtons {
   favourite?: boolean;
   epg?: boolean;
   stats?: boolean;
+  annotations?: boolean;
 }
