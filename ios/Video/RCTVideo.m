@@ -563,7 +563,7 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
 
 - (void)didTapAnnotationsButton {
     if (self.onAnnotationsButtonClick) {
-        self.onAnnotationsButtonClickcd (@{@"target": self.reactTag});
+        self.onAnnotationsButtonClick (@{@"target": self.reactTag});
     }
 }
 
