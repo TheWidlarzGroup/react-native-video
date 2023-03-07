@@ -21,6 +21,7 @@ import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
@@ -1903,6 +1904,7 @@ class ReactExoplayerView extends FrameLayout implements
                     int mUIFlag = View.SYSTEM_UI_FLAG_VISIBLE;
                     decorView
                             .setSystemUiVisibility(mUIFlag);
+                    Toast.makeText(activity, "Visible", Toast.LENGTH_LONG).show();
                 } else {
                     int mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -1912,6 +1914,7 @@ class ReactExoplayerView extends FrameLayout implements
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
                     decorView
                             .setSystemUiVisibility(mUIFlag);
+                    Toast.makeText(activity, "InVisible", Toast.LENGTH_LONG).show();
                 }
             }
         });
