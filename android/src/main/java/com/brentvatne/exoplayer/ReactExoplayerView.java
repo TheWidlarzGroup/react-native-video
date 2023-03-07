@@ -1931,6 +1931,7 @@ class ReactExoplayerView extends FrameLayout implements
             eventEmitter.fullscreenWillPresent();
             if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
+                reLayout(exoPlayerView);
             }
             post(() -> {
                 decorView.setSystemUiVisibility(uiOptions);
