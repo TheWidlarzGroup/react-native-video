@@ -1895,6 +1895,27 @@ class ReactExoplayerView extends FrameLayout implements
         Window window = activity.getWindow();
         View decorView = window.getDecorView();
         int uiOptions;
+
+        decorView.setOnSystemUiVisibilityChangeListener(new OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0 & !isFullscreen) {
+                    int mUIFlag = View.SYSTEM_UI_FLAG_VISIBLE;
+                    decorView
+                            .setSystemUiVisibility(mUIFlag);
+                } else {
+                    int mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LOW_PROFILE
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                    decorView
+                            .setSystemUiVisibility(mUIFlag);
+                }
+            }
+        });
+
         if (isFullscreen) {
             if (Util.SDK_INT >= 19) { // 4.4+
                 uiOptions = SYSTEM_UI_FLAG_HIDE_NAVIGATION
