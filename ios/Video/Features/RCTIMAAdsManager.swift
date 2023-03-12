@@ -1,3 +1,4 @@
+#if USE_GOOGLE_IMA
 import Foundation
 import GoogleInteractiveMediaAds
 
@@ -185,3 +186,4 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         return result;
     }
 }
+#endif
