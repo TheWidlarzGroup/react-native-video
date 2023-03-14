@@ -449,15 +449,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setCurrentTime(_ currentTime:Float) {
-        let info:NSDictionary = [
-            "time": NSNumber(value: currentTime),
-            "tolerance": NSNumber(value: 100)
-        ]
-        setSeek(info)
-    }
-
-    @objc
     func setSeek(_ info:NSDictionary!) {
         let seekTime:NSNumber! = info["time"] as! NSNumber
         let seekTolerance:NSNumber! = info["tolerance"] as! NSNumber
@@ -996,7 +987,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if _pendingSeek {
-            setCurrentTime(_pendingSeekTime)
+            setSeek([
+                "time": NSNumber(value: _pendingSeekTime),
+                "tolerance": NSNumber(value: 100)
+            ])
             _pendingSeek = false
         }
 
