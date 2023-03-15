@@ -323,30 +323,32 @@ class VideoEventEmitter {
     }
 
     void timedMetadata(Metadata metadata) {
-        WritableArray metadataArray = Arguments.createArray();
-
+        WritableArray metadataArray = null;
         for (int i = 0; i < metadata.length(); i++) {
+            Metadata.Entry entry = metadata.get(i);
+            if (!(entry instanceof Id3Frame)) {
+                continue;
+            }
 
-
-            Id3Frame frame = (Id3Frame) metadata.get(i);
-
+            if (metadataArray == null) {
+                metadataArray = Arguments.createArray();
+            }
             String value = "";
-
+            Id3Frame frame = (Id3Frame) entry;
             if (frame instanceof TextInformationFrame) {
                 TextInformationFrame txxxFrame = (TextInformationFrame) frame;
                 value = txxxFrame.value;
             }
-
             String identifier = frame.id;
-
             WritableMap map = Arguments.createMap();
             map.putString("identifier", identifier);
             map.putString("value", value);
-
             metadataArray.pushMap(map);
-
         }
 
+        if (metadataArray == null) {
+            return;
+        }
         WritableMap event = Arguments.createMap();
         event.putArray(EVENT_PROP_TIMED_METADATA, metadataArray);
         receiveEvent(EVENT_TIMED_METADATA, event);
