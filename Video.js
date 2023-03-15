@@ -563,11 +563,6 @@ Video.propTypes = {
   onReceiveAdEvent: PropTypes.func,
 
   /* Required by react-native */
-  scaleX: PropTypes.number,
-  scaleY: PropTypes.number,
-  translateX: PropTypes.number,
-  translateY: PropTypes.number,
-  rotation: PropTypes.number,
   ...ViewPropTypes,
 };
 
