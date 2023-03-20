@@ -204,6 +204,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    private boolean controlsIMA;
     private Uri adTagUrl;
     // \ End props
 
@@ -223,7 +224,7 @@ class ReactExoplayerView extends FrameLayout implements
             switch (msg.what) {
                 case SHOW_PROGRESS:
                     if (player != null) {
-                        if (playerControlView != null && isPlayingAd() && controls) {
+                        if (playerControlView != null && isPlayingAd() && !controlsIMA && controls) {
                             playerControlView.hide();
                         }
                         long pos = player.getCurrentPosition();
@@ -396,7 +397,7 @@ class ReactExoplayerView extends FrameLayout implements
         // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v || controlsIMA) {
                 if (!isPlayingAd()) {
                     togglePlayerControlVisibility();
                 }
@@ -2005,12 +2006,21 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setControlsIMA(boolean controls) {
+        this.controlsIMA = controls;
+    }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
     }
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
+        // Display player controller when AD is tapped
+        String adEventName = adEvent.getType().name();
+        if(controlsIMA && adEventName.equals("TAPPED")){
+            togglePlayerControlVisibility();     
+        }
         eventEmitter.receiveAdEvent(adEvent.getType().name());
     }
 }
