@@ -17,6 +17,9 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     }
 
     func setUpAdsLoader() {
+        let settings = IMASettings()
+        settings.disableNowPlayingInfo = true
+        settings.enableBackgroundPlayback = false
         adsLoader = IMAAdsLoader(settings: nil)
         adsLoader.delegate = self
     }
