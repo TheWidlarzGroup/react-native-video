@@ -372,9 +372,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_CONTROLS_IMA, defaultBoolean = false)
-+    public void setControlsIMA(final ReactExoplayerView videoView, final boolean controlsIMA) {
-+        videoView.setControlsIMA(controlsIMA);
-+    }
+    public void setControlsIMA(final ReactExoplayerView videoView, final boolean controlsIMA) {
+        videoView.setControlsIMA(controlsIMA);
+    }
 
     @ReactProp(name = PROP_SUBTITLE_STYLE)
     public void setSubtitleStyle(final ReactExoplayerView videoView, @Nullable final ReadableMap src) {

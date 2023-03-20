@@ -397,8 +397,8 @@ class ReactExoplayerView extends FrameLayout implements
         // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v || controlsIMA) {
-                if (!isPlayingAd()) {
+            public void onClick(View v) {
+                if (!isPlayingAd() || controlsIMA) {
                     togglePlayerControlVisibility();
                 }
             }
