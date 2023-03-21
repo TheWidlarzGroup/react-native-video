@@ -224,9 +224,25 @@ class ReactExoplayerView extends FrameLayout implements
             switch (msg.what) {
                 case SHOW_PROGRESS:
                     if (player != null) {
-                        if (playerControlView != null && isPlayingAd() && !controlsIMA && controls) {
-                            playerControlView.hide();
+                        if(playerControlView != null){
+                            TextView exo_duration = playerControlView.findViewById(R.id.exo_duration);
+                            TextView exo_live_indicator = playerControlView.findViewById(R.id.exo_duration_live);
+
+                            // Toggle live indicator based on player state
+                            if(player.isCurrentMediaItemLive()){
+                                exo_duration.setVisibility(GONE);
+                                exo_live_indicator.setVisibility(VISIBLE);
+                            }else{
+                                exo_duration.setVisibility(VISIBLE);
+                                exo_live_indicator.setVisibility(GONE);
+                            }
+
+                            // Hide player controller if it's not allowed for ads
+                            if (isPlayingAd() && controls) {
+                                playerControlView.hide();
+                            }
                         }
+
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
                         long duration = player.getDuration();
