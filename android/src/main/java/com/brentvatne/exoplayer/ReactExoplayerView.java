@@ -238,7 +238,7 @@ class ReactExoplayerView extends FrameLayout implements
                             }
 
                             // Hide player controller if it's not allowed for ads
-                            if (isPlayingAd() && controls) {
+                            if (isPlayingAd() && controls && !controlsIMA) {
                                 playerControlView.hide();
                             }
                         }
