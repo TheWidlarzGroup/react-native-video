@@ -21,6 +21,7 @@ import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
@@ -217,29 +218,38 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private void checkLiveIndicator() {
+        themedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(player != null && playerControlView != null){
+                    TextView exo_duration_indicator = playerControlView.findViewById(R.id.exo_duration);
+                    TextView exo_live_indicator = playerControlView.findViewById(R.id.exo_duration_live);
+                    int oldLiveIndicatorVisibility = exo_live_indicator.getVisibility();
+                    int newLiveIndicatorVisibility = player.isCurrentMediaItemLive()? VISIBLE: GONE;
+
+                    // Toggle live indicator
+                    if(oldLiveIndicatorVisibility != newLiveIndicatorVisibility){
+                        exo_live_indicator.setVisibility(newLiveIndicatorVisibility);
+                        exo_duration_indicator.setVisibility(newLiveIndicatorVisibility == VISIBLE? GONE: VISIBLE);
+                        reLayout(playerControlView);
+                    }
+                }
+            }
+        });
+
+    }
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW_PROGRESS:
+                    checkLiveIndicator();
                     if (player != null) {
-                        if(playerControlView != null){
-                            TextView exo_duration = playerControlView.findViewById(R.id.exo_duration);
-                            TextView exo_live_indicator = playerControlView.findViewById(R.id.exo_duration_live);
-
-                            // Toggle live indicator based on player state
-                            if(player.isCurrentMediaItemLive()){
-                                exo_duration.setVisibility(GONE);
-                                exo_live_indicator.setVisibility(VISIBLE);
-                            }else{
-                                exo_duration.setVisibility(VISIBLE);
-                                exo_live_indicator.setVisibility(GONE);
-                            }
-
-                            // Hide player controller if it's not allowed for ads
-                            if (isPlayingAd() && controls) {
-                                playerControlView.hide();
-                            }
+                        // Hide player controller if it's not allowed for ads
+                        if(playerControlView != null && isPlayingAd() && controls) {
+                            playerControlView.hide();
                         }
 
                         long pos = player.getCurrentPosition();
