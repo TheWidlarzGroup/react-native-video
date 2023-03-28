@@ -60,6 +60,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
+    private var _videoEnded = false
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -71,6 +72,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
+    private var _adsCompleted = true
 
 #if canImport(RCTVideoCache)
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
@@ -221,6 +223,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _imaAdsManager.requestAds()
                 _didRequestAds = true
             }
+            self._videoEnded = false
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player),
@@ -236,6 +239,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setSrc(_ source:NSDictionary!) {
         DispatchQueue.global(qos: .default).async {
+            self._didRequestAds = false
+            self._adsCompleted = true
             self._source = VideoSource(source)
             if (self._source?.uri == nil || self._source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
@@ -357,6 +362,30 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         return AVPlayerItem(asset: mixComposition)
+    }
+    
+    func receivedAdEvent(event: IMAAdEvent) {
+        if self.onReceiveAdEvent != nil {
+            let type = _imaAdsManager.convertEventToString(event: event.type)
+
+            self.onReceiveAdEvent?([
+                "event": type,
+                "target": self.reactTag!
+            ]);
+            
+            if(event.type == .LOADED){
+                _adsCompleted = false
+            }
+            
+            if(event.type == .ALL_ADS_COMPLETED){
+                self._adsCompleted = true
+                
+                // Handle video end
+                if(_videoEnded){
+                    handleVideoFinished()
+                }
+            }
+        }
     }
 
     // MARK: - Prop setters
@@ -1091,21 +1120,26 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onPlaybackStalled?(["target": reactTag as Any])
         _playbackStalled = true
     }
-
-    @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
+    
+    func handleVideoFinished(){
         onVideoEnd?(["target": reactTag as Any])
-
-        if notification.object as? AVPlayerItem == _player?.currentItem {
-            _imaAdsManager.getAdsLoader()?.contentComplete()
-        }
-
         if _repeat {
-            let item:AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero, completionHandler: nil)
+            _playerItem!.seek(to: CMTime.zero, completionHandler: nil)
             self.applyModifiers()
         } else {
             self.setPaused(true);
             _playerObserver.removePlayerTimeObserver()
+        }
+    }
+
+    @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
+        self._videoEnded = true
+        let waitForAds = !self._adsCompleted && notification.object as? AVPlayerItem == _player?.currentItem
+        
+        if(waitForAds){
+            _imaAdsManager.getAdsLoader()?.contentComplete()
+        }else{
+            handleVideoFinished()
         }
     }
 
