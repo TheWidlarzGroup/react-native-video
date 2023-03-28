@@ -36,20 +36,11 @@ dependencies {
     implementation project(":AmazonFireTVAdsSDK-release")
 
     // ExoDoris
-    implementation("com.github.DiceTechnology.doris-android:doris:$exoDorisVersion") {
-        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    api ("com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion"){
+        exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
     }
-    implementation("com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion") {
-        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
-    }
-    implementation("com.github.DiceTechnology.doris-android:extension-audio-only:$exoDorisVersion") {
-        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
-    }
-    implementation("com.github.DiceTechnology.doris-android:extension-ima-dai:$exoDorisVersion") {
-        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
-    }
-    implementation("com.github.DiceTechnology.doris-android:extension-ima-csai:$exoDorisVersion") {
-        exclude group: "com.github.DiceTechnology", module: "dice-shield-android"
+    api ("com.github.DiceTechnology.doris-android:doris-custom-ui:$exoDorisVersion"){
+        exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
     }
 
     // Stetho
@@ -69,11 +60,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     implementation(project(':dice-shield-android')) {
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-common"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-core"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-dash"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-hls"
-        exclude group: "com.google.android.exoplayer", module: "exoplayer-ui"
+        exclude group: "com.google.android.exoplayer", module: "exoplayer"
     }
 
     implementation 'com.github.bumptech.glide:glide:4.13.0'
