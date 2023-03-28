@@ -497,6 +497,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
+    func isMuted() -> Bool {
+        return _muted
+    }
+
+    @objc
     func setMuted(_ muted:Bool) {
         _muted = muted
         applyModifiers()
