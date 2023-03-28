@@ -1425,6 +1425,9 @@ static int const RCTVideoUnset = -1;
     [_playerViewController addObserver:self forKeyPath:readyForDisplayKeyPath options:NSKeyValueObservingOptionNew context:nil];
     
     [_playerViewController.contentOverlayView addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
+    
+    _playerViewController.allowsPictureInPicturePlayback = _pictureInPicture;
+    
   }
 }
 
