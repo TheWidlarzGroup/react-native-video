@@ -74,6 +74,17 @@ Video with caching ([more info](docs/caching.md)):
 end
 ```
 
+#### Enable custom feature in podfile file
+
+##### Google IMA
+
+Google IMA is the google SDK to support Client Side Ads Integration (CSAI), see [google documentation](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side) for more informations.
+
+To enable google IMA usage define add following line in your podfile:
+```podfile
+$RNVideoUseGoogleIMA=true
+```
+
 </details>
 
 ### tvOS installation
