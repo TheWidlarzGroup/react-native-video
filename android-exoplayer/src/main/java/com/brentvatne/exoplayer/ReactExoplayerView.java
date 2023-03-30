@@ -165,6 +165,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private boolean enableMediaSession = false;
+    private MediaDescriptionCompat.Builder mediaSessionMetadata = new MediaDescriptionCompat.Builder();
     // \ End props
 
     // React
@@ -438,6 +439,12 @@ class ReactExoplayerView extends FrameLayout implements
                         mediaSession = new MediaSessionCompat(getContext(), TAG);
                         mediaSessionConnector = new MediaSessionConnector(mediaSession);
                         mediaSessionConnector.setPlayer(player);
+                        mediaSessionConnector.setQueueNavigator(new TimelineQueueNavigator(mediaSession) {
+                            @Override
+                            public MediaDescriptionCompat getMediaDescription(Player player, int windowIndex) {
+                            return mediaSessionMetadata.build();
+                            }
+                        });
                         mediaSession.setActive(true);
                     }
                 }
@@ -1318,6 +1325,11 @@ class ReactExoplayerView extends FrameLayout implements
     public void setEnableMediaSession(boolean enableMediaSession) {
       this.enableMediaSession = enableMediaSession;
     }
+
+    public void setMediaSessionTitle(String title) { this.mediaSessionMetadata.setTitle((title)); }
+    public void setMediaSessionSubtitle(String subtitle) { this.mediaSessionMetadata.setSubtitle((subtitle)); }
+    public void setMediaSessionDescription(String description) { this.mediaSessionMetadata.setDescription((description)); }
+    public void setMediaSessionImage(String uri) { this.mediaSessionMetadata.setMediaUri((Uri.parse(uri))); }
 
     public void setFullscreen(boolean fullscreen) {
         if (fullscreen == isFullscreen) {

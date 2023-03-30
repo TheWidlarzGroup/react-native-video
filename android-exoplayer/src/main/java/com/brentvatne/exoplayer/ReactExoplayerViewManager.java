@@ -71,6 +71,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ENABLE_MEDIA_SESSION = "enableMediaSession";
+    private static final String PROP_MEDIA_SESSION_METADATA = "mediaSessionMetadata";
 
     private ReactExoplayerConfig config;
 
@@ -318,6 +319,21 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_ENABLE_MEDIA_SESSION, defaultBoolean = false)
     public void setEnabledMediaSession(final ReactExoplayerView videoView, final boolean enableMediaSession) {
       videoView.setEnableMediaSession(enableMediaSession);
+    }
+
+    @ReactProp(name = PROP_MEDIA_SESSION_METADATA, defaultBoolean = false)
+    public void setMediaSessionMetadata(final ReactExoplayerView videoView, @Nullable ReadableMap mediaSessionMetadata) {
+      if (mediaSessionMetadata == null) return;
+
+      String title = mediaSessionMetadata.getString("title");
+      String subtitle = mediaSessionMetadata.getString("subtitle");
+      String description = mediaSessionMetadata.getString("description");
+      String imageUri = mediaSessionMetadata.getString("imageUri");
+
+      if (title != null) { videoView.setMediaSessionTitle(title); }
+      if (subtitle != null) { videoView.setMediaSessionSubtitle(subtitle); }
+      if (description != null) { videoView.setMediaSessionDescription(description); }
+      if (imageUri != null) { videoView.setMediaSessionImage(imageUri); }
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)

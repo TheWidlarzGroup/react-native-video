@@ -473,6 +473,12 @@ Video.propTypes = {
   disableFocus: PropTypes.bool,
   controls: PropTypes.bool,
   enableMediaSession: PropTypes.bool,
+  mediaSessionMetadata: PropTypes.shape({
+    title: PropTypes.string,
+    subtitle: PropTypes.string,
+    description: PropTypes.string,
+    imageUri: PropTypes.string,
+  }),
   audioOnly: PropTypes.bool,
   currentTime: PropTypes.number,
   fullscreenAutorotate: PropTypes.bool,
