@@ -13,7 +13,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
 
-    private var _playerViewController:RCTVideoPlayerViewController?
+    public var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
 
     /* DRM */
@@ -61,6 +61,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
     private var _videoEnded = false
+    private var _wrapperViewController: UIViewController = UIViewController()
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -650,8 +651,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
 
             // Set presentation style to fullscreen
-            _playerViewController?.removeFromParent()
-            _playerViewController?.modalPresentationStyle = .fullScreen
+            _wrapperViewController.modalPresentationStyle = .fullScreen
             
             // Find the nearest view controller
             var viewController:UIViewController! = self.firstAvailableUIViewController()
@@ -671,7 +671,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
 
                 if let playerViewController = _playerViewController {
-                    viewController.present(playerViewController, animated:true, completion:{
+                    _wrapperViewController.removeFromParent()
+                    viewController.present(_wrapperViewController, animated:true, completion:{
                         self._playerViewController?.showsPlaybackControls = self._controls
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
                         self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
@@ -679,8 +680,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             }
         } else if !fullscreen && _fullscreenPlayerPresented, let _playerViewController = _playerViewController {
-            videoPlayerViewControllerWillDismiss(playerViewController: _playerViewController)
-            _presentingViewController?.dismiss(animated: true, completion:{
+            _presentingViewController?.dismiss(animated: false, completion:{
                 self.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
             })
         }
@@ -701,24 +701,37 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerViewController?.preferredOrientation = orientation
         }
     }
+    
+    func resetWrapperViewController() -> UIViewController{
+        // Clean wrapper
+        _wrapperViewController.removeFromParent()
+        
+        for viewContoller in _wrapperViewController.children{
+            viewContoller.willMove(toParent: nil)
+            viewContoller.view.removeFromSuperview()
+            viewContoller.removeFromParent()
+        }
+        
+        // Init wrapper
+        _wrapperViewController.view.frame = self.bounds
+        self.addSubview(_wrapperViewController.view)
+        return _wrapperViewController
+    }
 
     func usePlayerViewController() {
         guard let _player = _player, let _playerItem = _playerItem else { return }
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player:_player, withPlayerItem:_playerItem)
+            let wrapperController = resetWrapperViewController()
+            wrapperController.addChild(_playerViewController!)
+            wrapperController.view.addSubview(_playerViewController!.view)
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
 
         guard let _playerViewController = _playerViewController else { return }
-
-        if _controls {
-            let viewController:UIViewController! = self.reactViewController()
-            viewController?.addChild(_playerViewController)
-            self.addSubview(_playerViewController.view)
-        }
 
         _playerObserver.playerViewController = _playerViewController
     }
@@ -801,10 +814,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _playerViewController == playerViewController && _fullscreenPlayerPresented {
             _fullscreenPlayerPresented = false
             _presentingViewController = nil
-            _playerViewController = nil
-            _playerObserver.playerViewController = nil
-            self.applyModifiers()
-
+            _wrapperViewController.modalPresentationStyle = .automatic
+            self.addSubview(_wrapperViewController.view)
             onVideoFullscreenPlayerDidDismiss?(["target": reactTag as Any])
         }
     }
@@ -888,11 +899,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     override func layoutSubviews() {
         super.layoutSubviews()
         if _controls, let _playerViewController = _playerViewController {
-            _playerViewController.view.frame = bounds
+            let newBounds = _fullscreenPlayerPresented ? UIScreen.main.bounds: bounds
+            _wrapperViewController.view.frame = newBounds
+            _playerViewController.view.frame = newBounds
+            
+            // Adjust all children of wrapperView
+            for viewContoller in _wrapperViewController.children {
+                viewContoller.view.frame = newBounds
+            }
 
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
-                subview.frame = bounds
+                subview.frame = newBounds
             }
         } else {
             CATransaction.begin()
@@ -1115,7 +1133,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if newRect!.equalTo(UIScreen.main.bounds) {
                 RCTLog("in fullscreen")
 
-                self.reactViewController().view.frame = UIScreen.main.bounds
+                self.reactViewController().view.frame = newRect!
                 self.reactViewController().view.setNeedsLayout()
             } else {NSLog("not fullscreen")}
         }
