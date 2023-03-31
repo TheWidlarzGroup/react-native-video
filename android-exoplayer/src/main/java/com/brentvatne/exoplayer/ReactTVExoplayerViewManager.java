@@ -163,7 +163,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     protected ReactTVExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
         currentSrcUrls.evictAll();
         ThemedReactContext context = new ThemedReactContext(reactApplicationContext, new ContextThemeWrapper(themedReactContext, R.style.DceTVPlayerTheme));
-        return new ReactTVExoplayerView(context);
+        ReactTVExoplayerView reactTVExoplayerView = new ReactTVExoplayerView(context);
+        reactTVExoplayerView.setKeepScreenOn(true);
+        return reactTVExoplayerView;
     }
 
     @Override
