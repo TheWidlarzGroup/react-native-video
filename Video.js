@@ -520,6 +520,7 @@ Video.propTypes = {
   disableBuffering: PropTypes.bool,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
+  audioOutput: PropTypes.oneOf(['earpiece', 'speaker']),
   currentTime: PropTypes.number,
   fullscreenAutorotate: PropTypes.bool,
   fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),

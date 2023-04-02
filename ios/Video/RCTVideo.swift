@@ -35,6 +35,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _controls:Bool = false
 
     /* Keep track of any modifiers, need to be applied after each play */
+    private var _audioOutput: String = "speaker"
     private var _volume:Float = 1.0
     private var _rate:Float = 1.0
     private var _maxBitRate:Float?
@@ -513,6 +514,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setMuted(_ muted:Bool) {
         _muted = muted
         applyModifiers()
+    }
+
+    @objc
+    func setAudioOutput(_ audioOutput:String) {
+        _audioOutput = audioOutput
+        do {
+            if audioOutput == "speaker" {
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+            } else if audioOutput == "earpiece" {
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
+            }
+        } catch {
+            print("Error occurred: \(error.localizedDescription)")
+        }
     }
 
     @objc

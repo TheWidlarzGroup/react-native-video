@@ -294,6 +294,7 @@ var styles = StyleSheet.create({
 | [adTagUrl](#adTagUrl)                                                               | Android, iOS              |
 | [allowsExternalPlayback](#allowsexternalplayback)                                   | iOS                       |
 | [audioOnly](#audioonly)                                                             | All                       |
+| [audioOutput](#audioOutput)                                                         | Android, iOS              |
 | [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)       | iOS                       |
 | [backBufferDurationMs](#backBufferDurationMs)                                       | Android                   |
 | [bufferConfig](#bufferconfig)                                                       | Android                   |
@@ -416,6 +417,13 @@ Indicates whether the player should only play the audio track and instead of dis
 For this to work, the poster prop must be set.
 
 Platforms: all
+
+#### audioOutput
+Changes the audio output.
+* **speaker (default)** - plays through speaker
+* **earpiece** - plays through earpiece
+
+Platforms: Android, iOS
 
 #### automaticallyWaitsToMinimizeStalling
 A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later

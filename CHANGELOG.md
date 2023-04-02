@@ -1,5 +1,7 @@
 ## Changelog
 
+- Feature: playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+
 ### Version 6.0.0-alpha.5
 
 - iOS: ensure controls are not displayed when disabled by user [#3017](https://github.com/react-native-video/react-native-video/pull/3017)
