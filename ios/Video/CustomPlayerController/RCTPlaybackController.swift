@@ -12,22 +12,40 @@ import AVKit
 
 class RCTPlaybackController: UIView {
     private var playerItemContext = 0
-    private var _player: AVPlayer? = nil
     private var timeObserverToken: Any?
-    private var _playerItem:AVPlayerItem?
+    private var _video: RCTVideo?
+    
+    private var _player : AVPlayer? {
+        return self._video?._player
+    }
+    
+    private var _playerItem : AVPlayerItem? {
+        return self._video?._playerItem
+    }
     
     var isPlaying: Bool {
-        return _player?.rate != 0 && _player?.error == nil
+        return self._video?._player?.rate != 0 && _player?.error == nil
     }
+    
+    var isFullscreen: Bool {
+        return self._video?._fullscreenPlayerPresented == true
+    }
+    
     var isTracking: Bool = false
     var isSeeking: Bool = false
     
     private var seekBar: UISlider = {
         let bar = UISlider()
-        bar.minimumTrackTintColor = .red
-        bar.maximumTrackTintColor = .white
         bar.value = 0.0
         bar.isContinuous = true
+        
+        // Styling
+        bar.minimumTrackTintColor = .red
+        bar.maximumTrackTintColor = .darkGray
+        bar.thumbTintColor = .red
+        
+    
+        // Listeners
         bar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
         return bar
     }()
@@ -53,6 +71,9 @@ class RCTPlaybackController: UIView {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        stackView.spacing = 10
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
         return stackView
     }()
     
@@ -61,25 +82,32 @@ class RCTPlaybackController: UIView {
         stackView.axis  = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill
-        stackView.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.backgroundColor = UIColor.red.withAlphaComponent(0.2)
-        
         return stackView
     }()
     
     var playButton: UIButton = {
         let button = UIButton()
+        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.setImage(UIImage(systemName: "pause.fill"), for: .selected)
+        button.tintColor = .white
         
-        let bundle = Bundle(for: RCTPlaybackController.self)
-        button.setImage(UIImage(named: "play-solid", in:bundle, with: nil), for: .normal)
-        button.setImage(UIImage(named: "play-solid"), for: .selected)
-
-        button.setTitle("Play", for: .normal)
-        button.setTitle("Pause", for: .selected)
-        
+        // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        return button
+    }()
+    
+    var fullscreenButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "plus.square.fill"), for: .normal)
+        button.setImage(UIImage(systemName: "minus.square.fill"), for: .selected)
+        button.tintColor = .white
         
+        // Width constraint
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
         return button
     }()
     
@@ -87,32 +115,45 @@ class RCTPlaybackController: UIView {
         let label = UILabel()
         label.text = "--:--"
         label.textColor = UIColor.white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Width constraint
+        label.addConstraint(NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
+        label.lineBreakMode = .byClipping
         return label
     }()
+    
     
     var durTimeLabel: UILabel = {
         let label = UILabel()
         label.text = "--:--"
         label.textColor = UIColor.white
+        
+        // Width constraint
+        label.addConstraint(NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
+        label.lineBreakMode = .byClipping
         return label
     }()
     
-    init(playerItem: AVPlayerItem!, player: AVPlayer?) {
+    init(video: RCTVideo) {
+        self._video = video
         super.init(frame: .zero)
         self.clearPlayerListeners()
-        self._playerItem = playerItem
-        self._player = player
-
+    
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
+        
+        fullscreenButton.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
         
         mainControlStack.addArrangedSubview(playButton)
         mainControlStack.addArrangedSubview(curTimeLabel)
         mainControlStack.addArrangedSubview(self.seekBar)
         mainControlStack.addArrangedSubview(durTimeLabel)
+        mainControlStack.addArrangedSubview(fullscreenButton)
     
         let filler = UIView()
         mainStack.addArrangedSubview(filler)
         mainStack.addArrangedSubview(mainControlStack)
+        
         self.addSubview(self.mainStack)
         self.addPlayerListeners()
     }
@@ -124,7 +165,7 @@ class RCTPlaybackController: UIView {
     func manualSeekToProgress(seconds: Float){
         self.isSeeking = true
         let seekTime = CMTime(value: CMTimeValue(seconds), timescale: 1)
-        _playerItem?.seek(
+        self._playerItem?.seek(
             to: seekTime,
             toleranceBefore: CMTimeMake(value: 1,timescale: 1),
             toleranceAfter: CMTimeMake(value: 1,timescale: 1)
@@ -132,7 +173,6 @@ class RCTPlaybackController: UIView {
             guard let `self` = self else { return }
             self.isSeeking = false
         }
-        
         print("Seeking to time(s): \(seconds)")
     }
     
@@ -144,11 +184,12 @@ class RCTPlaybackController: UIView {
                     curTimeLabel.alpha = 0.4
                     self.isTracking = true
                     break
+
                 case .moved:
                     // handle drag moved
                     self.updateCurrentTime(seconds: slider.value)
                     break
-                    
+
                 case .ended:
                     // End slider interaction
                     curTimeLabel.alpha = 1
@@ -171,12 +212,12 @@ class RCTPlaybackController: UIView {
         var outputString = ""
         
         if(seconds > 3600){
-            let h1 = String(format: "%02d", secondsInt / 3600)
+            let h1 = numToString(myInt: secondsInt / 3600)
             outputString = "\(h1):"
         }
         
-        let m1 = String(format: "%02d", (secondsInt % 3600) / 60)
-        let s1 = String(format: "%02d", (secondsInt % 3600) % 60)
+        let m1 = numToString(myInt: (secondsInt % 3600) / 60)
+        let s1 = numToString(myInt: (secondsInt % 3600) % 60)
         outputString.append("\(m1):\(s1)")
         
         return outputString
@@ -184,6 +225,7 @@ class RCTPlaybackController: UIView {
     
     @objc func updateUi(){
         playButton.isSelected = isPlaying
+        fullscreenButton.isSelected = isFullscreen
     }
     
     @objc func togglePaused(){
@@ -192,6 +234,15 @@ class RCTPlaybackController: UIView {
             _player.pause()
         }else{
             _player.play()
+        }
+        updateUi()
+    }
+    
+    @objc func toggleFullscreen(){
+        if(isFullscreen){
+            _video?.setFullscreen(false)
+        }else{
+            _video?.setFullscreen(true)
         }
         updateUi()
     }
@@ -207,6 +258,7 @@ class RCTPlaybackController: UIView {
     func numToString(myInt: Int) -> String{
         return String(format: "%02d", myInt)
     }
+    
     func updateCurrentTime(seconds: Float){
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
@@ -222,7 +274,7 @@ class RCTPlaybackController: UIView {
             var duration:CMTime? = self?._player?.currentItem?.asset.duration
             
             let progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-            let durationFloat: Float = Float(CMTimeGetSeconds(duration!)) ?? progressFloat
+            let durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
             
             self?.seekBar.minimumValue = 0
             self?.seekBar.maximumValue = durationFloat
@@ -236,7 +288,7 @@ class RCTPlaybackController: UIView {
         }
         
         // Register as an observer of the player item's status property
-        _playerItem?.addObserver(self,
+        self._playerItem?.addObserver(self,
            forKeyPath: #keyPath(AVPlayerItem.status),
            options: [.old, .new],
            context: &playerItemContext)

@@ -7,8 +7,8 @@ import Promises
 
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
-    private var _player:AVPlayer?
-    private var _playerItem:AVPlayerItem?
+    public var _player:AVPlayer?
+    public var _playerItem:AVPlayerItem?
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
@@ -57,7 +57,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _fullscreen:Bool = false
     private var _fullscreenAutorotate:Bool = true
     private var _fullscreenOrientation:String! = "all"
-    private var _fullscreenPlayerPresented:Bool = false
+    public var _fullscreenPlayerPresented:Bool = false
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
@@ -728,7 +728,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _wrapperViewController.addChild(_playerViewController!)
             _wrapperViewController.view.addSubview(_playerViewController!.view)
             
-            _rctPlaybackControls = RCTPlaybackController(playerItem: _playerItem, player: _player)
+            _rctPlaybackControls = RCTPlaybackController(video: self)
 
             //wrapperViewController.view.
             _wrapperViewController.view.backgroundColor = UIColor.blue
