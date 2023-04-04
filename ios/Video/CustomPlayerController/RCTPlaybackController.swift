@@ -19,19 +19,16 @@ class RCTPlaybackController: UIView {
     var isPlaying: Bool {
         return _player?.rate != 0 && _player?.error == nil
     }
+    var isTracking: Bool = false
+    var isSeeking: Bool = false
     
-    private var progressBar: UISlider = {
+    private var seekBar: UISlider = {
         let bar = UISlider()
         bar.minimumTrackTintColor = .red
         bar.maximumTrackTintColor = .white
         bar.value = 0.0
-        bar.isContinuous = false
-        bar.addTarget(self, action: #selector(handleSliderChange), for: .valueChanged)
-//        self.progressBarHighlightedObserver = bar.observe(\UISlider.isTracking, options: [.old, .new]) { (_, change) in
-//            if let newValue = change.newValue {
-//                self.didChangeProgressBarDragging?(newValue, bar.value)
-//            }
-//        }
+        bar.isContinuous = true
+        bar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
         return bar
     }()
     
@@ -110,7 +107,7 @@ class RCTPlaybackController: UIView {
         
         mainControlStack.addArrangedSubview(playButton)
         mainControlStack.addArrangedSubview(curTimeLabel)
-        mainControlStack.addArrangedSubview(self.progressBar)
+        mainControlStack.addArrangedSubview(self.seekBar)
         mainControlStack.addArrangedSubview(durTimeLabel)
     
         let filler = UIView()
@@ -124,28 +121,65 @@ class RCTPlaybackController: UIView {
         super.init(coder: aDecoder)
     }
     
-    @objc func handleSliderChange() {
-        guard let duration = _player?.currentItem?.duration else { return }
-        let value = Float64(progressBar.value)// * CMTimeGetSeconds(duration)
-        let seekTime = CMTime(value: CMTimeValue(value), timescale: 1)
-        _playerItem?.seek(to: seekTime )
-        print("seeking to time(s): \(value)")
+    func manualSeekToProgress(seconds: Float){
+        self.isSeeking = true
+        let seekTime = CMTime(value: CMTimeValue(seconds), timescale: 1)
+        _playerItem?.seek(
+            to: seekTime,
+            toleranceBefore: CMTimeMake(value: 1,timescale: 1),
+            toleranceAfter: CMTimeMake(value: 1,timescale: 1)
+        ){ [weak self] _ in
+            guard let `self` = self else { return }
+            self.isSeeking = false
+        }
+        
+        print("Seeking to time(s): \(seconds)")
     }
     
-    func secondsToHoursMinutesSeconds(_ seconds: Int) -> (Int, String, Int, String, Int, String) {
-        let h = seconds / 3600
-        let h1 = String(format: "%02d", h)
-        let m = (seconds % 3600) / 60
-        let m1 = String(format: "%02d", m)
-        let s = (seconds % 3600) % 60
-        let s1 = String(format: "%02d", s)
+    @objc func onSeekbarChange(slider: UISlider, event: UIEvent) {
+        if let touchEvent = event.allTouches?.first {
+                switch touchEvent.phase {
+                case .began:
+                    // Start slider interaction
+                    curTimeLabel.alpha = 0.4
+                    self.isTracking = true
+                    break
+                case .moved:
+                    // handle drag moved
+                    self.updateCurrentTime(seconds: slider.value)
+                    break
+                    
+                case .ended:
+                    // End slider interaction
+                    curTimeLabel.alpha = 1
+                    self.isTracking = false
+                    
+                    //Seek to slider value
+                    guard let duration = _player?.currentItem?.duration else { return }
+                    manualSeekToProgress(seconds: Float(slider.value))
+                    break
+                default:
+                    break
+                }
+            }
         
         
+    }
+    
+    func secondsToTimeLabel(_ seconds: Float) -> String {
+        let secondsInt = Int(seconds)
+        var outputString = ""
         
-        String(format: "%02d", m)
-        String(format: "%02d", s)
+        if(seconds > 3600){
+            let h1 = String(format: "%02d", secondsInt / 3600)
+            outputString = "\(h1):"
+        }
         
-        return (h, h1, m, m1, s, s1)
+        let m1 = String(format: "%02d", (secondsInt % 3600) / 60)
+        let s1 = String(format: "%02d", (secondsInt % 3600) % 60)
+        outputString.append("\(m1):\(s1)")
+        
+        return outputString
     }
     
     @objc func updateUi(){
@@ -173,22 +207,12 @@ class RCTPlaybackController: UIView {
     func numToString(myInt: Int) -> String{
         return String(format: "%02d", myInt)
     }
-    func updateCurrentTime(seconds: Int){
-        let (h, h1, m, m1, s, s1) = secondsToHoursMinutesSeconds(seconds)
-        if(h>0){
-            self.curTimeLabel.text = "\(h1):\(m1):\(s1)"
-        }else{
-            self.curTimeLabel.text = "\(m1):\(s1)"
-        }
+    func updateCurrentTime(seconds: Float){
+        self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
-    func updateDurationTime(seconds: Int){
-        let (h, h1, m, m1, s, s1) = secondsToHoursMinutesSeconds(seconds)
-        if(h>0){
-            self.durTimeLabel.text = "\(h1):\(m1):\(s1)"
-        }else{
-            self.durTimeLabel.text = "\(m1):\(s1)"
-        }
+    func updateDurationTime(seconds: Float){
+        self.durTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
     func addPlayerListeners(){
@@ -200,13 +224,15 @@ class RCTPlaybackController: UIView {
             let progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
             let durationFloat: Float = Float(CMTimeGetSeconds(duration!)) ?? progressFloat
             
-            self?.progressBar.minimumValue = 0
-            self?.progressBar.maximumValue = durationFloat
-            self?.progressBar.setValue(progressFloat, animated: true)
-            //print(" ----- progressBar: \(progressFloat)/\(durationFloat)")
+            self?.seekBar.minimumValue = 0
+            self?.seekBar.maximumValue = durationFloat
+            
 
-            self!.updateCurrentTime(seconds: Int(progressFloat.rounded()))
-            self!.updateDurationTime(seconds: Int(durationFloat.rounded()))
+            if(self!.isTracking == false && !self!.isSeeking){
+                self?.seekBar.setValue(progressFloat, animated: true)
+                self!.updateCurrentTime(seconds: progressFloat)
+                self!.updateDurationTime(seconds: durationFloat)
+            }
         }
         
         // Register as an observer of the player item's status property
