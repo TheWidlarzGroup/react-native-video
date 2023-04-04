@@ -15,6 +15,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     public var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
+    private var _rctPlaybackControls: RCTPlaybackController?
 
     /* DRM */
     private var _drm:DRMParams?
@@ -723,9 +724,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player:_player, withPlayerItem:_playerItem)
-            let wrapperController = resetWrapperViewController()
-            wrapperController.addChild(_playerViewController!)
-            wrapperController.view.addSubview(_playerViewController!.view)
+            resetWrapperViewController()
+            _wrapperViewController.addChild(_playerViewController!)
+            _wrapperViewController.view.addSubview(_playerViewController!.view)
+            
+            _rctPlaybackControls = RCTPlaybackController(playerItem: _playerItem, player: _player)
+
+            //wrapperViewController.view.
+            _wrapperViewController.view.backgroundColor = UIColor.blue
+            _wrapperViewController.view.addSubview(_rctPlaybackControls!)
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
@@ -907,6 +914,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             for viewContoller in _wrapperViewController.children {
                 viewContoller.view.frame = newBounds
             }
+            _rctPlaybackControls!.frame = newBounds
 
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
