@@ -14,6 +14,7 @@ class RCTPlaybackController: UIView {
     private var playerItemContext = 0
     private var timeObserverToken: Any?
     private var _video: RCTVideo?
+    private var visibilityTimer: Timer?
     
     private var _player : AVPlayer? {
         return self._video?._player
@@ -43,12 +44,38 @@ class RCTPlaybackController: UIView {
         bar.minimumTrackTintColor = .red
         bar.maximumTrackTintColor = .darkGray
         bar.thumbTintColor = .red
-        
-    
-        // Listeners
-        bar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
         return bar
     }()
+    
+    func invalidateControlsTimer(){
+        visibilityTimer?.invalidate()
+    }
+    
+    func resetControlsTimer() {
+        invalidateControlsTimer()
+        visibilityTimer = Timer.scheduledTimer(timeInterval: 4.0, target: self, selector: #selector(hideControls), userInfo: nil, repeats: false)
+    }
+    
+    @objc func hideControls() {
+        toggleControlVisibility(visible: false)
+    }
+    
+    @objc func showControls() {
+        toggleControlVisibility(visible: true)
+    }
+    
+    @objc func toggleControlVisibility(visible: Bool) {
+        let alpha : CGFloat = visible ? 1.0: 0.0
+        let opacity : Float = visible ? 1.0: 0.0
+        UIView.animate(withDuration: 0.2) {
+            self.bottomControlStack.alpha = alpha
+            self.topControlStack.alpha = alpha
+            self.gradienceLayer.opacity = opacity
+        }
+        topControlStack.isUserInteractionEnabled = visible
+        bottomControlStack.isUserInteractionEnabled = visible
+        resetControlsTimer()
+    }
     
     override func layoutSubviews(){
         super.layoutSubviews()
@@ -56,7 +83,10 @@ class RCTPlaybackController: UIView {
         // also adjust all subviews of contentOverlayView
         for subview in subviews ?? [] {
             subview.frame = bounds
-            subview.backgroundColor = UIColor.red.withAlphaComponent(0.2)
+        }
+        
+        for layer in mainStack.layer.sublayers ?? []{
+            gradienceLayer.frame = bounds
         }
         
         NSLayoutConstraint.activate([
@@ -67,13 +97,44 @@ class RCTPlaybackController: UIView {
         ])
     }
     
-    var mainControlStack: UIStackView = {
+    var gradienceLayer: CAGradientLayer = {
+        let gradient: CAGradientLayer = CAGradientLayer()
+
+        gradient.colors = [
+            UIColor.black.cgColor,
+            UIColor.black.withAlphaComponent(0.7),
+            UIColor.black.withAlphaComponent(0),
+            UIColor.black.withAlphaComponent(0.7),
+            UIColor.black.cgColor
+        ]
+        
+        gradient.locations = [0.0, 0.3, 0.5, 0.7, 1.0]
+        gradient.startPoint = CGPoint(x : 0.0, y : 0)
+        gradient.endPoint = CGPoint(x :0.0, y: 1.0)
+        gradient.opacity = 0
+        
+        return gradient
+    }()
+    
+    var topControlStack: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         stackView.spacing = 10
         stackView.isLayoutMarginsRelativeArrangement = true
         stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+        return stackView
+    }()
+    
+    var bottomControlStack: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.spacing = 10
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        stackView.alpha = 0
         return stackView
     }()
     
@@ -83,7 +144,7 @@ class RCTPlaybackController: UIView {
         stackView.alignment = .fill
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.backgroundColor = UIColor.red.withAlphaComponent(0.2)
+//        stackView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         return stackView
     }()
     
@@ -108,6 +169,20 @@ class RCTPlaybackController: UIView {
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        return button
+    }()
+    
+    var fullscreenButtonTop: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "plus.square.fill"), for: .normal)
+        button.setImage(UIImage(systemName: "minus.square.fill"), for: .selected)
+        button.tintColor = .white
+        
+        // Width constraint
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
         return button
     }()
     
@@ -135,27 +210,59 @@ class RCTPlaybackController: UIView {
         return label
     }()
     
-    init(video: RCTVideo) {
-        self._video = video
-        super.init(frame: .zero)
-        self.clearPlayerListeners()
+    func initTopControls(){
+        topControlStack.addArrangedSubview(UIView())
+        topControlStack.addArrangedSubview(fullscreenButtonTop)
+        
+        fullscreenButtonTop.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
+    }
     
+    func initBottomControls(){
+        bottomControlStack.addArrangedSubview(playButton)
+        bottomControlStack.addArrangedSubview(curTimeLabel)
+        bottomControlStack.addArrangedSubview(seekBar)
+        bottomControlStack.addArrangedSubview(durTimeLabel)
+        bottomControlStack.addArrangedSubview(fullscreenButton)
+        
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
         
         fullscreenButton.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
         
-        mainControlStack.addArrangedSubview(playButton)
-        mainControlStack.addArrangedSubview(curTimeLabel)
-        mainControlStack.addArrangedSubview(self.seekBar)
-        mainControlStack.addArrangedSubview(durTimeLabel)
-        mainControlStack.addArrangedSubview(fullscreenButton)
+        // Listeners
+        seekBar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
+    }
     
-        let filler = UIView()
-        mainStack.addArrangedSubview(filler)
-        mainStack.addArrangedSubview(mainControlStack)
+    func initGestures(){
+        let gesture:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showControls))
+        gesture.numberOfTapsRequired = 1
+        gesture.cancelsTouchesInView = false
         
+        mainStack.addGestureRecognizer(gesture)
+    }
+    
+    init(video: RCTVideo) {
+        self._video = video
+        super.init(frame: .zero)
+        //self.backgroundColor = UIColor.green.withAlphaComponent(1)
+        self.clearPlayerListeners()
+        resetControlsTimer()
+
+        self.initTopControls()
+        self.initBottomControls()
+        
+        // Add components to main stack
+        mainStack.layer.addSublayer(gradienceLayer)
+        mainStack.addArrangedSubview(topControlStack)
+        mainStack.addArrangedSubview(UIView())
+        mainStack.addArrangedSubview(bottomControlStack)
+        mainStack.isUserInteractionEnabled = true
         self.addSubview(self.mainStack)
+        
+        self.initGestures()
         self.addPlayerListeners()
+        
+        // Display playback controls
+        self.toggleControlVisibility(visible: true)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -183,6 +290,7 @@ class RCTPlaybackController: UIView {
                     // Start slider interaction
                     curTimeLabel.alpha = 0.4
                     self.isTracking = true
+                    invalidateControlsTimer()
                     break
 
                 case .moved:
@@ -192,6 +300,7 @@ class RCTPlaybackController: UIView {
 
                 case .ended:
                     // End slider interaction
+                    resetControlsTimer()
                     curTimeLabel.alpha = 1
                     self.isTracking = false
                     

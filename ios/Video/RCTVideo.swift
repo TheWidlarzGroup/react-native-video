@@ -387,6 +387,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     handleVideoFinished()
                 }
             }
+            
+            if(event.type == .CLICKED){
+//                _rctPlaybackControls?.toggleControlVisibility(visible: true)
+            }
         }
     }
 
@@ -674,7 +678,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if let playerViewController = _playerViewController {
                     _wrapperViewController.removeFromParent()
                     viewController.present(_wrapperViewController, animated:true, completion:{
-                        self._playerViewController?.showsPlaybackControls = self._controls
+                        self._playerViewController?.showsPlaybackControls = false
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
                         self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
                     })
@@ -703,6 +707,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
     
+    @objc func togglePlaybackController(){
+        _rctPlaybackControls?.toggleControlVisibility(visible: true)
+    }
+    
     func resetWrapperViewController() -> UIViewController{
         // Clean wrapper
         _wrapperViewController.removeFromParent()
@@ -727,12 +735,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             resetWrapperViewController()
             _wrapperViewController.addChild(_playerViewController!)
             _wrapperViewController.view.addSubview(_playerViewController!.view)
-            
+
             _rctPlaybackControls = RCTPlaybackController(video: self)
 
-            //wrapperViewController.view.
-            _wrapperViewController.view.backgroundColor = UIColor.blue
+            _rctPlaybackControls?.translatesAutoresizingMaskIntoConstraints = false
             _wrapperViewController.view.addSubview(_rctPlaybackControls!)
+
+            _rctPlaybackControls?.topAnchor.constraint(equalTo: _wrapperViewController.view.topAnchor).isActive = true
+            _rctPlaybackControls?.bottomAnchor.constraint(equalTo: _wrapperViewController.view.bottomAnchor).isActive = true
+            _rctPlaybackControls?.leftAnchor.constraint(equalTo: _wrapperViewController.view.leftAnchor).isActive = true
+            _rctPlaybackControls?.rightAnchor.constraint(equalTo: _wrapperViewController.view.rightAnchor).isActive = true
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
@@ -745,7 +757,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
-        viewController.showsPlaybackControls = self._controls
+        viewController.showsPlaybackControls = false
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
