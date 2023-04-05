@@ -77,6 +77,10 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     // MARK: - IMAAdsManagerDelegate
 
     func adsManager(_ adsManager: IMAAdsManager, didReceive event: IMAAdEvent) {
+        // Mute ad if the main player is muted
+        if (_video.isMuted()) {
+            adsManager.volume = 0;
+        }
         // Play each ad once it has been loaded
         if event.type == IMAAdEventType.LOADED {
             adsManager.start()
