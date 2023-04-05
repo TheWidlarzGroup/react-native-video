@@ -6,7 +6,6 @@
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
-    "test": "",
     "repository": {
         "type": "git",
         "url": "git@github.com:react-native-video/react-native-video.git"
@@ -25,7 +24,8 @@
     },
     "scripts": {
         "lint": "yarn eslint .",
-        "xbasic": "yarn --cwd examples/basic"
+        "xbasic": "yarn --cwd examples/basic",
+        "test": "echo no test available"
     },
     "files": [
         "android",
