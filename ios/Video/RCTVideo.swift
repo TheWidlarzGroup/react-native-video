@@ -1,7 +1,9 @@
 import AVFoundation
 import AVKit
 import Foundation
+#if USE_GOOGLE_IMA
 import GoogleInteractiveMediaAds
+#endif
 import React
 import Promises
 
@@ -63,11 +65,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     /* IMA Ads */
     private var _adTagUrl:String?
+#if USE_GOOGLE_IMA
     private var _imaAdsManager: RCTIMAAdsManager!
-    private var _didRequestAds:Bool = false
-    private var _adPlaying:Bool = false
     /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
     private var _contentPlayhead: IMAAVPlayerContentPlayhead?
+#endif
+    private var _didRequestAds:Bool = false
+    private var _adPlaying:Bool = false
 
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
@@ -107,8 +111,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-
+#if USE_GOOGLE_IMA
         _imaAdsManager = RCTIMAAdsManager(video: self)
+#endif
 
         _eventDispatcher = eventDispatcher
 
@@ -147,8 +152,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-
+#if USE_GOOGLE_IMA
         _imaAdsManager = RCTIMAAdsManager(video: self)
+#endif
     }
 
     deinit {
@@ -220,10 +226,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if currentTimeSecs >= 0 {
+#if USE_GOOGLE_IMA
             if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
                 _imaAdsManager.requestAds()
                 _didRequestAds = true
             }
+#endif
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
@@ -311,13 +319,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
                     }
 
+#if USE_GOOGLE_IMA
                     if self._adTagUrl != nil {
                         // Set up your content playhead and contentComplete callback.
                         self._contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: self._player!)
 
                         self._imaAdsManager.setUpAdsLoader()
                     }
-
+#endif
                     //Perform on next run loop, otherwise onVideoLoadStart is nil
                     self.onVideoLoadStart?([
                         "src": [
@@ -428,7 +437,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setPaused(_ paused:Bool) {
         if paused {
             if _adPlaying {
+#if USE_GOOGLE_IMA
                 _imaAdsManager.getAdsManager()?.pause()
+#endif
             } else {
                 _player?.pause()
                 _player?.rate = 0.0
@@ -437,7 +448,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
 
             if _adPlaying {
+#if USE_GOOGLE_IMA
                 _imaAdsManager.getAdsManager()?.resume()
+#endif
             } else {
                 if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
                     _player?.playImmediately(atRate: _rate)
@@ -450,15 +463,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         _paused = paused
-    }
-
-    @objc
-    func setCurrentTime(_ currentTime:Float) {
-        let info:NSDictionary = [
-            "time": NSNumber(value: currentTime),
-            "tolerance": NSNumber(value: 100)
-        ]
-        setSeek(info)
     }
 
     @objc
@@ -498,6 +502,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setRate(_ rate:Float) {
         _rate = rate
         applyModifiers()
+    }
+
+    @objc
+    func isMuted() -> Bool {
+        return _muted
     }
 
     @objc
@@ -840,11 +849,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setAdTagUrl(_ adTagUrl:String!) {
         _adTagUrl = adTagUrl
     }
-
+#if USE_GOOGLE_IMA
     func getContentPlayhead() -> IMAAVPlayerContentPlayhead? {
         return _contentPlayhead
     }
-
+#endif
     func setAdPlaying(_ adPlaying:Bool) {
         _adPlaying = adPlaying
     }
@@ -1012,7 +1021,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if _pendingSeek {
-            setCurrentTime(_pendingSeekTime)
+            setSeek([
+                "time": NSNumber(value: _pendingSeekTime),
+                "tolerance": NSNumber(value: 100)
+            ])
             _pendingSeek = false
         }
 
@@ -1122,11 +1134,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc func handlePlayerItemDidReachEnd(notification:NSNotification!) {
         onVideoEnd?(["target": reactTag as Any])
-
+#if USE_GOOGLE_IMA
         if notification.object as? AVPlayerItem == _player?.currentItem {
             _imaAdsManager.getAdsLoader()?.contentComplete()
         }
-
+#endif
         if _repeat {
             let item:AVPlayerItem! = notification.object as? AVPlayerItem
             item.seek(to: CMTime.zero, completionHandler: nil)
