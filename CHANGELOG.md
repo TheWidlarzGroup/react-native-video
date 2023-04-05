@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 6.0.0-alpha.6
+
+- iOS: remove undocumented `currentTime` property [#3064](https://github.com/react-native-video/react-native-video/pull/3064)
+
 ### Version 6.0.0-alpha.5
 
 - iOS: ensure controls are not displayed when disabled by user [#3017](https://github.com/react-native-video/react-native-video/pull/3017)
