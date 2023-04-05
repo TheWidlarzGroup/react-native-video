@@ -927,6 +927,21 @@ The following other types are supported on some platforms, but aren't fully docu
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
 
+##### Playing only a portion of the video (start & end time)
+
+Provide an optional `startTime` and/or `endTime` for the video. Value is in milliseconds. Useful when you want to play only a portion of a large video.
+
+Example
+```
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012, endTime: 48500 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', endTime: 48500 }}
+```
+
+Platforms: iOS, Android
+
 #### subtitleStyle
 
 Property | Description | Platforms
