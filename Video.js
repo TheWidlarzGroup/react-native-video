@@ -556,7 +556,6 @@ Video.propTypes = {
   onAudioFocusChanged: PropTypes.func,
   onAudioBecomingNoisy: PropTypes.func,
   onPictureInPictureStatusChanged: PropTypes.func,
-  needsToRestoreUserInterfaceForPictureInPictureStop: PropTypes.func,
   onExternalPlaybackChange: PropTypes.func,
   adTagUrl: PropTypes.string,
   onReceiveAdEvent: PropTypes.func,
