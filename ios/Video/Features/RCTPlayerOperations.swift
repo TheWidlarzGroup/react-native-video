@@ -213,7 +213,7 @@ enum RCTPlayerOperations {
                 try audioSession.setCategory(category, options: options)
             } catch {
                 debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category and options. Error: \(error).")
-                // Handle specific set category abd option combination error
+                // Handle specific set category and option combination error
                 // setCategory:AVAudioSessionCategoryPlayback withOptions:mixWithOthers || duckOthers
                 // Failed to set category, error: 'what' Error Domain=NSOSStatusErrorDomain
                 // https://developer.apple.com/forums/thread/714598
