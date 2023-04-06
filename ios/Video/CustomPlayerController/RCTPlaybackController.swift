@@ -24,6 +24,10 @@ class RCTPlaybackController: UIView {
         return self._video?._playerItem
     }
     
+    private var _isAdPlaying = true
+    private var _isAdDisplaying = false // Advertisments play status
+    private var _isContentPlaying = false // Normal content play status
+    
     var isPlaying: Bool {
         return self._video?._player?.rate != 0 && _player?.error == nil
     }
@@ -211,7 +215,6 @@ class RCTPlaybackController: UIView {
     }()
     
     func initTopControls(){
-        topControlStack.addArrangedSubview(UIView())
         topControlStack.addArrangedSubview(fullscreenButtonTop)
         
         fullscreenButtonTop.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
@@ -332,19 +335,55 @@ class RCTPlaybackController: UIView {
         return outputString
     }
     
-    @objc func updateUi(){
-        playButton.isSelected = isPlaying
-        fullscreenButton.isSelected = isFullscreen
+    func setContentPlayStatus(playing: Bool){
+        _isContentPlaying = playing
+        if(!_isAdDisplaying){
+            setUI_isPlaying(_isPlaying: playing)
+        }
+    }
+    
+//    func setAdPlayStatus(playing: Bool){
+//        _isAdPlaying = playing
+//        if(_isAdDisplaying){
+//            setUI_isPlaying(_isPlaying: playing)
+//        }
+//    }
+    
+    func setUI_isPlaying(_isPlaying: Bool){
+        playButton.isSelected = _isPlaying
+    }
+    
+    func setUI_isFullscreen(_isFullscreen: Bool){
+        fullscreenButton.isSelected = _isFullscreen
+        fullscreenButtonTop.isSelected = _isFullscreen
+    }
+    
+    func setAdPlaying(playing: Bool){
+        _isAdPlaying = playing
+        if(_isAdDisplaying){
+            setUI_isPlaying(_isPlaying: playing)
+        }
+    }
+    
+    func setUI_isAdDisplaying(isDisplayed: Bool){
+        _isAdDisplaying = isDisplayed
+        forceUIRefresh()
+    }
+    
+    // Manually refresh the UI with up-to-date player states
+    @objc func forceUIRefresh(){
+        if(_isAdDisplaying){
+            setUI_isPlaying(_isPlaying: _isAdPlaying)
+        }else{
+            setUI_isPlaying(_isPlaying: _isContentPlaying)
+        }
+        setUI_isFullscreen(_isFullscreen: isFullscreen)
     }
     
     @objc func togglePaused(){
-        guard let _player = _player else { return }
-        if(isPlaying){
-            _player.pause()
-        }else{
-            _player.play()
-        }
-        updateUi()
+        guard let _video = _video else { return }
+        let toggleValue = _isAdDisplaying == true ? _isAdPlaying: isPlaying
+        _video.setPaused(toggleValue)
     }
     
     @objc func toggleFullscreen(){
@@ -353,7 +392,6 @@ class RCTPlaybackController: UIView {
         }else{
             _video?.setFullscreen(true)
         }
-        updateUi()
     }
     
     func clearPlayerListeners(){
@@ -401,6 +439,15 @@ class RCTPlaybackController: UIView {
            forKeyPath: #keyPath(AVPlayerItem.status),
            options: [.old, .new],
            context: &playerItemContext)
+        
+        self._player?.addObserver(
+            self,
+            forKeyPath: "timeControlStatus",
+            options: [.old, .new],
+            context: &playerItemContext)
+        
+        self._player?.addObserver(self, forKeyPath: "rate", options: [.old, .new], context: &playerItemContext)
+            
     }
     
     override func observeValue(forKeyPath keyPath: String?,
@@ -417,16 +464,37 @@ class RCTPlaybackController: UIView {
             return
         }
         
-        updateUi()
+        
+        
+        forceUIRefresh()
+        
+        switch (keyPath) {
+        case "timeControlStatus":
+            let status = self._player?.timeControlStatus
 
-        if keyPath == #keyPath(AVPlayerItem.status) {
+            if status == .playing {
+                setContentPlayStatus(playing: true)
+            }else if status == .paused {
+                setContentPlayStatus(playing: false)
+            }
+            break
+            
+        case "rate":
+            if self._player!.rate > 0 {
+                setContentPlayStatus(playing: true)
+            }else{
+                setContentPlayStatus(playing: false)
+            }
+            break
+            
+        case #keyPath(AVPlayerItem.status):
             let status: AVPlayerItem.Status
             if let statusNumber = change?[.newKey] as? NSNumber {
                 status = AVPlayerItem.Status(rawValue: statusNumber.intValue)!
             } else {
                 status = .unknown
             }
-
+            
             // Switch over status value
             switch status {
             case .readyToPlay:
@@ -442,6 +510,9 @@ class RCTPlaybackController: UIView {
                 print("unknown")
                 break
             }
+            break
+        default:
+            break
         }
     }
 }

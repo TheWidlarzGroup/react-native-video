@@ -369,28 +369,45 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func receivedAdEvent(event: IMAAdEvent) {
         if self.onReceiveAdEvent != nil {
             let type = _imaAdsManager.convertEventToString(event: event.type)
-
             self.onReceiveAdEvent?([
                 "event": type,
                 "target": self.reactTag!
             ]);
+        }
+        
+        
+        switch(event.type){
+        case .LOADED:
+            _adsCompleted = false
+            break
+        case .CLICKED:
+            _rctPlaybackControls?.toggleControlVisibility(visible: true)
+            break
+        
+        case .STARTED:
+            _rctPlaybackControls?.setUI_isAdDisplaying(isDisplayed: true)
+            break
+        
+        case .COMPLETE:
+            _rctPlaybackControls?.setUI_isAdDisplaying(isDisplayed: false)
+            break
+        case .ALL_ADS_COMPLETED:
+            self._adsCompleted = true
             
-            if(event.type == .LOADED){
-                _adsCompleted = false
+            // Handle video end
+            if(_videoEnded){
+                handleVideoFinished()
             }
-            
-            if(event.type == .ALL_ADS_COMPLETED){
-                self._adsCompleted = true
-                
-                // Handle video end
-                if(_videoEnded){
-                    handleVideoFinished()
-                }
-            }
-            
-            if(event.type == .CLICKED){
-//                _rctPlaybackControls?.toggleControlVisibility(visible: true)
-            }
+            break
+        case .PAUSE:
+            _rctPlaybackControls?.setAdPlaying(playing: false)
+            break
+        case .RESUME:
+            _rctPlaybackControls?.setAdPlaying(playing: true)
+            break
+        
+        default:
+            break
         }
     }
 
@@ -680,7 +697,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     viewController.present(_wrapperViewController, animated:true, completion:{
                         self._playerViewController?.showsPlaybackControls = false
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
-                        self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
+                        self.videoFullscreenPlayerDidPresent()
                     })
                 }
             }
@@ -690,7 +707,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             })
         }
     }
-
+    
+    func videoFullscreenPlayerDidPresent(){
+        self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
+        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: true)
+    }
+    
+    func videoFullscreenPlayerDidDismiss(){
+        self.onVideoFullscreenPlayerDidDismiss?(["target": reactTag as Any])
+        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: false)
+    }
+    
     @objc
     func setFullscreenAutorotate(_ autorotate:Bool) {
         _fullscreenAutorotate = autorotate
@@ -835,7 +862,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _presentingViewController = nil
             _wrapperViewController.modalPresentationStyle = .automatic
             self.addSubview(_wrapperViewController.view)
-            onVideoFullscreenPlayerDidDismiss?(["target": reactTag as Any])
+            self.videoFullscreenPlayerDidDismiss()
         }
     }
 

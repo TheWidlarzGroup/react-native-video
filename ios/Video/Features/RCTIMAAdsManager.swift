@@ -85,14 +85,9 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
             adsManager.start()
         }
 
-        if _video.onReceiveAdEvent != nil {
-            let type = convertEventToString(event: event.type)
-
-            _video.onReceiveAdEvent?([
-                "event": type,
-                "target": _video.reactTag!
-            ]);
-        }
+        let type = convertEventToString(event: event.type)
+        _video.receivedAdEvent(event: event);
+    
     }
 
     func adsManager(_ adsManager: IMAAdsManager, didReceive error: IMAAdError) {
