@@ -1,13 +1,15 @@
 
 <div align="center">
   <picture>
-    <img src="./docs/logo.svg" width="460" height="225" alt="React Native Video" />
+    <img src="./docs/logo.svg" alt="React Native Video" />
   </picture>
   <br><br>
+  <h1>React Native Video</h1>
   <p>A <code>&lt;Video/></code> component for iOS, tvOS, Android, Android TV, and Windows UWP.</p>
 
+<br>
 
----
+
 
 [![npm](https://img.shields.io/npm/dm/react-native-video?logo=npm)](https://www.npmjs.com/package/react-native-video)
 [![npm (tag)](https://img.shields.io/npm/v/react-native-video/latest?logo=npm)](https://www.npmjs.com/package/react-native-video)
