@@ -8,8 +8,8 @@
   <p>A <code>&lt;Video/></code> component for iOS, tvOS, Android, Android TV, and Windows UWP.</p>
 
 <br>
-
-
+<br>
+<br>
 
 [![npm](https://img.shields.io/npm/dm/react-native-video?logo=npm)](https://www.npmjs.com/package/react-native-video)
 [![npm (tag)](https://img.shields.io/npm/v/react-native-video/latest?logo=npm)](https://www.npmjs.com/package/react-native-video)
@@ -21,9 +21,15 @@
 
 </div>
 
-# React Native Video
 
 Native video components for React Native backed by **[AVPlayer](./ios/Video)**, **[ExoPlayer](./android/src/main/java/com/brentvatne/exoplayer)**, and **[Windows Media Core](./windows/ReactNativeVideoCPP)**. Play streaming media, local files and [DRM protected content](./docs/DRM.md) with support for Widevine, Playready, FairPlay and Clearkey DRM schemes.
+
+## Table of Contents
+- 📖 [Documentation](API.md)
+- 📓 [Changelog](CHANGELOG.md)
+- 🙋‍♀️ [Contribution Guide](CONTRIBUTING.md)
+- 🎒 [Useful Side Projects](./docs/PROJECTS.md)
+- 👾 [Advanced Debugging](./docs/DEBUGGING.md)
 
 ## Version Support
 
@@ -88,19 +94,12 @@ const App = () => {
 export default App;
 ```
 
-## Useful Resources
-- 📖 [Documentation](API.md)
-- 📓 [Changelog](CHANGELOG.md)
-- 🙋‍♀️ [Contribution Guide](CONTRIBUTING.md)
-- 🎒 [Useful Side Projects](./docs/PROJECTS.md)
-- 👾 [Advanced Debugging](./docs/DEBUGGING.md)
-
 ## Contributors
 
 We'd like to thank the many contributors! React Native Video is a democratic open source project and this project would not be possible without our community contributing back. [Learn how you can get involved](CONTRIBUTING.md).
 
 <a href="https://github.com/react-native-video/react-native-video/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=react-native-video/react-native-video" width="100%" />
+  <img src="https://contrib.rocks/image?repo=react-native-video/react-native-video" width="800" />
 </a>
 
 
