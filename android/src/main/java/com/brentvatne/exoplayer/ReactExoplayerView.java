@@ -205,6 +205,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    private boolean controlsIMA;
     private Uri adTagUrl;
     // \ End props
 
@@ -247,9 +248,23 @@ class ReactExoplayerView extends FrameLayout implements
                 case SHOW_PROGRESS:
                     checkLiveIndicator();
                     if (player != null) {
-                        // Hide player controller if it's not allowed for ads
-                        if(playerControlView != null && isPlayingAd() && controls) {
-                            playerControlView.hide();
+                        if(playerControlView != null){
+                            TextView exo_duration = playerControlView.findViewById(R.id.exo_duration);
+                            TextView exo_live_indicator = playerControlView.findViewById(R.id.exo_duration_live);
+
+                            // Toggle live indicator based on player state
+                            if(player.isCurrentMediaItemLive()){
+                                exo_duration.setVisibility(GONE);
+                                exo_live_indicator.setVisibility(VISIBLE);
+                            }else{
+                                exo_duration.setVisibility(VISIBLE);
+                                exo_live_indicator.setVisibility(GONE);
+                            }
+
+                            // Hide player controller if it's not allowed for ads
+                            if (isPlayingAd() && controls && !controlsIMA) {
+                                playerControlView.hide();
+                            }
                         }
 
                         long pos = player.getCurrentPosition();
@@ -423,7 +438,7 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isPlayingAd()) {
+                if (!isPlayingAd() || controlsIMA) {
                     togglePlayerControlVisibility();
                 }
             }
@@ -2031,12 +2046,21 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setControlsIMA(boolean controls) {
+        this.controlsIMA = controls;
+    }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
     }
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
+        // Display player controller when AD is tapped
+        String adEventName = adEvent.getType().name();
+        if(controlsIMA && adEventName.equals("TAPPED")){
+            togglePlayerControlVisibility();     
+        }
         eventEmitter.receiveAdEvent(adEvent.getType().name());
     }
 }
