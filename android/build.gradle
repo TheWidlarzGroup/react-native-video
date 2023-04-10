@@ -57,7 +57,7 @@ repositories {
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
+    implementation('com.google.android.exoplayer:exoplayer:2.18.5') {
         exclude group: 'com.android.support'
     }
 
@@ -67,12 +67,12 @@ dependencies {
     implementation "androidx.media:media:1.1.0"
     implementation "androidx.activity:activity:1.4.0"
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.18.1') {
+    implementation('com.google.android.exoplayer:extension-okhttp:2.18.5') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
 
     if (useExoplayerIMA) {
-        implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
+        implementation 'com.google.android.exoplayer:extension-ima:2.18.5'
     }
     implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
 }
