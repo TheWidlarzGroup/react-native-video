@@ -21,6 +21,7 @@ import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
