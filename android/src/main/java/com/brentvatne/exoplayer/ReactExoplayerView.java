@@ -277,7 +277,9 @@ class ReactExoplayerView extends FrameLayout implements
                             lastPos = pos;
                             lastBufferDuration = bufferedDuration;
                             lastDuration = duration;
-                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                            if(!isPlayingAd()){
+                                eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                            }
                         }
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
