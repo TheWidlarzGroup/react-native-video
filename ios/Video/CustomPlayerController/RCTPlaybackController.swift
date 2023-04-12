@@ -320,14 +320,27 @@ class RCTPlaybackController: UIView {
     }
     
     func secondsToTimeLabel(_ seconds: Float) -> String {
-        let secondsInt = Int(seconds)
-        var outputString = ""
-        
-        if(seconds > 3600){
-            let h1 = numToString(myInt: secondsInt / 3600)
-            outputString = "\(h1):"
+        if(seconds.isNaN){
+            return "NaN"
         }
         
+        var secondsInt = Int(seconds)
+        var isNegative = false
+        var outputString = ""
+        
+        // Handle negative values
+        if(secondsInt < 0){
+            secondsInt = abs(secondsInt)
+            outputString = "-"
+        }
+        
+        // Add hours if applicable (hh:)
+        if(seconds > 3600){
+            let h1 = numToString(myInt: secondsInt / 3600)
+            outputString.append("\(h1):")
+        }
+        
+        // Add minutes and seconds (mm:ss)
         let m1 = numToString(myInt: (secondsInt % 3600) / 60)
         let s1 = numToString(myInt: (secondsInt % 3600) % 60)
         outputString.append("\(m1):\(s1)")
@@ -410,8 +423,39 @@ class RCTPlaybackController: UIView {
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
-    func updateDurationTime(seconds: Float){
-        self.durTimeLabel.text = secondsToTimeLabel(seconds)
+    func updateDurationTime(seconds: Float, isLive: Bool){
+        if(isLive){
+            self.durTimeLabel.text = "Live"
+        }else{
+            self.durTimeLabel.text = secondsToTimeLabel(seconds)
+        }
+    }
+    
+    func getLiveDuration() -> (
+        livePosition: Float,
+        seekableStart: Float,
+        seekableEnd: Float,
+        seekableDuration: Float,
+        secondsBehindLive: Float
+    ){
+        var livePosition: Float = 0.0;
+        var seekableStart: Float = 0.0;
+        var seekableEnd: Float = 0.0;
+        var seekableDuration: Float = 0.0;
+        var secondsBehindLive: Float = 0.0;
+        if let items = _player?.currentItem?.seekableTimeRanges {
+            if(!items.isEmpty) {
+                let range = items[items.count - 1]
+                let timeRange = range.timeRangeValue
+                let currentTime = Float(_player?.currentTime().seconds ?? 0.0)
+                seekableStart = Float(CMTimeGetSeconds(timeRange.start))
+                seekableEnd = Float(CMTimeGetSeconds(timeRange.end))
+                seekableDuration = Float(CMTimeGetSeconds(timeRange.duration))
+                livePosition = Float(seekableStart + seekableDuration)
+                secondsBehindLive = currentTime - seekableDuration - seekableStart
+            }
+        }
+        return (livePosition, seekableStart, seekableEnd, seekableDuration, secondsBehindLive);
     }
     
     func addPlayerListeners(){
@@ -420,17 +464,26 @@ class RCTPlaybackController: UIView {
             //self?.updatePlaybackProgress(progressTime: progressTime)
             var duration:CMTime? = self?._player?.currentItem?.asset.duration
             
+            let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
             let progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-            let durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
+            var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
             
+            if(isLive){
+                let liveData = self!.getLiveDuration()
+                durationFloat = liveData.livePosition
+            }
+            
+            // Update seekbar min max values
             self?.seekBar.minimumValue = 0
             self?.seekBar.maximumValue = durationFloat
             
-
+            
+            // Update UI when user is not dragging or seeking
             if(self!.isTracking == false && !self!.isSeeking){
-                self?.seekBar.setValue(progressFloat, animated: true)
+                let isAnimated = isLive ? true : true
+                self?.seekBar.setValue(progressFloat, animated: isAnimated)
                 self!.updateCurrentTime(seconds: progressFloat)
-                self!.updateDurationTime(seconds: durationFloat)
+                self!.updateDurationTime(seconds: durationFloat, isLive: isLive)
             }
         }
         
