@@ -694,6 +694,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+        changeAudioOutput(this.audioOutput);
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -1857,18 +1858,26 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setAudioOutput(AudioOutput output) {
-        if (audioOutput != output && player != null) {
-            this.audioOutput = output;
+    private void changeAudioOutput(AudioOutput output) {
+        if (player != null) {
             int usage = Util.getAudioUsageForStreamType(audioOutput.streamType);
             int contentType = Util.getAudioContentTypeForStreamType(audioOutput.streamType);
-            AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(usage).setContentType(contentType)
+            AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(usage)
+                    .setContentType(contentType)
                     .build();
             player.setAudioAttributes(audioAttributes, false);
             AudioManager audioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
             audioManager.setMode(
-                    audioOutput == AudioOutput.SPEAKER ? AudioManager.MODE_NORMAL : AudioManager.MODE_IN_COMMUNICATION);
+                    audioOutput == AudioOutput.SPEAKER ? AudioManager.MODE_NORMAL
+                            : AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(audioOutput == AudioOutput.SPEAKER);
+        }
+    }
+
+    public void setAudioOutput(AudioOutput output) {
+        if (audioOutput != output) {
+            this.audioOutput = output;
+            changeAudioOutput(output);
         }
     }
 
