@@ -2020,7 +2020,6 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
 }
 
 - (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler {
-  NSAssert(_restoreUserInterfaceForPIPStopCompletionHandler == NULL, @"restoreUserInterfaceForPIPStopCompletionHandler was not called after picture in picture was exited.");
   if (self.onRestoreUserInterfaceForPictureInPictureStop) {
     self.onRestoreUserInterfaceForPictureInPictureStop(@{});
   }
