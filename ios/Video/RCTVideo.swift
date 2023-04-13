@@ -690,7 +690,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _presentingViewController = viewController
                 _fullscreenPlayerPresented = true
 
-                onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
+                self.videoFullscreenPlayerWillPresent()
 
                 if let playerViewController = _playerViewController {
                     _wrapperViewController.removeFromParent()
@@ -708,9 +708,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
     
+    func videoFullscreenPlayerWillPresent(){
+        onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
+        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: true)
+    }
+    
     func videoFullscreenPlayerDidPresent(){
         self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
-        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: true)
     }
     
     func videoFullscreenPlayerDidDismiss(){

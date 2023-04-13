@@ -126,9 +126,6 @@ class RCTPlaybackController: UIView {
         stackView.spacing = 10
         stackView.isLayoutMarginsRelativeArrangement = true
         stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-        
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
         return stackView
     }()
     
@@ -148,45 +145,38 @@ class RCTPlaybackController: UIView {
         stackView.alignment = .fill
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
-//        stackView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        stackView.insetsLayoutMarginsFromSafeArea = true
         return stackView
     }()
     
     var playButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        button.setImage(UIImage(systemName: "pause.fill"), for: .selected)
-        button.tintColor = .white
         
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
         return button
     }()
     
     var fullscreenButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "plus.square.fill"), for: .normal)
-        button.setImage(UIImage(systemName: "minus.square.fill"), for: .selected)
         button.tintColor = .white
         
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
-        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
         return button
     }()
     
     var fullscreenButtonTop: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "plus.square.fill"), for: .normal)
-        button.setImage(UIImage(systemName: "minus.square.fill"), for: .selected)
-        button.tintColor = .white
         
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
-        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 15))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
         return button
     }()
     
@@ -216,8 +206,29 @@ class RCTPlaybackController: UIView {
     
     func initTopControls(){
         topControlStack.addArrangedSubview(fullscreenButtonTop)
+        topControlStack.addArrangedSubview(UIView())
         
         fullscreenButtonTop.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
+    }
+    
+    func initIcons(){
+        let podBundle = Bundle(for: Self.self) // for getting pod url
+        if let url = podBundle.url(forResource: "IconBundle", withExtension: "bundle") {
+            let bundle = Bundle.init(url: url)
+            
+            fullscreenButton.setImage(UIImage(named: "fullscreen", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
+            fullscreenButton.setImage(UIImage(named: "fullscreen_exit", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
+            
+            fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
+            fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
+            
+            playButton.setImage(UIImage(named: "play", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
+            playButton.setImage(UIImage(named: "pause", in: bundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
+            
+//          Verify if file exist in bundle
+//          let exist = bundle?.path(forResource: "fullscreen", ofType: "png")
+//          print("exist \(exist)")
+        }
     }
     
     func initBottomControls(){
@@ -226,6 +237,7 @@ class RCTPlaybackController: UIView {
         bottomControlStack.addArrangedSubview(seekBar)
         bottomControlStack.addArrangedSubview(durTimeLabel)
         bottomControlStack.addArrangedSubview(fullscreenButton)
+        
         
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
         
@@ -252,11 +264,15 @@ class RCTPlaybackController: UIView {
 
         self.initTopControls()
         self.initBottomControls()
+        self.initIcons()
+        
+        let verticalSpacer = UIView()
+        verticalSpacer.isUserInteractionEnabled = false
         
         // Add components to main stack
         mainStack.layer.addSublayer(gradienceLayer)
         mainStack.addArrangedSubview(topControlStack)
-        mainStack.addArrangedSubview(UIView())
+        mainStack.addArrangedSubview(verticalSpacer)
         mainStack.addArrangedSubview(bottomControlStack)
         mainStack.isUserInteractionEnabled = true
         self.addSubview(self.mainStack)
@@ -354,13 +370,6 @@ class RCTPlaybackController: UIView {
             setUI_isPlaying(_isPlaying: playing)
         }
     }
-    
-//    func setAdPlayStatus(playing: Bool){
-//        _isAdPlaying = playing
-//        if(_isAdDisplaying){
-//            setUI_isPlaying(_isPlaying: playing)
-//        }
-//    }
     
     func setUI_isPlaying(_isPlaying: Bool){
         playButton.isSelected = _isPlaying
@@ -516,8 +525,6 @@ class RCTPlaybackController: UIView {
                                context: context)
             return
         }
-        
-        
         
         forceUIRefresh()
         
