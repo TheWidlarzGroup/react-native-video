@@ -1,4 +1,6 @@
-import RNCVideoView from './VideoNativeComponent';
+import VideoView, { VideoViewProps } from './VideoView';
 
-export default RNCVideoView
-export * from './VideoNativeComponent';
+export default VideoView
+export type {
+    VideoViewProps
+}
