@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = "9.0"
 
   s.subspec "Video" do |ss|
-    ss.source_files  = "ios/Video/**/*.{h,m,swift}"
+    ss.source_files  = "ios/Video/**/*.{h,m,swift,mm}"
     ss.dependency "PromisesSwift"
 
     if defined?($RNVideoUseGoogleIMA)
@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
     ss.dependency "SPTPersistentCache", "~> 1.1.0"
     ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
 
-    ss.source_files = "ios/VideoCaching/**/*.{h,m,swift}"
+    ss.source_files = "ios/VideoCaching/**/*.{h,m,swift,mm}"
   end
 
   s.dependency "React-Core"
