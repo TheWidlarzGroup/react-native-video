@@ -6,7 +6,10 @@
 #import <react/renderer/components/RNCVideo/Props.h>
 #import <react/renderer/components/RNCVideo/RCTComponentViewHelpers.h>
 
+#import <React/RCTBridge+Private.h>
+
 #import "RCTFabricComponentsPlugins.h"
+#import "RCTVideo.h"
 
 using namespace facebook::react;
 
@@ -29,7 +32,8 @@ using namespace facebook::react;
     static const auto defaultProps = std::make_shared<const RNCVideoProps>();
     _props = defaultProps;
 
-    _view = [[UIView alloc] init];
+    RCTBridge *bridge = [RCTBridge currentBridge];
+    _view = [[RCTVideo alloc] initWithEventDispatcher: bridge.eventDispatcher];
 
     self.contentView = _view;
   }
@@ -43,7 +47,7 @@ using namespace facebook::react;
     const auto &newViewProps = *std::static_pointer_cast<RNCVideoProps const>(props);
 
     if (oldViewProps.color != newViewProps.color) {
-        NSString * colorToConvert = [[NSString alloc] initWithUTF8String: newViewProps.color.c_str()];
+//        NSString * colorToConvert = [[NSString alloc] initWithUTF8String: newViewProps.color.c_str()];
 //        [_view setBackgroundColor: [ColorUtils hexStringToColor:colorToConvert]];
     }
 

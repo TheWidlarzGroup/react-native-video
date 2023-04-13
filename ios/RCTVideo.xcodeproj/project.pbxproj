@@ -17,6 +17,14 @@
 		DA0D40CD29E7E924002A59E8 /* RNCVideoComponentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40CB29E7E924002A59E8 /* RNCVideoComponentView.mm */; };
 		DA0D40CF29E7E930002A59E8 /* RNCVideoComponentView.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40CE29E7E930002A59E8 /* RNCVideoComponentView.h */; };
 		DA0D40D029E7E930002A59E8 /* RNCVideoComponentView.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40CE29E7E930002A59E8 /* RNCVideoComponentView.h */; };
+		DA0D40D229E7F074002A59E8 /* RCTVideo.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40D129E7F074002A59E8 /* RCTVideo.h */; };
+		DA0D40D329E7F074002A59E8 /* RCTVideo.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40D129E7F074002A59E8 /* RCTVideo.h */; };
+		DA0D40D929E7F4EE002A59E8 /* RCTVideoPlayerViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40D829E7F4EE002A59E8 /* RCTVideoPlayerViewController.h */; };
+		DA0D40DA29E7F4EE002A59E8 /* RCTVideoPlayerViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40D829E7F4EE002A59E8 /* RCTVideoPlayerViewController.h */; };
+		DA0D40DC29E7F50A002A59E8 /* UIView+FindUIViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40DB29E7F50A002A59E8 /* UIView+FindUIViewController.h */; };
+		DA0D40DD29E7F50A002A59E8 /* UIView+FindUIViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40DB29E7F50A002A59E8 /* UIView+FindUIViewController.h */; };
+		DA0D40DF29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40DE29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h */; };
+		DA0D40E029E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = DA0D40DE29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,6 +63,10 @@
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0D40CB29E7E924002A59E8 /* RNCVideoComponentView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RNCVideoComponentView.mm; sourceTree = "<group>"; };
 		DA0D40CE29E7E930002A59E8 /* RNCVideoComponentView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCVideoComponentView.h; sourceTree = "<group>"; };
+		DA0D40D129E7F074002A59E8 /* RCTVideo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTVideo.h; sourceTree = "<group>"; };
+		DA0D40D829E7F4EE002A59E8 /* RCTVideoPlayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewController.h; sourceTree = "<group>"; };
+		DA0D40DB29E7F50A002A59E8 /* UIView+FindUIViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+FindUIViewController.h"; sourceTree = "<group>"; };
+		DA0D40DE29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTVideoPlayerViewControllerDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +127,10 @@
 			children = (
 				DA0D40CB29E7E924002A59E8 /* RNCVideoComponentView.mm */,
 				DA0D40CE29E7E930002A59E8 /* RNCVideoComponentView.h */,
+				DA0D40D129E7F074002A59E8 /* RCTVideo.h */,
+				DA0D40D829E7F4EE002A59E8 /* RCTVideoPlayerViewController.h */,
+				DA0D40DB29E7F50A002A59E8 /* UIView+FindUIViewController.h */,
+				DA0D40DE29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h */,
 			);
 			path = Fabric;
 			sourceTree = "<group>";
@@ -200,14 +216,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA0D40DF29E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h in Sources */,
 				0177D39D27170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift in Sources */,
+				DA0D40D929E7F4EE002A59E8 /* RCTVideoPlayerViewController.h in Sources */,
 				0177D39C27170A7A00F5BE18 /* RCTVideoPlayerViewController.swift in Sources */,
+				DA0D40DC29E7F50A002A59E8 /* UIView+FindUIViewController.h in Sources */,
 				DA0D40CC29E7E924002A59E8 /* RNCVideoComponentView.mm in Sources */,
 				DA0D40CF29E7E930002A59E8 /* RNCVideoComponentView.h in Sources */,
 				0177D39B27170A7A00F5BE18 /* UIView+FindUIViewController.swift in Sources */,
 				0177D39F27170A7A00F5BE18 /* RCTVideo.swift in Sources */,
 				0177D39E27170A7A00F5BE18 /* ReactVideoManager.m in Sources */,
 				0177D39A27170A7A00F5BE18 /* ReactVideoManager.swift in Sources */,
+				DA0D40D229E7F074002A59E8 /* RCTVideo.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,8 +235,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA0D40E029E7F51E002A59E8 /* RCTVideoPlayerViewControllerDelegate.h in Sources */,
+				DA0D40DD29E7F50A002A59E8 /* UIView+FindUIViewController.h in Sources */,
 				DA0D40CD29E7E924002A59E8 /* RNCVideoComponentView.mm in Sources */,
+				DA0D40DA29E7F4EE002A59E8 /* RCTVideoPlayerViewController.h in Sources */,
 				DA0D40D029E7E930002A59E8 /* RNCVideoComponentView.h in Sources */,
+				DA0D40D329E7F074002A59E8 /* RCTVideo.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
