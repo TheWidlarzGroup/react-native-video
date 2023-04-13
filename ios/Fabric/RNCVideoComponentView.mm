@@ -18,7 +18,7 @@ using namespace facebook::react;
 @end
 
 @implementation RNCVideoComponentView {
-    UIView * _view;
+    RCTVideo * _view;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -45,11 +45,21 @@ using namespace facebook::react;
 {
     const auto &oldViewProps = *std::static_pointer_cast<RNCVideoProps const>(_props);
     const auto &newViewProps = *std::static_pointer_cast<RNCVideoProps const>(props);
-
-    if (oldViewProps.color != newViewProps.color) {
-//        NSString * colorToConvert = [[NSString alloc] initWithUTF8String: newViewProps.color.c_str()];
-//        [_view setBackgroundColor: [ColorUtils hexStringToColor:colorToConvert]];
-    }
+    
+    NSString * uri = [NSString stringWithFormat:@"%s", newViewProps.src.uri.c_str()];
+    NSString * type = [NSString stringWithFormat:@"%s", newViewProps.src.type.c_str()];
+    NSDictionary *sourceDict =  @{
+        @"uri" : uri,
+        @"type": type,
+        @"endTime": @(newViewProps.src.endTime),
+        @"isAsset": @(newViewProps.src.isAsset),
+        @"isNetwork": @(newViewProps.src.isNetwork),
+        @"shouldCache": @(newViewProps.src.shouldCache),
+        @"requestHeaders": @{},
+        @"startTime": @(newViewProps.src.startTime),
+    };
+    [_view setSrc:sourceDict];
+    
 
     [super updateProps:props oldProps:oldProps];
 }
