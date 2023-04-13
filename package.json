@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "^0.0.5",
+        "@types/react-native": "^0.71.5",
         "eslint": "^6.5.1",
         "react": "16.9.0",
         "react-native": "0.61.5",
@@ -42,5 +43,10 @@
         "VideoResizeMode.js",
         "react-native-video.podspec",
         "docs"
-    ]
+    ],
+    "codegenConfig": {
+        "name": "RNCVideo",
+        "type": "components",
+        "jsSrcsDir": "src"
+    }
 }
