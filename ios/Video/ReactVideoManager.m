@@ -1,7 +1,7 @@
 #import <React/RCTBridge.h>
 #import "React/RCTViewManager.h"
 
-@interface RCT_EXTERN_MODULE(RCTVideoManager, RCTViewManager)
+@interface RCT_EXTERN_MODULE(RNCVideoManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(drm, NSDictionary);

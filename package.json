@@ -2,8 +2,8 @@
     "name": "react-native-video",
     "version": "6.0.0-alpha.6",
     "description": "A <Video /> element for react-native",
-    "main": "Video.js",
-    "source": "Video.js",
+    "main": "src/index",
+    "source": "src/index",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
@@ -13,10 +13,12 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "^0.0.5",
+        "@types/react-native": "^0.71.5",
         "eslint": "^6.5.1",
         "react": "16.9.0",
         "react-native": "0.61.5",
-        "react-native-windows": "^0.61.0-0"
+        "react-native-windows": "^0.61.0-0",
+        "typescript": "^5.0.4"
     },
     "dependencies": {
         "deprecated-react-native-prop-types": "^2.2.0",
@@ -42,5 +44,10 @@
         "VideoResizeMode.js",
         "react-native-video.podspec",
         "docs"
-    ]
+    ],
+    "codegenConfig": {
+        "name": "RNCVideo",
+        "type": "components",
+        "jsSrcsDir": "src"
+    }
 }

@@ -1,8 +1,8 @@
 import AVFoundation
 import React
 
-@objc(RCTVideoManager)
-class RCTVideoManager: RCTViewManager {
+@objc(RNCVideoManager)
+class ReactVideoManager: RCTViewManager {
     
     override func view() -> UIView {
         return RCTVideo(eventDispatcher: bridge.eventDispatcher() as! RCTEventDispatcher)
