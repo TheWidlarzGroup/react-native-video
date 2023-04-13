@@ -14,6 +14,7 @@ class RCTPlaybackController: UIView {
     private var playerItemContext = 0
     private var timeObserverToken: Any?
     private var _video: RCTVideo?
+    private var _isVisible = false
     private var visibilityTimer: Timer?
     
     private var _player : AVPlayer? {
@@ -68,16 +69,22 @@ class RCTPlaybackController: UIView {
         toggleControlVisibility(visible: true)
     }
     
-    @objc func toggleControlVisibility(visible: Bool) {
-        let alpha : CGFloat = visible ? 1.0: 0.0
-        let opacity : Float = visible ? 1.0: 0.0
+    // Toggle playback controls by passing visible: nil
+    func toggleControlVisibility(visible: Bool?) {
+        var isVisible: Bool = visible ?? !_isVisible
+
+        _isVisible = isVisible
+        
+        let alpha : CGFloat = isVisible ? 1.0: 0.0
+        let opacity : Float = isVisible ? 1.0: 0.0
         UIView.animate(withDuration: 0.2) {
             self.bottomControlStack.alpha = alpha
             self.topControlStack.alpha = alpha
             self.gradienceLayer.opacity = opacity
         }
-        topControlStack.isUserInteractionEnabled = visible
-        bottomControlStack.isUserInteractionEnabled = visible
+        topControlStack.isUserInteractionEnabled = isVisible
+        bottomControlStack.isUserInteractionEnabled = isVisible
+        self.isUserInteractionEnabled = isVisible
         resetControlsTimer()
     }
     
@@ -126,6 +133,11 @@ class RCTPlaybackController: UIView {
         stackView.spacing = 10
         stackView.isLayoutMarginsRelativeArrangement = true
         stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        return stackView
+    }()
+    
+    var centerControlStack: UIView = {
+        let stackView = UIView()
         return stackView
     }()
     
@@ -238,7 +250,6 @@ class RCTPlaybackController: UIView {
         bottomControlStack.addArrangedSubview(durTimeLabel)
         bottomControlStack.addArrangedSubview(fullscreenButton)
         
-        
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
         
         fullscreenButton.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
@@ -248,11 +259,11 @@ class RCTPlaybackController: UIView {
     }
     
     func initGestures(){
-        let gesture:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showControls))
+        // Hide controls when tapping center controller
+        let gesture:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideControls))
         gesture.numberOfTapsRequired = 1
         gesture.cancelsTouchesInView = false
-        
-        mainStack.addGestureRecognizer(gesture)
+        centerControlStack.addGestureRecognizer(gesture)
     }
     
     init(video: RCTVideo) {
@@ -266,13 +277,10 @@ class RCTPlaybackController: UIView {
         self.initBottomControls()
         self.initIcons()
         
-        let verticalSpacer = UIView()
-        verticalSpacer.isUserInteractionEnabled = false
-        
         // Add components to main stack
         mainStack.layer.addSublayer(gradienceLayer)
         mainStack.addArrangedSubview(topControlStack)
-        mainStack.addArrangedSubview(verticalSpacer)
+        mainStack.addArrangedSubview(centerControlStack)
         mainStack.addArrangedSubview(bottomControlStack)
         mainStack.isUserInteractionEnabled = true
         self.addSubview(self.mainStack)
@@ -389,6 +397,15 @@ class RCTPlaybackController: UIView {
     
     func setUI_isAdDisplaying(isDisplayed: Bool){
         _isAdDisplaying = isDisplayed
+        
+        // Disable seekbar when ad is displayed
+        seekBar.isEnabled = !isDisplayed
+        
+        //Hide controls when ad is displayed
+        if(isDisplayed){
+            hideControls()
+        }
+        
         forceUIRefresh()
     }
     
@@ -489,7 +506,7 @@ class RCTPlaybackController: UIView {
             
             // Update UI when user is not dragging or seeking
             if(self!.isTracking == false && !self!.isSeeking){
-                let isAnimated = isLive ? true : true
+                let isAnimated = isLive ? false : true
                 self?.seekBar.setValue(progressFloat, animated: isAnimated)
                 self!.updateCurrentTime(seconds: progressFloat)
                 self!.updateDurationTime(seconds: durationFloat, isLive: isLive)
