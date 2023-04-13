@@ -1,9 +1,17 @@
-//
-//  RNCVideoComponentViewH.m
-//  RCTVideo
-//
-//  Created by Paul on 2023/04/13.
-//  Copyright © 2023 Facebook. All rights reserved.
-//
+// This guard prevent this file to be compiled in the old architecture.
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <React/RCTViewComponentView.h>
+#import <UIKit/UIKit.h>
 
-#import <Foundation/Foundation.h>
+#ifndef RNCVideoComponentView_h
+#define RNCVideoComponentView_h
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface RNCVideoComponentView : RCTViewComponentView
+@end
+
+NS_ASSUME_NONNULL_END
+
+#endif /* RNCVideoComponentView_h */
+#endif /* RCT_NEW_ARCH_ENABLED */

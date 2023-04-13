@@ -32,6 +32,10 @@ Pod::Spec.new do |s|
     end
   end
 
+  s.subspec "Fabric" do |ss|
+    ss.source_files  = "ios/Fabric/**/*.{h,m,swift,mm}"
+  end
+
   s.subspec "VideoCaching" do |ss|
     ss.dependency "react-native-video/Video"
     ss.dependency "SPTPersistentCache", "~> 1.1.0"
@@ -42,12 +46,11 @@ Pod::Spec.new do |s|
 
   s.dependency "React-Core"
 
-  s.default_subspec = "Video"
-
   s.static_framework = true
 
    # Don't install the dependencies when we run `pod install` in the old architecture.
    if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
+    s.default_subspecs = "Video", "Fabric"
     s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
     s.pod_target_xcconfig    = {
         "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
@@ -60,6 +63,8 @@ Pod::Spec.new do |s|
     s.dependency "RCTRequired"
     s.dependency "RCTTypeSafety"
     s.dependency "ReactCommon/turbomodule/core"
+  else
+    s.default_subspec = "Video"
   end
 
   s.xcconfig = {
