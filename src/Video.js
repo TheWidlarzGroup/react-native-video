@@ -6,7 +6,7 @@ import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 import TextTrackType from './TextTrackType';
 import FilterType from './FilterType';
 import DRMType from './DRMType';
-import VideoResizeMode from './VideoResizeMode.js';
+import VideoResizeMode from '../VideoResizeMode.js';
 
 const styles = StyleSheet.create({
   base: {
