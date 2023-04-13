@@ -23,6 +23,10 @@
         "keymirror": "^0.1.1",
         "prop-types": "^15.7.2"
     },
+    "peerDependencies": {
+        "react": "*",
+        "react-native": "*"
+    },
     "scripts": {
         "lint": "yarn eslint .",
         "xbasic": "yarn --cwd examples/basic",
