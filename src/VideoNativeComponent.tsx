@@ -1,7 +1,7 @@
 import React from 'react'
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import { ViewProps } from 'react-native';
-import { Double, Int32, WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
+import type { ViewProps } from 'react-native';
+import type { Double, Int32, WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface Src {
   uri: string

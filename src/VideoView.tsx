@@ -2,7 +2,7 @@ import React from 'react'
 import type { NativeProps } from './VideoNativeComponent';
 import RNCVideoComponent from './VideoNativeComponent'
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
-import { ResolvedAssetSource } from 'react-native/Libraries/Image/AssetSourceResolver';
+import type { ResolvedAssetSource } from 'react-native/Libraries/Image/AssetSourceResolver';
 
 export interface VideoViewProps extends Omit<NativeProps, 'src'> {
     source: {
