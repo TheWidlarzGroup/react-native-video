@@ -1,5 +1,5 @@
 export default {
-    NONE: '',
+    NONE: 'None',
     INVERT: 'CIColorInvert',
     MONOCHROME: 'CIColorMonochrome',
     POSTERIZE: 'CIColorPosterize',
