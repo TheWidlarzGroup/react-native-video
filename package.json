@@ -13,10 +13,10 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "^0.0.5",
-        "@types/react-native": "^0.71.5",
+        "@types/react": "^18.0.35",
         "eslint": "^6.5.1",
-        "react": "16.9.0",
-        "react-native": "0.61.5",
+        "react": "^18.2.0",
+        "react-native": "^0.71.6",
         "react-native-windows": "^0.61.0-0",
         "typescript": "^5.0.4"
     },
@@ -38,10 +38,7 @@
         "android",
         "ios",
         "windows",
-        "FilterType.js",
-        "DRMType.js",
-        "TextTrackType.js",
-        "VideoResizeMode.js",
+        "src",
         "react-native-video.podspec",
         "docs"
     ],
