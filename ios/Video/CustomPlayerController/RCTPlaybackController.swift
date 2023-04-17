@@ -310,6 +310,16 @@ class RCTPlaybackController: UIView {
         print("Seeking to time(s): \(seconds)")
     }
     
+    func isPlayerLive(duration: CMTime?) -> Bool {
+        var duration: CMTime? = duration
+        if(duration == nil){
+            duration = _player?.currentItem?.duration
+        }
+        
+        let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
+        return isLive
+    }
+        
     @objc func onSeekbarChange(slider: UISlider, event: UIEvent) {
         if let touchEvent = event.allTouches?.first {
                 switch touchEvent.phase {
@@ -322,7 +332,14 @@ class RCTPlaybackController: UIView {
 
                 case .moved:
                     // handle drag moved
-                    self.updateCurrentTime(seconds: slider.value)
+                    if(self.isPlayerLive(duration: nil)){
+                        let liveData = getLiveDuration()
+                        let seekableStart = liveData.seekableStart
+                        let seekTime = slider.value - seekableStart
+                        self.updateCurrentTime(seconds: seekTime > 0 ? seekTime : 0.0)
+                    }else{
+                        self.updateCurrentTime(seconds: slider.value)
+                    }
                     break
 
                 case .ended:
@@ -449,8 +466,8 @@ class RCTPlaybackController: UIView {
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
-    func updateDurationTime(seconds: Float, isLive: Bool){
-        if(isLive){
+    func updateDurationTime(seconds: Float){
+        if(self.isPlayerLive(duration: nil)){
             self.durTimeLabel.text = "Live"
         }else{
             self.durTimeLabel.text = secondsToTimeLabel(seconds)
@@ -462,13 +479,15 @@ class RCTPlaybackController: UIView {
         seekableStart: Float,
         seekableEnd: Float,
         seekableDuration: Float,
-        secondsBehindLive: Float
+        secondsBehindLive: Float,
+        secondsFromSeekStart: Float
     ){
         var livePosition: Float = 0.0;
         var seekableStart: Float = 0.0;
         var seekableEnd: Float = 0.0;
         var seekableDuration: Float = 0.0;
         var secondsBehindLive: Float = 0.0;
+        var secondsFromSeekStart: Float = 0.0;
         if let items = _player?.currentItem?.seekableTimeRanges {
             if(!items.isEmpty) {
                 let range = items[items.count - 1]
@@ -477,40 +496,46 @@ class RCTPlaybackController: UIView {
                 seekableStart = Float(CMTimeGetSeconds(timeRange.start))
                 seekableEnd = Float(CMTimeGetSeconds(timeRange.end))
                 seekableDuration = Float(CMTimeGetSeconds(timeRange.duration))
-                livePosition = Float(seekableStart + seekableDuration)
+                livePosition = Float(seekableStart + seekableDuration) //
                 secondsBehindLive = currentTime - seekableDuration - seekableStart
+                
+                secondsFromSeekStart = currentTime - seekableStart
             }
         }
-        return (livePosition, seekableStart, seekableEnd, seekableDuration, secondsBehindLive);
+        return (livePosition, seekableStart, seekableEnd, seekableDuration, secondsBehindLive, secondsFromSeekStart);
+    }
+    
+    func onProgress(progressTime: CMTime){
+        var duration:CMTime? = self._player?.currentItem?.asset.duration
+        
+        let isLive: Bool = self.isPlayerLive(duration: duration ?? CMTime.indefinite)
+        var progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
+        var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
+        
+        var secondsFromSeekStart : Float = 0.0
+        if(isLive){
+            let liveData = self.getLiveDuration()
+            durationFloat = liveData.livePosition
+            secondsFromSeekStart = liveData.secondsFromSeekStart > 0 ? liveData.secondsFromSeekStart : 0.0
+            self.seekBar.minimumValue = liveData.seekableStart
+            self.seekBar.maximumValue = durationFloat
+        }else{
+            self.seekBar.minimumValue = 0
+            self.seekBar.maximumValue = durationFloat
+        }
+        
+        // Update UI when user is not dragging or seeking
+        if(self.isTracking == false && self.isSeeking){
+            let isAnimated = isLive ? false : true
+            self.seekBar.setValue(progressFloat, animated: isAnimated)
+            self.updateCurrentTime(seconds: isLive ? secondsFromSeekStart : progressFloat)
+            self.updateDurationTime(seconds: durationFloat)
+        }
     }
     
     func addPlayerListeners(){
         timeObserverToken = _player?.addPeriodicTimeObserver(forInterval: CMTime(value: CMTimeValue(1), timescale: 2), queue: DispatchQueue.main) {[weak self] (progressTime) in
-            //print("periodic time: \(CMTimeGetSeconds(progressTime))")
-            //self?.updatePlaybackProgress(progressTime: progressTime)
-            var duration:CMTime? = self?._player?.currentItem?.asset.duration
-            
-            let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
-            let progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-            var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
-            
-            if(isLive){
-                let liveData = self!.getLiveDuration()
-                durationFloat = liveData.livePosition
-            }
-            
-            // Update seekbar min max values
-            self?.seekBar.minimumValue = 0
-            self?.seekBar.maximumValue = durationFloat
-            
-            
-            // Update UI when user is not dragging or seeking
-            if(self!.isTracking == false && !self!.isSeeking){
-                let isAnimated = isLive ? false : true
-                self?.seekBar.setValue(progressFloat, animated: isAnimated)
-                self!.updateCurrentTime(seconds: progressFloat)
-                self!.updateDurationTime(seconds: durationFloat, isLive: isLive)
-            }
+            self?.onProgress(progressTime: progressTime)
         }
         
         // Register as an observer of the player item's status property
@@ -525,7 +550,11 @@ class RCTPlaybackController: UIView {
             options: [.old, .new],
             context: &playerItemContext)
         
-        self._player?.addObserver(self, forKeyPath: "rate", options: [.old, .new], context: &playerItemContext)
+        self._player?.addObserver(
+            self,
+            forKeyPath: "rate",
+            options: [.old, .new],
+            context: &playerItemContext)
             
     }
     
@@ -583,7 +612,7 @@ class RCTPlaybackController: UIView {
                 print("failed")
                 break
             case .unknown:
-                // Player item is not yet ready.
+                // Player item is not ready.
                 print("unknown")
                 break
             }
