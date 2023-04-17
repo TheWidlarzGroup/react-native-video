@@ -525,7 +525,7 @@ class RCTPlaybackController: UIView {
         }
         
         // Update UI when user is not dragging or seeking
-        if(self.isTracking == false && self.isSeeking){
+        if(self.isTracking == false && self.isSeeking == false){
             let isAnimated = isLive ? false : true
             self.seekBar.setValue(progressFloat, animated: isAnimated)
             self.updateCurrentTime(seconds: isLive ? secondsFromSeekStart : progressFloat)
