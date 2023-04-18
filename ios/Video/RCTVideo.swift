@@ -390,11 +390,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             break
 
         case .STARTED:
-            _rctPlaybackControls?.setUI_isAdDisplaying(isDisplayed: true)
+            _rctPlaybackControls?.setUI_isAdDisplaying(adDisplayed: true)
             break
 
         case .COMPLETE:
-            _rctPlaybackControls?.setUI_isAdDisplaying(isDisplayed: false)
+            _rctPlaybackControls?.setUI_isAdDisplaying(adDisplayed: false)
             break
         case .ALL_ADS_COMPLETED:
             self._adsCompleted = true
