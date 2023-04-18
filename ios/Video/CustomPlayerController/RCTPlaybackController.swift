@@ -8,9 +8,14 @@
 import Foundation
 import AVFoundation
 import AVKit
+import MediaPlayer
+
+extension UIColor {
+    static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
+}
 
 
-class RCTPlaybackController: UIView {
+class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var playerItemContext = 0
     private var timeObserverToken: Any?
     private var _video: RCTVideo?
@@ -46,9 +51,9 @@ class RCTPlaybackController: UIView {
         bar.isContinuous = true
         
         // Styling
-        bar.minimumTrackTintColor = .red
+        bar.minimumTrackTintColor = .lighterGray
         bar.maximumTrackTintColor = .darkGray
-        bar.thumbTintColor = .red
+        bar.thumbTintColor = .lighterGray
         return bar
     }()
     
@@ -56,9 +61,11 @@ class RCTPlaybackController: UIView {
         visibilityTimer?.invalidate()
     }
     
-    func resetControlsTimer() {
+    // Hide playback controls after a given time (defaulted to 4s)
+    func resetControlsTimer(_timeInterval: Double? = nil) {
+        var timeInterval : Double = _timeInterval != nil ? _timeInterval! : 4.0
         invalidateControlsTimer()
-        visibilityTimer = Timer.scheduledTimer(timeInterval: 4.0, target: self, selector: #selector(hideControls), userInfo: nil, repeats: false)
+        visibilityTimer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(hideControls), userInfo: nil, repeats: false)
     }
     
     @objc func hideControls() {
@@ -70,7 +77,7 @@ class RCTPlaybackController: UIView {
     }
     
     // Toggle playback controls by passing visible: nil
-    func toggleControlVisibility(visible: Bool?) {
+    func toggleControlVisibility(visible: Bool?, timerInterval: Double? = nil) {
         var isVisible: Bool = visible ?? !_isVisible
 
         _isVisible = isVisible
@@ -85,7 +92,7 @@ class RCTPlaybackController: UIView {
         topControlStack.isUserInteractionEnabled = isVisible
         bottomControlStack.isUserInteractionEnabled = isVisible
         self.isUserInteractionEnabled = isVisible
-        resetControlsTimer()
+        resetControlsTimer(_timeInterval: timerInterval)
     }
     
     override func layoutSubviews(){
@@ -163,6 +170,7 @@ class RCTPlaybackController: UIView {
     
     var playButton: UIButton = {
         let button = UIButton()
+        button.tintColor = .white
         
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -184,6 +192,7 @@ class RCTPlaybackController: UIView {
     
     var fullscreenButtonTop: UIButton = {
         let button = UIButton()
+        button.tintColor = .white
         
         // Width constraint
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -191,6 +200,14 @@ class RCTPlaybackController: UIView {
         button.addConstraint(NSLayoutConstraint(item: button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
         return button
     }()
+    
+    var airplayView: AVRoutePickerView = {
+        let routePickerView = AVRoutePickerView()
+        routePickerView.tintColor = .lighterGray
+        routePickerView.prioritizesVideoDevices = true
+        return routePickerView
+    }()
+    
     
     var curTimeLabel: UILabel = {
         let label = UILabel()
@@ -248,7 +265,8 @@ class RCTPlaybackController: UIView {
         bottomControlStack.addArrangedSubview(curTimeLabel)
         bottomControlStack.addArrangedSubview(seekBar)
         bottomControlStack.addArrangedSubview(durTimeLabel)
-        bottomControlStack.addArrangedSubview(fullscreenButton)
+//        bottomControlStack.addArrangedSubview(fullscreenButton)
+        // bottomControlStack.addArrangedSubview(airplayView)
         
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
         
@@ -287,6 +305,8 @@ class RCTPlaybackController: UIView {
         
         self.initGestures()
         self.addPlayerListeners()
+        airplayView.delegate = self
+
         
         // Display playback controls
         self.toggleControlVisibility(visible: true)
@@ -531,6 +551,13 @@ class RCTPlaybackController: UIView {
             self.updateCurrentTime(seconds: isLive ? secondsFromSeekStart : progressFloat)
             self.updateDurationTime(seconds: durationFloat)
         }
+    }
+    
+    
+    // AVRoutePickerViewDelegate
+    func routePickerViewDidEndPresentingRoutes(_ routePickerView: AVRoutePickerView){
+        showControls()
+        toggleControlVisibility(visible: true, timerInterval: 8.0)
     }
     
     func addPlayerListeners(){
