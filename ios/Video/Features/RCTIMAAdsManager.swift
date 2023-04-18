@@ -26,7 +26,8 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
 
     func requestAds() {
         // Create ad display container for ad rendering.
-        let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video, viewController: _video.reactViewController())
+        if _video._playerViewController == nil {return} // TODO: Handle player layer ads
+        let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.view, viewController: _video._playerViewController)
 
         let adTagUrl = _video.getAdTagUrl()
         let contentPlayhead = _video.getContentPlayhead()
@@ -84,14 +85,9 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
             adsManager.start()
         }
 
-        if _video.onReceiveAdEvent != nil {
-            let type = convertEventToString(event: event.type)
-
-            _video.onReceiveAdEvent?([
-                "event": type,
-                "target": _video.reactTag!
-            ]);
-        }
+        let type = convertEventToString(event: event.type)
+        _video.receivedAdEvent(event: event);
+    
     }
 
     func adsManager(_ adsManager: IMAAdsManager, didReceive error: IMAAdError) {
