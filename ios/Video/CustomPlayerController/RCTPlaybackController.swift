@@ -184,19 +184,19 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self._playerItem?.addObserver(self,
            forKeyPath: #keyPath(AVPlayerItem.status),
            options: [.old, .new],
-           context: &_playerItemContext)
+           context: nil)
         
         self._player?.addObserver(
             self,
             forKeyPath: "timeControlStatus",
             options: [.old, .new],
-            context: &_playerItemContext)
+            context: nil)
         
         self._player?.addObserver(
             self,
             forKeyPath: "rate",
             options: [.old, .new],
-            context: &_playerItemContext)
+            context: nil)
     }
     
     func initSeekBar(){
@@ -284,21 +284,18 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         change: [NSKeyValueChangeKey : Any]?,
         context: UnsafeMutableRawPointer?
     ) {
-
-        // Only handle observations for the playerItemContext
-        guard context == &_playerItemContext else {
-            super.observeValue(forKeyPath: keyPath,
-                               of: object,
-                               change: change,
-                               context: context)
-            return
+        DispatchQueue.main.async {
+            self.onPlayerEvent(keyPath: keyPath, change: change)
         }
-        
+    }
+    
+    func onPlayerEvent(keyPath: String?, change: [NSKeyValueChangeKey : Any]?){
+        guard let _player = _player else { return }
         setUi_forceRefresh()
         
         switch (keyPath) {
         case "timeControlStatus":
-            let status = self._player?.timeControlStatus
+            let status = _player.timeControlStatus
 
             if status == .playing {
                 setContentPlayStatus(playing: true)
@@ -308,7 +305,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
             break
             
         case "rate":
-            if self._player!.rate > 0 {
+            if _player.rate > 0 {
                 setContentPlayStatus(playing: true)
             }else{
                 setContentPlayStatus(playing: false)
