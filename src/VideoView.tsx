@@ -1,17 +1,17 @@
 import React from 'react'
-import type { NativeProps } from './VideoNativeComponent';
-import RNCVideoComponent from './VideoNativeComponent'
+import type { VideoNativeProps } from './fabric/VideoNativeComponent';
+import RNCVideoComponent from './fabric/VideoNativeComponent'
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
 import type { ResolvedAssetSource } from 'react-native/Libraries/Image/AssetSourceResolver';
 
-export interface VideoViewProps extends Omit<NativeProps, 'src'> {
+export interface VideoViewProps extends Omit<VideoNativeProps, 'src'> {
     source: {
       uri: string
     } | number
 }
 
 export default function VideoView({ source: sourceProp, ...props }: VideoViewProps) {
-    const source = resolveAssetSource(sourceProp) || {} as ResolvedAssetSource
+    const source = resolveAssetSource(sourceProp) || {} as ResolvedAssetSource;
     const shouldCache = !(source as any).__packager_asset;
 
     let uri = source.uri || '';
@@ -22,11 +22,6 @@ export default function VideoView({ source: sourceProp, ...props }: VideoViewPro
     const isNetwork = !!(uri && uri.match(/^https?:/i));
     const isAsset = !!(uri && uri.match(/^(assets-library|ph|ipod-library|file|content|ms-appx|ms-appdata):/i));
 
-    if ((uri || uri === '') && !isNetwork && !isAsset) {
-      if (this.props.onError) {
-        this.props.onError({error: {errorString: 'invalid url, player will stop', errorCode: 'INVALID_URL'}});
-      }
-    }
 
     return (
       <RNCVideoComponent
@@ -38,7 +33,7 @@ export default function VideoView({ source: sourceProp, ...props }: VideoViewPro
           type: source.type || '',
           mainVer: source.mainVer || 0,
           patchVer: source.patchVer || 0,
-          requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
+          requestHeaders: source.headers ?? {},
           startTime: source.startTime || 0,
           endTime: source.endTime
         }}
