@@ -2,13 +2,14 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <React/RCTViewComponentView.h>
 #import <UIKit/UIKit.h>
+#import "RCTVideo.h"
 
 #ifndef RNCVideoComponentView_h
 #define RNCVideoComponentView_h
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RNCVideoComponentView : RCTViewComponentView
+@interface RNCVideoComponentView : RCTViewComponentView <RCTVideoEventDelegate>
 @end
 
 NS_ASSUME_NONNULL_END
