@@ -13,7 +13,6 @@ import {
   Platform,
 } from "react-native";
 import RNCVideoComponent, { Commands, OnAudioFocusChangedData, OnPlaybackStateChangedData, OnVideoErrorData } from "./fabric/VideoNativeComponent";
-
 import type { StyleProp, ImageStyle, NativeSyntheticEvent } from "react-native";
 import type {
   VideoComponentType,
