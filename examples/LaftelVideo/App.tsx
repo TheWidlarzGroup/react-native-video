@@ -9,19 +9,11 @@
  */
 
 import React, {type PropsWithChildren} from 'react';
-import {
-  StyleSheet,
-  View,
-} from 'react-native';
-import Video from 'react-native-video'
+import {StyleSheet, View} from 'react-native';
+import VideoPlayer from './src/VideoPlayer';
 
 const App = () => {
-
-  return (
-    <View style={{flex: 1}}>
-      <Video style={{flex:1, backgroundColor: 'blue'}} source={{uri: "https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4"}} />
-    </View>
-  );
+  return <VideoPlayer />;
 };
 
 export default App;
