@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
 
-    private static final String REACT_CLASS = "RCTVideo";
+    private static final String REACT_CLASS = "RNCVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_START_TIME = "startTime";
