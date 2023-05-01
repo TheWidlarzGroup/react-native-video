@@ -62,7 +62,7 @@ type SelectedTrack = {
 }
 
 type SelectedVideoTrack = {
-  type: 'system' | 'disabled' | 'resolution' | 'index';
+  type: 'auto' | 'disabled' | 'resolution' | 'index'
   value: number;
 }
 

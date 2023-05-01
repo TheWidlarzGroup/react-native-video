@@ -2,7 +2,7 @@ import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNati
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import type { HostComponent, ViewProps } from 'react-native';
 
-import type { Float, Int32, WithDefault, DirectEventHandler } from 'react-native/Libraries/Types/CodegenTypes';
+import type { Float, Int32, WithDefault, DirectEventHandler, Double } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Headers = ReadonlyArray<Readonly<{
   key: string;
@@ -79,6 +79,28 @@ export type Seek = Readonly<{
   tolerance?: Float;
 }>
 
+type BufferConfig = Readonly<{
+  minBufferMs?: Float;
+  maxBufferMs?: Float;
+  bufferForPlaybackMs?: Float;
+  bufferForPlaybackAfterRebufferMs?: Float;
+  maxHeapAllocationPercent?: Float;
+  minBackBufferMemoryReservePercent?: Float;
+  minBufferMemoryReservePercent?: Float;
+}>
+
+type SelectedVideoTrack = Readonly<{
+  type?: WithDefault<'auto' | 'disabled' | 'resolution' | 'index', 'auto'>
+  value?: Int32;
+}>
+
+type SubtitleStyle = Readonly<{
+  fontSize?: Float;
+  paddingTop?: WithDefault<Float, 0>;
+  paddingBottom?: WithDefault<Float, 0>;
+  paddingLeft?: WithDefault<Float, 0>;
+  paddingRight?: WithDefault<Float, 0>;
+}>
 
 export type OnLoadData = Readonly<{
   currentTime: Float;
@@ -114,6 +136,10 @@ export type OnSeekData = Readonly<{
   seekTime: Float;
 }>
 
+export type OnPlaybackStateChangedData = Readonly<{
+  isPlaying: boolean;
+}>
+
 export type OnTimedMetadataData = Readonly<{}>
 
 export type OnPlaybackData = Readonly<{
@@ -140,6 +166,10 @@ export type OnReceiveAdEventData = Readonly<{
 
 export type OnVideoErrorData = Readonly<{
   error: string;
+}>
+
+export type OnAudioFocusChangedData = Readonly<{
+  hasFocus: boolean;
 }>
 
 export interface VideoNativeProps extends ViewProps {
@@ -173,7 +203,23 @@ export interface VideoNativeProps extends ViewProps {
   fullscreenOrientation?: WithDefault<'all' | 'landscape' | 'portrait', 'all'>;
   progressUpdateInterval?: Float;
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
-  localSourceEncryptionKeyScheme?: string; 
+  localSourceEncryptionKeyScheme?: string;
+
+  backBufferDurationMs?: Int32; // Android
+  bufferConfig?: BufferConfig; // Android
+  contentStartTime?: Int32; // Android
+  currentPlaybackTime?: Double; // Android
+  disableDisconnectError?: boolean; // Android
+  focusable?: boolean; 	// Android
+  hideShutterView?: boolean; //	Android
+  minLoadRetryCount?: Int32;	// Android
+  reportBandwidth?: boolean; //Android
+  selectedVideoTrack?: SelectedVideoTrack; // android
+  subtitleStyle?: SubtitleStyle // android
+  trackId?: string; // Android
+  useTextureView?: boolean;	// Android
+  useSecureView?: boolean;	// Android
+
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoBuffer?: DirectEventHandler<OnBufferData>;
@@ -181,20 +227,28 @@ export interface VideoNativeProps extends ViewProps {
   onVideoProgress?: DirectEventHandler<OnProgressData>;
   onBandwidthUpdate?: DirectEventHandler<OnBandwidthUpdateData>
   onVideoSeek?: DirectEventHandler<OnSeekData>;
-  onVideoEnd?: DirectEventHandler<Readonly<{}>>;
-  onTimedMetadata?: DirectEventHandler<OnTimedMetadataData>;
+  onVideoEnd?: DirectEventHandler<Readonly<{}>>; // all
+  onTimedMetadata?: DirectEventHandler<OnTimedMetadataData>; // ios, android
   onVideoAudioBecomingNoisy?: DirectEventHandler<Readonly<{}>>;
-  onVideoFullscreenPlayerWillPresent?: DirectEventHandler<Readonly<{}>>;
-  onVideoFullscreenPlayerDidPresent?: DirectEventHandler<Readonly<{}>>;
-  onVideoFullscreenPlayerWillDismiss?: DirectEventHandler<Readonly<{}>>;
-  onVideoFullscreenPlayerDidDismiss?: DirectEventHandler<Readonly<{}>>;
+  onVideoFullscreenPlayerWillPresent?: DirectEventHandler<Readonly<{}>>; // ios, android
+  onVideoFullscreenPlayerDidPresent?: DirectEventHandler<Readonly<{}>>;  // ios, android
+  onVideoFullscreenPlayerWillDismiss?: DirectEventHandler<Readonly<{}>>;  // ios, android
+  onVideoFullscreenPlayerDidDismiss?: DirectEventHandler<Readonly<{}>>;  // ios, android
   onReadyForDisplay?: DirectEventHandler<Readonly<{}>>;
-  onPlaybackRateChange?: DirectEventHandler<OnPlaybackData>;
+  onPlaybackRateChange?: DirectEventHandler<OnPlaybackData>; // all
   onVideoExternalPlaybackChange?: DirectEventHandler<OnExternalPlaybackChangeData>;
   onGetLicense?: DirectEventHandler<OnGetLicenseData>;
   onPictureInPictureStatusChanged?: DirectEventHandler<OnPictureInPictureStatusChangedData>;
   onRestoreUserInterfaceForPictureInPictureStop?: DirectEventHandler<Readonly<{}>>;
   onReceiveAdEvent?: DirectEventHandler<OnReceiveAdEventData>;
+  onVideoPlaybackStateChanged?: DirectEventHandler<OnPlaybackStateChangedData>; // android only
+  onVideoIdle?: DirectEventHandler<{}>; // android only (nowhere in document, so do not use as props. just type declaration)
+  onAudioFocusChanged?: DirectEventHandler<OnAudioFocusChangedData>; // android only (nowhere in document, so do not use as props. just type declaration)
+  // @todo: fix type
+  // onAudioTracks: DirectEventHandler<any>; // android
+  // onTextTracks: DirectEventHandler<any>; // android
+  // onVideoTracks: DirectEventHandler<any>; // android
+  // onTimedMetadata: DirectEventHandler<any>; // android
 }
 
 export type VideoComponentType = HostComponent<VideoNativeProps>
