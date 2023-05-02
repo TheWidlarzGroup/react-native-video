@@ -6,7 +6,6 @@ import com.brentvatne.exoplayer.events.*
 import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.ReadableMapKeySetIterator
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
@@ -160,25 +159,26 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
 
     @ReactProp(name = "drm")
     override fun setDrm(view: ReactExoplayerView?, drm: ReadableMap?) {
-        if (view != null && drm != null && drm.hasKey(PROP_DRM_TYPE)) {
-            val drmType: String? = if (drm.hasKey(PROP_DRM_TYPE)) drm.getString(PROP_DRM_TYPE) else null
-            val drmLicenseServer: String? = if (drm.hasKey(PROP_DRM_LICENSESERVER)) drm.getString(PROP_DRM_LICENSESERVER) else null
-            val drmHeaders: ReadableMap? = if (drm.hasKey(PROP_DRM_HEADERS)) drm.getMap(PROP_DRM_HEADERS) else null
+        if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
+            val drmType = if (drm.hasKey(PROP_DRM_TYPE)) drm.getString(PROP_DRM_TYPE) else null
+            val drmLicenseServer = if (drm.hasKey(PROP_DRM_LICENSESERVER)) drm.getString(PROP_DRM_LICENSESERVER) else null
+            val drmHeadersArray = if (drm.hasKey(PROP_DRM_HEADERS)) drm.getArray(PROP_DRM_HEADERS) else null
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
-                val drmUUID: UUID? = Util.getDrmUuid(drmType)
-                view.setDrmType(drmUUID)
-                view.setDrmLicenseUrl(drmLicenseServer)
-                if (drmHeaders != null) {
+                val drmUUID = Util.getDrmUuid(drmType)
+                view?.setDrmType(drmUUID)
+                view?.setDrmLicenseUrl(drmLicenseServer)
+                if (drmHeadersArray != null) {
                     val drmKeyRequestPropertiesList: ArrayList<String?> = ArrayList()
-                    val itr: ReadableMapKeySetIterator = drmHeaders.keySetIterator()
-                    while (itr.hasNextKey()) {
-                        val key: String = itr.nextKey()
+                    for (i in 0 until drmHeadersArray.size()) {
+                        val current = drmHeadersArray.getMap(i)
+                        val key = if (current.hasKey("key")) current.getString("key") else null
+                        val value = if (current.hasKey("value")) current.getString("value") else null
                         drmKeyRequestPropertiesList.add(key)
-                        drmKeyRequestPropertiesList.add(drmHeaders.getString(key))
+                        drmKeyRequestPropertiesList.add(value)
                     }
-                    view.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(arrayOfNulls<String>(0)))
+                    view?.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(arrayOfNulls<String>(0)))
                 }
-                view.setUseTextureView(false)
+                view?.setUseTextureView(false)
             }
         }
     }
