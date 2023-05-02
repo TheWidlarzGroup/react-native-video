@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": "./",
     "paths": {
       "react-native-video": ["./src/index"]

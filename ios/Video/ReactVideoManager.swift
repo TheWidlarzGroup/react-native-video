@@ -24,7 +24,6 @@ class ReactVideoManager: RCTViewManager {
         })
     }
     
-#if RCT_NEW_ARCH_ENABLED
     @objc(seek:info:)
     func seek(_ reactTag: NSNumber, info: NSDictionary) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
@@ -36,7 +35,6 @@ class ReactVideoManager: RCTViewManager {
             }
         })
     }
-#endif
     
     @objc(setLicenseResult:license:)
     func setLicenseResult(_ reactTag: NSNumber, license: NSString) -> Void {

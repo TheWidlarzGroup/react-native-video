@@ -504,12 +504,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         _paused = paused
     }
-#if !RCT_NEW_ARCH_ENABLED
-    @objc
-    func setSeek(_ info:NSDictionary!) {
-        self.seek(info);
-    }
-#endif
 
     @objc
     func seek(_ info:NSDictionary!) {

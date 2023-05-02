@@ -34,9 +34,6 @@ RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(localSourceEncryptionKeyScheme, NSString);
-#ifndef RCT_NEW_ARCH_ENABLED
-RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
-#endif
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
@@ -71,8 +68,6 @@ RCT_EXTERN_METHOD(setLicenseResult:(nonnull NSNumber *)reactTag: license(NSStrin
 
 RCT_EXTERN_METHOD(setLicenseResultError:(nonnull NSNumber *)reactTag error:(NSString *)error);
 
-#ifdef RCT_NEW_ARCH_ENABLED
 RCT_EXTERN_METHOD(seek:(nonnull NSNumber *)reactTag info:(NSDictionary *)info);
-#endif
 
 @end

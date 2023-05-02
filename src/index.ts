@@ -1,12 +1,8 @@
-import OldArchVideo from './OldArchVideo';
+import Video from './Video';
 export { default as FilterType } from './lib/FilterType';
 export { default as VideoResizeMode } from './lib/VideoResizeMode';
 export { default as TextTrackType } from './lib/TextTrackType';
 export { default as DRMType } from './lib/DRMType';
-export { VideoRef } from './NewArchVideo';
-
-const NewArchVideo = require('./NewArchVideo').default;
-// @ts-expect-error nativeFabricUIManager is not yet included in the RN types
-const Video = !!global?.nativeFabricUIManager ? NewArchVideo : OldArchVideo;
+export { VideoRef } from './Video';
 
 export default Video;
