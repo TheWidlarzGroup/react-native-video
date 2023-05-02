@@ -451,8 +451,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
         if (!TextUtils.isEmpty(resizeModeOrdinalString)) {
-            int resizeModeOrdinal = Integer.parseInt(resizeModeOrdinalString);
-            return ResizeMode.toResizeMode(resizeModeOrdinal);
+            if (resizeModeOrdinalString.equals("none")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("contain")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("cover")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_CENTER_CROP);
+            } else if (resizeModeOrdinalString.equals("stretch")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FILL);
+            }
         }
         return ResizeMode.RESIZE_MODE_FIT;
     }
