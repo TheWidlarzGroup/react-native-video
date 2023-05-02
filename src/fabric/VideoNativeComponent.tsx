@@ -140,7 +140,55 @@ export type OnPlaybackStateChangedData = Readonly<{
   isPlaying: boolean;
 }>
 
-export type OnTimedMetadataData = Readonly<{}>
+// @todo: fix type. for now react native doesn't support array codegen type for native event
+type _OnTimedMetadataData = Readonly<{}>
+export type OnTimedMetadataData = Readonly<{
+  metadata: ReadonlyArray<Readonly<{
+    value?: string
+    identifier?: string
+  }>>
+}>
+
+// @todo: fix type. for now react native doesn't support array codegen type for native event
+type _OnAudioTracksData = Readonly<{}>
+export type OnAudioTracksData = Readonly<{
+  audioTracks: ReadonlyArray<Readonly<{
+    index?: Int32
+    title?: string
+    language?: string
+    bitrate?: Float
+    type?: string
+    selected?: boolean
+  }>>
+}>
+
+// @todo: fix type. for now react native doesn't support array codegen type for native event
+type _OnTextTracksData = Readonly<{}>
+export type OnTextTracksData = Readonly<{
+  textTracks: ReadonlyArray<Readonly<{
+    index?: Int32
+    title?: string
+    language?: string
+    /**
+     * iOS only supports VTT, Android supports all 3
+     */
+    type?: 'srt' | 'ttml' | 'vtt'
+    selected?: boolean
+  }>>
+}>
+
+// @todo: fix type. for now react native doesn't support array codegen type for native event
+type _OnVideoTracksData = Readonly<{}>
+export type OnVideoTracksData = Readonly<{
+  videoTracks: ReadonlyArray<Readonly<{
+    trackId?: Int32
+    codecs?: string
+    width?: Float
+    height?: Float
+    bitrate?: Float
+    selected?: boolean
+  }>>
+}>
 
 export type OnPlaybackData = Readonly<{
   playbackRate: Float;
@@ -228,7 +276,6 @@ export interface VideoNativeProps extends ViewProps {
   onBandwidthUpdate?: DirectEventHandler<OnBandwidthUpdateData>
   onVideoSeek?: DirectEventHandler<OnSeekData>;
   onVideoEnd?: DirectEventHandler<Readonly<{}>>; // all
-  onTimedMetadata?: DirectEventHandler<OnTimedMetadataData>; // ios, android
   onVideoAudioBecomingNoisy?: DirectEventHandler<Readonly<{}>>;
   onVideoFullscreenPlayerWillPresent?: DirectEventHandler<Readonly<{}>>; // ios, android
   onVideoFullscreenPlayerDidPresent?: DirectEventHandler<Readonly<{}>>;  // ios, android
@@ -245,10 +292,10 @@ export interface VideoNativeProps extends ViewProps {
   onVideoIdle?: DirectEventHandler<{}>; // android only (nowhere in document, so do not use as props. just type declaration)
   onAudioFocusChanged?: DirectEventHandler<OnAudioFocusChangedData>; // android only (nowhere in document, so do not use as props. just type declaration)
   // @todo: fix type
-  // onAudioTracks: DirectEventHandler<any>; // android
-  // onTextTracks: DirectEventHandler<any>; // android
-  // onVideoTracks: DirectEventHandler<any>; // android
-  // onTimedMetadata: DirectEventHandler<any>; // android
+  onTimedMetadata?: DirectEventHandler<_OnTimedMetadataData>; // ios, android
+  onAudioTracks: DirectEventHandler<_OnAudioTracksData>; // android
+  onTextTracks: DirectEventHandler<_OnTextTracksData>; // android
+  onVideoTracks: DirectEventHandler<_OnVideoTracksData>; // android
 }
 
 export type VideoComponentType = HostComponent<VideoNativeProps>

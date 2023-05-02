@@ -12,7 +12,7 @@ import {
   Image,
   Platform,
 } from "react-native";
-import RNCVideoComponent, { Commands, OnAudioFocusChangedData, OnPlaybackStateChangedData, OnVideoErrorData } from "./fabric/VideoNativeComponent";
+import RNCVideoComponent, { Commands, OnAudioFocusChangedData, OnAudioTracksData, OnPlaybackStateChangedData, OnTextTracksData, OnTimedMetadataData, OnVideoErrorData, OnVideoTracksData } from "./fabric/VideoNativeComponent";
 
 import type { StyleProp, ImageStyle, NativeSyntheticEvent } from "react-native";
 import type {
@@ -60,7 +60,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onEnd,
       onBuffer,
       onBandwidthUpdate,
-      onTimedMetadata,
       onExternalPlaybackChange,
       onFullscreenPlayerWillPresent,
       onFullscreenPlayerDidPresent,
@@ -75,6 +74,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onPlaybackStateChanged,
       onAudioFocusChanged,
       onIdle,
+      // @todo: fix type
+      onTimedMetadata,
+      onAudioTracks,
+      onTextTracks,
+      onVideoTracks,
       ...rest
     },
     ref
@@ -239,11 +243,26 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     /** @todo: fix type */
     const _onTimedMetadata = useCallback(
-      () => {
-        onTimedMetadata?.();
+      (e: NativeSyntheticEvent<OnTimedMetadataData>) => {
+        onTimedMetadata?.(e.nativeEvent);
       },
       [onTimedMetadata]
     );
+
+    /** @todo: fix type */
+    const _onAudioTracks = useCallback((e: NativeSyntheticEvent<OnAudioTracksData>) => {
+      onAudioTracks?.(e.nativeEvent)
+    }, [onAudioTracks])
+
+    /** @todo: fix type */
+    const _onTextTracks = useCallback((e: NativeSyntheticEvent<OnTextTracksData>) => {
+      onTextTracks?.(e.nativeEvent)
+    }, [onAudioTracks])
+
+    /** @todo: fix type */
+    const _onVideoTracks = useCallback((e: NativeSyntheticEvent<OnVideoTracksData>) => {
+      onVideoTracks?.(e.nativeEvent)
+    }, [onAudioTracks])
 
     const _onPlaybackRateChange = useCallback(
       (e: NativeSyntheticEvent<Readonly<{ playbackRate: number }>>) => {
@@ -352,7 +371,18 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoBuffer={onVideoBuffer}
           onVideoPlaybackStateChanged={onVideoPlaybackStateChanged}
           onBandwidthUpdate={_onBandwidthUpdate}
-          onTimedMetadata={_onTimedMetadata}
+          onTimedMetadata={(e) => {
+            _onTimedMetadata(e as NativeSyntheticEvent<OnTimedMetadataData>)
+          }}
+          onAudioTracks={(e) => {
+            _onAudioTracks(e as NativeSyntheticEvent<OnAudioTracksData>)
+          }}
+          onTextTracks={(e) => {
+            _onTextTracks(e as NativeSyntheticEvent<OnTextTracksData>)
+          }}
+          onVideoTracks={(e) => {
+            _onVideoTracks(e as NativeSyntheticEvent<OnVideoTracksData>)
+          }}
           onVideoFullscreenPlayerDidDismiss={onFullscreenPlayerDidDismiss}
           onVideoFullscreenPlayerDidPresent={onFullscreenPlayerDidPresent}
           onVideoFullscreenPlayerWillDismiss={onFullscreenPlayerWillDismiss}
