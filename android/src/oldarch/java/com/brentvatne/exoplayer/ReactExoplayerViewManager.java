@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -123,6 +125,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         );
     }
 
+    @Override
+    public void receiveCommand(@NonNull ReactExoplayerView root, String commandId, @androidx.annotation.Nullable ReadableArray args) {
+        switch (commandId) {
+            case "seek":
+                this.setSeek(root, args.getInt(0));
+                break;
+            default:
+                break;
+        }
+    }
+
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
@@ -155,7 +168,21 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         int startTimeMs = src.hasKey(PROP_SRC_START_TIME) ? src.getInt(PROP_SRC_START_TIME) : -1;
         int endTimeMs = src.hasKey(PROP_SRC_END_TIME) ? src.getInt(PROP_SRC_END_TIME) : -1;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+
+        Map<String, String> headers = new HashMap<>();
+        ReadableArray propSrcHeadersArray = (src.hasKey(PROP_SRC_HEADERS)) ? src.getArray(PROP_SRC_HEADERS) : null;
+        if (propSrcHeadersArray != null) {
+            if (propSrcHeadersArray.size() > 0) {
+                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
+                    ReadableMap current = propSrcHeadersArray.getMap(i);
+                    String key = current.hasKey("key") ? current.getString("key") : null;
+                    String value = current.hasKey("value") ? current.getString("value") : null;
+                    if (key != null && value != null) {
+                        headers.put(key, value);
+                    }
+                }
+            }
+        }
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
