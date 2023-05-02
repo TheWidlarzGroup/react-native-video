@@ -7,6 +7,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
