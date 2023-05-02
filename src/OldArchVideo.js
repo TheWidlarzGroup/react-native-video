@@ -90,13 +90,20 @@ export default class Video extends Component {
     return strObj;
   }
 
-  seek = async (time, tolerance = 100) => {
-    if (isNaN(time)) {throw new Error('Specified time is not a number');}
+seek = (time, tolerance = 100) => {
+    if (isNaN(time)) throw new Error('Specified time is not a number')
 
-    const options = Platform.OS === 'ios' ? { time, tolerance } : time;
-
-    return await NativeModules.VideoManager.seek(options, findNodeHandle(this._root));
-  };
+    if (Platform.OS === 'ios') {
+      this.setNativeProps({
+        seek: {
+          time,
+          tolerance,
+        },
+      })
+    } else {
+      this.setNativeProps({ seek: time })
+    }
+  }
 
   presentFullscreenPlayer = () => {
     this.setNativeProps({ fullscreen: true });
@@ -345,23 +352,10 @@ export default class Video extends Component {
       }
     }
 
-    let nativeResizeMode;
-    const RCTVideoInstance = this.getViewManagerConfig('RCTVideo');
-
-    if (resizeMode === VideoResizeMode.stretch) {
-      nativeResizeMode = RCTVideoInstance.Constants.ScaleToFill;
-    } else if (resizeMode === VideoResizeMode.contain) {
-      nativeResizeMode = RCTVideoInstance.Constants.ScaleAspectFit;
-    } else if (resizeMode === VideoResizeMode.cover) {
-      nativeResizeMode = RCTVideoInstance.Constants.ScaleAspectFill;
-    } else {
-      nativeResizeMode = RCTVideoInstance.Constants.ScaleNone;
-    }
-
     const nativeProps = Object.assign({}, this.props);
     Object.assign(nativeProps, {
       style: [styles.base, nativeProps.style],
-      resizeMode: nativeResizeMode,
+      resizeMode,
       src: {
         uri,
         isNetwork,
@@ -591,7 +585,7 @@ Video.propTypes = {
   ...ViewPropTypes,
 };
 
-const RCTVideo = requireNativeComponent('RCTVideo', Video, {
+const RCTVideo = requireNativeComponent('RNCVideo', Video, {
   nativeOnly: {
     src: true,
     seek: true,
