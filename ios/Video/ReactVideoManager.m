@@ -68,6 +68,6 @@ RCT_EXTERN_METHOD(setLicenseResult:(nonnull NSNumber *)reactTag: license(NSStrin
 
 RCT_EXTERN_METHOD(setLicenseResultError:(nonnull NSNumber *)reactTag error:(NSString *)error);
 
-RCT_EXTERN_METHOD(seek:(nonnull NSNumber *)reactTag info:(NSDictionary *)info);
+RCT_EXTERN_METHOD(seek:(nonnull NSNumber *)reactTag time:(nonnull NSNumber *) timeValue tolerance:(nonnull NSNumber *) toleranceValue)
 
 @end
