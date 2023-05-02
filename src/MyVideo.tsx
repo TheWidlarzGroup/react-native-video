@@ -12,7 +12,7 @@ import {
   Image,
   Platform,
 } from "react-native";
-import RNCVideoComponent, { Commands, OnVideoErrorData } from "./fabric/VideoNativeComponent";
+import RNCVideoComponent, { Commands, OnAudioFocusChangedData, OnPlaybackStateChangedData, OnVideoErrorData } from "./fabric/VideoNativeComponent";
 
 import type { StyleProp, ImageStyle, NativeSyntheticEvent } from "react-native";
 import type {
@@ -72,6 +72,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop,
       onReceiveAdEvent,
+      onPlaybackStateChanged,
+      onAudioFocusChanged,
+      onIdle,
       ...rest
     },
     ref
@@ -224,6 +227,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onSeek]
     );
 
+    // android only
+    const onVideoPlaybackStateChanged = useCallback((e: NativeSyntheticEvent<OnPlaybackStateChangedData>) => {
+      onPlaybackStateChanged?.(e.nativeEvent);
+    }, [onPlaybackStateChanged])
+
+    // android only
+    const onVideoIdle = useCallback(() => {
+      onIdle?.()
+    }, [onIdle])
+
     /** @todo: fix type */
     const _onTimedMetadata = useCallback(
       () => {
@@ -250,6 +263,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       },
       [onPictureInPictureStatusChanged]
     );
+
+    const _onAudioFocusChanged = useCallback((e: NativeSyntheticEvent<OnAudioFocusChangedData>) => {
+      onAudioFocusChanged?.(e.nativeEvent)
+    }, [onAudioFocusChanged])
 
     const onVideoBuffer = useCallback((e: NativeSyntheticEvent<OnBufferData>) => {
       onBuffer?.(e.nativeEvent);
@@ -333,6 +350,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoSeek={onVideoSeek}
           onVideoEnd={onEnd}
           onVideoBuffer={onVideoBuffer}
+          onVideoPlaybackStateChanged={onVideoPlaybackStateChanged}
           onBandwidthUpdate={_onBandwidthUpdate}
           onTimedMetadata={_onTimedMetadata}
           onVideoFullscreenPlayerDidDismiss={onFullscreenPlayerDidDismiss}
@@ -340,6 +358,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoFullscreenPlayerWillDismiss={onFullscreenPlayerWillDismiss}
           onVideoFullscreenPlayerWillPresent={onFullscreenPlayerWillPresent}
           onVideoExternalPlaybackChange={onVideoExternalPlaybackChange}
+          onVideoIdle={onVideoIdle}
+          onAudioFocusChanged={_onAudioFocusChanged}
           onReadyForDisplay={_onReadyForDisplay}
           onPlaybackRateChange={_onPlaybackRateChange}
           onVideoAudioBecomingNoisy={onAudioBecomingNoisy}
