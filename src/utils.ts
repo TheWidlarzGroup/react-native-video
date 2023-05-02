@@ -17,3 +17,8 @@ export function resolveAssetSourceForVideo(source: Source): ReactVideoSource {
   }
   return source as ReactVideoSource;
 }
+
+export function isFabric() {
+  // @ts-expect-error nativeFabricUIManager is not yet included in the RN types
+  return !!global?.nativeFabricUIManager;
+}

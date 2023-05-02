@@ -3,10 +3,46 @@ import PropTypes from 'prop-types';
 import { StyleSheet, requireNativeComponent, NativeModules, UIManager, View, Image, Platform, findNodeHandle } from 'react-native';
 import { ViewPropTypes, ImagePropTypes } from 'deprecated-react-native-prop-types';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
-import TextTrackType from './TextTrackType';
-import FilterType from './FilterType';
-import DRMType from './DRMType';
-import VideoResizeMode from '../VideoResizeMode.js';
+
+const TextTrackType = {
+  SRT: 'application/x-subrip',
+  TTML: 'application/ttml+xml',
+  VTT: 'text/vtt',
+};
+
+const FilterType = {
+    NONE: 'None',
+    INVERT: 'CIColorInvert',
+    MONOCHROME: 'CIColorMonochrome',
+    POSTERIZE: 'CIColorPosterize',
+    FALSE: 'CIFalseColor',
+    MAXIMUMCOMPONENT: 'CIMaximumComponent',
+    MINIMUMCOMPONENT: 'CIMinimumComponent',
+    CHROME: 'CIPhotoEffectChrome',
+    FADE: 'CIPhotoEffectFade',
+    INSTANT: 'CIPhotoEffectInstant',
+    MONO: 'CIPhotoEffectMono',
+    NOIR: 'CIPhotoEffectNoir',
+    PROCESS: 'CIPhotoEffectProcess',
+    TONAL: 'CIPhotoEffectTonal',
+    TRANSFER: 'CIPhotoEffectTransfer',
+    SEPIA: 'CISepiaTone',
+};
+
+const DRMType = {
+    WIDEVINE: 'widevine',
+    PLAYREADY: 'playready',
+    CLEARKEY: 'clearkey',
+    FAIRPLAY: 'fairplay',
+};
+
+const VideoResizeMode = {
+  contain: 'contain',
+  cover: 'cover',
+  stretch: 'stretch',
+};
+
+
 
 const styles = StyleSheet.create({
   base: {
@@ -15,7 +51,7 @@ const styles = StyleSheet.create({
 });
 
 const { VideoDecoderProperties } = NativeModules
-export { TextTrackType, FilterType, DRMType, VideoDecoderProperties }
+export { VideoDecoderProperties }
 
 export default class Video extends Component {
 
@@ -54,19 +90,12 @@ export default class Video extends Component {
     return strObj;
   }
 
-  seek = (time, tolerance = 100) => {
+  seek = async (time, tolerance = 100) => {
     if (isNaN(time)) {throw new Error('Specified time is not a number');}
 
-    if (Platform.OS === 'ios') {
-      this.setNativeProps({
-        seek: {
-          time,
-          tolerance,
-        },
-      });
-    } else {
-      this.setNativeProps({ seek: time });
-    }
+    const options = Platform.OS === 'ios' ? { time, tolerance } : time;
+
+    return await NativeModules.VideoManager.seek(options, findNodeHandle(this._root));
   };
 
   presentFullscreenPlayer = () => {
@@ -418,10 +447,6 @@ Video.propTypes = {
   filterEnabled: PropTypes.bool,
   /* Native only */
   src: PropTypes.object,
-  seek: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.object,
-  ]),
   fullscreen: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,
