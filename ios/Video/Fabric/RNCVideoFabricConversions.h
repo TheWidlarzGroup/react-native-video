@@ -19,21 +19,24 @@ inline NSDictionary *srcDictFromCppStruct(const RNCVideoSrcStruct &src) {
     };
 }
 
-inline NSDictionary *drmHeadersFromCppVector(const std::vector<RNCVideoDrmHeadersStruct> &vector) {
-    NSMutableDictionary *drmHeader = [NSMutableDictionary dictionaryWithCapacity:vector.size()];
+inline NSArray *drmHeadersFromCppVector(const std::vector<RNCVideoDrmHeadersStruct> &vector) {
+    NSMutableArray *drmHeaders = [NSMutableArray arrayWithCapacity:vector.size()];
     
     for (const RNCVideoDrmHeadersStruct &header : vector) {
         NSString *key = RCTNSStringFromString(header.key);
         NSString *value = RCTNSStringFromString(header.value);
         
-        [drmHeader setObject:value forKey:key];
+        [drmHeaders addObject:@{
+            @"key": key,
+            @"value": value
+        }];
     }
     
-    return drmHeader;
+    return drmHeaders;
 }
 
 inline NSDictionary *drmDictFromCppStruct(const RNCVideoDrmStruct &drm) {
-    NSDictionary *headers = drmHeadersFromCppVector(drm.headers);
+    NSArray *headers = drmHeadersFromCppVector(drm.headers);
     
     return @{
         @"type": RCTNSStringFromStringNilIfEmpty(toString(drm.drmType)) ?: @"",
