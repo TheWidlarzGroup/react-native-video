@@ -85,8 +85,8 @@ type TextTracks = {
 
 export interface ReactVideoProps extends ReactVideoEvents {
   source: ReactVideoSource;
-  drm: ReactVideoDrm;
-  style: StyleProp<ViewStyle>;
+  drm?: ReactVideoDrm;
+  style?: StyleProp<ViewStyle>;
   adTagUrl?: string; // iOS
   audioOnly?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
