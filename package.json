@@ -1,9 +1,10 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-alpha.7",
+    "version": "7.0.0-alpha.0",
     "description": "A <Video /> element for react-native",
-    "main": "Video.js",
-    "source": "Video.js",
+    "main": "src/index",
+    "source": "src/index",
+    "react-native": "src/index",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
@@ -41,5 +42,13 @@
         "src",
         "react-native-video.podspec",
         "docs"
-    ]
+    ],
+    "codegenConfig": {
+        "name": "RNCVideo",
+        "type": "components",
+        "jsSrcsDir": "src"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    }
 }
