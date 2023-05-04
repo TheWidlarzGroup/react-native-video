@@ -19,12 +19,27 @@ struct DRMParams {
             self.headers = nil
             return
         }
+        
+        
         self.json = json
         self.type = json["type"] as? String
         self.licenseServer = json["licenseServer"] as? String
         self.contentId = json["contentId"] as? String
         self.certificateUrl = json["certificateUrl"] as? String
         self.base64Certificate = json["base64Certificate"] as? Bool
-        self.headers = json["headers"] as? Dictionary<String,Any>
+        
+        if let headersArray = json["headers"] as? NSArray {
+            var headersDictionary: [String: Any] = [:]
+            for dict in headersArray {
+                if let dictionary = dict as? NSDictionary,
+                    let key = dictionary["key"] as? String,
+                    let value = dictionary["value"] {
+                    headersDictionary[key] = value
+                }
+            }
+            self.headers = headersDictionary
+        } else {
+            self.headers = nil
+        }
     }
 }

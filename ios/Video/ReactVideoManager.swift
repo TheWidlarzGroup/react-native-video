@@ -24,14 +24,17 @@ class ReactVideoManager: RCTViewManager {
         })
     }
     
-    @objc(seek:info:)
-    func seek(_ reactTag: NSNumber, info: NSDictionary) -> Void {
+    @objc(seek:time:tolerance:)
+    func seek(_ reactTag: NSNumber, time: NSNumber, tolerance: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                view.seek(info)
+                view.seek([
+                    "time": Float(truncating: time),
+                    "tolerance": Float(truncating: tolerance)
+                ])
             }
         })
     }

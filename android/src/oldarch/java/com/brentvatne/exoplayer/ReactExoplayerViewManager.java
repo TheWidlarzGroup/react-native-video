@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -124,23 +126,36 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         );
     }
 
+    @Override
+    public void receiveCommand(@NonNull ReactExoplayerView root, String commandId, @androidx.annotation.Nullable ReadableArray args) {
+        switch (commandId) {
+            case "seek":
+                this.setSeek(root, args.getInt(0));
+                break;
+            default:
+                break;
+        }
+    }
+
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = drm.hasKey(PROP_DRM_TYPE) ? drm.getString(PROP_DRM_TYPE) : null;
             String drmLicenseServer = drm.hasKey(PROP_DRM_LICENSESERVER) ? drm.getString(PROP_DRM_LICENSESERVER) : null;
-            ReadableMap drmHeaders = drm.hasKey(PROP_DRM_HEADERS) ? drm.getMap(PROP_DRM_HEADERS) : null;
+            ReadableArray drmHeadersArray = (drm.hasKey(PROP_DRM_HEADERS)) ? drm.getArray(PROP_DRM_HEADERS) : null;
+
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
                 videoView.setDrmType(drmUUID);
                 videoView.setDrmLicenseUrl(drmLicenseServer);
-                if (drmHeaders != null) {
+                if (drmHeadersArray != null) {
                     ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-                    ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
-                    while (itr.hasNextKey()) {
-                        String key = itr.nextKey();
+                    for (int i = 0; i < drmHeadersArray.size(); i++) {
+                        ReadableMap current = drmHeadersArray.getMap(i);
+                        String key = current.hasKey("key") ? current.getString("key") : null;
+                        String value = current.hasKey("value") ? current.getString("value") : null;
                         drmKeyRequestPropertiesList.add(key);
-                        drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
+                        drmKeyRequestPropertiesList.add(value);
                     }
                     videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
                 }
@@ -156,7 +171,21 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         int startTimeMs = src.hasKey(PROP_SRC_START_TIME) ? src.getInt(PROP_SRC_START_TIME) : -1;
         int endTimeMs = src.hasKey(PROP_SRC_END_TIME) ? src.getInt(PROP_SRC_END_TIME) : -1;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+
+        Map<String, String> headers = new HashMap<>();
+        ReadableArray propSrcHeadersArray = (src.hasKey(PROP_SRC_HEADERS)) ? src.getArray(PROP_SRC_HEADERS) : null;
+        if (propSrcHeadersArray != null) {
+            if (propSrcHeadersArray.size() > 0) {
+                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
+                    ReadableMap current = propSrcHeadersArray.getMap(i);
+                    String key = current.hasKey("key") ? current.getString("key") : null;
+                    String value = current.hasKey("value") ? current.getString("value") : null;
+                    if (key != null && value != null) {
+                        headers.put(key, value);
+                    }
+                }
+            }
+        }
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
@@ -418,8 +447,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
         if (!TextUtils.isEmpty(resizeModeOrdinalString)) {
-            int resizeModeOrdinal = Integer.parseInt(resizeModeOrdinalString);
-            return ResizeMode.toResizeMode(resizeModeOrdinal);
+            if (resizeModeOrdinalString.equals("none")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("contain")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("cover")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_CENTER_CROP);
+            } else if (resizeModeOrdinalString.equals("stretch")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FILL);
+            }
         }
         return ResizeMode.RESIZE_MODE_FIT;
     }

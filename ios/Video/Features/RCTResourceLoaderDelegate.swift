@@ -21,7 +21,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         onVideoError: RCTDirectEventBlock?,
         onGetLicense: RCTDirectEventBlock?,
         eventDelegate: RCTVideoEventDelegate?,
-        reactTag: NSNumber
+        reactTag: NSNumber?
     ) {
         super.init()
         let queue = DispatchQueue(label: "assetQueue")
