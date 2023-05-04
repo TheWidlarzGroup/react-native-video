@@ -12,8 +12,8 @@ class ReactVideoManager: RCTViewManager {
         return bridge.uiManager.methodQueue
     }
     
-    @objc(save:reactTag:resolver:rejecter:)
-    func save(options: NSDictionary, reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock,reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(save:options:resolver:rejecter:)
+    func save(_ reactTag: NSNumber, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
@@ -24,8 +24,23 @@ class ReactVideoManager: RCTViewManager {
         })
     }
     
-    @objc(setLicenseResult:reactTag:)
-    func setLicenseResult(license: NSString, reactTag: NSNumber) -> Void {
+    @objc(seek:time:tolerance:)
+    func seek(_ reactTag: NSNumber, time: NSNumber, tolerance: NSNumber) -> Void {
+        bridge.uiManager.prependUIBlock({_ , viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                view.seek([
+                    "time": Float(truncating: time),
+                    "tolerance": Float(truncating: tolerance)
+                ])
+            }
+        })
+    }
+    
+    @objc(setLicenseResult:license:)
+    func setLicenseResult(_ reactTag: NSNumber, license: NSString) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
@@ -36,8 +51,8 @@ class ReactVideoManager: RCTViewManager {
         })
     }
     
-    @objc(setLicenseResultError:reactTag:)
-    func setLicenseResultError(error: NSString, reactTag: NSNumber) -> Void {
+    @objc(setLicenseResultError:error:)
+    func setLicenseResultError(_ reactTag: NSNumber, error: NSString) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {

@@ -26,7 +26,6 @@ RCT_EXPORT_VIEW_PROPERTY(pictureInPicture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(ignoreSilentSwitch, NSString);
 RCT_EXPORT_VIEW_PROPERTY(mixWithOthers, NSString);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
-RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenAutorotate, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenOrientation, NSString);
@@ -61,15 +60,14 @@ RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onReceiveAdEvent, RCTDirectEventBlock);
 
-RCT_EXTERN_METHOD(save:(NSDictionary *)options
-        reactTag:(nonnull NSNumber *)reactTag
-        resolver:(RCTPromiseResolveBlock)resolve
-        rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(save:(nonnull NSNumber *)reactTag: options(NSDictionary *)options
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject);
 
-RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
-         reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(setLicenseResult:(nonnull NSNumber *)reactTag: license(NSString *)license);
 
-RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
-                 reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(setLicenseResultError:(nonnull NSNumber *)reactTag error:(NSString *)error);
+
+RCT_EXTERN_METHOD(seek:(nonnull NSNumber *)reactTag time:(nonnull NSNumber *) timeValue tolerance:(nonnull NSNumber *) toleranceValue)
 
 @end
