@@ -4,7 +4,7 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     "paths": {
-      "react-native-video": ["../../Video.js"]
+      "react-native-video": ["../../src/index.ts"]
     },
     /* Completeness */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
