@@ -116,7 +116,7 @@ static int const RCTVideoUnset = -1;
     _progressUpdateInterval = 250;
     _controls = NO;
     _playerBufferEmpty = YES;
-    _playInBackground = true;
+    _playInBackground = false;
     _preventsDisplaySleepDuringVideoPlayback = true;
     _preferredForwardBufferDuration = 10.0f;
     _allowsExternalPlayback = YES;
@@ -217,8 +217,8 @@ static int const RCTVideoUnset = -1;
   NSLog(@"RCTVideo dealloc");
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self cleanupRemoteTransportControl];
-  [self removePlayerLayer];
   [self cleanupNowPlaying];
+  [self removePlayerLayer];
   [self removePlayerItemObservers];
   [_player removeObserver:self forKeyPath:playbackRate context:nil];
   [_player removeObserver:self forKeyPath:externalPlaybackActive context: nil];
@@ -421,10 +421,9 @@ static int const RCTVideoUnset = -1;
     }];
   });
     
-    if (_playInBackground) {
-        [self setupNowPlaying];
-        [self setupRemoteTransportControl];
-    }
+ 
+    
+    NSLog(@"RCTVideo setSrc %@", [_source objectForKey:@"uri"]);
 
   _videoLoadStarted = YES;
 }
@@ -486,7 +485,7 @@ static int const RCTVideoUnset = -1;
 }
 
 -(void)cleanupRemoteTransportControl {
-    NSLog(@"RCTVideo cleanupRemoteTransportControl");
+    NSLog(@"RCTVideo cleanupRemoteTransportControl, _playInBackground:%d", _playInBackground);
     MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
     [[commandCenter playCommand] removeTarget:nil];
     [[commandCenter pauseCommand] removeTarget:nil];
@@ -495,14 +494,14 @@ static int const RCTVideoUnset = -1;
 }
 
 -(void)cleanupNowPlaying {
-    NSLog(@"RCTVideo cleanupNowPlaying");
+    NSLog(@"RCTVideo cleanupNowPlaying, _playInBackground:%d", _playInBackground);
     MPNowPlayingInfoCenter *playingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
     NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
     [playingInfoCenter setNowPlayingInfo:songInfo];
 }
 
 - (void)setupNowPlaying {
-    NSLog(@"RCTVideo setupNowPlaying");
+    NSLog(@"RCTVideo setupNowPlaying, _playInBackground:%d", _playInBackground);
     MPNowPlayingInfoCenter *playingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
     
     NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
@@ -955,12 +954,13 @@ static int const RCTVideoUnset = -1;
 
 - (void)setPlayInBackground:(BOOL)playInBackground
 {
+  _playInBackground = playInBackground;
+    
     if (playInBackground) {
         NSLog(@"RCTVideo setPlayInBackground YES");
     } else {
         NSLog(@"RCTVideo setPlayInBackground NO");
     }
-  _playInBackground = playInBackground;
 }
 
 - (void)setPreventsDisplaySleepDuringVideoPlayback:(BOOL)preventsDisplaySleepDuringVideoPlayback
@@ -1035,21 +1035,33 @@ static int const RCTVideoUnset = -1;
   if (paused) {
     [_player pause];
     [_player setRate:0.0];
+      NSLog(@"RCTVideo setPaused YES, _playInBackground:%d", _playInBackground);
   } else {
-    AVAudioSession *session = [AVAudioSession sharedInstance];
+      NSLog(@"RCTVideo setPaused NO, _playInBackground:%d", _playInBackground);
       
+      AVAudioSession *session = [AVAudioSession sharedInstance];
       
-      [session setCategory: AVAudioSessionCategoryPlayback error:nil];
-      [session setMode: AVAudioSessionModeMoviePlayback error: nil];
-
-
+      if (_playInBackground) {
+          [session setCategory: AVAudioSessionCategoryPlayback error:nil];
+          [session setMode: AVAudioSessionModeMoviePlayback error: nil];
+      } else {
+          [session setCategory: AVAudioSessionCategoryAmbient error:nil];
+          [session setMode: AVAudioSessionModeDefault error: nil];
+      }
+      
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
     } else {
       [_player play];
       [_player setRate:_rate];
     }
+      
     [_player setRate:_rate];
+      
+    if (_playInBackground) {
+        [self setupNowPlaying];
+        [self setupRemoteTransportControl];
+    }
   }
   
   _paused = paused;
