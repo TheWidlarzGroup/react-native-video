@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import Video, {FilterType, VideoRef} from 'react-native-video';
+import Video, {FilterType, VideoRef} from '@laftel-team/react-native-video';
 
 const filterTypes = [
   FilterType.NONE,
