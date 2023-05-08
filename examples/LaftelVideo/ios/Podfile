@@ -4,7 +4,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 platform :ios, '12.4'
 install! 'cocoapods', :deterministic_uuids => false
 
-target 'LaftelVideo' do
+target 'FabricExample' do
   config = use_native_modules!
 
   # Flags change depending on the env values.
@@ -26,7 +26,7 @@ target 'LaftelVideo' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  target 'LaftelVideoTests' do
+  target 'FabricExampleTests' do
     inherit! :complete
     # Pods for testing
   end

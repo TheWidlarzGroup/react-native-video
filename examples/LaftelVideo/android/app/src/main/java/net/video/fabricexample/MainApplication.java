@@ -1,4 +1,4 @@
-package com.laftelvideo;
+package net.video.fabricexample;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

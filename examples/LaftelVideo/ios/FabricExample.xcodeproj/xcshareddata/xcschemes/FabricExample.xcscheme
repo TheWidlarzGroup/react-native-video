@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "LaftelVideo.app"
-               BlueprintName = "LaftelVideo"
-               ReferencedContainer = "container:LaftelVideo.xcodeproj">
+               BuildableName = "FabricExample.app"
+               BlueprintName = "FabricExample"
+               ReferencedContainer = "container:FabricExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "LaftelVideoTests.xctest"
-               BlueprintName = "LaftelVideoTests"
-               ReferencedContainer = "container:LaftelVideo.xcodeproj">
+               BuildableName = "FabricExampleTests.xctest"
+               BlueprintName = "FabricExampleTests"
+               ReferencedContainer = "container:FabricExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "LaftelVideo.app"
-            BlueprintName = "LaftelVideo"
-            ReferencedContainer = "container:LaftelVideo.xcodeproj">
+            BuildableName = "FabricExample.app"
+            BlueprintName = "FabricExample"
+            ReferencedContainer = "container:FabricExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "LaftelVideo.app"
-            BlueprintName = "LaftelVideo"
-            ReferencedContainer = "container:LaftelVideo.xcodeproj">
+            BuildableName = "FabricExample.app"
+            BlueprintName = "FabricExample"
+            ReferencedContainer = "container:FabricExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
