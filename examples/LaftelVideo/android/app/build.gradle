@@ -93,9 +93,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.laftelvideo"
+    namespace "net.video.fabricexample"
     defaultConfig {
-        applicationId "com.laftelvideo"
+        applicationId "net.video.fabricexample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

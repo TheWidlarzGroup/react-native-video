@@ -1,4 +1,4 @@
-package com.laftelvideo;
+package net.video.fabricexample;
 
 import android.os.Bundle;
 import android.view.View;
@@ -20,7 +20,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "LaftelVideo";
+    return "FabricExample";
   }
 
   /**

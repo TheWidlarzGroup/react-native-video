@@ -7,11 +7,11 @@
 #define TIMEOUT_SECONDS 600
 #define TEXT_TO_LOOK_FOR @"Welcome to React"
 
-@interface LaftelVideoTests : XCTestCase
+@interface FabricExampleTests : XCTestCase
 
 @end
 
-@implementation LaftelVideoTests
+@implementation FabricExampleTests
 
 - (BOOL)findSubviewInView:(UIView *)view matching:(BOOL (^)(UIView *view))test
 {
