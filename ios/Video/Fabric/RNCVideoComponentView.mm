@@ -45,6 +45,12 @@ using namespace facebook::react;
   return self;
 }
 
+- (void)prepareForRecycle {
+    [super prepareForRecycle];
+    static const auto defaultProps = std::make_shared<const RNCVideoProps>();
+    _props = defaultProps;
+}
+
 # pragma mark - updateProps
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
