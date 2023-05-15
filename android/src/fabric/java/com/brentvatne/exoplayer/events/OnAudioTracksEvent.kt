@@ -23,7 +23,8 @@ class OnAudioTracksEvent(viewTag: Int, private val audioTracks: ArrayList<Track>
 
     fun arrayToObject(field: String?, array: WritableArray?): WritableMap? {
         val event = Arguments.createMap()
-        event.putArray(field!!, array)
+        // @todo: temporarily remove put array on event callback parameter (codegen issue)
+        // event.putArray(field!!, array)
         return event
     }
 
