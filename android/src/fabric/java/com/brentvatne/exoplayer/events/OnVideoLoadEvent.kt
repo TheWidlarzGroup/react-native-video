@@ -66,9 +66,10 @@ class OnVideoLoadEvent(viewTag: Int,
         val naturalSize: WritableMap? = aspectRatioToNaturalSize(videoWidth, videoHeight)
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize)
         event.putString(EVENT_PROP_TRACK_ID, trackId)
-        event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks)
-        event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks)
-        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks)
+        // @todo: temporarily remove put array on event callback parameter (codegen issue)
+        // event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks)
+        // event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks)
+        // event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks)
 
         // TODO: Actually check if you can.
 
