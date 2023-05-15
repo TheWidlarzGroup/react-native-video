@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer.events
 
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.events.Event
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
@@ -9,7 +10,7 @@ class OnVideoLoadStartEvent(viewTag: Int) : Event<OnVideoLoadStartEvent>(viewTag
     }
 
     override fun dispatch(rctEventEmitter: RCTEventEmitter?) {
-        rctEventEmitter?.receiveEvent(viewTag, getEventName(), null)
+        rctEventEmitter?.receiveEvent(viewTag, getEventName(), Arguments.createMap())
     }
 
     companion object {
