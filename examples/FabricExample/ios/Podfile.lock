@@ -659,16 +659,16 @@ PODS:
   - React-jsinspector (0.71.7)
   - React-logger (0.71.7):
     - glog
-  - react-native-video (7.0.0-alpha.1):
+  - react-native-video (7.0.0-alpha.4):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
     - React-Codegen
     - React-Core
-    - react-native-video/Video (= 7.0.0-alpha.1)
+    - react-native-video/Video (= 7.0.0-alpha.4)
     - React-RCTFabric
     - ReactCommon/turbomodule/core
-  - react-native-video/Fabric (7.0.0-alpha.1):
+  - react-native-video/Fabric (7.0.0-alpha.4):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -676,7 +676,7 @@ PODS:
     - React-Core
     - React-RCTFabric
     - ReactCommon/turbomodule/core
-  - react-native-video/Video (7.0.0-alpha.1):
+  - react-native-video/Video (7.0.0-alpha.4):
     - PromisesSwift
     - RCT-Folly
     - RCTRequired
@@ -988,7 +988,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: eaa5f71eb8f6861cf0e57f1a0f52aeb020d9e18e
   React-jsinspector: 9885f6f94d231b95a739ef7bb50536fb87ce7539
   React-logger: 3f8ebad1be1bf3299d1ab6d7f971802d7395c7ef
-  react-native-video: 658e607a02fe35f70d2f284e4f86bf814b431634
+  react-native-video: 2e4e523aa2899837e9b0e28cd4087ec513e3f28b
   React-perflogger: 2d505bbe298e3b7bacdd9e542b15535be07220f6
   React-RCTActionSheet: 0e96e4560bd733c9b37efbf68f5b1a47615892fb
   React-RCTAnimation: fd138e26f120371c87e406745a27535e2c8a04ef
