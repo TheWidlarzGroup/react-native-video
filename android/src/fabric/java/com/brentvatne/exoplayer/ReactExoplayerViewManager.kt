@@ -35,7 +35,7 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     private val PROP_SRC_TYPE = "type"
     private val PROP_SRC_HEADERS = "requestHeaders"
 
-    private val PROP_DRM_TYPE = "type"
+    private val PROP_DRM_TYPE = "drmType"
     private val PROP_DRM_LICENSESERVER = "licenseServer"
     private val PROP_DRM_HEADERS = "headers"
 
