@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import Video from 'react-native-video';
+import Video from '@laftel-team/react-native-video';
 
 class VideoPlayer extends Component {
   constructor(props: any) {
