@@ -142,7 +142,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         index: selectedTextTrack?.value,
       }
       return {
-        seletedTextType: selectedTextTrack?.type,
+        selectedTextType: selectedTextTrack?.type,
         value: selectedTextTrack?.value,
       }
     }, [selectedTextTrack]);
@@ -150,11 +150,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const _selectedAudioTrack = useMemo(() => {
       if (!selectedAudioTrack) return;
       if (typeof selectedAudioTrack?.value === 'number') return {
-        seletedAudioType: selectedAudioTrack?.type,
+        selectedAudioType: selectedAudioTrack?.type,
         index: selectedAudioTrack?.value,
       }
       return {
-        seletedAudioType: selectedAudioTrack?.type,
+        selectedAudioType: selectedAudioTrack?.type,
         value: selectedAudioTrack?.value,
       }
     }, [selectedAudioTrack]);
