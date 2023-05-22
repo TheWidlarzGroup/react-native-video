@@ -362,13 +362,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         "drm": self._drm?.json ?? NSNull(),
                         "target": self.reactTag
                     ])
-                    
+                    let isNetwork: Bool = self._source?.isNetwork ?? false
+                    let type: NSString = self._source?.type as NSString? ?? ""
+                    let uri: NSString = self._source?.uri as NSString? ?? ""
+                    self.eventDelegate?.onVideoLoadStart(isNetwork: isNetwork, type: type, uri: uri)
                 }.catch{_ in }
-            let isNetwork: Bool = self._source?.isNetwork ?? false
-            let type: NSString = self._source?.type as NSString? ?? ""
-            let uri: NSString = self._source?.uri as NSString? ?? ""
             
-            self.eventDelegate?.onVideoLoadStart(isNetwork: isNetwork, type: type, uri: uri)
             self._videoLoadStarted = true
         }
     }
