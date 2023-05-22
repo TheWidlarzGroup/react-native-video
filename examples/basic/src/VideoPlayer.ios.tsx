@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-import Video, {FilterType} from 'react-native-video';
+import Video, {FilterType} from '@laftel-team/react-native-video';
 
 const filterTypes = [
   FilterType.NONE,

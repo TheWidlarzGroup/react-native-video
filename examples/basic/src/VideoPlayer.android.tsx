@@ -16,7 +16,7 @@ import {
 
 import { Picker } from '@react-native-picker/picker'
 
-import Video, { VideoDecoderProperties, TextTrackType } from 'react-native-video';
+import Video, { VideoDecoderProperties, TextTrackType } from '@laftel-team/react-native-video';
 
 class VideoPlayer extends Component {
 
