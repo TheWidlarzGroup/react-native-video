@@ -305,10 +305,10 @@ PODS:
   - React-jsinspector (0.70.6)
   - React-logger (0.70.6):
     - glog
-  - react-native-video (7.0.0-alpha.4):
+  - react-native-video (7.0.0-alpha.5):
     - React-Core
-    - react-native-video/Video (= 7.0.0-alpha.4)
-  - react-native-video/Video (7.0.0-alpha.4):
+    - react-native-video/Video (= 7.0.0-alpha.5)
+  - react-native-video/Video (7.0.0-alpha.5):
     - PromisesSwift
     - React-Core
   - React-perflogger (0.70.6)
@@ -578,7 +578,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b4a65947391c658450151275aa406f2b8263178f
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
-  react-native-video: 5c17798406d9acb4c419973494f3b7d6344c5169
+  react-native-video: cc60ba7d2d232af13f416ec0e0a8f722de6f2f1f
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
   React-RCTAnimation: 5341e288375451297057391227f691d9b2326c3d
