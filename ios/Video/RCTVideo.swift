@@ -986,10 +986,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
+    @objc
     func setLicenseResult(_ license:String!) {
         _resouceLoaderDelegate?.setLicenseResult(license)
     }
 
+    @objc
     func setLicenseResultError(_ error:String!) {
         _resouceLoaderDelegate?.setLicenseResultError(error)
     }
