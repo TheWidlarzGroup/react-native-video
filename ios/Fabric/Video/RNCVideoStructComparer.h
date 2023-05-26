@@ -56,7 +56,7 @@ inline bool isSrcStructEqual(const RNCVideoSrcStruct &prev, const RNCVideoSrcStr
 inline bool isDrmStructEqual(const RNCVideoDrmStruct &prev, const RNCVideoDrmStruct &next) {
     bool isEqualHeaders = isDrmHeadersEqual(prev.headers, next.headers);
     
-    return toString(prev.drmType) == toString(next.drmType) && prev.licenseServer == next.licenseServer && prev.contentId == next.contentId && prev.certificateUrl == next.certificateUrl && prev.base64Certificate == next.base64Certificate && isEqualHeaders;
+    return toString(prev.drmType) == toString(next.drmType) && prev.licenseServer == next.licenseServer && prev.contentId == next.contentId && prev.certificateUrl == next.certificateUrl && prev.base64Certificate == next.base64Certificate && prev.useExternalGetLicense == next.useExternalGetLicense && isEqualHeaders;
 }
 
 inline bool isTextTracksVectorEqual(const std::vector<RNCVideoTextTracksStruct> &prev, const std::vector<RNCVideoTextTracksStruct> &next) {

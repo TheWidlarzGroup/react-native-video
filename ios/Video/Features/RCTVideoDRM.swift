@@ -139,7 +139,12 @@ struct RCTVideoDRM {
     static func handleInternalGetLicense(loadingRequest: AVAssetResourceLoadingRequest, contentId:String?, licenseServer:String?, certificateUrl:String?, base64Certificate:Bool?, headers: [String:Any]?) -> Promise<Data> {
         let url = loadingRequest.request.url
         
-        guard let contentId = contentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with:"") else {
+        var contentId = contentId
+        if contentId == nil || contentId?.isEmpty == true {
+            contentId = url?.absoluteString.replacingOccurrences(of: "skd://", with:"")
+        }
+
+        guard let contentId = contentId else {
             return Promise(RCTVideoError.invalidContentId as! Error)
         }
         

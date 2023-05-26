@@ -45,6 +45,7 @@ inline NSDictionary *drmDictFromCppStruct(const RNCVideoDrmStruct &drm) {
         @"contentId": RCTNSStringFromStringNilIfEmpty(drm.contentId) ?: @"",
         @"certificateUrl": RCTNSStringFromStringNilIfEmpty(drm.certificateUrl) ?: @"",
         @"base64Certificate": @(drm.base64Certificate),
+        @"useExternalGetLicense": @(drm.useExternalGetLicense),
     };
 }
 
