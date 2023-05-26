@@ -39,10 +39,10 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     private val PROP_DRM_LICENSESERVER = "licenseServer"
     private val PROP_DRM_HEADERS = "headers"
 
-    private val PROP_SELECTED_TEXT_TRACK_TYPE = "type"
+    private val PROP_SELECTED_TEXT_TRACK_TYPE = "selectedTextType"
     private val PROP_SELECTED_TEXT_TRACK_VALUE = "value"
 
-    private val PROP_SELECTED_AUDIO_TRACK_TYPE = "type"
+    private val PROP_SELECTED_AUDIO_TRACK_TYPE = "selectedAudioType"
     private val PROP_SELECTED_AUDIO_TRACK_VALUE = "value"
 
     private val PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs"
