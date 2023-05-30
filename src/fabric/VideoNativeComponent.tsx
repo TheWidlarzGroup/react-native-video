@@ -49,6 +49,7 @@ type Drm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
+  useExternalGetLicense?: boolean; // ios
 }>
 
 type TextTracks = ReadonlyArray<Readonly<{

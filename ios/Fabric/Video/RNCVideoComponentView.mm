@@ -205,6 +205,13 @@ using namespace facebook::react;
     [_view seek:info];
 }
 
+- (void)setLicenseResult:(NSString *)result {
+    [_view setLicenseResult:result];
+}
+
+- (void)setLicenseResultError:(NSString *)error {
+    [_view setLicenseResultError:error];
+}
 
 # pragma mark - event
 

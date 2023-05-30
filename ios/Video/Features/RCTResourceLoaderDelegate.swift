@@ -132,7 +132,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         }
         
         var promise: Promise<Data>
-        if _onGetLicense != nil || _eventDelegate != nil {
+        if let useExternalGetLicense = _drm.useExternalGetLicense, useExternalGetLicense {
+            
             let contentId = _drm.contentId ?? loadingRequest.request.url?.host
             promise = RCTVideoDRM.handleWithOnGetLicense(
                 loadingRequest:loadingRequest,
