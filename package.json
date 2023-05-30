@@ -1,6 +1,6 @@
 {
     "name": "@laftel-team/react-native-video",
-    "version": "7.0.0-android-kotlin.0",
+    "version": "7.0.0-alpha.7",
     "description": "A <Video /> element for react-native",
     "main": "src/index",
     "source": "src/index",
