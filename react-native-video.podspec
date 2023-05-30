@@ -37,6 +37,7 @@ Pod::Spec.new do |s|
     s.dependency "RCTRequired"
     s.dependency "RCTTypeSafety"
     s.dependency "ReactCommon/turbomodule/core"
+    s.ios.deployment_target = "12.4"
   end
 
   if fabric_enabled
