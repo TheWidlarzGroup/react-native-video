@@ -1040,12 +1040,11 @@ static int const RCTVideoUnset = -1;
       NSLog(@"RCTVideo setPaused NO, _playInBackground:%d", _playInBackground);
       
       AVAudioSession *session = [AVAudioSession sharedInstance];
+      [session setCategory: AVAudioSessionCategoryPlayback error:nil];
       
       if (_playInBackground) {
-          [session setCategory: AVAudioSessionCategoryPlayback error:nil];
           [session setMode: AVAudioSessionModeMoviePlayback error: nil];
       } else {
-          [session setCategory: AVAudioSessionCategoryAmbient error:nil];
           [session setMode: AVAudioSessionModeDefault error: nil];
       }
       
