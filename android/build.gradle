@@ -67,6 +67,11 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjvm-default=all']
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
+   }
+
     buildDir 'buildOutput_' + configStringPath
 
     sourceSets {
