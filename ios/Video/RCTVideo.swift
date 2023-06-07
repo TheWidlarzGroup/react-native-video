@@ -7,7 +7,7 @@ import GoogleInteractiveMediaAds
 import React
 import Promises
 
-class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
+class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler, AVPlayerItemMetadataCollectorPushDelegate {
 
     private var _player:AVPlayer?
     private var _playerItem:AVPlayerItem?
@@ -243,6 +243,25 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    var metadataCollector: AVPlayerItemMetadataCollector!
+    func metadataCollector(_ metadataCollector: AVPlayerItemMetadataCollector,
+                        didCollect metadataGroups: [AVDateRangeMetadataGroup],
+                        indexesOfNewGroups: IndexSet,
+                        indexesOfModifiedGroups: IndexSet) {
+        print(metadataGroups)
+        for metaDataGroup in metadataGroups {
+            for metadataitem in metaDataGroup.items {
+                onTimedMetadata?([
+                    "metadata": [
+                        "key": metadataitem.key,
+                        "value": metadataitem.value,
+                    ]
+                ])
+            }
+        }
+    }
+
+
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
@@ -298,6 +317,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     return Promise{self.playerItemPrepareText(asset: asset, assetOptions:assetOptions)}
                 }.then{[weak self] (playerItem:AVPlayerItem!) in
                     guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
+
+                    metadataCollector = AVPlayerItemMetadataCollector()
+                    metadataCollector.setDelegate(self, queue: DispatchQueue.main)
+                    playerItem.add(metadataCollector)
 
                     self._player?.pause()
                     self._playerItem = playerItem
@@ -903,6 +926,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
+        #if USE_GOOGLE_IMA
+        _imaAdsManager.getAdsManager()?.destroy()
+        #endif
 
         self.removePlayerLayer()
 

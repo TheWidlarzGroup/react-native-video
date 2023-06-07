@@ -68,6 +68,8 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsManifest;
+import com.google.android.exoplayer2.source.hls.playlist.HlsMasterPlaylist;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -1380,6 +1382,41 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onTimelineChanged(Timeline timeline, int reason) {
         // Do nothing.
+        Object manifest = player.getCurrentManifest();
+       if(manifest == null){
+            return;
+        }
+        try {
+            String convertedToString = String.valueOf(manifest);
+            HlsManifest hlsManifest = (HlsManifest) manifest;
+            for (String arg : hlsManifest.mediaPlaylist.tags) {
+                if(arg.contains(",")) {
+                    for (String splitted : arg.split(",")) {
+                        if (splitted.split(":", 2).length > 1) {
+                            String[] splittedSplit = splitted.split(":", 2);
+                            eventEmitter.timedManifest(splittedSplit[0], splittedSplit[1]);
+                        } else if (splitted.split("=", 2).length > 1) {
+                            String[] splittedSplit = splitted.split("=", 2);
+                            eventEmitter.timedManifest(splittedSplit[0], splittedSplit[1]);
+                        } else {
+                            eventEmitter.timedManifest(splitted);
+                        }
+                    }
+                } else {
+                    if (arg.split(":", 2).length > 1) {
+                        String[] splittedSplit = arg.split(":", 2);
+                        eventEmitter.timedManifest(splittedSplit[0], splittedSplit[1]);
+                    } else if (arg.split("=", 2).length > 1) {
+                        String[] splittedSplit = arg.split(":", 2);
+                        eventEmitter.timedManifest(splittedSplit[0], splittedSplit[1]);
+                    } else {
+                        eventEmitter.timedManifest(arg);
+                    }
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
