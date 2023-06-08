@@ -213,6 +213,7 @@ export interface VideoProperties extends ViewProps {
     onPictureInPictureStatusChanged?(data: OnPictureInPictureStatusData): void;
     onRestoreUserInterfaceForPictureInPictureStop?(): void;
     onExternalPlaybackChange?(data: OnExternalPlaybackChangeData): void;
+    onTextTracks(data: any): void;
     selectedAudioTrack?: {
         type: 'system' | 'disabled' | 'title' | 'language' | 'index';
         value?: string | number | undefined;
