@@ -45,6 +45,13 @@ using namespace facebook::react;
   return self;
 }
 
+# pragma mark - Life cycle
+
+- (void)removeFromSuperview {
+    [_view removeFromSuperview];
+    [super removeFromSuperview];
+}
+
 - (void)prepareForRecycle {
     [super prepareForRecycle];
     static const auto defaultProps = std::make_shared<const RNCVideoProps>();

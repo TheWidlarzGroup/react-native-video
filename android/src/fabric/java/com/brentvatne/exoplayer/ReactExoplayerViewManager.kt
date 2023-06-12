@@ -101,6 +101,10 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
         mDelegate.receiveCommand(root, commandId, args)
     }
 
+    override fun onDropViewInstance(view: ReactExoplayerView) {
+        view.cleanUpResources();
+    }
+
     @ReactProp(name = "src")
     override fun setSrc(view: ReactExoplayerView?, src: ReadableMap?) {
         if (view != null && src != null) {
