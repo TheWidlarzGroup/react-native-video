@@ -950,7 +950,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - Lifecycle
-
+    @objc
     override func removeFromSuperview() {
         _player?.pause()
         _player = nil
