@@ -329,6 +329,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                     self.setPlaybackRange(playerItem, withVideoStart: self._source?.startTime, withVideoEnd: self._source?.endTime)
+                    print("setPlaybackRange \(self._source?.startTime) \(self._source?.endTime)")
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -598,7 +599,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if (videoEnd != nil) {
+        if (videoEnd != nil && videoEnd > 0) {
             item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
         }
     }
