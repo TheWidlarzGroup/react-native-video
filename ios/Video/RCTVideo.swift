@@ -598,7 +598,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if (videoEnd != nil) {
+        if (videoEnd != nil && videoEnd! > 0) {
             item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
         }
     }
@@ -792,7 +792,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.layer.needsDisplayOnBoundsChange = true
 #if TARGET_OS_IOS
-            NSLog("HIHIHIHI --------------")
             _pip.setupPipController(_playerLayer)
 #endif
         }
