@@ -1,4 +1,4 @@
-import type { OnBandwidthUpdateData, OnBufferData, OnLoadData, OnLoadStartData, OnProgressData, OnSeekData, OnPlaybackData, OnExternalPlaybackChangeData, OnPictureInPictureStatusChangedData, OnReceiveAdEventData, OnVideoErrorData, OnPlaybackStateChangedData, OnAudioFocusChangedData, OnTimedMetadataData, OnAudioTracksData, OnTextTracksData, OnVideoTracksData } from 'src/fabric/VideoNativeComponent';
+import type { OnBandwidthUpdateData, OnBufferData, OnLoadData, OnLoadStartData, OnProgressData, OnSeekData, OnPlaybackData, OnExternalPlaybackChangeData, OnPictureInPictureStatusChangedData, OnReceiveAdEventData, OnVideoErrorData, OnPlaybackStateChangedData, OnAudioFocusChangedData, OnTimedMetadataData, OnAudioTracksData, OnTextTracksData, OnVideoTracksData } from '../fabric/VideoNativeComponent';
 
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void //Android, iOS
