@@ -56,6 +56,11 @@ using namespace facebook::react;
     [super prepareForRecycle];
     static const auto defaultProps = std::make_shared<const RNCVideoProps>();
     _props = defaultProps;
+
+    _view = [[RCTVideo alloc] initWithFrame: self.bounds];
+    _view.eventDelegate = self;
+
+    self.contentView = _view;
 }
 
 # pragma mark - updateProps
