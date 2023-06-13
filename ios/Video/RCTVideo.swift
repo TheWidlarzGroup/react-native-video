@@ -792,7 +792,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.layer.needsDisplayOnBoundsChange = true
 #if TARGET_OS_IOS
-            NSLog("HIHIHIHI --------------")
             _pip.setupPipController(_playerLayer)
 #endif
         }
