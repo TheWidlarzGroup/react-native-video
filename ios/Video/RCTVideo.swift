@@ -599,7 +599,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if (videoEnd != nil && videoEnd > 0) {
+        if (videoEnd != nil && videoEnd! > 0) {
             item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
         }
     }
