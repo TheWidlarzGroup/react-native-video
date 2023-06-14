@@ -529,13 +529,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if !wasPaused {
                     self.setPaused(false)
                 }
-                
-                let currentTime: NSNumber = NSNumber(value: Float(CMTimeGetSeconds(item.currentTime())))
-                self.onVideoSeek?(["currentTime": currentTime,
-                                   "seekTime": seekTime,
-                                   "target": self.reactTag])
-                
-                self.eventDelegate?.onVideoSeek(currentTime: currentTime, seekTime: seekTime)
+                if finished {
+                    let currentTime: NSNumber = NSNumber(value: Float(CMTimeGetSeconds(item.currentTime())))
+                    self.onVideoSeek?(["currentTime": currentTime,
+                                       "seekTime": seekTime,
+                                       "target": self.reactTag])
+                    
+                    self.eventDelegate?.onVideoSeek(currentTime: currentTime, seekTime: seekTime)
+                }
                 
             }.catch{_ in }
 
