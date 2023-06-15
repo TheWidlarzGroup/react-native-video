@@ -255,10 +255,10 @@ class VideoEventEmitter {
         eventDispatcher.dispatchEvent(new OnVideoBandwidthUpdateEvent(viewId, bitRateEstimate, height, width, id));
     }    
 
-    void seek(long currentPosition, long seekTime) {
+    void seek(long currentPosition, long seekTime, boolean finished) {
         EventDispatcher eventDispatcher =
                 UIManagerHelper.getEventDispatcherForReactTag(this.context, viewId);
-        eventDispatcher.dispatchEvent(new OnVideoSeekEvent(viewId, currentPosition, seekTime));
+        eventDispatcher.dispatchEvent(new OnVideoSeekEvent(viewId, currentPosition, seekTime, finished));
     }
 
     void ready() {
