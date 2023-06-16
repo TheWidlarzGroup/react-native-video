@@ -362,9 +362,28 @@ static NSString *const playerVersion = @"react-native-video/3.3.1";
         }
         if (ac) {
             _actionToken = ac;
-            AVURLAsset* asset = [ac urlAsset];
-            handler([AVPlayerItem playerItemWithAsset:asset]);
             
+            id subtitleObjects = [source objectForKey:@"subtitles"];
+            if ([subtitleObjects isKindOfClass:NSArray.class]) {
+                NSArray* subs = subtitleObjects;
+                NSArray* subtitleTracks = [SubtitleResourceLoaderDelegate createSubtitleTracksFromArray:subs];
+                SubtitleResourceLoaderDelegate* delegate = [[SubtitleResourceLoaderDelegate alloc] initWithM3u8URL:url subtitles:subtitleTracks];
+                _delegate = delegate;
+                url = delegate.redirectURL;
+                if (!delegateQueue) {
+                    delegateQueue = dispatch_queue_create("SubtitleResourceLoaderDelegate", 0);
+                }
+                AVURLAsset* asset = [AVURLAsset URLAssetWithURL:url options:nil];
+                [asset.resourceLoader setDelegate:delegate queue:delegateQueue];
+                [_actionToken attachToAsset:asset];
+                handler([AVPlayerItem playerItemWithAsset:asset]);
+                return;
+            } else {
+                AVURLAsset* asset = [ac urlAsset];
+                [_actionToken attachToAsset:asset];
+                handler([AVPlayerItem playerItemWithAsset:asset]);
+            }
+                        
             return;
         } else {
             NSLog(@"Failed to created action token for playback.");
