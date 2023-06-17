@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,7 +37,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
-    private static final String PROP_DRM_LICENSESERVER = "licenseServer";
+    private static final String PROP_DRM_LICENSE_SERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
@@ -81,8 +82,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
-
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
+    private static final String PROP_SHUTTER_COLOR = "shutterColor";
+    private static final String PROP_FRAME_QUALITY = "frameQuality";
 
     private ReactExoplayerConfig config;
 
@@ -128,7 +130,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = drm.hasKey(PROP_DRM_TYPE) ? drm.getString(PROP_DRM_TYPE) : null;
-            String drmLicenseServer = drm.hasKey(PROP_DRM_LICENSESERVER) ? drm.getString(PROP_DRM_LICENSESERVER) : null;
+            String drmLicenseServer = drm.hasKey(PROP_DRM_LICENSE_SERVER) ? drm.getString(PROP_DRM_LICENSE_SERVER) : null;
             ReadableMap drmHeaders = drm.hasKey(PROP_DRM_HEADERS) ? drm.getMap(PROP_DRM_HEADERS) : null;
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
@@ -366,6 +368,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
     public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
         videoView.setHideShutterView(hideShutterView);
+    }
+
+    @ReactProp(name = PROP_SHUTTER_COLOR, customType = "Color")
+    public void setShutterColor(final ReactExoplayerView videoView, final Integer color) {
+        videoView.setShutterColor(color == null ? Color.BLACK : color);
+    }
+
+    @ReactProp(name = PROP_FRAME_QUALITY)
+    public void setFrameQuality(final ReactExoplayerView videoView, @Nullable final Integer frameQuality) {
+        videoView.setFrameQuality(frameQuality);
     }
 
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)

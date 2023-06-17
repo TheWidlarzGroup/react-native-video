@@ -77,7 +77,7 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
-  save = async (options?) => {
+  save = async (options) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
@@ -286,6 +286,12 @@ export default class Video extends Component {
     }
   };
 
+  _onFrameChange = (event) => {
+    if(this.props.onFrameChange) {
+      this.props.onFrameChange(event.nativeEvent.onFrameChange)
+    }
+  }
+
   getViewManagerConfig = viewManagerName => {
     if (!UIManager.getViewManagerConfig) {
       return UIManager[viewManagerName];
@@ -374,6 +380,7 @@ export default class Video extends Component {
       onPictureInPictureStatusChanged: this._onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop: this._onRestoreUserInterfaceForPictureInPictureStop,
       onReceiveAdEvent: this._onReceiveAdEvent,
+      onFrameChange: this._onFrameChange,
     });
 
     const posterStyle = {
@@ -535,6 +542,9 @@ Video.propTypes = {
   useTextureView: PropTypes.bool,
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
+  shutterColor: PropTypes.string,
+  frameQuality: PropTypes.number,
+  onFrameChange: PropTypes.func,
   onLoadStart: PropTypes.func,
   onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,

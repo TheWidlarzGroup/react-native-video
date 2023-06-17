@@ -221,6 +221,10 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         updateShutterViewVisibility();
     }
 
+    public void setShutterColor(Integer color) {
+        shutterView.setBackgroundColor(color);
+    }
+
     private final Runnable measureAndLayout = new Runnable() {
         @Override
         public void run() {

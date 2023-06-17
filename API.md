@@ -310,6 +310,9 @@ var styles = StyleSheet.create({
 | [fullscreenOrientation](#fullscreenorientation)                                     | iOS                       |
 | [headers](#headers)                                                                 | Android                   |
 | [hideShutterView](#hideshutterview)                                                 | Android                   |
+| [shutterColor](#shutterColor)                                                       | Android                   |
+| [frameQuality](#frameQuality)                                                       | Android                   |
+| [onFrameChange](#onFrameChange)                                                     | Android                   |
 | [ignoreSilentSwitch](#ignoresilentswitch)                                           | iOS                       |
 | [maxBitRate](#maxbitrate)                                                           | Android, iOS              |
 | [minLoadRetryCount](#minLoadRetryCount)                                             | Android                   |
@@ -581,6 +584,43 @@ Controls whether the ExoPlayer shutter view (black screen while loading) is enab
 
 * **false (default)** - Show shutter view 
 * **true** - Hide shutter view
+
+Platforms: Android
+
+#### shutterColor
+Apply color to shutter view, if you see black flashes before video start then set shutterColor='transparent'
+
+won't work if useTextureView={false}
+
+* **black (default)**
+
+Platforms: Android
+
+#### frameQuality
+Use this prop to set quality of Base64 encoded string image obtained by onFrameChange callback. 
+
+won't work if useTextureView={false}
+
+* **undefined (default)** - range [0-100]
+
+Platforms: Android
+
+#### onFrameChange
+Callback function that is when video frame changes
+It works only when frameQuality prop is set, return Base64 encoded string image.
+
+won't work if useTextureView={false}
+
+Example
+
+```
+  <Video
+    frameQuality={30}
+    onFrameChange={(imageString) => {
+      setImageSource(`data:image/jpeg;base64,${imageString}`)
+    }
+  />
+```
 
 Platforms: Android
 
