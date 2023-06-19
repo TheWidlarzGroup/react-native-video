@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -258,10 +259,10 @@ class ReactExoplayerView extends FrameLayout implements
         if(frameQuality == null) return;
         ((Runnable) () -> {
             try {
-                System.out.println("frameQuality: " + frameQuality + " isSurfaceView: "  + (exoPlayerView.getVideoSurfaceView() instanceof TextureView));
                 if (exoPlayerView.getVideoSurfaceView() instanceof TextureView) {
-                    TextureView view = (TextureView) exoPlayerView.getVideoSurfaceView();
-                    final String base64Image = ImageUtil.convert(view.getBitmap(), frameQuality);
+                    Bitmap bitmap = ((TextureView) exoPlayerView.getVideoSurfaceView()).getBitmap();
+                    if(bitmap == null) return;
+                    final String base64Image = ImageUtil.convert(bitmap, frameQuality);
                     eventEmitter.setFrame(base64Image);
                 }
             } catch (Exception e) {
