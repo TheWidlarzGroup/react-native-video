@@ -1135,9 +1135,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackBufferKeyEmpty(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>) {
-        _playerBufferEmpty = true
-        onVideoBuffer?(["isBuffering": true, "target": reactTag as Any])
-        self.eventDelegate?.onVideoBuffer(isBuffering: true)
+        var isEmpty = change.newValue ?? false
+        _playerBufferEmpty = isEmpty
+        onVideoBuffer?(["isBuffering": isEmpty, "target": reactTag as Any])
+        self.eventDelegate?.onVideoBuffer(isBuffering: isEmpty)
     }
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
@@ -1145,9 +1146,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) != nil) {
             setPaused(_paused)
         }
-        _playerBufferEmpty = false
-        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
-        self.eventDelegate?.onVideoBuffer(isBuffering: false)
+        
+        var isPlaybackLikelyToKeepUp = change.newValue ?? true
+        _playerBufferEmpty = !isPlaybackLikelyToKeepUp
+        onVideoBuffer?(["isBuffering": !isPlaybackLikelyToKeepUp, "target": reactTag as Any])
+        self.eventDelegate?.onVideoBuffer(isBuffering: !isPlaybackLikelyToKeepUp)
     }
 
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
