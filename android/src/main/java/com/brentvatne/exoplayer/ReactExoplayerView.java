@@ -905,10 +905,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
-            if (adsLoader != null) {
-                adsLoader.setPlayer(null);
-            }
             updateResumePosition();
+            player.stop();
             player.release();
             player.removeListener(this);
             trackSelector = null;
@@ -916,6 +914,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         if (adsLoader != null) {
             adsLoader.release();
+            adsLoader.setPlayer(null);
         }
         adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
