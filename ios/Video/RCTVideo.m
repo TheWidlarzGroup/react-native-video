@@ -79,6 +79,10 @@ static int const RCTVideoUnset = -1;
   BOOL _playWhenInactive;
   BOOL _pictureInPicture;
   NSString * _ignoreSilentSwitch;
+  NSString * _title;
+  NSString * _artist;
+  NSString * _artworkUrl;
+  NSString * _loadedArtworkUrl;
   NSString * _mixWithOthers;
   NSString * _resizeMode;
   BOOL _fullscreen;
@@ -123,6 +127,10 @@ static int const RCTVideoUnset = -1;
     _playWhenInactive = false;
     _pictureInPicture = false;
     _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+    _title = @"Fireside";
+    _artist = nil;
+    _artworkUrl = nil;
+    _loadedArtworkUrl = nil;
     _mixWithOthers = @"inherit"; // inherit, mix, duck
 #if TARGET_OS_IOS
     _restoreUserInterfaceForPIPStopCompletionHandler = NULL;
@@ -506,11 +514,15 @@ static int const RCTVideoUnset = -1;
     
     NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
 
-    [songInfo setObject:@"Fireside" forKey:MPMediaItemPropertyTitle];
+    [songInfo setObject:_title forKey:MPMediaItemPropertyTitle];
+    [songInfo setObject:_artist forKey:MPMediaItemPropertyArtist];
     [songInfo setObject:[NSNumber numberWithDouble:_playerItem.currentTime.value] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
     [songInfo setObject:[NSNumber numberWithDouble:_playerItem.duration.value] forKey:MPMediaItemPropertyPlaybackDuration];
     [songInfo setObject:[NSNumber numberWithDouble:(_player.rate ? 0.0f : 1.0f)] forKey:MPNowPlayingInfoPropertyPlaybackRate];
     [playingInfoCenter setNowPlayingInfo:songInfo];
+    
+    //will load in image from url and assign image to default MPNowPlayingInfoCenter
+    [self updateExistingNowPlayingDataArtwork:_artworkUrl];
 }
 
 - (void)setDrm:(NSDictionary *)drm {
@@ -1022,6 +1034,87 @@ static int const RCTVideoUnset = -1;
 {
   _ignoreSilentSwitch = ignoreSilentSwitch;
   [self applyModifiers];
+}
+
+- (void)setTitle:(NSString *)title
+{
+  _title = title;
+}
+
+- (void)setArtist:(NSString *)artist
+{
+  _artist = artist;
+}
+
+- (void)setArtworkUrl:(NSString *)artworkUrl
+{
+    _artworkUrl = artworkUrl;
+}
+
+//updates existing nowPlaying info with image loaded from artworkUrl
+-(void)updateExistingNowPlayingDataArtwork:(NSString *)artworkUrl {
+    if( artworkUrl == nil ) {
+        return;
+    }
+
+    //if artwork url is already loaded and it's a duplicate we are done now
+    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+    if ([_loadedArtworkUrl isEqualToString:_artworkUrl] && [center.nowPlayingInfo objectForKey:MPMediaItemPropertyArtwork] != nil) {
+        return;
+    }
+    
+    //flag url we are gonna load as being loaded item to prevent duplication
+    _loadedArtworkUrl = artworkUrl;
+
+    // Custom handling of artwork in another thread, will be loaded async
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        UIImage *image = nil;
+
+        // check whether artwork path is present
+        if ([artworkUrl isEqual: @""]) {
+            return;
+        }
+
+        // artwork is url download from the interwebs
+        if ([artworkUrl hasPrefix: @"http://"] || [artworkUrl hasPrefix: @"https://"]) {
+            NSURL *imageURL = [NSURL URLWithString:artworkUrl];
+            NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+            image = [UIImage imageWithData:imageData];
+        } else {
+            NSString *localArtworkUrl = [artworkUrl stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+            BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:localArtworkUrl];
+            if (fileExists) {
+                image = [UIImage imageNamed:localArtworkUrl];
+            }
+        }
+
+        // Check if image was available otherwise don't do anything
+        if (image == nil) {
+            return;
+        }
+
+        // check whether image is loaded
+        CGImageRef cgref = [image CGImage];
+        CIImage *cim = [image CIImage];
+
+        if (cim == nil && cgref == NULL) {
+            return;
+        }
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+
+            // Check if URL wasn't changed in the meantime
+            if (![artworkUrl isEqual:_artworkUrl]) {
+                return;
+            }
+
+            MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
+            MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
+            NSMutableDictionary *mediaDict = (center.nowPlayingInfo != nil) ? [[NSMutableDictionary alloc] initWithDictionary: center.nowPlayingInfo] : [NSMutableDictionary dictionary];
+            [mediaDict setValue:artwork forKey:MPMediaItemPropertyArtwork];
+            center.nowPlayingInfo = mediaDict;
+        });
+    });
 }
 
 - (void)setMixWithOthers:(NSString *)mixWithOthers
