@@ -1,10 +1,32 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
 
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+buildscript {
+    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVkotlinVersion']
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
 }
 
-def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA", false)
+def getExtOrDefault(name, defaultValue) {
+    rootProject.ext.has(name) ? rootProject.ext.get(name) : defaultValue
+}
+
+def isNewArchitectureEnabled() {
+    // To opt-in for the New Architecture, you can either:
+    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+    // - Invoke gradle with `-newArchEnabled=true`
+    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+def useExoplayerIMA = getExtOrDefault("RNVUseExoplayerIMA", project.properties['RNVUseExoplayerIMA'])
 
 println "useExoplayerIMA:" + useExoplayerIMA
 
@@ -16,26 +38,39 @@ def configStringPath = (
         'useExoplayerIMA' + useExoplayerIMA \
 ).md5()
 
-android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 31)
-    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
+if (isNewArchitectureEnabled()) {
+    apply plugin: "com.facebook.react"
+}
 
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
-    }
+android {
+    compileSdkVersion getExtOrDefault('compileSdkVersion', project.properties['RNVcompileSdkVersion'])
+    buildToolsVersion getExtOrDefault('buildToolsVersion', project.properties['RNVbuildToolsVersion'])
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 21)
-        targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        minSdkVersion getExtOrDefault('minSdkVersion', project.properties['RNVminSdkVersion'])
+        targetSdkVersion getExtOrDefault('targetSdkVersion', project.properties['RNVtargetSdkVersion'])
         versionCode 1
         versionName "1.0"
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+
+        ndk {
+            abiFilters(*reactNativeArchitectures())
+        }
+    }
+
+    packagingOptions {
+        exclude "**/libreact_render*.so"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
+
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjvm-default=all']
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
+   }
 
     buildDir 'buildOutput_' + configStringPath
 
@@ -49,14 +84,41 @@ android {
             }
         }
     }
+
+    sourceSets.main {
+        java {
+            if (isNewArchitectureEnabled()) {
+                srcDirs += [
+                    "src/fabric/java",
+                    "${project.buildDir}/generated/source/codegen/java"
+                ]
+            } else {
+                srcDirs += [
+                    "src/oldarch/java"
+                ]
+            }
+        }
+    }
+}
+
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
 }
 
 repositories {
     google()
+    maven {
+        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+        url "$rootDir/../node_modules/react-native/android"
+    }
+    mavenCentral()
 }
 
+def kotlin_version = getExtOrDefault('kotlinVersion', project.properties['RNVkotlinVersion'])
+
 dependencies {
-    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation "com.facebook.react:react-native:${getExtOrDefault('reactNativeVersion', '+')}"
     implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
         exclude group: 'com.android.support'
     }
@@ -75,4 +137,5 @@ dependencies {
         implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
     }
     implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

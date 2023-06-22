@@ -11,6 +11,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
     private var _reactTag: NSNumber?
     private var _onVideoError: RCTDirectEventBlock?
     private var _onGetLicense: RCTDirectEventBlock?
+    private weak var _eventDelegate: RCTVideoEventDelegate? = nil
     
     
     init(
@@ -19,7 +20,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         localSourceEncryptionKeyScheme: String?,
         onVideoError: RCTDirectEventBlock?,
         onGetLicense: RCTDirectEventBlock?,
-        reactTag: NSNumber
+        eventDelegate: RCTVideoEventDelegate?,
+        reactTag: NSNumber?
     ) {
         super.init()
         let queue = DispatchQueue(label: "assetQueue")
@@ -29,6 +31,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         _onGetLicense = onGetLicense
         _drm = drm
         _localSourceEncryptionKeyScheme = localSourceEncryptionKeyScheme
+        _eventDelegate = eventDelegate
     }
     
     deinit {
@@ -68,16 +71,20 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         if let _loadingRequest = _loadingRequest, let error = error {
             _loadingRequest.finishLoading(with: error as! NSError)
             
+            let errorDict = [
+                "code": NSNumber(value: (error as NSError).code),
+                "localizedDescription": error.localizedDescription == nil ? "" : error.localizedDescription,
+                "localizedFailureReason": ((error as NSError).localizedFailureReason == nil ? "" : (error as NSError).localizedFailureReason) ?? "",
+                "localizedRecoverySuggestion": ((error as NSError).localizedRecoverySuggestion == nil ? "" : (error as NSError).localizedRecoverySuggestion) ?? "",
+                "domain": (error as NSError).domain
+            ] as [String : Any]
+            
             _onVideoError?([
-                "error": [
-                    "code": NSNumber(value: (error as NSError).code),
-                    "localizedDescription": error.localizedDescription == nil ? "" : error.localizedDescription,
-                    "localizedFailureReason": ((error as NSError).localizedFailureReason == nil ? "" : (error as NSError).localizedFailureReason) ?? "",
-                    "localizedRecoverySuggestion": ((error as NSError).localizedRecoverySuggestion == nil ? "" : (error as NSError).localizedRecoverySuggestion) ?? "",
-                    "domain": (error as NSError).domain
-                ],
+                "error": errorDict,
                 "target": _reactTag
             ])
+            
+            _eventDelegate?.onVideoError(error: errorDict as NSDictionary)
             
         }
         return false
@@ -125,7 +132,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         }
         
         var promise: Promise<Data>
-        if _onGetLicense != nil {
+        if let useExternalGetLicense = _drm.useExternalGetLicense, useExternalGetLicense {
+            
             let contentId = _drm.contentId ?? loadingRequest.request.url?.host
             promise = RCTVideoDRM.handleWithOnGetLicense(
                 loadingRequest:loadingRequest,
@@ -138,6 +146,12 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                                      "contentId": contentId,
                                      "spcBase64": spcData.base64EncodedString(options: []),
                                      "target": self._reactTag])
+                
+                let licenseUrl: NSString = self._drm?.licenseServer as NSString? ?? ""
+                let spcBase64: NSString = spcData.base64EncodedString(options: []) as NSString
+                
+                
+                self._eventDelegate?.onGetLicense(licenseUrl: licenseUrl, contentId: contentId as! NSString ?? "", spcBase64: spcBase64)
             }
         } else {
             promise = RCTVideoDRM.handleInternalGetLicense(

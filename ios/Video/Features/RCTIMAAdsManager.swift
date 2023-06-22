@@ -85,10 +85,11 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         if event.type == IMAAdEventType.LOADED {
             adsManager.start()
         }
+        
+        let type = convertEventToString(event: event.type)
+        _video.eventDelegate?.onReceiveAdEvent(event: event.type)
 
         if _video.onReceiveAdEvent != nil {
-            let type = convertEventToString(event: event.type)
-
             _video.onReceiveAdEvent?([
                 "event": type,
                 "target": _video.reactTag!

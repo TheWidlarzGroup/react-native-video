@@ -1,8 +1,10 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-alpha.6",
+    "version": "7.0.0-alpha.14",
     "description": "A <Video /> element for react-native",
-    "main": "Video.js",
+    "main": "src/index",
+    "source": "src/index",
+    "react-native": "src/index",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
@@ -12,15 +14,21 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "^0.0.5",
+        "@types/react": "^18.0.35",
         "eslint": "^6.5.1",
-        "react": "16.9.0",
-        "react-native": "0.61.5",
-        "react-native-windows": "^0.61.0-0"
+        "react": "^18.2.0",
+        "react-native": "^0.71.6",
+        "react-native-windows": "^0.61.0-0",
+        "typescript": "^5.0.4"
     },
     "dependencies": {
         "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
         "prop-types": "^15.7.2"
+    },
+    "peerDependencies": {
+        "react": "*",
+        "react-native": "*"
     },
     "scripts": {
         "lint": "yarn eslint .",
@@ -31,11 +39,13 @@
         "android",
         "ios",
         "windows",
-        "FilterType.js",
-        "DRMType.js",
-        "TextTrackType.js",
-        "VideoResizeMode.js",
+        "src",
         "react-native-video.podspec",
         "docs"
-    ]
+    ],
+    "codegenConfig": {
+        "name": "RNCVideo",
+        "type": "components",
+        "jsSrcsDir": "src"
+    }
 }

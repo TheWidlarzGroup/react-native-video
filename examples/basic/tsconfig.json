@@ -9,7 +9,10 @@
     "moduleResolution": "node",
     "noEmit": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "paths": {
+      "react-native-video": ["../../src/index.ts"]
+    }
   },
   "exclude": [
     "node_modules",
