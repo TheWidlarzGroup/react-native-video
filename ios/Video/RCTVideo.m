@@ -515,7 +515,10 @@ static int const RCTVideoUnset = -1;
     NSMutableDictionary *songInfo = [[NSMutableDictionary alloc] init];
 
     [songInfo setObject:_title forKey:MPMediaItemPropertyTitle];
-    [songInfo setObject:_artist forKey:MPMediaItemPropertyArtist];
+    if(_artist) {
+        [songInfo setObject:_artist forKey:MPMediaItemPropertyArtist];
+    }
+    
     [songInfo setObject:[NSNumber numberWithDouble:_playerItem.currentTime.value] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
     [songInfo setObject:[NSNumber numberWithDouble:_playerItem.duration.value] forKey:MPMediaItemPropertyPlaybackDuration];
     [songInfo setObject:[NSNumber numberWithDouble:(_player.rate ? 0.0f : 1.0f)] forKey:MPNowPlayingInfoPropertyPlaybackRate];
