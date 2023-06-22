@@ -315,7 +315,7 @@ using namespace facebook::react;
     std::dynamic_pointer_cast<const RNCVideoEventEmitter>(_eventEmitter)->onGetLicense(event);
 }
 
-- (void)onVideoSeekWithCurrentTime:(NSNumber *)currentTime seekTime:(NSNumber *)seekTime {
+- (void)onVideoSeekWithCurrentTime:(NSNumber *)currentTime seekTime:(NSNumber *)seekTime finished:(BOOL)finished {
     if(!_eventEmitter) {
         return;
     }
@@ -323,6 +323,7 @@ using namespace facebook::react;
     RNCVideoEventEmitter::OnVideoSeek event = {
         .currentTime = [currentTime floatValue],
         .seekTime = [seekTime floatValue],
+        .finished = finished
     };
     
     std::dynamic_pointer_cast<const RNCVideoEventEmitter>(_eventEmitter)->onVideoSeek(event);

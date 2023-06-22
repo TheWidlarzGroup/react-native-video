@@ -23,7 +23,7 @@
 - (void)onVideoBufferWithIsBuffering:(BOOL)isBuffering;
 - (void)onVideoErrorWithError:(NSDictionary *)error;
 - (void)onGetLicenseWithLicenseUrl:(NSString *)licenseUrl contentId:(NSString*)contentId spcBase64:(NSString *)spcBase64;
-- (void)onVideoSeekWithCurrentTime:(NSNumber *)currentTime seekTime:(NSNumber *)seekTime;
+- (void)onVideoSeekWithCurrentTime:(NSNumber *)currentTime seekTime:(NSNumber *)seekTime finished:(BOOL)finished;
 - (void)onVideoEnd;
 - (void)onTimedMetadata;
 - (void)onVideoAudioBecomingNoisy;

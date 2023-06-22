@@ -135,6 +135,7 @@ export type OnBandwidthUpdateData = Readonly<{
 export type OnSeekData = Readonly<{
   currentTime: Float;
   seekTime: Float;
+  finished: boolean;
 }>
 
 export type OnPlaybackStateChangedData = Readonly<{
