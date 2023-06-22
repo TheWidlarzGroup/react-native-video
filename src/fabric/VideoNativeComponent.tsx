@@ -135,6 +135,7 @@ export type OnBandwidthUpdateData = Readonly<{
 export type OnSeekData = Readonly<{
   currentTime: Float;
   seekTime: Float;
+  finished: boolean;
 }>
 
 export type OnPlaybackStateChangedData = Readonly<{
@@ -142,54 +143,54 @@ export type OnPlaybackStateChangedData = Readonly<{
 }>
 
 // @todo: fix type. for now react native doesn't support array codegen type for native event
-type _OnTimedMetadataData = Readonly<{}>
-export type OnTimedMetadataData = Readonly<{
-  metadata: ReadonlyArray<Readonly<{
-    value?: string
-    identifier?: string
-  }>>
-}>
+export type OnTimedMetadataData = Readonly<{}>
+// export type _OnTimedMetadataData = Readonly<{
+//   metadata: ReadonlyArray<Readonly<{
+//     value?: string
+//     identifier?: string
+//   }>>
+// }>
 
 // @todo: fix type. for now react native doesn't support array codegen type for native event
-type _OnAudioTracksData = Readonly<{}>
-export type OnAudioTracksData = Readonly<{
-  audioTracks: ReadonlyArray<Readonly<{
-    index?: Int32
-    title?: string
-    language?: string
-    bitrate?: Float
-    type?: string
-    selected?: boolean
-  }>>
-}>
+export type OnAudioTracksData = Readonly<{}>
+// export type _OnAudioTracksData = Readonly<{
+//   audioTracks: ReadonlyArray<Readonly<{
+//     index?: Int32
+//     title?: string
+//     language?: string
+//     bitrate?: Float
+//     type?: string
+//     selected?: boolean
+//   }>>
+// }>
 
 // @todo: fix type. for now react native doesn't support array codegen type for native event
-type _OnTextTracksData = Readonly<{}>
-export type OnTextTracksData = Readonly<{
-  textTracks: ReadonlyArray<Readonly<{
-    index?: Int32
-    title?: string
-    language?: string
-    /**
-     * iOS only supports VTT, Android supports all 3
-     */
-    type?: 'srt' | 'ttml' | 'vtt'
-    selected?: boolean
-  }>>
-}>
+export type OnTextTracksData = Readonly<{}>
+// export type _OnTextTracksData = Readonly<{
+//   textTracks: ReadonlyArray<Readonly<{
+//     index?: Int32
+//     title?: string
+//     language?: string
+//     /**
+//      * iOS only supports VTT, Android supports all 3
+//      */
+//     type?: 'srt' | 'ttml' | 'vtt'
+//     selected?: boolean
+//   }>>
+// }>
 
 // @todo: fix type. for now react native doesn't support array codegen type for native event
-type _OnVideoTracksData = Readonly<{}>
-export type OnVideoTracksData = Readonly<{
-  videoTracks: ReadonlyArray<Readonly<{
-    trackId?: Int32
-    codecs?: string
-    width?: Float
-    height?: Float
-    bitrate?: Float
-    selected?: boolean
-  }>>
-}>
+export type OnVideoTracksData = Readonly<{}>
+// export type _OnVideoTracksData = Readonly<{
+//   videoTracks: ReadonlyArray<Readonly<{
+//     trackId?: Int32
+//     codecs?: string
+//     width?: Float
+//     height?: Float
+//     bitrate?: Float
+//     selected?: boolean
+//   }>>
+// }>
 
 export type OnPlaybackData = Readonly<{
   playbackRate: Float;
@@ -293,10 +294,10 @@ export interface VideoNativeProps extends ViewProps {
   onVideoIdle?: DirectEventHandler<{}>; // android only (nowhere in document, so do not use as props. just type declaration)
   onAudioFocusChanged?: DirectEventHandler<OnAudioFocusChangedData>; // android only (nowhere in document, so do not use as props. just type declaration)
   // @todo: fix type
-  onTimedMetadata?: DirectEventHandler<_OnTimedMetadataData>; // ios, android
-  onAudioTracks: DirectEventHandler<_OnAudioTracksData>; // android
-  onTextTracks: DirectEventHandler<_OnTextTracksData>; // android
-  onVideoTracks: DirectEventHandler<_OnVideoTracksData>; // android
+  onTimedMetadata?: DirectEventHandler<OnTimedMetadataData>; // ios, android
+  onAudioTracks: DirectEventHandler<OnAudioTracksData>; // android
+  onTextTracks: DirectEventHandler<OnTextTracksData>; // android
+  onVideoTracks: DirectEventHandler<OnVideoTracksData>; // android
 }
 
 export type VideoComponentType = HostComponent<VideoNativeProps>

@@ -12,7 +12,8 @@ import {
   Image,
   Platform,
 } from "react-native";
-import RNCVideoComponent, { Commands, OnAudioFocusChangedData, OnAudioTracksData, OnPlaybackStateChangedData, OnTextTracksData, OnTimedMetadataData, OnVideoErrorData, OnVideoTracksData } from "./fabric/VideoNativeComponent";
+import RNCVideoComponent, { Commands } from "./fabric/VideoNativeComponent";
+import type { OnAudioFocusChangedData, OnAudioTracksData, OnPlaybackStateChangedData, OnTextTracksData, OnTimedMetadataData, OnVideoErrorData, OnVideoTracksData } from './fabric/VideoNativeComponent'
 
 import type { StyleProp, ImageStyle, NativeSyntheticEvent } from "react-native";
 import type {
@@ -374,18 +375,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoBuffer={onVideoBuffer}
           onVideoPlaybackStateChanged={onVideoPlaybackStateChanged}
           onBandwidthUpdate={_onBandwidthUpdate}
-          onTimedMetadata={(e) => {
-            _onTimedMetadata(e as NativeSyntheticEvent<OnTimedMetadataData>)
-          }}
-          onAudioTracks={(e) => {
-            _onAudioTracks(e as NativeSyntheticEvent<OnAudioTracksData>)
-          }}
-          onTextTracks={(e) => {
-            _onTextTracks(e as NativeSyntheticEvent<OnTextTracksData>)
-          }}
-          onVideoTracks={(e) => {
-            _onVideoTracks(e as NativeSyntheticEvent<OnVideoTracksData>)
-          }}
+          onTimedMetadata={_onTimedMetadata}
+          onAudioTracks={_onAudioTracks}
+          onTextTracks={_onTextTracks}
+          onVideoTracks={_onVideoTracks}
           onVideoFullscreenPlayerDidDismiss={onFullscreenPlayerDidDismiss}
           onVideoFullscreenPlayerDidPresent={onFullscreenPlayerDidPresent}
           onVideoFullscreenPlayerWillDismiss={onFullscreenPlayerWillDismiss}

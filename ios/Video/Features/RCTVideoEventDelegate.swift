@@ -5,7 +5,7 @@
     func onVideoBuffer(isBuffering: Bool);
     func onVideoError(error: NSDictionary);
     func onGetLicense(licenseUrl: NSString, contentId: NSString, spcBase64: NSString);
-    func onVideoSeek(currentTime: NSNumber, seekTime: NSNumber);
+    func onVideoSeek(currentTime: NSNumber, seekTime: NSNumber, finished: Bool);
     func onVideoEnd();
     func onTimedMetadata();
     func onVideoAudioBecomingNoisy();
