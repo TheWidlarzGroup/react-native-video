@@ -9,12 +9,13 @@ import { IVideoPlayerTranslations } from './translations';
 import { IVideoPlayerTheme } from './theme';
 import { IVideoBufferConfig } from './buffer';
 import { IRelatedVideos } from './relatedVideos';
+import { INowPlaying } from "./nowPlaying";
 
 export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   audioOnly?: boolean;
   bufferConfig?: IVideoBufferConfig;
   buttons?: IVideoPlayerButtons;
-  colorProgressBar?: string
+  colorProgressBar?: string;
   controls?: boolean;
   disableFocus?: boolean;
   hasEpg?: boolean;
@@ -27,6 +28,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   mediaKeys?: boolean;
   metadata?: IVideoPlayerMetadata;
   muted?: boolean;
+  nowPlaying?: INowPlaying;
   overlayAutoHideTimeout?: number;
   poster?: string;
   paused?: boolean;

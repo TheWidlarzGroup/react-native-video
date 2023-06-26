@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.LruCache;
@@ -12,6 +13,7 @@ import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
+import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
@@ -64,14 +66,21 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_SRC_LIMIT_RANGE = "limitedSeekableRange";
     private static final String PROP_SRC_SAVE_SUBTITLE_SELECTION = "shouldSaveSubtitleSelection";
+    private static final String PROP_SRC_NOW_PLAYING = "nowPlaying";
+    private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
     private static final String PROP_METADATA_CHANNEL_LOGO_URL = "channelLogoUrl";
     private static final String PROP_METADATA_DESCRIPTION = "description";
     private static final String PROP_METADATA_THUMBNAIL_URL = "thumbnailUrl";
+    private static final String PROP_METADATA_DURATION = "duration";
     private static final String PROP_METADATA_TITLE = "title";
     private static final String PROP_METADATA_TYPE = "type";
+    private static final String PROP_METADATA_EPISODE_INFO = "episodeInfo";
+
+    // Theme
+    private static final String PROP_THEME = "theme";
 
     // DRM properties
     private static final String PROP_DRM_CRO_TOKEN = "croToken";
@@ -226,6 +235,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         LimitedSeekRange limitedSeekRange = generateRange(src.hasKey(PROP_SRC_LIMIT_RANGE) ? src.getMap(PROP_SRC_LIMIT_RANGE) : null);
         boolean shouldSaveSubtitleSelection = src.hasKey(PROP_SRC_SAVE_SUBTITLE_SELECTION) && src.getBoolean(PROP_SRC_SAVE_SUBTITLE_SELECTION);
 
+        if (src.hasKey(PROP_SRC_NOW_PLAYING)) {
+            videoView.setProgramInfo(parseProgramInfo(src.getMap(PROP_SRC_NOW_PLAYING)));
+        }
+        if (src.hasKey(PROP_SRC_BIF_URL)) {
+            videoView.setThumbnailsPreviewUrl(src.getString(PROP_SRC_BIF_URL));
+        }
+
         if (TextUtils.isEmpty(uriString)) {
             return;
         }
@@ -304,23 +320,47 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_METADATA)
     public void setMetadata(final ReactTVExoplayerView videoView, final ReadableMap metadata) {
         if (metadata != null) {
-            String channelLogoUrl = metadata.hasKey(PROP_METADATA_CHANNEL_LOGO_URL) ? metadata.getString(PROP_METADATA_CHANNEL_LOGO_URL) : null;
             String description = metadata.hasKey(PROP_METADATA_DESCRIPTION) ? metadata.getString(PROP_METADATA_DESCRIPTION) : null;
             String thumbnailUrl = metadata.hasKey(PROP_METADATA_THUMBNAIL_URL) ? metadata.getString(PROP_METADATA_THUMBNAIL_URL) : null;
-            String title = metadata.hasKey(PROP_METADATA_TITLE) ? metadata.getString(PROP_METADATA_TITLE) : null;
             String type = metadata.hasKey(PROP_METADATA_TYPE) ? metadata.getString(PROP_METADATA_TYPE) : null;
+            String episodeTitle = metadata.hasKey(PROP_METADATA_EPISODE_INFO) ? metadata.getString(PROP_METADATA_EPISODE_INFO) : null;
 
-            videoView.setMetadata(new RNMetadata(channelLogoUrl,
-                    description,
-                    thumbnailUrl,
-                    title,
-                    type));
+            videoView.setMetadata(new RNMetadata(description, thumbnailUrl, episodeTitle, type));
+        }
+    }
+
+    @ReactProp(name = PROP_SRC_NOW_PLAYING)
+    public void setNowPlaying(final ReactTVExoplayerView videoView, @Nullable ReadableMap nowPlayingMap) {
+        if (nowPlayingMap == null) {
+            return;
+        }
+        videoView.setProgramInfo(parseProgramInfo(nowPlayingMap));
+    }
+
+    @ReactProp(name = PROP_THEME)
+    public void setTheme(final ReactTVExoplayerView videoView, final ReadableMap theme) {
+        if (theme == null) {
+            return;
+        }
+        ReadableMap colors = theme.getMap("colors");
+        if (colors != null) {
+            String primaryColor = colors.getString("primary");
+            if (primaryColor == null) {
+                return;
+            }
+            try {
+                int primaryColorInt = Color.parseColor(primaryColor);
+                videoView.applyPrimaryColor(primaryColorInt);
+            } catch (IllegalArgumentException ex) {
+                // Ignore exception
+            }
         }
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactTVExoplayerView videoView, final String resizeModeOrdinalString) {
-        videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
+        // TODO crashing with NumberFormatException, check if we are using this prop at all
+        //videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
@@ -399,16 +439,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
     public void setDisableFocus(final ReactTVExoplayerView videoView, final boolean disableFocus) {
         videoView.setDisableFocus(disableFocus);
-    }
-
-    @ReactProp(name = PROP_COLOR_PROGRESS_BAR)
-    public void setColorProgressBar(final ReactTVExoplayerView videoView, final String color) {
-        videoView.setColorProgressBar(color);
-    }
-
-    @ReactProp(name = PROP_LABEL_FONT_NAME)
-    public void setLabelFont(final ReactTVExoplayerView videoView, final String fontName) {
-        videoView.setLabelFont(fontName);
     }
 
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)
@@ -509,9 +539,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 String title = relatedVideo.hasKey(PROP_METADATA_TITLE) ? relatedVideo.getString(PROP_METADATA_TITLE) : null;
                 String subtitle = relatedVideo.hasKey(PROP_RELATED_VIDEOS_SUBTITLE) ? relatedVideo.getString(PROP_RELATED_VIDEOS_SUBTITLE) : null;
                 String thumbnailUrl = relatedVideo.hasKey(PROP_METADATA_THUMBNAIL_URL) ? relatedVideo.getString(PROP_METADATA_THUMBNAIL_URL) : null;
-
+                long duration = relatedVideo.hasKey(PROP_METADATA_DURATION) ? (long) relatedVideo.getDouble(PROP_METADATA_DURATION) : 0L;
                 relatedVideos.add(new RelatedVideo(title,
                         subtitle,
+                        duration,
                         thumbnailUrl,
                         relatedVideo.toHashMap()));
             }
@@ -644,5 +675,16 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             limitedSeekRange = LimitedSeekRange.from(start, end, seekToStart);
         }
         return limitedSeekRange;
+    }
+
+    private ProgramInfo parseProgramInfo(ReadableMap map) {
+        if (map == null) {
+            return ProgramInfo.EMPTY;
+        }
+        String title = map.hasKey("title") ? map.getString("title") : null;
+        long startDate = map.hasKey("startDate") ? (long) map.getDouble("startDate") : 0;
+        long endDate = map.hasKey("endDate") ? (long) map.getDouble("endDate") : 0;
+        String channelLogoUrl = map.hasKey("channelLogoUrl") ? map.getString("channelLogoUrl") : null;
+        return new ProgramInfo(title, startDate, endDate, channelLogoUrl);
     }
 }

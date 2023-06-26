@@ -5,6 +5,9 @@ export interface IVideoPlayerTranslations {
   player_pause_button: string;
   // new labels
   live: string;
+  goLive: string;
+  nowPlaying: string;
+  playingLive: string;
   favourite: string;
   watchlist: string;
   moreVideos: string;
@@ -15,4 +18,5 @@ export interface IVideoPlayerTranslations {
   info: string;
   adsCountdownAd: string;
   adsCountdownOf: string;
+  tvPlayerEPG: string;
 }

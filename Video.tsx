@@ -202,7 +202,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   getVideoPlayerProps = () => {
     return {
       ...this.props,
-      resizeMode: this.getNativeResizeMode(),
+      // resizeMode: this.getNativeResizeMode(),
       onVideoLoadStart: this.onLoadStart,
       onVideoLoad: this.onLoad,
       onVideoError: this.onError,
@@ -246,7 +246,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
         {...this.getVideoPlayerProps()}
         ref={this.refPlayer}
         style={[styles.base, this.props.style]}
-        resizeMode={this.getNativeResizeMode()}
+        // resizeMode={this.getNativeResizeMode()}
         src={{
           isNetwork,
           isAsset,

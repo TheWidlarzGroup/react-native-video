@@ -1,32 +1,23 @@
 package com.brentvatne.entity;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class RNMetadata {
 
-    private final String channelLogoUrl;
     private final String description;
     private final String thumbnailUrl;
-    private final String title;
     private final String type;
+    private final String episodeTitle;
 
     public RNMetadata(
-            @Nullable String channelLogoUrl,
             @Nullable String description,
-            @NonNull String thumbnailUrl,
-            @NonNull String title,
-            @NonNull String type) {
-        this.channelLogoUrl = channelLogoUrl;
+            @Nullable String thumbnailUrl,
+            @Nullable String episodeTitle,
+            @Nullable String type) {
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
-        this.title = title;
+        this.episodeTitle = episodeTitle;
         this.type = type;
-    }
-
-    @Nullable
-    public String getChannelLogoUrl() {
-        return channelLogoUrl;
     }
 
     @Nullable
@@ -34,17 +25,17 @@ public class RNMetadata {
         return description;
     }
 
-    @NonNull
+    @Nullable
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
 
-    @NonNull
-    public String getTitle() {
-        return title;
+    @Nullable
+    public String getEpisodeTitle() {
+        return episodeTitle;
     }
 
-    @NonNull
+    @Nullable
     public String getType() {
         return type;
     }

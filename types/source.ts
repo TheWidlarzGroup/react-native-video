@@ -3,6 +3,7 @@ import { IVideoPlayerIMA } from './ima';
 import { IMuxData } from './mux';
 import { IVideoPlayerSubtitles } from './subtitles';
 import { IVideoPlayerAPS } from './aps';
+import { INowPlaying } from "./nowPlaying";
 
 type SourceType = 'mpd' | 'm3u8';
 
@@ -22,15 +23,15 @@ export interface IVideoPlayerSourceLimitedSeekableRange {
 export interface IVideoPlayerSource {
   uri: string;
   id?: string;
-  subtitles?: IVideoPlayerSubtitles[],
+  subtitles?: IVideoPlayerSubtitles[];
   type?: SourceType;
   duration?: string;
   drm?: IVideoPlayerDRM;
   ima?: IVideoPlayerIMA;
   config?: {
-    muxData: IMuxData
-  },
-  limitedSeekableRange?: IVideoPlayerSourceLimitedSeekableRange,
+    muxData: IMuxData;
+  };
+  limitedSeekableRange?: IVideoPlayerSourceLimitedSeekableRange;
   mainVer?: number;
   patchVer?: number;
   requestHeaders?: Record<string, any>;
@@ -43,4 +44,6 @@ export interface IVideoPlayerSource {
   adTagUrl?: string;
   metadata?: IVideoPlayerSourceMetadata;
   shouldSaveSubtitleSelection?: boolean;
+  nowPlaying: INowPlaying;
+  thumbnailsPreview?: string;
 }

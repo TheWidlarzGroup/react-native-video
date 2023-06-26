@@ -10,6 +10,7 @@ public class RelatedVideo {
     private int id;
     private final String title;
     private final String subtitle;
+    private final long duration;
     private final String thumbnailUrl;
     private String type;
     private final Map<String, Object> relatedVideoMap;
@@ -17,10 +18,12 @@ public class RelatedVideo {
     public RelatedVideo(
             String title,
             String subtitle,
+            long duration,
             String thumbnailUrl,
             Map<String, Object> relatedVideoMap) {
         this.title = title;
         this.subtitle = subtitle;
+        this.duration = duration;
         this.thumbnailUrl = thumbnailUrl;
         this.relatedVideoMap = relatedVideoMap;
 
@@ -40,6 +43,10 @@ public class RelatedVideo {
 
     public String getSubtitle() {
         return subtitle;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 
     public String getThumbnailUrl() {
