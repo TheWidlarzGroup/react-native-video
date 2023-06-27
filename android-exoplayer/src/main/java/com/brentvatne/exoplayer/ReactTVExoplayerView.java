@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -39,7 +38,6 @@ import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
-import com.bumptech.glide.Glide;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.DorisPlayerOutput;
 import com.diceplatform.doris.ExoDoris;
@@ -1933,8 +1931,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     eventEmitter.playbackRateChange(1f);
                     break;
                 case PAUSED:
+                    eventEmitter.playbackRateChange(0f);
+                    break;
                 case ENDED:
                     eventEmitter.playbackRateChange(0f);
+                    if (exoDorisPlayerView != null) {
+                        exoDorisPlayerView.hideController();
+                    }
                     break;
             }
         }
