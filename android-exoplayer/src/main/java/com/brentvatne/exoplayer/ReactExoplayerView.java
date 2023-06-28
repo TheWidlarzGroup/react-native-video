@@ -628,12 +628,28 @@ class ReactExoplayerView extends FrameLayout implements
         this.releaseMux();
         if (player != null) {
             updateResumePosition();
-            try {
-                player.release();
-                player.removeMetadataOutput(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            final SimpleExoPlayer playerOld = player;
+            player = null;
+            //Releasing the player in another thread since for some Android 10 devices, release is
+            //blocked for more than 5 seconds creating an ANR
+            Thread releaseThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        playerOld.release();
+                        playerOld.addMetadataOutput(null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+                public void uncaughtException(Thread th, Throwable ex) {
+                    //catching exception here, can send an event to RN for logging
+                }
+            };
+            releaseThread.setUncaughtExceptionHandler(h);
+            releaseThread.start();
             trackSelector = null;
             player = null;
         }
