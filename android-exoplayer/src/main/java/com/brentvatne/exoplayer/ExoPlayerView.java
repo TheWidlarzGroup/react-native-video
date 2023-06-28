@@ -263,7 +263,7 @@ public final class ExoPlayerView extends FrameLayout {
     public void sendFileChangeEventForTime(long time) {
         Object manifest = player.getCurrentManifest();
         if (manifest instanceof HlsManifest) {
-            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", null, "", 0, 0, time * 1000, null, "", "", 0, 0, false, ImmutableList.of());
+            HlsMediaPlaylist.Segment segment = new HlsMediaPlaylist.Segment("", null,"", 0, 0, time*1000,null, "", "", 0, 0, false, ImmutableList.of());
 
             int index = Collections.binarySearch(((HlsManifest) manifest).mediaPlaylist.segments, segment, new Comparator<HlsMediaPlaylist.Segment>() {
                 @Override
