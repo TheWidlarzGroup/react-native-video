@@ -1401,7 +1401,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         if (player != null) {
             PlaybackParameters params = new PlaybackParameters(rate, 1f);
-            ThreadUtil.executeOnApplicationThread(player, () -> player.setPlaybackParameters(params));
+            player.setPlaybackParameters(params);
         }
     }
 
