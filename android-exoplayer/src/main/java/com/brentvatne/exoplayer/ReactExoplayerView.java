@@ -198,23 +198,11 @@ class ReactExoplayerView extends FrameLayout implements
                         Long duration = ThreadUtil.callOnApplicationThread(player, () -> player.getDuration());
                         Long currentPos = ThreadUtil.callOnApplicationThread(player, () -> player.getCurrentPosition());
 
-                        if (playBackState != null
-                                && playWhenReady != null
-                                && duration != null
-                                && currentPos != null
-                                && playBackState == Player.STATE_READY
-                                && playWhenReady) {
-                            Format videoFormat = player.getVideoFormat();
-                            int width = videoFormat != null ? videoFormat.width : 0;
-                            int height = videoFormat != null ? videoFormat.height : 0;
-                            int bitrate = videoFormat != null ? videoFormat.bitrate : 0;
-
-                            long pos = currentPos;
-                            long bufferedDuration = player.getBufferedPercentage() * duration / 100;
-                            eventEmitter.progressChanged(pos, bufferedDuration, duration, getPositionInFirstPeriodMsForCurrentWindow(pos), height, width, bitrate);
-                            msg = obtainMessage(SHOW_PROGRESS);
-                            sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-                        }
+                        long pos = player.getCurrentPosition();
+                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos), height, width, bitrate);
+                        msg = obtainMessage(SHOW_PROGRESS);
+                        sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
                     }
                     break;
             }
@@ -223,10 +211,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
-        Timeline currentTimeLine = ThreadUtil.callOnApplicationThread(player, () -> player.getCurrentTimeline());
-        Integer currentWindowIndex = ThreadUtil.callOnApplicationThread(player, () -> player.getCurrentWindowIndex());
-        if (currentTimeLine != null && currentWindowIndex != null && !currentTimeLine.isEmpty()) {
-            currentTimeLine.getWindow(currentWindowIndex, window);
+        if (!player.getCurrentTimeline().isEmpty()) {
+            player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
         }
         return window.windowStartTimeMs + currentPosition;
     }
@@ -449,7 +435,7 @@ class ReactExoplayerView extends FrameLayout implements
                     playerNeedsSource = true;
 
                     PlaybackParameters params = new PlaybackParameters(rate, 1f);
-                    ThreadUtil.executeOnApplicationThread(player, () -> player.setPlaybackParameters(params));
+                    player.setPlaybackParameters(params);
                     if (muxKey != null) {
                         initializeMux();
                     }
@@ -550,9 +536,7 @@ class ReactExoplayerView extends FrameLayout implements
                 if (key != null && ivParam != null) {
                     this.mediaDataSourceFactory = DataSourceUtil.getEncryptedDataSourceFactory(key, ivParam, !areKeysInitialised);
                     areKeysInitialised = true;
-                } else if(isEncrypted){
-                  this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
-              }
+                }
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
@@ -606,11 +590,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (player != null) {
             updateResumePosition();
             try {
-<<<<<<< HEAD
-                ThreadUtil.executeOnApplicationThread(player, () -> player.release());
-=======
                 player.release();
->>>>>>> 00a672d4 (fixes for player release and m4s files)
                 player.removeMetadataOutput(this);
             } catch (Exception e) {
                 e.printStackTrace();
