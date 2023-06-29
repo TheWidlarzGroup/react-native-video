@@ -898,7 +898,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // MARK: - Lifecycle
 
-    override func removeFromSuperview() {
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+
+        if (self.window != nil) {
+            return;
+        }
+
         _player?.pause()
         _player = nil
         _resouceLoaderDelegate = nil
@@ -917,8 +923,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         _eventDispatcher = nil
         NotificationCenter.default.removeObserver(self)
-
-        super.removeFromSuperview()
     }
 
     // MARK: - Export
