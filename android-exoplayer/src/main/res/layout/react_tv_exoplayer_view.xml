@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <com.diceplatform.doris.ui.ExoDorisPlayerView
+    <com.diceplatform.doris.ui.ExoDorisTvPlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

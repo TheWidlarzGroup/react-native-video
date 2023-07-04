@@ -53,6 +53,7 @@ import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
+import com.diceplatform.doris.ui.ExoDorisTvPlayerView;
 import com.diceplatform.doris.ui.entity.Labels;
 import com.diceplatform.doris.ui.entity.LabelsBuilder;
 import com.diceplatform.doris.ui.entity.VideoTile;
@@ -157,7 +158,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final VideoEventEmitter eventEmitter;
 
     private ReactTVExoDorisFactory exoDorisFactory;
-    private ExoDorisPlayerView exoDorisPlayerView;
+    private ExoDorisTvPlayerView exoDorisPlayerView;
     private DceWatermarkWidget watermarkWidget;
     private ExoDoris player;
     private DefaultTrackSelector trackSelector;
@@ -1311,7 +1312,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setProgramInfo(ProgramInfo programInfo) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setTitle(programInfo.getTitle());
-            exoDorisPlayerView.setProgramDateRange(programInfo.getStartDate(), programInfo.getEndDate());
+            exoDorisPlayerView.setProgramDateRange(
+                    programInfo.getStartDate(),
+                    programInfo.getEndDate(),
+                    programInfo.getDateFormat());
             exoDorisPlayerView.setChannelLogo(programInfo.getChannelLogoUrl());
         }
     }

@@ -684,7 +684,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String title = map.hasKey("title") ? map.getString("title") : null;
         long startDate = map.hasKey("startDate") ? (long) map.getDouble("startDate") : 0;
         long endDate = map.hasKey("endDate") ? (long) map.getDouble("endDate") : 0;
+        String dateFormat = map.hasKey("dateFormat") ? map.getString("dateFormat") : null;
         String channelLogoUrl = map.hasKey("channelLogoUrl") ? map.getString("channelLogoUrl") : null;
-        return new ProgramInfo(title, startDate, endDate, channelLogoUrl);
+        return new ProgramInfo(title, startDate, endDate, dateFormat, channelLogoUrl);
     }
 }
