@@ -550,15 +550,9 @@ class ReactExoplayerView extends FrameLayout implements
                 if (key != null && ivParam != null) {
                     this.mediaDataSourceFactory = DataSourceUtil.getEncryptedDataSourceFactory(key, ivParam, !areKeysInitialised);
                     areKeysInitialised = true;
-<<<<<<< HEAD
-                } else if (isEncrypted) {
-                    this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
-                }
-=======
                 } else if(isEncrypted){
                   this.mediaDataSourceFactory = new EncryptedFileDataSourceFactory(themedReactContext);
               }
->>>>>>> 426a0632 (Reading Encrypted file support)
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
@@ -612,7 +606,11 @@ class ReactExoplayerView extends FrameLayout implements
         if (player != null) {
             updateResumePosition();
             try {
+<<<<<<< HEAD
                 ThreadUtil.executeOnApplicationThread(player, () -> player.release());
+=======
+                player.release();
+>>>>>>> 00a672d4 (fixes for player release and m4s files)
                 player.removeMetadataOutput(this);
             } catch (Exception e) {
                 e.printStackTrace();
