@@ -665,6 +665,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self.onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
 
                 if let playerViewController = _playerViewController {
+                    if(_controls) {
+                        // prevents crash https://github.com/react-native-video/react-native-video/issues/3040
+                        self._playerViewController?.removeFromParent()
+                    }
+
                     viewController.present(playerViewController, animated:true, completion:{
                         self._playerViewController?.showsPlaybackControls = self._controls
                         self._fullscreenPlayerPresented = fullscreen
