@@ -310,7 +310,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     self._player = self._player ?? AVPlayer()
-                    self._player?.replaceCurrentItem(with: playerItem)
+                    // https://github.com/react-native-video/react-native-video/issues/2744#issuecomment-1237459473
+                    DispatchQueue.global(qos: .default).async { [weak self] in
+                        self?._player?.replaceCurrentItem(with: playerItem)
+                    }
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
