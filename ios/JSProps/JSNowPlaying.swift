@@ -12,4 +12,5 @@ struct JSNowPlaying: SuperCodable {
     let channelLogoUrl: URL?
     let startDate: Double?
     let endDate: Double?
+    let dateFormat: String?
 }

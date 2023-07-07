@@ -127,7 +127,7 @@ class JSDoris {
            let programEnd = nowPlaying.endDate,
            let programStartDate = Date(timeIntervalSince1970InMilliseconds: programStart),
            let programEndDate = Date(timeIntervalSince1970InMilliseconds: programEnd) {
-            doris?.viewModel.labels.metadata.programRanges = DorisProgramRanges(start: programStartDate, end: programEndDate)
+            doris?.viewModel.labels.metadata.programRanges = DorisProgramRanges(start: programStartDate, end: programEndDate, dateFormat: nowPlaying.dateFormat ?? "HH:mm")
         }
     }
     
@@ -210,7 +210,7 @@ extension JSDoris: DorisOutputProtocol {
             output?.onVideoEnd?(nil)
         case .currentTimeChanged(let seconds, _):
             if seconds > 0 {
-                output?.onVideoProgress?(["currentTime": time])
+                output?.onVideoProgress?(["currentTime": seconds])
             }
             
             if let duration = currentPlayingItemDuration {
