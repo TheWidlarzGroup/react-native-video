@@ -192,36 +192,51 @@ enum RCTPlayerOperations {
     }
     
     static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String) {
-        let session:AVAudioSession! = AVAudioSession.sharedInstance()
+        let audioSession:AVAudioSession! = AVAudioSession.sharedInstance()
         var category:AVAudioSession.Category? = nil
         var options:AVAudioSession.CategoryOptions? = nil
-        
+
         if (ignoreSilentSwitch == "ignore") {
             category = AVAudioSession.Category.playback
         } else if (ignoreSilentSwitch == "obey") {
             category = AVAudioSession.Category.ambient
         }
-        
+
         if (mixWithOthers == "mix") {
             options = .mixWithOthers
         } else if (mixWithOthers == "duck") {
             options = .duckOthers
         }
-        
+
         if let category = category, let options = options {
             do {
-                try session.setCategory(category, options: options)
+                try audioSession.setCategory(category, options: options)
             } catch {
+                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category and options. Error: \(error).")
+                // Handle specific set category and option combination error
+                // setCategory:AVAudioSessionCategoryPlayback withOptions:mixWithOthers || duckOthers
+                // Failed to set category, error: 'what' Error Domain=NSOSStatusErrorDomain
+                // https://developer.apple.com/forums/thread/714598
+                if #available(iOS 16.0, *) {
+                    do {
+                        debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
+                        try audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
+                    } catch {
+                        debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
+                    }
+                }
             }
         } else if let category = category, options == nil {
             do {
-                try session.setCategory(category)
+                try audioSession.setCategory(category)
             } catch {
+                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category. Error: \(error).")
             }
         } else if category == nil, let options = options {
             do {
-                try session.setCategory(session.category, options: options)
+                try audioSession.setCategory(audioSession.category, options: options)
             } catch {
+                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession options. Error: \(error).")
             }
         }
     }
