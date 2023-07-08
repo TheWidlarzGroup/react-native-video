@@ -21,11 +21,11 @@ using namespace Windows::ApplicationModel;
 App::App() noexcept
 {
 #if BUNDLE
-    JavaScriptBundleFile(L"index.windows");
+    JavaScriptBundleFile(L"src/index.windows");
     InstanceSettings().UseWebDebugger(false);
     InstanceSettings().UseFastRefresh(false);
 #else
-    JavaScriptMainModuleName(L"index");
+    JavaScriptMainModuleName(L"src/index");
     InstanceSettings().UseWebDebugger(true);
     InstanceSettings().UseFastRefresh(true);
 #endif
