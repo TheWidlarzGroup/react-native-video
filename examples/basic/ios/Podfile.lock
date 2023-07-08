@@ -73,7 +73,6 @@ PODS:
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
   - glog (0.3.5)
-  - GoogleAds-IMA-iOS-SDK (3.18.4)
   - hermes-engine (0.70.6)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
@@ -306,12 +305,10 @@ PODS:
   - React-jsinspector (0.70.6)
   - React-logger (0.70.6):
     - glog
-  - react-native-video (6.0.0-alpha.4):
+  - react-native-video (6.0.0-alpha.6):
     - React-Core
-    - react-native-video/Video (= 6.0.0-alpha.4)
-  - react-native-video/Video (6.0.0-alpha.4):
-    - GoogleAds-IMA-iOS-SDK (~> 3.18.1)
-    - GoogleAds-IMA-tvOS-SDK (~> 4.2)
+    - react-native-video/Video (= 6.0.0-alpha.6)
+  - react-native-video/Video (6.0.0-alpha.6):
     - PromisesSwift
     - React-Core
   - React-perflogger (0.70.6)
@@ -463,7 +460,6 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - fmt
-    - GoogleAds-IMA-iOS-SDK
     - libevent
     - OpenSSL-Universal
     - PromisesObjC
@@ -562,7 +558,6 @@ SPEC CHECKSUMS:
   FlipperKit: cbdee19bdd4e7f05472a66ce290f1b729ba3cb86
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
-  GoogleAds-IMA-iOS-SDK: b01284e3bf3d64ba948de6692ffda531452c3713
   hermes-engine: 2af7b7a59128f250adfd86f15aa1d5a2ecd39995
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
@@ -583,7 +578,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b4a65947391c658450151275aa406f2b8263178f
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
-  react-native-video: 8e76728a1f4bc35ae6744504fdafd02a482905bd
+  react-native-video: fee89269ad07556d960721f3b62e39be6ace3c90
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
   React-RCTAnimation: 5341e288375451297057391227f691d9b2326c3d
@@ -601,6 +596,6 @@ SPEC CHECKSUMS:
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: a0bccf2003717719312846648e64926660d44487
+PODFILE CHECKSUM: 00947c6516c41a956e96bcf92e4f9fa213f5b8d3
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

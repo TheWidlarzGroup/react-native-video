@@ -743,6 +743,7 @@ class VideoPlayer extends Component {
           repeat={this.state.loop}
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
+          preventsDisplaySleepDuringVideoPlayback={false}
         />
       </TouchableOpacity>
     )
