@@ -15,12 +15,7 @@ struct SelectedTrackCriteria {
         #if RCT_NEW_ARCH_ENABLED
         self.type = json["type"] as? String ?? ""
         #else
-        if json["selectedAudioType"] as? String != nil {
-            self.type = json["selectedAudioType"] as? String ?? ""
-        }
-        if json["selectedTextType"] as? String != nil {
-            self.type = json["selectedTextType"] as? String ?? ""
-        }
+        self.type = json["selectedAudioType"] as? String ?? json["selectedTextType"] as? String ?? ""
         #endif
         self.value = json["value"]
     }
