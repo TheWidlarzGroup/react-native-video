@@ -2,7 +2,7 @@ import AVKit
 
 class RCTVideoPlayerViewController: AVPlayerViewController {
     
-    var rctDelegate:RCTVideoPlayerViewControllerDelegate!
+    weak var rctDelegate: RCTVideoPlayerViewControllerDelegate?
     
     // Optional paramters
     var preferredOrientation:String?
@@ -19,11 +19,9 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-
-        if rctDelegate != nil {
-            rctDelegate.videoPlayerViewControllerWillDismiss(playerViewController: self)
-            rctDelegate.videoPlayerViewControllerDidDismiss(playerViewController: self)
-        }
+        
+        rctDelegate?.videoPlayerViewControllerWillDismiss(playerViewController: self)
+        rctDelegate?.videoPlayerViewControllerDidDismiss(playerViewController: self)
     }
 
     #if !TARGET_OS_TV
