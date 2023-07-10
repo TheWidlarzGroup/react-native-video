@@ -305,7 +305,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_BANDWIDTH, event);
     }
 
-    void seek(long currentPosition, long seekTime) {
+    void seek(long currentPosition, long seekTime, boolean finished) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_SEEK_TIME, seekTime / 1000D);
