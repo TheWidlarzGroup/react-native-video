@@ -132,6 +132,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     private static final String EVENT_PROP_CURRENT_PLAYBACK_TIME = "currentPlaybackTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
+    private static final String EVENT_PROP_FINISHED = "finished";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
     private static final String EVENT_PROP_TRACK_ID = "trackId";
     private static final String EVENT_PROP_WIDTH = "width";
@@ -308,6 +309,7 @@ class VideoEventEmitter {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_SEEK_TIME, seekTime / 1000D);
+        event.putBoolean(EVENT_PROP_FINISHED, finished);
         receiveEvent(EVENT_SEEK, event);
     }
 
