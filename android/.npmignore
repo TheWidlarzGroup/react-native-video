@@ -1,9 +1,0 @@
-build*
-*.iml
-.idea
-.gradle
-local.properties
-*.hprof
-.project
-.settings
-.classpath
