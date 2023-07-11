@@ -24,7 +24,11 @@ struct DRMParams {
         
         
         self.json = json
+        #if RCT_NEW_ARCH_ENABLED
         self.type = json["type"] as? String
+        #else
+        self.type = json["drmType"] as? String
+        #endif
         self.licenseServer = json["licenseServer"] as? String
         self.contentId = json["contentId"] as? String
         self.certificateUrl = json["certificateUrl"] as? String
