@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "7.0.0-alpha.18",
+    "version": "7.0.0-alpha.19",
     "description": "A <Video /> element for react-native",
     "main": "src/index",
     "source": "src/index",
@@ -41,7 +41,11 @@
         "windows",
         "src",
         "react-native-video.podspec",
-        "docs"
+        "docs",
+        "!android/build",
+        "!android/buildOutput_*",
+        "!android/local.properties",
+        "!ios/build"
     ],
     "codegenConfig": {
         "name": "RNCVideo",
