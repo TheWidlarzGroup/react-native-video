@@ -2,6 +2,8 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
+fabric_enabled = ENV['RCT_NEW_ARCH_ENABLED'] == '1'
+
 Pod::Spec.new do |s|
   s.name           = 'react-native-video'
   s.version        = package['version']
@@ -30,6 +32,17 @@ Pod::Spec.new do |s|
     end
   end
 
+
+  if fabric_enabled
+    install_modules_dependencies(s)
+    s.platforms       = { ios: '11.0', tvos: '11.0' }
+    s.dependency "React"
+  else
+    s.platforms = { :ios => "9.0", :tvos => "9.0" }
+
+    s.dependency "React-Core"
+  end
+
   s.subspec "VideoCaching" do |ss|
     ss.dependency "react-native-video/Video"
     ss.dependency "SPTPersistentCache", "~> 1.1.0"
@@ -37,9 +50,6 @@ Pod::Spec.new do |s|
 
     ss.source_files = "ios/VideoCaching/**/*.{h,m,swift}"
   end
-
-  s.dependency "React-Core"
-
   s.default_subspec = "Video"
 
   s.static_framework = true
