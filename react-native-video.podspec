@@ -14,8 +14,9 @@ Pod::Spec.new do |s|
   s.homepage       = 'https://github.com/react-native-video/react-native-video'
   s.source       = { :git => "https://github.com/react-native-video/react-native-video.git", :tag => "v#{s.version}" }
 
-  s.ios.deployment_target = "9.0"
-  s.tvos.deployment_target = "9.0"
+  s.ios.deployment_target = "11.0"
+  s.tvos.deployment_target = "11.0"
+  
 
   s.subspec "Video" do |ss|
     ss.source_files  = "ios/Video/**/*.{h,m,swift}"
@@ -38,7 +39,7 @@ Pod::Spec.new do |s|
     s.platforms       = { ios: '11.0', tvos: '11.0' }
     s.dependency "React"
   else
-    s.platforms = { :ios => "9.0", :tvos => "9.0" }
+    s.platforms = { :ios => "11.0", :tvos => "11.0" }
 
     s.dependency "React-Core"
   end
