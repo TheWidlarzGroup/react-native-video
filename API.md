@@ -331,6 +331,7 @@ var styles = StyleSheet.create({
 | [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS              |
 | [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS              |
 | [selectedVideoTrack](#selectedvideotrack)                                           | Android                   |
+| [shutterColor](#shutterColor)                                                       | Android                   |
 | [source](#source)                                                                   | All                       |
 | [subtitleStyle](#subtitleStyle)                                                     | Android                   |
 | [textTracks](#texttracks)                                                           | Android, iOS              |
@@ -850,6 +851,14 @@ Type | Value | Description
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, ABR will be used.
 
+Platforms: Android
+
+#### shutterColor
+Apply color to shutter view, if you see black flashes before video start then set shutterColor='transparent'
+
+won't work if useTextureView={false}
+
+black (default)
 Platforms: Android
 
 #### source

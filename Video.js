@@ -77,7 +77,7 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
-  save = async (options?) => {
+  save = async (options) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
@@ -528,6 +528,7 @@ Video.propTypes = {
   useTextureView: PropTypes.bool,
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
+  shutterColor: PropTypes.string,
   onLoadStart: PropTypes.func,
   onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,

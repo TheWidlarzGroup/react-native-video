@@ -116,6 +116,10 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
     }
 
+    public void setShutterColor(Integer color) {
+        shutterView.setBackgroundColor(color);
+    }
+
     private void updateSurfaceView() {
         View view;
         if (!useTextureView || useSecureView) {

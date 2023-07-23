@@ -2032,6 +2032,10 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setSubtitleStyle(style);
     }
 
+    public void setShutterColor(Integer color) {
+        exoPlayerView.setShutterColor(color);
+    }
+
     @Override
     public void onAdEvent(AdEvent adEvent) {
         eventEmitter.receiveAdEvent(adEvent.getType().name());
