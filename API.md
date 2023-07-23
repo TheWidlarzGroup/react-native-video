@@ -854,11 +854,14 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 Platforms: Android
 
 #### shutterColor
-Apply color to shutter view, if you see black flashes before video start then set shutterColor='transparent'
+Apply color to shutter view, if you see black flashes before video start then set 
 
-won't work if useTextureView={false}
+```
+shutterColor='transparent'
+```
 
-black (default)
+- black (default)
+
 Platforms: Android
 
 #### source
