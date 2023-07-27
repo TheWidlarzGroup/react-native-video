@@ -60,6 +60,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _fullscreenAutorotate:Bool = true
     private var _fullscreenOrientation:String! = "all"
     private var _fullscreenPlayerPresented:Bool = false
+    private var _fullscreenUncontrolPlayerPresented:Bool = false // to call events switching full screen mode from player controls
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
@@ -214,7 +215,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
 
-        let currentTime = _player?.currentTime()
+        var currentTime = _player?.currentTime()
+        if (currentTime != nil && _source?.startTime != nil) {
+            currentTime = CMTimeSubtract(currentTime!, CMTimeMake(value: _source?.startTime ?? 0, timescale: 1000))
+        }
         let currentPlaybackTime = _player?.currentItem?.currentDate()
         let duration = CMTimeGetSeconds(playerDuration)
         let currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
@@ -232,7 +236,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 #endif
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
-                "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player),
+                "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
                 "atValue": NSNumber(value: currentTime?.value ?? .zero),
                 "currentPlaybackTime": NSNumber(value: NSNumber(value: floor(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value),
                 "target": reactTag,
@@ -244,7 +248,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: .default).async { [weak self] in
+            guard let self = self else {return}
             self._source = VideoSource(source)
             if (self._source?.uri == nil || self._source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
@@ -301,6 +306,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem = playerItem
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
+                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.startTime, withVideoEnd: self._source?.endTime)
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -463,15 +469,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setCurrentTime(_ currentTime:Float) {
-        let info:NSDictionary = [
-            "time": NSNumber(value: currentTime),
-            "tolerance": NSNumber(value: 100)
-        ]
-        setSeek(info)
-    }
-
-    @objc
     func setSeek(_ info:NSDictionary!) {
         let seekTime:NSNumber! = info["time"] as! NSNumber
         let seekTolerance:NSNumber! = info["tolerance"] as! NSNumber
@@ -508,6 +505,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setRate(_ rate:Float) {
         _rate = rate
         applyModifiers()
+    }
+
+    @objc
+    func isMuted() -> Bool {
+        return _muted
     }
 
     @objc
@@ -559,6 +561,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.automaticallyWaitsToMinimizeStalling = waits
         } else {
             // Fallback on earlier versions
+        }
+    }
+    
+    func setPlaybackRange(_ item:AVPlayerItem!, withVideoStart videoStart:Int64?, withVideoEnd videoEnd:Int64?) {
+        if (videoStart != nil) {
+            let start = CMTimeMake(value: videoStart!, timescale: 1000)
+            item.reversePlaybackEndTime = start
+            _pendingSeekTime = Float(CMTimeGetSeconds(start))
+            _pendingSeek = true
+        }
+        if (videoEnd != nil) {
+            item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
         }
     }
 
@@ -666,7 +680,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self.onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
 
                 if let playerViewController = _playerViewController {
-                    viewController.present(playerViewController, animated:true, completion:{
+                    if(_controls) {
+                        // prevents crash https://github.com/react-native-video/react-native-video/issues/3040
+                        self._playerViewController?.removeFromParent()
+                    }
+
+                    viewController.present(playerViewController, animated:true, completion:{ [weak self] in
+                        guard let self = self else {return}
                         self._playerViewController?.showsPlaybackControls = self._controls
                         self._fullscreenPlayerPresented = fullscreen
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
@@ -678,8 +698,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         } else if !fullscreen && _fullscreenPlayerPresented, let _playerViewController = _playerViewController {
             self.videoPlayerViewControllerWillDismiss(playerViewController: _playerViewController)
-            _presentingViewController?.dismiss(animated: true, completion:{
-                self.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
+            _presentingViewController?.dismiss(animated: true, completion:{[weak self] in
+                self?.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
             })
         }
     }
@@ -1025,7 +1045,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if _pendingSeek {
-            setCurrentTime(_pendingSeekTime)
+            setSeek([
+                "time": NSNumber(value: _pendingSeekTime),
+                "tolerance": NSNumber(value: 100)
+            ])
             _pendingSeek = false
         }
 
@@ -1104,12 +1127,27 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let oldRect = change.oldValue
         let newRect = change.newValue
         if !oldRect!.equalTo(newRect!) {
+            // https://github.com/react-native-video/react-native-video/issues/3085#issuecomment-1557293391
             if newRect!.equalTo(UIScreen.main.bounds) {
                 RCTLog("in fullscreen")
+                if (!_fullscreenUncontrolPlayerPresented) {
+                    _fullscreenUncontrolPlayerPresented = true;
 
-                self.reactViewController().view.frame = UIScreen.main.bounds
-                self.reactViewController().view.setNeedsLayout()
-            } else {NSLog("not fullscreen")}
+                    self.onVideoFullscreenPlayerWillPresent?(["target": self.reactTag as Any])
+                    self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag as Any])
+                }
+            } else {
+                NSLog("not fullscreen")
+                if (_fullscreenUncontrolPlayerPresented) {
+                    _fullscreenUncontrolPlayerPresented = false;
+
+                    self.onVideoFullscreenPlayerWillDismiss?(["target": self.reactTag as Any])
+                    self.onVideoFullscreenPlayerDidDismiss?(["target": self.reactTag as Any])
+                }
+            }
+
+            self.reactViewController().view.frame = UIScreen.main.bounds
+            self.reactViewController().view.setNeedsLayout()
         }
     }
 

@@ -6,6 +6,8 @@ struct VideoSource {
     let isAsset: Bool
     let shouldCache: Bool
     let requestHeaders: Dictionary<String,Any>?
+    let startTime: Int64?
+    let endTime: Int64?
     
     let json: NSDictionary?
     
@@ -18,6 +20,8 @@ struct VideoSource {
             self.isAsset = false
             self.shouldCache = false
             self.requestHeaders = nil
+            self.startTime = nil
+            self.endTime = nil
             return
         }
         self.json = json
@@ -27,5 +31,7 @@ struct VideoSource {
         self.isAsset = json["isAsset"] as? Bool ?? false
         self.shouldCache = json["shouldCache"] as? Bool ?? false
         self.requestHeaders = json["requestHeaders"] as? Dictionary<String,Any>
+        self.startTime = json["startTime"] as? Int64
+        self.endTime = json["endTime"] as? Int64
     }
 }
