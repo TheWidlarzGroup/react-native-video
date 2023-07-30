@@ -546,7 +546,7 @@ Setting this prop will fire [onFrameChange](#onframechange) callback
 * **0 (default)** - Don't display the video in fullscreen
 * **1** - Display the video in fullscreen
 
-Platforms: iOS
+Platforms: Android, iOS
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
