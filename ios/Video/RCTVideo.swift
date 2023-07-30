@@ -55,6 +55,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _ignoreSilentSwitch:String! = "inherit" // inherit, ignore, obey
     private var _mixWithOthers:String! = "inherit" // inherit, mix, duck
     private var _resizeMode:String! = "AVLayerVideoGravityResizeAspectFill"
+    private var _frameQuality:Float = 0
     private var _fullscreen:Bool = false
     private var _fullscreenAutorotate:Bool = true
     private var _fullscreenOrientation:String! = "all"
@@ -109,6 +110,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onFrameChange: RCTDirectEventBlock?
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -241,9 +243,36 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "target": reactTag,
                 "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player)
             ])
+            setFrame()
+        }
+    }
+    
+    // MARK: - Frame
+    @objc
+    func setFrame() {
+        guard let player = _player ,
+            let asset = _player?.currentItem?.asset else {
+                return
+        }
+        
+        if(_frameQuality == 0) { return; }
+        if(_frameQuality > 1) { _frameQuality = 1; }
+        
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        let times = [NSValue(time:player.currentTime())]
+            
+        imageGenerator.generateCGImagesAsynchronously(forTimes: times) {_, image, _, _, _ in
+            if let img = image {
+                let uiImage = UIImage(cgImage: img)
+                let base64Image:String = uiImage
+                    .jpegData(compressionQuality: CGFloat(self._frameQuality))?.base64EncodedString() ?? ""
+                self.onFrameChange?(["base64ImageString": base64Image, "target": reactTag]);
+            }
         }
     }
 
+ 
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
@@ -503,6 +532,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setRate(_ rate:Float) {
         _rate = rate
+        applyModifiers()
+    }
+    
+    @objc
+    func setFrameQuality(_ frameQuality:Float) {
+        _frameQuality = frameQuality
         applyModifiers()
     }
 

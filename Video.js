@@ -77,7 +77,7 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
-  save = async (options?) => {
+  save = async (options) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
@@ -170,6 +170,12 @@ export default class Video extends Component {
       this.props.onTimedMetadata(event.nativeEvent);
     }
   };
+
+  _onFrameChange = (event) => {
+    if(this.props.onFrameChange) {
+      this.props.onFrameChange(event.nativeEvent.base64ImageString);
+    }
+  }
 
   _onFullscreenPlayerWillPresent = (event) => {
     if (this.props.onFullscreenPlayerWillPresent) {
@@ -345,6 +351,7 @@ export default class Video extends Component {
         startTime: source.startTime || 0,
         endTime: source.endTime
       },
+      onFrameChange: this._onFrameChange,
       onVideoLoadStart: this._onLoadStart,
       onVideoPlaybackStateChanged: this._onPlaybackStateChanged,
       onVideoLoad: this._onLoad,
@@ -415,6 +422,8 @@ Video.propTypes = {
     FilterType.TRANSFER,
     FilterType.SEPIA,
   ]),
+  frameQuality: PropTypes.number,
+  onFrameChange: PropTypes.func,
   filterEnabled: PropTypes.bool,
   onVideoLoadStart: PropTypes.func,
   onVideoLoad: PropTypes.func,

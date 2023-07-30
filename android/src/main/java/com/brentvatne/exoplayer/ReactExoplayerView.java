@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -17,6 +18,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -220,6 +223,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
+    private Integer frameQuality;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -244,11 +248,29 @@ class ReactExoplayerView extends FrameLayout implements
                         }
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                        setFrame();
                     }
                     break;
             }
         }
     };
+
+    private void setFrame() {
+        if(frameQuality == null) return;
+        if(frameQuality > 1) frameQuality = 1;
+        ((Runnable) () -> {
+            try {
+                if (exoPlayerView.getVideoSurfaceView() instanceof TextureView) {
+                    Bitmap bitmap = ((TextureView) exoPlayerView.getVideoSurfaceView()).getBitmap();
+                    if(bitmap == null) return;
+                    final String base64Image = ImageUtil.convert(bitmap, frameQuality);
+                    eventEmitter.setFrame(base64Image);
+                }
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }).run();
+    }
 
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
@@ -1962,6 +1984,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setHideShutterView(boolean hideShutterView) {
         exoPlayerView.setHideShutterView(hideShutterView);
+    }
+    
+    public void setFrameQuality(Integer quality) {
+        frameQuality = quality;
     }
 
     public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent) {

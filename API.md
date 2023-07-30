@@ -540,6 +540,14 @@ Whether this video view should be focusable with a non-touch input device, eg. r
 Platforms: Android
 
 
+#### frameQuality
+Setting this prop will fire [onFrameChange](#onframechange) callback
+
+* **0 (default)** - Don't display the video in fullscreen
+* **1** - Display the video in fullscreen
+
+Platforms: iOS
+
 #### fullscreen
 Controls whether the player enters fullscreen on play.
 * **false (default)** - Don't display the video in fullscreen
@@ -1130,6 +1138,19 @@ Example:
 ```
 
 Platforms: iOS
+
+#### onFrameChange
+callback function that is called for each frame when [frameQuality](#framequality) > 0`, results each frame as base64Image(thumbnail)
+
+```javascript
+  <Video
+    {...videoProps}
+    frameQuality={0.3} // required to fire callback
+    onFrameChange={(thumbnail: string) => setThumbnail(thumbnail)}
+  />
+```
+
+Platform: iOS, Android
 
 #### onFullscreenPlayerWillPresent
 Callback function that is called when the player is about to enter fullscreen mode.
