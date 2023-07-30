@@ -258,6 +258,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void setFrame() {
         if(frameQuality == null) return;
         if(frameQuality > 1) frameQuality = 1;
+        frameQuality = Math.round(frameQuality * 100);
         ((Runnable) () -> {
             try {
                 if (exoPlayerView.getVideoSurfaceView() instanceof TextureView) {
