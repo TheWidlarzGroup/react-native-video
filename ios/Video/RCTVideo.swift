@@ -14,6 +14,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
+    private var _playerOutput:AVPlayerItemVideoOutput?
 
     private var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
@@ -113,6 +114,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onFrameChange: RCTDirectEventBlock?
 
     init(eventDispatcher:RCTEventDispatcher!) {
+        self._playerOutput = AVPlayerItemVideoOutput(outputSettings: ["\(kCVPixelBufferPixelFormatTypeKey)": kCVPixelFormatType_32BGRA])
+
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 #if USE_GOOGLE_IMA
         _imaAdsManager = RCTIMAAdsManager(video: self)
@@ -154,6 +157,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     required init?(coder aDecoder: NSCoder) {
+        self._playerOutput = AVPlayerItemVideoOutput(outputSettings: ["\(kCVPixelBufferPixelFormatTypeKey)": kCVPixelFormatType_32BGRA])
         super.init(coder: aDecoder)
 #if USE_GOOGLE_IMA
         _imaAdsManager = RCTIMAAdsManager(video: self)
@@ -250,34 +254,33 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Frame
     @objc
     func setFrame() {
-        guard let player = _player ,
-            let asset = _player?.currentItem?.asset else {
-                return
-        }
-        
         if(_frameQuality == 0) { return; }
         if(_frameQuality > 1) { _frameQuality = 1; }
         
-        let imageGenerator = AVAssetImageGenerator(asset: asset)
-        imageGenerator.appliesPreferredTrackTransform = true
-        let times = [NSValue(time:player.currentTime())]
-            
-        imageGenerator.generateCGImagesAsynchronously(forTimes: times) {_, image, _, _, _ in
-            if let img = image {
-                let uiImage = UIImage(cgImage: img)
-                let base64Image:String = uiImage
-                    .jpegData(compressionQuality: CGFloat(self._frameQuality))?.base64EncodedString() ?? ""
-                self.onFrameChange?(["base64ImageString": base64Image, "target": reactTag]);
+        if let _playerItem = _playerItem, let _playerOutput = self._playerOutput {
+            let pixelBuffer = _playerOutput.copyPixelBuffer(
+                forItemTime:_playerItem.currentTime(), itemTimeForDisplay: nil)
+            if let _pixelBuffer = pixelBuffer {
+                let ciImage = CIImage(cvPixelBuffer: _pixelBuffer);
+                let ciContext = CIContext()
+                let cgImage = ciContext.createCGImage(
+                    ciImage, from: CGRect(x: 0, y: 0, width:CVPixelBufferGetWidth(_pixelBuffer), height:CVPixelBufferGetHeight(_pixelBuffer)))
+                if let _cgImage = cgImage {
+                    let uiImage = UIImage(cgImage: _cgImage);
+                    let base64Image = uiImage.jpegData(compressionQuality: CGFloat(self._frameQuality))?.base64EncodedString()
+                    self.onFrameChange?([
+                        "base64ImageString": base64Image ?? "",
+                        "target": reactTag
+                    ])
+                }
             }
         }
     }
 
- 
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
-        DispatchQueue.global(qos: .default).async { [weak self] in
-            guard let self = self else {return}
+        DispatchQueue.global(qos: .default).async {
             self._source = VideoSource(source)
             if (self._source?.uri == nil || self._source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
@@ -332,6 +335,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     self._player?.pause()
                     self._playerItem = playerItem
+                    if self._playerOutput != nil {
+                        self._playerItem?.add(self._playerOutput!)
+                    }
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                     self.setPlaybackRange(playerItem, withVideoStart: self._source?.startTime, withVideoEnd: self._source?.endTime)
@@ -339,7 +345,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
                     }
-
+                    
                     self._player = self._player ?? AVPlayer()
                     self._player?.replaceCurrentItem(with: playerItem)
                     self._playerObserver.player = self._player
@@ -498,7 +504,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setSeek(_ info:NSDictionary!) {
-        let seekTime:NSNumber! = info["time"] as! NSNumber
+        let seekTime:NSNumber! = (info["time"] as! NSNumber)
         let seekTolerance:NSNumber! = info["tolerance"] as! NSNumber
         let item:AVPlayerItem? = _player?.currentItem
         guard item != nil, let player = _player, let item = item, item.status == AVPlayerItem.Status.readyToPlay else {
@@ -1165,8 +1171,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             }
 
-            self.reactViewController().view.frame = UIScreen.main.bounds
-            self.reactViewController().view.setNeedsLayout()
+                self.reactViewController().view.frame = UIScreen.main.bounds
+                self.reactViewController().view.setNeedsLayout()
         }
     }
 
