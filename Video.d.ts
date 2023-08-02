@@ -136,6 +136,7 @@ export interface VideoProperties extends ViewProps {
 
     /* Native only */
     src?: any;
+    stop?: boolean | undefined;
     seek?: number | undefined;
     fullscreen?: boolean | undefined;
     fullscreenOrientation?: 'all' | 'landscape' | 'portrait' | undefined;
@@ -249,4 +250,5 @@ export default class Video extends React.Component<VideoProperties> {
     restoreUserInterfaceForPictureInPictureStopCompleted(restored: boolean): void;
     save(): Promise<void>;
     seek(time: number, tolerance?: number): void;
+    stop(): void;
 }

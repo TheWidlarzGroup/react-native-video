@@ -43,6 +43,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _muted:Bool = false
     private var _paused:Bool = false
     private var _repeat:Bool = false
+    private var _stopped:Bool = false
     private var _allowsExternalPlayback:Bool = true
     private var _textTracks:[TextTrack]?
     private var _selectedTextTrackCriteria:SelectedTrackCriteria?
@@ -368,6 +369,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
+    func setStop(_ stop:Bool) {
+        _stopped = stop
+        if (stop) {
+            self._player?.pause()
+            self.removePlayerLayer()
+            self._playerObserver.player = nil
+            self._resouceLoaderDelegate = nil
+            self._playerObserver.playerItem = nil
+            self._player = nil
+        } else {
+            setSrc(_source?.json)
+        }
+    }
+
+    @objc
     func setDrm(_ drm:NSDictionary) {
         _drm = DRMParams(drm)
     }
@@ -533,7 +549,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func isMuted() -> Bool {
         return _muted
     }
-
+    
     @objc
     func setMuted(_ muted:Bool) {
         _muted = muted

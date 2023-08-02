@@ -1856,6 +1856,16 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void stop(boolean stop) {
+        if (player != null) {
+            if(stop) {
+                player.stop();
+            } else {
+                player.play();
+            }
+        }
+    }
+
     public void seekTo(long positionMs) {
         if (player != null) {
             player.seekTo(positionMs);
