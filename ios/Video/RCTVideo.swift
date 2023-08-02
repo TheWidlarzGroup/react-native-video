@@ -110,6 +110,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onTextTracks: RCTDirectEventBlock?
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -1049,6 +1050,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         var width: Float? = nil
         var height: Float? = nil
         var orientation = "undefined"
+
+        let textTracks = RCTVideoUtils.getTextTrackInfo(_player).map(\.json)
+        onTextTracks?([
+            "textTracks": textTracks
+        ])
 
         if _playerItem.asset.tracks(withMediaType: AVMediaType.video).count > 0 {
             let videoTrack = _playerItem.asset.tracks(withMediaType: .video)[0]
