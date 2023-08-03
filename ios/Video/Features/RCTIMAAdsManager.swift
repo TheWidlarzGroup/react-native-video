@@ -4,7 +4,7 @@ import GoogleInteractiveMediaAds
 
 class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
 
-    private var _video:RCTVideo
+    private weak var _video: RCTVideo?
 
     /* Entry point for the SDK. Used to make ad requests. */
     private var adsLoader: IMAAdsLoader!
@@ -23,6 +23,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     }
 
     func requestAds() {
+        guard let _video = _video else {return}
         // Create ad display container for ad rendering.
         let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video, viewController: _video.reactViewController())
 
@@ -54,6 +55,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     // MARK: - IMAAdsLoaderDelegate
 
     func adsLoader(_ loader: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
+        guard let _video = _video else {return}
         // Grab the instance of the IMAAdsManager and set yourself as the delegate.
         adsManager = adsLoadedData.adsManager
         adsManager?.delegate = self
@@ -71,12 +73,13 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
             print("Error loading ads: " + adErrorData.adError.message!)
         }
 
-        _video.setPaused(false)
+        _video?.setPaused(false)
     }
 
     // MARK: - IMAAdsManagerDelegate
 
     func adsManager(_ adsManager: IMAAdsManager, didReceive event: IMAAdEvent) {
+        guard let _video = _video else {return}
         // Mute ad if the main player is muted
         if (_video.isMuted()) {
             adsManager.volume = 0;
@@ -102,19 +105,19 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         }
 
         // Fall back to playing content
-        _video.setPaused(false)
+        _video?.setPaused(false)
     }
 
     func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
         // Pause the content for the SDK to play ads.
-        _video.setPaused(true)
-        _video.setAdPlaying(true)
+        _video?.setPaused(true)
+        _video?.setAdPlaying(true)
     }
 
     func adsManagerDidRequestContentResume(_ adsManager: IMAAdsManager) {
         // Resume the content since the SDK is done playing ads (at least for now).
-        _video.setAdPlaying(false)
-        _video.setPaused(false)
+        _video?.setAdPlaying(false)
+        _video?.setPaused(false)
     }
 
     // MARK: - Helpers

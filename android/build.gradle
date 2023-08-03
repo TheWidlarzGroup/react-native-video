@@ -17,6 +17,7 @@ def configStringPath = (
 ).md5()
 
 android {
+    namespace 'com.brentvatne.react'
     compileSdkVersion safeExtGet('compileSdkVersion', 31)
     buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
 
