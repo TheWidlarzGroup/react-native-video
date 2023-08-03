@@ -13,6 +13,7 @@ import {
   Platform,
   TextStyle,
   PanResponderInstance,
+  Alert,
 } from 'react-native';
 
 import {Picker} from '@react-native-picker/picker';
@@ -48,31 +49,11 @@ class VideoPlayer extends Component {
 
   seekerWidth = 0;
 
-  srcList = [
+  srcAllPlatformList = [
     require('./broadchurch.mp4'),
-    {
-      description: '(dash) sintel subtitles',
-      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
-    },
-    {
-      description: '(mp4) big buck bunny',
-      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
-    },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
-    },
-    {
-      description: '(mp4|subtitles) demo with sintel Subtitles',
-      uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
-      type: 'mpd',
-    },
-
-    {
-      description: '(mp4) big buck bunny With Ads',
-      adTagUrl:
-        'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
-      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
     },
     {
       description: 'invalid URL',
@@ -84,7 +65,41 @@ class VideoPlayer extends Component {
       description: '(no view) no View',
       noView: true,
     },
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
   ];
+
+  srcAndroidList = [
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
+    {
+      description: '(dash) sintel subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
+    },
+    {
+      description: '(mp4) big buck bunny',
+      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+    },
+    {
+      description: '(mp4|subtitles) demo with sintel Subtitles',
+      uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
+      type: 'mpd',
+    },
+    {
+      description: '(mp4) big buck bunny With Ads',
+      adTagUrl:
+        'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
+      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+    },
+  ];
+
+  srcList = this.srcAllPlatformList.concat(
+    [Platform.OS === 'android' ? this.srcAndroidList : null].filter(Boolean),
+  );
 
   video: Video;
   seekPanResponder?: PanResponderInstance;
@@ -258,16 +273,18 @@ class VideoPlayer extends Component {
 
   toast = (visible: boolean, message: string) => {
     if (visible) {
-      ToastAndroid.showWithGravityAndOffset(
-        message,
-        ToastAndroid.LONG,
-        ToastAndroid.BOTTOM,
-        25,
-        50,
-      );
-      return null;
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravityAndOffset(
+          message,
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+      } else {
+        Alert.alert(message, message);
+      }
     }
-    return null;
   };
 
   onError = (err: any) => {
