@@ -3,6 +3,7 @@
     "version": "6.0.0-alpha.7",
     "description": "A <Video /> element for react-native",
     "main": "Video.js",
+    "source": "Video.js",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
@@ -21,6 +22,10 @@
         "deprecated-react-native-prop-types": "^2.2.0",
         "keymirror": "^0.1.1",
         "prop-types": "^15.7.2"
+    },
+    "peerDependencies": {
+        "react": "*",
+        "react-native": "*"
     },
     "scripts": {
         "lint": "yarn eslint .",
