@@ -4,9 +4,9 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.endeavor.LimitedSeekRange;
 
 import com.diceplatform.doris.entity.TextTrack;
-import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
 
 import java.util.Map;
 

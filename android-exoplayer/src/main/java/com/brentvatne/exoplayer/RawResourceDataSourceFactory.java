@@ -2,8 +2,8 @@ package com.brentvatne.exoplayer;
 
 import android.content.Context;
 
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.RawResourceDataSource;
 
 class RawResourceDataSourceFactory implements DataSource.Factory {
 

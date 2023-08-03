@@ -7,7 +7,7 @@ apply plugin: 'com.android.library'
  */
 def packageJsonFile = file('../package.json')
 def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
-def exoDorisVersion = packageJson.exoDorisVersion
+def dorisAndroidVersion = packageJson.dorisAndroidVersion
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -36,10 +36,10 @@ dependencies {
     implementation project(":AmazonFireTVAdsSDK-release")
 
     // ExoDoris
-    api ("com.github.DiceTechnology.doris-android:doris-ui:$exoDorisVersion"){
+    api ("com.github.DiceTechnology.doris-android:doris-ui:$dorisAndroidVersion"){
         exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
     }
-    api ("com.github.DiceTechnology.doris-android:doris-custom-ui:$exoDorisVersion"){
+    api ("com.github.DiceTechnology.doris-android:doris-custom-ui:$dorisAndroidVersion"){
         exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
     }
 
@@ -60,7 +60,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     implementation(project(':dice-shield-android')) {
-        exclude group: "com.google.android.exoplayer", module: "exoplayer"
+        exclude group: "androidx.media3", module: "media3-exoplayer"
+        exclude group: "androidx.media3", module: "media3-exoplayer-dash"
+        exclude group: "androidx.media3", module: "media3-ui"
     }
 
     implementation 'com.github.bumptech.glide:glide:4.13.0'

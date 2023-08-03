@@ -1,5 +1,8 @@
 package com.dice.util;
 
+import androidx.media3.common.endeavor.WebUtil;
+import androidx.media3.common.util.Log;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -7,8 +10,6 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
-import com.google.android.exoplayer2.endeavor.WebUtil;
-import com.google.android.exoplayer2.util.Log;
 
 public class MockStreamSource {
 

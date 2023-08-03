@@ -7,6 +7,14 @@ import android.text.TextUtils;
 import android.util.LruCache;
 import android.view.ContextThemeWrapper;
 
+import androidx.media3.common.C;
+import androidx.media3.common.endeavor.ExoConfig;
+import androidx.media3.common.endeavor.LimitedSeekRange;
+import androidx.media3.common.endeavor.WebUtil;
+import androidx.media3.common.util.Log;
+import androidx.media3.datasource.RawResourceDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
+
 import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
@@ -22,13 +30,6 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.endeavor.ExoConfig;
-import com.google.android.exoplayer2.endeavor.LimitedSeekRange;
-import com.google.android.exoplayer2.endeavor.WebUtil;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
-import com.google.android.exoplayer2.util.Log;
 import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
 

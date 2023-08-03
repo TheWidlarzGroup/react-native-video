@@ -1,12 +1,14 @@
 package com.brentvatne.exoplayer;
 
-import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static androidx.media3.common.util.Assertions.checkNotNull;
 
 import android.content.Context;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.AdViewProvider;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
@@ -14,8 +16,6 @@ import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
 import com.diceplatform.doris.plugin.Plugin;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.Parameters;
-import com.google.android.exoplayer2.ui.AdViewProvider;
 
 import java.util.List;
 
