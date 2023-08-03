@@ -528,6 +528,7 @@ Video.propTypes = {
   useTextureView: PropTypes.bool,
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
+  shutterColor: PropTypes.string,
   onLoadStart: PropTypes.func,
   onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,
