@@ -1,13 +1,14 @@
 ## Changelog
 
-
+### Version 6.0.0-alpha.7
+- Android: Fix memory leaks from AudioManager [#3123](https://github.com/react-native-video/react-native-video/pull/3123)
+- Android: Fixed syntax error [#3182](https://github.com/react-native-video/react-native-video/issues/3182)
 
 ### Version 6.0.0-alpha.6
 - Feature: Video range support [#3030](https://github.com/react-native-video/react-native-video/pull/3030)
 - iOS: remove undocumented `currentTime` property [#3064](https://github.com/react-native-video/react-native-video/pull/3064)
 - iOS: make sure that the audio in ads is muted when the player is muted. [#3068](https://github.com/react-native-video/react-native-video/pull/3077)
 - iOS: make IMA build optionnal
-- Android: Fixed syntax error [#3182](https://github.com/react-native-video/react-native-video/issues/3182)
 
 ### Version 6.0.0-alpha.5
 
