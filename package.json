@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.1.0",
+    "version": "6.1.1",
     "dorisAndroidVersion": "3.0.2",
     "description": "A <Video /> element for react-native",
     "main": "Video.tsx",
@@ -29,7 +29,7 @@
         "react-native": "0.61.5"
     },
     "scripts": {
-        "install": "sh ./scripts/install-dependencies",
+        "install": "bash ./scripts/install-dependencies",
         "installpeers": "install-self-peers -- --ignore-scripts",
         "postinstall": "",
         "test": "node_modules/.bin/eslint *.js"
