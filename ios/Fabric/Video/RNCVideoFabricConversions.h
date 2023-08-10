@@ -39,7 +39,7 @@ inline NSDictionary *drmDictFromCppStruct(const RNCVideoDrmStruct &drm) {
     NSArray *headers = drmHeadersFromCppVector(drm.headers);
     
     return @{
-        @"type": RCTNSStringFromStringNilIfEmpty(toString(drm.drmType)) ?: @"",
+        @"drmType": RCTNSStringFromStringNilIfEmpty(toString(drm.drmType)) ?: @"",
         @"headers": headers,
         @"licenseServer": RCTNSStringFromStringNilIfEmpty(drm.licenseServer) ?: @"",
         @"contentId": RCTNSStringFromStringNilIfEmpty(drm.contentId) ?: @"",
@@ -70,17 +70,17 @@ inline NSDictionary *selectedTextTrackDictFromCppStruct(const RNCVideoSelectedTe
     
     if ([type isEqualToString:@"title"] || [type isEqualToString:@"language"]) {
         return @{
-            @"type": type,
+            @"selectedTextType": type,
             @"value": RCTNSStringFromStringNilIfEmpty(textTrack.value) ?: @"",
         };
     } else if ([type isEqualToString:@"index"]) {
         return @{
-            @"type": type,
+            @"selectedTextType": type,
             @"value": @(textTrack.index)
         };
     }
     return @{
-        @"type": type,
+        @"selectedTextType": type,
     };
 }
 
@@ -89,17 +89,17 @@ inline NSDictionary *selectedAudioTrackDictFromCppStruct(const RNCVideoSelectedA
     
     if ([type isEqualToString:@"title"] || [type isEqualToString:@"language"]) {
         return @{
-            @"type": type,
+            @"selectedAudioType": type,
             @"value": RCTNSStringFromStringNilIfEmpty(audioTrack.value) ?: @"",
         };
     } else if ([type isEqualToString:@"index"]) {
         return @{
-            @"type": type,
+            @"selectedAudioType": type,
             @"value": @(audioTrack.index)
         };
     }
     return @{
-        @"type": type,
+        @"selectedAudioType": type,
     };
 }
 
