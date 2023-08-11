@@ -131,6 +131,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         contentId: drm.contentId,
         certificateUrl: drm.certificateUrl,
         base64Certificate: drm.base64Certificate,
+        useExternalGetLicense: !!drm.getLicense,
       };
     }, [drm]);
 

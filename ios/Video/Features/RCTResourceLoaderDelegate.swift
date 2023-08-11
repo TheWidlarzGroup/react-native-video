@@ -2,7 +2,7 @@ import AVFoundation
 import Promises
 
 class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSessionDelegate {
-    
+
     private var _loadingRequest:AVAssetResourceLoadingRequest?
     private var _requestingCertificate:Bool = false
     private var _requestingCertificateErrored:Bool = false
@@ -11,8 +11,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
     private var _reactTag: NSNumber?
     private var _onVideoError: RCTDirectEventBlock?
     private var _onGetLicense: RCTDirectEventBlock?
-    
-    
+
+
     init(
         asset: AVURLAsset,
         drm: DRMParams?,
@@ -30,19 +30,19 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         _drm = drm
         _localSourceEncryptionKeyScheme = localSourceEncryptionKeyScheme
     }
-    
+
     deinit {
         _loadingRequest?.finishLoading()
     }
-    
+
     func resourceLoader(_ resourceLoader:AVAssetResourceLoader, shouldWaitForRenewalOfRequestedResource renewalRequest:AVAssetResourceRenewalRequest) -> Bool {
         return loadingRequestHandling(renewalRequest)
     }
-    
+
     func resourceLoader(_ resourceLoader:AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest:AVAssetResourceLoadingRequest) -> Bool {
         return loadingRequestHandling(loadingRequest)
     }
-    
+
     func resourceLoader(_ resourceLoader:AVAssetResourceLoader, didCancel loadingRequest:AVAssetResourceLoadingRequest) {
         RCTLog("didCancelLoadingRequest")
     }
@@ -57,17 +57,17 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         dataRequest.respond(with: respondData)
         _loadingRequest.finishLoading()
     }
-    
+
     func setLicenseResultError(_ error:String!) {
         if _loadingRequest != nil {
             self.finishLoadingWithError(error: RCTVideoErrorHandler.fromJSPart(error))
         }
     }
-    
+
     func finishLoadingWithError(error:Error!) -> Bool {
         if let _loadingRequest = _loadingRequest, let error = error {
             _loadingRequest.finishLoading(with: error as! NSError)
-            
+
             _onVideoError?([
                 "error": [
                     "code": NSNumber(value: (error as NSError).code),
@@ -78,23 +78,23 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                 ],
                 "target": _reactTag
             ])
-            
+
         }
         return false
     }
-    
+
     func loadingRequestHandling(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         if handleEmbeddedKey(loadingRequest) {
             return true
         }
-        
+
         if _drm != nil {
             return handleDrm(loadingRequest)
         }
-        
+
        return false
     }
-    
+
     func handleEmbeddedKey(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         guard let url = loadingRequest.request.url,
               let _localSourceEncryptionKeyScheme = _localSourceEncryptionKeyScheme,
@@ -102,16 +102,16 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         else {
             return false
         }
-        
+
         loadingRequest.contentInformationRequest?.contentType = AVStreamingKeyDeliveryPersistentContentKeyType
         loadingRequest.contentInformationRequest?.isByteRangeAccessSupported = true
         loadingRequest.contentInformationRequest?.contentLength = Int64(persistentKeyData.count)
         loadingRequest.dataRequest?.respond(with: persistentKeyData)
         loadingRequest.finishLoading()
-        
+
         return true
     }
-    
+
     func handleDrm(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         if _requestingCertificate {
             return true
@@ -119,11 +119,11 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
             return false
         }
         _loadingRequest = loadingRequest
-        
+
         guard let _drm = _drm, let drmType = _drm.type, drmType == "fairplay" else {
             return finishLoadingWithError(error: RCTVideoErrorHandler.noDRMData)
         }
-        
+
         var promise: Promise<Data>
         if _onGetLicense != nil {
             let contentId = _drm.contentId ?? loadingRequest.request.url?.host
@@ -155,13 +155,13 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                     loadingRequest.finishLoading()
                 }
         }
-        
-        
+
+
         promise.catch{ error in
             self.finishLoadingWithError(error:error)
             self._requestingCertificateErrored = true
         }
-        
+
         return true
     }
 }

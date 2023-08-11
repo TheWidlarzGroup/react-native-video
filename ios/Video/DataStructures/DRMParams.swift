@@ -5,9 +5,9 @@ struct DRMParams {
     let contentId: String?
     let certificateUrl: String?
     let base64Certificate: Bool?
-    
+
     let json: NSDictionary?
-    
+
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil
