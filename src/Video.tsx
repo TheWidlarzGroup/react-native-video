@@ -119,6 +119,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         mainVer: resolvedSource.mainVer || 0,
         patchVer: resolvedSource.patchVer || 0,
         requestHeaders: generateHeaderForNative(resolvedSource?.headers),
+        startTime: resolvedSource.startTime || 0,
+        endTime: resolvedSource.endTime
       };
     }, [source]);
 
