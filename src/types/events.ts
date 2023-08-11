@@ -1,8 +1,7 @@
-import type { OnBandwidthUpdateData, OnBufferData, OnLoadData, OnLoadStartData, OnProgressData, OnSeekData, OnPlaybackData, OnExternalPlaybackChangeData, OnPictureInPictureStatusChangedData, OnReceiveAdEventData, OnVideoErrorData, OnPlaybackStateChangedData, OnAudioFocusChangedData } from "src/fabric/VideoNativeComponent";
+import type { OnBandwidthUpdateData, OnBufferData, OnLoadData, OnLoadStartData, OnProgressData, OnSeekData, OnPlaybackData, OnExternalPlaybackChangeData, OnPictureInPictureStatusChangedData, OnReceiveAdEventData, OnVideoErrorData, OnPlaybackStateChangedData, OnAudioFocusChangedData, OnTimedMetadataData, OnAudioTracksData, OnTextTracksData, OnVideoTracksData } from "src/fabric/VideoNativeComponent";
 
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void //Android, iOS
-  onAudioTracks?: () => void // Android
   onAudioFocusChanged?: (e: OnAudioFocusChangedData) => void // Android
   onIdle?: () => void // Android
   onBandwidthUpdate?: (e: OnBandwidthUpdateData) => void //Android
@@ -25,7 +24,8 @@ export interface ReactVideoEvents {
   onSeek?: (e: OnSeekData) => void //Android, iOS, Windows UWP
   onPlaybackStateChanged?: (e: OnPlaybackStateChangedData) => void // Android
   // @todo: fix type
-  onTimedMetadata?: () => void //Android, iOS
-  onTextTracks?: () => void //Android
-  onVideoTracks?: () => void //Android
+  onTimedMetadata?: (e: OnTimedMetadataData) => void //Android, iOS
+  onAudioTracks?: (e: OnAudioTracksData) => void // Android
+  onTextTracks?: (e: OnTextTracksData) => void //Android
+  onVideoTracks?: (e: OnVideoTracksData) => void //Android
 }
