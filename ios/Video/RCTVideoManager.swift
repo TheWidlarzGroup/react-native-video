@@ -3,15 +3,15 @@ import React
 
 @objc(RCTVideoManager)
 class RCTVideoManager: RCTViewManager {
-    
+
     override func view() -> UIView {
         return RCTVideo(eventDispatcher: bridge.eventDispatcher() as! RCTEventDispatcher)
     }
-    
+
     func methodQueue() -> DispatchQueue {
         return bridge.uiManager.methodQueue
     }
-    
+
     @objc(save:reactTag:resolver:rejecter:)
     func save(options: NSDictionary, reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock,reject: @escaping RCTPromiseRejectBlock) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
@@ -23,7 +23,7 @@ class RCTVideoManager: RCTViewManager {
             }
         })
     }
-    
+
     @objc(setLicenseResult:reactTag:)
     func setLicenseResult(license: NSString, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
@@ -35,7 +35,7 @@ class RCTVideoManager: RCTViewManager {
             }
         })
     }
-    
+
     @objc(setLicenseResultError:reactTag:)
     func setLicenseResultError(error: NSString, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
@@ -47,7 +47,7 @@ class RCTVideoManager: RCTViewManager {
             }
         })
     }
-    
+
     override func constantsToExport() -> [AnyHashable : Any]? {
         return [
             "ScaleNone": AVLayerVideoGravity.resizeAspect,
