@@ -51,8 +51,5 @@
         "name": "RNCVideo",
         "type": "components",
         "jsSrcsDir": "src"
-    },
-    "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
     }
 }
