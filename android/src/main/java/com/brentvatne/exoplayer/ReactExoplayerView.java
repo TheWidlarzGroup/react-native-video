@@ -221,6 +221,8 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private boolean initialized = false;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -305,7 +307,7 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        initializePlayer();
+        if (!initialized) initializePlayer();
     }
 
     @Override
@@ -543,6 +545,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayer() {
+        initialized = true;
         ReactExoplayerView self = this;
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -596,6 +599,7 @@ class ReactExoplayerView extends FrameLayout implements
                         initializePlayerSource(self, null);
                     }
                 } catch (Exception ex) {
+                    initialized = false;
                     self.playerNeedsSource = true;
                     Log.e("ExoPlayer Exception", "Failed to initialize Player!");
                     Log.e("ExoPlayer Exception", ex.toString());
