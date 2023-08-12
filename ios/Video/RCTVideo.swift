@@ -14,6 +14,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
+    private var _chapters:[Chapter]?
 
     private var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
@@ -356,7 +357,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func playerItemPrepareText(asset:AVAsset!, assetOptions:NSDictionary?) -> AVPlayerItem {
         if (_textTracks == nil) || _textTracks?.count==0 {
-            return AVPlayerItem(asset: asset)
+            return self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
         // AVPlayer can't airplay AVMutableCompositions
@@ -371,7 +372,74 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             setTextTracks(validTextTracks)
         }
 
-        return AVPlayerItem(asset: mixComposition)
+        return self.playerItemPropegateMetadata(AVPlayerItem(asset: mixComposition))
+    }
+    
+    func playerItemPropegateMetadata(_ playerItem: AVPlayerItem!) -> AVPlayerItem {
+        var mapping: [AVMetadataIdentifier: Any] = [:]
+        
+        if let title = _source?.title {
+            mapping[.commonIdentifierTitle] = title
+        }
+        
+        if let subtitle = _source?.subtitle {
+            mapping[.iTunesMetadataTrackSubTitle] = subtitle
+        }
+        
+        if let description = _source?.description {
+            mapping[.commonIdentifierDescription] = description
+        }
+        
+        if !mapping.isEmpty {
+            playerItem.externalMetadata = createMetadataItems(for: mapping)
+        }
+        
+        if let chapters = _chapters {
+            playerItem.navigationMarkerGroups = makeNavigationMarkerGroups(chapters)
+        }
+        
+        return playerItem
+    }
+    
+    func createMetadataItems(for mapping: [AVMetadataIdentifier: Any]) -> [AVMetadataItem] {
+        return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
+    }
+    
+    private func makeNavigationMarkerGroups(_ chapters: [Chapter]) -> [AVNavigationMarkersGroup] {
+        var metadataGroups = [AVTimedMetadataGroup]()
+        
+        // Iterate over the defined chapters and build a timed metadata group object for each.
+        chapters.forEach { chapter in
+            metadataGroups.append(makeTimedMetadataGroup(for: chapter))
+        }
+        
+        return [AVNavigationMarkersGroup(title: nil, timedNavigationMarkers: metadataGroups)]
+    }
+    
+    private func makeTimedMetadataGroup(for chapter: Chapter) -> AVTimedMetadataGroup {
+        var metadata = [AVMetadataItem]()
+        
+        // Create a metadata item that contains the chapter title.
+        let titleItem = createMetadataItem(for: .commonIdentifierTitle, value: chapter.title)
+        metadata.append(titleItem)
+        
+        // Create a time range for the metadata group.
+        let timescale: Int32 = 600
+        let startTime = CMTime(seconds: chapter.startTime, preferredTimescale: timescale)
+        let endTime = CMTime(seconds: chapter.endTime, preferredTimescale: timescale)
+        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+        
+        return AVTimedMetadataGroup(items: metadata, timeRange: timeRange)
+    }
+
+    private func createMetadataItem(for identifier: AVMetadataIdentifier,
+                                    value: Any) -> AVMetadataItem {
+        let item = AVMutableMetadataItem()
+        item.identifier = identifier
+        item.value = value as? NSCopying & NSObjectProtocol
+        // Specify "und" to indicate an undefined language.
+        item.extendedLanguageTag = "und"
+        return item.copy() as! AVMetadataItem
     }
 
     // MARK: - Prop setters
@@ -639,6 +707,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         // in case textTracks was set after selectedTextTrack
         if (_selectedTextTrackCriteria != nil) {setSelectedTextTrack(_selectedTextTrackCriteria)}
+    }
+    
+    @objc
+    func setChapters(_ chapters:[NSDictionary]?) {
+        setChapters(chapters?.map { Chapter($0) })
+    }
+
+    func setChapters(_ chapters:[Chapter]?) {
+        _chapters = chapters
     }
 
     @objc
