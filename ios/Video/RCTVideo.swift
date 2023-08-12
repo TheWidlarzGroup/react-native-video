@@ -548,7 +548,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // Fallback on earlier versions
         }
     }
-    
+
     func setPlaybackRange(_ item:AVPlayerItem!, withVideoStart videoStart:Int64?, withVideoEnd videoEnd:Int64?) {
         if (videoStart != nil) {
             let start = CMTimeMake(value: videoStart!, timescale: 1000)
@@ -577,7 +577,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.isMuted = false
         }
 
-        if #available(iOS 12.0, *) {
+        if #available(iOS 12.0, tvOS 12.0, *) {
             _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
         } else {
             // Fallback on earlier versions
