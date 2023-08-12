@@ -41,5 +41,6 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
             return orientation
         }
     }
+    
     #endif
 }

@@ -5,6 +5,7 @@ import Photos
 /*!
  * Collection of pure functions
  */
+@available(tvOS 10.0, *)
 enum RCTVideoUtils {
     
     /*!
