@@ -429,6 +429,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let endTime = CMTime(seconds: chapter.endTime, preferredTimescale: timescale)
         let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
         
+        // Image
+        if let imgUri = chapter.uri,
+           let uri = URL(string: imgUri),
+           let imgData = try? Data(contentsOf: uri),
+           let image = UIImage(data: imgData),
+           let pngData = image.pngData()
+        {
+            let imageItem = createMetadataItem(for: .commonIdentifierArtwork, value: pngData)
+            metadata.append(imageItem)
+            print("Image added")
+        } else {
+            print("Something went wrong")
+        }
+        
         return AVTimedMetadataGroup(items: metadata, timeRange: timeRange)
     }
 
