@@ -390,13 +390,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             mapping[.commonIdentifierDescription] = description
         }
         
-        if !mapping.isEmpty {
+        if #available(iOS 12.2, *), !mapping.isEmpty {
             playerItem.externalMetadata = createMetadataItems(for: mapping)
         }
         
+        #if os(tvOS)
         if let chapters = _chapters {
             playerItem.navigationMarkerGroups = makeNavigationMarkerGroups(chapters)
         }
+        #endif
         
         return playerItem
     }
@@ -405,6 +407,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
     }
     
+    #if os(tvOS)
     private func makeNavigationMarkerGroups(_ chapters: [Chapter]) -> [AVNavigationMarkersGroup] {
         var metadataGroups = [AVTimedMetadataGroup]()
         
@@ -438,13 +441,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         {
             let imageItem = createMetadataItem(for: .commonIdentifierArtwork, value: pngData)
             metadata.append(imageItem)
-            print("Image added")
-        } else {
-            print("Something went wrong")
         }
         
         return AVTimedMetadataGroup(items: metadata, timeRange: timeRange)
     }
+    #endif
 
     private func createMetadataItem(for identifier: AVMetadataIdentifier,
                                     value: Any) -> AVMetadataItem {
