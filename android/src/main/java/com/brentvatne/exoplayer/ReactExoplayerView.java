@@ -597,7 +597,7 @@ class ReactExoplayerView extends FrameLayout implements
                                     // Failed to intialize DRM session manager - cannot continue
                                     Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
-                                    return;                                          
+                                    return;
                                 }
                                     
                                 if (activity == null) {
@@ -1084,7 +1084,7 @@ class ReactExoplayerView extends FrameLayout implements
         return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
-                
+
     // AudioBecomingNoisyListener implementation
 
     @Override
@@ -1216,7 +1216,7 @@ class ReactExoplayerView extends FrameLayout implements
                                            int trackIndex){
         return selection != null && selection.getTrackGroup() == group
                 && selection.indexOf( trackIndex ) != C.INDEX_UNSET;
-    }            
+    }
 
     private ArrayList<Track> getAudioTrackInfo() {
         ArrayList<Track> audioTracks = new ArrayList<>();
