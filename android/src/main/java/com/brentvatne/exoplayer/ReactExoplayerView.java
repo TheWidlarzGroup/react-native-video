@@ -397,8 +397,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Toggling the visibility of the player control view
      */
     private void togglePlayerControlVisibility() {
-        if(player == null)
-            return;
+        if(player == null) return;
         reLayout(playerControlView);
         if (playerControlView.isVisible()) {
             playerControlView.hide();
@@ -495,8 +494,7 @@ class ReactExoplayerView extends FrameLayout implements
      * Adding Player control to the frame layout
      */
     private void addPlayerControl() {
-        if(playerControlView == null)
-            return;
+        if(playerControlView == null) return;
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -599,8 +597,7 @@ class ReactExoplayerView extends FrameLayout implements
                                     // Failed to intialize DRM session manager - cannot continue
                                     Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
-                                    return;
-                                            
+                                    return;                                          
                                 }
                                     
                                 if (activity == null) {
@@ -697,7 +694,7 @@ class ReactExoplayerView extends FrameLayout implements
             } catch (UnsupportedDrmException e) {
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                                ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
             }
@@ -774,7 +771,6 @@ class ReactExoplayerView extends FrameLayout implements
         if (Util.SDK_INT < 18) {
             return null;
         }
-            
         try {
             HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
                     buildHttpDataSourceFactory(false));
@@ -1088,7 +1084,6 @@ class ReactExoplayerView extends FrameLayout implements
         return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
-
                 
     // AudioBecomingNoisyListener implementation
 
@@ -1221,8 +1216,7 @@ class ReactExoplayerView extends FrameLayout implements
                                            int trackIndex){
         return selection != null && selection.getTrackGroup() == group
                 && selection.indexOf( trackIndex ) != C.INDEX_UNSET;
-    }
-            
+    }            
 
     private ArrayList<Track> getAudioTrackInfo() {
         ArrayList<Track> audioTracks = new ArrayList<>();
@@ -1532,7 +1526,6 @@ class ReactExoplayerView extends FrameLayout implements
             boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
             hasDrmFailed = false;
             this.srcUri = uri;
-                    
             this.startTimeMs = startTimeMs;
             this.endTimeMs = endTimeMs;
             this.extension = extension;
