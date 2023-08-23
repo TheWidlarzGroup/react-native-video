@@ -120,7 +120,6 @@ class ReactExoplayerView extends FrameLayout implements
         Player.Listener,
         BandwidthMeter.EventListener,
         BecomingNoisyListener,
-        AudioManager.OnAudioFocusChangeListener,
         DrmSessionEventListener,
         AdEvent.AdEventListener {
 
@@ -244,6 +243,7 @@ class ReactExoplayerView extends FrameLayout implements
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
+    private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
 
     // store last progress event values to avoid sending unnecessary messages
     private long lastPos = -1;
@@ -300,6 +300,7 @@ class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
+        audioFocusChangeListener = new OnAudioFocusChangedListener(this);
     }
 
     private boolean isPlayingAd() {
@@ -951,11 +952,54 @@ class ReactExoplayerView extends FrameLayout implements
         bandwidthMeter.removeEventListener(this);
     }
 
+    private static class OnAudioFocusChangedListener implements AudioManager.OnAudioFocusChangeListener {
+        private final ReactExoplayerView view;
+
+        private OnAudioFocusChangedListener(ReactExoplayerView view) {
+            this.view = view;
+        }
+
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            switch (focusChange) {
+                case AudioManager.AUDIOFOCUS_LOSS:
+                    view.hasAudioFocus = false;
+                    view.eventEmitter.audioFocusChanged(false);
+                    view.pausePlayback();
+                    view.audioManager.abandonAudioFocus(this);
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    view.eventEmitter.audioFocusChanged(false);
+                    break;
+                case AudioManager.AUDIOFOCUS_GAIN:
+                    view.hasAudioFocus = true;
+                    view.eventEmitter.audioFocusChanged(true);
+                    break;
+                default:
+                    break;
+            }
+
+            if (view.player != null) {
+                if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                    // Lower the volume
+                    if (!view.muted) {
+                        view.player.setVolume(view.audioVolume * 0.8f);
+                    }
+                } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                    // Raise it back to normal
+                    if (!view.muted) {
+                        view.player.setVolume(view.audioVolume * 1);
+                    }
+                }
+            }
+        }
+    }
+
     private boolean requestAudioFocus() {
         if (disableFocus || srcUri == null || this.hasAudioFocus) {
             return true;
         }
-        int result = audioManager.requestAudioFocus(this,
+        int result = audioManager.requestAudioFocus(audioFocusChangeListener,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
@@ -1021,7 +1065,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (isFullscreen) {
             setFullscreen(false);
         }
-        audioManager.abandonAudioFocus(this);
+        audioManager.abandonAudioFocus(audioFocusChangeListener);
     }
 
     private void updateResumePosition() {
@@ -1059,43 +1103,6 @@ class ReactExoplayerView extends FrameLayout implements
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
         return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext,
                 useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
-    }
-
-    // AudioManager.OnAudioFocusChangeListener implementation
-
-    @Override
-    public void onAudioFocusChange(int focusChange) {
-        switch (focusChange) {
-            case AudioManager.AUDIOFOCUS_LOSS:
-                this.hasAudioFocus = false;
-                eventEmitter.audioFocusChanged(false);
-                pausePlayback();
-                audioManager.abandonAudioFocus(this);
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                eventEmitter.audioFocusChanged(false);
-                break;
-            case AudioManager.AUDIOFOCUS_GAIN:
-                this.hasAudioFocus = true;
-                eventEmitter.audioFocusChanged(true);
-                break;
-            default:
-                break;
-        }
-
-        if (player != null) {
-            if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                // Lower the volume
-                if (!muted) {
-                    player.setVolume(audioVolume * 0.8f);
-                }
-            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-                // Raise it back to normal
-                if (!muted) {
-                    player.setVolume(audioVolume * 1);
-                }
-            }
-        }
     }
 
     // AudioBecomingNoisyListener implementation
@@ -2128,6 +2135,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
+    }
+
+    public void setShutterColor(Integer color) {
+        exoPlayerView.setShutterColor(color);
     }
 
     @Override

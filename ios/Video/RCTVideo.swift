@@ -578,6 +578,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
 
     func applyModifiers() {
+        if let video = _player?.currentItem,
+            video == nil || video.status != AVPlayerItem.Status.readyToPlay {
+            return
+        }
         if _muted {
             if !_controls {
                 _player?.volume = 0
