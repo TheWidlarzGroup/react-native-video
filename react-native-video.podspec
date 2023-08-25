@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/react-native-video/react-native-video.git", :tag => "v#{s.version}" }
 
   s.ios.deployment_target = "9.0"
-  s.tvos.deployment_target = "9.0"
+  s.tvos.deployment_target = "10.0"
 
   s.subspec "Video" do |ss|
     ss.source_files  = "ios/Video/**/*.{h,m,swift}"
