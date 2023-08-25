@@ -10,8 +10,9 @@ export default function App() {
       <ActivityIndicator style={styles.activityIndicator} size={'large'} />
       <Video
         source={{
-          // uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-          uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',
+          uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          // uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',
+          // type: 'm3u8',
           title: 'Custom Title',
           subtitle: 'Custom Subtitle',
           description: 'Custom Description',
