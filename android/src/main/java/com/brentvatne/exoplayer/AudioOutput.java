@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import com.google.android.exoplayer2.C;
+
 @SuppressLint("InlinedApi")
 public enum AudioOutput {
     SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
