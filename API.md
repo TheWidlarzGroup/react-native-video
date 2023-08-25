@@ -457,6 +457,19 @@ bufferConfig={{
 
 Platforms: Android
 
+#### chapters
+To provide a custom chapter source for tvOS. This prop takes an array of objects with the properties listed below.
+
+| Property  | Type    | Description                                                                                                                                               |
+|-----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title     | string  | The title of the chapter to create                                                                                                                        |
+| startTime | number  | The start time of the chapter in seconds                                                                                                                  |
+| endTime   | number  | The end time of the chapter in seconds                                                                                                                    |
+| uri       | string? | Optional: Provide an http orl or the some base64 string to override the image of the chapter. For some media files the images are generated automatically |
+
+
+Platforms: tvOS
+
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
 
@@ -953,6 +966,24 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 ```
 
 Platforms: iOS, Android
+
+##### Overriding the metadata of a source
+
+Provide an optional `title`, `subtitle`  and/or `description` properties for the video. 
+Useful when to adapt the tvOS playback experience.
+
+Example:
+
+```
+source={{ 
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', 
+    title: 'Custom Title', 
+    subtitle: 'Custom Subtitle', 
+    description: 'Custom Description'
+  }}
+```
+
+Platforms: tvOS
 
 #### subtitleStyle
 
