@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer;
 
+import android.annotation.SuppressLint;
 import com.google.android.exoplayer2.C;
 
 @SuppressLint("InlinedApi")
