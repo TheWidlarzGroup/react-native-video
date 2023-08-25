@@ -8,4 +8,5 @@ export interface IMuxData {
   videoStreamType: string;
   videoTitle: string;
   playerName: string;
+  experimentName?: string;
 }

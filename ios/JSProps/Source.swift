@@ -98,5 +98,6 @@ extension Source.Config {
         let videoStreamType: String
         let subPropertyId: String
         let videoIsLive: Bool
+        let experimentName: String?
     }
 }

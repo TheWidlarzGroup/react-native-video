@@ -14,6 +14,7 @@ class AVDorisMuxDataMapper {
         let playerData = DorisMuxCustomerPlayerData(playerName: muxData.playerName, environmentKey: muxData.envKey)
         playerData.viewerUserId = muxData.viewerUserId
         playerData.subPropertyId = muxData.subPropertyId
+        playerData.experimentName = muxData.experimentName
         
         let videoData = DorisMuxCustomerVideoData()
         videoData.videoTitle = muxData.videoTitle
