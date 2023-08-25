@@ -28,6 +28,7 @@ import androidx.activity.OnBackPressedCallback;
 
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
+import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -135,33 +136,6 @@ class ReactExoplayerView extends FrameLayout implements
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-    }
-
-    @SuppressLint("InlinedApi")
-    public enum AudioOutput {
-        SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
-        EARPIECE("earpiece", C.STREAM_TYPE_VOICE_CALL);
-
-        private final int streamType;
-        private final String mName;
-
-        AudioOutput(final String name, int stream) {
-            mName = name;
-            streamType = stream;
-        }
-
-        public static AudioOutput get(String name) {
-            for (AudioOutput d : values()) {
-                if (d.mName.equalsIgnoreCase(name))
-                    return d;
-            }
-            return SPEAKER;
-        }
-
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + "(" + this.mName + ", " + streamType + ")";
-        }
     }
 
     private final VideoEventEmitter eventEmitter;
