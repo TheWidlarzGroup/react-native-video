@@ -81,8 +81,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
 #endif
 
-#if TARGET_OS_IOS
-    private let _pip:RCTPictureInPicture = RCTPictureInPicture(self.onPictureInPictureStatusChanged, self.onRestoreUserInterfaceForPictureInPictureStop)
+#if os(iOS)
+    private var _pip:RCTPictureInPicture? = nil
 #endif
 
     // Events
@@ -109,6 +109,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    
+    @objc func _onPictureInPictureStatusChanged() {
+        onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: true)])
+    }
+
+    @objc func _onRestoreUserInterfaceForPictureInPictureStop() {
+        onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: false)])
+    }
 
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -117,6 +125,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 #endif
 
         _eventDispatcher = eventDispatcher
+
+#if os(iOS)
+        _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
+#endif
 
         NotificationCenter.default.addObserver(
             self,
@@ -410,15 +422,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setPictureInPicture(_ pictureInPicture:Bool) {
-#if TARGET_OS_IOS
-        _pip.setPictureInPicture(pictureInPicture)
+#if os(iOS)
+        _pip?.setPictureInPicture(pictureInPicture)
 #endif
     }
 
     @objc
     func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore:Bool) {
-#if TARGET_OS_IOS
-        _pip.setRestoreUserInterfaceForPIPStopCompletionHandler(restore)
+#if os(iOS)
+        _pip?.setRestoreUserInterfaceForPIPStopCompletionHandler(restore)
 #endif
     }
 
@@ -737,6 +749,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         viewController.view.frame = self.bounds
         viewController.player = player
+        viewController.allowsPictureInPicturePlayback = true
         return viewController
     }
 
@@ -755,8 +768,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self.layer.addSublayer(_playerLayer)
             }
             self.layer.needsDisplayOnBoundsChange = true
-#if TARGET_OS_IOS
-            _pip.setupPipController(_playerLayer)
+#if os(iOS)
+            _pip?.setupPipController(_playerLayer)
 #endif
         }
     }
