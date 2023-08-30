@@ -41,12 +41,13 @@ public final class ThreadUtil {
             return null;
         }
         if (isOnApplicationThread(player)) {
-            try {
-                return task.call();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+            return task.call();
+            // try {
+            //     return task.call();
+            // } catch (Exception e) {
+            //     e.printStackTrace();
+            //     return null;
+            // }
         } else {
             return callOnApplicationHandler(player, task);
         }
@@ -57,13 +58,13 @@ public final class ThreadUtil {
         FutureTask<T> futureTask = new FutureTask<>(task);
 
         handler.post(futureTask);
-
-        try {
-            return futureTask.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return futureTask.get();
+        // try {
+        //     return futureTask.get();
+        // } catch (InterruptedException | ExecutionException e) {
+        //     e.printStackTrace();
+        //     return null;
+        // }
     }
 
 }
