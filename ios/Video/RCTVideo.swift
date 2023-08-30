@@ -127,12 +127,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
 #if os(iOS)
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playback)
-            try audioSession.setActive(true, options: [])
-        } catch {
-        }
         _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
 #endif
 
@@ -429,6 +423,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setPictureInPicture(_ pictureInPicture:Bool) {
 #if os(iOS)
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback)
+            try audioSession.setActive(true, options: [])
+        } catch {
+        }
         _pip?.setPictureInPicture(pictureInPicture)
 #endif
     }
