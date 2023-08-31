@@ -1,5 +1,7 @@
 ## Changelog
 
+- Feature: playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+
 ### Version 6.0.0-alpha.7
 - All: clean JS warnings (https://github.com/react-native-video/react-native-video/pull/3183)
 - Android: Add shutterView color configurtion (https://github.com/react-native-video/react-native-video/pull/3179)

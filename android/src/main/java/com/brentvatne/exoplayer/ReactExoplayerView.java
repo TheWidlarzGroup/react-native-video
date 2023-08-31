@@ -28,6 +28,7 @@ import androidx.activity.OnBackPressedCallback;
 
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
+import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -48,6 +49,7 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.Tracks;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
@@ -162,6 +164,7 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean muted = false;
     private boolean hasAudioFocus = false;
     private float rate = 1f;
+    private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
@@ -653,6 +656,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+        changeAudioOutput(this.audioOutput);
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -1816,6 +1820,29 @@ class ReactExoplayerView extends FrameLayout implements
         this.muted = muted;
         if (player != null) {
             player.setVolume(muted ? 0.f : audioVolume);
+        }
+    }
+
+    private void changeAudioOutput(AudioOutput output) {
+        if (player != null) {
+            int usage = Util.getAudioUsageForStreamType(audioOutput.streamType);
+            int contentType = Util.getAudioContentTypeForStreamType(audioOutput.streamType);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(usage)
+                    .setContentType(contentType)
+                    .build();
+            player.setAudioAttributes(audioAttributes, false);
+            AudioManager audioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setMode(
+                    audioOutput == AudioOutput.SPEAKER ? AudioManager.MODE_NORMAL
+                            : AudioManager.MODE_IN_COMMUNICATION);
+            audioManager.setSpeakerphoneOn(audioOutput == AudioOutput.SPEAKER);
+        }
+    }
+
+    public void setAudioOutput(AudioOutput output) {
+        if (audioOutput != output) {
+            this.audioOutput = output;
+            changeAudioOutput(output);
         }
     }
 
