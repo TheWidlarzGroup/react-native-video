@@ -40,6 +40,8 @@ class VideoPlayer extends Component {
     this.onProgress = this.onProgress.bind(this);
     this.onBuffer = this.onBuffer.bind(this);
   }
+  video = React.createRef();
+
   state = {
     rate: 1,
     volume: 1,
@@ -155,6 +157,20 @@ class VideoPlayer extends Component {
     )
   }
 
+  renderFullscreenControl(fullscreen: string) {
+    return (
+      <TouchableOpacity onPress={() => {
+          if (fullscreen === 'fullscreen') {
+            this.video.presentFullscreenPlayer()
+          }
+        }}>
+        <Text style={[styles.controlOption]}>
+          {fullscreen}
+        </Text>
+      </TouchableOpacity>
+    )
+  }
+
   renderMixWithOthersControl(mixWithOthers: string) {
     const isSelected = (this.state.mixWithOthers == mixWithOthers);
 
@@ -175,6 +191,9 @@ class VideoPlayer extends Component {
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
+            ref={(ref: Video) => {
+              this.video = ref
+            }}
             source={require('./broadchurch.mp4')}
             style={styles.fullScreen}
             rate={this.state.rate}
@@ -247,6 +266,9 @@ class VideoPlayer extends Component {
                   <View style={styles.mixWithOthersControl}>
                     {this.renderMixWithOthersControl('mix')}
                     {this.renderMixWithOthersControl('duck')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderFullscreenControl('fullscreen')}
                   </View>
                 </> : null
             }
