@@ -112,7 +112,9 @@ enum RCTPlayerOperations {
                 }
             }
         } else { // default. invalid type or "system"
-            #if os(iOS)
+            #if os(tvOS)
+                // Do noting. Fix for tvOS native audio menu language selector
+            #else
                 player?.currentItem?.selectMediaOptionAutomatically(in: group)
                 return
             #endif
