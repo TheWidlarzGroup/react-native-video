@@ -120,7 +120,7 @@ enum RCTPlayerOperations {
             #endif
         }
 
-        #if os(iOS)
+        #if os(tvOS)
             // Do noting. Fix for tvOS native audio menu language selector
         #else
             // If a match isn't found, option will be nil and text tracks will be disabled
