@@ -679,7 +679,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setFullscreen(_ fullscreen:Bool) {
         if fullscreen && !_fullscreenPlayerPresented && _player != nil {
             // Ensure player view controller is not null
-            if _playerViewController == nil && _controls {
+            // Controls will be displayed even if it is disabled in configuration
+            if _playerViewController == nil {
                 self.usePlayerViewController()
             }
 
@@ -709,7 +710,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     viewController.present(playerViewController, animated:true, completion:{ [weak self] in
                         guard let self = self else {return}
-                        self._playerViewController?.showsPlaybackControls = self._controls
+                        // In fullscreen we must display controls
+                        self._playerViewController?.showsPlaybackControls = true
                         self._fullscreenPlayerPresented = fullscreen
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
 
@@ -986,6 +988,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func setLicenseResultError(_ error:String!) {
         _resouceLoaderDelegate?.setLicenseResultError(error)
+    }
+
+    func dismissFullscreenPlayer(_ error:String!) {
+        setFullscreen(false)
+    }
+
+    func presentFullscreenPlayer(_ error:String!) {
+        setFullscreen(true)
     }
 
     // MARK: - RCTPlayerObserverHandler
