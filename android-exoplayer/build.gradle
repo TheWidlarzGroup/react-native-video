@@ -38,9 +38,11 @@ dependencies {
     // ExoDoris
     api ("com.github.DiceTechnology.doris-android:doris-ui:$dorisAndroidVersion"){
         exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
+        exclude group: "androidx.media3"
     }
     api ("com.github.DiceTechnology.doris-android:doris-custom-ui:$dorisAndroidVersion"){
         exclude group: 'com.github.DiceTechnology', module: 'dice-shield-android'
+        exclude group: "androidx.media3"
     }
 
     // Stetho
