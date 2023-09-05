@@ -1825,17 +1825,19 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void changeAudioOutput(AudioOutput output) {
         if (player != null) {
-            int usage = Util.getAudioUsageForStreamType(audioOutput.streamType);
-            int contentType = Util.getAudioContentTypeForStreamType(audioOutput.streamType);
+            int streamType = output.getStreamType();
+            int usage = Util.getAudioUsageForStreamType(streamType);
+            int contentType = Util.getAudioContentTypeForStreamType(streamType);
             AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(usage)
                     .setContentType(contentType)
                     .build();
             player.setAudioAttributes(audioAttributes, false);
             AudioManager audioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
+            boolean isSpeakerOutput = output == AudioOutput.SPEAKER;
             audioManager.setMode(
-                    audioOutput == AudioOutput.SPEAKER ? AudioManager.MODE_NORMAL
+                    isSpeakerOutput ? AudioManager.MODE_NORMAL
                             : AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(audioOutput == AudioOutput.SPEAKER);
+            audioManager.setSpeakerphoneOn(isSpeakerOutput);
         }
     }
 

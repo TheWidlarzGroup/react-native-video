@@ -24,6 +24,10 @@ public enum AudioOutput {
         return SPEAKER;
     }
 
+    public int getStreamType() {
+        return streamType;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" + this.mName + ", " + streamType + ")";

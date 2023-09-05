@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.brentvatne.exoplayer.AudioOutput;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -280,7 +281,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_AUDIO_OUTPUT)
     public void setAudioOutput(final ReactExoplayerView videoView, final String audioOutput) {
-        videoView.setAudioOutput(ReactExoplayerView.AudioOutput.get(audioOutput));
+        videoView.setAudioOutput(AudioOutput.get(audioOutput));
     }
 
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
