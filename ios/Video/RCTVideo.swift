@@ -391,70 +391,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
         
         if #available(iOS 12.2, *), !mapping.isEmpty {
-            playerItem.externalMetadata = createMetadataItems(for: mapping)
+            playerItem.externalMetadata = RCTVideoUtils.createMetadataItems(for: mapping)
         }
         
         #if os(tvOS)
         if let chapters = _chapters {
-            playerItem.navigationMarkerGroups = makeNavigationMarkerGroups(chapters)
+            playerItem.navigationMarkerGroups = RCTVideoTVUtils.makeNavigationMarkerGroups(chapters)
         }
         #endif
         
         return playerItem
-    }
-    
-    func createMetadataItems(for mapping: [AVMetadataIdentifier: Any]) -> [AVMetadataItem] {
-        return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
-    }
-    
-    #if os(tvOS)
-    private func makeNavigationMarkerGroups(_ chapters: [Chapter]) -> [AVNavigationMarkersGroup] {
-        var metadataGroups = [AVTimedMetadataGroup]()
-        
-        // Iterate over the defined chapters and build a timed metadata group object for each.
-        chapters.forEach { chapter in
-            metadataGroups.append(makeTimedMetadataGroup(for: chapter))
-        }
-        
-        return [AVNavigationMarkersGroup(title: nil, timedNavigationMarkers: metadataGroups)]
-    }
-    
-    private func makeTimedMetadataGroup(for chapter: Chapter) -> AVTimedMetadataGroup {
-        var metadata = [AVMetadataItem]()
-        
-        // Create a metadata item that contains the chapter title.
-        let titleItem = createMetadataItem(for: .commonIdentifierTitle, value: chapter.title)
-        metadata.append(titleItem)
-        
-        // Create a time range for the metadata group.
-        let timescale: Int32 = 600
-        let startTime = CMTime(seconds: chapter.startTime, preferredTimescale: timescale)
-        let endTime = CMTime(seconds: chapter.endTime, preferredTimescale: timescale)
-        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
-        
-        // Image
-        if let imgUri = chapter.uri,
-           let uri = URL(string: imgUri),
-           let imgData = try? Data(contentsOf: uri),
-           let image = UIImage(data: imgData),
-           let pngData = image.pngData()
-        {
-            let imageItem = createMetadataItem(for: .commonIdentifierArtwork, value: pngData)
-            metadata.append(imageItem)
-        }
-        
-        return AVTimedMetadataGroup(items: metadata, timeRange: timeRange)
-    }
-    #endif
-
-    private func createMetadataItem(for identifier: AVMetadataIdentifier,
-                                    value: Any) -> AVMetadataItem {
-        let item = AVMutableMetadataItem()
-        item.identifier = identifier
-        item.value = value as? NSCopying & NSObjectProtocol
-        // Specify "und" to indicate an undefined language.
-        item.extendedLanguageTag = "und"
-        return item.copy() as! AVMetadataItem
     }
 
     // MARK: - Prop setters
