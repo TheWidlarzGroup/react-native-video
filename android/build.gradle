@@ -7,10 +7,12 @@ buildscript {
             (project.properties['RNSAC_kotlinVersion'] ? project.properties['RNSAC_kotlinVersion'] : "1.6.10")
 
     repositories {
+        google()
         mavenCentral()
     }
 
     dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.0'
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }

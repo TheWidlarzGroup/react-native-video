@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer;
 
+import com.brentvatne.exoplayer.cache.SharedExoPlayerCache;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
@@ -9,12 +10,14 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.google.android.exoplayer2.util.Util;
+
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
-import java.util.Map;
 
 public class DataSourceUtil {
 
@@ -76,8 +79,12 @@ public class DataSourceUtil {
     }
 
     private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        return new DefaultDataSource.Factory(context,
-                buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders));
+        HttpDataSource.Factory httpDataSourceFactory = buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders);
+        CacheDataSource.Factory factory = new CacheDataSource.Factory()
+                .setCache(SharedExoPlayerCache.getCache())
+                .setUpstreamDataSourceFactory(httpDataSourceFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
+        return new DefaultDataSource.Factory(context, factory);
     }
 
     private static HttpDataSource.Factory buildHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {

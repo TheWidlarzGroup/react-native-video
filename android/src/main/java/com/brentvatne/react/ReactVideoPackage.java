@@ -3,6 +3,7 @@ package com.brentvatne.react;
 import com.brentvatne.exoplayer.DefaultReactExoplayerConfig;
 import com.brentvatne.exoplayer.ReactExoplayerConfig;
 import com.brentvatne.exoplayer.ReactExoplayerViewManager;
+import com.brentvatne.exoplayer.cache.SharedExoPlayerCache;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -25,6 +26,7 @@ public class ReactVideoPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+        SharedExoPlayerCache.initCache(reactContext);
         return Collections.singletonList(
                 new VideoDecoderPropertiesModule(reactContext)
         );
