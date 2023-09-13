@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okhttp3.Call;
 import okhttp3.JavaNetCookieJar;
@@ -28,6 +29,7 @@ public class DataSourceUtil {
     private static DataSource.Factory defaultDataSourceFactory = null;
     private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
     private static String userAgent = null;
+    public static AtomicReference<CacheDataSource> cacheDataSourceAtomicReference = null;
 
     public static void setUserAgent(String userAgent) {
         DataSourceUtil.userAgent = userAgent;
@@ -84,6 +86,7 @@ public class DataSourceUtil {
                 .setCache(SharedExoPlayerCache.getCache())
                 .setUpstreamDataSourceFactory(httpDataSourceFactory)
                 .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
+        cacheDataSourceAtomicReference = new AtomicReference<>(factory.createDataSource());
         return new DefaultDataSource.Factory(context, factory);
     }
 

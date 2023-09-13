@@ -6,10 +6,12 @@ import android.media.MediaDrm;
 import android.media.MediaFormat;
 import android.media.UnsupportedSchemeException;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import com.brentvatne.exoplayer.cache.CachingJobIntentService;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class VideoDecoderPropertiesModule extends ReactContextBaseJavaModule {
 
     ReactApplicationContext reactContext;
+    private static final String TAG = "VideoDecoderPropertiesM";
 
     @NonNull
     @Override
@@ -97,6 +100,12 @@ public class VideoDecoderPropertiesModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void isHEVCSupported(Promise p) {
         isCodecSupported("video/hevc", 1920, 1080, p);
+    }
+
+    @ReactMethod
+    public void prefetch(String url) {
+        Log.d(TAG, "prefetch: " + url);
+        CachingJobIntentService.enqueuePrefetchWork(reactContext, url);
     }
 
     public VideoDecoderPropertiesModule(ReactApplicationContext reactContext) {

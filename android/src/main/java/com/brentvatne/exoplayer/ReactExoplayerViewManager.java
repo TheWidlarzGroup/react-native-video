@@ -1,11 +1,10 @@
 package com.brentvatne.exoplayer;
 
-import android.graphics.Color;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.brentvatne.exoplayer.AudioOutput;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -14,18 +13,20 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.google.android.exoplayer2.util.Util;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
+
+    private static final String TAG = "ReactExoplayerViewManag";
 
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
