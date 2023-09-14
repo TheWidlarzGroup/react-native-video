@@ -2,6 +2,10 @@
     package="com.brentvatne.react">
     
     <application>
-        <service android:name="com.brentvatne.exoplayer.cache.CachingJobIntentService" />
+        <service
+            android:name="com.brentvatne.exoplayer.cache.CachingJobIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            />
     </application>
 </manifest>

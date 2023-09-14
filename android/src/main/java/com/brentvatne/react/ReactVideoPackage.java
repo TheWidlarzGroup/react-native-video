@@ -1,5 +1,8 @@
 package com.brentvatne.react;
 
+import androidx.annotation.NonNull;
+
+import com.brentvatne.exoplayer.DataSourceUtil;
 import com.brentvatne.exoplayer.DefaultReactExoplayerConfig;
 import com.brentvatne.exoplayer.ReactExoplayerConfig;
 import com.brentvatne.exoplayer.ReactExoplayerViewManager;
@@ -25,8 +28,9 @@ public class ReactVideoPackage implements ReactPackage {
     }
 
     @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+    public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
         SharedExoPlayerCache.initCache(reactContext);
+        DataSourceUtil.getDefaultHttpDataSourceFactory(reactContext);
         return Collections.singletonList(
                 new VideoDecoderPropertiesModule(reactContext)
         );
