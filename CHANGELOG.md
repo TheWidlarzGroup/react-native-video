@@ -1,6 +1,16 @@
 ## Changelog
 
-- Feature: playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+## Next
+
+### Version 6.0.0-alpha.8
+- All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+- All: Prepare for fabric [#3175](https://github.com/react-native-video/react-native-video/pull/3175) [#]()
+- iOS: Fix Pip [#3221](https://github.com/react-native-video/react-native-video/pull/3221)
+- iOS: Fix regression in presentFullscreenPlayer & dismissFullscreenPlayer [#3230](https://github.com/react-native-video/react-native-video/pull/3230)
+- tvOS: Fix build [#3207](https://github.com/react-native-video/react-native-video/pull/3207)
+- tvOS: Add sample [#3208](https://github.com/react-native-video/react-native-video/pull/3208)
+- tvOS: Allow chapter customization [#3216](https://github.com/react-native-video/react-native-video/pull/3216)
+- doc: Fix internal links [#3229](https://github.com/react-native-video/react-native-video/pull/3229)
 
 ### Version 6.0.0-alpha.7
 - All: clean JS warnings (https://github.com/react-native-video/react-native-video/pull/3183)
