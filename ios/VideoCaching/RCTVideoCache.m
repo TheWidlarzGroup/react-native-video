@@ -1,4 +1,5 @@
 #import "RCTVideoCache.h"
+#import "RCTLog.h"
 
 @implementation RCTVideoCache
 

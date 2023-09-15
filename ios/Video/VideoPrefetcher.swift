@@ -16,8 +16,10 @@ class VideoPrefetcher: NSObject {
 #endif
     
     @objc
-    func prefetch(url: NSString) {
+    func prefetch(_ url: NSString) {
+#if canImport(RCTVideoCache)
         _videoCache.cacheVideoForUrl(url as String)
+#endif
     }
     
     @objc

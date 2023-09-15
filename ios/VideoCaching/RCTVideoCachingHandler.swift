@@ -87,7 +87,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
 
     func cacheVideoForUrl(_ url: String) -> Promise<Bool> {
         guard let videoUrl = URL(string: url) else {
-            return Promise<Bool>(error: NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
+            return Promise<Bool>(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
         }
         
         let request = URLRequest(url: videoUrl)
