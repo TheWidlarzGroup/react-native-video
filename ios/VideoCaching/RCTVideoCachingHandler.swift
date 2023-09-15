@@ -82,6 +82,43 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
             DebugLog("Cache data stored successfully 🎉")
         })
     }
+
+    // MARK: - Prefetching
+
+    func cacheVideoForUrl(_ url: String) -> Promise<Bool> {
+        guard let videoUrl = URL(string: url) else {
+            return Promise<Bool>(error: NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
+        }
+        
+        let request = URLRequest(url: videoUrl)
+        let session = URLSession.shared
+        
+        return Promise<Bool> { fulfill, reject in
+            let task = session.dataTask(with: request) { [weak self] (data, response, error) in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    reject(error)
+                    return
+                }
+                
+                guard let data = data else {
+                    reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"]))
+                    return
+                }
+                
+                self._videoCache.storeItem(data, forUri: url) { (success) in
+                    if success {
+                        fulfill(true)
+                    } else {
+                        reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to store video in cache"]))
+                    }
+                }
+            }
+            
+            task.resume()
+        }
+    }
     
 }
 
