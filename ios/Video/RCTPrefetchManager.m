@@ -23,9 +23,9 @@ RCT_EXPORT_MODULE(VideoPrefetcher);
 RCT_EXPORT_METHOD(prefetch:(NSString *)url)
 {
   // prefetch video
-  RCTLogInfo(@"Pretending to prefetch a video %@", name);
+  RCTLogInfo(@"Pretending to prefetch a video %@", url);
   #if canImport(RCTVideoCache)
-    [_videoCache cacheVideoForUrl:url resolver:resolve rejecter:reject];
+    [_videoCache cacheVideoForUrl:url];
 #endif
 }
 @end
