@@ -8,6 +8,10 @@ struct VideoSource {
     let requestHeaders: Dictionary<String,Any>?
     let startTime: Int64?
     let endTime: Int64?
+    // Custom Metadata
+    let title: String?
+    let subtitle: String?
+    let description: String?
     
     let json: NSDictionary?
     
@@ -22,6 +26,9 @@ struct VideoSource {
             self.requestHeaders = nil
             self.startTime = nil
             self.endTime = nil
+            self.title = nil
+            self.subtitle = nil
+            self.description = nil
             return
         }
         self.json = json
@@ -33,5 +40,8 @@ struct VideoSource {
         self.requestHeaders = json["requestHeaders"] as? Dictionary<String,Any>
         self.startTime = json["startTime"] as? Int64
         self.endTime = json["endTime"] as? Int64
+        self.title = json["title"] as? String
+        self.subtitle = json["subtitle"] as? String
+        self.description = json["description"] as? String
     }
 }

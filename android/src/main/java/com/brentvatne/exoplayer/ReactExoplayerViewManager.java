@@ -1,10 +1,11 @@
 package com.brentvatne.exoplayer;
 
+import android.graphics.Color;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.brentvatne.exoplayer.AudioOutput;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -13,7 +14,6 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.bridge.ReactMethod;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
@@ -50,6 +50,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
+    private static final String PROP_AUDIO_OUTPUT = "audioOutput";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BACK_BUFFER_DURATION_MS = "backBufferDurationMs";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
@@ -81,8 +82,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
-
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
+    private static final String PROP_SHUTTER_COLOR = "shutterColor";
 
     private ReactExoplayerConfig config;
 
@@ -278,6 +279,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setMutedModifier(muted);
     }
 
+    @ReactProp(name = PROP_AUDIO_OUTPUT)
+    public void setAudioOutput(final ReactExoplayerView videoView, final String audioOutput) {
+        videoView.setAudioOutput(AudioOutput.get(audioOutput));
+    }
+
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)
     public void setVolume(final ReactExoplayerView videoView, final float volume) {
         videoView.setVolumeModifier(volume);
@@ -376,6 +382,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SUBTITLE_STYLE)
     public void setSubtitleStyle(final ReactExoplayerView videoView, @Nullable final ReadableMap src) {
         videoView.setSubtitleStyle(SubtitleStyle.parse(src));
+    }
+
+    @ReactProp(name = PROP_SHUTTER_COLOR, customType = "Color")
+    public void setShutterColor(final ReactExoplayerView videoView, final Integer color) {
+        videoView.setShutterColor(color == null ? Color.BLACK : color);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)

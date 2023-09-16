@@ -291,29 +291,30 @@ var styles = StyleSheet.create({
 ### Configurable props
 | Name                                                                                | Platforms Support         |
 |-------------------------------------------------------------------------------------|---------------------------|
-| [adTagUrl](#adTagUrl)                                                               | Android, iOS              |
+| [adTagUrl](#adtagurl)                                                               | Android, iOS              |
 | [allowsExternalPlayback](#allowsexternalplayback)                                   | iOS                       |
 | [audioOnly](#audioonly)                                                             | All                       |
-| [automaticallyWaitsToMinimizeStalling](#automaticallyWaitsToMinimizeStalling)       | iOS                       |
-| [backBufferDurationMs](#backBufferDurationMs)                                       | Android                   |
+| [audioOutput](#audioOutput)                                                         | Android, iOS              |
+| [automaticallyWaitsToMinimizeStalling](#automaticallywaitstominimizestalling)       | iOS                       |
+| [backBufferDurationMs](#backbufferdurationms)                                       | Android                   |
 | [bufferConfig](#bufferconfig)                                                       | Android                   |
-| [contentStartTime](#contentStartTime)                                               | Android                   |
+| [contentStartTime](#contentstarttime)                                               | Android                   |
 | [controls](#controls)                                                               | Android, iOS              |
-| [currentPlaybackTime](#currentPlaybackTime)                                         | Android                   |
-| [disableFocus](#disableFocus)                                                       | Android, iOS              |
-| [disableDisconnectError](#disableDisconnectError)                                   | Android                   |
+| [currentPlaybackTime](#currentplaybacktime)                                         | Android                   |
+| [disableFocus](#disablefocus)                                                       | Android, iOS              |
+| [disableDisconnectError](#disabledisconnecterror)                                   | Android                   |
 | [filter](#filter)                                                                   | iOS                       |
-| [filterEnabled](#filterEnabled)                                                     | iOS                       |
+| [filterEnabled](#filterenabled)                                                     | iOS                       |
 | [focusable](#focusable)                                                             | Android                   |
-| [fullscreen](#fullscreen)                                                           | iOS                       |
+| [fullscreen](#fullscreen)                                                           | Android, iOS              |
 | [fullscreenAutorotate](#fullscreenautorotate)                                       | iOS                       |
 | [fullscreenOrientation](#fullscreenorientation)                                     | iOS                       |
 | [headers](#headers)                                                                 | Android                   |
 | [hideShutterView](#hideshutterview)                                                 | Android                   |
 | [ignoreSilentSwitch](#ignoresilentswitch)                                           | iOS                       |
 | [maxBitRate](#maxbitrate)                                                           | Android, iOS              |
-| [minLoadRetryCount](#minLoadRetryCount)                                             | Android                   |
-| [mixWithOthers](#mixWithOthers)                                                     | iOS                       |
+| [minLoadRetryCount](#minloadretrycount)                                             | Android                   |
+| [mixWithOthers](#mixwithothers)                                                     | iOS                       |
 | [muted](#muted)                                                                     | All                       |
 | [paused](#paused)                                                                   | All                       |
 | [pictureInPicture](#pictureinpicture)                                               | iOS                       |
@@ -321,8 +322,8 @@ var styles = StyleSheet.create({
 | [playWhenInactive](#playwheninactive)                                               | iOS                       |
 | [poster](#poster)                                                                   | All                       |
 | [posterResizeMode](#posterresizemode)                                               | All                       |
-| [preferredForwardBufferDuration](#preferredForwardBufferDuration)                   | iOS                       |
-| [preventsDisplaySleepDuringVideoPlayback](#preventsDisplaySleepDuringVideoPlayback) | iOS, Android              |
+| [preferredForwardBufferDuration](#preferredforwardbufferduration)                   | iOS                       |
+| [preventsDisplaySleepDuringVideoPlayback](#preventsdisplaysleepduringvideoplayback) | iOS, Android              |
 | [progressUpdateInterval](#progressupdateinterval)                                   | All                       |
 | [rate](#rate)                                                                       | All                       |
 | [repeat](#repeat)                                                                   | All                       |
@@ -331,14 +332,15 @@ var styles = StyleSheet.create({
 | [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS              |
 | [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS              |
 | [selectedVideoTrack](#selectedvideotrack)                                           | Android                   |
+| [shutterColor](#shutterColor)                                                       | Android                   |
 | [source](#source)                                                                   | All                       |
-| [subtitleStyle](#subtitleStyle)                                                     | Android                   |
+| [subtitleStyle](#subtitlestyle)                                                     | Android                   |
 | [textTracks](#texttracks)                                                           | Android, iOS              |
-| [trackId](#trackId)                                                                 | Android                   |
+| [trackId](#trackid)                                                                 | Android                   |
 | [useTextureView](#usetextureview)                                                   | Android                   |
-| [useSecureView](#useSecureView)                                                     | Android                   |
+| [useSecureView](#usesecureview)                                                     | Android                   |
 | [volume](#volume)                                                                   | All                       |
-| [localSourceEncryptionKeyScheme](#localSourceEncryptionKeyScheme)                   | All                       |
+| [localSourceEncryptionKeyScheme](#localsourceencryptionkeyscheme)                   | All                       |
 
 
 ### Event props
@@ -346,7 +348,7 @@ var styles = StyleSheet.create({
 | Name                                                                                            | Platforms Support         | 
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
-| [onAudioTracks](#onAudioTracks)                                                                 | Android                   |
+| [onAudioTracks](#onaudiotracks)                                                                 | Android                   |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
@@ -362,12 +364,12 @@ var styles = StyleSheet.create({
 | [onPlaybackRateChange](#onplaybackratechange)                                                   | All                       |
 | [onProgress](#onprogress)                                                                       | All                       |
 | [onReadyForDisplay](#onreadyfordisplay)                                                         | Android, iOS, Web         |
-| [onReceiveAdEvent](#onReceiveAdEvent)                                                           | Android, iOS              |
+| [onReceiveAdEvent](#onreceiveadevent)                                                           | Android, iOS              |
 | [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS                       |
 | [onSeek](#onseek)                                                                               | Android, iOS, Windows UWP |
 | [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
-| [onTextTracks](#onTextTracks)                                                                   | Android                   |
-| [onVideoTracks](#onVideoTracks)                                                                 | Android                   |
+| [onTextTracks](#ontexttracks)                                                                   | Android                   |
+| [onVideoTracks](#onvideotracks)                                                                 | Android                   |
 
 ### Methods
 | Name |Platforms Support  | 
@@ -382,9 +384,9 @@ var styles = StyleSheet.create({
 
 | Name |Platforms Support  |
 |--|--|
-|[getWidevineLevel](#getWidevineLevel)|Android|
-|[isCodecSupported](#isCodecSupported)|Android|
-|[isHEVCSupported](#isHEVCSupported)|Android|
+|[getWidevineLevel](#getwidevinelevel)|Android|
+|[isCodecSupported](#iscodecsupported)|Android|
+|[isHEVCSupported](#ishevcsupported)|Android|
 
 ### Configurable props
 
@@ -416,6 +418,13 @@ Indicates whether the player should only play the audio track and instead of dis
 For this to work, the poster prop must be set.
 
 Platforms: all
+
+#### audioOutput
+Changes the audio output.
+* **speaker (default)** - plays through speaker
+* **earpiece** - plays through earpiece
+
+Platforms: Android, iOS
 
 #### automaticallyWaitsToMinimizeStalling
 A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
@@ -455,6 +464,19 @@ bufferConfig={{
 ```
 
 Platforms: Android
+
+#### chapters
+To provide a custom chapter source for tvOS. This prop takes an array of objects with the properties listed below.
+
+| Property  | Type    | Description                                                                                                                                               |
+|-----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title     | string  | The title of the chapter to create                                                                                                                        |
+| startTime | number  | The start time of the chapter in seconds                                                                                                                  |
+| endTime   | number  | The end time of the chapter in seconds                                                                                                                    |
+| uri       | string? | Optional: Provide an http orl or the some base64 string to override the image of the chapter. For some media files the images are generated automatically |
+
+
+Platforms: tvOS
 
 #### currentPlaybackTime
 When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured, then this property will contain the epoch value in msec.
@@ -542,10 +564,12 @@ Platforms: Android
 
 #### fullscreen
 Controls whether the player enters fullscreen on play.
+See [presentFullscreenPlayer](#presentfullscreenplayer) for details.
+
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS
+Platforms: iOS, Android
 
 #### fullscreenAutorotate
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
@@ -852,6 +876,17 @@ If a track matching the specified Type (and Value if appropriate) is unavailable
 
 Platforms: Android
 
+#### shutterColor
+Apply color to shutter view, if you see black flashes before video start then set 
+
+```
+shutterColor='transparent'
+```
+
+- black (default)
+
+Platforms: Android
+
 #### source
 Sets the media source. You can pass an asset loaded via require or an object with a uri.
 
@@ -941,6 +976,24 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 ```
 
 Platforms: iOS, Android
+
+##### Overriding the metadata of a source
+
+Provide an optional `title`, `subtitle`  and/or `description` properties for the video. 
+Useful when to adapt the tvOS playback experience.
+
+Example:
+
+```
+source={{ 
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', 
+    title: 'Custom Title', 
+    subtitle: 'Custom Subtitle', 
+    description: 'Custom Description'
+  }}
+```
+
+Platforms: tvOS
 
 #### subtitleStyle
 

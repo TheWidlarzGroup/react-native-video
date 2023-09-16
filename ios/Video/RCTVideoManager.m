@@ -14,9 +14,11 @@ RCT_EXPORT_VIEW_PROPERTY(allowsExternalPlayback, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(textTracks, NSArray);
 RCT_EXPORT_VIEW_PROPERTY(selectedTextTrack, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(selectedAudioTrack, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(chapters, NSArray);
 RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(controls, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(audioOutput, NSString);
 RCT_EXPORT_VIEW_PROPERTY(volume, float);
 RCT_EXPORT_VIEW_PROPERTY(playInBackground, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(preventsDisplaySleepDuringVideoPlayback, BOOL);
@@ -70,6 +72,12 @@ RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
          reactTag:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
+                 reactTag:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(presentFullscreenPlayer
+                 reactTag:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(dismissFullscreenPlayer
                  reactTag:(nonnull NSNumber *)reactTag)
 
 @end

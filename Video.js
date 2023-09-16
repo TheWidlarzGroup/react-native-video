@@ -77,7 +77,7 @@ export default class Video extends Component {
     this.setNativeProps({ fullscreen: false });
   };
 
-  save = async (options?) => {
+  save = async (options) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
 
@@ -343,7 +343,11 @@ export default class Video extends Component {
         patchVer: source.patchVer || 0,
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
         startTime: source.startTime || 0,
-        endTime: source.endTime
+        endTime: source.endTime,
+        // Custom Metadata
+        title: source.title,
+        subtitle: source.subtitle,
+        description: source.description,
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoPlaybackStateChanged: this._onPlaybackStateChanged,
@@ -492,6 +496,13 @@ Video.propTypes = {
       language: PropTypes.string.isRequired,
     })
   ),
+  chapters: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string,
+      startTime: PropTypes.number.isRequired,
+      endTime: PropTypes.number.isRequired,
+    })
+  ),
   paused: PropTypes.bool,
   muted: PropTypes.bool,
   volume: PropTypes.number,
@@ -515,6 +526,7 @@ Video.propTypes = {
   disableBuffering: PropTypes.bool,
   controls: PropTypes.bool,
   audioOnly: PropTypes.bool,
+  audioOutput: PropTypes.oneOf(['earpiece', 'speaker']),
   fullscreenAutorotate: PropTypes.bool,
   fullscreenOrientation: PropTypes.oneOf(['all', 'landscape', 'portrait']),
   progressUpdateInterval: PropTypes.number,
@@ -528,6 +540,7 @@ Video.propTypes = {
   useTextureView: PropTypes.bool,
   useSecureView: PropTypes.bool,
   hideShutterView: PropTypes.bool,
+  shutterColor: PropTypes.string,
   onLoadStart: PropTypes.func,
   onPlaybackStateChanged: PropTypes.func,
   onLoad: PropTypes.func,
