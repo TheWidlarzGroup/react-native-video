@@ -65,6 +65,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
+    private var _pictureInPictureEnabled = false
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -120,10 +121,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: false)])
     }
 
+    func isPipEnabled () -> Bool {
+        return _pictureInPictureEnabled
+    }
+
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 #if USE_GOOGLE_IMA
-        _imaAdsManager = RCTIMAAdsManager(video: self)
+        _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
 #endif
 
         _eventDispatcher = eventDispatcher
@@ -168,7 +173,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 #if USE_GOOGLE_IMA
-        _imaAdsManager = RCTIMAAdsManager(video: self)
+        _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
 #endif
     }
 
@@ -458,6 +463,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             try audioSession.setCategory(.playback)
             try audioSession.setActive(true, options: [])
         } catch {
+        }
+        if (pictureInPicture) {
+            _pictureInPictureEnabled = true
+        } else {
+            _pictureInPictureEnabled = false
         }
         _pip?.setPictureInPicture(pictureInPicture)
 #endif
