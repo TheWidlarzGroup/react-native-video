@@ -11,15 +11,13 @@ import Foundation
 @objc(VideoPrefetcher)
 class VideoPrefetcher: NSObject {
     
-#if canImport(RCTVideoCache)
+
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
-#endif
+
     
     @objc
     func prefetch(_ url: NSString) {
-#if canImport(RCTVideoCache)
         _videoCache.cacheVideoForUrl(url as String)
-#endif
     }
     
     @objc
