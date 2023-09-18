@@ -1,6 +1,7 @@
 ## Changelog
 
 ## Next
+- iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
 
 ### Version 6.0.0-alpha.8
 - All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
