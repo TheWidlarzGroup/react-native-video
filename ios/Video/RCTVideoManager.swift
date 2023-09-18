@@ -71,6 +71,19 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(setPlayerStatus:reactTag:)
+    func setPlayerStatus(shouldPlay: NSNumber, reactTag: NSNumber) -> Void {
+        bridge.uiManager.prependUIBlock({_ , viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                let shouldPlay = shouldPlay.boolValue
+                view.setPaused(!shouldPlay)
+            }
+        })
+    }
+
     override func constantsToExport() -> [AnyHashable : Any]? {
         return [
             "ScaleNone": AVLayerVideoGravity.resizeAspect,
