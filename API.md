@@ -1643,6 +1643,47 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
+### setPlayerStatus
+`setPlayerStatus(shouldPlay: boolean): Promise<void>`
+
+Play/Pause the video.
+
+Example:
+```
+this.player.setPlayerStatus(true); // Play the video
+this.player.setPlayerStatus(false); // Pause the video
+```
+
+platforms: Android, iOS
+
+### pause
+`pause(): Promise<void>`
+
+Pause the video.
+
+Example:
+```
+this.player.pause();
+```
+
+NOTE: This is the same as calling `setPlayerStatus(false)`
+
+Platforms: Android, iOS
+
+### play
+`play(): Promise<void>`
+
+Play the video.
+
+Example:
+```
+this.player.play();
+```
+
+NOTE: This is the same as calling `setPlayerStatus(true)`
+
+Platforms: Android, iOS
+
 #### Static methods
 
 ### Video Decoding capabilities
