@@ -1,6 +1,7 @@
 ## Changelog
 
 ## Next
+- Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
 
 ### Version 6.0.0-alpha.8
 - All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
