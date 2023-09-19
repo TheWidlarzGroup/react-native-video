@@ -13,6 +13,13 @@
 		0177D39D27170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39627170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift */; };
 		0177D39E27170A7A00F5BE18 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39727170A7A00F5BE18 /* RCTVideoManager.m */; };
 		0177D39F27170A7A00F5BE18 /* RCTVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39927170A7A00F5BE18 /* RCTVideo.swift */; };
+		7A5933462AB98E62001199AA /* Stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5933452AB98E62001199AA /* Stream.swift */; };
+		7A5933482AB98E95001199AA /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5933472AB98E95001199AA /* Asset.swift */; };
+		7A59334A2AB98EC8001199AA /* AssetListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5933492AB98EC8001199AA /* AssetListManager.swift */; };
+		7A59334C2AB98EE0001199AA /* AssetPlaybackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A59334B2AB98EE0001199AA /* AssetPlaybackManager.swift */; };
+		7A59334E2AB98EF2001199AA /* StreamListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A59334D2AB98EF2001199AA /* StreamListManager.swift */; };
+		7A5933502AB98F03001199AA /* AssetPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A59334F2AB98F03001199AA /* AssetPersistenceManager.swift */; };
+		7A5933522AB98F18001199AA /* PerfMeasurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5933512AB98F18001199AA /* PerfMeasurements.swift */; };
 		7A76ED0B2AB4819B00E79249 /* RCTPrefetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A76ED0A2AB4819B00E79249 /* RCTPrefetchManager.m */; };
 		7A76ED0D2AB48E7100E79249 /* VideoPrefetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A76ED0C2AB48E7100E79249 /* VideoPrefetcher.swift */; };
 /* End PBXBuildFile section */
@@ -51,6 +58,13 @@
 		0177D39827170A7A00F5BE18 /* RCTVideo-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTVideo-Bridging-Header.h"; path = "Video/RCTVideo-Bridging-Header.h"; sourceTree = "<group>"; };
 		0177D39927170A7A00F5BE18 /* RCTVideo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RCTVideo.swift; path = Video/RCTVideo.swift; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A5933452AB98E62001199AA /* Stream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stream.swift; sourceTree = "<group>"; };
+		7A5933472AB98E95001199AA /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
+		7A5933492AB98EC8001199AA /* AssetListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetListManager.swift; sourceTree = "<group>"; };
+		7A59334B2AB98EE0001199AA /* AssetPlaybackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetPlaybackManager.swift; sourceTree = "<group>"; };
+		7A59334D2AB98EF2001199AA /* StreamListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamListManager.swift; sourceTree = "<group>"; };
+		7A59334F2AB98F03001199AA /* AssetPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetPersistenceManager.swift; sourceTree = "<group>"; };
+		7A5933512AB98F18001199AA /* PerfMeasurements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfMeasurements.swift; sourceTree = "<group>"; };
 		7A76ED0A2AB4819B00E79249 /* RCTPrefetchManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTPrefetchManager.m; path = Video/RCTPrefetchManager.m; sourceTree = "<group>"; };
 		7A76ED0C2AB48E7100E79249 /* VideoPrefetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VideoPrefetcher.swift; path = Video/VideoPrefetcher.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,6 +105,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				7A5933422AB98E32001199AA /* Caching */,
 				01489050272001A100E69940 /* DataStructures */,
 				01489051272001A100E69940 /* Features */,
 				0177D39527170A7A00F5BE18 /* RCTSwiftLog */,
@@ -107,6 +122,36 @@
 				49E995712048B4CE00EA7890 /* Frameworks */,
 				01450CB5271D5738005D8F6B /* libRCTVideo.a */,
 			);
+			sourceTree = "<group>";
+		};
+		7A5933422AB98E32001199AA /* Caching */ = {
+			isa = PBXGroup;
+			children = (
+				7A5933442AB98E49001199AA /* Managers */,
+				7A5933432AB98E3F001199AA /* Model */,
+				7A5933512AB98F18001199AA /* PerfMeasurements.swift */,
+			);
+			path = Caching;
+			sourceTree = "<group>";
+		};
+		7A5933432AB98E3F001199AA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7A5933452AB98E62001199AA /* Stream.swift */,
+				7A5933472AB98E95001199AA /* Asset.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		7A5933442AB98E49001199AA /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				7A5933492AB98EC8001199AA /* AssetListManager.swift */,
+				7A59334B2AB98EE0001199AA /* AssetPlaybackManager.swift */,
+				7A59334D2AB98EF2001199AA /* StreamListManager.swift */,
+				7A59334F2AB98F03001199AA /* AssetPersistenceManager.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -191,12 +236,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				0177D39D27170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift in Sources */,
+				7A59334A2AB98EC8001199AA /* AssetListManager.swift in Sources */,
 				0177D39C27170A7A00F5BE18 /* RCTVideoPlayerViewController.swift in Sources */,
+				7A59334C2AB98EE0001199AA /* AssetPlaybackManager.swift in Sources */,
+				7A5933482AB98E95001199AA /* Asset.swift in Sources */,
+				7A5933522AB98F18001199AA /* PerfMeasurements.swift in Sources */,
 				0177D39B27170A7A00F5BE18 /* UIView+FindUIViewController.swift in Sources */,
+				7A59334E2AB98EF2001199AA /* StreamListManager.swift in Sources */,
 				7A76ED0B2AB4819B00E79249 /* RCTPrefetchManager.m in Sources */,
+				7A5933502AB98F03001199AA /* AssetPersistenceManager.swift in Sources */,
 				0177D39F27170A7A00F5BE18 /* RCTVideo.swift in Sources */,
 				7A76ED0D2AB48E7100E79249 /* VideoPrefetcher.swift in Sources */,
 				0177D39E27170A7A00F5BE18 /* RCTVideoManager.m in Sources */,
+				7A5933462AB98E62001199AA /* Stream.swift in Sources */,
 				0177D39A27170A7A00F5BE18 /* RCTVideoManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
