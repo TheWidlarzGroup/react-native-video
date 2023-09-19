@@ -1,6 +1,7 @@
 ## Changelog
 
 ## Next
+- Windows: fix `onError` not being raised [#3247](https://github.com/react-native-video/react-native-video/pull/3247)
 
 ### Version 6.0.0-alpha.8
 - All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
