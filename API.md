@@ -352,7 +352,7 @@ var styles = StyleSheet.create({
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
-| [onError](#onerror)                                                                             | Android, iOS              |
+| [onError](#onerror)                                                                             | Android, iOS, Windows UWP |
 | [onExternalPlaybackChange](#onexternalplaybackchange)                                           | iOS                       |
 | [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS              |
 | [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS              |
