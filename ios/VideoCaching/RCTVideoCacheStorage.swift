@@ -57,10 +57,6 @@ class RCTVideoCacheStorage {
                 try fileManager.removeItem(atPath: storagePath.path)
             }
             try fileManager.createDirectory(at: storagePath, withIntermediateDirectories: true, attributes: nil)
-            if let libraryPath =  fileManager.urls(for: .libraryDirectory, in: .userDomainMask).first {
-                let assetsPath = libraryPath.appendingPathComponent("com.apple.UserManagedAssets.H83v9A")
-                try fileManager.removeItem(atPath: assetsPath.path)
-            }
 
         } catch {
             DebugLog("Can't purge storage \(error.localizedDescription)")

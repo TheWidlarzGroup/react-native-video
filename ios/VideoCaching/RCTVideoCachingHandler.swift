@@ -18,16 +18,15 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     var playerItemPrepareText: ((AVAsset?, NSDictionary?) -> AVPlayerItem)?
 
     /// The AVAssetDownloadURLSession to use for managing AVAssetDownloadTasks.
-    fileprivate var assetDownloadURLSession: AVAssetDownloadURLSession!
+    private var assetDownloadURLSession: AVAssetDownloadURLSession!
 
     /// Internal map of AVAggregateAssetDownloadTask to its corresponding Asset.
-    fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: AVURLAsset]()
+    private var activeDownloadsMap: [AVAggregateAssetDownloadTask: AVURLAsset] = [:]
 
     /// Internal map of AVAggregateAssetDownloadTask to download URL.
-    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: URL]()
+    private var willDownloadToUrlMap: [AVAggregateAssetDownloadTask: URL] = [:]
 
-    typealias AssetLocation = URL
-    fileprivate var cachedAccestsByUrlMap = [URL: AssetLocation]()
+    private var queuedAssetsMap: [URL: AVURLAsset] = [:]
 
     private override init() {
         super.init()
@@ -100,7 +99,8 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     func getItemForUri(_ uri:String) ->  Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> {
         return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { [weak self] fulfill, reject in
 
-            guard let assetURL = URL(string: uri) else {
+            guard let self = self, let assetURL = URL(string: uri)
+            else {
                 reject(NSError(domain: "", code: 2))
                 return
             }
@@ -108,16 +108,26 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
             let cachedAsset: AVAsset
             let videoCacheStatus: RCTVideoCacheStatus
 
-            if let localFileLocation = self?._cacheStorage.storedItemUrl(forUrl: assetURL) {
+            if let localFileLocation = self._cacheStorage.storedItemUrl(forUrl: assetURL) {
                 cachedAsset = AVURLAsset(url: localFileLocation)
                 videoCacheStatus = .available
             } else {
-                cachedAsset = AVURLAsset(url: assetURL)
+                let queuedAssets = self.getQueuedAsset(forUrl: assetURL)
+                cachedAsset = queuedAssets
                 videoCacheStatus = .notAvailable
             }
 
             fulfill((videoCacheStatus, cachedAsset))
         }
+    }
+
+    func getQueuedAsset(forUrl assetUrl: URL) -> AVURLAsset {
+        guard let queuedAssets = queuedAssetsMap[assetUrl] else {
+            let newAsset = AVURLAsset(url: assetUrl)
+            queuedAssetsMap[assetUrl] = newAsset
+            return newAsset
+        }
+        return queuedAssets
     }
     
     // MARK: - DVAssetLoaderDelegate
@@ -128,25 +138,23 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     // MARK: - Prefetching
 
     func cacheVideoForUrl(_ url: String) {
-        guard let assetURL = URL(string: url),
-              !willDownloadToUrlMap.values.contains(where: { $0.absoluteString == url}),
-              _cacheStorage.storedItemUrl(forUrl: assetURL) == nil
+        DispatchQueue.main.async {
+            guard let assetURL = URL(string: url),
+                  !self.willDownloadToUrlMap.values.contains(where: { $0.absoluteString == url}),
+                  self._cacheStorage.storedItemUrl(forUrl: assetURL) == nil
+            else { return }
 
-        else {
-            return
+            self.downloadStream(for: assetURL)
+            urls.insert(assetURL)
+            print("************************************** \(urls.count)")
         }
-        downloadStream(for: assetURL)
-        urls.insert(assetURL)
-        print("************************************** \(urls.count)")
-
-
     }
 
     /// Triggers the initial AVAssetDownloadTask for a given Asset.
     /// - Tag: DownloadStream
     func downloadStream(for assetURL: URL) {
 
-        let urlAsset = AVURLAsset(url: assetURL)
+        let urlAsset = getQueuedAsset(forUrl: assetURL)
 
         // Get the default media selections for the asset's media selection groups.
         let preferredMediaSelection = urlAsset.preferredMediaSelection
@@ -167,7 +175,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
                                                                     [AVAssetDownloadTaskMinimumRequiredMediaBitrateKey: 265_000]) else { return }
 
         // To better track the AVAssetDownloadTask, set the taskDescription to something unique for the sample.
-        task.taskDescription = ""
+        task.taskDescription = "asset.stream.download.task"
 
         activeDownloadsMap[task] = urlAsset
 
@@ -204,25 +212,29 @@ extension RCTVideoCachingHandler: AVAssetDownloadDelegate {
                  This task was canceled, you should perform cleanup using the
                  URL saved from AVAssetDownloadDelegate.urlSession(_:assetDownloadTask:didFinishDownloadingTo:).
                  */
-//                guard let localFileLocation = localAssetForStream(withName: asset.stream.name)?.urlAsset.url else { return }
-//
-//                do {
-//                    try FileManager.default.removeItem(at: localFileLocation)
-//
-//                    userDefaults.removeObject(forKey: asset.stream.name)
-//                } catch {
-//                    print("An error occured trying to delete the contents on disk for \(asset.stream.name): \(error)")
-//                }
+                guard let localFileLocation = _cacheStorage.storedItemUrl(forUrl: asset.url) else { return }
+
+                do {
+                    try FileManager.default.removeItem(at: localFileLocation)
+                } catch {
+                    DebugLog("An error occured trying to delete the contents on disk for \(localFileLocation): \(error)")
+                }
 
                 break
             case (NSURLErrorDomain, NSURLErrorUnknown):
                 fatalError("Downloading HLS streams is not supported in the simulator.")
 
             default:
-                fatalError("An unexpected error occured \(error.domain)")
+                fatalError("An unexpected error occured \(error.localizedDescription)")
             }
         } else {
             _cacheStorage.storeItem(from: downloadURL, forUri: asset.url)
+
+            guard let cashedAssetUrl =  _cacheStorage.storedItemUrl(forUrl: asset.url) else { return }
+            let policy = AVMutableAssetDownloadStorageManagementPolicy()
+            policy.expirationDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
+            policy.priority = .default
+            AVAssetDownloadStorageManager.shared().setStorageManagementPolicy(policy, for: cashedAssetUrl)
         }
 
     }
@@ -250,7 +262,7 @@ extension RCTVideoCachingHandler: AVAssetDownloadDelegate {
 
 //        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
 
-        aggregateAssetDownloadTask.taskDescription = "asset.stream.name"
+        aggregateAssetDownloadTask.taskDescription = "asset.stream.download.task"
 
         aggregateAssetDownloadTask.resume()
     }
