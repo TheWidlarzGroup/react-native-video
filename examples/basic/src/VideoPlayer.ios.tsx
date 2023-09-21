@@ -1,5 +1,7 @@
 'use strict';
-import React, {Component} from 'react';
+import React, {
+  Component
+} from 'react';
 
 import {
   Alert,
@@ -10,25 +12,25 @@ import {
   View,
 } from 'react-native';
 
-import Video, {FilterType} from 'react-native-video';
+import Video,{FilterType} from 'react-native-video';
 
 const filterTypes = [
-  FilterType.NONE,
-  FilterType.INVERT,
-  FilterType.MONOCHROME,
-  FilterType.POSTERIZE,
-  FilterType.FALSE,
-  FilterType.MAXIMUMCOMPONENT,
-  FilterType.MINIMUMCOMPONENT,
-  FilterType.CHROME,
-  FilterType.FADE,
-  FilterType.INSTANT,
-  FilterType.MONO,
-  FilterType.NOIR,
-  FilterType.PROCESS,
-  FilterType.TONAL,
-  FilterType.TRANSFER,
-  FilterType.SEPIA,
+    FilterType.NONE,
+    FilterType.INVERT,
+    FilterType.MONOCHROME,
+    FilterType.POSTERIZE,
+    FilterType.FALSE,
+    FilterType.MAXIMUMCOMPONENT,
+    FilterType.MINIMUMCOMPONENT,
+    FilterType.CHROME,
+    FilterType.FADE,
+    FilterType.INSTANT,
+    FilterType.MONO,
+    FilterType.NOIR,
+    FilterType.PROCESS,
+    FilterType.TONAL,
+    FilterType.TRANSFER,
+    FilterType.SEPIA
 ];
 
 class VideoPlayer extends Component {
@@ -38,7 +40,7 @@ class VideoPlayer extends Component {
     this.onProgress = this.onProgress.bind(this);
     this.onBuffer = this.onBuffer.bind(this);
   }
-  video = React.createRef<Video>();
+  video = React.createRef();
 
   state = {
     rate: 1,
@@ -54,7 +56,7 @@ class VideoPlayer extends Component {
     mixWithOthers: null,
     isBuffering: false,
     filter: FilterType.NONE,
-    filterEnabled: true,
+    filterEnabled: true
   };
 
   onLoad(data: any) {
@@ -66,8 +68,8 @@ class VideoPlayer extends Component {
     this.setState({currentTime: data.currentTime});
   }
 
-  onBuffer({isBuffering}: {isBuffering: boolean}) {
-    this.setState({isBuffering});
+  onBuffer({ isBuffering }: { isBuffering: boolean }) {
+    this.setState({ isBuffering });
   }
 
   getCurrentTimePercentage() {
@@ -88,26 +90,19 @@ class VideoPlayer extends Component {
     }
 
     this.setState({
-      filter: filterTypes[index],
-    });
+      filter: filterTypes[index]
+    })
   }
 
-  renderSkinControl(skin: 'custom' | 'native' | 'embed') {
+  renderSkinControl(skin) {
     const isSelected = this.state.skin == skin;
     const selectControls = skin == 'native' || skin == 'embed';
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({
-            controls: selectControls,
-            skin: skin,
-          });
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({
+          controls: selectControls,
+          skin: skin
+        }) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {skin}
         </Text>
       </TouchableOpacity>
@@ -115,111 +110,77 @@ class VideoPlayer extends Component {
   }
 
   renderRateControl(rate: number) {
-    const isSelected = this.state.rate == rate;
+    const isSelected = (this.state.rate == rate);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({rate: rate});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {rate}x
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderResizeModeControl(resizeMode: string) {
-    const isSelected = this.state.resizeMode == resizeMode;
+    const isSelected = (this.state.resizeMode == resizeMode);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({resizeMode: resizeMode});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {resizeMode}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderVolumeControl(volume: number) {
-    const isSelected = this.state.volume == volume;
+    const isSelected = (this.state.volume == volume);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({volume: volume});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {volume * 100}%
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderIgnoreSilentSwitchControl(ignoreSilentSwitch: string) {
-    const isSelected = this.state.ignoreSilentSwitch == ignoreSilentSwitch;
+    const isSelected = (this.state.ignoreSilentSwitch == ignoreSilentSwitch);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({ignoreSilentSwitch: ignoreSilentSwitch});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({ignoreSilentSwitch: ignoreSilentSwitch}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {ignoreSilentSwitch}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderFullscreenControl(fullscreen: string) {
     return (
-      <TouchableOpacity
-        onPress={() => {
+      <TouchableOpacity onPress={() => {
           if (fullscreen === 'fullscreen') {
-            this.video.current?.presentFullscreenPlayer();
+            this.video.presentFullscreenPlayer()
           }
         }}>
-        <Text style={[styles.controlOption]}>{fullscreen}</Text>
+        <Text style={[styles.controlOption]}>
+          {fullscreen}
+        </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderMixWithOthersControl(mixWithOthers: string) {
-    const isSelected = this.state.mixWithOthers == mixWithOthers;
+    const isSelected = (this.state.mixWithOthers == mixWithOthers);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({mixWithOthers: mixWithOthers});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({mixWithOthers: mixWithOthers}) }}>
+        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
           {mixWithOthers}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderCustomSkin() {
@@ -228,23 +189,10 @@ class VideoPlayer extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.fullScreen}
-          onPress={() => {
-            if (!this.video.current) {
-              return;
-            }
-
-            const {play, pause} = this.video.current;
-            const shouldPlay = !this.state.paused;
-
-            shouldPlay ? play() : pause();
-
-            this.setState({paused: shouldPlay});
-          }}>
+        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
           <Video
             ref={(ref: Video) => {
-              this.video = ref;
+              this.video = ref
             }}
             source={require('./broadchurch.mp4')}
             style={styles.fullScreen}
@@ -258,9 +206,7 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => {
-              Alert.alert('Done!');
-            }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             filter={this.state.filter}
             filterEnabled={this.state.filterEnabled}
@@ -274,22 +220,21 @@ class VideoPlayer extends Component {
               {this.renderSkinControl('native')}
               {this.renderSkinControl('embed')}
             </View>
-            {this.state.filterEnabled ? (
-              <View style={styles.skinControl}>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(-1);
-                  }}>
-                  <Text style={styles.controlOption}>Previous Filter</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(1);
-                  }}>
-                  <Text style={styles.controlOption}>Next Filter</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
+            {
+              (this.state.filterEnabled) ?
+                  <View style={styles.skinControl}>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(-1)
+                    }}>
+                      <Text style={styles.controlOption}>Previous Filter</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(1)
+                    }}>
+                      <Text style={styles.controlOption}>Next Filter</Text>
+                    </TouchableOpacity>
+                  </View> : null
+            }
           </View>
           <View style={styles.generalControls}>
             <View style={styles.rateControl}>
@@ -311,31 +256,28 @@ class VideoPlayer extends Component {
             </View>
           </View>
           <View style={styles.generalControls}>
-            {Platform.OS === 'ios' ? (
-              <>
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
-                </View>
-                <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl('mix')}
-                  {this.renderMixWithOthersControl('duck')}
-                </View>
-                <View style={styles.mixWithOthersControl}>
-                  {this.renderFullscreenControl('fullscreen')}
-                </View>
-              </>
-            ) : null}
+            {
+              (Platform.OS === 'ios') ?
+                <>
+                  <View style={styles.ignoreSilentSwitchControl}>
+                    {this.renderIgnoreSilentSwitchControl('ignore')}
+                    {this.renderIgnoreSilentSwitchControl('obey')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderMixWithOthersControl('mix')}
+                    {this.renderMixWithOthersControl('duck')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderFullscreenControl('fullscreen')}
+                  </View>
+                </> : null
+            }
           </View>
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
-              <View
-                style={[styles.innerProgressCompleted, {flex: flexCompleted}]}
-              />
-              <View
-                style={[styles.innerProgressRemaining, {flex: flexRemaining}]}
-              />
+              <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
+              <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
             </View>
           </View>
         </View>
@@ -344,10 +286,7 @@ class VideoPlayer extends Component {
   }
 
   renderNativeSkin() {
-    const videoStyle =
-      this.state.skin == 'embed'
-        ? styles.nativeVideoControls
-        : styles.fullScreen;
+    const videoStyle = this.state.skin == 'embed' ? styles.nativeVideoControls : styles.fullScreen;
     return (
       <View style={styles.container}>
         <View style={styles.fullScreen}>
@@ -364,9 +303,7 @@ class VideoPlayer extends Component {
             onLoad={this.onLoad}
             onBuffer={this.onBuffer}
             onProgress={this.onProgress}
-            onEnd={() => {
-              Alert.alert('Done!');
-            }}
+            onEnd={() => { Alert.alert('Done!') }}
             repeat={true}
             controls={this.state.controls}
             filter={this.state.filter}
@@ -380,22 +317,21 @@ class VideoPlayer extends Component {
               {this.renderSkinControl('native')}
               {this.renderSkinControl('embed')}
             </View>
-            {this.state.filterEnabled ? (
-              <View style={styles.skinControl}>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(-1);
-                  }}>
-                  <Text style={styles.controlOption}>Previous Filter</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(1);
-                  }}>
-                  <Text style={styles.controlOption}>Next Filter</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
+            {
+              (this.state.filterEnabled) ?
+                  <View style={styles.skinControl}>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(-1)
+                    }}>
+                      <Text style={styles.controlOption}>Previous Filter</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      this.setFilter(1)
+                    }}>
+                      <Text style={styles.controlOption}>Next Filter</Text>
+                    </TouchableOpacity>
+                  </View> : null
+            }
           </View>
           <View style={styles.generalControls}>
             <View style={styles.rateControl}>
@@ -417,28 +353,28 @@ class VideoPlayer extends Component {
             </View>
           </View>
           <View style={styles.generalControls}>
-            {Platform.OS === 'ios' ? (
-              <>
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
-                </View>
-                <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl('mix')}
-                  {this.renderMixWithOthersControl('duck')}
-                </View>
-              </>
-            ) : null}
+            {
+              (Platform.OS === 'ios') ?
+                <>
+                  <View style={styles.ignoreSilentSwitchControl}>
+                    {this.renderIgnoreSilentSwitchControl('ignore')}
+                    {this.renderIgnoreSilentSwitchControl('obey')}
+                  </View>
+                  <View style={styles.mixWithOthersControl}>
+                    {this.renderMixWithOthersControl('mix')}
+                    {this.renderMixWithOthersControl('duck')}
+                  </View>
+                </> : null
+            }
           </View>
         </View>
+
       </View>
     );
   }
 
   render() {
-    return this.state.controls
-      ? this.renderNativeSkin()
-      : this.renderCustomSkin();
+    return this.state.controls ? this.renderNativeSkin() : this.renderCustomSkin();
   }
 }
 
@@ -457,7 +393,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   controls: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderRadius: 5,
     position: 'absolute',
     bottom: 44,
@@ -503,24 +439,24 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   ignoreSilentSwitchControl: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   mixWithOthersControl: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   controlOption: {
     alignSelf: 'center',
     fontSize: 11,
-    color: 'white',
+    color: "white",
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
@@ -536,4 +472,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-export default VideoPlayer;
+export default VideoPlayer

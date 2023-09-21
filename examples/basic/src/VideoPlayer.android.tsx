@@ -1,6 +1,8 @@
 'use strict';
 
-import React, {Component, createRef} from 'react';
+import React, {
+  Component
+} from 'react';
 
 import {
   StyleSheet,
@@ -12,11 +14,12 @@ import {
   ToastAndroid,
 } from 'react-native';
 
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker'
 
-import Video, {TextTrackType, VideoDecoderProperties} from 'react-native-video';
+import Video, { VideoDecoderProperties, TextTrackType } from 'react-native-video';
 
 class VideoPlayer extends Component {
+
   state = {
     rate: 1,
     volume: 1,
@@ -43,7 +46,7 @@ class VideoPlayer extends Component {
     showRNVControls: false,
   };
 
-  seekerWidth = 0;
+  seekerWidth = 0
 
   srcList = [
     require('./broadchurch.mp4'),
@@ -57,95 +60,99 @@ class VideoPlayer extends Component {
     },
     {
       description: '(hls|live) red bull tv',
-      uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
+      uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8'
     },
     {
       description: '(mp4|subtitles) demo with sintel Subtitles',
-      uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
+      uri:
+        'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
       type: 'mpd',
     },
     {
       description: 'invalid URL',
-      uri: 'mmt://www.youtube.com',
+      uri:
+        'mmt://www.youtube.com',
       type: 'mpd',
     },
-    {description: '(no url) Stopped playback', uri: undefined},
+    { description: '(no url) Stopped playback', uri: undefined },
     {
       description: '(no view) no View',
       noView: true,
     },
-  ];
+  ]
 
-  video = createRef<Video>();
+  video: Video;
   seekPanResponder: PanResponder | undefined;
 
   popupInfo = () => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
-      VideoDecoderProperties.isHEVCSupported().then(
-        (hevcSupported: boolean) => {
-          VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
-            (avcSupported: boolean) => {
-              this.toast(
-                true,
-                'Widevine level: ' +
-                  widevineLevel +
-                  '\n hevc: ' +
-                  (hevcSupported ? '' : 'NOT') +
-                  'supported' +
-                  '\n avc: ' +
-                  (avcSupported ? '' : 'NOT') +
-                  'supported',
-              );
-            },
-          );
-        },
-      );
-    });
-  };
+      VideoDecoderProperties.isHEVCSupported().then((hevcSupported: boolean) => {
+        VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+          (avcSupported: boolean) => {
+            this.toast(
+              true,
+              'Widevine level: ' +
+              widevineLevel +
+              '\n hevc: ' +
+              (hevcSupported ? '' : 'NOT') +
+              'supported' +
+              '\n avc: ' +
+              (avcSupported ? '' : 'NOT') +
+              'supported',
+            )
+          },
+        )
+      })
+    })
+  }
 
   onLoad = (data: any) => {
-    this.setState({duration: data.duration, loading: false});
-    this.onAudioTracks(data);
-    this.onTextTracks(data);
+    this.setState({ duration: data.duration, loading: false, });
+    this.onAudioTracks(data)
+    this.onTextTracks(data)
   };
 
   onProgress = (data: any) => {
     if (!this.state.seeking) {
-      const position = this.calculateSeekerPosition();
-      this.setSeekerPosition(position);
+      const position = this.calculateSeekerPosition()
+      this.setSeekerPosition(position)
     }
-    this.setState({currentTime: data.currentTime});
+    this.setState({ currentTime: data.currentTime })
   };
 
+
   onVideoLoadStart = () => {
-    this.setState({isLoading: true});
-  };
+    console.log('onVideoLoadStart')
+    this.setState({ isLoading: true })
+  }
+
 
   onAudioTracks = (data: any) => {
     const selectedTrack = data.audioTracks?.find((x: any) => {
-      return x.selected;
-    });
+      return x.selected
+    })
     this.setState({
       audioTracks: data.audioTracks,
-    });
+    })
     if (selectedTrack?.language) {
       this.setState({
         selectedAudioTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
-      });
+      })
+
     }
-  };
+  }
 
   onTextTracks = (data: any) => {
     const selectedTrack = data.textTracks?.find((x: any) => {
-      return x.selected;
-    });
+      return x.selected
+    })
 
     this.setState({
       textTracks: data.textTracks,
-    });
+    })
     if (selectedTrack?.language) {
       this.setState({
         textTracks: data,
@@ -153,31 +160,38 @@ class VideoPlayer extends Component {
           type: 'language',
           value: selectedTrack?.language,
         },
-      });
+      })
     }
-  };
+  }
 
   onAspectRatio = (data: any) => {
+    console.log('onAspectRadio called ' + JSON.stringify(data))
     this.setState({
       videoWidth: data.width,
       videoHeight: data.height,
-    });
-  };
+    })
+  }
 
   onVideoBuffer = (param: any) => {
-    this.setState({isLoading: param.isBuffering});
-  };
+    console.log('onVideoBuffer')
+
+    this.setState({ isLoading: param.isBuffering })
+  }
+
 
   onReadyForDisplay = () => {
-    this.setState({isLoading: false});
-  };
+    console.log('onReadyForDisplay')
+
+    this.setState({ isLoading: false })
+  }
+
 
   onAudioBecomingNoisy = () => {
-    this.setState({paused: true});
+    this.setState({ paused: true })
   };
 
-  onAudioFocusChanged = (event: {hasAudioFocus: boolean}) => {
-    this.setState({paused: !event.hasAudioFocus});
+  onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
+    this.setState({ paused: !event.hasAudioFocus })
   };
 
   getCurrentTimePercentage = () => {
@@ -188,18 +202,11 @@ class VideoPlayer extends Component {
   };
 
   renderRateControl(rate: number) {
-    const isSelected = this.state.rate === rate;
+    const isSelected = (this.state.rate === rate);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({rate});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({ rate }) }}>
+        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
           {rate}
         </Text>
       </TouchableOpacity>
@@ -207,42 +214,29 @@ class VideoPlayer extends Component {
   }
 
   renderResizeModeControl(resizeMode: string) {
-    const isSelected = this.state.resizeMode === resizeMode;
+    const isSelected = (this.state.resizeMode === resizeMode);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({resizeMode});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({ resizeMode }) }}>
+        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
           {resizeMode}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderVolumeControl(volume: number) {
-    const isSelected = this.state.volume === volume;
+    const isSelected = (this.state.volume === volume);
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({volume});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
+      <TouchableOpacity onPress={() => { this.setState({ volume }) }}>
+        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
           {volume * 100}%
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
+
 
   toast = (visible: boolean, message: string) => {
     if (visible) {
@@ -252,33 +246,35 @@ class VideoPlayer extends Component {
         ToastAndroid.BOTTOM,
         25,
         50,
-      );
-      return null;
+      )
+      return null
     }
-    return null;
-  };
+    return null
+  }
 
   onError = (err: any) => {
-    this.toast(true, 'error: ' + err?.error.errorCode);
-  };
+    console.log(JSON.stringify(err?.error.errorCode))
+    this.toast(true, 'error: ' + err?.error.errorCode)
+  }
 
   onEnd = () => {
-    this.channelUp();
+    this.channelUp()
   };
 
+
   toggleFullscreen() {
-    this.setState({fullscreen: !this.state.fullscreen});
+    this.setState({ fullscreen: !this.state.fullscreen })
   }
   toggleControls() {
-    this.setState({showRNVControls: !this.state.showRNVControls});
+    this.setState({ showRNVControls: !this.state.showRNVControls })
   }
 
   toggleDecoration() {
-    this.setState({decoration: !this.state.decoration});
+    this.setState({ decoration: !this.state.decoration })
     if (this.state.decoration) {
-      this.video.current?.dismissFullscreenPlayer();
+      this.video.dismissFullscreenPlayer()
     } else {
-      this.video.current?.presentFullscreenPlayer();
+      this.video.presentFullscreenPlayer()
     }
   }
 
@@ -294,80 +290,86 @@ class VideoPlayer extends Component {
       textTracks: [],
       selectedAudioTrack: undefined,
       selectedTextTrack: undefined,
-    });
+    })
   }
 
+
   channelUp() {
-    this.goToChannel((this.state.srcListId + 1) % this.srcList.length);
+    console.log('channel up')
+    this.goToChannel((this.state.srcListId + 1) % this.srcList.length)
   }
 
   channelDown() {
-    this.goToChannel(
-      (this.state.srcListId + this.srcList.length - 1) % this.srcList.length,
-    );
+    console.log('channel down')
+    this.goToChannel((this.state.srcListId + this.srcList.length - 1) % this.srcList.length)
   }
 
   componentDidMount() {
-    this.initSeekPanResponder();
+    this.initSeekPanResponder()
   }
 
   renderDecorationsControl() {
     return (
       <TouchableOpacity
         onPress={() => {
-          this.toggleDecoration();
-        }}>
+          this.toggleDecoration()
+        }}
+      >
         <Text style={[styles.controlOption]}>{'decoration'}</Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderInfoControl() {
     return (
       <TouchableOpacity
         onPress={() => {
-          this.popupInfo();
-        }}>
+          this.popupInfo()
+        }}
+      >
         <Text style={[styles.controlOption]}>{'decoderInfo'}</Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderFullScreenControl() {
     return (
       <TouchableOpacity
         onPress={() => {
-          this.toggleFullscreen();
-        }}>
+          this.toggleFullscreen()
+        }}
+      >
         <Text style={[styles.controlOption]}>{'fullscreen'}</Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderPause() {
     return (
       <TouchableOpacity
         onPress={() => {
-          this.setState({paused: !this.state.paused});
-        }}>
+          this.setState({ paused: !this.state.paused })
+        }}
+      >
         <Text style={[styles.controlOption]}>
           {this.state.paused ? 'pause' : 'playing'}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderRepeatModeControl() {
     return (
       <TouchableOpacity
         onPress={() => {
-          this.setState({loop: !this.state.loop});
-        }}>
+          this.setState({ loop: !this.state.loop })
+        }}
+      >
         <Text style={[styles.controlOption]}>
           {this.state.loop ? 'loop enable' : 'loop disable'}
         </Text>
       </TouchableOpacity>
-    );
+    )
   }
 
   renderLeftControl() {
@@ -375,13 +377,14 @@ class VideoPlayer extends Component {
       <View>
         <TouchableOpacity
           onPress={() => {
-            this.channelDown();
-          }}>
+            this.channelDown()
+          }}
+        >
           <Text style={[styles.leftRightControlOption]}>{'ChDown'}</Text>
         </TouchableOpacity>
       </View>
       // onTimelineUpdated
-    );
+    )
   }
 
   renderRightControl() {
@@ -389,12 +392,13 @@ class VideoPlayer extends Component {
       <View>
         <TouchableOpacity
           onPress={() => {
-            this.channelUp();
-          }}>
+            this.channelUp()
+          }}
+        >
           <Text style={[styles.leftRightControlOption]}>{'ChUp'}</Text>
         </TouchableOpacity>
       </View>
-    );
+    )
   }
 
   /**
@@ -411,11 +415,11 @@ class VideoPlayer extends Component {
    */
   constrainToSeekerMinMax(val = 0) {
     if (val <= 0) {
-      return 0;
+      return 0
     } else if (val >= this.seekerWidth) {
-      return this.seekerWidth;
+      return this.seekerWidth
     }
-    return val;
+    return val
   }
 
   /**
@@ -426,17 +430,17 @@ class VideoPlayer extends Component {
    * @param {float} position position in px of seeker handle}
    */
   setSeekerPosition(position = 0) {
-    const state = this.state;
-    position = this.constrainToSeekerMinMax(position);
+    const state = this.state
+    position = this.constrainToSeekerMinMax(position)
 
-    state.seekerFillWidth = position;
-    state.seekerPosition = position;
+    state.seekerFillWidth = position
+    state.seekerPosition = position
 
     if (!state.seeking) {
-      state.seekerOffset = position;
+      state.seekerOffset = position
     }
 
-    this.setState(state);
+    this.setState(state)
   }
 
   /**
@@ -446,8 +450,8 @@ class VideoPlayer extends Component {
    * @return {float} position of seeker handle in px based on currentTime
    */
   calculateSeekerPosition() {
-    const percent = this.state.currentTime / this.state.duration;
-    return this.seekerWidth * percent;
+    const percent = this.state.currentTime / this.state.duration
+    return this.seekerWidth * percent
   }
 
   /**
@@ -457,8 +461,8 @@ class VideoPlayer extends Component {
    * @return {float} time in ms based on seekerPosition.
    */
   calculateTimeFromSeekerPosition() {
-    const percent = this.state.seekerPosition / this.seekerWidth;
-    return this.state.duration * percent;
+    const percent = this.state.seekerPosition / this.seekerWidth
+    return this.state.duration * percent
   }
 
   /**
@@ -476,20 +480,20 @@ class VideoPlayer extends Component {
        * position in the onProgress listener.
        */
       onPanResponderGrant: (evt, gestureState) => {
-        const state = this.state;
+        const state = this.state
         // this.clearControlTimeout()
-        const position = evt.nativeEvent.locationX;
-        this.setSeekerPosition(position);
-        state.seeking = true;
-        this.setState(state);
+        const position = evt.nativeEvent.locationX
+        this.setSeekerPosition(position)
+        state.seeking = true
+        this.setState(state)
       },
 
       /**
        * When panning, update the seekbar position, duh.
        */
       onPanResponderMove: (evt, gestureState) => {
-        const position = this.state.seekerOffset + gestureState.dx;
-        this.setSeekerPosition(position);
+        const position = this.state.seekerOffset + gestureState.dx
+        this.setSeekerPosition(position)
       },
 
       /**
@@ -498,43 +502,41 @@ class VideoPlayer extends Component {
        * onEnd callback
        */
       onPanResponderRelease: (evt, gestureState) => {
-        const time = this.calculateTimeFromSeekerPosition();
-        const state = this.state;
+        const time = this.calculateTimeFromSeekerPosition()
+        const state = this.state
         if (time >= state.duration && !state.isLoading) {
-          state.paused = true;
-          this.onEnd();
+          state.paused = true
+          this.onEnd()
         } else {
-          this.video.current?.seek(time);
-          state.seeking = false;
+          this.video?.seek(time)
+          state.seeking = false
         }
-        this.setState(state);
+        this.setState(state)
       },
-    });
+    })
   }
 
   renderSeekBar() {
     if (!this.seekPanResponder) {
-      return null;
+      return null
     }
     return (
       <View
         style={styles.seekbarContainer}
         {...this.seekPanResponder.panHandlers}
-        {...styles.generalControls}>
+        {...styles.generalControls}
+      >
         <View
           style={styles.seekbarTrack}
-          onLayout={event =>
-            (this.seekerWidth = event.nativeEvent.layout.width)
-          }
-          pointerEvents={'none'}>
+          onLayout={(event) => (this.seekerWidth = event.nativeEvent.layout.width)}
+          pointerEvents={'none'}
+        >
           <View
             style={[
               styles.seekbarFill,
               {
                 width:
-                  this.state.seekerFillWidth > 0
-                    ? this.state.seekerFillWidth
-                    : 0,
+                  this.state.seekerFillWidth > 0 ? this.state.seekerFillWidth : 0,
                 backgroundColor: '#FFF',
               },
             ]}
@@ -544,84 +546,65 @@ class VideoPlayer extends Component {
         <View
           style={[
             styles.seekbarHandle,
-            {
-              left:
-                this.state.seekerPosition > 0 ? this.state.seekerPosition : 0,
-            },
+            { left: this.state.seekerPosition > 0 ? this.state.seekerPosition : 0 },
           ]}
-          pointerEvents={'none'}>
+          pointerEvents={'none'}
+        >
           <View
-            style={[styles.seekbarCircle, {backgroundColor: '#FFF'}]}
+            style={[
+              styles.seekbarCircle,
+              { backgroundColor: '#FFF' },
+            ]}
             pointerEvents={'none'}
           />
         </View>
       </View>
-    );
+    )
   }
 
   IndicatorLoadingView() {
     if (this.state.isLoading)
-      return (
-        <ActivityIndicator
-          color="#3235fd"
-          size="large"
-          style={styles.IndicatorStyle}
-        />
-      );
-    else return <View />;
+      return <ActivityIndicator color="#3235fd" size="large" style={styles.IndicatorStyle} />
+    else return <View />
   }
 
   renderTopControl() {
-    return (
-      <>
-        <Text style={[styles.controlOption]}>
-          {this.srcList[this.state.srcListId]?.description || 'local file'}
-        </Text>
-        <View>
-          <TouchableOpacity
-            onPress={() => {
-              this.toggleControls();
-            }}>
-            <Text style={[styles.leftRightControlOption]}>
-              {this.state.showRNVControls ? 'Hide controls' : 'Show controls'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </>
-    );
+    return (<>
+      <Text style={[styles.controlOption]}>
+        {this.srcList[this.state.srcListId]?.description || 'local file'}
+      </Text>
+      <View >
+        <TouchableOpacity
+          onPress={() => {
+            this.toggleControls()
+          }}
+        >
+          <Text style={[styles.leftRightControlOption]}>{this.state.showRNVControls ? 'Hide controls' : 'Show controls'}</Text>
+        </TouchableOpacity>
+      </View>
+    </>)
   }
+
 
   renderOverlay() {
     return (
       <>
         {this.IndicatorLoadingView()}
         <View style={styles.topControls}>
-          <View style={styles.resizeModeControl}>
-            {this.renderTopControl()}
-          </View>
+          <View style={styles.resizeModeControl}>{this.renderTopControl()}</View>
         </View>
         {!this.state.showRNVControls ? (
           <>
             <View style={styles.leftControls}>
-              <View style={styles.resizeModeControl}>
-                {this.renderLeftControl()}
-              </View>
-            </View>
-            <View style={styles.rightControls}>
-              <View style={styles.resizeModeControl}>
-                {this.renderRightControl()}
-              </View>
-            </View>
-            <View style={styles.bottomControls}>
+              <View style={styles.resizeModeControl}>{this.renderLeftControl()}</View>
+            </View><View style={styles.rightControls}>
+              <View style={styles.resizeModeControl}>{this.renderRightControl()}</View>
+            </View><View style={styles.bottomControls}>
               <View style={styles.generalControls}>
                 <View style={styles.generalControls}>
-                  <View style={styles.resizeModeControl}>
-                    {this.renderInfoControl()}
-                  </View>
+                  <View style={styles.resizeModeControl}>{this.renderInfoControl()}</View>
                 </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderPause()}
-                </View>
+                <View style={styles.resizeModeControl}>{this.renderPause()}</View>
                 <View style={styles.resizeModeControl}>
                   {this.renderRepeatModeControl()}
                 </View>
@@ -663,20 +646,21 @@ class VideoPlayer extends Component {
                     style={styles.picker}
                     selectedValue={this.state.selectedAudioTrack?.value}
                     onValueChange={(itemValue, itemIndex) => {
+                      console.log('on audio value change ' + itemValue);
                       this.setState({
                         selectedAudioTrack: {
                           type: 'language',
                           value: itemValue,
                         },
                       });
-                    }}>
-                    {this.state.audioTracks.map(track => {
+                    }}
+                  >
+                    {this.state.audioTracks.map((track) => {
                       return (
                         <Picker.Item
                           label={track.language}
                           value={track.language}
-                          key={track.language}
-                        />
+                          key={track.language} />
                       );
                     })}
                   </Picker>
@@ -689,58 +673,45 @@ class VideoPlayer extends Component {
                     style={styles.picker}
                     selectedValue={this.state.selectedTextTrack?.value}
                     onValueChange={(itemValue, itemIndex) => {
+                      console.log('on value change ' + itemValue);
                       this.setState({
                         selectedTextTrack: {
                           type: 'language',
                           value: itemValue,
                         },
                       });
-                    }}>
+                    }}
+                  >
                     <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map(track => (
+                    {this.state.textTracks.map((track) => (
                       <Picker.Item
                         label={track.language}
                         value={track.language}
-                        key={track.language}
-                      />
+                        key={track.language} />
                     ))}
                   </Picker>
                 )}
               </View>
-            </View>
-          </>
-        ) : null}
+            </View></>
+        ) : null
+        }
       </>
-    );
+    )
   }
 
   renderVideoView() {
-    const viewStyle = this.state.fullscreen
-      ? styles.fullScreen
-      : styles.halfScreen;
+    const viewStyle = this.state.fullscreen ? styles.fullScreen : styles.halfScreen
 
     return (
-      <TouchableOpacity
-        style={viewStyle}
-        onPress={() => {
-          if (!this.video.current) {
-            return;
-          }
-
-          const {paused} = this.state;
-          const {pause, play} = this.video.current;
-          const shouldPlay = paused === true || paused === undefined;
-
-          shouldPlay ? play() : pause();
-
-          this.setState({paused: !shouldPlay});
-        }}>
+      <TouchableOpacity style={viewStyle}>
         <Video
-          // paused={this.state.paused}
-          ref={this.video}
+          ref={(ref: Video) => {
+            this.video = ref
+          }}
           source={this.srcList[this.state.srcListId]}
           style={viewStyle}
           rate={this.state.rate}
+          paused={this.state.paused}
           volume={this.state.volume}
           muted={this.state.muted}
           fullscreen={this.state.fullscreen}
@@ -765,20 +736,20 @@ class VideoPlayer extends Component {
           playInBackground={false}
         />
       </TouchableOpacity>
-    );
+    )
   }
 
   render() {
     return (
       <View style={styles.container}>
-        {this.srcList[this.state.srcListId]?.noView
-          ? null
-          : this.renderVideoView()}
+        {this.srcList[this.state.srcListId]?.noView ? null : this.renderVideoView()}
         {this.renderOverlay()}
       </View>
-    );
+    )
   }
+
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -919,4 +890,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VideoPlayer;
+export default VideoPlayer
