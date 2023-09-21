@@ -12,7 +12,7 @@ import Foundation
 class VideoPrefetcher: NSObject {
     
 
-    private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
+    private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler.instance
 
     
     @objc

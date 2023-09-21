@@ -80,7 +80,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
 
 
-    private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
+    private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler.instance
 
 
 #if os(iOS)

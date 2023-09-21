@@ -9,8 +9,7 @@ struct VideoSource {
     let startTime: Int64?
     let endTime: Int64?
     let json: NSDictionary?
-    let asset: Asset
-    
+
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil
@@ -22,7 +21,6 @@ struct VideoSource {
             self.requestHeaders = nil
             self.startTime = nil
             self.endTime = nil
-            self.asset = nil
             return
         }
         self.json = json
@@ -34,7 +32,5 @@ struct VideoSource {
         self.requestHeaders = json["requestHeaders"] as? Dictionary<String,Any>
         self.startTime = json["startTime"] as? Int64
         self.endTime = json["endTime"] as? Int64
-        let stream = Stream(name: self.uri, playlistURL: self.uri)
-        self.asset = Asset(stream: stream, urlAsset: AVURLAsset(url: URL(string: self.uri!)!))
     }
 }

@@ -3,13 +3,43 @@ import AVFoundation
 import DVAssetLoaderDelegate
 import Promises
 
+enum RCTVideoCacheStatus: UInt {
+    case missingFileExtension
+    case unsupportedFileExtension
+    case notAvailable
+    case available
+}
+
 class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
+
+    static let instance = RCTVideoCachingHandler()
     
-    private var _videoCache:RCTVideoCache! = RCTVideoCache.sharedInstance()
+    private var _cacheStorage = RCTVideoCacheStorage.instance
     var playerItemPrepareText: ((AVAsset?, NSDictionary?) -> AVPlayerItem)?
-    
-    override init() {
+
+    /// The AVAssetDownloadURLSession to use for managing AVAssetDownloadTasks.
+    fileprivate var assetDownloadURLSession: AVAssetDownloadURLSession!
+
+    /// Internal map of AVAggregateAssetDownloadTask to its corresponding Asset.
+    fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: AVURLAsset]()
+
+    /// Internal map of AVAggregateAssetDownloadTask to download URL.
+    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: URL]()
+
+    typealias AssetLocation = URL
+    fileprivate var cachedAccestsByUrlMap = [URL: AssetLocation]()
+
+    private override init() {
         super.init()
+        // Create the configuration for the AVAssetDownloadURLSession.
+        let backgroundConfiguration = URLSessionConfiguration.background(withIdentifier: "AAPL-Identifier")
+
+        // Create the AVAssetDownloadURLSession using the configuration.
+        self.assetDownloadURLSession = AVAssetDownloadURLSession(
+            configuration: backgroundConfiguration,
+            assetDownloadDelegate: self,
+            delegateQueue: OperationQueue.main
+        )
     }
     
     func shouldCache(source: VideoSource, textTracks:[TextTrack]?) -> Bool {
@@ -68,57 +98,176 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     }
 
     func getItemForUri(_ uri:String) ->  Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> {
-        return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { fulfill, reject in
-            self._videoCache.getItemForUri(uri, withCallback:{ (videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?) in
-                fulfill((videoCacheStatus, cachedAsset))
-            })
+        return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { [weak self] fulfill, reject in
+
+            guard let assetURL = URL(string: uri) else {
+                reject(NSError(domain: "", code: 2))
+                return
+            }
+
+            let cachedAsset: AVAsset
+            let videoCacheStatus: RCTVideoCacheStatus
+
+            if let localFileLocation = self?._cacheStorage.storedItemUrl(forUrl: assetURL) {
+                cachedAsset = AVURLAsset(url: localFileLocation)
+                videoCacheStatus = .available
+            } else {
+                cachedAsset = AVURLAsset(url: assetURL)
+                videoCacheStatus = .notAvailable
+            }
+
+            fulfill((videoCacheStatus, cachedAsset))
         }
     }
     
     // MARK: - DVAssetLoaderDelegate
     
     func dvAssetLoaderDelegate(loaderDelegate:DVAssetLoaderDelegate!, didLoadData data:NSData!, forURL url:NSURL!) {
-        _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
-            DebugLog("Cache data stored successfully 🎉")
-        })
     }
 
     // MARK: - Prefetching
 
-    func cacheVideoForUrl(_ url: String) -> Promise<Bool> {
-        guard let videoUrl = URL(string: url) else {
-            return Promise<Bool>(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
+    func cacheVideoForUrl(_ url: String) {
+        guard let assetURL = URL(string: url),
+              !willDownloadToUrlMap.values.contains(where: { $0.absoluteString == url}),
+              _cacheStorage.storedItemUrl(forUrl: assetURL) == nil
+
+        else {
+            return
         }
-        
-        let request = URLRequest(url: videoUrl)
-        let session = URLSession.shared
-        
-        return Promise<Bool> { fulfill, reject in
-            let task = session.dataTask(with: request) { [weak self] (data, response, error) in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    reject(error)
-                    return
-                }
-                
-                guard let data = data else {
-                    reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"]))
-                    return
-                }
-                
-                self._videoCache.storeItem(data, forUri: url) { (success) in
-                    if success {
-                        fulfill(true)
-                    } else {
-                        reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to store video in cache"]))
-                    }
-                }
-            }
-            
-            task.resume()
-        }
+        downloadStream(for: assetURL)
+        urls.insert(assetURL)
+        print("************************************** \(urls.count)")
+
+
     }
-    
+
+    /// Triggers the initial AVAssetDownloadTask for a given Asset.
+    /// - Tag: DownloadStream
+    func downloadStream(for assetURL: URL) {
+
+        let urlAsset = AVURLAsset(url: assetURL)
+
+        // Get the default media selections for the asset's media selection groups.
+        let preferredMediaSelection = urlAsset.preferredMediaSelection
+
+        /*
+         Creates and initializes an AVAggregateAssetDownloadTask to download multiple AVMediaSelections
+         on an AVURLAsset.
+
+         For the initial download, we ask the URLSession for an AVAssetDownloadTask with a minimum bitrate
+         corresponding with one of the lower bitrate variants in the asset.
+         */
+        guard let task =
+                assetDownloadURLSession.aggregateAssetDownloadTask(with: urlAsset,
+                                                                   mediaSelections: [preferredMediaSelection],
+                                                                   assetTitle: "",
+                                                                   assetArtworkData: nil,
+                                                                   options:
+                                                                    [AVAssetDownloadTaskMinimumRequiredMediaBitrateKey: 265_000]) else { return }
+
+        // To better track the AVAssetDownloadTask, set the taskDescription to something unique for the sample.
+        task.taskDescription = ""
+
+        activeDownloadsMap[task] = urlAsset
+
+        task.resume()
+    }
+
 }
 
+var urls = Set<URL>()
+
+/**
+ Extend `RCTVideoCachingHandler` to conform to the `AVAssetDownloadDelegate` protocol.
+ */
+extension RCTVideoCachingHandler: AVAssetDownloadDelegate {
+
+    /// Tells the delegate that the task finished transferring data.
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        let userDefaults = UserDefaults.standard
+
+        /*
+         This is the ideal place to begin downloading additional media selections
+         once the asset itself has finished downloading.
+         */
+        guard let task = task as? AVAggregateAssetDownloadTask,
+              let asset = activeDownloadsMap.removeValue(forKey: task) else { return }
+
+        guard let downloadURL = willDownloadToUrlMap.removeValue(forKey: task) else { return }
+
+
+        if let error = error as NSError? {
+            switch (error.domain, error.code) {
+            case (NSURLErrorDomain, NSURLErrorCancelled):
+                /*
+                 This task was canceled, you should perform cleanup using the
+                 URL saved from AVAssetDownloadDelegate.urlSession(_:assetDownloadTask:didFinishDownloadingTo:).
+                 */
+//                guard let localFileLocation = localAssetForStream(withName: asset.stream.name)?.urlAsset.url else { return }
+//
+//                do {
+//                    try FileManager.default.removeItem(at: localFileLocation)
+//
+//                    userDefaults.removeObject(forKey: asset.stream.name)
+//                } catch {
+//                    print("An error occured trying to delete the contents on disk for \(asset.stream.name): \(error)")
+//                }
+
+                break
+            case (NSURLErrorDomain, NSURLErrorUnknown):
+                fatalError("Downloading HLS streams is not supported in the simulator.")
+
+            default:
+                fatalError("An unexpected error occured \(error.domain)")
+            }
+        } else {
+            _cacheStorage.storeItem(from: downloadURL, forUri: asset.url)
+        }
+
+    }
+
+    /// Method called when the an aggregate download task determines the location this asset will be downloaded to.
+    func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    willDownloadTo location: URL) {
+
+        /*
+         This delegate callback should only be used to save the location URL
+         somewhere in your application. Any additional work should be done in
+         `URLSessionTaskDelegate.urlSession(_:task:didCompleteWithError:)`.
+         */
+
+        willDownloadToUrlMap[aggregateAssetDownloadTask] = location
+    }
+
+    /// Method called when a child AVAssetDownloadTask completes.
+    func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    didCompleteFor mediaSelection: AVMediaSelection) {
+        /*
+         This delegate callback provides an AVMediaSelection object which is now fully available for
+         offline use. You can perform any additional processing with the object here.
+         */
+
+//        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
+
+        aggregateAssetDownloadTask.taskDescription = "asset.stream.name"
+
+        aggregateAssetDownloadTask.resume()
+    }
+
+    /// Method to adopt to subscribe to progress updates of an AVAggregateAssetDownloadTask.
+    func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue],
+                    timeRangeExpectedToLoad: CMTimeRange, for mediaSelection: AVMediaSelection) {
+
+        // This delegate callback should be used to provide download progress for your AVAssetDownloadTask.
+//        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
+//
+//        var percentComplete = 0.0
+//        for value in loadedTimeRanges {
+//            let loadedTimeRange: CMTimeRange = value.timeRangeValue
+//            percentComplete +=
+//            loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
+//        }
+    }
+}
