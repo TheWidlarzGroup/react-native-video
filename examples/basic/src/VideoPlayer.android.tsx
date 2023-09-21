@@ -728,11 +728,10 @@ class VideoPlayer extends Component {
           }
 
           const {paused} = this.state;
-          const {pause, play, setPlayerStatus} = this.video.current;
+          const {pause, play} = this.video.current;
           const shouldPlay = paused === true || paused === undefined;
 
           shouldPlay ? play() : pause();
-          // OR setPlayerStatus(shouldPlay);
 
           this.setState({paused: !shouldPlay});
         }}>

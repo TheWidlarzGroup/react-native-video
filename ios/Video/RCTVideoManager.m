@@ -74,7 +74,7 @@ RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
 RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
                  reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(setPlayerStatus:(nonnull NSNumber *)shouldPlay
+RCT_EXTERN_METHOD(setPlayerPauseState:(nonnull NSNumber *)shouldPlay
                  reactTag:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(presentFullscreenPlayer

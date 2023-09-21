@@ -20,7 +20,7 @@ public class VideoManagerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setPlayerStatus(Boolean shouldPlay, int reactTag) {
+    public void setPlayerPauseState(Boolean shouldPlay, int reactTag) {
         UIManagerModule uiManager = getReactApplicationContext().getNativeModule(UIManagerModule.class);
         uiManager.prependUIBlock(manager -> {
             View view = manager.resolveView(reactTag);

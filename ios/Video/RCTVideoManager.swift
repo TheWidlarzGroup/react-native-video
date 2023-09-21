@@ -71,8 +71,8 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
-    @objc(setPlayerStatus:reactTag:)
-    func setPlayerStatus(shouldPlay: NSNumber, reactTag: NSNumber) -> Void {
+    @objc(setPlayerPauseState:reactTag:)
+    func setPlayerPauseState(shouldPlay: NSNumber, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
