@@ -20,14 +20,14 @@ public class VideoManagerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setPlayerPauseState(Boolean shouldPlay, int reactTag) {
+    public void setPlayerPauseState(Boolean paused, int reactTag) {
         UIManagerModule uiManager = getReactApplicationContext().getNativeModule(UIManagerModule.class);
         uiManager.prependUIBlock(manager -> {
             View view = manager.resolveView(reactTag);
 
             if (view instanceof ReactExoplayerView) {
                 ReactExoplayerView videoView = (ReactExoplayerView) view;
-                videoView.setPausedModifier(!shouldPlay);
+                videoView.setPausedModifier(paused);
             }
         });
     }

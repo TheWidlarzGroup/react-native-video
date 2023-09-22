@@ -82,15 +82,15 @@ export default class Video extends Component {
   }
 
   pause = async () => {
-    await this.setPlayerPauseState(false);
-  };
-
-  play = async () => {
     await this.setPlayerPauseState(true);
   };
 
-  setPlayerPauseState = async (shouldPlay) => {
-    return await NativeModules.VideoManager.setPlayerPauseState(shouldPlay, findNodeHandle(this._root));
+  play = async () => {
+    await this.setPlayerPauseState(false);
+  };
+
+  setPlayerPauseState = async (paused) => {
+    return await NativeModules.VideoManager.setPlayerPauseState(paused, findNodeHandle(this._root));
   };
 
   restoreUserInterfaceForPictureInPictureStopCompleted = (restored) => {

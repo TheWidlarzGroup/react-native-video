@@ -72,14 +72,14 @@ class RCTVideoManager: RCTViewManager {
     }
 
     @objc(setPlayerPauseState:reactTag:)
-    func setPlayerPauseState(shouldPlay: NSNumber, reactTag: NSNumber) -> Void {
+    func setPlayerPauseState(paused: NSNumber, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                let shouldPlay = shouldPlay.boolValue
-                view.setPaused(!shouldPlay)
+                let paused = paused.boolValue
+                view.setPaused(paused)
             }
         })
     }
