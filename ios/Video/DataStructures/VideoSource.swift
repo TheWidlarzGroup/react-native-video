@@ -8,6 +8,11 @@ struct VideoSource {
     let requestHeaders: Dictionary<String,Any>?
     let startTime: Int64?
     let endTime: Int64?
+    // Custom Metadata
+    let title: String?
+    let subtitle: String?
+    let description: String?
+    
     let json: NSDictionary?
 
     init(_ json: NSDictionary!) {
