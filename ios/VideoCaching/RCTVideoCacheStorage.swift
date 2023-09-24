@@ -17,7 +17,7 @@ class RCTVideoCacheStorage {
 
     private init() {
 
-        purge()
+        //purge()
     }
 
     func storeItem(from: URL, forUri url: URL) {
@@ -31,7 +31,9 @@ class RCTVideoCacheStorage {
             if fileManager.fileExists(atPath: filePath.path) {
                 try fileManager.removeItem(atPath: filePath.path)
             }
-            try from.bookmarkData().write(to: filePath)
+            let bookmarkData = try from.bookmarkData()
+            try bookmarkData.write(to: filePath)
+
         } catch {
             DebugLog("Can't store item \(url.absoluteString) \(error.localizedDescription)")
         }
@@ -41,10 +43,7 @@ class RCTVideoCacheStorage {
         let fileUrl = dataPathForUrl(url: url)
         guard fileManager.fileExists(atPath: fileUrl.path) else { return nil }
         do {
-            let data = try Data(contentsOf: fileUrl)
-            var bookmarkDataIsStale = false
-            let bookmarkUrl = try URL(resolvingBookmarkData: data, bookmarkDataIsStale: &bookmarkDataIsStale)
-            return (bookmarkDataIsStale == false) ? bookmarkUrl : nil
+            return try fileUrl.urlResolvingBookmarkData
         } catch {
             DebugLog("Can't getting data for \(url.absoluteString) \(error.localizedDescription)")
             return nil
@@ -53,6 +52,15 @@ class RCTVideoCacheStorage {
 
     func purge() {
         do {
+            let bookmarksDataItems = try fileManager.contentsOfDirectory(atPath: storagePath.path)
+            let bookmarksDataUrls = bookmarksDataItems.map { storagePath.appendingPathComponent($0) }
+
+            for bookmarksDataUrl in bookmarksDataUrls {
+                let bookmarkUrl = try bookmarksDataUrl.urlResolvingBookmarkData
+                try fileManager.removeItem(atPath: bookmarkUrl.path)
+                DebugLog("Item Removed at \(bookmarksDataUrl)")
+            }
+
             if fileManager.fileExists(atPath: storagePath.path) {
                 try fileManager.removeItem(atPath: storagePath.path)
             }
@@ -79,5 +87,24 @@ class RCTVideoCacheStorage {
         }
         let hexBytes = digest.map { String(format: "%02hhx", $0) }
         return hexBytes.joined()
+    }
+}
+
+
+
+private extension URL {
+
+    enum URLDataError: Error {
+        case bookmarkDataIsStale
+    }
+
+    var urlResolvingBookmarkData: URL {
+        get throws {
+            let data = try Data(contentsOf: self)
+            var bookmarkDataIsStale = false
+            let bookmarkUrl = try URL(resolvingBookmarkData: data, bookmarkDataIsStale: &bookmarkDataIsStale)
+            if bookmarkDataIsStale { throw URLDataError.bookmarkDataIsStale }
+            return bookmarkUrl
+        }
     }
 }

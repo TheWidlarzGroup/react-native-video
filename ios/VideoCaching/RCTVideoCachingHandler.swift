@@ -10,7 +10,7 @@ enum RCTVideoCacheStatus: UInt {
     case available
 }
 
-class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
+class RCTVideoCachingHandler: NSObject {
 
     static let instance = RCTVideoCachingHandler()
     
@@ -60,43 +60,29 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
             guard let self = self, let playerItemPrepareText = self.playerItemPrepareText else {throw  NSError(domain: "", code: 0, userInfo: nil)}
             switch (videoCacheStatus) {
             case .missingFileExtension:
-                DebugLog("Could not generate cache key for uri '\(uri)'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
-                let asset:AVURLAsset! = AVURLAsset(url: url!, options:options as! [String : Any])
+                DebugLog("Could not generate cache key for uri '\(String(describing: uri))'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
+                let asset:AVURLAsset! = self.getQueuedAsset(forUrl: url!, options: options as? [String : Any])
                 return playerItemPrepareText(asset, options)
                 
             case .unsupportedFileExtension:
-                DebugLog("Could not generate cache key for uri '\(uri)'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
-                let asset:AVURLAsset! = AVURLAsset(url: url!, options:options as! [String : Any])
+                DebugLog("Could not generate cache key for uri '\(String(describing: uri))'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
+                let asset:AVURLAsset! = self.getQueuedAsset(forUrl: url!, options: options as? [String : Any])
                 return playerItemPrepareText(asset, options)
                 
             default:
                 if let cachedAsset = cachedAsset {
-                    DebugLog("Playing back uri '\(uri)' from cache")
+                    DebugLog("Playing back uri '\(String(describing: uri))' from cache")
                     // See note in playerItemForSource about not being able to support text tracks & caching
                     return AVPlayerItem(asset: cachedAsset)
+                } else {
+                    let asset:AVURLAsset! = self.getQueuedAsset(forUrl: url!, options: options as? [String : Any])
+                    return playerItemPrepareText(asset, options)
                 }
             }
-            
-            let asset:DVURLAsset! = DVURLAsset(url:url, options:options as! [String : Any], networkTimeout:10000)
-            asset.loaderDelegate = self
-            
-            /* More granular code to have control over the DVURLAsset
-             let resourceLoaderDelegate = DVAssetLoaderDelegate(url: url)
-             resourceLoaderDelegate.delegate = self
-             let components = NSURLComponents(url: url, resolvingAgainstBaseURL: false)
-             components?.scheme = DVAssetLoaderDelegate.scheme()
-             var asset: AVURLAsset? = nil
-             if let url = components?.url {
-             asset = AVURLAsset(url: url, options: options)
-             }
-             asset?.resourceLoader.setDelegate(resourceLoaderDelegate, queue: DispatchQueue.main)
-             */
-            
-            return AVPlayerItem(asset: asset)
         }
     }
 
-    func getItemForUri(_ uri:String) ->  Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> {
+    func getItemForUri(_ uri: String) ->  Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> {
         return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { [weak self] fulfill, reject in
 
             guard let self = self, let assetURL = URL(string: uri)
@@ -121,32 +107,28 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
         }
     }
 
-    func getQueuedAsset(forUrl assetUrl: URL) -> AVURLAsset {
+    private func getQueuedAsset(forUrl assetUrl: URL, options: [String : Any]? = nil) -> AVURLAsset {
         guard let queuedAssets = queuedAssetsMap[assetUrl] else {
-            let newAsset = AVURLAsset(url: assetUrl)
-            queuedAssetsMap[assetUrl] = newAsset
+            let newAsset = AVURLAsset(url: assetUrl, options: options)
+                self.queuedAssetsMap[assetUrl] = newAsset
             return newAsset
         }
         return queuedAssets
-    }
-    
-    // MARK: - DVAssetLoaderDelegate
-    
-    func dvAssetLoaderDelegate(loaderDelegate:DVAssetLoaderDelegate!, didLoadData data:NSData!, forURL url:NSURL!) {
     }
 
     // MARK: - Prefetching
 
     func cacheVideoForUrl(_ url: String) {
+
         DispatchQueue.main.async {
             guard let assetURL = URL(string: url),
-                  !self.willDownloadToUrlMap.values.contains(where: { $0.absoluteString == url}),
                   self._cacheStorage.storedItemUrl(forUrl: assetURL) == nil
             else { return }
 
-            self.downloadStream(for: assetURL)
-            urls.insert(assetURL)
-            print("************************************** \(urls.count)")
+            DispatchQueue.global().async { [weak self] in
+                guard let assetURL = URL(string: url) else { return }
+                self?.downloadStream(for: assetURL)
+            }
         }
     }
 
@@ -156,8 +138,13 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
 
         let urlAsset = getQueuedAsset(forUrl: assetURL)
 
+        guard !activeDownloadsMap.values.contains(urlAsset) else { return }
+
         // Get the default media selections for the asset's media selection groups.
         let preferredMediaSelection = urlAsset.preferredMediaSelection
+
+        urls.insert(assetURL)
+        print("************************************** \(urls.count)")
 
         /*
          Creates and initializes an AVAggregateAssetDownloadTask to download multiple AVMediaSelections
@@ -177,7 +164,10 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
         // To better track the AVAssetDownloadTask, set the taskDescription to something unique for the sample.
         task.taskDescription = "asset.stream.download.task"
 
-        activeDownloadsMap[task] = urlAsset
+        DispatchQueue.main.async {
+            self.activeDownloadsMap[task] = urlAsset
+        }
+
 
         task.resume()
     }
@@ -225,16 +215,10 @@ extension RCTVideoCachingHandler: AVAssetDownloadDelegate {
                 fatalError("Downloading HLS streams is not supported in the simulator.")
 
             default:
-                fatalError("An unexpected error occured \(error.localizedDescription)")
+                DebugLog("An unexpected \(error.domain) error occured \(error.localizedDescription)")
             }
         } else {
             _cacheStorage.storeItem(from: downloadURL, forUri: asset.url)
-
-            guard let cashedAssetUrl =  _cacheStorage.storedItemUrl(forUrl: asset.url) else { return }
-            let policy = AVMutableAssetDownloadStorageManagementPolicy()
-            policy.expirationDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
-            policy.priority = .default
-            AVAssetDownloadStorageManager.shared().setStorageManagementPolicy(policy, for: cashedAssetUrl)
         }
 
     }
@@ -272,14 +256,17 @@ extension RCTVideoCachingHandler: AVAssetDownloadDelegate {
                     didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue],
                     timeRangeExpectedToLoad: CMTimeRange, for mediaSelection: AVMediaSelection) {
 
-        // This delegate callback should be used to provide download progress for your AVAssetDownloadTask.
-//        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
-//
-//        var percentComplete = 0.0
-//        for value in loadedTimeRanges {
-//            let loadedTimeRange: CMTimeRange = value.timeRangeValue
-//            percentComplete +=
-//            loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
-//        }
+        //This delegate callback should be used to provide download progress for your AVAssetDownloadTask.
+        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
+
+        var percentComplete = 0.0
+        for value in loadedTimeRanges {
+            let loadedTimeRange: CMTimeRange = value.timeRangeValue
+            percentComplete +=
+            loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
+        }
+
+        percentComplete *= 100
+        DebugLog("Asset \(asset.url) Download Progress \(percentComplete)%")
     }
 }
