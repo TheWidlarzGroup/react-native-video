@@ -1684,8 +1684,9 @@ parameters:
 - **width**, **height**: resolution to query
 
 Possible results:
--   **true** - codec supported
--   **false** - codec is not supported
+-   **`hardware`** - codec is supported by hardware
+-   **`software`** - codec is supported by software only
+-   **`unsupported`** - codec is not supported
 
 Example:
 ```
