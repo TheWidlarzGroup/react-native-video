@@ -12,14 +12,30 @@ import Foundation
 class VideoPrefetcher: NSObject {
     
 
-    private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
+    private let _videoCache:RCTVideoCacheStorage = RCTVideoCacheStorage.instance
 
     
     @objc
     func prefetch(_ url: NSString) {
-        _videoCache.cacheVideoForUrl(url as String)
+        _videoCache.prefetchVideoForUrl(url as String)
     }
-    
+
+
+    @objc
+    func removeVideoForUrl(_ url: String) {
+        _videoCache.removeVideoForUrl(url)
+    }
+
+    @objc
+    func clearCache() {
+        _videoCache.clearCache()
+    }
+
+    @objc
+    func setCacheMaxSize(_ newSize: Int64) {
+        _videoCache.setCacheMaxSize(newSize)
+    }
+
     @objc
     static func requiresMainQueueSetup() -> Bool {
       return true

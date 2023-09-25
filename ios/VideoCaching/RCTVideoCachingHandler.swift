@@ -4,10 +4,11 @@ import DVAssetLoaderDelegate
 import Promises
 
 class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
-    
+
     private var _videoCache:RCTVideoCache! = RCTVideoCache.sharedInstance()
+    private var _m3u8VideoCache:RCTVideoCacheStorage! = RCTVideoCacheStorage.instance
     var playerItemPrepareText: ((AVAsset?, NSDictionary?) -> AVPlayerItem)?
-    
+
     override init() {
         super.init()
     }
@@ -68,57 +69,35 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     }
 
     func getItemForUri(_ uri:String) ->  Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> {
-        return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { fulfill, reject in
-            self._videoCache.getItemForUri(uri, withCallback:{ (videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?) in
-                fulfill((videoCacheStatus, cachedAsset))
-            })
+        return Promise<(videoCacheStatus:RCTVideoCacheStatus,cachedAsset:AVAsset?)> { [weak self] fulfill, reject in
+
+            guard let assetURL = URL(string: uri) else {
+                reject(NSError(domain: "", code: 2))
+                return
+            }
+
+            let cachedAsset: AVAsset
+            let videoCacheStatus: RCTVideoCacheStatus
+
+            if let localFileLocation = self?._m3u8VideoCache.storedItemUrl(forUri: assetURL.absoluteString) {
+                cachedAsset = AVURLAsset(url: localFileLocation)
+                videoCacheStatus = .available
+                self?._m3u8VideoCache.updateAsset(uri: uri, lastAccessedDate: Date())
+            } else {
+                cachedAsset = AVURLAsset(url: assetURL)
+                videoCacheStatus = .notAvailable
+            }
+
+            fulfill((videoCacheStatus, cachedAsset))
         }
     }
     
     // MARK: - DVAssetLoaderDelegate
     
     func dvAssetLoaderDelegate(loaderDelegate:DVAssetLoaderDelegate!, didLoadData data:NSData!, forURL url:NSURL!) {
-        _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
-            DebugLog("Cache data stored successfully 🎉")
-        })
+//        _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
+//            DebugLog("Cache data stored successfully 🎉")
+//        })
     }
-
-    // MARK: - Prefetching
-
-    func cacheVideoForUrl(_ url: String) -> Promise<Bool> {
-        guard let videoUrl = URL(string: url) else {
-            return Promise<Bool>(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
-        }
-        
-        let request = URLRequest(url: videoUrl)
-        let session = URLSession.shared
-        
-        return Promise<Bool> { fulfill, reject in
-            let task = session.dataTask(with: request) { [weak self] (data, response, error) in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    reject(error)
-                    return
-                }
-                
-                guard let data = data else {
-                    reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"]))
-                    return
-                }
-                
-                self._videoCache.storeItem(data, forUri: url) { (success) in
-                    if success {
-                        fulfill(true)
-                    } else {
-                        reject(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to store video in cache"]))
-                    }
-                }
-            }
-            
-            task.resume()
-        }
-    }
-    
 }
 
