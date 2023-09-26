@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static com.diceplatform.doris.entity.DorisPlayerEvent.Event.TIMELINE_ADJUSTER_CHANGED;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioManager;
@@ -70,6 +72,7 @@ import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
+import com.diceplatform.doris.entity.DorisAdEvent.AdMarkers;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.entity.DorisPlayerEvent;
 import com.diceplatform.doris.entity.ImaDaiProperties;
@@ -509,7 +512,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoPlayer.setAudioAttributes(audioAttributes, false);
             exoPlayer.addListener(this);
             exoPlayer.addAnalyticsListener(this);
-            exoDorisPlayerView.setPlayer(exoPlayer);
+            exoDorisPlayerView.setPlayer(player.createForwardPlayer());
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -528,22 +531,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             showOverlay();
             showWatermark();
 
-            MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(src.getUrl());
-            if (src.getAdTagUrl() != null) {
-                mediaItemBuilder.setAdsConfiguration(new MediaItem.AdsConfiguration.Builder(Uri.parse(src.getAdTagUrl())).build());
-            }
-            SourceBuilder sourceBuilder = new SourceBuilder()
-                    .setMediaItemBuilder(mediaItemBuilder)
-                    .setId(src.getId())
-                    .setTextTracks(src.getTextTracks())
-                    .setDrmParams(actionToken);
-
-            Map<String, Object> muxData = src.getMuxData();
-            if (muxData != null) {
-                String correlationId = (String) muxData.get("correlationId");
-                sourceBuilder.setMuxProperties(muxData, correlationId, exoDorisPlayerView.getVideoSurfaceView());
-            }
-
+            SourceBuilder sourceBuilder = new SourceBuilder();
             if (isImaDaiStream) {
                 ImaDaiProperties imaDaiProperties = new ImaDaiPropertiesBuilder()
                         .setAssetKey(imaDaiSrc.getAssetKey())
@@ -556,6 +544,21 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                         .setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate())
                         .build();
                 sourceBuilder.setImaDaiProperties(imaDaiProperties);
+            } else if (src.getAdTagUrl() != null) {
+                MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
+                        .setAdsConfiguration(new MediaItem.AdsConfiguration.Builder(Uri.parse(src.getAdTagUrl())).build());
+                sourceBuilder.setMediaItemBuilder(mediaItemBuilder);
+            }
+            sourceBuilder
+                    .setId(src.getId())
+                    .setUrl(src.getUrl())
+                    .setTextTracks(src.getTextTracks())
+                    .setDrmParams(actionToken);
+
+            Map<String, Object> muxData = src.getMuxData();
+            if (muxData != null) {
+                String correlationId = (String) muxData.get("correlationId");
+                sourceBuilder.setMuxProperties(muxData, correlationId, exoDorisPlayerView.getVideoSurfaceView());
             }
 
             if (shouldSeekOnInit) {
@@ -942,7 +945,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         } else if (player != null) {
             // When reach the endTime of limited seek range, we need to notify the JS side to show the restart layout.
             // We will seek to start position at first, and then play() when user click the restart button.
-            if (LimitedSeekRange.isUseAsVod(player.getLimitedSeekRange()) && player.getPlaybackState() == Player.STATE_ENDED) {
+            if (LimitedSeekRange.isUseLiveAsVod(player.getLimitedSeekRange()) && player.getPlaybackState() == Player.STATE_ENDED) {
                 player.seekTo(0);
                 eventEmitter.endLiveChannelAsVod();
             }
@@ -1944,6 +1947,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     }
                     break;
             }
+            if (playerEvent.event == TIMELINE_ADJUSTER_CHANGED) {
+                exoDorisPlayerView.setExtraTimelineAdjuster(playerEvent.details.timelineAdjuster);
+            }
         }
 
         @Override
@@ -1961,10 +1967,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     }
                     break;
                 case AD_MARKERS_CHANGED:
-                    if (adEvent.details.adType.equals(AdType.IMA_DAI.name())) {
-                        DorisAdEvent.AdMarkers adMarkers = adEvent.details.adMarkers;
+                    if (adEvent.details.adType != AdType.IMA_CSAI) {
+                        AdMarkers adMarkers = adEvent.details.adMarkers;
                         exoDorisPlayerView.setExtraAdGroupMarkers(adMarkers.adGroupTimesMs, adMarkers.playedAdGroups);
-                        Log.d(TAG, "IMA Stream ID = " + adEvent.details.streamId);
+                        Log.d(TAG, adEvent.details.adType + " Ad Stream ID = " + adEvent.details.streamId);
                     }
                     break;
                 case REQUIRE_AD_TAG_PARAMETERS:

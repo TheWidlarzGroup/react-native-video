@@ -15,6 +15,7 @@ import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
+import com.diceplatform.doris.ext.yossai.ExoDorisYoSsaiBuilder;
 import com.diceplatform.doris.plugin.Plugin;
 
 import java.util.List;
@@ -56,7 +57,9 @@ public final class ReactTVExoDorisFactory {
             @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider) {
         final ExoDorisBuilder builder;
-        if (adType == AdType.IMA_DAI) {
+        if (adType == AdType.YO_SSAI) {
+            builder = new ExoDorisYoSsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
+        } else if (adType == AdType.IMA_DAI) {
             builder = new ExoDorisImaDaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
         } else if (adType == AdType.IMA_CSAI) {
             builder = new ExoDorisImaCsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
