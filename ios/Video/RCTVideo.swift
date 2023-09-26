@@ -1030,12 +1030,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func setLicenseResult(_ license:String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license)
+    func setLicenseResult(_ license:String!, _ contentId: String!) {
+        _resouceLoaderDelegate?.setLicenseResult(license, contentId)
     }
 
-    func setLicenseResultError(_ error:String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error)
+    func setLicenseResultError(_ error:String!, _ contentId: String!) {
+        _resouceLoaderDelegate?.setLicenseResultError(error, contentId)
     }
 
     func dismissFullscreenPlayer(_ error:String!) {

@@ -24,26 +24,26 @@ class RCTVideoManager: RCTViewManager {
         })
     }
     
-    @objc(setLicenseResult:reactTag:)
-    func setLicenseResult(license: NSString, reactTag: NSNumber) -> Void {
+    @objc(setLicenseResult:contentId:reactTag:)
+    func setLicenseResult(license: NSString, contentId:NSString, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                view.setLicenseResult(license as String)
+                view.setLicenseResult(license as String, contentId as String)
             }
         })
     }
     
-    @objc(setLicenseResultError:reactTag:)
-    func setLicenseResultError(error: NSString, reactTag: NSNumber) -> Void {
+    @objc(setLicenseResultError:contentId:reactTag:)
+    func setLicenseResultError(error: NSString, contentId:NSString, reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                view.setLicenseResultError(error as String)
+                view.setLicenseResultError(error as String, contentId as String)
             }
         })
     }

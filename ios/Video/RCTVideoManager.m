@@ -69,10 +69,12 @@ RCT_EXTERN_METHOD(save:(NSDictionary *)options
         rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
+         contentId:(NSString *)contentId
          reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
-                 reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(setLicenseResultError:(NSString *)error
+         contentId:(NSString *)contentId
+         reactTag:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(presentFullscreenPlayer
                  reactTag:(nonnull NSNumber *)reactTag)
