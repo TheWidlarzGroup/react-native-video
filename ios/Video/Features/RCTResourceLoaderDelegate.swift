@@ -66,6 +66,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         let dataRequest: AVAssetResourceLoadingDataRequest! = loadingRequest?.dataRequest
         dataRequest.respond(with: respondData)
         loadingRequest!.finishLoading()
+        _loadingRequests.removeValue(forKey: contentId)
     }
     
     func setLicenseResultError(_ error:String!,_ contentId: String!) {
@@ -86,7 +87,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         }
 
         loadingRequest!.finishLoading(with: error)
-
+        _loadingRequests.removeValue(forKey: contentId)
         _onVideoError?([
             "error": [
                 "code": NSNumber(value: error.code),
