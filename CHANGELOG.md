@@ -3,7 +3,7 @@
 ## Next
 - Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
 - Windows: fix `onError` not being raised [#3247](https://github.com/react-native-video/react-native-video/pull/3247)
-- Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
+- **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
 
 ### Version 6.0.0-alpha.8
 - All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
