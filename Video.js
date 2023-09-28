@@ -267,15 +267,15 @@ export default class Video extends Component {
         const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
         getLicensePromise.then((result => {
           if (result !== undefined) {
-            NativeModules.VideoManager.setLicenseResult(result,  data.contentId, findNodeHandle(this._root));
+            NativeModules.VideoManager.setLicenseResult(result,  data.licenseUrl, findNodeHandle(this._root));
           } else {
-            NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('Empty license result',  data.contentId, findNodeHandle(this._root));
+            NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('Empty license result',  data.licenseUrl, findNodeHandle(this._root));
           }
         })).catch((error) => {
-          NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError(error, data.contentId, findNodeHandle(this._root));
+          NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError(error, data.licenseUrl, findNodeHandle(this._root));
         });
       } else {
-        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('No spc received', data.contentId, findNodeHandle(this._root));
+        NativeModules.VideoManager.setLicenseError && NativeModules.VideoManager.setLicenseError('No spc received', data.licenseUrl, findNodeHandle(this._root));
       }
     }
   }
