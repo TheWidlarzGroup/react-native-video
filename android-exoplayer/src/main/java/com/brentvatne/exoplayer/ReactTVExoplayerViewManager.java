@@ -22,6 +22,7 @@ import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
+import com.diceplatform.doris.internal.ResumePositionHandler;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
@@ -145,7 +146,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 6;
 
     private final ReactApplicationContext reactApplicationContext;
-    private LruCache<Integer, String> currentSrcUrls;
+    private final LruCache<Integer, String> currentSrcUrls;
 
     public ReactTVExoplayerViewManager(ReactApplicationContext reactApplicationContext) {
         this.reactApplicationContext = reactApplicationContext;
@@ -424,7 +425,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_SEEK)
     public void setSeek(final ReactTVExoplayerView videoView, final float seek) {
-        videoView.setShouldSeekTo(Math.round(seek * 1000f));
+        videoView.resumeTo(Math.round(seek * 1000f));
     }
 
     @ReactProp(name = PROP_RATE)
@@ -645,7 +646,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 String timestamp = args.getString(0);
                 Log.d(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
                 long positionMs = root.parseTimestamp(timestamp);
-                if (positionMs != C.POSITION_UNSET) {
+                if (positionMs != ResumePositionHandler.RESUME_UNSET) {
                     root.resumeTo(positionMs);
                 }
                 break;
