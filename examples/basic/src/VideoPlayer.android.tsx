@@ -86,25 +86,23 @@ class VideoPlayer extends Component {
 
   popupInfo = () => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
-      VideoDecoderProperties.isHEVCSupported().then((hevcSupported: boolean) => {
+      VideoDecoderProperties.isHEVCSupported().then((hevc: string) => {
         VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
-          (avcSupported: boolean) => {
+          (avc: string) => {
             this.toast(
               true,
               'Widevine level: ' +
               widevineLevel +
               '\n hevc: ' +
-              (hevcSupported ? '' : 'NOT') +
-              'supported' +
+              hevc +
               '\n avc: ' +
-              (avcSupported ? '' : 'NOT') +
-              'supported',
-            )
+              avc,
+            );
           },
-        )
-      })
-    })
-  }
+        );
+      });
+    });
+  };
 
   onLoad = (data: any) => {
     this.setState({ duration: data.duration, loading: false, });
