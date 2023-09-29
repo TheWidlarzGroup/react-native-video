@@ -352,7 +352,7 @@ var styles = StyleSheet.create({
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
-| [onError](#onerror)                                                                             | Android, iOS              |
+| [onError](#onerror)                                                                             | Android, iOS, Windows UWP |
 | [onExternalPlaybackChange](#onexternalplaybackchange)                                           | iOS                       |
 | [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS              |
 | [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS              |
@@ -666,6 +666,8 @@ Platforms: all
 Determine whether the media should played as picture in picture.
 * **false (default)** - Don't not play as picture in picture
 * **true** - Play the media as picture in picture
+
+NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must disable your PIP button when you receive the ```STARTED``` event from ```onReceiveAdEvent``` and show it again when you receive the ```ALL_ADS_COMPLETED``` event.
 
 Platforms: iOS
 
@@ -1682,8 +1684,9 @@ parameters:
 - **width**, **height**: resolution to query
 
 Possible results:
--   **true** - codec supported
--   **false** - codec is not supported
+-   **`hardware`** - codec is supported by hardware
+-   **`software`** - codec is supported by software only
+-   **`unsupported`** - codec is not supported
 
 Example:
 ```

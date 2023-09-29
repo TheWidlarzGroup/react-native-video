@@ -132,7 +132,13 @@ void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
   });
 }
 
-void ReactVideoView::OnMediaFailed(IInspectable const &, IInspectable const &) {}
+void ReactVideoView::OnMediaFailed(IInspectable const &, IInspectable const &) {
+  runOnQueue([weak_this{get_weak()}]() {
+    if (auto strong_this{weak_this.get()}) {
+      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topError", nullptr);
+    }
+  });
+}
 
 void ReactVideoView::OnMediaEnded(IInspectable const &, IInspectable const &) {
   runOnQueue([weak_this{get_weak()}]() {

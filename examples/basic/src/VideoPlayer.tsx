@@ -97,34 +97,31 @@ class VideoPlayer extends Component {
     },
   ];
 
-  srcList = this.srcAllPlatformList.concat(
-    [Platform.OS === 'android' ? this.srcAndroidList : null].filter(Boolean),
+  
+  srcList = this.srcAllPlatformList.concat( this.srcAndroidList
+//    Platform.OS === 'android' ? this.srcAndroidList : [],
   );
 
-  video: Video;
+  video?: Video;
   seekPanResponder?: PanResponderInstance;
 
   popupInfo = () => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
-      VideoDecoderProperties.isHEVCSupported().then(
-        (hevcSupported: boolean) => {
-          VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
-            (avcSupported: boolean) => {
-              this.toast(
-                true,
-                'Widevine level: ' +
-                  widevineLevel +
-                  '\n hevc: ' +
-                  (hevcSupported ? '' : 'NOT') +
-                  'supported' +
-                  '\n avc: ' +
-                  (avcSupported ? '' : 'NOT') +
-                  'supported',
-              );
-            },
-          );
-        },
-      );
+      VideoDecoderProperties.isHEVCSupported().then((hevc: string) => {
+        VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+          (avc: string) => {
+            this.toast(
+              true,
+              'Widevine level: ' +
+              widevineLevel +
+              '\n hevc: ' +
+              hevc +
+              '\n avc: ' +
+              avc,
+            );
+          },
+        );
+      });
     });
   };
 
@@ -306,9 +303,9 @@ class VideoPlayer extends Component {
   toggleDecoration() {
     this.setState({decoration: !this.state.decoration});
     if (this.state.decoration) {
-      this.video.dismissFullscreenPlayer();
+      this.video?.dismissFullscreenPlayer();
     } else {
-      this.video.presentFullscreenPlayer();
+      this.video?.presentFullscreenPlayer();
     }
   }
 

@@ -5,14 +5,16 @@ import GoogleInteractiveMediaAds
 class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
 
     private weak var _video: RCTVideo?
+    private var _pipEnabled:() -> Bool
 
     /* Entry point for the SDK. Used to make ad requests. */
     private var adsLoader: IMAAdsLoader!
     /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
     private var adsManager: IMAAdsManager!
 
-    init(video:RCTVideo!) {
+    init(video:RCTVideo!, pipEnabled:@escaping () -> Bool) {
         _video = video
+        _pipEnabled = pipEnabled
 
         super.init()
     }
@@ -86,6 +88,9 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         }
         // Play each ad once it has been loaded
         if event.type == IMAAdEventType.LOADED {
+            if (_pipEnabled()) {
+                return
+            }
             adsManager.start()
         }
 
