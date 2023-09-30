@@ -1,6 +1,7 @@
 ## Changelog
 
 ## Next
+- iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
 - Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
 - Windows: fix `onError` not being raised [#3247](https://github.com/react-native-video/react-native-video/pull/3247)
 - **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)

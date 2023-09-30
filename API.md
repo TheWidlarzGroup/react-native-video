@@ -1645,6 +1645,30 @@ this.player.seek(120, 50); // Seek to 2 minutes with +/- 50 milliseconds accurac
 
 Platforms: iOS
 
+### pause
+`pause(): Promise<void>`
+
+Pause the video.
+
+Example:
+```
+this.player.pause();
+```
+
+Platforms: Android, iOS
+
+### play
+`play(): Promise<void>`
+
+Play the video.
+
+Example:
+```
+this.player.play();
+```
+
+Platforms: Android, iOS
+
 #### Static methods
 
 ### Video Decoding capabilities
