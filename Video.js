@@ -14,8 +14,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const { VideoDecoderProperties } = NativeModules
-export { TextTrackType, FilterType, DRMType, VideoDecoderProperties }
+const { VideoDecoderProperties } = NativeModules;
+export { TextTrackType, FilterType, DRMType, VideoDecoderProperties };
 
 export default class Video extends Component {
 
@@ -80,6 +80,18 @@ export default class Video extends Component {
   save = async (options) => {
     return await NativeModules.VideoManager.save(options, findNodeHandle(this._root));
   }
+
+  pause = async () => {
+    await this.setPlayerPauseState(true);
+  };
+
+  play = async () => {
+    await this.setPlayerPauseState(false);
+  };
+
+  setPlayerPauseState = async (paused) => {
+    return await NativeModules.VideoManager.setPlayerPauseState(paused, findNodeHandle(this._root));
+  };
 
   restoreUserInterfaceForPictureInPictureStopCompleted = (restored) => {
     this.setNativeProps({ restoreUserInterfaceForPIPStopCompletionHandler: restored });
