@@ -71,6 +71,9 @@ class VideoPlayer extends Component {
     },
   ];
 
+  srcIosList = [
+  ]
+
   srcAndroidList = [
     {
       description: 'Another live sample',
@@ -98,8 +101,8 @@ class VideoPlayer extends Component {
   ];
 
   
-  srcList = this.srcAllPlatformList.concat( this.srcAndroidList
-//    Platform.OS === 'android' ? this.srcAndroidList : [],
+  srcList = this.srcAllPlatformList.concat(
+      Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
   );
 
   video?: Video;
