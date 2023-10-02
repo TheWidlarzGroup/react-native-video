@@ -3,4 +3,4 @@ export default {
     PLAYREADY: 'playready',
     CLEARKEY: 'clearkey',
     FAIRPLAY: 'fairplay',
-};
+} as const;
