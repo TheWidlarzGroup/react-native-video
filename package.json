@@ -33,6 +33,7 @@
     },
     "scripts": {
         "lint": "yarn eslint .",
+        "build": "yarn tsc",
         "xbasic": "yarn --cwd examples/basic",
         "test": "echo no test available"
     },
