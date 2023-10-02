@@ -11,7 +11,6 @@ import {
   PanResponder,
   ToastAndroid,
   Platform,
-  TextStyle,
   PanResponderInstance,
   Alert,
 } from 'react-native';
@@ -19,6 +18,8 @@ import {
 import {Picker} from '@react-native-picker/picker';
 
 import Video, {VideoDecoderProperties} from 'react-native-video';
+import ToggleControl from './ToggleControl';
+import MultiValueControl from './MultiValueControl';
 
 class VideoPlayer extends Component {
   state = {
@@ -193,13 +194,11 @@ class VideoPlayer extends Component {
 
   onVideoBuffer = (param: any) => {
     console.log('onVideoBuffer');
-
     this.setState({isLoading: param.isBuffering});
   };
 
   onReadyForDisplay = () => {
     console.log('onReadyForDisplay');
-
     this.setState({isLoading: false});
   };
 
@@ -217,59 +216,6 @@ class VideoPlayer extends Component {
     }
     return 0;
   };
-
-  selectedStyle: TextStyle = StyleSheet.flatten([
-    styles.controlOption,
-    {fontWeight: 'bold'},
-  ]);
-  unselectedStyle: TextStyle = StyleSheet.flatten([
-    styles.controlOption,
-    {fontWeight: 'normal'},
-  ]);
-
-  renderRateControl(rate: number) {
-    const style =
-      this.state.rate === rate ? this.selectedStyle : this.unselectedStyle;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({rate});
-        }}>
-        <Text style={style}>{rate}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderResizeModeControl(resizeMode: string) {
-    const style =
-      this.state.resizeMode === resizeMode
-        ? this.selectedStyle
-        : this.unselectedStyle;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({resizeMode});
-        }}>
-        <Text style={style}>{resizeMode}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderVolumeControl(volume: number) {
-    const style =
-      this.state.volume === volume ? this.selectedStyle : this.unselectedStyle;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({volume});
-        }}>
-        <Text style={style}>{volume * 100}%</Text>
-      </TouchableOpacity>
-    );
-  }
 
   toast = (visible: boolean, message: string) => {
     if (visible) {
@@ -341,93 +287,6 @@ class VideoPlayer extends Component {
 
   componentDidMount() {
     this.initSeekPanResponder();
-  }
-
-  renderDecorationsControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.toggleDecoration();
-        }}>
-        <Text style={[styles.controlOption]}>{'decoration'}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  // android only
-  renderInfoControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.popupInfo();
-        }}>
-        <Text style={[styles.controlOption]}>{'decoderInfo'}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderFullScreenControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.toggleFullscreen();
-        }}>
-        <Text style={[styles.controlOption]}>{'fullscreen'}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderPause() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({paused: !this.state.paused});
-        }}>
-        <Text style={[styles.controlOption]}>
-          {this.state.paused ? 'pause' : 'playing'}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderRepeatModeControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({loop: !this.state.loop});
-        }}>
-        <Text style={[styles.controlOption]}>
-          {this.state.loop ? 'loop enable' : 'loop disable'}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderLeftControl() {
-    return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            this.channelDown();
-          }}>
-          <Text style={[styles.leftRightControlOption]}>{'ChDown'}</Text>
-        </TouchableOpacity>
-      </View>
-      // onTimelineUpdated
-    );
-  }
-
-  renderRightControl() {
-    return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            this.channelUp();
-          }}>
-          <Text style={[styles.leftRightControlOption]}>{'ChUp'}</Text>
-        </TouchableOpacity>
-      </View>
-    );
   }
 
   /**
@@ -623,6 +482,16 @@ class VideoPlayer extends Component {
     );
   }
 
+  onRateSelected = (value: string | number) => {
+    this.setState({rate: value});
+  }
+  onVolumeSelected = (value: string | number) => {
+    this.setState({volume: value});
+  }
+  onResizeModeSelected = (value: string | number) => {
+    this.setState({resizeMode: value});
+  }
+
   renderOverlay() {
     return (
       <>
@@ -635,57 +504,78 @@ class VideoPlayer extends Component {
         {!this.state.showRNVControls ? (
           <>
             <View style={styles.leftControls}>
-              <View style={styles.resizeModeControl}>
-                {this.renderLeftControl()}
-              </View>
+              <ToggleControl
+                onPress={() => {
+                  this.channelDown();
+                }}
+                text='ChDown'
+              />
             </View>
             <View style={styles.rightControls}>
-              <View style={styles.resizeModeControl}>
-                {this.renderRightControl()}
-              </View>
+              <ToggleControl
+                onPress={() => {
+                  this.channelUp();
+                }}
+                text='ChUp'
+              /> 
             </View>
             <View style={styles.bottomControls}>
               <View style={styles.generalControls}>
                 {Platform.OS === 'android' ? (
                   <View style={styles.generalControls}>
-                    <View style={styles.resizeModeControl}>
-                      {this.renderInfoControl()}
-                    </View>
-                  </View>
+                    <ToggleControl
+                      onPress={() => {
+                        this.popupInfo();
+                      }}
+                      text='decoderInfo'
+                    />
+                </View>
                 ) : null}
-                <View style={styles.resizeModeControl}>
-                  {this.renderPause()}
-                </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderRepeatModeControl()}
-                </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderFullScreenControl()}
-                </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderDecorationsControl()}
-                </View>
+                <ToggleControl
+                  isSelected={this.state.paused}
+                  onPress={() => {
+                    this.setState({paused: !this.state.paused});
+                  }}
+                  selectedText='pause'
+                  unselectedText='playing'
+                />
+                <ToggleControl
+                  isSelected={this.state.loop}
+                  onPress={() => {
+                    this.setState({loop: !this.state.loop});
+                  }}
+                  selectedText='loop enable'
+                  unselectedText='loop disable'
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleFullscreen();
+                  }}
+                  text='fullscreen'
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleDecoration();
+                  }}
+                  text='decoration'
+                /> 
               </View>
               <View style={styles.generalControls}>
-                <View style={styles.rateControl}>
-                  {this.renderRateControl(0.25)}
-                  {this.renderRateControl(0.5)}
-                  {this.renderRateControl(1.0)}
-                  {this.renderRateControl(1.5)}
-                  {this.renderRateControl(2.0)}
-                </View>
-
-                <View style={styles.volumeControl}>
-                  {this.renderVolumeControl(0.5)}
-                  {this.renderVolumeControl(1)}
-                  {this.renderVolumeControl(1.5)}
-                </View>
-
-                <View style={styles.resizeModeControl}>
-                  {this.renderResizeModeControl('cover')}
-                  {this.renderResizeModeControl('contain')}
-                  {this.renderResizeModeControl('stretch')}
-                </View>
+                <MultiValueControl
+                  values={[0.25, 0.5, 1.0, 1.5, 2.0]}
+                  onPress={this.onRateSelected}
+                  selected={this.state.rate}
+                />
+                <MultiValueControl
+                  values={[0.5, 1, 1.5]}
+                  onPress={this.onVolumeSelected}
+                  selected={this.state.volume}
+                />
+                <MultiValueControl
+                  values={['cover', 'contain', 'stretch']}
+                  onPress={this.onResizeModeSelected}
+                  selected={this.state.resizeMode}
+                />
               </View>
               {this.renderSeekBar()}
               <View style={styles.generalControls}>
