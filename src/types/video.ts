@@ -63,7 +63,7 @@ type SelectedTrack = {
 
 type SelectedVideoTrack = {
   type: 'auto' | 'disabled' | 'resolution' | 'index'
-  value: number;
+  value?: number;
 }
 
 type SubtitleStyle = {
@@ -84,7 +84,7 @@ type TextTracks = {
 }[]
 
 export interface ReactVideoProps extends ReactVideoEvents {
-  source: ReactVideoSource;
+  source?: ReactVideoSource;
   drm?: ReactVideoDrm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string; // iOS

@@ -60,17 +60,17 @@ type TextTracks = ReadonlyArray<Readonly<{
 type TextTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 
 type SelectedTextTrack = Readonly<{
-  selectedTextType?: TextTrackType;
+  selectedTextType: TextTrackType;
   value?: string;
-  index?: number;
+  index: number;
 }>
 
 type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 
 type SelectedAudioTrack = Readonly<{
-  selectedAudioType?: AudioTrackType;
+  selectedAudioType: AudioTrackType;
   value?: string;
-  index?: number;
+  index: number;
 }>
 
 export type Seek = Readonly<{
@@ -89,7 +89,7 @@ type BufferConfig = Readonly<{
 }>
 
 type SelectedVideoTrack = Readonly<{
-  type?: 'auto' | 'disabled' | 'resolution' | 'index';
+  type: 'auto' | 'disabled' | 'resolution' | 'index';
   value?: number;
 }>
 
@@ -107,7 +107,7 @@ export type OnLoadData = Readonly<{
   naturalSize: Readonly<{
     width: number;
     height: number;
-    orientation: string;
+    orientation: 'portrait' | 'landscape';
   }>;
 }>
 
@@ -143,14 +143,14 @@ export type OnPlaybackStateChangedData = Readonly<{
 export type OnTimedMetadataData = Readonly<{
   metadata: ReadonlyArray<Readonly<{
     value?: string
-    identifier?: string
+    identifier: string
   }>>
 }>
 
 
 export type OnAudioTracksData = Readonly<{
   audioTracks: ReadonlyArray<Readonly<{
-    index?: number
+    index: number
     title?: string
     language?: string
     bitrate?: number
@@ -161,7 +161,7 @@ export type OnAudioTracksData = Readonly<{
 
 export type OnTextTracksData = Readonly<{
   textTracks: ReadonlyArray<Readonly<{
-    index?: number
+    index: number
     title?: string
     language?: string
     /**
@@ -174,7 +174,7 @@ export type OnTextTracksData = Readonly<{
 
 export type OnVideoTracksData = Readonly<{
   videoTracks: ReadonlyArray<Readonly<{
-    trackId?: number
+    trackId: number
     codecs?: string
     width?: number
     height?: number
@@ -215,7 +215,7 @@ export type OnAudioFocusChangedData = Readonly<{
 
 export type NativeVideoResizeMode = 'ScaleNone' | 'ScaleToFill' | 'ScaleAspectFit' | 'ScaleAspectFill';
 export interface VideoNativeProps extends ViewProps {
-  src: VideoSrc;
+  src?: VideoSrc;
   drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
@@ -286,9 +286,9 @@ export interface VideoNativeProps extends ViewProps {
   onVideoIdle?: (event: NativeSyntheticEvent<{}>) => void; // android only (nowhere in document, so do not use as props. just type declaration)
   onAudioFocusChanged?: (event: NativeSyntheticEvent<OnAudioFocusChangedData>) => void; // android only (nowhere in document, so do not use as props. just type declaration)
   onTimedMetadata?: (event: NativeSyntheticEvent<OnTimedMetadataData>) => void; // ios, android
-  onAudioTracks: (event: NativeSyntheticEvent<OnAudioTracksData>) => void; // android
-  onTextTracks: (event: NativeSyntheticEvent<OnTextTracksData>) => void; // android
-  onVideoTracks: (event: NativeSyntheticEvent<OnVideoTracksData>) => void; // android
+  onAudioTracks?: (event: NativeSyntheticEvent<OnAudioTracksData>) => void; // android
+  onTextTracks?: (event: NativeSyntheticEvent<OnTextTracksData>) => void; // android
+  onVideoTracks?: (event: NativeSyntheticEvent<OnVideoTracksData>) => void; // android
 }
 
 export type VideoComponentType = HostComponent<VideoNativeProps>;
