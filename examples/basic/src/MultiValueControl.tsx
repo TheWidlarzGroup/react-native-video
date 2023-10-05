@@ -8,9 +8,16 @@ import {
   View,
 } from 'react-native';
 
+/*
+* MultiValueControl displays a list clickable text view
+*/
+
 interface MultiValueControlType {
-  selected?: string | number
+  // a list a string or number to be displayed
   values: Array<string | number>
+  // The selected value in values
+  selected?: string | number
+  // callback to press onPress
   onPress: (arg: string | number) => any
 }
 

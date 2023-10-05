@@ -8,11 +8,20 @@ import {
   View,
 } from 'react-native';
 
+/*
+* ToggleControl displays a 2 states clickable text
+*/
+
 interface ToggleControlType {
+  // boolean indicating if text is selected state
   isSelected?: boolean
+  // value of text when selected
   selectedText?: string
+  // value of text when NOT selected
   unselectedText?: string
+  // default text if no only one text field is needed
   text?: string
+  // callback called when pressing the component
   onPress: () => any
 }
 
