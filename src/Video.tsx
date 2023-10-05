@@ -443,4 +443,5 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
   }
 );
 
+Video.displayName = "Video";
 export default Video;
