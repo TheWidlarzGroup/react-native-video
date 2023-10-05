@@ -62,7 +62,7 @@ type TextTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 type SelectedTextTrack = Readonly<{
   selectedTextType: TextTrackType;
   value?: string;
-  index: number;
+  index?: number;
 }>
 
 type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
@@ -70,7 +70,7 @@ type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 type SelectedAudioTrack = Readonly<{
   selectedAudioType: AudioTrackType;
   value?: string;
-  index: number;
+  index?: number;
 }>
 
 export type Seek = Readonly<{

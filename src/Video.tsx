@@ -106,6 +106,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const src = useMemo(() => {
+      if (!source) return undefined;
+
       const resolvedSource = resolveAssetSourceForVideo(source);
       let uri = resolvedSource.uri || "";
       if (uri && uri.match(/^\//)) uri = `file://${uri}`;
