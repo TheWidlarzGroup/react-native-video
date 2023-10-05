@@ -1,3 +1,10 @@
 {
-  "extends": "@react-native-community",
+  "extends": [
+    "@react-native",
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "parserOptions": {
+    "requireConfigFile": false
+  }
 }
