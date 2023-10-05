@@ -4,7 +4,10 @@ import android.graphics.Color;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.common.toolbox.ReactBridgeUtils;
 import com.brentvatne.exoplayer.AudioOutput;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -84,6 +87,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
+    private static final String PROP_DEBUG = "debug";
 
     private ReactExoplayerConfig config;
 
@@ -415,6 +419,18 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             minBufferMemoryReservePercent = bufferConfig.hasKey(PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT)
                     ? bufferConfig.getDouble(PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT) : minBufferMemoryReservePercent;
             videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, maxHeapAllocationPercent, minBackBufferMemoryReservePercent, minBufferMemoryReservePercent);
+        }
+    }
+
+    @ReactProp(name = PROP_DEBUG, defaultBoolean = false)
+    public void setDebug(final ReactExoplayerView videoView,
+                         @Nullable final ReadableMap debugConfig) {
+        boolean enableDebug = ReactBridgeUtils.safeGetBool(debugConfig, "enable", false);
+        boolean enableThreadDebug = ReactBridgeUtils.safeGetBool(debugConfig, "thread", false);
+        if (enableDebug) {
+            DebugLog.setConfig(Log.VERBOSE, enableThreadDebug);
+        } else {
+            DebugLog.setConfig(Log.WARN, enableThreadDebug);
         }
     }
 

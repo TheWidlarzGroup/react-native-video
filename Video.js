@@ -525,6 +525,11 @@ Video.propTypes = {
     bufferForPlaybackAfterRebufferMs: PropTypes.number,
     maxHeapAllocationPercent: PropTypes.number,
   }),
+  debug: PropTypes.shape({
+    enable: PropTypes.bool,
+    thread: PropTypes.bool,
+    describeStateInAccessibilityLabel: PropTypes.bool,
+  }),
   rate: PropTypes.number,
   pictureInPicture: PropTypes.bool,
   playInBackground: PropTypes.bool,

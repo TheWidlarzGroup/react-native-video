@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -28,6 +27,7 @@ import androidx.activity.OnBackPressedCallback;
 
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -531,7 +531,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 return false;
             }
             if (runtime.freeMemory() == 0) {
-                Log.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
+                DebugLog.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
                 runtime.gc();
                 return false;
             }
@@ -569,13 +569,13 @@ public class ReactExoplayerView extends FrameLayout implements
                                 DrmSessionManager drmSessionManager = initializePlayerDrm(self);
                                 if (drmSessionManager == null && self.drmUUID != null) {
                                     // Failed to intialize DRM session manager - cannot continue
-                                    Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
+                                    DebugLog.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
                                     
                                 if (activity == null) {
-                                    Log.e("ExoPlayer Exception", "Failed to initialize Player!");
+                                    DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
                                     eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
                                     return;
                                 }
@@ -588,8 +588,8 @@ public class ReactExoplayerView extends FrameLayout implements
                                             initializePlayerSource(self, drmSessionManager);
                                         } catch (Exception ex) {
                                             self.playerNeedsSource = true;
-                                            Log.e("ExoPlayer Exception", "Failed to initialize Player!");
-                                            Log.e("ExoPlayer Exception", ex.toString());
+                                            DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
+                                            DebugLog.e("ExoPlayer Exception", ex.toString());
                                             self.eventEmitter.error(ex.toString(), ex, "1001");
                                         }
                                     }
@@ -601,8 +601,8 @@ public class ReactExoplayerView extends FrameLayout implements
                     }
                 } catch (Exception ex) {
                     self.playerNeedsSource = true;
-                    Log.e("ExoPlayer Exception", "Failed to initialize Player!");
-                    Log.e("ExoPlayer Exception", ex.toString());
+                    DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
+                    DebugLog.e("ExoPlayer Exception", ex.toString());
                     eventEmitter.error(ex.toString(), ex, "1001");
                 }
             }
@@ -711,7 +711,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 wait();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                Log.e("ExoPlayer Exception", ex.toString());
+                DebugLog.e("ExoPlayer Exception", ex.toString());
             }
         }
 
@@ -1905,7 +1905,7 @@ public class ReactExoplayerView extends FrameLayout implements
         long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
         if (reserveMemory > freeMemory) {
             // We don't have enough memory in reserve so we will
-            Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
+            DebugLog.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
             this.backBufferDurationMs = 0;
             return;
         }
@@ -2027,23 +2027,23 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysLoaded");
+        DebugLog.d("DRM Info", "onDrmKeysLoaded");
     }
 
     @Override
     public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
-        Log.d("DRM Info", "onDrmSessionManagerError");
+        DebugLog.d("DRM Info", "onDrmSessionManagerError");
         eventEmitter.error("onDrmSessionManagerError", e, "3002");
     }
 
     @Override
     public void onDrmKeysRestored(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysRestored");
+        DebugLog.d("DRM Info", "onDrmKeysRestored");
     }
 
     @Override
     public void onDrmKeysRemoved(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
-        Log.d("DRM Info", "onDrmKeysRemoved");
+        DebugLog.d("DRM Info", "onDrmKeysRemoved");
     }
 
     /**
