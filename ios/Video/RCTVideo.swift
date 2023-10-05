@@ -580,7 +580,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _audioOutput = audioOutput
         do {
             if audioOutput == "speaker" {
+                #if os(iOS)
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+                #endif
             } else if audioOutput == "earpiece" {
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
             }
@@ -821,7 +823,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         viewController.view.frame = self.bounds
         viewController.player = player
-        viewController.allowsPictureInPicturePlayback = true
+        if #available(tvOS 14.0, *) {
+            viewController.allowsPictureInPicturePlayback = true
+        }
         return viewController
     }
 
