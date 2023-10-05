@@ -30,6 +30,7 @@ const MultiValueControl = ({ values, selected, onPress }: MultiValueControlType)
           const _style = value === selected ? selectedStyle : unselectedStyle
           return (
             <TouchableOpacity
+              key={value}
               onPress={() => {
                 onPress?.(value)
               }}>
