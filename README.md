@@ -121,7 +121,9 @@ Select RCTVideo-tvOS
 Linking is not required in React Native 0.60 and above.
 If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
 
-Or if you have trouble, make the following additions to the given files manually:
+Note that with Autolinking the old Android MediaPlayer based player is used.
+
+If you have trouble or if you want to manually select the player to use, make the following additions to the given files manually:
 
 #### **android/settings.gradle**
 
