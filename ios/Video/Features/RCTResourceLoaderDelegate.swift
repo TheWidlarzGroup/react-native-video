@@ -3,7 +3,7 @@ import Promises
 
 class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSessionDelegate {
     
-    private var _loadingRequest:AVAssetResourceLoadingRequest?
+    private var _loadingRequests: [String: AVAssetResourceLoadingRequest?] = [:]
     private var _requestingCertificate:Bool = false
     private var _requestingCertificateErrored:Bool = false
     private var _drm: DRMParams?
@@ -32,7 +32,9 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
     }
     
     deinit {
-        _loadingRequest?.finishLoading()
+        for request in _loadingRequests.values {
+            request?.finishLoading()
+        }
     }
     
     func resourceLoader(_ resourceLoader:AVAssetResourceLoader, shouldWaitForRenewalOfRequestedResource renewalRequest:AVAssetResourceRenewalRequest) -> Bool {
@@ -47,41 +49,59 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         RCTLog("didCancelLoadingRequest")
     }
 
-    func setLicenseResult(_ license:String!) {
-        guard let respondData = RCTVideoUtils.base64DataFromBase64String(base64String: license),
-              let _loadingRequest = _loadingRequest else {
-                  setLicenseResultError("No data from JS license response")
-                  return
-              }
-        let dataRequest:AVAssetResourceLoadingDataRequest! = _loadingRequest.dataRequest
+    func setLicenseResult(_ license:String!,_ licenseUrl: String!) {
+        
+        // Check if the loading request exists in _loadingRequests based on licenseUrl
+        guard let loadingRequest = _loadingRequests[licenseUrl] else {
+            setLicenseResultError("Loading request for licenseUrl \(licenseUrl) not found", licenseUrl)
+            return
+        }
+        
+        // Check if the license data is valid
+        guard let respondData = RCTVideoUtils.base64DataFromBase64String(base64String: license) else {
+            setLicenseResultError("No data from JS license response", licenseUrl)
+            return
+        }
+        
+        let dataRequest: AVAssetResourceLoadingDataRequest! = loadingRequest?.dataRequest
         dataRequest.respond(with: respondData)
-        _loadingRequest.finishLoading()
+        loadingRequest!.finishLoading()
+        _loadingRequests.removeValue(forKey: licenseUrl)
     }
     
-    func setLicenseResultError(_ error:String!) {
-        if _loadingRequest != nil {
-            self.finishLoadingWithError(error: RCTVideoErrorHandler.fromJSPart(error))
+    func setLicenseResultError(_ error:String!,_ licenseUrl: String!) {
+        // Check if the loading request exists in _loadingRequests based on licenseUrl
+        guard let loadingRequest = _loadingRequests[licenseUrl] else {
+            print("Loading request for licenseUrl \(licenseUrl) not found. Error: \(error)")
+            return
         }
+
+        self.finishLoadingWithError(error: RCTVideoErrorHandler.fromJSPart(error), licenseUrl: licenseUrl)
     }
     
-    func finishLoadingWithError(error:Error!) -> Bool {
-        if let _loadingRequest = _loadingRequest, let error = error {
-            _loadingRequest.finishLoading(with: error as! NSError)
-            
-            _onVideoError?([
-                "error": [
-                    "code": NSNumber(value: (error as NSError).code),
-                    "localizedDescription": error.localizedDescription == nil ? "" : error.localizedDescription,
-                    "localizedFailureReason": ((error as NSError).localizedFailureReason == nil ? "" : (error as NSError).localizedFailureReason) ?? "",
-                    "localizedRecoverySuggestion": ((error as NSError).localizedRecoverySuggestion == nil ? "" : (error as NSError).localizedRecoverySuggestion) ?? "",
-                    "domain": (error as NSError).domain
-                ],
-                "target": _reactTag
-            ])
-            
+    func finishLoadingWithError(error: Error!, licenseUrl: String!) -> Bool {
+        // Check if the loading request exists in _loadingRequests based on licenseUrl
+        guard let loadingRequest = _loadingRequests[licenseUrl], let error = error as NSError? else {
+            // Handle the case where the loading request is not found or error is nil
+            return false
         }
+
+        loadingRequest!.finishLoading(with: error)
+        _loadingRequests.removeValue(forKey: licenseUrl)
+        _onVideoError?([
+            "error": [
+                "code": NSNumber(value: error.code),
+                "localizedDescription": error.localizedDescription ?? "",
+                "localizedFailureReason": error.localizedFailureReason ?? "",
+                "localizedRecoverySuggestion": error.localizedRecoverySuggestion ?? "",
+                "domain": error.domain
+            ],
+            "target": _reactTag
+        ])
+
         return false
     }
+
     
     func loadingRequestHandling(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         if handleEmbeddedKey(loadingRequest) {
@@ -118,10 +138,13 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         } else if _requestingCertificateErrored {
             return false
         }
-        _loadingRequest = loadingRequest
+
+        var requestKey: String = loadingRequest.request.url?.absoluteString ?? ""
+
+        _loadingRequests[requestKey] = loadingRequest
         
         guard let _drm = _drm, let drmType = _drm.type, drmType == "fairplay" else {
-            return finishLoadingWithError(error: RCTVideoErrorHandler.noDRMData)
+            return finishLoadingWithError(error: RCTVideoErrorHandler.noDRMData, licenseUrl: requestKey)
         }
         
         var promise: Promise<Data>
@@ -134,8 +157,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                 base64Certificate:_drm.base64Certificate
             ) .then{ spcData -> Void in
                 self._requestingCertificate = true
-                self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? "",
-                                     "contentId": contentId,
+                self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? loadingRequest.request.url?.absoluteString ?? "",
+                                     "contentId": contentId ?? "",
                                      "spcBase64": spcData.base64EncodedString(options: []),
                                      "target": self._reactTag])
             }
@@ -158,7 +181,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         
         
         promise.catch{ error in
-            self.finishLoadingWithError(error:error)
+            self.finishLoadingWithError(error:error, licenseUrl: requestKey)
             self._requestingCertificateErrored = true
         }
         

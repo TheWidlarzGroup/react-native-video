@@ -31,13 +31,16 @@ Platforms: iOS
 
 ### `getLicense`
 
-`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`.
-  You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
+`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`. 
+
+Also, you will receive the `contentId` and a `licenseUrl` URL defined as `loadingRequest.request.URL.absoluteString ` or as the `licenseServer` prop if it's passed.
+  
+You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
 
 With this prop you can override the license acquisition flow, as an example:
 
 ```js
-getLicense: (spcString) => {
+getLicense: (spcString, contentId, licenseUrl) => {
   const base64spc = Base64.encode(spcString);
   const formData = new FormData();
   formData.append('spc', base64spc);
