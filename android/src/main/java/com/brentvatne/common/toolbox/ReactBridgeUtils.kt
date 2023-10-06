@@ -1,5 +1,6 @@
 package com.brentvatne.common.toolbox
 
+import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableArray
 import java.util.HashMap
@@ -18,6 +19,16 @@ object ReactBridgeUtils {
     @JvmStatic
     fun safeGetString(map: ReadableMap?, key: String?): String? {
         return safeGetString(map, key, null)
+    }
+
+    @JvmStatic
+    fun safeGetDynamic(map: ReadableMap?, key: String?, fallback: Dynamic?): Dynamic? {
+        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDynamic(key) else fallback
+    }
+
+    @JvmStatic
+    fun safeGetDynamic(map: ReadableMap?, key: String?): Dynamic? {
+        return safeGetDynamic(map, key, null)
     }
 
     @JvmStatic
@@ -42,9 +53,17 @@ object ReactBridgeUtils {
 
     @JvmStatic
     fun safeGetInt(map: ReadableMap?, key: String?): Int {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getInt(key) else 0
+        return safeGetInt(map, key, 0);
     }
 
+    @JvmStatic
+    fun safeGetDouble(map: ReadableMap?, key: String?, fallback: Double): Double {
+        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key) else fallback
+    }
+    @JvmStatic
+    fun safeGetDouble(map: ReadableMap?, key: String?): Double {
+        return safeGetDouble(map, key, 0.0);
+    }
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.
      *
