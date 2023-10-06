@@ -18,6 +18,10 @@ type VideoSrc = Readonly<{
   requestHeaders?: Headers;
   startTime?: number;
   endTime?: number;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  customImageUri?: string;
 }>
 
 

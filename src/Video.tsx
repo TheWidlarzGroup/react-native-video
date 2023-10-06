@@ -130,7 +130,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         patchVer: resolvedSource.patchVer || 0,
         requestHeaders: resolvedSource?.headers || {},
         startTime: resolvedSource.startTime || 0,
-        endTime: resolvedSource.endTime
+        endTime: resolvedSource.endTime,
+        title: resolvedSource.title,
+        subtitle: resolvedSource.subtitle,
+        description: resolvedSource.description,
+        customImageUri: resolvedSource.customImageUri,
       };
     }, [source]);
 
@@ -194,7 +198,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           console.warn("Video Component is not mounted");
           return;
         }
-        
+
         Platform.select({
           ios: () => {
             nativeRef.current?.setNativeProps({
@@ -405,6 +409,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             _restoreUserInterfaceForPIPStopCompletionHandler
           }
           textTracks={textTracks}
+          // @ts-ignore
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           onGetLicense={onGetLicense}
