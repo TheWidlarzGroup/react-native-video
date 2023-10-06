@@ -293,14 +293,14 @@ export interface VideoNativeProps extends ViewProps {
 
 export type VideoComponentType = HostComponent<VideoNativeProps>;
 
-export interface VideoManager {
+export interface VideoManagerType {
   save: (reactTag: number) => Promise<void>;
   setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
   setLicenseResult: (result: string, licenseUrl: string, reactTag: number) => Promise<void>;
   setLicenseResultError: (error: string, licenseUrl: string, reactTag: number) => Promise<void>;
 }
 
-export interface VideoDecoderProperties {
+export interface VideoDecoderPropertiesType {
   getWidevineLevel: () => Promise<number>;
   isCodecSupported: (mimeType: string, width: number, height: number) => Promise<'unsupported' | 'hardware' | 'software'>;
   isHEVCSupported: () => Promise<'unsupported' | 'hardware' | 'software'>;
@@ -316,8 +316,8 @@ export type VideoViewManagerConfig = {
   Commands: { [key: string]: number; };
 };
 
-export const VideoManager = NativeModules.VideoManager as VideoManager;
-export const VideoDecoderProperties = NativeModules.VideoDecoderProperties as VideoDecoderProperties;
+export const VideoManager = NativeModules.VideoManager as VideoManagerType;
+export const VideoDecoderProperties = NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
 export const RCTVideoConstants = (getViewManagerConfig('RCTVideo') as VideoViewManagerConfig).Constants;
 
 export default requireNativeComponent<VideoNativeProps>('RCTVideo') as VideoComponentType;
