@@ -15,4 +15,4 @@ export default {
     TONAL: 'CIPhotoEffectTonal',
     TRANSFER: 'CIPhotoEffectTransfer',
     SEPIA: 'CISepiaTone',
-};
+} as const;
