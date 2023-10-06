@@ -330,4 +330,15 @@ enum RCTVideoUtils {
         item.extendedLanguageTag = "und"
         return item.copy() as! AVMetadataItem
     }
+    
+    static func createImageMetadataItem(imageUri: String)  -> Data? {
+        if let uri = URL(string: imageUri),
+           let imgData = try? Data(contentsOf: uri),
+           let image = UIImage(data: imgData),
+           let pngData = image.pngData() {
+            return pngData
+        }
+        
+        return nil
+    }
 }
