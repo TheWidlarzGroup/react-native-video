@@ -1,25 +1,24 @@
-import type { ISO639_1 } from './language';
-import type { ReactVideoEvents } from './events';
-import type { StyleProp, ViewStyle } from 'react-native'
+import type {ISO639_1} from './language';
+import type {ReactVideoEvents} from './events';
+import type {StyleProp, ViewStyle} from 'react-native';
 
-type Filter = | 'None'
-              | 'CIColorInvert'
-              | 'CIColorMonochrome'
-              | 'CIColorPosterize'
-              | 'CIFalseColor'
-              | 'CIMaximumComponent'
-              | 'CIMinimumComponent'
-              | 'CIPhotoEffectChrome'
-              | 'CIPhotoEffectFade'
-              | 'CIPhotoEffectInstant'
-              | 'CIPhotoEffectMono'
-              | 'CIPhotoEffectNoir'
-              | 'CIPhotoEffectProcess'
-              | 'CIPhotoEffectTonal'
-              | 'CIPhotoEffectTransfer'
-              | 'CISepiaTone'
-
-
+type Filter =
+  | 'None'
+  | 'CIColorInvert'
+  | 'CIColorMonochrome'
+  | 'CIColorPosterize'
+  | 'CIFalseColor'
+  | 'CIMaximumComponent'
+  | 'CIMinimumComponent'
+  | 'CIPhotoEffectChrome'
+  | 'CIPhotoEffectFade'
+  | 'CIPhotoEffectInstant'
+  | 'CIPhotoEffectMono'
+  | 'CIPhotoEffectNoir'
+  | 'CIPhotoEffectProcess'
+  | 'CIPhotoEffectTonal'
+  | 'CIPhotoEffectTransfer'
+  | 'CISepiaTone';
 
 type Headers = Record<string, string>;
 
@@ -47,8 +46,14 @@ export type ReactVideoDrm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
-  getLicense?: (licenseUrl: string, contentId: string, spcBase64: string) => void; // ios
-}>
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  getLicense?: (
+    licenseUrl: string,
+    contentId: string,
+    spcBase64: string,
+  ) => void; // ios
+  /* eslint-enable @typescript-eslint/no-unused-vars */
+}>;
 
 type BufferConfig = {
   minBufferMs?: number;
@@ -58,17 +63,17 @@ type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
-}
+};
 
 type SelectedTrack = {
   type: 'system' | 'disabled' | 'title' | 'language' | 'index';
   value?: string | number;
-}
+};
 
 type SelectedVideoTrack = {
-  type: 'auto' | 'disabled' | 'resolution' | 'index'
+  type: 'auto' | 'disabled' | 'resolution' | 'index';
   value?: number;
-}
+};
 
 type SubtitleStyle = {
   fontSize?: number;
@@ -76,16 +81,14 @@ type SubtitleStyle = {
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
-}
+};
 
 type TextTracks = {
   title: string;
   language: ISO639_1;
-  type: | 'application/x-subrip'
-        | 'application/ttml+xml'
-        | 'text/vtt';
+  type: 'application/x-subrip' | 'application/ttml+xml' | 'text/vtt';
   uri: string;
-}[]
+}[];
 
 type Chapters = {
   title: string;
@@ -110,24 +113,30 @@ export interface ReactVideoProps extends ReactVideoEvents {
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
   filter?: Filter; // iOS
-  filterEnabled?:	boolean; // iOS
-  focusable?: boolean; 	// Android
+  filterEnabled?: boolean; // iOS
+  focusable?: boolean; // Android
   fullscreen?: boolean; // iOS
   fullscreenAutorotate?: boolean; // iOS
-  fullscreenOrientation?: 'all' | 'landscape' | 'portrait';	// iOS
+  fullscreenOrientation?: 'all' | 'landscape' | 'portrait'; // iOS
   hideShutterView?: boolean; //	Android
-  ignoreSilentSwitch?: 'inherit' | 'ignore' | 'obey'	// iOS
-  minLoadRetryCount?: number;	// Android
+  ignoreSilentSwitch?: 'inherit' | 'ignore' | 'obey'; // iOS
+  minLoadRetryCount?: number; // Android
   maxBitRate?: number;
   mixWithOthers?: 'inherit' | 'mix' | 'duck'; // iOS
   muted?: boolean;
   paused?: boolean;
-  pictureInPicture?: boolean // iOS
+  pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
-  playWhenInactive?: boolean // iOS
+  playWhenInactive?: boolean; // iOS
   poster?: string;
-  posterResizeMode?: 'contain' | 'center' | 'cover' | 'none' | 'repeat' | 'stretch';
-  preferredForwardBufferDuration?: number// iOS
+  posterResizeMode?:
+    | 'contain'
+    | 'center'
+    | 'cover'
+    | 'none'
+    | 'repeat'
+    | 'stretch';
+  preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
@@ -137,11 +146,11 @@ export interface ReactVideoProps extends ReactVideoEvents {
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
-  subtitleStyle?: SubtitleStyle // android
+  subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
   trackId?: string; // Android
-  useTextureView?: boolean;	// Android
-  useSecureView?: boolean;	// Android
+  useTextureView?: boolean; // Android
+  useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
 }
