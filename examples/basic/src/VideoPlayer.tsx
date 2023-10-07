@@ -1,8 +1,6 @@
 'use strict';
 
-import React, {
-  Component
-} from 'react';
+import React, {Component} from 'react';
 
 import {
   StyleSheet,
@@ -12,14 +10,18 @@ import {
   ActivityIndicator,
   PanResponder,
   ToastAndroid,
+  Platform,
+  PanResponderInstance,
+  Alert,
 } from 'react-native';
 
-import { Picker } from '@react-native-picker/picker'
+import {Picker} from '@react-native-picker/picker';
 
-import Video, { VideoDecoderProperties, TextTrackType } from 'react-native-video';
+import Video, {VideoDecoderProperties} from 'react-native-video';
+import ToggleControl from './ToggleControl';
+import MultiValueControl from './MultiValueControl';
 
 class VideoPlayer extends Component {
-
   state = {
     rate: 1,
     volume: 1,
@@ -46,10 +48,38 @@ class VideoPlayer extends Component {
     showRNVControls: false,
   };
 
-  seekerWidth = 0
+  seekerWidth = 0;
 
-  srcList = [
+  srcAllPlatformList = [
     require('./broadchurch.mp4'),
+    {
+      description: '(hls|live) red bull tv',
+      uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
+    },
+    {
+      description: 'invalid URL',
+      uri: 'mmt://www.youtube.com',
+      type: 'mpd',
+    },
+    {description: '(no url) Stopped playback', uri: undefined},
+    {
+      description: '(no view) no View',
+      noView: true,
+    },
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
+  ];
+
+  srcIosList = [
+  ]
+
+  srcAndroidList = [
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
     {
       description: '(dash) sintel subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
@@ -59,30 +89,25 @@ class VideoPlayer extends Component {
       uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
     },
     {
-      description: '(hls|live) red bull tv',
-      uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8'
-    },
-    {
       description: '(mp4|subtitles) demo with sintel Subtitles',
-      uri:
-        'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
+      uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
       type: 'mpd',
     },
     {
-      description: 'invalid URL',
-      uri:
-        'mmt://www.youtube.com',
-      type: 'mpd',
+      description: '(mp4) big buck bunny With Ads',
+      adTagUrl:
+        'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
+      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
     },
-    { description: '(no url) Stopped playback', uri: undefined },
-    {
-      description: '(no view) no View',
-      noView: true,
-    },
-  ]
+  ];
 
-  video: Video;
-  seekPanResponder: PanResponder | undefined;
+  
+  srcList = this.srcAllPlatformList.concat(
+      Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
+  );
+
+  video?: Video;
+  seekPanResponder?: PanResponderInstance;
 
   popupInfo = () => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
@@ -105,52 +130,49 @@ class VideoPlayer extends Component {
   };
 
   onLoad = (data: any) => {
-    this.setState({ duration: data.duration, loading: false, });
-    this.onAudioTracks(data)
-    this.onTextTracks(data)
+    this.setState({duration: data.duration, loading: false});
+    this.onAudioTracks(data);
+    this.onTextTracks(data);
   };
 
   onProgress = (data: any) => {
     if (!this.state.seeking) {
-      const position = this.calculateSeekerPosition()
-      this.setSeekerPosition(position)
+      const position = this.calculateSeekerPosition();
+      this.setSeekerPosition(position);
     }
-    this.setState({ currentTime: data.currentTime })
+    this.setState({currentTime: data.currentTime});
   };
 
-
   onVideoLoadStart = () => {
-    console.log('onVideoLoadStart')
-    this.setState({ isLoading: true })
-  }
-
+    console.log('onVideoLoadStart');
+    this.setState({isLoading: true});
+  };
 
   onAudioTracks = (data: any) => {
     const selectedTrack = data.audioTracks?.find((x: any) => {
-      return x.selected
-    })
+      return x.selected;
+    });
     this.setState({
       audioTracks: data.audioTracks,
-    })
+    });
     if (selectedTrack?.language) {
       this.setState({
         selectedAudioTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
-      })
-
+      });
     }
-  }
+  };
 
   onTextTracks = (data: any) => {
     const selectedTrack = data.textTracks?.find((x: any) => {
-      return x.selected
-    })
+      return x.selected;
+    });
 
     this.setState({
       textTracks: data.textTracks,
-    })
+    });
     if (selectedTrack?.language) {
       this.setState({
         textTracks: data,
@@ -158,38 +180,34 @@ class VideoPlayer extends Component {
           type: 'language',
           value: selectedTrack?.language,
         },
-      })
+      });
     }
-  }
+  };
 
   onAspectRatio = (data: any) => {
-    console.log('onAspectRadio called ' + JSON.stringify(data))
+    console.log('onAspectRadio called ' + JSON.stringify(data));
     this.setState({
       videoWidth: data.width,
       videoHeight: data.height,
-    })
-  }
-
-  onVideoBuffer = (param: any) => {
-    console.log('onVideoBuffer')
-
-    this.setState({ isLoading: param.isBuffering })
-  }
-
-
-  onReadyForDisplay = () => {
-    console.log('onReadyForDisplay')
-
-    this.setState({ isLoading: false })
-  }
-
-
-  onAudioBecomingNoisy = () => {
-    this.setState({ paused: true })
+    });
   };
 
-  onAudioFocusChanged = (event: { hasAudioFocus: boolean }) => {
-    this.setState({ paused: !event.hasAudioFocus })
+  onVideoBuffer = (param: any) => {
+    console.log('onVideoBuffer');
+    this.setState({isLoading: param.isBuffering});
+  };
+
+  onReadyForDisplay = () => {
+    console.log('onReadyForDisplay');
+    this.setState({isLoading: false});
+  };
+
+  onAudioBecomingNoisy = () => {
+    this.setState({paused: true});
+  };
+
+  onAudioFocusChanged = (event: {hasAudioFocus: boolean}) => {
+    this.setState({paused: !event.hasAudioFocus});
   };
 
   getCurrentTimePercentage = () => {
@@ -199,80 +217,44 @@ class VideoPlayer extends Component {
     return 0;
   };
 
-  renderRateControl(rate: number) {
-    const isSelected = (this.state.rate === rate);
-
-    return (
-      <TouchableOpacity onPress={() => { this.setState({ rate }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
-          {rate}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderResizeModeControl(resizeMode: string) {
-    const isSelected = (this.state.resizeMode === resizeMode);
-
-    return (
-      <TouchableOpacity onPress={() => { this.setState({ resizeMode }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
-          {resizeMode}
-        </Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderVolumeControl(volume: number) {
-    const isSelected = (this.state.volume === volume);
-
-    return (
-      <TouchableOpacity onPress={() => { this.setState({ volume }) }}>
-        <Text style={[styles.controlOption, { fontWeight: isSelected ? 'bold' : 'normal' }]}>
-          {volume * 100}%
-        </Text>
-      </TouchableOpacity>
-    )
-  }
-
-
   toast = (visible: boolean, message: string) => {
     if (visible) {
-      ToastAndroid.showWithGravityAndOffset(
-        message,
-        ToastAndroid.LONG,
-        ToastAndroid.BOTTOM,
-        25,
-        50,
-      )
-      return null
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravityAndOffset(
+          message,
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+      } else {
+        Alert.alert(message, message);
+      }
     }
-    return null
-  }
-
-  onError = (err: any) => {
-    console.log(JSON.stringify(err?.error.errorCode))
-    this.toast(true, 'error: ' + err?.error.errorCode)
-  }
-
-  onEnd = () => {
-    this.channelUp()
   };
 
+  onError = (err: any) => {
+    console.log(JSON.stringify(err?.error.errorCode));
+    this.toast(true, 'error: ' + err?.error.errorCode);
+  };
+
+  onEnd = () => {
+    this.channelUp();
+  };
 
   toggleFullscreen() {
-    this.setState({ fullscreen: !this.state.fullscreen })
+    this.setState({fullscreen: !this.state.fullscreen});
   }
   toggleControls() {
-    this.setState({ showRNVControls: !this.state.showRNVControls })
+    this.setState({showRNVControls: !this.state.showRNVControls});
   }
 
   toggleDecoration() {
-    this.setState({ decoration: !this.state.decoration })
+    this.setState({decoration: !this.state.decoration});
     if (this.state.decoration) {
-      this.video.dismissFullscreenPlayer()
+      this.video?.dismissFullscreenPlayer();
     } else {
-      this.video.presentFullscreenPlayer()
+      this.video?.presentFullscreenPlayer();
     }
   }
 
@@ -288,115 +270,23 @@ class VideoPlayer extends Component {
       textTracks: [],
       selectedAudioTrack: undefined,
       selectedTextTrack: undefined,
-    })
+    });
   }
 
-
   channelUp() {
-    console.log('channel up')
-    this.goToChannel((this.state.srcListId + 1) % this.srcList.length)
+    console.log('channel up');
+    this.goToChannel((this.state.srcListId + 1) % this.srcList.length);
   }
 
   channelDown() {
-    console.log('channel down')
-    this.goToChannel((this.state.srcListId + this.srcList.length - 1) % this.srcList.length)
+    console.log('channel down');
+    this.goToChannel(
+      (this.state.srcListId + this.srcList.length - 1) % this.srcList.length,
+    );
   }
 
   componentDidMount() {
-    this.initSeekPanResponder()
-  }
-
-  renderDecorationsControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.toggleDecoration()
-        }}
-      >
-        <Text style={[styles.controlOption]}>{'decoration'}</Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderInfoControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.popupInfo()
-        }}
-      >
-        <Text style={[styles.controlOption]}>{'decoderInfo'}</Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderFullScreenControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.toggleFullscreen()
-        }}
-      >
-        <Text style={[styles.controlOption]}>{'fullscreen'}</Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderPause() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({ paused: !this.state.paused })
-        }}
-      >
-        <Text style={[styles.controlOption]}>
-          {this.state.paused ? 'pause' : 'playing'}
-        </Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderRepeatModeControl() {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({ loop: !this.state.loop })
-        }}
-      >
-        <Text style={[styles.controlOption]}>
-          {this.state.loop ? 'loop enable' : 'loop disable'}
-        </Text>
-      </TouchableOpacity>
-    )
-  }
-
-  renderLeftControl() {
-    return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            this.channelDown()
-          }}
-        >
-          <Text style={[styles.leftRightControlOption]}>{'ChDown'}</Text>
-        </TouchableOpacity>
-      </View>
-      // onTimelineUpdated
-    )
-  }
-
-  renderRightControl() {
-    return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            this.channelUp()
-          }}
-        >
-          <Text style={[styles.leftRightControlOption]}>{'ChUp'}</Text>
-        </TouchableOpacity>
-      </View>
-    )
+    this.initSeekPanResponder();
   }
 
   /**
@@ -413,11 +303,11 @@ class VideoPlayer extends Component {
    */
   constrainToSeekerMinMax(val = 0) {
     if (val <= 0) {
-      return 0
+      return 0;
     } else if (val >= this.seekerWidth) {
-      return this.seekerWidth
+      return this.seekerWidth;
     }
-    return val
+    return val;
   }
 
   /**
@@ -428,17 +318,17 @@ class VideoPlayer extends Component {
    * @param {float} position position in px of seeker handle}
    */
   setSeekerPosition(position = 0) {
-    const state = this.state
-    position = this.constrainToSeekerMinMax(position)
+    const state = this.state;
+    position = this.constrainToSeekerMinMax(position);
 
-    state.seekerFillWidth = position
-    state.seekerPosition = position
+    state.seekerFillWidth = position;
+    state.seekerPosition = position;
 
     if (!state.seeking) {
-      state.seekerOffset = position
+      state.seekerOffset = position;
     }
 
-    this.setState(state)
+    this.setState(state);
   }
 
   /**
@@ -448,8 +338,8 @@ class VideoPlayer extends Component {
    * @return {float} position of seeker handle in px based on currentTime
    */
   calculateSeekerPosition() {
-    const percent = this.state.currentTime / this.state.duration
-    return this.seekerWidth * percent
+    const percent = this.state.currentTime / this.state.duration;
+    return this.seekerWidth * percent;
   }
 
   /**
@@ -459,8 +349,8 @@ class VideoPlayer extends Component {
    * @return {float} time in ms based on seekerPosition.
    */
   calculateTimeFromSeekerPosition() {
-    const percent = this.state.seekerPosition / this.seekerWidth
-    return this.state.duration * percent
+    const percent = this.state.seekerPosition / this.seekerWidth;
+    return this.state.duration * percent;
   }
 
   /**
@@ -469,29 +359,29 @@ class VideoPlayer extends Component {
   initSeekPanResponder() {
     this.seekPanResponder = PanResponder.create({
       // Ask to be the responder.
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponder: (_evt, _gestureState) => true,
+      onMoveShouldSetPanResponder: (_evt, _gestureState) => true,
 
       /**
        * When we start the pan tell the machine that we're
        * seeking. This stops it from updating the seekbar
        * position in the onProgress listener.
        */
-      onPanResponderGrant: (evt, gestureState) => {
-        const state = this.state
+      onPanResponderGrant: (evt, _gestureState) => {
+        const state = this.state;
         // this.clearControlTimeout()
-        const position = evt.nativeEvent.locationX
-        this.setSeekerPosition(position)
-        state.seeking = true
-        this.setState(state)
+        const position = evt.nativeEvent.locationX;
+        this.setSeekerPosition(position);
+        state.seeking = true;
+        this.setState(state);
       },
 
       /**
        * When panning, update the seekbar position, duh.
        */
       onPanResponderMove: (evt, gestureState) => {
-        const position = this.state.seekerOffset + gestureState.dx
-        this.setSeekerPosition(position)
+        const position = this.state.seekerOffset + gestureState.dx;
+        this.setSeekerPosition(position);
       },
 
       /**
@@ -499,140 +389,193 @@ class VideoPlayer extends Component {
        * If you seek to the end of the video we fire the
        * onEnd callback
        */
-      onPanResponderRelease: (evt, gestureState) => {
-        const time = this.calculateTimeFromSeekerPosition()
-        const state = this.state
+      onPanResponderRelease: (_evt, _gestureState) => {
+        const time = this.calculateTimeFromSeekerPosition();
+        const state = this.state;
         if (time >= state.duration && !state.isLoading) {
-          state.paused = true
-          this.onEnd()
+          state.paused = true;
+          this.onEnd();
         } else {
-          this.video?.seek(time)
-          state.seeking = false
+          this.video?.seek(time);
+          state.seeking = false;
         }
-        this.setState(state)
+        this.setState(state);
       },
-    })
+    });
   }
 
   renderSeekBar() {
     if (!this.seekPanResponder) {
-      return null
+      return null;
     }
+    const seekerStyle = [
+      styles.seekbarFill,
+      {
+        width: this.state.seekerFillWidth > 0 ? this.state.seekerFillWidth : 0,
+        backgroundColor: '#FFF',
+      },
+    ];
+
+    const seekerPositionStyle = [
+      styles.seekbarHandle,
+      {
+        left: this.state.seekerPosition > 0 ? this.state.seekerPosition : 0,
+      },
+    ];
+
+    const seekerPointerStyle = [
+      styles.seekbarCircle,
+      {backgroundColor: '#FFF'},
+    ];
+
     return (
       <View
         style={styles.seekbarContainer}
         {...this.seekPanResponder.panHandlers}
-        {...styles.generalControls}
-      >
+        {...styles.generalControls}>
         <View
           style={styles.seekbarTrack}
-          onLayout={(event) => (this.seekerWidth = event.nativeEvent.layout.width)}
-          pointerEvents={'none'}
-        >
-          <View
-            style={[
-              styles.seekbarFill,
-              {
-                width:
-                  this.state.seekerFillWidth > 0 ? this.state.seekerFillWidth : 0,
-                backgroundColor: '#FFF',
-              },
-            ]}
-            pointerEvents={'none'}
-          />
+          onLayout={event =>
+            (this.seekerWidth = event.nativeEvent.layout.width)
+          }
+          pointerEvents={'none'}>
+          <View style={seekerStyle} pointerEvents={'none'} />
         </View>
-        <View
-          style={[
-            styles.seekbarHandle,
-            { left: this.state.seekerPosition > 0 ? this.state.seekerPosition : 0 },
-          ]}
-          pointerEvents={'none'}
-        >
-          <View
-            style={[
-              styles.seekbarCircle,
-              { backgroundColor: '#FFF' },
-            ]}
-            pointerEvents={'none'}
-          />
+        <View style={seekerPositionStyle} pointerEvents={'none'}>
+          <View style={seekerPointerStyle} pointerEvents={'none'} />
         </View>
       </View>
-    )
+    );
   }
 
   IndicatorLoadingView() {
-    if (this.state.isLoading)
-      return <ActivityIndicator color="#3235fd" size="large" style={styles.IndicatorStyle} />
-    else return <View />
+    if (this.state.isLoading) {
+      return (
+        <ActivityIndicator
+          color="#3235fd"
+          size="large"
+          style={styles.IndicatorStyle}
+        />
+      );
+    } else {
+      return <View />;
+    }
   }
 
   renderTopControl() {
-    return (<>
-      <Text style={[styles.controlOption]}>
-        {this.srcList[this.state.srcListId]?.description || 'local file'}
-      </Text>
-      <View >
-        <TouchableOpacity
-          onPress={() => {
-            this.toggleControls()
-          }}
-        >
-          <Text style={[styles.leftRightControlOption]}>{this.state.showRNVControls ? 'Hide controls' : 'Show controls'}</Text>
-        </TouchableOpacity>
-      </View>
-    </>)
+    return (
+      <>
+        <Text style={[styles.controlOption]}>
+          {this.srcList[this.state.srcListId]?.description || 'local file'}
+        </Text>
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              this.toggleControls();
+            }}>
+            <Text style={[styles.leftRightControlOption]}>
+              {this.state.showRNVControls ? 'Hide controls' : 'Show controls'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    );
   }
 
+  onRateSelected = (value: string | number) => {
+    this.setState({rate: value});
+  }
+  onVolumeSelected = (value: string | number) => {
+    this.setState({volume: value});
+  }
+  onResizeModeSelected = (value: string | number) => {
+    this.setState({resizeMode: value});
+  }
 
   renderOverlay() {
     return (
       <>
         {this.IndicatorLoadingView()}
         <View style={styles.topControls}>
-          <View style={styles.resizeModeControl}>{this.renderTopControl()}</View>
+          <View style={styles.resizeModeControl}>
+            {this.renderTopControl()}
+          </View>
         </View>
         {!this.state.showRNVControls ? (
           <>
             <View style={styles.leftControls}>
-              <View style={styles.resizeModeControl}>{this.renderLeftControl()}</View>
-            </View><View style={styles.rightControls}>
-              <View style={styles.resizeModeControl}>{this.renderRightControl()}</View>
-            </View><View style={styles.bottomControls}>
+              <ToggleControl
+                onPress={() => {
+                  this.channelDown();
+                }}
+                text='ChDown'
+              />
+            </View>
+            <View style={styles.rightControls}>
+              <ToggleControl
+                onPress={() => {
+                  this.channelUp();
+                }}
+                text='ChUp'
+              /> 
+            </View>
+            <View style={styles.bottomControls}>
               <View style={styles.generalControls}>
-                <View style={styles.generalControls}>
-                  <View style={styles.resizeModeControl}>{this.renderInfoControl()}</View>
+                {Platform.OS === 'android' ? (
+                  <View style={styles.generalControls}>
+                    <ToggleControl
+                      onPress={() => {
+                        this.popupInfo();
+                      }}
+                      text='decoderInfo'
+                    />
                 </View>
-                <View style={styles.resizeModeControl}>{this.renderPause()}</View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderRepeatModeControl()}
-                </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderFullScreenControl()}
-                </View>
-                <View style={styles.resizeModeControl}>
-                  {this.renderDecorationsControl()}
-                </View>
+                ) : null}
+                <ToggleControl
+                  isSelected={this.state.paused}
+                  onPress={() => {
+                    this.setState({paused: !this.state.paused});
+                  }}
+                  selectedText='pause'
+                  unselectedText='playing'
+                />
+                <ToggleControl
+                  isSelected={this.state.loop}
+                  onPress={() => {
+                    this.setState({loop: !this.state.loop});
+                  }}
+                  selectedText='loop enable'
+                  unselectedText='loop disable'
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleFullscreen();
+                  }}
+                  text='fullscreen'
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleDecoration();
+                  }}
+                  text='decoration'
+                /> 
               </View>
               <View style={styles.generalControls}>
-                <View style={styles.rateControl}>
-                  {this.renderRateControl(0.25)}
-                  {this.renderRateControl(0.5)}
-                  {this.renderRateControl(1.0)}
-                  {this.renderRateControl(1.5)}
-                  {this.renderRateControl(2.0)}
-                </View>
-
-                <View style={styles.volumeControl}>
-                  {this.renderVolumeControl(0.5)}
-                  {this.renderVolumeControl(1)}
-                  {this.renderVolumeControl(1.5)}
-                </View>
-
-                <View style={styles.resizeModeControl}>
-                  {this.renderResizeModeControl('cover')}
-                  {this.renderResizeModeControl('contain')}
-                  {this.renderResizeModeControl('stretch')}
-                </View>
+                <MultiValueControl
+                  values={[0.25, 0.5, 1.0, 1.5, 2.0]}
+                  onPress={this.onRateSelected}
+                  selected={this.state.rate}
+                />
+                <MultiValueControl
+                  values={[0.5, 1, 1.5]}
+                  onPress={this.onVolumeSelected}
+                  selected={this.state.volume}
+                />
+                <MultiValueControl
+                  values={['cover', 'contain', 'stretch']}
+                  onPress={this.onResizeModeSelected}
+                  selected={this.state.resizeMode}
+                />
               </View>
               {this.renderSeekBar()}
               <View style={styles.generalControls}>
@@ -651,14 +594,14 @@ class VideoPlayer extends Component {
                           value: itemValue,
                         },
                       });
-                    }}
-                  >
-                    {this.state.audioTracks.map((track) => {
+                    }}>
+                    {this.state.audioTracks.map(track => {
                       return (
                         <Picker.Item
                           label={track.language}
                           value={track.language}
-                          key={track.language} />
+                          key={track.language}
+                        />
                       );
                     })}
                   </Picker>
@@ -678,35 +621,38 @@ class VideoPlayer extends Component {
                           value: itemValue,
                         },
                       });
-                    }}
-                  >
+                    }}>
                     <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map((track) => (
+                    {this.state.textTracks.map(track => (
                       <Picker.Item
                         label={track.language}
                         value={track.language}
-                        key={track.language} />
+                        key={track.language}
+                      />
                     ))}
                   </Picker>
                 )}
               </View>
-            </View></>
-        ) : null
-        }
+            </View>
+          </>
+        ) : null}
       </>
-    )
+    );
   }
 
   renderVideoView() {
-    const viewStyle = this.state.fullscreen ? styles.fullScreen : styles.halfScreen
+    const viewStyle = this.state.fullscreen
+      ? styles.fullScreen
+      : styles.halfScreen;
 
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
           ref={(ref: Video) => {
-            this.video = ref
+            this.video = ref;
           }}
           source={this.srcList[this.state.srcListId]}
+          //adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
           style={viewStyle}
           rate={this.state.rate}
           paused={this.state.paused}
@@ -734,20 +680,20 @@ class VideoPlayer extends Component {
           playInBackground={false}
         />
       </TouchableOpacity>
-    )
+    );
   }
 
   render() {
     return (
       <View style={styles.container}>
-        {this.srcList[this.state.srcListId]?.noView ? null : this.renderVideoView()}
+        {this.srcList[this.state.srcListId]?.noView
+          ? null
+          : this.renderVideoView()}
         {this.renderOverlay()}
       </View>
-    )
+    );
   }
-
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -888,4 +834,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VideoPlayer
+export default VideoPlayer;
