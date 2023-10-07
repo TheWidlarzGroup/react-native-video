@@ -408,6 +408,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             mapping[.commonIdentifierDescription] = description
         }
         
+        if let customImageUri = _source?.customImageUri,
+           let imageData = RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
+            mapping[.commonIdentifierArtwork] = imageData
+        }
+        
         if #available(iOS 12.2, *), !mapping.isEmpty {
             playerItem.externalMetadata = RCTVideoUtils.createMetadataItems(for: mapping)
         }

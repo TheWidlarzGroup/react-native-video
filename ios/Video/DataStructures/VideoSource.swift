@@ -12,6 +12,7 @@ struct VideoSource {
     let title: String?
     let subtitle: String?
     let description: String?
+    let customImageUri: String?
     
     let json: NSDictionary?
     
@@ -29,6 +30,7 @@ struct VideoSource {
             self.title = nil
             self.subtitle = nil
             self.description = nil
+            self.customImageUri = nil
             return
         }
         self.json = json
@@ -43,5 +45,6 @@ struct VideoSource {
         self.title = json["title"] as? String
         self.subtitle = json["subtitle"] as? String
         self.description = json["description"] as? String
+        self.customImageUri = json["customImageUri"] as? String
     }
 }
