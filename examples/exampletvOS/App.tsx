@@ -16,6 +16,8 @@ export default function App() {
           title: 'Custom Title',
           subtitle: 'Custom Subtitle',
           description: 'Custom Description',
+          customImageUri:
+            'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
         }}
         style={[styles.fullScreen, StyleSheet.absoluteFillObject]}
         controls

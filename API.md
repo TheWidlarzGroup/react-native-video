@@ -1004,7 +1004,7 @@ Platforms: iOS, Android
 
 ##### Overriding the metadata of a source
 
-Provide an optional `title`, `subtitle`  and/or `description` properties for the video. 
+Provide an optional `title`, `subtitle`, `customImageUri` and/or `description` properties for the video. 
 Useful when to adapt the tvOS playback experience.
 
 Example:
@@ -1014,7 +1014,8 @@ source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', 
     title: 'Custom Title', 
     subtitle: 'Custom Subtitle', 
-    description: 'Custom Description'
+    description: 'Custom Description',
+    customImageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
   }}
 ```
 

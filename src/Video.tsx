@@ -143,6 +143,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         requestHeaders: resolvedSource?.headers || {},
         startTime: resolvedSource.startTime || 0,
         endTime: resolvedSource.endTime,
+        title: resolvedSource.title,
+        subtitle: resolvedSource.subtitle,
+        description: resolvedSource.description,
+        customImageUri: resolvedSource.customImageUri,
       };
     }, [source]);
 

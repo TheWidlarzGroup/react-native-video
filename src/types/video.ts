@@ -33,6 +33,10 @@ export type ReactVideoSource = Readonly<{
   headers?: Headers;
   startTime?: number;
   endTime?: number;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  customImageUri?: string;
 }>;
 
 type DebugConfig = Readonly<{
@@ -91,6 +95,13 @@ type TextTracks = {
   uri: string;
 }[];
 
+type Chapters = {
+  title: string;
+  startTime: number;
+  endTime: number;
+  uri?: string;
+};
+
 export interface ReactVideoProps extends ReactVideoEvents {
   source?: ReactVideoSource;
   drm?: ReactVideoDrm;
@@ -100,6 +111,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   backBufferDurationMs?: number; // Android
   bufferConfig?: BufferConfig; // Android
+  chapters?: Chapters[]; // iOS
   contentStartTime?: number; // Android
   controls?: boolean;
   currentPlaybackTime?: number; // Android
