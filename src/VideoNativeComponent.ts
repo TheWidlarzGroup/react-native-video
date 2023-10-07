@@ -47,7 +47,7 @@ export type DrmType = 'widevine' | 'playready' | 'clearkey' | 'fairplay';
 type DebugConfig = Readonly<{
   enable?: boolean;
   thread?: boolean;
-}>
+}>;
 
 type Drm = Readonly<{
   drmType?: DrmType;
