@@ -482,7 +482,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             _restoreUserInterfaceForPIPStopCompletionHandler
           }
           textTracks={textTracks}
-          // @ts-ignore
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           onGetLicense={onGetLicense}
