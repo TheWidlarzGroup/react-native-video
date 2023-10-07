@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import androidx.annotation.StringDef;
 import android.view.View;
 
+import com.brentvatne.common.API.TimedMetadata;
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
 import com.facebook.react.bridge.Arguments;
@@ -10,10 +11,6 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.emsg.EventMessage;
-import com.google.android.exoplayer2.metadata.id3.Id3Frame;
-import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -382,42 +379,18 @@ class VideoEventEmitter {
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
 
-    void timedMetadata(Metadata metadata) {
+
+    public void timedMetadata(ArrayList<TimedMetadata> _metadataArrayList) {
+        if (_metadataArrayList.size() == 0) {
+            return;
+        }
         WritableArray metadataArray = Arguments.createArray();
 
-        for (int i = 0; i < metadata.length(); i++) {
-            
-            Metadata.Entry entry = metadata.get(i);
-
-            if (entry instanceof Id3Frame) {
-
-                Id3Frame frame = (Id3Frame) entry;
-
-                String value = "";
-
-                if (frame instanceof TextInformationFrame) {
-                    TextInformationFrame txxxFrame = (TextInformationFrame) frame;
-                    value = txxxFrame.value;
-                }
-
-                String identifier = frame.id;
-
-                WritableMap map = Arguments.createMap();
-                map.putString("identifier", identifier);
-                map.putString("value", value);
-
-                metadataArray.pushMap(map);
-                
-            } else if (entry instanceof EventMessage) {
-                
-                EventMessage eventMessage = (EventMessage) entry;
-                
-                WritableMap map = Arguments.createMap();
-                map.putString("identifier", eventMessage.schemeIdUri);
-                map.putString("value", eventMessage.value);
-                metadataArray.pushMap(map);
-                
-            }
+        for (int i = 0; i < _metadataArrayList.size(); i++) {
+            WritableMap map = Arguments.createMap();
+            map.putString("identifier", _metadataArrayList.get(i).m_Identifier);
+            map.putString("value", _metadataArrayList.get(i).m_Value);
+            metadataArray.pushMap(map);
         }
 
         WritableMap event = Arguments.createMap();
