@@ -1,11 +1,11 @@
-package com.brentvatne.exoplayer;
+package com.brentvatne.common.react;
 
 import androidx.annotation.StringDef;
 import android.view.View;
 
 import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.Track;
-import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.API.Track;
+import com.brentvatne.common.API.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
@@ -18,13 +18,13 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-class VideoEventEmitter {
+public class VideoEventEmitter {
 
     private final RCTEventEmitter eventEmitter;
 
     private int viewId = View.NO_ID;
 
-    VideoEventEmitter(ReactContext reactContext) {
+    public VideoEventEmitter(ReactContext reactContext) {
         this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
     }
 
@@ -55,7 +55,7 @@ class VideoEventEmitter {
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
-    static final String[] Events = {
+    static public final String[] Events = {
             EVENT_LOAD_START,
             EVENT_LOAD,
             EVENT_ERROR,
@@ -153,11 +153,11 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
 
-    void setViewId(int viewId) {
+    public void setViewId(int viewId) {
         this.viewId = viewId;
     }
 
-    void loadStart() {
+    public void loadStart() {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
@@ -182,11 +182,11 @@ class VideoEventEmitter {
                 Track format = audioTracks.get(i);
                 WritableMap audioTrack = Arguments.createMap();
                 audioTrack.putInt("index", i);
-                audioTrack.putString("title", format.m_title != null ? format.m_title : "");
-                audioTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                audioTrack.putString("language", format.m_language != null ? format.m_language : "");
-                audioTrack.putInt("bitrate", format.m_bitrate);
-                audioTrack.putBoolean("selected", format.m_isSelected);
+                audioTrack.putString("title", format.getTitle());
+                audioTrack.putString("type", format.getMimeType());
+                audioTrack.putString("language", format.getLanguage());
+                audioTrack.putInt("bitrate", format.getBitrate());
+                audioTrack.putBoolean("selected", format.isSelected());
                 waAudioTracks.pushMap(audioTrack);
             }
         }
@@ -199,12 +199,12 @@ class VideoEventEmitter {
             for (int i = 0; i < videoTracks.size(); ++i) {
                 VideoTrack vTrack = videoTracks.get(i);
                 WritableMap videoTrack = Arguments.createMap();
-                videoTrack.putInt("width", vTrack.m_width);
-                videoTrack.putInt("height",vTrack.m_height);
-                videoTrack.putInt("bitrate", vTrack.m_bitrate);
-                videoTrack.putString("codecs", vTrack.m_codecs);
-                videoTrack.putInt("trackId",vTrack.m_id);
-                videoTrack.putBoolean("selected", vTrack.m_isSelected);
+                videoTrack.putInt("width", vTrack.getWidth());
+                videoTrack.putInt("height",vTrack.getHeight());
+                videoTrack.putInt("bitrate", vTrack.getBitrate());
+                videoTrack.putString("codecs", vTrack.getCodecs());
+                videoTrack.putInt("trackId",vTrack.getId());
+                videoTrack.putBoolean("selected", vTrack.isSelected());
                 waVideoTracks.pushMap(videoTrack);
             }
         }
@@ -218,10 +218,10 @@ class VideoEventEmitter {
                 Track format = textTracks.get(i);
                 WritableMap textTrack = Arguments.createMap();
                 textTrack.putInt("index", i);
-                textTrack.putString("title", format.m_title != null ? format.m_title : "");
-                textTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                textTrack.putString("language", format.m_language != null ? format.m_language : "");
-                textTrack.putBoolean("selected", format.m_isSelected);
+                textTrack.putString("title", format.getTitle());
+                textTrack.putString("type", format.getMimeType());
+                textTrack.putString("language", format.getLanguage());
+                textTrack.putBoolean("selected", format.isSelected());
                 waTextTracks.pushMap(textTrack);
             }
         }
@@ -283,7 +283,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_VIDEO_TRACKS, arrayToObject(EVENT_PROP_VIDEO_TRACKS, videoTracksToArray(videoTracks)));
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
+    public void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
@@ -292,67 +292,67 @@ class VideoEventEmitter {
         receiveEvent(EVENT_PROGRESS, event);
     }
 
-    void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
+    public void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_BITRATE, bitRateEstimate);
         event.putInt(EVENT_PROP_WIDTH, width);
         event.putInt(EVENT_PROP_HEIGHT, height);
         event.putString(EVENT_PROP_TRACK_ID, id);
         receiveEvent(EVENT_BANDWIDTH, event);
-    }    
+    }
 
-    void seek(long currentPosition, long seekTime) {
+    public void seek(long currentPosition, long seekTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_SEEK_TIME, seekTime / 1000D);
         receiveEvent(EVENT_SEEK, event);
     }
 
-    void ready() {
+    public void ready() {
         receiveEvent(EVENT_READY, null);
     }
 
-    void buffering(boolean isBuffering) {
+    public void buffering(boolean isBuffering) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_BUFFERING, isBuffering);
         receiveEvent(EVENT_BUFFER, map);
     }
 
-    void playbackStateChanged(boolean isPlaying) {
+    public void playbackStateChanged(boolean isPlaying) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
         receiveEvent(EVENT_PLAYBACK_STATE_CHANGED, map);
     }
 
-    void idle() {
+    public void idle() {
         receiveEvent(EVENT_IDLE, null);
     }
 
-    void end() {
+    public void end() {
         receiveEvent(EVENT_END, null);
     }
 
-    void fullscreenWillPresent() {
+    public void fullscreenWillPresent() {
         receiveEvent(EVENT_FULLSCREEN_WILL_PRESENT, null);
     }
 
-    void fullscreenDidPresent() {
+    public void fullscreenDidPresent() {
         receiveEvent(EVENT_FULLSCREEN_DID_PRESENT, null);
     }
 
-    void fullscreenWillDismiss() {
+    public void fullscreenWillDismiss() {
         receiveEvent(EVENT_FULLSCREEN_WILL_DISMISS, null);
     }
 
-    void fullscreenDidDismiss() {
+    public void fullscreenDidDismiss() {
         receiveEvent(EVENT_FULLSCREEN_DID_DISMISS, null);
     }
 
-    void error(String errorString, Exception exception) {
+    public void error(String errorString, Exception exception) {
         _error(errorString, exception, "0001");
     }
 
-    void error(String errorString, Exception exception, String errorCode) {
+    public void error(String errorString, Exception exception, String errorCode) {
         _error(errorString, exception, errorCode);
     }
 
@@ -373,7 +373,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_ERROR, event);
     }
 
-    void playbackRateChange(float rate) {
+    public void playbackRateChange(float rate) {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
@@ -388,8 +388,8 @@ class VideoEventEmitter {
 
         for (int i = 0; i < _metadataArrayList.size(); i++) {
             WritableMap map = Arguments.createMap();
-            map.putString("identifier", _metadataArrayList.get(i).m_Identifier);
-            map.putString("value", _metadataArrayList.get(i).m_Value);
+            map.putString("identifier", _metadataArrayList.get(i).getIdentifier());
+            map.putString("value", _metadataArrayList.get(i).getValue());
             metadataArray.pushMap(map);
         }
 
@@ -398,17 +398,17 @@ class VideoEventEmitter {
         receiveEvent(EVENT_TIMED_METADATA, event);
     }
 
-    void audioFocusChanged(boolean hasFocus) {
+    public void audioFocusChanged(boolean hasFocus) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_HAS_AUDIO_FOCUS, hasFocus);
         receiveEvent(EVENT_AUDIO_FOCUS_CHANGE, map);
     }
 
-    void audioBecomingNoisy() {
+    public void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
     }
 
-    void receiveAdEvent(String event) {
+    public void receiveAdEvent(String event) {
         WritableMap map = Arguments.createMap();
         map.putString("event", event);
 
