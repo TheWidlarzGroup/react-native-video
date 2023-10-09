@@ -438,28 +438,4 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
         return ResizeMode.RESIZE_MODE_FIT;
     }
-
-    /**
-     * toStringMap converts a {@link ReadableMap} into a HashMap.
-     *
-     * @param readableMap The ReadableMap to be conveted.
-     * @return A HashMap containing the data that was in the ReadableMap.
-     * @see 'Adapted from https://github.com/artemyarulin/react-native-eval/blob/master/android/src/main/java/com/evaluator/react/ConversionUtil.java'
-     */
-    public static Map<String, String> toStringMap(@Nullable ReadableMap readableMap) {
-        if (readableMap == null)
-            return null;
-
-        com.facebook.react.bridge.ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
-        if (!iterator.hasNextKey())
-            return null;
-
-        Map<String, String> result = new HashMap<>();
-        while (iterator.hasNextKey()) {
-            String key = iterator.nextKey();
-            result.put(key, readableMap.getString(key));
-        }
-
-        return result;
-    }
 }
