@@ -408,6 +408,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             mapping[.commonIdentifierDescription] = description
         }
         
+        if let customImageUri = _source?.customImageUri,
+           let imageData = RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
+            mapping[.commonIdentifierArtwork] = imageData
+        }
+        
         if #available(iOS 12.2, *), !mapping.isEmpty {
             playerItem.externalMetadata = RCTVideoUtils.createMetadataItems(for: mapping)
         }
@@ -581,7 +586,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers, audioOutput:_audioOutput)
         do {
             if audioOutput == "speaker" {
+                #if os(iOS)
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+                #endif
             } else if audioOutput == "earpiece" {
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
             }
@@ -822,7 +829,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         viewController.view.frame = self.bounds
         viewController.player = player
-        viewController.allowsPictureInPicturePlayback = true
+        if #available(tvOS 14.0, *) {
+            viewController.allowsPictureInPicturePlayback = true
+        }
         return viewController
     }
 
@@ -1031,12 +1040,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func setLicenseResult(_ license:String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license)
+    func setLicenseResult(_ license:String!, _ licenseUrl: String!) {
+        _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
     }
 
-    func setLicenseResultError(_ error:String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error)
+    func setLicenseResultError(_ error:String!, _ licenseUrl: String!) {
+        _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
     }
 
     func dismissFullscreenPlayer(_ error:String!) {

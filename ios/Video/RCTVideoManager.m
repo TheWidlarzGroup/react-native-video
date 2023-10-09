@@ -69,10 +69,12 @@ RCT_EXTERN_METHOD(save:(NSDictionary *)options
         rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
+         licenseUrl:(NSString *)licenseUrl
          reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
-                 reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(setLicenseResultError:(NSString *)error
+         licenseUrl:(NSString *)licenseUrl
+         reactTag:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(setPlayerPauseState:(nonnull NSNumber *)paused
                  reactTag:(nonnull NSNumber *)reactTag)
