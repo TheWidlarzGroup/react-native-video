@@ -191,13 +191,13 @@ enum RCTPlayerOperations {
         }
     }
 
-    static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String) {
+    static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String, audioOutput:String) {
         let audioSession:AVAudioSession! = AVAudioSession.sharedInstance()
         var category:AVAudioSession.Category? = nil
         var options:AVAudioSession.CategoryOptions? = nil
 
         if (ignoreSilentSwitch == "ignore") {
-            category = AVAudioSession.Category.playAndRecord
+            category = audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback
         } else if (ignoreSilentSwitch == "obey") {
             category = AVAudioSession.Category.ambient
         }
@@ -221,7 +221,7 @@ enum RCTPlayerOperations {
                 if #available(iOS 16.0, *) {
                     do {
                         debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
-                        try audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
+                        try audioSession.setCategory(audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
                     } catch {
                         debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
                     }
