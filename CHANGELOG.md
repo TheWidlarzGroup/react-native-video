@@ -1,6 +1,7 @@
 ## Changelog
 
 ## Next
+- iOS: Fix audio session category when not using the audioOutput prop
 - All: add built-in typescript support [#3266](https://github.com/react-native-video/react-native-video/pull/3266)
 - iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
 - Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
