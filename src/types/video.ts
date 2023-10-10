@@ -39,6 +39,11 @@ export type ReactVideoSource = Readonly<{
   customImageUri?: string;
 }>;
 
+type DebugConfig = Readonly<{
+  enable?: boolean;
+  thread?: boolean;
+}>;
+
 export type ReactVideoDrm = Readonly<{
   type?: 'widevine' | 'playready' | 'clearkey' | 'fairplay';
   licenseServer?: string;
@@ -153,4 +158,5 @@ export interface ReactVideoProps extends ReactVideoEvents {
   useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
+  debug?: DebugConfig;
 }

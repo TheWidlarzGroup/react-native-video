@@ -301,6 +301,7 @@ var styles = StyleSheet.create({
 | [contentStartTime](#contentstarttime)                                               | Android                   |
 | [controls](#controls)                                                               | Android, iOS              |
 | [currentPlaybackTime](#currentplaybacktime)                                         | Android                   |
+| [debug](#debug)                                                                     | Android                   |
 | [disableFocus](#disablefocus)                                                       | Android, iOS              |
 | [disableDisconnectError](#disabledisconnecterror)                                   | Android                   |
 | [filter](#filter)                                                                   | iOS                       |
@@ -496,6 +497,28 @@ If needed, you can also add your controls or use a package like [react-native-vi
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
 Platforms: Android, iOS
+
+#### debug
+
+Enable more verbosity in logs.
+
+> [!WARNING]
+> Do not use this open in production build
+
+| Property                | Type   | Description                                                                                 |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------- |
+| enable | boolean    | when true, display logs with verbosity higher |
+| thread | boolean    | enable thread display  |
+
+
+Example with default values:
+```
+debug={{
+  enable: true,
+  thread: true,
+}}
+```
+Platforms: Android
 
 #### disableFocus
 Determines whether video audio should override background music/audio in Android devices.

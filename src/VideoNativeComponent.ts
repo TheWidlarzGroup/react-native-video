@@ -48,6 +48,11 @@ export type Filter =
 
 export type DrmType = 'widevine' | 'playready' | 'clearkey' | 'fairplay';
 
+type DebugConfig = Readonly<{
+  enable?: boolean;
+  thread?: boolean;
+}>;
+
 type Drm = Readonly<{
   drmType?: DrmType;
   licenseServer?: string;
@@ -262,6 +267,7 @@ export interface VideoNativeProps extends ViewProps {
   progressUpdateInterval?: number;
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   localSourceEncryptionKeyScheme?: string;
+  debug?: DebugConfig;
 
   backBufferDurationMs?: number; // Android
   bufferConfig?: BufferConfig; // Android
