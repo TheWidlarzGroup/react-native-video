@@ -121,12 +121,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @Override
     public @Nullable Map<String, Object> getExportedViewConstants() {
-        return MapBuilder.<String, Object>of(
-                "ScaleNone", Integer.toString(ResizeMode.RESIZE_MODE_FIT),
-                "ScaleAspectFit", Integer.toString(ResizeMode.RESIZE_MODE_FIT),
-                "ScaleToFill", Integer.toString(ResizeMode.RESIZE_MODE_FILL),
-                "ScaleAspectFill", Integer.toString(ResizeMode.RESIZE_MODE_CENTER_CROP)
-        );
+        return MapBuilder.of();
     }
 
     @ReactProp(name = PROP_DRM)
@@ -212,8 +207,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
 
     @ReactProp(name = PROP_RESIZE_MODE)
-    public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
-        videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
+    public void setResizeMode(final ReactExoplayerView videoView, final String resizeMode) {
+        switch (resizeMode) {
+            case "cover":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_CENTER_CROP);
+                break;
+            case "stretch":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FILL);
+                break;
+            default:
+                // Handle also for "none" or "contain"
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
+                break;
+        }
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
@@ -429,13 +435,5 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 || lowerCaseUri.startsWith("content://")
                 || lowerCaseUri.startsWith("file://")
                 || lowerCaseUri.startsWith("asset://");
-    }
-
-    private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
-        if (!TextUtils.isEmpty(resizeModeOrdinalString)) {
-            int resizeModeOrdinal = Integer.parseInt(resizeModeOrdinalString);
-            return ResizeMode.toResizeMode(resizeModeOrdinal);
-        }
-        return ResizeMode.RESIZE_MODE_FIT;
     }
 }

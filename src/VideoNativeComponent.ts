@@ -233,15 +233,13 @@ export type OnVideoErrorData = Readonly<{
 export type OnAudioFocusChangedData = Readonly<{
   hasFocus: boolean;
 }>;
-
-export type NativeVideoResizeMode = unknown;
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: number;
-  resizeMode?: NativeVideoResizeMode;
+  resizeMode?: 'none' | 'cover' | 'contain' | 'stretch';
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
@@ -365,12 +363,7 @@ export interface VideoDecoderPropertiesType {
 }
 
 export type VideoViewManagerConfig = {
-  Constants: {
-    ScaleNone: unknown;
-    ScaleToFill: unknown;
-    ScaleAspectFit: unknown;
-    ScaleAspectFill: unknown;
-  };
+  Constants: Record<string, never>;
   Commands: {[key: string]: number};
 };
 
