@@ -1,4 +1,4 @@
-package com.brentvatne.exoplayer;
+package com.brentvatne.common.react;
 
 import androidx.annotation.StringDef;
 import android.view.View;
@@ -18,13 +18,13 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-class VideoEventEmitter {
+public class VideoEventEmitter {
 
     private final RCTEventEmitter eventEmitter;
 
     private int viewId = View.NO_ID;
 
-    VideoEventEmitter(ReactContext reactContext) {
+    public VideoEventEmitter(ReactContext reactContext) {
         this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
     }
 
@@ -55,7 +55,7 @@ class VideoEventEmitter {
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
-    static final String[] Events = {
+    public static final String[] Events = {
             EVENT_LOAD_START,
             EVENT_LOAD,
             EVENT_ERROR,
@@ -153,11 +153,11 @@ class VideoEventEmitter {
 
     private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
 
-    void setViewId(int viewId) {
+    public void setViewId(int viewId) {
         this.viewId = viewId;
     }
 
-    void loadStart() {
+    public void loadStart() {
         receiveEvent(EVENT_LOAD_START, null);
     }
 
@@ -238,7 +238,7 @@ class VideoEventEmitter {
     }
 
 
-    private void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+    public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
               WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
@@ -283,7 +283,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_VIDEO_TRACKS, arrayToObject(EVENT_PROP_VIDEO_TRACKS, videoTracksToArray(videoTracks)));
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
+    public void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
@@ -292,67 +292,67 @@ class VideoEventEmitter {
         receiveEvent(EVENT_PROGRESS, event);
     }
 
-    void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
+    public void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_BITRATE, bitRateEstimate);
         event.putInt(EVENT_PROP_WIDTH, width);
         event.putInt(EVENT_PROP_HEIGHT, height);
         event.putString(EVENT_PROP_TRACK_ID, id);
         receiveEvent(EVENT_BANDWIDTH, event);
-    }    
+    }
 
-    void seek(long currentPosition, long seekTime) {
+    public void seek(long currentPosition, long seekTime) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_SEEK_TIME, seekTime / 1000D);
         receiveEvent(EVENT_SEEK, event);
     }
 
-    void ready() {
+    public void ready() {
         receiveEvent(EVENT_READY, null);
     }
 
-    void buffering(boolean isBuffering) {
+    public void buffering(boolean isBuffering) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_BUFFERING, isBuffering);
         receiveEvent(EVENT_BUFFER, map);
     }
 
-    void playbackStateChanged(boolean isPlaying) {
+    public void playbackStateChanged(boolean isPlaying) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_IS_PLAYING, isPlaying);
         receiveEvent(EVENT_PLAYBACK_STATE_CHANGED, map);
     }
 
-    void idle() {
+    public void idle() {
         receiveEvent(EVENT_IDLE, null);
     }
 
-    void end() {
+    public void end() {
         receiveEvent(EVENT_END, null);
     }
 
-    void fullscreenWillPresent() {
+    public void fullscreenWillPresent() {
         receiveEvent(EVENT_FULLSCREEN_WILL_PRESENT, null);
     }
 
-    void fullscreenDidPresent() {
+    public void fullscreenDidPresent() {
         receiveEvent(EVENT_FULLSCREEN_DID_PRESENT, null);
     }
 
-    void fullscreenWillDismiss() {
+    public void fullscreenWillDismiss() {
         receiveEvent(EVENT_FULLSCREEN_WILL_DISMISS, null);
     }
 
-    void fullscreenDidDismiss() {
+    public void fullscreenDidDismiss() {
         receiveEvent(EVENT_FULLSCREEN_DID_DISMISS, null);
     }
 
-    void error(String errorString, Exception exception) {
+    public void error(String errorString, Exception exception) {
         _error(errorString, exception, "0001");
     }
 
-    void error(String errorString, Exception exception, String errorCode) {
+    public void error(String errorString, Exception exception, String errorCode) {
         _error(errorString, exception, errorCode);
     }
 
@@ -373,7 +373,7 @@ class VideoEventEmitter {
         receiveEvent(EVENT_ERROR, event);
     }
 
-    void playbackRateChange(float rate) {
+    public void playbackRateChange(float rate) {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
@@ -398,17 +398,17 @@ class VideoEventEmitter {
         receiveEvent(EVENT_TIMED_METADATA, event);
     }
 
-    void audioFocusChanged(boolean hasFocus) {
+    public void audioFocusChanged(boolean hasFocus) {
         WritableMap map = Arguments.createMap();
         map.putBoolean(EVENT_PROP_HAS_AUDIO_FOCUS, hasFocus);
         receiveEvent(EVENT_AUDIO_FOCUS_CHANGE, map);
     }
 
-    void audioBecomingNoisy() {
+    public void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
     }
 
-    void receiveAdEvent(String event) {
+    public void receiveAdEvent(String event) {
         WritableMap map = Arguments.createMap();
         map.putString("event", event);
 

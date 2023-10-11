@@ -28,6 +28,7 @@ import androidx.activity.OnBackPressedCallback;
 import com.brentvatne.common.API.TimedMetadata;
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
