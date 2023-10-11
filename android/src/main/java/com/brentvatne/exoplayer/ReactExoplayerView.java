@@ -22,14 +22,17 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
 
+import com.brentvatne.common.API.ResizeMode;
+import com.brentvatne.common.API.SubtitleStyle;
 import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.Track;
-import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.API.Track;
+import com.brentvatne.common.API.VideoTrack;
+import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
-import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -93,7 +96,6 @@ import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.dash.manifest.Period;
 import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
 import com.google.android.exoplayer2.source.dash.manifest.Representation;
-import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.emsg.EventMessage;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
@@ -185,7 +187,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
     private double minBackBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE;
     private double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-    private Handler mainHandler;
 
     // Props from React
     private int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
@@ -307,8 +308,6 @@ public class ReactExoplayerView extends FrameLayout implements
         addView(exoPlayerView, 0, layoutParams);
 
         exoPlayerView.setFocusable(this.focusable);
-
-        mainHandler = new Handler();
     }
 
     @Override
@@ -490,7 +489,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * Update the layout
      * @param view  view needs to update layout
      *
-     * This is a workaround for the open bug in react-native: https://github.com/facebook/react-native/issues/17968
+     * This is a workaround for the open bug in react-native: <a href="https://github.com/facebook/react-native/issues/17968">...</a>
      */
     private void reLayout(View view) {
         if (view == null) return;
@@ -500,8 +499,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
-        private int availableHeapInBytes = 0;
-        private Runtime runtime;
+        private final int availableHeapInBytes;
+        private final Runtime runtime;
         public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
             super(allocator,
                     minBufferMs,
@@ -513,7 +512,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     backBufferDurationMs,
                     retainBackBufferFromKeyframe);
             runtime = Runtime.getRuntime();
-            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
+            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
             availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
         }
 
@@ -542,13 +541,6 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
         }
-    }
-
-    private void startBufferCheckTimer() {
-        Player player = this.player;
-        VideoEventEmitter eventEmitter = this.eventEmitter;
-        Handler mainHandler = this.mainHandler;
-
     }
 
     private void initializePlayer() {
@@ -739,7 +731,6 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayerControl();
         setControls(controls);
         applyModifiers();
-        startBufferCheckTimer();
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -772,7 +763,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
                 return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, ++retryCount);
             }
-            // Handle the unknow exception and emit to JS
+            // Handle the unknown exception and emit to JS
             eventEmitter.error(ex.toString(), ex, "3006");
             return null;
         }
@@ -795,8 +786,8 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         MediaItem mediaItem = mediaItemBuilder.build();
-        MediaSource mediaSource = null;
-        DrmSessionManagerProvider drmProvider = null;
+        MediaSource mediaSource;
+        DrmSessionManagerProvider drmProvider;
         if (drmSessionManager != null) {
             drmProvider = new DrmSessionManagerProvider() {
                 @Override
@@ -873,9 +864,7 @@ public class ReactExoplayerView extends FrameLayout implements
             Uri uri = Uri.parse(textTrack.getString("uri"));
             MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
                     language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
+            textSources.add(textSource);
         }
         return textSources;
     }
@@ -1079,7 +1068,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onEvents(Player player, Player.Events events) {
+    public void onEvents(@NonNull Player player, Player.Events events) {
         if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) || events.contains(Player.EVENT_PLAY_WHEN_READY_CHANGED)) {
             int playbackState = player.getPlaybackState();
             boolean playWhenReady = player.getPlayWhenReady();
@@ -1127,6 +1116,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 text += "unknown";
                 break;
             }
+            DebugLog.d(TAG, "state changed " + text);
         }
     }
 
@@ -1216,16 +1206,21 @@ public class ReactExoplayerView extends FrameLayout implements
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
             Format format = group.getFormat(0);
-            Track audioTrack = new Track();
-            audioTrack.m_index = i;
-            audioTrack.m_title = format.id != null ? format.id : "";
-            audioTrack.m_mimeType = format.sampleMimeType;
-            audioTrack.m_language = format.language != null ? format.language : "";
-            audioTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-            audioTrack.m_isSelected = isTrackSelected(selection, group, 0 );
+            Track audioTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
+            audioTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
             audioTracks.add(audioTrack);
         }
         return audioTracks;
+    }
+
+    private VideoTrack exoplayerVideoTrackToGenericVideoTrack(Format format, int trackIndex) {
+        VideoTrack videoTrack = new VideoTrack();
+        videoTrack.setWidth(format.width == Format.NO_VALUE ? 0 : format.width);
+        videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
+        videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+        if (format.codecs != null) videoTrack.setCodecs(format.codecs);
+        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
+        return videoTrack;
     }
 
     private ArrayList<VideoTrack> getVideoTrackInfo() {
@@ -1247,12 +1242,7 @@ public class ReactExoplayerView extends FrameLayout implements
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
                 if (isFormatSupported(format)) {
-                    VideoTrack videoTrack = new VideoTrack();
-                    videoTrack.m_width = format.width == Format.NO_VALUE ? 0 : format.width;
-                    videoTrack.m_height = format.height == Format.NO_VALUE ? 0 : format.height;
-                    videoTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-                    videoTrack.m_codecs = format.codecs != null ? format.codecs : "";
-                    videoTrack.m_trackId = format.id == null ? String.valueOf(trackIndex) : format.id;
+                    VideoTrack videoTrack = exoplayerVideoTrackToGenericVideoTrack(format, trackIndex);
                     videoTracks.add(videoTrack);
                 }
             }
@@ -1264,7 +1254,7 @@ public class ReactExoplayerView extends FrameLayout implements
         return this.getVideoTrackInfoFromManifest(0);
     }
 
-    // We need retry count to in case where minefest request fails from poor network conditions
+    // We need retry count to in case where manifest request fails from poor network conditions
     @WorkerThread
     private ArrayList<VideoTrack> getVideoTrackInfoFromManifest(int retryCount) {
         ExecutorService es = Executors.newSingleThreadExecutor();
@@ -1272,12 +1262,12 @@ public class ReactExoplayerView extends FrameLayout implements
         final Uri sourceUri = this.srcUri;
         final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
 
-        Future<ArrayList<VideoTrack>> result = es.submit(new Callable<ArrayList<VideoTrack>>() {
-            DataSource ds = dataSource;
-            Uri uri = sourceUri;
-            long startTimeUs = startTime * 1000; // ms -> us
+        Future<ArrayList<VideoTrack>> result = es.submit(new Callable<>() {
+            final DataSource ds = dataSource;
+            final Uri uri = sourceUri;
+            final long startTimeUs = startTime * 1000; // ms -> us
 
-            public ArrayList<VideoTrack> call() throws Exception {
+            public ArrayList<VideoTrack> call() {
                 ArrayList<VideoTrack> videoTracks = new ArrayList<>();
                 try  {
                     DashManifest manifest = DashUtil.loadManifest(this.ds, this.uri);
@@ -1298,12 +1288,7 @@ public class ReactExoplayerView extends FrameLayout implements
                                         break;
                                     }
                                     hasFoundContentPeriod = true;
-                                    VideoTrack videoTrack = new VideoTrack();
-                                    videoTrack.m_width = format.width == Format.NO_VALUE ? 0 : format.width;
-                                    videoTrack.m_height = format.height == Format.NO_VALUE ? 0 : format.height;
-                                    videoTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-                                    videoTrack.m_codecs = format.codecs != null ? format.codecs : "";
-                                    videoTrack.m_trackId = format.id == null ? String.valueOf(representationIndex) : format.id;
+                                    VideoTrack videoTrack = exoplayerVideoTrackToGenericVideoTrack(format, representationIndex);
                                     videoTracks.add(videoTrack);
                                 }
                             }
@@ -1312,7 +1297,9 @@ public class ReactExoplayerView extends FrameLayout implements
                             }
                         }
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    DebugLog.e(TAG, "getVideoTrackInfoFromManifest during loading: " + e.getMessage());
+                }
                 return null;
             }
         });
@@ -1324,9 +1311,22 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             es.shutdown();
             return results;
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DebugLog.e(TAG, "getVideoTrackInfoFromManifest getting getVideoTrackInfoFromManifest: " + e.getMessage());
+        }
 
         return null;
+    }
+
+
+    private Track exoplayerTrackToGenericTrack(Format format, int trackIndex, TrackSelection selection, TrackGroup group) {
+        Track track = new Track();
+        track.setIndex(trackIndex);
+        if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
+        if (format.language != null) track.setLanguage(format.language);
+        if (format.id != null) track.setTitle(format.id);
+        track.setSelected(isTrackSelected(selection, group, 0));
+        return track;
     }
 
     private ArrayList<Track> getTextTrackInfo() {
@@ -1346,13 +1346,7 @@ public class ReactExoplayerView extends FrameLayout implements
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
             Format format = group.getFormat(0);
-
-            Track textTrack = new Track();
-            textTrack.m_index = i;
-            textTrack.m_title = format.id != null ? format.id : "";
-            textTrack.m_mimeType = format.sampleMimeType;
-            textTrack.m_language = format.language != null ? format.language : "";
-            textTrack.m_isSelected = isTrackSelected(selection, group, 0 );
+            Track textTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
             textTracks.add(textTrack);
         }
         return textTracks;
@@ -1364,11 +1358,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         isBuffering = buffering;
-        if (buffering) {
-            eventEmitter.buffering(true);
-        } else {
-            eventEmitter.buffering(false);
-        }
+        eventEmitter.buffering(buffering);
     }
 
     @Override
@@ -1443,8 +1433,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         String errorString = "ExoPlaybackException: " + PlaybackException.getErrorCodeName(e.errorCode);
-        String errorCode = "2" + String.valueOf(e.errorCode);
-        boolean needsReInitialization = false;
+        String errorCode = "2" + e.errorCode;
         switch(e.errorCode) {
             case PlaybackException.ERROR_CODE_DRM_DEVICE_REVOKED:
             case PlaybackException.ERROR_CODE_DRM_LICENSE_ACQUISITION_FAILED:
@@ -1471,9 +1460,6 @@ public class ReactExoplayerView extends FrameLayout implements
             initializePlayer();
         } else {
             updateResumePosition();
-            if (needsReInitialization) {
-                initializePlayer();
-            }
         }
     }
 
@@ -1508,19 +1494,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     TextInformationFrame txxxFrame = (TextInformationFrame) frame;
                     value = txxxFrame.value;
                 }
-
-                String identifier = frame.id;
-
-                TimedMetadata timedMetadata = new TimedMetadata();
-                timedMetadata.m_Identifier = identifier;
-                timedMetadata.m_Value = value;
-
+                TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
                 metadataArray.add(timedMetadata);
             } else if (entry instanceof EventMessage) {
                 EventMessage eventMessage = (EventMessage) entry;
-                TimedMetadata timedMetadata = new TimedMetadata();
-                timedMetadata.m_Identifier = eventMessage.schemeIdUri;
-                timedMetadata.m_Value = eventMessage.value;
+                TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
                 metadataArray.add(timedMetadata);
             } else {
                 DebugLog.d(TAG, "unhandled metadata " + entry.toString());
@@ -1738,16 +1716,15 @@ public class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new ArrayList<Integer>(group.length);
-            ArrayList<Integer> allTracks = new ArrayList<Integer>(group.length);
+            ArrayList<Integer> allTracks = new ArrayList<>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
                 allTracks.add(j);
             }
 
-            // Valiate list of all tracks and add only supported formats
+            // Validate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
-            ArrayList<Integer> supportedTrackList = new ArrayList<Integer>();
+            ArrayList<Integer> supportedTrackList = new ArrayList<>();
             for (int g = 0; g < allTracks.size(); g++) {
                 Format format = group.getFormat(g);
                 if (isFormatSupported(format)) {
@@ -1793,7 +1770,7 @@ public class ReactExoplayerView extends FrameLayout implements
         if (mimeType == null) {
             return true;
         }
-        boolean isSupported = false;
+        boolean isSupported;
         try {
             MediaCodecInfo codecInfo = MediaCodecUtil.getDecoderInfo(mimeType, false, false);
             isSupported = codecInfo.isVideoSizeAndRateSupportedV21(width, height, frameRate);
