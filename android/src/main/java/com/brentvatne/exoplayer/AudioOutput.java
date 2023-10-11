@@ -1,9 +1,6 @@
 package com.brentvatne.exoplayer;
 
 import android.annotation.SuppressLint;
-
-import androidx.annotation.NonNull;
-
 import com.google.android.exoplayer2.C;
 
 @SuppressLint("InlinedApi")
@@ -31,7 +28,6 @@ public enum AudioOutput {
         return streamType;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" + this.mName + ", " + streamType + ")";

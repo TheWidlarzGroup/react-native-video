@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
@@ -11,8 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.brentvatne.common.API.ResizeMode;
-import com.brentvatne.common.API.SubtitleStyle;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
