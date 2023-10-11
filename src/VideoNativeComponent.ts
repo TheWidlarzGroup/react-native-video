@@ -53,7 +53,7 @@ type DebugConfig = Readonly<{
 }>;
 
 type Drm = Readonly<{
-  drmType?: DrmType;
+  type?: DrmType;
   licenseServer?: string;
   headers?: Headers;
   contentId?: string; // ios
@@ -74,17 +74,15 @@ type TextTracks = ReadonlyArray<
 type TextTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 
 type SelectedTextTrack = Readonly<{
-  selectedTextType: TextTrackType;
-  value?: string;
-  index?: number;
+  type: TextTrackType;
+  value?: string | number;
 }>;
 
 type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
 
 type SelectedAudioTrack = Readonly<{
-  selectedAudioType: AudioTrackType;
-  value?: string;
-  index?: number;
+  type: AudioTrackType;
+  value?: string | number;
 }>;
 
 export type Seek = Readonly<{
@@ -146,7 +144,6 @@ export type OnBandwidthUpdateData = Readonly<{
 export type OnSeekData = Readonly<{
   currentTime: number;
   seekTime: number;
-  finished: boolean;
 }>;
 
 export type OnPlaybackStateChangedData = Readonly<{
