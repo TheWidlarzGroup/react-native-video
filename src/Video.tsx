@@ -60,6 +60,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       fullscreen,
       drm,
       textTracks,
+      selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
       onLoadStart,
@@ -167,8 +168,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!drm) {
         return;
       }
+
       return {
-        drmType: drm.type,
+        type: drm.type,
         licenseServer: drm.licenseServer,
         headers: drm.headers,
         contentId: drm.contentId,
@@ -182,14 +184,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
-      if (typeof selectedTextTrack?.value === 'number') {
-        return {
-          selectedTextType: selectedTextTrack?.type,
-          index: selectedTextTrack?.value,
-        };
-      }
+
       return {
-        selectedTextType: selectedTextTrack?.type,
+        type: selectedTextTrack?.type,
         value: selectedTextTrack?.value,
       };
     }, [selectedTextTrack]);
@@ -198,17 +195,23 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
-      if (typeof selectedAudioTrack?.value === 'number') {
-        return {
-          selectedAudioType: selectedAudioTrack?.type,
-          index: selectedAudioTrack?.value,
-        };
-      }
+
       return {
-        selectedAudioType: selectedAudioTrack?.type,
+        type: selectedAudioTrack?.type,
         value: selectedAudioTrack?.value,
       };
     }, [selectedAudioTrack]);
+
+    const _selectedVideoTrack = useMemo(() => {
+      if (!selectedVideoTrack) {
+        return;
+      }
+
+      return {
+        type: selectedVideoTrack?.type,
+        value: selectedVideoTrack?.value,
+      };
+    }, [selectedVideoTrack]);
 
     const seek = useCallback(async (time: number, tolerance?: number) => {
       if (isNaN(time)) {
@@ -484,6 +487,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           textTracks={textTracks}
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
+          selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={onGetLicense}
           onVideoLoad={onVideoLoad}
           onVideoLoadStart={onVideoLoadStart}
