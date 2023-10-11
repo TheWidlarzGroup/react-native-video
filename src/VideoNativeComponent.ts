@@ -4,7 +4,6 @@ import type {
   ViewProps,
 } from 'react-native';
 import {NativeModules, requireNativeComponent} from 'react-native';
-import {getViewManagerConfig} from './utils';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -233,15 +232,13 @@ export type OnVideoErrorData = Readonly<{
 export type OnAudioFocusChangedData = Readonly<{
   hasFocus: boolean;
 }>;
-
-export type NativeVideoResizeMode = unknown;
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: number;
-  resizeMode?: NativeVideoResizeMode;
+  resizeMode?: 'none' | 'cover' | 'contain' | 'stretch';
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
@@ -364,22 +361,9 @@ export interface VideoDecoderPropertiesType {
   isHEVCSupported: () => Promise<'unsupported' | 'hardware' | 'software'>;
 }
 
-export type VideoViewManagerConfig = {
-  Constants: {
-    ScaleNone: unknown;
-    ScaleToFill: unknown;
-    ScaleAspectFit: unknown;
-    ScaleAspectFill: unknown;
-  };
-  Commands: {[key: string]: number};
-};
-
 export const VideoManager = NativeModules.VideoManager as VideoManagerType;
 export const VideoDecoderProperties =
   NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
-export const RCTVideoConstants = (
-  getViewManagerConfig('RCTVideo') as VideoViewManagerConfig
-).Constants;
 
 export default requireNativeComponent<VideoNativeProps>(
   'RCTVideo',

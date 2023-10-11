@@ -56,7 +56,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playWhenInactive:Bool = false
     private var _ignoreSilentSwitch:String! = "inherit" // inherit, ignore, obey
     private var _mixWithOthers:String! = "inherit" // inherit, mix, duck
-    private var _resizeMode:String! = "AVLayerVideoGravityResizeAspectFill"
+    private var _resizeMode:String! = "cover"
     private var _fullscreen:Bool = false
     private var _fullscreenAutorotate:Bool = true
     private var _fullscreenOrientation:String! = "all"
@@ -429,12 +429,32 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Prop setters
 
     @objc
-    func setResizeMode(_ mode: String?) {
-        if _controls {
-            _playerViewController?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
-        } else {
-            _playerLayer?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
+    func setResizeMode(_ mode: String) {
+        var resizeMode: AVLayerVideoGravity = .resizeAspect
+        
+        switch mode {
+        case "contain":
+            resizeMode = .resizeAspect
+            break
+        case "none":
+            resizeMode = .resizeAspect
+            break
+        case "cover":
+            resizeMode = .resizeAspectFill
+            break
+        case "stretch":
+            resizeMode = .resize
+            break
+        default:
+            resizeMode = .resizeAspect
         }
+        
+        if _controls {
+            _playerViewController?.videoGravity = resizeMode
+        } else {
+            _playerLayer?.videoGravity = resizeMode
+        }
+        
         _resizeMode = mode
     }
 

@@ -8,9 +8,8 @@ import React, {
   type ComponentRef,
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
-import NativeVideoComponent, {RCTVideoConstants} from './VideoNativeComponent';
+import NativeVideoComponent from './VideoNativeComponent';
 import type {
-  NativeVideoResizeMode,
   OnAudioFocusChangedData,
   OnAudioTracksData,
   OnPlaybackStateChangedData,
@@ -149,19 +148,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         customImageUri: resolvedSource.customImageUri,
       };
     }, [source]);
-
-    const _resizeMode: NativeVideoResizeMode = useMemo(() => {
-      switch (resizeMode) {
-        case 'contain':
-          return RCTVideoConstants.ScaleAspectFit;
-        case 'cover':
-          return RCTVideoConstants.ScaleAspectFill;
-        case 'stretch':
-          return RCTVideoConstants.ScaleToFill;
-        default:
-          return RCTVideoConstants.ScaleNone;
-      }
-    }, [resizeMode]);
 
     const _drm = useMemo(() => {
       if (!drm) {
@@ -476,7 +462,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           src={src}
           drm={_drm}
           style={StyleSheet.absoluteFill}
-          resizeMode={_resizeMode}
+          resizeMode={resizeMode}
           fullscreen={isFullscreen}
           restoreUserInterfaceForPIPStopCompletionHandler={
             _restoreUserInterfaceForPIPStopCompletionHandler

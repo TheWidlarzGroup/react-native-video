@@ -119,16 +119,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         return builder.build();
     }
 
-    @Override
-    public @Nullable Map<String, Object> getExportedViewConstants() {
-        return MapBuilder.<String, Object>of(
-                "ScaleNone", Integer.toString(ResizeMode.RESIZE_MODE_FIT),
-                "ScaleAspectFit", Integer.toString(ResizeMode.RESIZE_MODE_FIT),
-                "ScaleToFill", Integer.toString(ResizeMode.RESIZE_MODE_FILL),
-                "ScaleAspectFill", Integer.toString(ResizeMode.RESIZE_MODE_CENTER_CROP)
-        );
-    }
-
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
@@ -212,8 +202,23 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
 
     @ReactProp(name = PROP_RESIZE_MODE)
-    public void setResizeMode(final ReactExoplayerView videoView, final String resizeModeOrdinalString) {
-        videoView.setResizeModeModifier(convertToIntDef(resizeModeOrdinalString));
+    public void setResizeMode(final ReactExoplayerView videoView, final String resizeMode) {
+        switch (resizeMode) {
+            case "none":
+            case "contain":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
+                break;
+            case "cover":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_CENTER_CROP);
+                break;
+            case "stretch":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FILL);
+                break;
+            default:
+                DebugLog.w("ExoPlayer Warning", "Unsupported resize mode: " + resizeMode + " - falling back to fit");
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
+                break;
+        }
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
@@ -429,13 +434,5 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 || lowerCaseUri.startsWith("content://")
                 || lowerCaseUri.startsWith("file://")
                 || lowerCaseUri.startsWith("asset://");
-    }
-
-    private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
-        if (!TextUtils.isEmpty(resizeModeOrdinalString)) {
-            int resizeModeOrdinal = Integer.parseInt(resizeModeOrdinalString);
-            return ResizeMode.toResizeMode(resizeModeOrdinal);
-        }
-        return ResizeMode.RESIZE_MODE_FIT;
     }
 }

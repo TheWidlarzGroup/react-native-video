@@ -1,5 +1,5 @@
 import type {Component, RefObject, ComponentClass} from 'react';
-import {Image, UIManager, findNodeHandle} from 'react-native';
+import {Image, findNodeHandle} from 'react-native';
 import type {ImageSourcePropType} from 'react-native';
 import type {ReactVideoSource} from './types/video';
 
@@ -34,12 +34,4 @@ export function getReactTag(
   }
 
   return reactTag;
-}
-
-export function getViewManagerConfig(name: string) {
-  if ('getViewManagerConfig' in UIManager) {
-    return UIManager.getViewManagerConfig(name);
-  }
-
-  return UIManager[name];
 }
