@@ -204,6 +204,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactExoplayerView videoView, final String resizeMode) {
         switch (resizeMode) {
+            case "none":
+            case "contain":
+                videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
+                break;
             case "cover":
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_CENTER_CROP);
                 break;
@@ -211,7 +215,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FILL);
                 break;
             default:
-                // Handle also for "none" or "contain"
+                DebugLog.w("ExoPlayer Warning", "Unsupported resize mode: " + resizeMode + " - falling back to fit");
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
                 break;
         }
