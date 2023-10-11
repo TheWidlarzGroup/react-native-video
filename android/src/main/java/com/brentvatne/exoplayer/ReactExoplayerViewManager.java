@@ -119,11 +119,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         return builder.build();
     }
 
-    @Override
-    public @Nullable Map<String, Object> getExportedViewConstants() {
-        return MapBuilder.of();
-    }
-
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {

@@ -84,10 +84,6 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
-    override func constantsToExport() -> [AnyHashable : Any]? {
-        return [:]
-    }
-
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

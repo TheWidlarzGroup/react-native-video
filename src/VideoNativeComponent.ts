@@ -4,7 +4,6 @@ import type {
   ViewProps,
 } from 'react-native';
 import {NativeModules, requireNativeComponent} from 'react-native';
-import {getViewManagerConfig} from './utils';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -362,17 +361,9 @@ export interface VideoDecoderPropertiesType {
   isHEVCSupported: () => Promise<'unsupported' | 'hardware' | 'software'>;
 }
 
-export type VideoViewManagerConfig = {
-  Constants: Record<string, never>;
-  Commands: {[key: string]: number};
-};
-
 export const VideoManager = NativeModules.VideoManager as VideoManagerType;
 export const VideoDecoderProperties =
   NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
-export const RCTVideoConstants = (
-  getViewManagerConfig('RCTVideo') as VideoViewManagerConfig
-).Constants;
 
 export default requireNativeComponent<VideoNativeProps>(
   'RCTVideo',
