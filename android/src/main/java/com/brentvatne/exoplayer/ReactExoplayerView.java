@@ -22,6 +22,7 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
 
@@ -485,7 +486,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * Update the layout
      * @param view  view needs to update layout
      *
-     * This is a workaround for the open bug in react-native: https://github.com/facebook/react-native/issues/17968
+     * This is a workaround for the open bug in react-native: <a href="https://github.com/facebook/react-native/issues/17968">...</a>
      */
     private void reLayout(View view) {
         if (view == null) return;
@@ -495,8 +496,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
-        private int availableHeapInBytes = 0;
-        private Runtime runtime;
+        private final int availableHeapInBytes;
+        private final Runtime runtime;
         public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
             super(allocator,
                     minBufferMs,
@@ -508,7 +509,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     backBufferDurationMs,
                     retainBackBufferFromKeyframe);
             runtime = Runtime.getRuntime();
-            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
+            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
             availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
         }
 
@@ -537,13 +538,6 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
         }
-    }
-
-    private void startBufferCheckTimer() {
-        Player player = this.player;
-        VideoEventEmitter eventEmitter = this.eventEmitter;
-        Handler mainHandler = this.mainHandler;
-
     }
 
     private void initializePlayer() {
@@ -734,7 +728,6 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayerControl();
         setControls(controls);
         applyModifiers();
-        startBufferCheckTimer();
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -790,8 +783,8 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         MediaItem mediaItem = mediaItemBuilder.build();
-        MediaSource mediaSource = null;
-        DrmSessionManagerProvider drmProvider = null;
+        MediaSource mediaSource;
+        DrmSessionManagerProvider drmProvider;
         if (drmSessionManager != null) {
             drmProvider = new DrmSessionManagerProvider() {
                 @Override
@@ -868,9 +861,7 @@ public class ReactExoplayerView extends FrameLayout implements
             Uri uri = Uri.parse(textTrack.getString("uri"));
             MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
                     language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
+            textSources.add(textSource);
         }
         return textSources;
     }
@@ -1074,7 +1065,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onEvents(Player player, Player.Events events) {
+    public void onEvents(@NonNull Player player, Player.Events events) {
         if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) || events.contains(Player.EVENT_PLAY_WHEN_READY_CHANGED)) {
             int playbackState = player.getPlaybackState();
             boolean playWhenReady = player.getPlayWhenReady();
@@ -1122,6 +1113,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 text += "unknown";
                 break;
             }
+            DebugLog.d(TAG, text);
         }
     }
 
@@ -1267,12 +1259,12 @@ public class ReactExoplayerView extends FrameLayout implements
         final Uri sourceUri = this.srcUri;
         final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
 
-        Future<ArrayList<VideoTrack>> result = es.submit(new Callable<ArrayList<VideoTrack>>() {
-            DataSource ds = dataSource;
-            Uri uri = sourceUri;
-            long startTimeUs = startTime * 1000; // ms -> us
+        Future<ArrayList<VideoTrack>> result = es.submit(new Callable<>() {
+            final DataSource ds = dataSource;
+            final Uri uri = sourceUri;
+            final long startTimeUs = startTime * 1000; // ms -> us
 
-            public ArrayList<VideoTrack> call() throws Exception {
+            public ArrayList<VideoTrack> call() {
                 ArrayList<VideoTrack> videoTracks = new ArrayList<>();
                 try  {
                     DashManifest manifest = DashUtil.loadManifest(this.ds, this.uri);
@@ -1307,7 +1299,9 @@ public class ReactExoplayerView extends FrameLayout implements
                             }
                         }
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    DebugLog.w(TAG, "error in getVideoTrackInfoFromManifest:" + e.getMessage());
+                }
                 return null;
             }
         });
@@ -1319,7 +1313,9 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             es.shutdown();
             return results;
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DebugLog.w(TAG, "error in getVideoTrackInfoFromManifest handling request:" + e.getMessage());
+        }
 
         return null;
     }
@@ -1359,15 +1355,11 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         isBuffering = buffering;
-        if (buffering) {
-            eventEmitter.buffering(true);
-        } else {
-            eventEmitter.buffering(false);
-        }
+        eventEmitter.buffering(buffering);
     }
 
     @Override
-    public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
+    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -1389,7 +1381,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, int reason) {
+    public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
         // Do nothing.
     }
 
@@ -1416,7 +1408,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onTracksChanged(Tracks tracks) {
+    public void onTracksChanged(@NonNull Tracks tracks) {
         eventEmitter.textTracks(getTextTrackInfo());
         eventEmitter.audioTracks(getAudioTrackInfo());
         eventEmitter.videoTracks(getVideoTrackInfo());
@@ -1433,13 +1425,9 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPlayerError(PlaybackException e) {
-        if (e == null) {
-            return;
-        }
+    public void onPlayerError(@NonNull PlaybackException e) {
         String errorString = "ExoPlaybackException: " + PlaybackException.getErrorCodeName(e.errorCode);
         String errorCode = "2" + String.valueOf(e.errorCode);
-        boolean needsReInitialization = false;
         switch(e.errorCode) {
             case PlaybackException.ERROR_CODE_DRM_DEVICE_REVOKED:
             case PlaybackException.ERROR_CODE_DRM_LICENSE_ACQUISITION_FAILED:
@@ -1466,9 +1454,6 @@ public class ReactExoplayerView extends FrameLayout implements
             initializePlayer();
         } else {
             updateResumePosition();
-            if (needsReInitialization) {
-                initializePlayer();
-            }
         }
     }
 
@@ -1489,7 +1474,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onMetadata(Metadata metadata) {
+    public void onMetadata(@NonNull Metadata metadata) {
         eventEmitter.timedMetadata(metadata);
     }
 
@@ -1702,8 +1687,8 @@ public class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new ArrayList<Integer>(group.length);
-            ArrayList<Integer> allTracks = new ArrayList<Integer>(group.length);
+            tracks = new ArrayList<>(group.length);
+            ArrayList<Integer> allTracks = new ArrayList<>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
                 allTracks.add(j);
@@ -1711,7 +1696,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
             // Valiate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
-            ArrayList<Integer> supportedTrackList = new ArrayList<Integer>();
+            ArrayList<Integer> supportedTrackList = new ArrayList<>();
             for (int g = 0; g < allTracks.size(); g++) {
                 Format format = group.getFormat(g);
                 if (isFormatSupported(format)) {
@@ -1757,7 +1742,7 @@ public class ReactExoplayerView extends FrameLayout implements
         if (mimeType == null) {
             return true;
         }
-        boolean isSupported = false;
+        boolean isSupported;
         try {
             MediaCodecInfo codecInfo = MediaCodecUtil.getDecoderInfo(mimeType, false, false);
             isSupported = codecInfo.isVideoSizeAndRateSupportedV21(width, height, frameRate);
@@ -1913,7 +1898,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setContentStartTime(int contentStartTime) {
-        this.contentStartTime = (long)contentStartTime;
+        this.contentStartTime = contentStartTime;
     }
 
     public void setDisableBuffering(boolean disableBuffering) {
