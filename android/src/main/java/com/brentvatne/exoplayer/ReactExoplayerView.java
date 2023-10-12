@@ -273,7 +273,7 @@ public class ReactExoplayerView extends FrameLayout implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-        audioFocusChangeListener = new OnAudioFocusChangedListener(this);
+        audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
     }
 
     private boolean isPlayingAd() {
@@ -910,9 +910,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private static class OnAudioFocusChangedListener implements AudioManager.OnAudioFocusChangeListener {
         private final ReactExoplayerView view;
+        private final ThemedReactContext themedReactContext;
 
-        private OnAudioFocusChangedListener(ReactExoplayerView view) {
+        private OnAudioFocusChangedListener(ReactExoplayerView view, ThemedReactContext themedReactContext) {
             this.view = view;
+            this.themedReactContext = themedReactContext;
         }
 
         @Override
@@ -921,6 +923,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 case AudioManager.AUDIOFOCUS_LOSS:
                     view.hasAudioFocus = false;
                     view.eventEmitter.audioFocusChanged(false);
+                    // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
                     view.pausePlayback();
                     view.audioManager.abandonAudioFocus(this);
                     break;
@@ -935,16 +938,21 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
             }
 
-            if (view.player != null) {
+            Activity activity = themedReactContext.getCurrentActivity();
+            if (view.player != null && activity != null) {
                 if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     // Lower the volume
                     if (!view.muted) {
-                        view.player.setVolume(view.audioVolume * 0.8f);
+                        activity.runOnUiThread(() -> {
+                            view.player.setVolume(view.audioVolume * 0.8f);
+                        });
                     }
                 } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                     // Raise it back to normal
                     if (!view.muted) {
-                        view.player.setVolume(view.audioVolume * 1);
+                        activity.runOnUiThread(() -> {
+                            view.player.setVolume(view.audioVolume * 1);
+                        });
                     }
                 }
             }
