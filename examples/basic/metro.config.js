@@ -6,8 +6,15 @@
  */
 const path = require('path');
 const blacklist = require('metro-config/src/defaults/exclusionList');
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 
-module.exports = {
+/**
+ * Metro configuration
+ * https://facebook.github.io/metro/docs/configuration
+ *
+ * @type {import('metro-config').MetroConfig}
+ */
+const config = {
   resolver: {
     blacklistRE: blacklist([
       // This stops "react-native run-windows" from causing the metro server to crash if its already running
@@ -19,12 +26,6 @@ module.exports = {
       /(.*\/react-native-video\/node_modules\/.*)$/,
     ]),
   },
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-  },
 };
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);

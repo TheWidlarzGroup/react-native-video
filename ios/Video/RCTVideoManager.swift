@@ -84,15 +84,6 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
-    override func constantsToExport() -> [AnyHashable : Any]? {
-        return [
-            "ScaleNone": AVLayerVideoGravity.resizeAspect,
-            "ScaleToFill": AVLayerVideoGravity.resize,
-            "ScaleAspectFit": AVLayerVideoGravity.resizeAspect,
-            "ScaleAspectFill": AVLayerVideoGravity.resizeAspectFill
-        ]
-    }
-
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

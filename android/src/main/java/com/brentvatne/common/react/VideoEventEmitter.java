@@ -238,7 +238,7 @@ public class VideoEventEmitter {
     }
 
 
-    private void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+    public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
               WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
