@@ -26,8 +26,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
 
+import com.brentvatne.common.API.TimedMetadata;
 import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
@@ -93,6 +95,10 @@ import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.dash.manifest.Period;
 import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
 import com.google.android.exoplayer2.source.dash.manifest.Representation;
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.emsg.EventMessage;
+import com.google.android.exoplayer2.metadata.id3.Id3Frame;
+import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
@@ -1475,7 +1481,38 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onMetadata(@NonNull Metadata metadata) {
-        eventEmitter.timedMetadata(metadata);
+        ArrayList<TimedMetadata> metadataArray = new ArrayList<>();
+        for (int i = 0; i < metadata.length(); i++) {
+            Metadata.Entry entry = metadata.get(i);
+
+            if (entry instanceof Id3Frame) {
+                Id3Frame frame = (Id3Frame) metadata.get(i);
+
+                String value = "";
+
+                if (frame instanceof TextInformationFrame) {
+                    TextInformationFrame txxxFrame = (TextInformationFrame) frame;
+                    value = txxxFrame.value;
+                }
+
+                String identifier = frame.id;
+
+                TimedMetadata timedMetadata = new TimedMetadata();
+                timedMetadata.m_Identifier = identifier;
+                timedMetadata.m_Value = value;
+
+                metadataArray.add(timedMetadata);
+            } else if (entry instanceof EventMessage) {
+                EventMessage eventMessage = (EventMessage) entry;
+                TimedMetadata timedMetadata = new TimedMetadata();
+                timedMetadata.m_Identifier = eventMessage.schemeIdUri;
+                timedMetadata.m_Value = eventMessage.value;
+                metadataArray.add(timedMetadata);
+            } else {
+                DebugLog.d(TAG, "unhandled metadata " + entry.toString());
+            }
+        }
+        eventEmitter.timedMetadata(metadataArray);
     }
 
     // ReactExoplayerViewManager public api
