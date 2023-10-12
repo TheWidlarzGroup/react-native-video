@@ -1,13 +1,11 @@
 package com.brentvatne.exoplayer;
 
-import java.io.IOException;
 import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
-import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy.LoadErrorInfo;
 import com.google.android.exoplayer2.C;
 
 public final class ReactExoplayerLoadErrorHandlingPolicy extends DefaultLoadErrorHandlingPolicy {
-  private int minLoadRetryCount = Integer.MAX_VALUE;
+  private final int minLoadRetryCount;
 
   public ReactExoplayerLoadErrorHandlingPolicy(int minLoadRetryCount) {
     super(minLoadRetryCount);
@@ -16,9 +14,11 @@ public final class ReactExoplayerLoadErrorHandlingPolicy extends DefaultLoadErro
 
   @Override
   public long getRetryDelayMsFor(LoadErrorInfo loadErrorInfo) {
+    String errorMessage = loadErrorInfo.exception.getMessage();
+
     if (
       loadErrorInfo.exception instanceof HttpDataSourceException &&
-      (loadErrorInfo.exception.getMessage() == "Unable to connect" || loadErrorInfo.exception.getMessage() == "Software caused connection abort")
+      errorMessage != null && (errorMessage.equals("Unable to connect") || errorMessage.equals("Software caused connection abort"))
     ) {
       // Capture the error we get when there is no network connectivity and keep retrying it
       return 1000; // Retry every second
