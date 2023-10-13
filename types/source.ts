@@ -46,4 +46,5 @@ export interface IVideoPlayerSource {
   shouldSaveSubtitleSelection?: boolean;
   nowPlaying: INowPlaying;
   thumbnailsPreview?: string;
+  selectedSubtitleTrack?: string;
 }

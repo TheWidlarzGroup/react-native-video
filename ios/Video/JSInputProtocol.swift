@@ -34,4 +34,5 @@ protocol JSInputProtocol: AnyObject {
     var onStatsIconClick: RCTBubblingEventBlock? { get }
     var onEpgIconClick: RCTBubblingEventBlock? { get }
     var onAnnotationsButtonClick: RCTBubblingEventBlock? { get }
+    var onSubtitleTrackChanged: RCTBubblingEventBlock? { get }
 }

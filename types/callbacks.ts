@@ -23,4 +23,5 @@ export interface IVideoPlayerCallbacks {
   onVideoAboutToEnd?: (e: any) => void;
   onReloadCurrentSource?: (e: any) => void;
   onBehindLiveWindowError?: (e: any) => void;
+  onSubtitleTrackChanged?: ({ language: string }) => void;
 }

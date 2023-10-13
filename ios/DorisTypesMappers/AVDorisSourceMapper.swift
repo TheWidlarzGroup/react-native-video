@@ -63,7 +63,7 @@ class AVDorisSourceMapper {
     
     private func sideloadedSubtitles(from source: Source) -> [DorisTextTrack] {
         var textTracks = [DorisTextTrack]()
-        if let subtitles = source.subtitles, source.live == false {
+        if let subtitles = source.subtitles, source.live != true {
             textTracks = subtitles
                 .compactMap{$0}
                 .filter{$0.isVtt}

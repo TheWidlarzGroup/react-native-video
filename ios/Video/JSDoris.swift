@@ -206,6 +206,17 @@ extension JSDoris: DorisOutputProtocol {
     
     func onPlayerEvent(_ event: DorisPlayerEvent) {
         switch event {
+        case .readyToPlay:
+            if let selectedSubtitleTrack = props.source.value?.selectedSubtitleTrack {
+                if selectedSubtitleTrack.isEmpty {
+                    //select subtitle disabled option if possible
+                    doris?.player.selectSubtitles(code: nil)
+                } else {
+                    doris?.player.selectSubtitles(code: selectedSubtitleTrack)
+                    //if selectedSubtitleTrack is NAME of the track and it matches one of the tracks in the stream it will be reset
+                    doris?.player.selectSubtitles(title: selectedSubtitleTrack)
+                }
+            }
         case .finishedPlaying(endTime: _):
             output?.onVideoEnd?(nil)
         case .currentTimeChanged(let seconds, _):
@@ -221,6 +232,16 @@ extension JSDoris: DorisOutputProtocol {
             currentPlayingItemDuration = duration
         case .playerItemFailed:
             output?.onVideoError?(nil)
+        case .subtitleChanged(let subtitle, let autoSet):
+            guard !autoSet else { return }
+            
+            switch subtitle {
+            case .option(_, let languageCode, _):
+                guard let code = languageCode else { break }
+                output?.onSubtitleTrackChanged?(["language": code])
+            case .empty:
+                output?.onSubtitleTrackChanged?(["language": ""])
+            }
         default: break
         }
     }

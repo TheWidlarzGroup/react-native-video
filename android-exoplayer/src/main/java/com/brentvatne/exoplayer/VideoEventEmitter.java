@@ -60,6 +60,7 @@ class VideoEventEmitter {
     private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
     private static final String EVENT_FAVOURITE_BUTTON_CLICK = "onFavouriteButtonClick";
     private static final String EVENT_ANNOTATIONS_BUTTON_CLICK = "onAnnotationsButtonClick";
+    private static final String EVENT_SUBTITLE_TRACK_CHANGED = "onSubtitleTrackChanged";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -92,6 +93,7 @@ class VideoEventEmitter {
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
+            EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR
@@ -129,6 +131,7 @@ class VideoEventEmitter {
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
+            EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR
@@ -165,6 +168,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_IS_ABOUT_TO_END = "isAboutToEnd";
     private static final String EVENT_PROP_DATE = "date";
     private static final String EVENT_PROP_IS_BLOCKING = "isBlocking";
+    private static final String EVENT_PROP_LANGUAGE = "language";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -380,6 +384,12 @@ class VideoEventEmitter {
 
     void annotationsButtonClick() {
         receiveEvent(EVENT_ANNOTATIONS_BUTTON_CLICK, null);
+    }
+
+    void subtitleTrackChanged(String language) {
+        WritableMap map = Arguments.createMap();
+        map.putString(EVENT_PROP_LANGUAGE, language);
+        receiveEvent(EVENT_SUBTITLE_TRACK_CHANGED, map);
     }
 
     void requireAdParameters(double date, boolean isBlocking) {

@@ -37,6 +37,7 @@ class PlayerView: UIView, JSInputProtocol {
     @objc var onStatsIconClick: RCTBubblingEventBlock?
     @objc var onEpgIconClick: RCTBubblingEventBlock?
     @objc var onAnnotationsButtonClick: RCTBubblingEventBlock?
+    @objc var onSubtitleTrackChanged: RCTBubblingEventBlock?    
     
     //Props
     //MARK: Differs (source)

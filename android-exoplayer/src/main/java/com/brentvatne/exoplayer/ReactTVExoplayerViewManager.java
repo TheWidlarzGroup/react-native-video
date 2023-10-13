@@ -70,6 +70,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_SAVE_SUBTITLE_SELECTION = "shouldSaveSubtitleSelection";
     private static final String PROP_SRC_NOW_PLAYING = "nowPlaying";
     private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
+    private static final String PROP_SRC_SELECTED_SUBTITLE_TRACK = "selectedSubtitleTrack";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -244,6 +245,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             videoView.setThumbnailsPreviewUrl(src.getString(PROP_SRC_BIF_URL));
         }
 
+        String selectedSubtitleTrack = src.hasKey(PROP_SRC_SELECTED_SUBTITLE_TRACK)
+                ? src.getString(PROP_SRC_SELECTED_SUBTITLE_TRACK)
+                : null;
+
         if (TextUtils.isEmpty(uriString)) {
             return;
         }
@@ -296,7 +301,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     adTagUrl,
                     Watermark.fromMap(metadata),
                     limitedSeekRange,
-                    shouldSaveSubtitleSelection);
+                    shouldSaveSubtitleSelection,
+                    selectedSubtitleTrack);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
@@ -373,29 +379,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactTVExoplayerView videoView,
                                       @Nullable ReadableMap selectedAudioTrack) {
-        String typeString = null;
-        Dynamic value = null;
-        if (selectedAudioTrack != null) {
-            typeString = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_TYPE)
-                    ? selectedAudioTrack.getString(PROP_SELECTED_AUDIO_TRACK_TYPE) : null;
-            value = selectedAudioTrack.hasKey(PROP_SELECTED_AUDIO_TRACK_VALUE)
-                    ? selectedAudioTrack.getDynamic(PROP_SELECTED_AUDIO_TRACK_VALUE) : null;
-        }
-        videoView.setSelectedAudioTrack(typeString, value);
+       // Deprecated, not used.
     }
 
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
     public void setSelectedTextTrack(final ReactTVExoplayerView videoView,
                                      @Nullable ReadableMap selectedTextTrack) {
-        String typeString = null;
-        Dynamic value = null;
-        if (selectedTextTrack != null) {
-            typeString = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_TYPE)
-                    ? selectedTextTrack.getString(PROP_SELECTED_TEXT_TRACK_TYPE) : null;
-            value = selectedTextTrack.hasKey(PROP_SELECTED_TEXT_TRACK_VALUE)
-                    ? selectedTextTrack.getDynamic(PROP_SELECTED_TEXT_TRACK_VALUE) : null;
-        }
-        videoView.setSelectedTextTrack(typeString, value);
+        // Deprecated, not used.
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)

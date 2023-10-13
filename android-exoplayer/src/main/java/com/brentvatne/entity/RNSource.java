@@ -21,6 +21,7 @@ public class RNSource {
     private final Map<String, String> headers;
     private final Map<String, Object> muxData;
     private final String selectedAudioTrack;
+    private final String selectedSubtitleTrack;
     private final String locale;
     private final String channelId;
     private final String seriesId;
@@ -41,6 +42,7 @@ public class RNSource {
             @Nullable Map<String, String> headers,
             @Nullable Map<String, Object> muxData,
             @Nullable String selectedAudioTrack,
+            @Nullable String selectedSubtitleTrack,
             @Nullable String locale,
             @Nullable String channelId,
             @Nullable String seriesId,
@@ -59,6 +61,7 @@ public class RNSource {
         this.headers = headers;
         this.muxData = muxData;
         this.selectedAudioTrack = selectedAudioTrack;
+        this.selectedSubtitleTrack = selectedSubtitleTrack;
         this.locale = locale;
         this.channelId = channelId;
         this.seriesId = seriesId;
@@ -119,6 +122,11 @@ public class RNSource {
     @Nullable
     public String getSelectedAudioTrack() {
         return selectedAudioTrack;
+    }
+
+    @Nullable
+    public String getSelectedSubtitleTrack() {
+        return selectedSubtitleTrack;
     }
 
     @Nullable
