@@ -4,8 +4,8 @@ import androidx.annotation.StringDef;
 import android.view.View;
 
 import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.Track;
-import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.API.Track;
+import com.brentvatne.common.API.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
@@ -55,7 +55,7 @@ public class VideoEventEmitter {
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
-    public static final String[] Events = {
+    static public final String[] Events = {
             EVENT_LOAD_START,
             EVENT_LOAD,
             EVENT_ERROR,
@@ -182,11 +182,11 @@ public class VideoEventEmitter {
                 Track format = audioTracks.get(i);
                 WritableMap audioTrack = Arguments.createMap();
                 audioTrack.putInt("index", i);
-                audioTrack.putString("title", format.m_title != null ? format.m_title : "");
-                audioTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                audioTrack.putString("language", format.m_language != null ? format.m_language : "");
-                audioTrack.putInt("bitrate", format.m_bitrate);
-                audioTrack.putBoolean("selected", format.m_isSelected);
+                audioTrack.putString("title", format.getTitle());
+                audioTrack.putString("type", format.getMimeType());
+                audioTrack.putString("language", format.getLanguage());
+                audioTrack.putInt("bitrate", format.getBitrate());
+                audioTrack.putBoolean("selected", format.isSelected());
                 waAudioTracks.pushMap(audioTrack);
             }
         }
@@ -199,12 +199,12 @@ public class VideoEventEmitter {
             for (int i = 0; i < videoTracks.size(); ++i) {
                 VideoTrack vTrack = videoTracks.get(i);
                 WritableMap videoTrack = Arguments.createMap();
-                videoTrack.putInt("width", vTrack.m_width);
-                videoTrack.putInt("height",vTrack.m_height);
-                videoTrack.putInt("bitrate", vTrack.m_bitrate);
-                videoTrack.putString("codecs", vTrack.m_codecs);
-                videoTrack.putInt("trackId",vTrack.m_id);
-                videoTrack.putBoolean("selected", vTrack.m_isSelected);
+                videoTrack.putInt("width", vTrack.getWidth());
+                videoTrack.putInt("height",vTrack.getHeight());
+                videoTrack.putInt("bitrate", vTrack.getBitrate());
+                videoTrack.putString("codecs", vTrack.getCodecs());
+                videoTrack.putInt("trackId",vTrack.getId());
+                videoTrack.putBoolean("selected", vTrack.isSelected());
                 waVideoTracks.pushMap(videoTrack);
             }
         }
@@ -218,10 +218,10 @@ public class VideoEventEmitter {
                 Track format = textTracks.get(i);
                 WritableMap textTrack = Arguments.createMap();
                 textTrack.putInt("index", i);
-                textTrack.putString("title", format.m_title != null ? format.m_title : "");
-                textTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                textTrack.putString("language", format.m_language != null ? format.m_language : "");
-                textTrack.putBoolean("selected", format.m_isSelected);
+                textTrack.putString("title", format.getTitle());
+                textTrack.putString("type", format.getMimeType());
+                textTrack.putString("language", format.getLanguage());
+                textTrack.putBoolean("selected", format.isSelected());
                 waTextTracks.pushMap(textTrack);
             }
         }
@@ -388,8 +388,8 @@ public class VideoEventEmitter {
 
         for (int i = 0; i < _metadataArrayList.size(); i++) {
             WritableMap map = Arguments.createMap();
-            map.putString("identifier", _metadataArrayList.get(i).m_Identifier);
-            map.putString("value", _metadataArrayList.get(i).m_Value);
+            map.putString("identifier", _metadataArrayList.get(i).getIdentifier());
+            map.putString("value", _metadataArrayList.get(i).getValue());
             metadataArray.pushMap(map);
         }
 

@@ -26,12 +26,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
 
+import com.brentvatne.common.API.ResizeMode;
+import com.brentvatne.common.API.SubtitleStyle;
 import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.Track;
-import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.API.Track;
+import com.brentvatne.common.API.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
-import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -1209,16 +1210,21 @@ public class ReactExoplayerView extends FrameLayout implements
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
             Format format = group.getFormat(0);
-            Track audioTrack = new Track();
-            audioTrack.m_index = i;
-            audioTrack.m_title = format.id != null ? format.id : "";
-            audioTrack.m_mimeType = format.sampleMimeType;
-            audioTrack.m_language = format.language != null ? format.language : "";
-            audioTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-            audioTrack.m_isSelected = isTrackSelected(selection, group, 0 );
+            Track audioTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
+            audioTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
             audioTracks.add(audioTrack);
         }
         return audioTracks;
+    }
+
+    private VideoTrack exoplayerVideoTrackToGenericVideoTrack(Format format, int trackIndex) {
+        VideoTrack videoTrack = new VideoTrack();
+        videoTrack.setWidth(format.width == Format.NO_VALUE ? 0 : format.width);
+        videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
+        videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+        if (format.codecs != null) videoTrack.setCodecs(format.codecs);
+        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);;
+        return videoTrack;
     }
 
     private ArrayList<VideoTrack> getVideoTrackInfo() {
@@ -1240,12 +1246,7 @@ public class ReactExoplayerView extends FrameLayout implements
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
                 if (isFormatSupported(format)) {
-                    VideoTrack videoTrack = new VideoTrack();
-                    videoTrack.m_width = format.width == Format.NO_VALUE ? 0 : format.width;
-                    videoTrack.m_height = format.height == Format.NO_VALUE ? 0 : format.height;
-                    videoTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-                    videoTrack.m_codecs = format.codecs != null ? format.codecs : "";
-                    videoTrack.m_trackId = format.id == null ? String.valueOf(trackIndex) : format.id;
+                    VideoTrack videoTrack = exoplayerVideoTrackToGenericVideoTrack(format, trackIndex);
                     videoTracks.add(videoTrack);
                 }
             }
@@ -1291,12 +1292,7 @@ public class ReactExoplayerView extends FrameLayout implements
                                         break;
                                     }
                                     hasFoundContentPeriod = true;
-                                    VideoTrack videoTrack = new VideoTrack();
-                                    videoTrack.m_width = format.width == Format.NO_VALUE ? 0 : format.width;
-                                    videoTrack.m_height = format.height == Format.NO_VALUE ? 0 : format.height;
-                                    videoTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
-                                    videoTrack.m_codecs = format.codecs != null ? format.codecs : "";
-                                    videoTrack.m_trackId = format.id == null ? String.valueOf(representationIndex) : format.id;
+                                    VideoTrack videoTrack = exoplayerVideoTrackToGenericVideoTrack(format, representationIndex);
                                     videoTracks.add(videoTrack);
                                 }
                             }
@@ -1326,6 +1322,17 @@ public class ReactExoplayerView extends FrameLayout implements
         return null;
     }
 
+
+    private Track exoplayerTrackToGenericTrack(Format format, int trackIndex, TrackSelection selection, TrackGroup group) {
+        Track track = new Track();
+        track.setIndex(trackIndex);
+        if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
+        if (format.language != null) track.setLanguage(format.language);
+        if (format.id != null) track.setTitle(format.id);
+        track.setSelected(isTrackSelected(selection, group, 0));
+        return track;
+    }
+
     private ArrayList<Track> getTextTrackInfo() {
         ArrayList<Track> textTracks = new ArrayList<>();
         if (trackSelector == null) {
@@ -1343,13 +1350,7 @@ public class ReactExoplayerView extends FrameLayout implements
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
             Format format = group.getFormat(0);
-
-            Track textTrack = new Track();
-            textTrack.m_index = i;
-            textTrack.m_title = format.id != null ? format.id : "";
-            textTrack.m_mimeType = format.sampleMimeType;
-            textTrack.m_language = format.language != null ? format.language : "";
-            textTrack.m_isSelected = isTrackSelected(selection, group, 0 );
+            Track textTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
             textTracks.add(textTrack);
         }
         return textTracks;
@@ -1494,19 +1495,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     TextInformationFrame txxxFrame = (TextInformationFrame) frame;
                     value = txxxFrame.value;
                 }
-
-                String identifier = frame.id;
-
-                TimedMetadata timedMetadata = new TimedMetadata();
-                timedMetadata.m_Identifier = identifier;
-                timedMetadata.m_Value = value;
-
+                TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
                 metadataArray.add(timedMetadata);
             } else if (entry instanceof EventMessage) {
                 EventMessage eventMessage = (EventMessage) entry;
-                TimedMetadata timedMetadata = new TimedMetadata();
-                timedMetadata.m_Identifier = eventMessage.schemeIdUri;
-                timedMetadata.m_Value = eventMessage.value;
+                TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
                 metadataArray.add(timedMetadata);
             } else {
                 DebugLog.d(TAG, "unhandled metadata " + entry.toString());
