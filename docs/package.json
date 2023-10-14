@@ -1,0 +1,20 @@
+{
+  "name": "react-native-video-docs",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Documentation for react-native-video",
+  "scripts": {
+    "dev": "bun next dev",
+    "build": "bun next build"
+  },
+  "dependencies": {
+    "next": "^13.5.4",
+    "nextra": "^2.13.2",
+    "nextra-theme-docs": "^2.13.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

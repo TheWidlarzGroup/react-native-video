@@ -39,6 +39,7 @@
         "lint": "yarn eslint .",
         "build": "yarn tsc",
         "xbasic": "yarn --cwd examples/basic",
+        "docs": "yarn --cwd docs build",
         "test": "echo no test available"
     },
     "files": [
