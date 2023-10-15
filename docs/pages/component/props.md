@@ -13,6 +13,7 @@
 | [contentStartTime](#contentstarttime)                                               | Android                   |
 | [controls](#controls)                                                               | Android, iOS              |
 | [currentPlaybackTime](#currentplaybacktime)                                         | Android                   |
+| [debug](#debug)                                                                     | Android                   |
 | [disableFocus](#disablefocus)                                                       | Android, iOS              |
 | [disableDisconnectError](#disabledisconnecterror)                                   | Android                   |
 | [filter](#filter)                                                                   | iOS                       |
@@ -161,6 +162,29 @@ If needed, you can also add your controls or use a package like [react-native-vi
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
 Platforms: Android, iOS
+
+### `debug`
+
+Enable more verbosity in logs.
+
+> [!WARNING]
+> Do not use this open in production build
+
+| Property                | Type   | Description                                                                                 |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------- |
+| `enable` | boolean    | when true, display logs with verbosity higher |
+| `thread` | boolean    | enable thread display  |
+
+
+Example with default values:
+```javascript
+debug={{
+  enable: true,
+  thread: true,
+}}
+```
+Platforms: Android
+
 
 ### `disableFocus`
 Determines whether video audio should override background music/audio in Android devices.
@@ -332,7 +356,7 @@ Determine whether the media should played as picture in picture.
 * **false (default)** - Don't not play as picture in picture
 * **true** - Play the media as picture in picture
 
-NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must disable your PIP button when you receive the ```STARTED``` event from ```onReceiveAdEvent``` and show it again when you receive the ```ALL_ADS_COMPLETED``` event.
+NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must hide your PIP button when you receive the ```STARTED``` event from ```onReceiveAdEvent``` and show it again when you receive the ```ALL_ADS_COMPLETED``` event.
 
 Platforms: iOS
 
@@ -646,7 +670,7 @@ Platforms: iOS, Android
 
 #### Overriding the metadata of a source
 
-Provide an optional `title`, `subtitle`  and/or `description` properties for the video. 
+Provide an optional `title`, `subtitle`, `customImageUri` and/or `description` properties for the video. 
 Useful when to adapt the tvOS playback experience.
 
 Example:
@@ -656,7 +680,8 @@ source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', 
     title: 'Custom Title', 
     subtitle: 'Custom Subtitle', 
-    description: 'Custom Description'
+    description: 'Custom Description',
+    customImageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
   }}
 ```
 
