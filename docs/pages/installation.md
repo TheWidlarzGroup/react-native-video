@@ -62,7 +62,7 @@ Video with caching ([more info](docs/caching.md)):
 
 #### Google IMA
 
-Google IMA is the google SDK to support Client Side Ads Integration (CSAI), see [google documentation](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side) for more informations.
+Google IMA is the google SDK to support Client Side Ads Integration (CSAI), see [google documentation](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side) for more information.
 
 To enable google IMA usage define add following line in your podfile:
 ```podfile
@@ -198,7 +198,7 @@ Add `PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider(
 
 **React Native Windows 0.61 and below**
 
-Follow the manual linking instuctions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
+Follow the manual linking instructions for React Native Windows 0.62 above, but substitute _ReactNativeVideoCPP61_ for _ReactNativeVideoCPP_.
 
 </details>
 <details>

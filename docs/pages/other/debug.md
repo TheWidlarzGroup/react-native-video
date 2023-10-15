@@ -12,7 +12,7 @@ If your video work on Debug mode, but on Release you see only black screen, plea
 
 ## Decoder Issue (Android)
 
-Devices have a maximum of simulataneous possible playback. It means you have reach this limit. Exoplayer returns: 'Unable to instantiate decoder'
+Devices have a maximum of simultaneous possible playback. It means you have reach this limit. Exoplayer returns: 'Unable to instantiate decoder'
 
 **known issue**: This issue happen really often in debug mode.
 
@@ -22,7 +22,7 @@ Here are the steps to consider before opening a ticket in issue tracker
 
 ## Check you can access to remote file
 
-Ensure you can download to manifest / content file with a browser for exemple
+Ensure you can download to manifest / content file with a browser for example
 
 ## Check another player can read the content
 
@@ -37,8 +37,8 @@ If content is protected with an access token or any other http header, ensure yo
 ## Everything seems correct but content cannot be accessed
 
 You need to record network trace to ensure communications with server is correct.
-[Charles proxy](https://www.charlesproxy.com/) is a simple and usefull tool to sniff all http/https calls. 
-With this tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / vido chuncks, ...
+[Charles proxy](https://www.charlesproxy.com/) is a simple and useful tool to sniff all http/https calls. 
+With this tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / video chunks, ...
 
 Then try to compare exchanges with previous tests you made.
 

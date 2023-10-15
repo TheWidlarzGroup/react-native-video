@@ -17,6 +17,6 @@ Currently, caching is only supported for URLs that end in a `.mp4`, `.m4v`, or `
 
 You will also receive warnings in the Xcode logs by using the `debug` mode. So if you are not 100% sure if your video is cached, check your Xcode logs!
 
-By default files expire after 30 days and the maxmimum cache size is 100mb.
+By default files expire after 30 days and the maximum cache size is 100mb.
 
 In a future release the cache might have more configurable options.

@@ -63,7 +63,7 @@ Example:
 adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
 ```
 
-Note: On android, you need enable IMA SDK in gradle file, see: [enableclient side ads insertion](#enable-client-side-ads-insertion)
+Note: On android, you need enable IMA SDK in gradle file, see: [enable client side ads insertion](#enable-client-side-ads-insertion)
 
 
 Platforms: Android, iOS
@@ -155,7 +155,7 @@ Determines whether to show player controls.
 
 Note on iOS, controls are always shown when in fullscreen mode.
 Note on Android, native controls are available by default.
-If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Usefull Side Project](./docs/PROJECTS.md).
+If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Project](./docs/PROJECTS.md).
 
 ### `contentStartTime`
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.

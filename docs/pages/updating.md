@@ -37,7 +37,7 @@ dependencies {
 
 Migrating to AndroidX (needs version >= 5.0.0):
 
-```gradle.properties
+```groovy
 android.useAndroidX=true
 android.enableJetifier=true
 ```
@@ -52,7 +52,7 @@ ExoPlayer 2.9.0 uses some Java 1.8 features, so you may need to enable support f
 `Default interface methods are only supported starting with Android N (--min-api 24)`
 
 Add the following to your app/build.gradle file:
-```
+```groovy
 android {
    ... // Various other settings go here
    compileOptions {
@@ -81,13 +81,13 @@ Previously, on Android MediaPlayer if you setup an AppState event when the app w
 Note, Windows does not have a concept of an app going into the background, so this doesn't apply there.
 
 #### Use Android target SDK 27 by default
-Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switchting over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
+Version 3.0 updates the Android build tools and SDK to version 27. React Native is in the process of [switching over](https://github.com/facebook/react-native/issues/18095#issuecomment-395596130) to SDK 27 in preparation for Google's requirement that new Android apps [use SDK 26](https://android-developers.googleblog.com/2017/12/improving-app-security-and-performance.html) by August 2018.
 
 You will either need to install the version 27 SDK and version 27.0.3 buildtools or modify your build.gradle file to configure react-native-video to use the same build settings as the rest of your app as described below.
 
 ##### Using app build settings
 You will need to create a `project.ext` section in the top-level build.gradle file (not app/build.gradle). Fill in the values from the example below using the values found in your app/build.gradle file.
-```
+```groovy
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
