@@ -1,3 +1,5 @@
+import { IAdsConfiguration } from '@dicetechnology/dice-unity/lib/types/content'
+
 import { IVideoPlayerDRM } from './drm';
 import { IVideoPlayerIMA } from './ima';
 import { IMuxData } from './mux';
@@ -6,6 +8,11 @@ import { IVideoPlayerAPS } from './aps';
 import { INowPlaying } from "./nowPlaying";
 
 type SourceType = 'mpd' | 'm3u8';
+
+export enum ContentTypes {
+  HLS = 'application/x-mpegURL',
+  DASH = 'application/dash+xml',
+}
 
 export interface IVideoPlayerSourceMetadata {
   logoUrl?: string;
@@ -21,6 +28,8 @@ export interface IVideoPlayerSourceLimitedSeekableRange {
 }
 
 export interface IVideoPlayerSource {
+  ads?: IAdsConfiguration;
+  contentType?: ContentTypes;
   uri: string;
   id?: string;
   subtitles?: IVideoPlayerSubtitles[];
