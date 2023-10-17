@@ -14,6 +14,7 @@ import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
+import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLiveBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
 import com.diceplatform.doris.ext.yossai.ExoDorisYoSsaiBuilder;
 import com.diceplatform.doris.plugin.Plugin;
@@ -39,7 +40,6 @@ public final class ReactTVExoDorisFactory {
                 forwardIncrementMs,
                 rewindIncrementMs,
                 null,
-                null,
                 parametersBuilder,
                 adViewProvider);
     }
@@ -53,7 +53,6 @@ public final class ReactTVExoDorisFactory {
             long forwardIncrementMs,
             long rewindIncrementMs,
             @Nullable List<Plugin> plugins,
-            @Nullable SurfaceView surfaceView,
             @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider) {
         final ExoDorisBuilder builder;
@@ -61,6 +60,8 @@ public final class ReactTVExoDorisFactory {
             builder = new ExoDorisYoSsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
         } else if (adType == AdType.IMA_DAI) {
             builder = new ExoDorisImaDaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
+        } else if (adType == AdType.IMA_CSAI_LIVE) {
+            builder = new ExoDorisImaCsaiLiveBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
         } else if (adType == AdType.IMA_CSAI) {
             builder = new ExoDorisImaCsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
         } else {
@@ -74,7 +75,6 @@ public final class ReactTVExoDorisFactory {
                 .setForwardIncrementMs(forwardIncrementMs)
                 .setRewindIncrementMs(rewindIncrementMs)
                 .setPlugins(plugins)
-                .setSurfaceView(surfaceView)
                 .setParamsBuilder(parametersBuilder)
                 .build();
     }

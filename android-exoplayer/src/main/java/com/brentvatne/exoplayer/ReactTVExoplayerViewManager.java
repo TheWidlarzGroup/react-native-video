@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.LruCache;
+import android.util.Pair;
 import android.view.ContextThemeWrapper;
 
 import androidx.media3.common.C;
@@ -20,10 +21,12 @@ import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
+import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
+import com.diceplatform.doris.entity.ImaCsaiProperties;
+import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.internal.ResumePositionHandler;
-import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -48,12 +51,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     // Source properties
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
+    private static final String PROP_SRC_CONTENT_TYPE = "contentType";
     private static final String PROP_SRC_SUBTITLES = "subtitles";
     private static final String PROP_SRC_ID = "id";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_DRM = "drm";
     private static final String PROP_SRC_IMA = "ima";
-    private static final String PROP_SRC_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_CHANNEL_ID = "channelId";
     private static final String PROP_SRC_SERIES_ID = "seriesId";
     private static final String PROP_SRC_SEASON_ID = "seasonId";
@@ -212,6 +215,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         // MockStreamSource.logRNParam(0, "src", ReadableType.Map, src);
 
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
+        String mimeType = ReadableMapUtils.getString(src, PROP_SRC_CONTENT_TYPE);
         String id = src.hasKey(PROP_SRC_ID) ? src.getString(PROP_SRC_ID) : null;
         ReadableArray textTracks = src.hasKey(PROP_SRC_SUBTITLES) ? src.getArray(PROP_SRC_SUBTITLES) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
@@ -224,7 +228,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String playlistId = src.hasKey(PROP_SRC_PLAYLIST_ID) ? src.getString(PROP_SRC_PLAYLIST_ID) : null;
         String duration = src.hasKey(PROP_SRC_DURATION) ? src.getString(PROP_SRC_DURATION) : null;
         String channelName = src.hasKey(PROP_SRC_CHANNEL_NAME) ? src.getString(PROP_SRC_CHANNEL_NAME) : null;
-        String adTagUrl = src.hasKey(PROP_SRC_AD_TAG_URL) ? src.getString(PROP_SRC_AD_TAG_URL) : null;
 
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
@@ -273,16 +276,23 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                         .replace("Bearer ", ""));
                 actionToken = ActionToken.fromJson(new Gson().toJson(drmMap));
             }
-            Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, isImaDai %b, adTag %s, license %s, token %s, url %s",
+
+            // Ads
+            Pair<ImaCsaiProperties, YoSsaiProperties> adProperties = ReactTVPropsParser.parseAdUnitsV2(videoView.isLive(), src);
+
+            Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, mimeType %s, isYoSsai %b, isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
                     channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
+                    mimeType,
+                    adProperties.second != null,
                     ima != null,
-                    adTagUrl == null ? "-" : adTagUrl,
+                    adProperties.first == null || adProperties.first.preRollAdTagUri == null ? "-" : adProperties.first.preRollAdTagUri.toString(),
+                    adProperties.first == null || adProperties.first.midRollAdTagUri == null ? "-" : adProperties.first.midRollAdTagUri.toString(),
                     (actionToken == null ? "-" : actionToken.getLicensingServerUrl()),
-                    (actionToken == null ? "-" : actionToken.getCroToken()),
                     uriString));
 
             videoView.setSrc(
                     uriString,
+                    mimeType,
                     id,
                     extension,
                     type,
@@ -290,7 +300,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     actionToken,
                     headers,
                     muxData != null ? muxData.toHashMap() : null,
+                    adProperties.first,
                     ima != null ? ima.toHashMap() : null,
+                    adProperties.second,
                     channelId,
                     seriesId,
                     seasonId,
@@ -298,7 +310,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     duration != null ? Integer.parseInt(duration) : 0,
                     channelName,
                     apsTestMode,
-                    adTagUrl,
                     Watermark.fromMap(metadata),
                     limitedSeekRange,
                     shouldSaveSubtitleSelection,

@@ -22,10 +22,10 @@ import android.widget.FrameLayout;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
-import androidx.media3.common.MediaItem;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
@@ -75,11 +75,14 @@ import com.diceplatform.doris.entity.DorisAdEvent;
 import com.diceplatform.doris.entity.DorisAdEvent.AdMarkers;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.entity.DorisPlayerEvent;
+import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.ImaDaiProperties;
 import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.entity.YoSsaiProperties;
+import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
@@ -198,14 +201,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private float jsProgressUpdateInterval = 250.0f;
     // \ End props
 
+    // AD relative
+    private AdType adType;
+    private ExoDorisTvPlayerView secondaryPlayerView;
+
     // IMA DAI
     private RNImaDaiSource imaDaiSrc;
-    private boolean isImaDaiStream = false;
     private boolean isImaDaiStreamLoaded = false;
     private AdTagParameters adTagParameters;
-
-    // IMA CSAI
-    private boolean isImaCsaiStream = false;
 
     // Custom
     private final PowerManager powerManager;
@@ -252,7 +255,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (msg.what == SHOW_NATIVE_PROGRESS) {
                 ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
                 if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
-                    if (isLive && isImaDaiStream) {
+                    if (isLive && adType == AdType.IMA_DAI) {
                         long windowStartTimeMs = player.getWindowStartTime();
                         if (windowStartTimeMs != C.TIME_UNSET) {
                             long positionMs = player.getCurrentPosition();
@@ -355,6 +358,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         exoDorisPlayerView.setExoDorisPlayerViewListener(this);
         exoDorisPlayerView.setUseController(false);
         exoDorisPlayerView.setShowBuffering(ExoDorisPlayerView.SHOW_BUFFERING_WHEN_PLAYING);
+        secondaryPlayerView = findViewById(R.id.secondaryPlayerView);
 
         // Watermark view.
         if (exoDorisPlayerView.getChildCount() > 1) {
@@ -466,8 +470,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             releasePlayer();
         }
         if (player == null) {
-            AdType adType = (isImaDaiStream ? AdType.IMA_DAI : (isImaCsaiStream ? AdType.IMA_CSAI : null));
-
             Parameters.Builder parametersBuilder = new Parameters.Builder(getContext());
             String preferredSubtitleLang = getPreferredSubtitleLang();
             if (preferredSubtitleLang != null) {
@@ -476,6 +478,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 parametersBuilder.setDisabledTextTrackSelectionFlags(C.SELECTION_FLAG_DEFAULT);
             }
 
+            AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE ? secondaryPlayerView : exoDorisPlayerView;
             player = exoDorisFactory.createPlayer(
                     getContext(),
                     adType,
@@ -483,7 +486,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     exoDorisPlayerView.getFastForwardIncrementMs(),
                     exoDorisPlayerView.getRewindIncrementMs(),
                     parametersBuilder,
-                    exoDorisPlayerView);
+                    adViewProvider);
 
             player.setDorisListener(dorisListener);
             trackSelector = player.getTrackSelector();
@@ -515,7 +518,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             showWatermark();
 
             SourceBuilder sourceBuilder = new SourceBuilder();
-            if (isImaDaiStream) {
+            if (adType == AdType.IMA_DAI) {
                 ImaDaiProperties imaDaiProperties = new ImaDaiPropertiesBuilder()
                         .setAssetKey(imaDaiSrc.getAssetKey())
                         .setContentSourceId(imaDaiSrc.getContentSourceId())
@@ -527,14 +530,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                         .setAdTagParametersValidUntil((long) imaDaiSrc.getEndDate())
                         .build();
                 sourceBuilder.setImaDaiProperties(imaDaiProperties);
-            } else if (src.getAdTagUrl() != null) {
-                MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
-                        .setAdsConfiguration(new MediaItem.AdsConfiguration.Builder(Uri.parse(src.getAdTagUrl())).build());
-                sourceBuilder.setMediaItemBuilder(mediaItemBuilder);
+            } else if (src.getImaCsai() != null) {
+                sourceBuilder.setImaCsaiProperties(src.getImaCsai());
             }
             sourceBuilder
                     .setId(src.getId())
                     .setUrl(src.getUrl())
+                    .setMimeType(src.getMimeType())
+                    .setYoSsaiProperties(src.getYoSsai())
                     .setTextTracks(src.getTextTracks())
                     .setDrmParams(actionToken);
 
@@ -554,7 +557,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
             playerInitTime = new Date().getTime();
 
-            if (isImaDaiStream) {
+            if (adType == AdType.IMA_DAI) {
                 if (!isImaDaiStreamLoaded && viewWidth != 0 && viewHeight != 0) {
                     loadImaDaiStream();
                 }
@@ -1184,6 +1187,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private void resetSourceUrl() {
         if (src != null) {
             src.setUrl("");
+            src.setMimeType(null);
         }
     }
 
@@ -1209,6 +1213,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void setSrc(
             String url,
+            String mimeType,
             String id,
             String extension,
             String type,
@@ -1216,7 +1221,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             ActionToken actionToken,
             Map<String, String> headers,
             Map<String, Object> muxData,
-            Map<String, Object> ima,
+            ImaCsaiProperties imaCsai,
+            Map<String, Object> imaDai,
+            YoSsaiProperties yoSsai,
             String channelId,
             String seriesId,
             String seasonId,
@@ -1224,7 +1231,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             int duration,
             String channelName,
             boolean apsTestFlag,
-            @Nullable String adTagUrl,
             Watermark watermark,
             LimitedSeekRange limitedSeekRange,
             boolean shouldSaveSubtitleSelection,
@@ -1234,18 +1240,23 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean isOriginalSourceNull = srcUrl == null;
             boolean isSourceEqual = url.equals(srcUrl);
 
-            this.isImaDaiStream = false;
+            this.adType = null;
+            this.imaDaiSrc = null;
             this.isImaDaiStreamLoaded = false;
-            this.isImaCsaiStream = false;
-            if (ima != null && !ima.isEmpty()) {
-                this.isImaDaiStream = true;
-                this.imaDaiSrc = new RNImaDaiSource(ima);
-            } else if (adTagUrl != null) {
-                this.isImaCsaiStream = true;
+            if (yoSsai != null) {
+                this.adType = AdType.YO_SSAI;
+            } else if (imaDai != null && !imaDai.isEmpty()) {
+                this.adType = AdType.IMA_DAI;
+                this.imaDaiSrc = new RNImaDaiSource(imaDai);
+            } else if (imaCsai != null && imaCsai.midRollAdTagUri != null) {
+                this.adType = AdType.IMA_CSAI_LIVE;
+            } else if (imaCsai != null && imaCsai.preRollAdTagUri != null) {
+                this.adType = AdType.IMA_CSAI;
             }
 
             this.src = new RNSource(
                     url,
+                    mimeType,
                     id,
                     extension,
                     isLive,
@@ -1262,7 +1273,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     duration,
                     channelName,
                     apsTestFlag,
-                    adTagUrl,
+                    imaCsai,
+                    yoSsai,
                     limitedSeekRange);
             this.actionToken = actionToken;
             if (watermarkWidget != null) {
@@ -1555,6 +1567,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
+    public boolean isLive() {
+        return isLive;
+    }
+
     public void setEpg(boolean hasEpg) {
         this.hasEpg = hasEpg;
     }
@@ -1667,7 +1683,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (player != null) {
             player.setVideoSurfaceView(exoDorisPlayerView.getVideoSurfaceView());
 
-            if (isImaDaiStream && !isImaDaiStreamLoaded && player != null) {
+            if (adType == AdType.IMA_DAI && !isImaDaiStreamLoaded && player != null) {
                 loadImaDaiStream();
             }
         }
@@ -1678,14 +1694,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (!areControlsVisible &&
+        boolean isPlayingAd = player != null && player.isPlayingAd();
+        if (!areControlsVisible && !isPlayingAd &&
                 event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY &&
                 event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PAUSE &&
                 event.getKeyCode() != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE &&
                 event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return true;
         }
-        return (exoDorisPlayerView.getPlayer() != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
+        return (exoDorisPlayerView != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
     }
 
     public void showWatermark(){
@@ -1871,12 +1888,31 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     }
                     break;
                 case AD_BREAK_ENDED:
+                    // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
+                    if (isCsaiLiveEvent(adEvent)) {
+                        exoDorisPlayerView.setVisibility(View.VISIBLE);
+                        secondaryPlayerView.setPlayer(null);
+                        secondaryPlayerView.setVisibility(View.GONE);
+                    }
                     if (areControlsAllowed) {
                         setControls(true);
                     }
                     break;
+                case AD_RESUMED:
+                    // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
+                    if (isCsaiLiveEvent(adEvent)) {
+                        secondaryPlayerView.setVisibility(View.VISIBLE);
+                        exoDorisPlayerView.setVisibility(View.GONE);
+                    }
+                    break;
+                case AD_LOADING:
+                    // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
+                    if (isCsaiLiveEvent(adEvent)) {
+                        secondaryPlayerView.setPlayer(((ExoDorisImaCsaiLivePlayer) player).getLiveAdExoPlayer());
+                    }
+                    break;
                 case AD_MARKERS_CHANGED:
-                    if (adEvent.details.adType != AdType.IMA_CSAI) {
+                    if (adEvent.details.adType != AdType.IMA_CSAI && exoDorisPlayerView != null) {
                         AdMarkers adMarkers = adEvent.details.adMarkers;
                         exoDorisPlayerView.setExtraAdGroupMarkers(adMarkers.adGroupTimesMs, adMarkers.playedAdGroups);
                         Log.d(TAG, adEvent.details.adType + " Ad Stream ID = " + adEvent.details.streamId);
@@ -1888,27 +1924,27 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     }
                     break;
                 case ERROR:
-                    boolean reloadCurrentSource = false;
+                    // We can ignore the csai ad error and make the content continue to playback.
+                    boolean ignoreAdError = adEvent.details.adType == AdType.IMA_CSAI || adEvent.details.adType == AdType.IMA_CSAI_LIVE;
                     if (adEvent.details.adType == AdType.IMA_DAI) {
                         Exception error = adEvent.details.error;
-
                         if (!hasReloadedCurrentSource && isUnauthorizedAdError(error)) {
                             hasReloadedCurrentSource = true;
-                            reloadCurrentSource = true;
+                            ignoreAdError = true;
                             eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
                         }
-
-                        // Reset imaDaiSrc and isImaDaiStream to allow a new source to be loaded
-                        imaDaiSrc = null;
-                        isImaDaiStream = false;
                     }
-                    if (!reloadCurrentSource) {
+                    if (!ignoreAdError) {
                         eventEmitter.error("Ad exception", adEvent.details.error);
                     }
                     break;
                 default:
                     break;
             }
+        }
+
+        private boolean isCsaiLiveEvent(DorisAdEvent adEvent) {
+            return adEvent.details.adType == AdType.IMA_CSAI_LIVE && exoDorisPlayerView != null && secondaryPlayerView != null;
         }
     };
 }

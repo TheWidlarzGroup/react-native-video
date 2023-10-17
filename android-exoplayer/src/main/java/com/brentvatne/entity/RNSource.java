@@ -6,13 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.endeavor.LimitedSeekRange;
 
+import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.entity.YoSsaiProperties;
 
 import java.util.Map;
 
 public class RNSource {
 
     private String url;
+    private String mimeType;
     private String extension;
 
     private final String id;
@@ -30,11 +33,13 @@ public class RNSource {
     private final int duration;
     private final String channelName;
     private final boolean apsTestFlag;
-    private final String adTagUrl;
+    private final ImaCsaiProperties imaCsai;
+    private final YoSsaiProperties yoSsai;
     private final LimitedSeekRange limitedSeekRange;
 
     public RNSource(
             @NonNull String url,
+            @Nullable String mimeType,
             @NonNull String id,
             @Nullable String extension,
             boolean isLive,
@@ -51,10 +56,12 @@ public class RNSource {
             int duration,
             @Nullable String channelName,
             boolean apsTestFlag,
-            @Nullable String adTagUrl,
+            @Nullable ImaCsaiProperties imaCsai,
+            @Nullable YoSsaiProperties yoSsai,
             @Nullable LimitedSeekRange limitedSeekRange) {
         this.id = id;
         this.url = url;
+        this.mimeType = mimeType;
         this.extension = extension;
         this.isLive = isLive;
         this.textTracks = textTracks;
@@ -70,7 +77,8 @@ public class RNSource {
         this.channelName = channelName;
         this.duration = duration;
         this.apsTestFlag = apsTestFlag;
-        this.adTagUrl = adTagUrl;
+        this.imaCsai = imaCsai;
+        this.yoSsai = yoSsai;
         this.limitedSeekRange = limitedSeekRange;
     }
 
@@ -85,6 +93,14 @@ public class RNSource {
 
     public void setUri(Uri uri) {
         this.url = uri.toString();
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
     public String getId() {
@@ -166,8 +182,12 @@ public class RNSource {
         return apsTestFlag;
     }
 
-    public String getAdTagUrl() {
-        return adTagUrl;
+    public ImaCsaiProperties getImaCsai() {
+        return imaCsai;
+    }
+
+    public YoSsaiProperties getYoSsai() {
+        return yoSsai;
     }
 
     public LimitedSeekRange getLimitedSeekRange() {

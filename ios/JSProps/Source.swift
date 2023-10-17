@@ -22,6 +22,7 @@ struct Source: SuperCodable {
     let titleInfo: TitleInfo?
     let imageUri: URL?
     let subtitles: [JSSubtitles]?
+    let ads: JSAds?
     let thumbnailsPreview: URL?
     let limitedSeekableRange: LimitedSeekableRange?
     let nowPlaying: JSNowPlaying?

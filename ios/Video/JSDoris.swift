@@ -148,7 +148,9 @@ class JSDoris {
             }
             
             switch avDorisSource {
-            case .ima(let source):
+            case .csai(let source):
+                self.doris?.player.load(source: source, initialSeek: initialSeek)
+            case .ssai(let source):
                 self.doris?.player.load(source: source, initialSeek: initialSeek)
             case .regular(let source):
                 self.doris?.player.load(source: source, initialSeek: initialSeek)

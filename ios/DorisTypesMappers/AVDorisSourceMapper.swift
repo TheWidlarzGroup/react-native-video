@@ -8,7 +8,8 @@
 import AVDoris
 
 enum AVDorisSourceType {
-    case ima(DAISource)
+    case ssai(DorisSSAISource)
+    case csai(DorisCSAISource)
     case regular(DorisSource)
     case unknown
 }
@@ -31,27 +32,42 @@ class AVDorisSourceMapper {
                                                            info: AdTagParametersModifierInfo(viewWidth: view?.bounds.width ?? 0,
                                                                                              viewHeight: view?.bounds.height ?? 0)) { newAdTagParameters in
                 if let assetKey = ima.assetKey {
-                    let liveDAISource = DAISource(assetKey: assetKey,
+                    let liveData = DorisImaLiveData(assetKey: assetKey,
+                                                    authToken: ima.authToken,
+                                                    adTagParameters: newAdTagParameters,
+                                                    adTagParametersValidFrom: ima.startDate,
+                                                    adTagParametersValidUntil: ima.endDate,
+                                                    drm: drmData)
+                    
+                    let liveDAISource = DorisSSAISource(provider: .ima(.live(liveData)))
+                    
+                    completion(.ssai(liveDAISource))
+                } else if let contentSourceId = ima.contentSourceId, let videoId = ima.videoId {
+                    let vodData = DorisImaVODData(contentSourceId: contentSourceId,
+                                                  videoId: videoId,
                                                   authToken: ima.authToken,
                                                   adTagParameters: newAdTagParameters,
-                                                  adTagParametersValidFrom: ima.startDate,
-                                                  adTagParametersValidUntil: ima.endDate)
+                                                  drm: drmData)
                     
-                    liveDAISource.drm = drmData
-                    
-                    completion(.ima(liveDAISource))
-                } else if let contentSourceId = ima.contentSourceId, let videoId = ima.videoId {
-                    let vodDAISource = DAISource(contentSourceId: contentSourceId,
-                                                 videoId: videoId,
-                                                 authToken: ima.authToken,
-                                                 adTagParameters: newAdTagParameters)
-                    
-                    vodDAISource.drm = drmData
-                    
-                    completion(.ima(vodDAISource))
+                    let vodDAISource = DorisSSAISource(provider: .ima(.vod(vodData)))
+
+                    completion(.ssai(vodDAISource))
                 } else {
                     completion(.unknown)
                 }
+            }
+            
+        } else if let ads = source.ads {
+            if let ssai = ads.ssai {
+                let source = DorisSSAISource(provider: DorisSSAIProvider(adUnit: ssai, isLive: source.live ?? false, playbackUrl: source.uri))
+            } else if !ads.csai.isEmpty {
+                let source = DorisCSAISource(contentURL: source.uri,
+                                             preroll: ads.csai.first(where: {$0.adFormat == .preroll})?.adTagUrl,
+                                             liveMidroll: ads.csai.first(where: {$0.adFormat == .midroll})?.adTagUrl,
+                                             textTracks: sideloadedSubtitles(from: source))
+                
+                source.drm = drmData
+                completion(.csai(source))
             }
             
         } else {
