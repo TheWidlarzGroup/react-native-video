@@ -17,7 +17,21 @@ import {
 
 import {Picker} from '@react-native-picker/picker';
 
-import Video, {VideoDecoderProperties} from 'react-native-video';
+import Video, {
+  AudioTrack,
+  OnAudioTracksData,
+  OnLoadData,
+  OnProgressData,
+  OnTextTracksData,
+  OnVideoAspectRatioData,
+  TextTrack,
+  VideoDecoderProperties,
+  OnVideoBufferData,
+  OnAudioFocusChangedData,
+  OnVideoErrorData,
+  VideoRef,
+  ResizeMode
+} from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl from './MultiValueControl';
 
@@ -26,7 +40,7 @@ class VideoPlayer extends Component {
     rate: 1,
     volume: 1,
     muted: false,
-    resizeMode: 'contain',
+    resizeMode: ResizeMode.CONTAIN,
     duration: 0.0,
     currentTime: 0.0,
     videoWidth: 0,
@@ -106,7 +120,7 @@ class VideoPlayer extends Component {
       Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
   );
 
-  video?: Video;
+  video?: VideoRef;
   seekPanResponder?: PanResponderInstance;
 
   popupInfo = () => {
@@ -129,13 +143,13 @@ class VideoPlayer extends Component {
     });
   };
 
-  onLoad = (data: any) => {
+  onLoad = (data: OnLoadData) => {
     this.setState({duration: data.duration, loading: false});
     this.onAudioTracks(data);
     this.onTextTracks(data);
   };
 
-  onProgress = (data: any) => {
+  onProgress = (data: OnProgressData) => {
     if (!this.state.seeking) {
       const position = this.calculateSeekerPosition();
       this.setSeekerPosition(position);
@@ -148,8 +162,8 @@ class VideoPlayer extends Component {
     this.setState({isLoading: true});
   };
 
-  onAudioTracks = (data: any) => {
-    const selectedTrack = data.audioTracks?.find((x: any) => {
+  onAudioTracks = (data: OnAudioTracksData) => {
+    const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
     this.setState({
@@ -165,8 +179,8 @@ class VideoPlayer extends Component {
     }
   };
 
-  onTextTracks = (data: any) => {
-    const selectedTrack = data.textTracks?.find((x: any) => {
+  onTextTracks = (data: OnTextTracksData) => {
+    const selectedTrack = data.textTracks?.find((x: TextTrack) => {
       return x.selected;
     });
 
@@ -184,7 +198,7 @@ class VideoPlayer extends Component {
     }
   };
 
-  onAspectRatio = (data: any) => {
+  onAspectRatio = (data: OnVideoAspectRatioData) => {
     console.log('onAspectRadio called ' + JSON.stringify(data));
     this.setState({
       videoWidth: data.width,
@@ -192,7 +206,7 @@ class VideoPlayer extends Component {
     });
   };
 
-  onVideoBuffer = (param: any) => {
+  onVideoBuffer = (param: OnVideoBufferData) => {
     console.log('onVideoBuffer');
     this.setState({isLoading: param.isBuffering});
   };
@@ -206,7 +220,7 @@ class VideoPlayer extends Component {
     this.setState({paused: true});
   };
 
-  onAudioFocusChanged = (event: {hasAudioFocus: boolean}) => {
+  onAudioFocusChanged = (event: OnAudioFocusChangedData) => {
     this.setState({paused: !event.hasAudioFocus});
   };
 
@@ -233,9 +247,9 @@ class VideoPlayer extends Component {
     }
   };
 
-  onError = (err: any) => {
-    console.log(JSON.stringify(err?.error.errorCode));
-    this.toast(true, 'error: ' + err?.error.errorCode);
+  onError = (err: OnVideoErrorData) => {
+    console.log(JSON.stringify(err));
+    this.toast(true, 'error: ' + JSON.stringify(err));
   };
 
   onEnd = () => {
@@ -488,7 +502,7 @@ class VideoPlayer extends Component {
   onVolumeSelected = (value: string | number) => {
     this.setState({volume: value});
   }
-  onResizeModeSelected = (value: string | number) => {
+  onResizeModeSelected = (value: ResizeMode) => {
     this.setState({resizeMode: value});
   }
 
@@ -572,7 +586,7 @@ class VideoPlayer extends Component {
                   selected={this.state.volume}
                 />
                 <MultiValueControl
-                  values={['cover', 'contain', 'stretch']}
+                  values={[ResizeMode.COVER, ResizeMode.CONTAIN, ResizeMode.STRETCH]}
                   onPress={this.onResizeModeSelected}
                   selected={this.state.resizeMode}
                 />
@@ -648,7 +662,7 @@ class VideoPlayer extends Component {
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
-          ref={(ref: Video) => {
+          ref={(ref: VideoRef) => {
             this.video = ref;
           }}
           source={this.srcList[this.state.srcListId]}
@@ -671,7 +685,7 @@ class VideoPlayer extends Component {
           onAudioBecomingNoisy={this.onAudioBecomingNoisy}
           onAudioFocusChanged={this.onAudioFocusChanged}
           onLoadStart={this.onVideoLoadStart}
-          onVideoAspectRatio={this.onAspectRatio}
+          OnVideoAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
           repeat={this.state.loop}

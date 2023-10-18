@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
   StyleSheet,
@@ -12,16 +12,16 @@ import {
 * MultiValueControl displays a list clickable text view
 */
 
-interface MultiValueControlType {
+interface MultiValueControlType<T> {
   // a list a string or number to be displayed
-  values: Array<string | number>
+  values: Array<T>
   // The selected value in values
-  selected?: string | number
+  selected?: T
   // callback to press onPress
-  onPress: (arg: string | number) => any
+  onPress: (arg: T) => any
 }
 
-const MultiValueControl = ({ values, selected, onPress }: MultiValueControlType) => {
+const MultiValueControl: FunctionComponent<MultiValueControlType<any>> = ({ values, selected, onPress }) => {
   const selectedStyle: TextStyle = StyleSheet.flatten([
     styles.option,
     {fontWeight: 'bold'},

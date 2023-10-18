@@ -8,34 +8,31 @@ import React, {
   type ComponentRef,
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
-import NativeVideoComponent from './VideoNativeComponent';
+import NativeVideoComponent, { type VideoComponentType } from './VideoNativeComponent';
+
+import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
+import type {ReactVideoProps} from './types/video';
+import {getReactTag, resolveAssetSourceForVideo} from './utils';
+import { VideoManager } from './VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,
+  OnBandwidthUpdateData,
+  OnBufferData,
+  OnExternalPlaybackChangeData,
+  OnGetLicenseData,
+  OnLoadData,
+  OnLoadStartData,
+  OnPictureInPictureStatusChangedData,
   OnPlaybackStateChangedData,
+  OnProgressData,
+  OnReceiveAdEventData,
+  OnSeekData,
   OnTextTracksData,
   OnTimedMetadataData,
   OnVideoErrorData,
-  OnVideoTracksData,
-} from './VideoNativeComponent';
-
-import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import {
-  type VideoComponentType,
-  type OnLoadData,
-  type OnGetLicenseData,
-  type OnLoadStartData,
-  type OnProgressData,
-  type OnSeekData,
-  type OnPictureInPictureStatusChangedData,
-  type OnBandwidthUpdateData,
-  type OnBufferData,
-  type OnExternalPlaybackChangeData,
-  type OnReceiveAdEventData,
-  VideoManager,
-} from './VideoNativeComponent';
-import type {ReactVideoProps} from './types/video';
-import {getReactTag, resolveAssetSourceForVideo} from './utils';
+  OnVideoTracksData
+} from './types/events';
 
 export interface VideoRef {
   seek: (time: number, tolerance?: number) => void;
@@ -122,7 +119,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         uri = `file://${uri}`;
       }
       if (!uri) {
-        console.warn('Trying to load empty source');
+        console.log('Trying to load empty source');
       }
       const isNetwork = !!(uri && uri.match(/^https?:/));
       const isAsset = !!(

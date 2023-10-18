@@ -1,26 +1,10 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewStyle} from 'react-native';
+import type VideoResizeMode from './ResizeMode'
+import type FilterType from './FilterType'
 
-type Filter =
-  | 'None'
-  | 'CIColorInvert'
-  | 'CIColorMonochrome'
-  | 'CIColorPosterize'
-  | 'CIFalseColor'
-  | 'CIMaximumComponent'
-  | 'CIMinimumComponent'
-  | 'CIPhotoEffectChrome'
-  | 'CIPhotoEffectFade'
-  | 'CIPhotoEffectInstant'
-  | 'CIPhotoEffectMono'
-  | 'CIPhotoEffectNoir'
-  | 'CIPhotoEffectProcess'
-  | 'CIPhotoEffectTonal'
-  | 'CIPhotoEffectTransfer'
-  | 'CISepiaTone';
-
-type Headers = Record<string, string>;
+export type Headers = Record<string, string>;
 
 export type ReactVideoSource = Readonly<{
   uri?: string;
@@ -39,13 +23,20 @@ export type ReactVideoSource = Readonly<{
   customImageUri?: string;
 }>;
 
-type DebugConfig = Readonly<{
+export type DebugConfig = Readonly<{
   enable?: boolean;
   thread?: boolean;
 }>;
 
-export type ReactVideoDrm = Readonly<{
-  type?: 'widevine' | 'playready' | 'clearkey' | 'fairplay';
+export enum DrmType {
+  WIDEVINE = 'widevine',
+  PLAYREADY = 'playready',
+  CLEARKEY = 'clearkey',
+  FAIRPLAY = 'fairplay',
+}
+
+export type Drm = Readonly<{
+  type?: DrmType;
   licenseServer?: string;
   headers?: Headers;
   contentId?: string; // ios
@@ -60,7 +51,7 @@ export type ReactVideoDrm = Readonly<{
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
 
-type BufferConfig = {
+export type BufferConfig = {
   minBufferMs?: number;
   maxBufferMs?: number;
   bufferForPlaybackMs?: number;
@@ -70,17 +61,32 @@ type BufferConfig = {
   minBufferMemoryReservePercent?: number;
 };
 
-type SelectedTrack = {
-  type: 'system' | 'disabled' | 'title' | 'language' | 'index';
+export enum SelectedTrackType {
+  SYSTEM = 'system',
+  DISABLED = 'disabled',
+  TITLE = 'title',
+  LANGUAGE = 'language',
+  INDEX = 'index',
+}
+
+export type SelectedTrack = {
+  type: SelectedTrackType;
   value?: string | number;
 };
 
-type SelectedVideoTrack = {
-  type: 'auto' | 'disabled' | 'resolution' | 'index';
+export enum SelectedVideoTrackType {
+  AUDO = 'auto',
+  DISABLED = 'disabled',
+  RESOLUTION = 'resolution',
+  IUNDEX = 'index',
+}
+
+export type SelectedVideoTrack = {
+  type: SelectedVideoTrackType;
   value?: number;
 };
 
-type SubtitleStyle = {
+export type SubtitleStyle = {
   fontSize?: number;
   paddingTop?: number;
   paddingBottom?: number;
@@ -88,23 +94,70 @@ type SubtitleStyle = {
   paddingRight?: number;
 };
 
-type TextTracks = {
+export enum TextTracksType {
+  SUBRIP = 'application/x-subrip',
+  TTML = 'application/ttml+xml',
+  VTT = 'text/vtt',
+}
+
+export type TextTracks = {
   title: string;
   language: ISO639_1;
-  type: 'application/x-subrip' | 'application/ttml+xml' | 'text/vtt';
+  type: TextTracksType;
   uri: string;
 }[];
 
-type Chapters = {
+export type TextTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
+
+export type SelectedTextTrack = Readonly<{
+  type: TextTrackType;
+  value?: string | number;
+}>;
+
+export type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
+
+export type SelectedAudioTrack = Readonly<{
+  type: AudioTrackType;
+  value?: string | number;
+}>;
+
+export type Chapters = {
   title: string;
   startTime: number;
   endTime: number;
   uri?: string;
 };
 
+export enum FullscreenOrientationType {
+  ALL = 'all',
+  LANDSCAPE = 'landscape',
+  PORTRAIT = 'portrait',
+}
+
+export enum IgnoreSilentSwitchType {
+  INHERIT = 'inherit',
+  IGNORE = 'ignore',
+  OBEY = 'obey',
+}
+
+export enum MixWithOthersType {
+    INHERIT = 'inherit',
+    MIX = 'mix',
+    DUCK = 'duck',
+}
+
+export enum PosterResizeModeType {
+    CONTAIN = 'contain',
+    CENTER = 'center',
+    COVER = 'cover',
+    NONE = 'none',
+    REPEAT = 'repeat',
+    STRETCH = 'stretch',
+}
+
 export interface ReactVideoProps extends ReactVideoEvents {
   source?: ReactVideoSource;
-  drm?: ReactVideoDrm;
+  drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string; // iOS
   audioOnly?: boolean;
@@ -117,37 +170,31 @@ export interface ReactVideoProps extends ReactVideoEvents {
   currentPlaybackTime?: number; // Android
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
-  filter?: Filter; // iOS
+  filter?: FilterType; // iOS
   filterEnabled?: boolean; // iOS
   focusable?: boolean; // Android
   fullscreen?: boolean; // iOS
   fullscreenAutorotate?: boolean; // iOS
-  fullscreenOrientation?: 'all' | 'landscape' | 'portrait'; // iOS
+  fullscreenOrientation?: FullscreenOrientationType; // iOS
   hideShutterView?: boolean; //	Android
-  ignoreSilentSwitch?: 'inherit' | 'ignore' | 'obey'; // iOS
+  ignoreSilentSwitch?: IgnoreSilentSwitchType; // iOS
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
-  mixWithOthers?: 'inherit' | 'mix' | 'duck'; // iOS
+  mixWithOthers?: MixWithOthersType; // iOS
   muted?: boolean;
   paused?: boolean;
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   poster?: string;
-  posterResizeMode?:
-    | 'contain'
-    | 'center'
-    | 'cover'
-    | 'none'
-    | 'repeat'
-    | 'stretch';
+  posterResizeMode?: PosterResizeModeType;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
-  resizeMode?: 'none' | 'contain' | 'cover' | 'stretch';
+  resizeMode?: VideoResizeMode;
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
