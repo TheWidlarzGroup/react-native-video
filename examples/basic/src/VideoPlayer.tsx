@@ -26,7 +26,7 @@ import Video, {
   OnVideoAspectRatioData,
   TextTrack,
   VideoDecoderProperties,
-  OnVideoBufferData,
+  OnBufferData,
   OnAudioFocusChangedData,
   OnVideoErrorData,
   VideoRef,
@@ -206,7 +206,7 @@ class VideoPlayer extends Component {
     });
   };
 
-  onVideoBuffer = (param: OnVideoBufferData) => {
+  onVideoBuffer = (param: OnBufferData) => {
     console.log('onVideoBuffer');
     this.setState({isLoading: param.isBuffering});
   };

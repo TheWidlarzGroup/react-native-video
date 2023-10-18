@@ -125,7 +125,7 @@ export type OnAudioFocusChangedData = Readonly<{
   hasAudioFocus: boolean;
 }>;
 
-export type OnVideoBufferData = Readonly<{isBuffering: boolean}>;
+export type OnBufferData = Readonly<{isBuffering: boolean}>;
 
 export type OnBandwidthUpdateData = Readonly<{
   bitrate: number;
@@ -136,7 +136,7 @@ export interface ReactVideoEvents {
   onAudioFocusChanged?: (e: OnAudioFocusChangedData) => void; // Android
   onIdle?: () => void; // Android
   onBandwidthUpdate?: (e: OnBandwidthUpdateData) => void; //Android
-  onBuffer?: (e: OnVideoBufferData) => void; //Android, iOS
+  onBuffer?: (e: OnBufferData) => void; //Android, iOS
   onEnd?: () => void; //All
   onError?: (e: OnVideoErrorData) => void; //Android, iOS
   onExternalPlaybackChange?: (e: OnExternalPlaybackChangeData) => void; //iOS
