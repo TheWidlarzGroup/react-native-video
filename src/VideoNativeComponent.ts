@@ -12,8 +12,8 @@ import type {
   SelectedVideoTrack,
   SubtitleStyle,
   BufferConfig,
-  SelectedAudioTrack
-} from './types/video'
+  SelectedAudioTrack,
+} from './types/video';
 import {NativeModules, requireNativeComponent} from 'react-native';
 import type {
   OnAudioFocusChangedData,
@@ -34,7 +34,7 @@ import type {
   OnTimedMetadataData,
   OnVideoAspectRatioData,
   OnVideoErrorData,
-  OnVideoTracksData
+  OnVideoTracksData,
 } from './types/events';
 import type ResizeMode from './types/ResizeMode';
 import type FilterType from 'react-native-video/src/types/FilterType';
@@ -109,7 +109,9 @@ export interface VideoNativeProps extends ViewProps {
   useSecureView?: boolean; // Android
   onVideoLoad?: (event: NativeSyntheticEvent<OnLoadData>) => void;
   onVideoLoadStart?: (event: NativeSyntheticEvent<OnLoadStartData>) => void;
-  onVideoAspectRatio?: (event: NativeSyntheticEvent<OnVideoAspectRatioData>) => void;
+  onVideoAspectRatio?: (
+    event: NativeSyntheticEvent<OnVideoAspectRatioData>,
+  ) => void;
   onVideoBuffer?: (event: NativeSyntheticEvent<OnVideoBufferData>) => void;
   onVideoError?: (event: NativeSyntheticEvent<OnVideoErrorData>) => void;
   onVideoProgress?: (event: NativeSyntheticEvent<OnProgressData>) => void;

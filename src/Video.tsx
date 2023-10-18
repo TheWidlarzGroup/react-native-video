@@ -8,12 +8,14 @@ import React, {
   type ComponentRef,
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
-import NativeVideoComponent, { type VideoComponentType } from './VideoNativeComponent';
+import NativeVideoComponent, {
+  type VideoComponentType,
+} from './VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
 import type {ReactVideoProps} from './types/video';
 import {getReactTag, resolveAssetSourceForVideo} from './utils';
-import { VideoManager } from './VideoNativeComponent';
+import {VideoManager} from './VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,
@@ -31,7 +33,7 @@ import type {
   OnTextTracksData,
   OnTimedMetadataData,
   OnVideoErrorData,
-  OnVideoTracksData
+  OnVideoTracksData,
 } from './types/events';
 
 export interface VideoRef {

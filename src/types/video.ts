@@ -1,8 +1,8 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewStyle} from 'react-native';
-import type VideoResizeMode from './ResizeMode'
-import type FilterType from './FilterType'
+import type VideoResizeMode from './ResizeMode';
+import type FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
 
@@ -107,14 +107,24 @@ export type TextTracks = {
   uri: string;
 }[];
 
-export type TextTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
+export type TextTrackType =
+  | 'system'
+  | 'disabled'
+  | 'title'
+  | 'language'
+  | 'index';
 
 export type SelectedTextTrack = Readonly<{
   type: TextTrackType;
   value?: string | number;
 }>;
 
-export type AudioTrackType = 'system' | 'disabled' | 'title' | 'language' | 'index';
+export type AudioTrackType =
+  | 'system'
+  | 'disabled'
+  | 'title'
+  | 'language'
+  | 'index';
 
 export type SelectedAudioTrack = Readonly<{
   type: AudioTrackType;
@@ -141,18 +151,18 @@ export enum IgnoreSilentSwitchType {
 }
 
 export enum MixWithOthersType {
-    INHERIT = 'inherit',
-    MIX = 'mix',
-    DUCK = 'duck',
+  INHERIT = 'inherit',
+  MIX = 'mix',
+  DUCK = 'duck',
 }
 
 export enum PosterResizeModeType {
-    CONTAIN = 'contain',
-    CENTER = 'center',
-    COVER = 'cover',
-    NONE = 'none',
-    REPEAT = 'repeat',
-    STRETCH = 'stretch',
+  CONTAIN = 'contain',
+  CENTER = 'center',
+  COVER = 'cover',
+  NONE = 'none',
+  REPEAT = 'repeat',
+  STRETCH = 'stretch',
 }
 
 export interface ReactVideoProps extends ReactVideoEvents {

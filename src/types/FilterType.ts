@@ -15,6 +15,6 @@ enum FilterType {
   TONAL = 'CIPhotoEffectTonal',
   TRANSFER = 'CIPhotoEffectTransfer',
   SEPIA = 'CISepiaTone',
-};
+}
 
-export default FilterType
+export default FilterType;

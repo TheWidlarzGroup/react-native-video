@@ -1,4 +1,3 @@
-
 enum ResizeMode {
   NONE = 'none',
   CONTAIN = 'contain',

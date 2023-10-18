@@ -1,4 +1,4 @@
-import type Orientation from "./Orientation";
+import type Orientation from './Orientation';
 
 export type OnLoadData = Readonly<{
   currentTime: number;
@@ -8,11 +8,13 @@ export type OnLoadData = Readonly<{
     height: number;
     orientation: Orientation;
   }>;
-}> & OnAudioTracksData & OnTextTracksData;
+}> &
+  OnAudioTracksData &
+  OnTextTracksData;
 
 export type OnVideoAspectRatioData = Readonly<{
-  width: number,
-  height: number,
+  width: number;
+  height: number;
 }>;
 
 export type OnLoadStartData = Readonly<{
@@ -45,23 +47,21 @@ export type OnTimedMetadataData = Readonly<{
   >;
 }>;
 
-
 export type AudioTrack = Readonly<{
-    index: number;
-    title?: string;
-    language?: string;
-    bitrate?: number;
-    type?: string;
-    selected?: boolean;
-  }
->;
+  index: number;
+  title?: string;
+  language?: string;
+  bitrate?: number;
+  type?: string;
+  selected?: boolean;
+}>;
 
 export type OnAudioTracksData = Readonly<{
-  audioTracks: ReadonlyArray<AudioTrack>
+  audioTracks: ReadonlyArray<AudioTrack>;
 }>;
 
 export enum OnTextTracksTypeData {
-  SRT ='srt',
+  SRT = 'srt',
   TTML = 'ttml',
   VTT = 'vtt',
 }
@@ -72,7 +72,7 @@ export type TextTrack = Readonly<{
   language?: string;
   type?: OnTextTracksTypeData;
   selected?: boolean;
-}>
+}>;
 
 export type OnTextTracksData = Readonly<{
   textTracks: ReadonlyArray<TextTrack>;
@@ -114,10 +114,10 @@ export type OnReceiveAdEventData = Readonly<{
 }>;
 
 export type OnVideoErrorData = Readonly<{
-  errorString: string
-  errorException: string
-  errorStackTrace: string
-  errorCode: string
+  errorString: string;
+  errorException: string;
+  errorStackTrace: string;
+  errorCode: string;
   error: string;
 }>;
 
@@ -160,5 +160,5 @@ export interface ReactVideoEvents {
   onAudioTracks?: (e: OnAudioTracksData) => void; // Android
   onTextTracks?: (e: OnTextTracksData) => void; //Android
   onVideoTracks?: (e: OnVideoTracksData) => void; //Android
-  onVideoAspectRatio?: (e: OnVideoAspectRatioData) => void
+  onVideoAspectRatio?: (e: OnVideoAspectRatioData) => void;
 }
