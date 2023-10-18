@@ -685,7 +685,7 @@ class VideoPlayer extends Component {
           onAudioBecomingNoisy={this.onAudioBecomingNoisy}
           onAudioFocusChanged={this.onAudioFocusChanged}
           onLoadStart={this.onVideoLoadStart}
-          OnVideoAspectRatio={this.onAspectRatio}
+          onVideoAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
           repeat={this.state.loop}
