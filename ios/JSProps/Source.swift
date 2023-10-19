@@ -27,6 +27,7 @@ struct Source: SuperCodable {
     let limitedSeekableRange: LimitedSeekableRange?
     let nowPlaying: JSNowPlaying?
     let selectedSubtitleTrack: String?
+    let preferredAudioTracks: [String]?
 }
 
 

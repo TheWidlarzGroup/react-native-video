@@ -16,7 +16,6 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ColorInt;
@@ -36,7 +35,6 @@ import androidx.media3.common.Tracks;
 import androidx.media3.common.endeavor.LimitedSeekRange;
 import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Log;
-import androidx.media3.common.util.Util;
 import androidx.media3.exoplayer.ExoPlaybackException;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.analytics.AnalyticsListener;
@@ -93,7 +91,6 @@ import com.diceplatform.doris.ui.entity.VideoTile;
 import com.diceplatform.doris.util.DorisExceptionUtil;
 import com.diceplatform.doris.util.LocalizationService;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -112,6 +109,7 @@ import java.net.CookiePolicy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +166,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ExoDoris player;
     private DefaultTrackSelector trackSelector;
     private Source source;
+    private LocalizationService localizationService;
     private boolean playerNeedsSource;
     private long resumePosition; // unit: millisecond
     private boolean loadVideoStarted;
@@ -190,10 +189,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private RNMetadata metadata;
     private RNTranslations translations;
     private boolean repeat;
-    private String audioTrackType;
-    private Dynamic audioTrackValue;
-    private String textTrackType;
-    private Dynamic textTrackValue;
     private boolean disableFocus;
     private boolean isLive = false;
     private boolean hasEpg;
@@ -280,7 +275,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Log.d(TAG, "APS - Successful response");
             List<AmazonFireTVAdsKeyValuePair> amazonKeyWords = amazonFireTVAdResponse.getAdServerTargetingParams();
             StringBuilder customParams = new StringBuilder();
-            for (AmazonFireTVAdsKeyValuePair pair: amazonKeyWords) {
+            for (AmazonFireTVAdsKeyValuePair pair : amazonKeyWords) {
                 customParams.append(pair.getKey()).append("=").append(pair.getValue()).append("&");
             }
 
@@ -325,6 +320,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
         mediaSessionConnector = new MediaSessionConnector(mediaSession);
+        localizationService = new LocalizationService(Locale.getDefault());
     }
 
     @Override
@@ -470,22 +466,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             releasePlayer();
         }
         if (player == null) {
-            Parameters.Builder parametersBuilder = new Parameters.Builder(getContext());
-            String preferredSubtitleLang = getPreferredSubtitleLang();
-            if (preferredSubtitleLang != null) {
-                parametersBuilder.setPreferredTextLanguage(preferredSubtitleLang);
-            } else {
-                parametersBuilder.setDisabledTextTrackSelectionFlags(C.SELECTION_FLAG_DEFAULT);
-            }
-
-            AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE ? secondaryPlayerView : exoDorisPlayerView;
+            AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
+                    ? secondaryPlayerView
+                    : exoDorisPlayerView;
             player = exoDorisFactory.createPlayer(
                     getContext(),
                     adType,
                     MAX_LOAD_BUFFER_MS,
                     exoDorisPlayerView.getFastForwardIncrementMs(),
                     exoDorisPlayerView.getRewindIncrementMs(),
-                    parametersBuilder,
                     adViewProvider);
 
             player.setDorisListener(dorisListener);
@@ -996,12 +985,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private void videoLoaded() {
         if (loadVideoStarted) {
             loadVideoStarted = false;
-            if (audioTrackType != null && audioTrackValue != null) {
-                setSelectedAudioTrack(audioTrackType, audioTrackValue);
-            }
-            if (textTrackType != null && textTrackValue != null) {
-                setSelectedTextTrack(textTrackType, textTrackValue);
-            }
+
+            // Preselect subtitle and audio.
+            selectTrack(C.TRACK_TYPE_TEXT, Collections.singletonList(getPreferredSubtitleLang()));
+            selectTrack(C.TRACK_TYPE_AUDIO, src.getPreferredAudioTracks());
+
             ExoPlayer exoPlayer = player.getExoPlayer();
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
@@ -1234,7 +1222,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Watermark watermark,
             LimitedSeekRange limitedSeekRange,
             boolean shouldSaveSubtitleSelection,
-            String selectedSubtitleTrack) {
+            String selectedSubtitleTrack,
+            List<String> preferredAudioTracks) {
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1263,7 +1252,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     getTextTracks(textTracks),
                     headers,
                     muxData,
-                    null,
+                    preferredAudioTracks,
                     selectedSubtitleTrack,
                     null,
                     channelId,
@@ -1350,12 +1339,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         this.repeat = repeat;
     }
 
-    @SuppressLint("ObsoleteSdkInt")
-    public void setSelectedTrack(int trackType, String type, Dynamic value) {
+    private void selectTrack(int trackType, @Nullable List<String> preferredLanguages) {
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
         }
+
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         if (info == null) {
             return;
@@ -1364,91 +1353,52 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         TrackGroupArray groups = info.getTrackGroups(rendererIndex);
         int trackIndex = C.INDEX_UNSET;
 
-        if (groups.isEmpty()) {
-            type = "disabled";
-        } else if (TextUtils.isEmpty(type)) {
-            type = "default";
+        // Turn subtitles off if the language is null/empty.
+        if (trackType == C.TRACK_TYPE_TEXT) {
+            if (preferredLanguages == null || preferredLanguages.isEmpty()
+                    || TextUtils.isEmpty(preferredLanguages.get(0))) {
+                Parameters disableParameters = trackSelector.getParameters()
+                        .buildUpon()
+                        .setRendererDisabled(rendererIndex, true)
+                        .build();
+                trackSelector.setParameters(disableParameters);
+                return;
+            }
         }
 
-        Parameters disableParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, true)
-                .build();
-
-        if (type.equals("disabled")) {
-            trackSelector.setParameters(disableParameters);
+        if (preferredLanguages == null) {
             return;
-        } else if (type.equals("language")) {
+        }
+
+        // Select the first match of preferred languages and available languages.
+        boolean matchFound = false;
+        for (String language : preferredLanguages) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.language != null && format.language.equals(value.asString())) {
+                if (format.language != null && language != null
+                        && localizationService.isMatch(format.language, language)) {
                     trackIndex = i;
+                    matchFound = true;
                     break;
                 }
             }
-        } else if (type.equals("title")) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value.asString())) {
-                    trackIndex = i;
-                    break;
-                }
-            }
-        } else if (type.equals("index")) {
-            if (value.asInt() < groups.length) {
-                trackIndex = value.asInt();
-            }
-        } else { // default
-            if (rendererIndex == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18 && groups.length > 0) {
-                // Use system settings if possible
-                CaptioningManager captioningManager
-                        = (CaptioningManager) themedReactContext.getSystemService(Context.CAPTIONING_SERVICE);
-                if (captioningManager != null && captioningManager.isEnabled()) {
-                    trackIndex = getTrackIndexForDefaultLocale(groups);
-                }
-            } else if (rendererIndex == C.TRACK_TYPE_AUDIO) {
-                trackIndex = getTrackIndexForDefaultLocale(groups);
+            if (matchFound) {
+                break;
             }
         }
 
+        // No match, return.
         if (trackIndex == C.INDEX_UNSET) {
-            trackSelector.setParameters(disableParameters);
             return;
         }
 
+        // Select the matching track.
         Parameters selectionParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setRendererDisabled(rendererIndex, false)
                 .setOverrideForType(new TrackSelectionOverride(groups.get(trackIndex), 0))
                 .build();
         trackSelector.setParameters(selectionParameters);
-    }
-
-    private int getTrackIndexForDefaultLocale(TrackGroupArray groups) {
-        int trackIndex = 0; // default if no match
-        String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
-        String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
-        for (int i = 0; i < groups.length; ++i) {
-            Format format = groups.get(i).getFormat(0);
-            String language = format.language;
-            if (language != null && (language.equals(locale2) || language.equals(locale3))) {
-                trackIndex = i;
-                break;
-            }
-        }
-        return trackIndex;
-    }
-
-    public void setSelectedAudioTrack(String type, Dynamic value) {
-        audioTrackType = type;
-        audioTrackValue = value;
-        setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
-    }
-
-    public void setSelectedTextTrack(String type, Dynamic value) {
-        textTrackType = type;
-        textTrackValue = value;
-        setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
     }
 
     public void setPausedModifier(boolean paused) {
@@ -1705,7 +1655,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         return (exoDorisPlayerView != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
     }
 
-    public void showWatermark(){
+    public void showWatermark() {
         if (watermarkWidget != null) {
             watermarkWidget.show();
         }
@@ -1859,7 +1809,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final DorisPlayerOutput dorisListener = new DorisPlayerOutput() {
         @Override
         public void onPlayerEvent(DorisPlayerEvent playerEvent) {
-            switch (playerEvent.details.state){
+            switch (playerEvent.details.state) {
                 case PLAYING:
                     eventEmitter.playbackRateChange(1f);
                     break;

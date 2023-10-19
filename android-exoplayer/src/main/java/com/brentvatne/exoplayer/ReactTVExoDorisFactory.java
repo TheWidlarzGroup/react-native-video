@@ -29,7 +29,6 @@ public final class ReactTVExoDorisFactory {
             int loadBufferMs,
             long forwardIncrementMs,
             long rewindIncrementMs,
-            @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider) {
         return createPlayer(
                 context,
@@ -40,7 +39,7 @@ public final class ReactTVExoDorisFactory {
                 forwardIncrementMs,
                 rewindIncrementMs,
                 null,
-                parametersBuilder,
+                null,
                 adViewProvider);
     }
 

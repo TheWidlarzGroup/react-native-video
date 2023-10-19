@@ -10,6 +10,7 @@ import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 
+import java.util.List;
 import java.util.Map;
 
 public class RNSource {
@@ -23,7 +24,7 @@ public class RNSource {
     private final TextTrack[] textTracks;
     private final Map<String, String> headers;
     private final Map<String, Object> muxData;
-    private final String selectedAudioTrack;
+    private final List<String> preferredAudioTracks;
     private final String selectedSubtitleTrack;
     private final String locale;
     private final String channelId;
@@ -46,7 +47,7 @@ public class RNSource {
             @Nullable TextTrack[] textTracks,
             @Nullable Map<String, String> headers,
             @Nullable Map<String, Object> muxData,
-            @Nullable String selectedAudioTrack,
+            @Nullable List<String> preferredAudioTracks,
             @Nullable String selectedSubtitleTrack,
             @Nullable String locale,
             @Nullable String channelId,
@@ -67,7 +68,7 @@ public class RNSource {
         this.textTracks = textTracks;
         this.headers = headers;
         this.muxData = muxData;
-        this.selectedAudioTrack = selectedAudioTrack;
+        this.preferredAudioTracks = preferredAudioTracks;
         this.selectedSubtitleTrack = selectedSubtitleTrack;
         this.locale = locale;
         this.channelId = channelId;
@@ -136,8 +137,8 @@ public class RNSource {
     }
 
     @Nullable
-    public String getSelectedAudioTrack() {
-        return selectedAudioTrack;
+    public List<String> getPreferredAudioTracks() {
+        return preferredAudioTracks;
     }
 
     @Nullable

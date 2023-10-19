@@ -38,6 +38,8 @@ import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +76,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_NOW_PLAYING = "nowPlaying";
     private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
     private static final String PROP_SRC_SELECTED_SUBTITLE_TRACK = "selectedSubtitleTrack";
+    private static final String PROP_SRC_PREFERRED_AUDIO_TRACKS = "preferredAudioTracks";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -248,9 +251,15 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             videoView.setThumbnailsPreviewUrl(src.getString(PROP_SRC_BIF_URL));
         }
 
-        String selectedSubtitleTrack = src.hasKey(PROP_SRC_SELECTED_SUBTITLE_TRACK)
-                ? src.getString(PROP_SRC_SELECTED_SUBTITLE_TRACK)
-                : null;
+        String selectedSubtitleTrack = ReadableMapUtils.getString(src, PROP_SRC_SELECTED_SUBTITLE_TRACK);
+        ReadableArray preferredAudioTracksArray = ReadableMapUtils.getArray(src, PROP_SRC_PREFERRED_AUDIO_TRACKS);
+
+        List<String> preferredAudioTracks = new ArrayList<>();
+        if (preferredAudioTracksArray != null) {
+            for (int i = 0; i < preferredAudioTracksArray.size(); i++) {
+                preferredAudioTracks.add(preferredAudioTracksArray.getString(i));
+            }
+        }
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -313,7 +322,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     Watermark.fromMap(metadata),
                     limitedSeekRange,
                     shouldSaveSubtitleSelection,
-                    selectedSubtitleTrack);
+                    selectedSubtitleTrack,
+                    preferredAudioTracks);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
