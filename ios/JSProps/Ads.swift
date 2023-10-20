@@ -55,10 +55,26 @@ struct JSAds: SuperCodable {
 }
 
 extension DorisSSAIProvider {
-    init(adUnit: JSAds.AdUnit, isLive: Bool, playbackUrl: URL) {
+    init?(adUnit: JSAds.AdUnit, isLive: Bool, playbackUrl: URL, drm: DorisDRMSource?) {
         switch adUnit.adProvider {
-        case .yospace: self = .yospace(isLive ? .dvrLive(url: playbackUrl.absoluteString) : .vod(url: playbackUrl.absoluteString),
-                                       queryItems: DorisYospaceQueryItems(queryItems: adUnit.adManifestParams?.compactMap {URLQueryItem(name: $0.key, value: $0.value)} ?? []))
+        case .yospace:
+            if var urlComps = URLComponents(url: playbackUrl, resolvingAgainstBaseURL: true) {
+                var newQueryItems = urlComps.queryItems ?? []
+                let queryItems = adUnit.adManifestParams?.compactMap {URLQueryItem(name: $0.key, value: $0.value)} ?? []
+                newQueryItems.append(contentsOf: queryItems)
+                //workaround to make any live stream live-DVR compatible for yospace
+                if isLive { newQueryItems.append(URLQueryItem(name: "yo.lpa", value: "dur")) }
+                
+                urlComps.queryItems = newQueryItems
+                if let newURL = urlComps.url {
+                    self = .yospace(isLive ? .dvrLive(url: newURL.absoluteString) : .vod(url: newURL.absoluteString),
+                                    drm: drm)
+                } else {
+                    return nil
+                }
+            } else {
+                return nil
+            }
         }
     }
 }

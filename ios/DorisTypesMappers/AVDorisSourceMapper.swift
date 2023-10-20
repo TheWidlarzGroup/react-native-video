@@ -58,8 +58,9 @@ class AVDorisSourceMapper {
             }
             
         } else if let ads = source.ads {
-            if let ssai = ads.ssai {
-                let source = DorisSSAISource(provider: DorisSSAIProvider(adUnit: ssai, isLive: source.live ?? false, playbackUrl: source.uri))
+            if let ssai = ads.ssai, let provider = DorisSSAIProvider(adUnit: ssai, isLive: source.live ?? false, playbackUrl: source.uri, drm: drmData) {
+                let source = DorisSSAISource(provider: provider)
+                completion(.ssai(source))
             } else if !ads.csai.isEmpty {
                 let source = DorisCSAISource(contentURL: source.uri,
                                              preroll: ads.csai.first(where: {$0.adFormat == .preroll})?.adTagUrl,
@@ -68,6 +69,11 @@ class AVDorisSourceMapper {
                 
                 source.drm = drmData
                 completion(.csai(source))
+            } else {
+                let source = DorisSource(url: source.uri,
+                                         textTracks: sideloadedSubtitles(from: source))
+                source.drm = drmData
+                completion(.regular(source))
             }
             
         } else {
