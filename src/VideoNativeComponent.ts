@@ -19,7 +19,7 @@ import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,
   OnBandwidthUpdateData,
-  OnVideoBufferData,
+  OnBufferData,
   OnExternalPlaybackChangeData,
   OnGetLicenseData,
   OnLoadData,
@@ -112,7 +112,7 @@ export interface VideoNativeProps extends ViewProps {
   onVideoAspectRatio?: (
     event: NativeSyntheticEvent<OnVideoAspectRatioData>,
   ) => void;
-  onVideoBuffer?: (event: NativeSyntheticEvent<OnVideoBufferData>) => void;
+  onVideoBuffer?: (event: NativeSyntheticEvent<OnBufferData>) => void;
   onVideoError?: (event: NativeSyntheticEvent<OnVideoErrorData>) => void;
   onVideoProgress?: (event: NativeSyntheticEvent<OnProgressData>) => void;
   onBandwidthUpdate?: (
