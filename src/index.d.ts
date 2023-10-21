@@ -1,5 +1,5 @@
 import Video from './Video';
-export {default as ResizeMode} from 'react-native-video/src/types/ResizeMode';
+export {default as ResizeMode} from './types/ResizeMode';
 export {VideoDecoderProperties} from './VideoNativeComponent';
 export * from './types/FilterType';
 export * from './types/TextTrackType';
