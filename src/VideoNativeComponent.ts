@@ -37,7 +37,7 @@ import type {
   OnVideoTracksData,
 } from './types/events';
 import type ResizeMode from './types/ResizeMode';
-import type FilterType from 'react-native-video/src/types/FilterType';
+import type FilterType from './types/FilterType';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
