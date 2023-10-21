@@ -32,6 +32,7 @@ import type {
   OnSeekData,
   OnTextTracksData,
   OnTimedMetadataData,
+  OnVideoAspectRatioData,
   OnVideoErrorData,
   OnVideoTracksData,
 } from './types/events';
@@ -87,6 +88,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onAudioTracks,
       onTextTracks,
       onVideoTracks,
+      onAspectRatio,
       ...rest
     },
     ref,
@@ -385,6 +387,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onReceiveAdEvent],
     );
 
+    const _onVideoAspectRatio = useCallback(
+      (e: NativeSyntheticEvent<OnVideoAspectRatioData>) => {
+        onAspectRatio?.(e.nativeEvent);
+      },
+      [onAspectRatio],
+    );
+
     const onGetLicense = useCallback(
       (event: NativeSyntheticEvent<OnGetLicenseData>) => {
         if (drm && drm.getLicense instanceof Function) {
@@ -501,6 +510,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onRestoreUserInterfaceForPictureInPictureStop={
             onRestoreUserInterfaceForPictureInPictureStop
           }
+          onVideoAspectRatio={_onVideoAspectRatio}
           onReceiveAdEvent={_onReceiveAdEvent}
         />
         {showPoster ? (
