@@ -3,8 +3,8 @@ description: Setup bun and install dependencies
 
 runs:
   using: composite
-  setups:
-    - name: Setup
+  steps:
+    - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
         bun-version: 1.0.4
