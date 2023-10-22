@@ -20,5 +20,7 @@ runs:
           ${{ runner.os }}-bun-
 
     - name: Install dependencies
+      working-directory: ./docs
       run: bun install
+      shell: bash
       
