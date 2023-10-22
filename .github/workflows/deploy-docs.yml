@@ -1,5 +1,5 @@
 
-name: Deploy Docs
+name: deploy docs
 on:
   workflow_dispatch:
   push:
@@ -18,6 +18,8 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup-bun
+        with:
+          working-directory: ./docs
 
       - name: Cache build
         uses: actions/cache@v3

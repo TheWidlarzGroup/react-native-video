@@ -1,5 +1,11 @@
-name: Setup bun
+name: setup bun
 description: Setup bun and install dependencies
+
+inputs:
+  working-directory:
+    description: 'working directory for action'
+    default: ./
+    required: false
 
 runs:
   using: composite
@@ -10,6 +16,7 @@ runs:
         bun-version: 1.0.4
     
     - name: Cache dependencies
+      id: bun-cache
       uses: actions/cache@v3
       with:
         path: |
@@ -20,7 +27,8 @@ runs:
           ${{ runner.os }}-bun-
 
     - name: Install dependencies
-      working-directory: ./docs
+      working-directory: github.event.inputs.working-directory
+      if: steps.bun-cache.outputs.cache-hit != 'true'
       run: bun install
       shell: bash
       
