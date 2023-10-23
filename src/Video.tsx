@@ -291,7 +291,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onSeek],
     );
 
-    // android only
     const onVideoPlaybackStateChanged = useCallback(
       (e: NativeSyntheticEvent<OnPlaybackStateChangedData>) => {
         onPlaybackStateChanged?.(e.nativeEvent);
