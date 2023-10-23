@@ -74,7 +74,7 @@ class RCTPlayerObserver: NSObject {
     private var _timeObserver:Any?
     
     private var _playerRateChangeObserver:NSKeyValueObservation?
-    private var _playerExpernalPlaybackActiveObserver:NSKeyValueObservation?
+    private var _playerExternalPlaybackActiveObserver:NSKeyValueObservation?
     private var _playerItemStatusObserver:NSKeyValueObservation?
     private var _playerPlaybackBufferEmptyObserver:NSKeyValueObservation?
     private var _playerPlaybackLikelyToKeepUpObserver:NSKeyValueObservation?
@@ -95,12 +95,12 @@ class RCTPlayerObserver: NSObject {
         }
         
         _playerRateChangeObserver = player.observe(\.rate, changeHandler: _handlers.handlePlaybackRateChange)
-        _playerExpernalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
+        _playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
     }
     
     func removePlayerObservers() {
         _playerRateChangeObserver?.invalidate()
-        _playerExpernalPlaybackActiveObserver?.invalidate()
+        _playerExternalPlaybackActiveObserver?.invalidate()
     }
     
     func addPlayerItemObservers() {
