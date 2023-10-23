@@ -5,7 +5,7 @@
     "main": "lib/index",
     "source": "src/index",
     "react-native": "src/index",
-    "types": "./src/index.d.ts",
+    "types": "./lib/index.d.ts",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
