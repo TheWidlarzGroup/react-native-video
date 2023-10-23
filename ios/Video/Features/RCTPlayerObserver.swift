@@ -94,7 +94,7 @@ class RCTPlayerObserver: NSObject {
             return
         }
         
-        _playerRateChangeObserver = player.observe(\.rate, changeHandler: _handlers.handlePlaybackRateChange)
+        _playerRateChangeObserver = player.observe(\.rate, options: [.old], changeHandler: _handlers.handlePlaybackRateChange)
         _playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
     }
     
