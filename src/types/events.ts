@@ -38,11 +38,11 @@ export interface ReactVideoEvents {
   ) => void; //iOS
   onPlaybackRateChange?: (e: OnPlaybackData) => void; //All
   onProgress?: (e: OnProgressData) => void; //All
-  onReadyForDisplay?: () => void; //Android, iOS, Web
+  onReadyForDisplay?: () => void; //Android, iOS
   onReceiveAdEvent?: (e: OnReceiveAdEventData) => void; //Android, iOS
   onRestoreUserInterfaceForPictureInPictureStop?: () => void; //iOS
   onSeek?: (e: OnSeekData) => void; //Android, iOS, Windows UWP
-  onPlaybackStateChanged?: (e: OnPlaybackStateChangedData) => void; // Android
+  onPlaybackStateChanged?: (e: OnPlaybackStateChangedData) => void; // Android, iOS
   onTimedMetadata?: (e: OnTimedMetadataData) => void; //Android, iOS
   onAudioTracks?: (e: OnAudioTracksData) => void; // Android
   onTextTracks?: (e: OnTextTracksData) => void; //Android
