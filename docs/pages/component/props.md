@@ -205,7 +205,7 @@ Determines if the player needs to throw an error when connection is lost or not
 Platforms: Android
 
 ### `DRM`
-To setup DRM please follow [this guide](/other/drm)
+To setup DRM please follow [this guide](/component/drm)
 
 Platforms: Android, iOS
 
