@@ -5,7 +5,7 @@ const withNextra = require('nextra')({
   themeConfig: './theme.config.jsx',
 });
 
-let assetPrefix = './';
+let assetPrefix = '';
 let basePath = '';
 
 // If we're in a GitHub Action, we need to set the assetPrefix and basePath
