@@ -42,8 +42,6 @@ android.useAndroidX=true
 android.enableJetifier=true
 ```
 
-### Version 4.0.0
-
 #### Gradle 3 and target SDK 26 requirement
 In order to support ExoPlayer 2.9.0, you must use version 3 or higher of the Gradle plugin. This is included by default in React Native 0.57.
 

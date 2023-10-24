@@ -1,4 +1,5 @@
 # Events
+This page shows the list of available callbacks to handle player notifications
 
 ## List
 | Name                                                                                            | Platforms Support         | 

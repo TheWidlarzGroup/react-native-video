@@ -1,7 +1,7 @@
 {
   "index": "Introduction",
   "installation": "Installation",
-  "component": "Component",
+  "component": "API",
   "other": "Other",
   "separator_versions": {
     "type": "separator",

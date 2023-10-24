@@ -1,4 +1,6 @@
 # Configurable props
+This page shows the list of available properties to configure player
+
 ## List
 
 | Name                                                                                | Platforms Support         |
