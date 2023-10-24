@@ -150,6 +150,9 @@ export type OnProgressData = Readonly<{
 
 export type OnBandwidthUpdateData = Readonly<{
   bitrate: number;
+  width: number;
+  height: number;
+  trackId: number;
 }>;
 
 export type OnSeekData = Readonly<{
@@ -301,7 +304,7 @@ export interface VideoNativeProps extends ViewProps {
   onVideoBuffer?: (event: NativeSyntheticEvent<OnBufferData>) => void;
   onVideoError?: (event: NativeSyntheticEvent<OnVideoErrorData>) => void;
   onVideoProgress?: (event: NativeSyntheticEvent<OnProgressData>) => void;
-  onBandwidthUpdate?: (
+  onVideoBandwidthUpdate?: (
     event: NativeSyntheticEvent<OnBandwidthUpdateData>,
   ) => void;
   onVideoSeek?: (event: NativeSyntheticEvent<OnSeekData>) => void;

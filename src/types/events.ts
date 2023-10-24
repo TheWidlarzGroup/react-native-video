@@ -129,6 +129,9 @@ export type OnBufferData = Readonly<{isBuffering: boolean}>;
 
 export type OnBandwidthUpdateData = Readonly<{
   bitrate: number;
+  width: number;
+  height: number;
+  trackId: number;
 }>;
 
 export interface ReactVideoEvents {
