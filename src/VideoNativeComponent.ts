@@ -354,8 +354,12 @@ export interface VideoNativeProps extends ViewProps {
 
 export type VideoComponentType = HostComponent<VideoNativeProps>;
 
+export type VideoSaveData = {
+  uri: string;
+};
+
 export interface VideoManagerType {
-  save: (reactTag: number) => Promise<void>;
+  save: (reactTag: number) => Promise<VideoSaveData>;
   setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
   setLicenseResult: (
     result: string,

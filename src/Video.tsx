@@ -37,6 +37,10 @@ import type {
   OnVideoTracksData,
 } from './types/events';
 
+export type VideoSaveData = {
+  uri: string;
+};
+
 export interface VideoRef {
   seek: (time: number, tolerance?: number) => void;
   resume: () => void;
@@ -46,6 +50,7 @@ export interface VideoRef {
   restoreUserInterfaceForPictureInPictureStopCompleted: (
     restore: boolean,
   ) => void;
+  save: () => Promise<VideoSaveData>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -235,16 +240,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setIsFullscreen(false);
     }, [setIsFullscreen]);
 
-    const save = useCallback(async () => {
-      await VideoManager.save(getReactTag(nativeRef));
+    const save = useCallback(() => {
+      return VideoManager.save(getReactTag(nativeRef));
     }, []);
 
-    const pause = useCallback(async () => {
-      await VideoManager.setPlayerPauseState(true, getReactTag(nativeRef));
+    const pause = useCallback(() => {
+      return VideoManager.setPlayerPauseState(true, getReactTag(nativeRef));
     }, []);
 
-    const resume = useCallback(async () => {
-      await VideoManager.setPlayerPauseState(false, getReactTag(nativeRef));
+    const resume = useCallback(() => {
+      return VideoManager.setPlayerPauseState(false, getReactTag(nativeRef));
     }, []);
 
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(
