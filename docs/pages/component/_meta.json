@@ -1,5 +1,6 @@
 {
   "props": "Properties",
+  "drm": "DRM",
   "events": "Events",
-  "drm": "DRM"
+  "methods": "Methods"
 }
