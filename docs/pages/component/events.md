@@ -19,6 +19,7 @@ This page shows the list of available callbacks to handle player notifications
 | [onLoadStart](#onloadstart)                                                                     | All                       |
 | [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)                             | iOS                       |
 | [onPlaybackRateChange](#onplaybackratechange)                                                   | All                       |
+| [onPlaybackStateChanged](#onplaybackstatechanged)                                               | Android, iOS              |
 | [onProgress](#onprogress)                                                                       | All                       |
 | [onReadyForDisplay](#onreadyfordisplay)                                                         | Android, iOS, Web         |
 | [onReceiveAdEvent](#onreceiveadevent)                                                           | Android, iOS              |
@@ -226,7 +227,7 @@ Example:
 }
 ```
 
-Platforms: Android
+Platforms: Android, iOS
 
 ### `onPictureInPictureStatusChanged`
 Callback function that is called when picture in picture becomes active or inactive.
