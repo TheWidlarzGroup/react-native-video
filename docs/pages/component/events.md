@@ -5,6 +5,7 @@ This page shows the list of available callbacks to handle player notifications
 | Name                                                                                            | Platforms Support         | 
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
+| [onAudioFocusChanged](#onaudiofocuschanged)                                                     | Android                   |
 | [onAudioTracks](#onaudiotracks)                                                                 | Android                   |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
@@ -37,6 +38,44 @@ Callback function that is called when the audio is about to become 'noisy' due t
 Payload: none
 
 Platforms: Android, iOS
+
+### `onAudioFocusChanged`
+Callback function that is called when the audio focus changes. This is called when the audio focus is gained or lost. This is useful for determining if the media should be paused or not.
+
+Payload:
+Property | Type | Description
+--- | --- | ---
+hasAudioFocus | boolean | Boolean indicating whether the media has audio focus
+
+Example:
+```javascript
+{
+  hasAudioFocus: true
+}
+```
+
+### `onAudioTracks`
+Callback function that is called when audio tracks change
+
+Payload:
+
+An **array** of
+Property | Type | Description
+--- | --- | ---
+index | number | Index number of the track
+title | string | Description of the track
+language | string | 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code
+type | string | Mime type of track
+
+Example:
+```javascript
+{
+  audioTracks: [
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0 },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
+  ]
+}
+```
 
 ### `onBandwidthUpdate`
 Callback function that is called when the available bandwidth changes.
