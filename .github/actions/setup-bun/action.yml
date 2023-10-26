@@ -3,7 +3,7 @@ description: Setup bun and install dependencies
 
 inputs:
   working-directory:
-    description: 'working directory for action'
+    description: 'working directory for bun install'
     default: ./
     required: false
 
@@ -27,7 +27,7 @@ runs:
           ${{ runner.os }}-bun-
 
     - name: Install dependencies
-      working-directory: github.event.inputs.working-directory
+      working-directory: ${{ inputs.working-directory }}
       if: steps.bun-cache.outputs.cache-hit != 'true'
       run: bun install
       shell: bash
