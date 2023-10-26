@@ -31,7 +31,10 @@ Platforms: iOS
 
 ### `getLicense`
 
-`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via `[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];`. 
+`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC` (as ASCII string, you will probably need to convert it to base 64) obtained from your `contentId` + the provided certificate via 
+```objc
+[loadingRequest streamingContentKeyRequestDataForApp:certificateData contentIdentifier:contentIdData options:nil error:&spcError];
+```
 
 Also, you will receive the `contentId` and a `licenseUrl` URL defined as `loadingRequest.request.URL.absoluteString ` or as the `licenseServer` prop if it's passed.
   
