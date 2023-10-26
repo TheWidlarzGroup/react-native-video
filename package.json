@@ -48,6 +48,7 @@
         "ios",
         "windows",
         "src",
+        "lib",
         "react-native-video.podspec",
         "!android/build",
         "!android/buildOutput_*",
