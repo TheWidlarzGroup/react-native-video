@@ -4,6 +4,10 @@ import type {
   ViewProps,
 } from 'react-native';
 import {NativeModules, requireNativeComponent} from 'react-native';
+import type ResizeMode from './types/ResizeMode';
+import type FilterType from './types/FilterType';
+import type Orientation from './types/Orientation';
+import type {OnTextTracksTypeData} from './types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -119,14 +123,21 @@ export type OnLoadData = Readonly<{
   naturalSize: Readonly<{
     width: number;
     height: number;
-    orientation: 'portrait' | 'landscape';
+    orientation: Orientation;
   }>;
-}>;
+}> &
+  OnAudioTracksData &
+  OnTextTracksData;
 
 export type OnLoadStartData = Readonly<{
   isNetwork: boolean;
   type: string;
   uri: string;
+}>;
+
+export type OnVideoAspectRatioData = Readonly<{
+  width: number;
+  height: number;
 }>;
 
 export type OnBufferData = Readonly<{isBuffering: boolean}>;
@@ -139,6 +150,9 @@ export type OnProgressData = Readonly<{
 
 export type OnBandwidthUpdateData = Readonly<{
   bitrate: number;
+  width: number;
+  height: number;
+  trackId: number;
 }>;
 
 export type OnSeekData = Readonly<{
@@ -181,7 +195,7 @@ export type OnTextTracksData = Readonly<{
       /**
        * iOS only supports VTT, Android supports all 3
        */
-      type?: 'srt' | 'ttml' | 'vtt';
+      type?: OnTextTracksTypeData;
       selected?: boolean;
     }>
   >;
@@ -223,19 +237,24 @@ export type OnReceiveAdEventData = Readonly<{
 }>;
 
 export type OnVideoErrorData = Readonly<{
+  errorString: string;
+  errorException: string;
+  errorStackTrace: string;
+  errorCode: string;
   error: string;
 }>;
 
 export type OnAudioFocusChangedData = Readonly<{
-  hasFocus: boolean;
+  hasAudioFocus: boolean;
 }>;
+
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: number;
-  resizeMode?: 'none' | 'cover' | 'contain' | 'stretch';
+  resizeMode?: ResizeMode;
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
@@ -244,7 +263,7 @@ export interface VideoNativeProps extends ViewProps {
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
-  filter?: Filter;
+  filter?: FilterType;
   filterEnabled?: boolean;
   volume?: number; // default 1.0
   playInBackground?: boolean;
@@ -277,13 +296,15 @@ export interface VideoNativeProps extends ViewProps {
   trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
-
   onVideoLoad?: (event: NativeSyntheticEvent<OnLoadData>) => void;
   onVideoLoadStart?: (event: NativeSyntheticEvent<OnLoadStartData>) => void;
+  onVideoAspectRatio?: (
+    event: NativeSyntheticEvent<OnVideoAspectRatioData>,
+  ) => void;
   onVideoBuffer?: (event: NativeSyntheticEvent<OnBufferData>) => void;
   onVideoError?: (event: NativeSyntheticEvent<OnVideoErrorData>) => void;
   onVideoProgress?: (event: NativeSyntheticEvent<OnProgressData>) => void;
-  onBandwidthUpdate?: (
+  onVideoBandwidthUpdate?: (
     event: NativeSyntheticEvent<OnBandwidthUpdateData>,
   ) => void;
   onVideoSeek?: (event: NativeSyntheticEvent<OnSeekData>) => void;
@@ -333,8 +354,12 @@ export interface VideoNativeProps extends ViewProps {
 
 export type VideoComponentType = HostComponent<VideoNativeProps>;
 
+export type VideoSaveData = {
+  uri: string;
+};
+
 export interface VideoManagerType {
-  save: (reactTag: number) => Promise<void>;
+  save: (reactTag: number) => Promise<VideoSaveData>;
   setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
   setLicenseResult: (
     result: string,
