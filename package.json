@@ -49,7 +49,6 @@
         "windows",
         "src",
         "react-native-video.podspec",
-        "docs",
         "!android/build",
         "!android/buildOutput_*",
         "!android/local.properties",
