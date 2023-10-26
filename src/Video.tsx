@@ -220,7 +220,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           nativeRef.current?.setNativeProps({
             seek: {
               time,
-              tolerance,
+              tolerance: tolerance || 0,
             },
           });
         },
