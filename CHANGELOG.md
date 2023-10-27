@@ -2,7 +2,7 @@
 
 ## Next
 
-### Version 6.0.0-alpha.8
+### Version 6.0.0-alpha.9
 - All: add built-in typescript support [#3266](https://github.com/react-native-video/react-native-video/pull/3266)
 - All: update documentation generation [#3296](https://github.com/react-native-video/react-native-video/pull/3296)
 - **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
