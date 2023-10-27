@@ -1,12 +1,24 @@
 ## Changelog
 
 ## Next
-- iOS: Fix audio session category when not using the audioOutput prop
+
+### Version 6.0.0-alpha.9
 - All: add built-in typescript support [#3266](https://github.com/react-native-video/react-native-video/pull/3266)
+- All: update documentation generation [#3296](https://github.com/react-native-video/react-native-video/pull/3296)
+- **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
+- Android: remove kotlin-android-extensions [#3299](https://github.com/react-native-video/react-native-video/pull/3299)
+- Android: ensure audio volume is changed in UI thread [3292](https://github.com/react-native-video/react-native-video/pull/3292)
+- Android: multiple internal refactor and switch to kotlin
+- Android: refactor log management and add an option to increase log verbosity [#3277](https://github.com/react-native-video/react-native-video/pull/3277)
+- iOS: Fix audio session category when not using the audioOutput prop
+- iOS: implement onPlaybackStateChanged callback [#3307](https://github.com/react-native-video/react-native-video/pull/3307)
+- iOS: remove false calls at onPlaybackRateChange [#3306](https://github.com/react-native-video/react-native-video/pull/3306)
+- iOS: audio does not work with headphones [#3284](https://github.com/react-native-video/react-native-video/pull/3284) 
+- iOS: Resuming video ad after closing the in-app browser on iOS [#3275](https://github.com/react-native-video/react-native-video/pull/3275)
 - iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
+- tvOS: fix build: [#3276](https://github.com/react-native-video/react-native-video/pull/3276)
 - Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
 - Windows: fix `onError` not being raised [#3247](https://github.com/react-native-video/react-native-video/pull/3247)
-- **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
 
 ### Version 6.0.0-alpha.8
 - All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
