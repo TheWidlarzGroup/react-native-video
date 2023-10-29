@@ -51,7 +51,7 @@ Video only:
   end
 ```
 
-Video with caching ([more info](docs/caching.md)):
+Video with caching ([more info](other/caching.md)):
 
 ```diff
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
