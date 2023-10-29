@@ -82,6 +82,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onFullscreenPlayerDidDismiss,
       onReadyForDisplay,
       onPlaybackRateChange,
+      onVolumeChange,
       onAudioBecomingNoisy,
       onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop,
@@ -344,6 +345,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onPlaybackRateChange],
     );
 
+    const _onVolumeChange = useCallback(
+      (e: NativeSyntheticEvent<Readonly<{volume: number}>>) => {
+        onVolumeChange?.(e.nativeEvent);
+      },
+      [onVolumeChange],
+    );
+
     const _onReadyForDisplay = useCallback(() => {
       setShowPoster(false);
       onReadyForDisplay?.();
@@ -509,6 +517,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onAudioFocusChanged={_onAudioFocusChanged}
           onReadyForDisplay={_onReadyForDisplay}
           onPlaybackRateChange={_onPlaybackRateChange}
+          onVolumeChange={_onVolumeChange}
           onVideoAudioBecomingNoisy={onAudioBecomingNoisy}
           onPictureInPictureStatusChanged={_onPictureInPictureStatusChanged}
           onRestoreUserInterfaceForPictureInPictureStop={

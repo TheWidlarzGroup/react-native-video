@@ -19,6 +19,7 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handlePlaybackBufferKeyEmpty(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>)
     func handlePlaybackLikelyToKeepUp(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>)
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>)
+    func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>)
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>)
     func handleViewControllerOverlayViewFrameChange(overlayView:UIView, change:NSKeyValueObservedChange<CGRect>)
 }
@@ -74,6 +75,7 @@ class RCTPlayerObserver: NSObject {
     private var _timeObserver:Any?
     
     private var _playerRateChangeObserver:NSKeyValueObservation?
+    private var _playerVolumeChangeObserver:NSKeyValueObservation?
     private var _playerExternalPlaybackActiveObserver:NSKeyValueObservation?
     private var _playerItemStatusObserver:NSKeyValueObservation?
     private var _playerPlaybackBufferEmptyObserver:NSKeyValueObservation?
@@ -95,6 +97,7 @@ class RCTPlayerObserver: NSObject {
         }
         
         _playerRateChangeObserver = player.observe(\.rate, options: [.old], changeHandler: _handlers.handlePlaybackRateChange)
+        _playerVolumeChangeObserver = player.observe(\.volume, options: [.old] ,changeHandler: _handlers.handleVolumeChange)
         _playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
     }
     

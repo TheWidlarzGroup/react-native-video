@@ -95,6 +95,10 @@ export type OnPlaybackData = Readonly<{
   playbackRate: number;
 }>;
 
+export type OnVolumeChangeData = Readonly<{
+  volume: number;
+}>;
+
 export type OnExternalPlaybackChangeData = Readonly<{
   isExternalPlaybackActive: boolean;
 }>;
@@ -153,6 +157,7 @@ export interface ReactVideoEvents {
     e: OnPictureInPictureStatusChangedData,
   ) => void; //iOS
   onPlaybackRateChange?: (e: OnPlaybackData) => void; //All
+  onVolumeChange?: (e: OnVolumeChangeData) => void; //Android, iOS
   onProgress?: (e: OnProgressData) => void; //All
   onReadyForDisplay?: () => void; //Android, iOS
   onReceiveAdEvent?: (e: OnReceiveAdEventData) => void; //Android, iOS

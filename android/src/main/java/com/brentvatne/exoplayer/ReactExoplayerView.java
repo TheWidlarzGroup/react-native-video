@@ -1435,6 +1435,11 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
+    public void onVolumeChanged(float volume) {
+        eventEmitter.volumeChange(volume);
+    }
+
+    @Override
     public void onIsPlayingChanged(boolean isPlaying) {
         eventEmitter.playbackStateChanged(isPlaying);
     }
