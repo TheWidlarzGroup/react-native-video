@@ -29,6 +29,7 @@ This page shows the list of available callbacks to handle player notifications
 | [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
 | [onTextTracks](#ontexttracks)                                                                   | Android                   |
 | [onVideoTracks](#onvideotracks)                                                                 | Android                   |
+| [onVolumeChange](#onvolumechange)                                                               | Android, iOS              |
 
 
 ## Details
@@ -508,3 +509,22 @@ Example:
 ```
 
 Platforms: Android
+
+### `onVolumeChange`
+Callback function that is called when the volume of player changes.
+> Note: This event applies to the volume of the player, not the volume of the device.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+volume | number | The volume of the player (between 0 and 1)
+
+Example:
+```javascript
+{
+  volume: 0.5
+}
+```
+
+Platforms: Android, iOS
