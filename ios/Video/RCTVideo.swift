@@ -144,6 +144,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
+                
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive(notification:)),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
 
         NotificationCenter.default.addObserver(
             self,
@@ -191,6 +198,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         _player?.pause()
         _player?.rate = 0.0
+    }
+    
+    @objc func applicationDidBecomeActive(notification: NSNotification!) {
+        if _playInBackground || _playWhenInactive || _paused { return }
+
+        // Resume the player or any other tasks that should continue when the app becomes active.
+        _player?.play()
+        _player?.rate = 1.0
     }
 
     @objc func applicationDidEnterBackground(notification:NSNotification!) {
