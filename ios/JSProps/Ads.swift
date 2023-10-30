@@ -28,7 +28,7 @@ struct JSAds: SuperCodable {
     struct AdUnit: SuperCodable {
         let insertionType: AdInsertionType
         let adFormat: AdFormat
-        let adProvider: AdProvider
+        let adProvider: AdProvider?
         let adTagUrl: String?
         let adManifestParams: [QueryParam]?
         
@@ -75,6 +75,7 @@ extension DorisSSAIProvider {
             } else {
                 return nil
             }
+        default: return nil
         }
     }
 }

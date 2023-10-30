@@ -63,7 +63,7 @@ class AVDorisSourceMapper {
                 completion(.ssai(source))
             } else if !ads.csai.isEmpty {
                 let source = DorisCSAISource(contentURL: source.uri,
-                                             preroll: ads.csai.first(where: {$0.adFormat == .preroll})?.adTagUrl,
+                                             preroll: ads.csai.first(where: {$0.adFormat == .preroll || $0.adFormat == .vmap})?.adTagUrl,
                                              liveMidroll: ads.csai.first(where: {$0.adFormat == .midroll})?.adTagUrl,
                                              textTracks: sideloadedSubtitles(from: source))
                 
