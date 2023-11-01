@@ -2,6 +2,7 @@ package com.brentvatne.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -25,7 +26,7 @@ public class AudioBecomingNoisyReceiver extends BroadcastReceiver {
     public void setListener(BecomingNoisyListener listener) {
         this.listener = listener;
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        context.registerReceiver(this, intentFilter);
+        ContextCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     public void removeListener() {
