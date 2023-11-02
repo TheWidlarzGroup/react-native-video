@@ -62,7 +62,6 @@ dependencies {
         exclude group: 'com.android.support'
     }
 
-    // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.7.0"
     implementation "androidx.core:core:1.12.0"
     implementation "androidx.media:media:1.6.0"
