@@ -45,7 +45,7 @@ enum RCTVideoUtils {
         
         return 0
     }
-
+    
     static func urlFilePath(filepath:NSString!, searchPath:FileManager.SearchPathDirectory) -> NSURL! {
         if filepath.contains("file://") {
             return NSURL(string: filepath as String)
@@ -100,7 +100,7 @@ enum RCTVideoUtils {
         guard let player = player else {
             return []
         }
-
+        
         let audioTracks:NSMutableArray! = NSMutableArray()
         let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .audible)
         for i in 0..<(group?.options.count ?? 0) {
@@ -111,9 +111,9 @@ enum RCTVideoUtils {
                 title = value as! String
             }
             let language:String! = currentOption?.extendedLanguageTag ?? ""
-
+            
             let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
-
+            
             let audioTrack = [
                 "index": NSNumber(value: i),
                 "title": title,
@@ -129,7 +129,7 @@ enum RCTVideoUtils {
         guard let player = player else {
             return []
         }
-
+        
         // if streaming video, we extract the text tracks
         var textTracks:[TextTrack] = []
         let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .legible)
@@ -165,18 +165,18 @@ enum RCTVideoUtils {
         }
         return nil
     }
-
+    
     static func replaceURLScheme(url: URL, scheme: String?) -> URL? {
         var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
         urlComponents?.scheme = scheme
-
+        
         return urlComponents?.url
     }
-
+    
     static func extractDataFromCustomSchemeUrl(from url: URL, scheme: String) -> Data? {
         guard url.scheme == scheme,
               let adoptURL = RCTVideoUtils.replaceURLScheme(url:url, scheme: nil) else { return nil }
-
+        
         return Data(base64Encoded: adoptURL.absoluteString)
     }
     
@@ -184,24 +184,24 @@ enum RCTVideoUtils {
         let mixComposition:AVMutableComposition = AVMutableComposition()
         
         let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
-        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try videoCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: videoAsset,
-                at: .zero)
-        } catch {
+        
+        // we need videoAsset asset to be not null to get durration later
+        if videoAsset == nil {
+            return mixComposition
         }
+        
+        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
+        try? videoCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+            of: videoAsset,
+            at: .zero)
         
         let audioAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
         let audioCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try audioCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: audioAsset,
-                at: .zero)
-        } catch {
-        }
+        try? audioCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
+            of: audioAsset,
+            at: .zero)
         
         return mixComposition
     }
@@ -226,12 +226,11 @@ enum RCTVideoUtils {
                 validTextTracks.append(textTracks[i])
                 let textCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                               preferredTrackID:kCMPersistentTrackID_Invalid)
-                do {
-                    try textCompTrack.insertTimeRange(
-                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                if videoAsset != nil {
+                    try? textCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: videoAsset!.timeRange.duration),
                         of: textTrackAsset,
                         at: .zero)
-                } catch {
                 }
             }
         }
@@ -243,7 +242,7 @@ enum RCTVideoUtils {
         
         return validTextTracks
     }
-
+    
     /*
      * Create an useless / almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
      * This is needed because there is a bug where sideloaded texttracks cannot be disabled in the AVPlayer. Loading this VTT file instead solves that problem.
@@ -256,7 +255,7 @@ enum RCTVideoUtils {
         
         if !fileManager.fileExists(atPath: filePath) {
             let stringToWrite = "WEBVTT\n\n1\n99:59:59.000 --> 99:59:59.001\n."
-
+            
             do {
                 try stringToWrite.write(to: URL(fileURLWithPath: filePath), atomically: true, encoding: String.Encoding.utf8)
             } catch {
@@ -320,9 +319,9 @@ enum RCTVideoUtils {
     static func createMetadataItems(for mapping: [AVMetadataIdentifier: Any]) -> [AVMetadataItem] {
         return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
     }
-
+    
     static func createMetadataItem(for identifier: AVMetadataIdentifier,
-                                    value: Any) -> AVMetadataItem {
+                                   value: Any) -> AVMetadataItem {
         let item = AVMutableMetadataItem()
         item.identifier = identifier
         item.value = value as? NSCopying & NSObjectProtocol
