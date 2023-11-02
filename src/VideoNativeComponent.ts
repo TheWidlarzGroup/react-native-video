@@ -148,12 +148,15 @@ export type OnProgressData = Readonly<{
   seekableDuration: number;
 }>;
 
-export type OnBandwidthUpdateData = Readonly<{
-  bitrate: number;
-  width: number;
-  height: number;
-  trackId: number;
-}>;
+export type OnBandwidthUpdateData = Readonly<
+  | {
+      bitrate: number;
+      width: number;
+      height: number;
+      trackId: number;
+    }
+  | {bitrate: number}
+>;
 
 export type OnSeekData = Readonly<{
   currentTime: number;
