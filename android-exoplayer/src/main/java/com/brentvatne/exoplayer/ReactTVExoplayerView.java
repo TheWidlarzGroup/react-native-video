@@ -216,6 +216,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
 
     private final float NATIVE_PROGRESS_UPDATE_INTERVAL = 250.0f;
+    private final int VIDEO_ABOUT_TO_END_TIME_MS = 5_000;
 
     @SuppressLint("HandlerLeak")
     private final Handler jsProgressHandler = new Handler() {
@@ -229,11 +230,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     long duration = player.getDuration();
 
                     if (!isLive) {
-                        boolean isAboutToEnd = duration - position <= 5_000;
+                        boolean isAboutToEnd = duration - position <= VIDEO_ABOUT_TO_END_TIME_MS;
+                        if (isAboutToEnd) {
+                            // Handles some ad situations that are different from the seekbar and timeline.
+                            long timelineDuration = exoPlayer.getDuration();
+                            if (timelineDuration != duration) {
+                                isAboutToEnd = timelineDuration - exoPlayer.getCurrentPosition() <= VIDEO_ABOUT_TO_END_TIME_MS;
+                            }
+                        }
                         eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
-                    eventEmitter.progressChanged(position, bufferedDuration, exoPlayer.getDuration());
+                    eventEmitter.progressChanged(position, bufferedDuration, duration);
 
                     jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);
