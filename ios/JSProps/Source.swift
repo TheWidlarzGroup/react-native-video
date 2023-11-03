@@ -15,7 +15,7 @@ struct Source: SuperCodable {
     let progressUpdateInterval: Int?
     let type: String
     let title: String?
-    let live: Bool?
+    var live: Bool { config.muxData.videoIsLive }
     let partialVideoInformation: PartialVideoInformation?
     let isAudioOnly: Bool?
     let config: Config

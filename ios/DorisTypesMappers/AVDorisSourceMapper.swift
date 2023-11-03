@@ -58,7 +58,7 @@ class AVDorisSourceMapper {
             }
             
         } else if let ads = source.ads {
-            if let ssai = ads.ssai, let provider = DorisSSAIProvider(adUnit: ssai, isLive: source.live ?? false, playbackUrl: source.uri, drm: drmData) {
+            if let ssai = ads.ssai, let provider = DorisSSAIProvider(adUnit: ssai, isLive: source.live, playbackUrl: source.uri, drm: drmData) {
                 let source = DorisSSAISource(provider: provider)
                 completion(.ssai(source))
             } else if !ads.csai.isEmpty {
