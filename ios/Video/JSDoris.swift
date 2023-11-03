@@ -244,16 +244,6 @@ extension JSDoris: DorisOutputProtocol {
             currentPlayingItemDuration = duration
         case .playerItemFailed:
             output?.onVideoError?(nil)
-        case .subtitleChanged(let subtitle, let autoSet):
-            guard !autoSet else { return }
-            
-            switch subtitle {
-            case .option(_, let languageCode, _):
-                guard let code = languageCode else { break }
-                output?.onSubtitleTrackChanged?(["language": code])
-            case .empty:
-                output?.onSubtitleTrackChanged?(["language": ""])
-            }
         default: break
         }
     }
@@ -269,6 +259,12 @@ extension JSDoris: DorisOutputProtocol {
     
     func onViewEvent(_ event: DorisViewEvent) {
         switch event {
+        case .subtitleSelected(let option):
+            if let code = option?.code {
+                output?.onSubtitleTrackChanged?(["language": code])
+            } else {
+                output?.onSubtitleTrackChanged?(["language": ""])
+            }
         case .favouritesButtonTap:
             output?.onFavouriteButtonClick?(nil)
         case .statsButtonTap:
