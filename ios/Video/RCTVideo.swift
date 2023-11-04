@@ -205,7 +205,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         // Resume the player or any other tasks that should continue when the app becomes active.
         _player?.play()
-        _player?.rate = 1.0
+        _player?.rate = _rate
     }
 
     @objc func applicationDidEnterBackground(notification:NSNotification!) {
