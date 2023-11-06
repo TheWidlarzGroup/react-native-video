@@ -116,7 +116,6 @@ class RCTPlayerObserver: NSObject {
         _playerPlaybackLikelyToKeepUpObserver?.invalidate()
         _playerTimedMetadataObserver?.invalidate()
     }
-    
     func addPlayerViewControllerObservers() {
         guard let playerViewController = playerViewController, let _handlers = _handlers else { return }
         
