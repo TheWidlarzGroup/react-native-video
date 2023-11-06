@@ -23,7 +23,6 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
 }
 
 class RCTPlayerObserver: NSObject {
-    
     weak var _handlers: RCTPlayerObserverHandler?
     
     var player:AVPlayer? {
