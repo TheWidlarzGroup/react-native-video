@@ -177,7 +177,6 @@ class RCTPlayerObserver: NSObject {
     
     func attachPlayerEventListeners() {
         guard let _handlers = _handlers else {return}
-        
         NotificationCenter.default.removeObserver(_handlers,
                                                   name:NSNotification.Name.AVPlayerItemDidPlayToEndTime,
                                                   object:player?.currentItem)
