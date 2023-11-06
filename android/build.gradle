@@ -1,9 +1,10 @@
+import com.android.Version
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 buildscript {
-    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') :
-            (project.properties['RNSAC_kotlinVersion'] ? project.properties['RNSAC_kotlinVersion'] : "1.6.10")
+    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
 
     repositories {
         mavenCentral()
@@ -14,8 +15,8 @@ buildscript {
     }
 }
 
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+def safeExtGet(prop) {
+    return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : project.properties["RNVideo_" + prop]
 }
 
 def getExtOrDefault(name, defaultValue) {
@@ -27,7 +28,7 @@ def isNewArchitectureEnabled() {
 }
 
 def supportsNamespace() {
-  def parsed = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+  def parsed = Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
   def major = parsed[0].toInteger()
   def minor = parsed[1].toInteger()
 
@@ -39,7 +40,7 @@ def supportsNamespace() {
   return major >= 8
 }
 
-def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA", false)
+def useExoplayerIMA = getExtOrDefault("RNVUseExoplayerIMA", false)
 
 println "useExoplayerIMA:" + useExoplayerIMA
 
@@ -66,10 +67,10 @@ android {
       }
     }
 
-    compileSdkVersion safeExtGet('compileSdkVersion', 31)
-    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
+    compileSdkVersion safeExtGet('compileSdkVersion')
+    buildToolsVersion safeExtGet('buildToolsVersion')
 
-    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    def agpVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION
     if (agpVersion.tokenize('.')[0].toInteger() < 8) {
       compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -82,8 +83,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 21)
-        targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        minSdkVersion safeExtGet('minSdkVersion')
+        targetSdkVersion safeExtGet('targetSdkVersion')
         versionCode 1
         versionName "1.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
@@ -144,10 +145,13 @@ repositories {
     mavenCentral()
 }
 
-def kotlin_version = getExtOrDefault('kotlinVersion', project.properties['RNSAC_kotlinVersion'])
+def kotlin_version = safeExtGet('kotlinVersion')
 
 dependencies {
-    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    // For < 0.71, this will be from the local maven repo
+    // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"
     implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
         exclude group: 'com.android.support'
     }
