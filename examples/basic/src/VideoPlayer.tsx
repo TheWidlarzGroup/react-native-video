@@ -84,6 +84,10 @@ class VideoPlayer extends Component {
       description: 'Another live sample',
       uri: 'https://live.forstreet.cl/live/livestream.m3u8',
     },
+    {
+      description: 'another bunny (can be saved)',
+      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4'
+    }
   ];
 
   srcIosList = [
@@ -589,6 +593,18 @@ class VideoPlayer extends Component {
                   values={[ResizeMode.COVER, ResizeMode.CONTAIN, ResizeMode.STRETCH]}
                   onPress={this.onResizeModeSelected}
                   selected={this.state.resizeMode}
+                />
+                <ToggleControl
+                  isSelected={this.state.paused}
+                  onPress={() => {
+                      this.video?.save({}).then((response) => {
+                        console.log('Downloaded URI', response);
+                      }).catch((error) => {
+                        console.log('error during save ', error)
+                      });
+                    }
+                  }
+                  text='save'
                 />
               </View>
               {this.renderSeekBar()}
