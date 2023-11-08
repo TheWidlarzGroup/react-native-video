@@ -46,7 +46,8 @@
         "docs": "yarn --cwd docs build",
         "release": "release-it",
         "test": "echo no test available",
-        "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh"
+        "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
+        "check-android": "scripts/kotlin-lint.sh"
     },
     "files": [
         "android",
