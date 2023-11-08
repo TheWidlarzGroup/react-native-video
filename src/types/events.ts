@@ -131,12 +131,15 @@ export type OnAudioFocusChangedData = Readonly<{
 
 export type OnBufferData = Readonly<{isBuffering: boolean}>;
 
-export type OnBandwidthUpdateData = Readonly<{
-  bitrate: number;
-  width: number;
-  height: number;
-  trackId: number;
-}>;
+export type OnBandwidthUpdateData = Readonly<
+  | {
+      bitrate: number;
+      width: number;
+      height: number;
+      trackId: number;
+    }
+  | {bitrate: number}
+>;
 
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void; //Android, iOS

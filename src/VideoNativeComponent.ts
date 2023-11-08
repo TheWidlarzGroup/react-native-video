@@ -150,9 +150,9 @@ export type OnProgressData = Readonly<{
 
 export type OnBandwidthUpdateData = Readonly<{
   bitrate: number;
-  width: number;
-  height: number;
-  trackId: number;
+  width?: number;
+  height?: number;
+  trackId?: number;
 }>;
 
 export type OnSeekData = Readonly<{

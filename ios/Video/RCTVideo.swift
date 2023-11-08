@@ -94,7 +94,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onVideoBuffer: RCTDirectEventBlock?
     @objc var onVideoError: RCTDirectEventBlock?
     @objc var onVideoProgress: RCTDirectEventBlock?
-    @objc var onBandwidthUpdate: RCTDirectEventBlock?
+    @objc var onVideoBandwidthUpdate: RCTDirectEventBlock?
     @objc var onVideoSeek: RCTDirectEventBlock?
     @objc var onVideoEnd: RCTDirectEventBlock?
     @objc var onTimedMetadata: RCTDirectEventBlock?
@@ -1335,16 +1335,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerObserver.removePlayerTimeObserver()
         }
     }
-
-    //unused
-    //    @objc func handleAVPlayerAccess(notification:NSNotification!) {
-    //        let accessLog:AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
-    //        let lastEvent:AVPlayerItemAccessLogEvent! = accessLog.events.last
-    //
-    //        /* TODO: get this working
-    //         if (self.onBandwidthUpdate) {
-    //         self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
-    //         }
-    //         */
-    //    }
+    
+    @objc func handleAVPlayerAccess(notification:NSNotification!) {
+        let accessLog:AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
+        let lastEvent:AVPlayerItemAccessLogEvent! = accessLog.events.last
+        
+        onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
+    }
 }
