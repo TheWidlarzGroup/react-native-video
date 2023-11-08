@@ -1,6 +1,6 @@
 package com.brentvatne.common.API
 
-import com.brentvatne.ReactBridgeUtils
+import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.facebook.react.bridge.ReadableMap
 
 /**
