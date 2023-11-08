@@ -92,6 +92,18 @@ include ':react-native-video'
 project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 ```
 
+`android/build.gradle`
+
+From version >= 6.0.0, your application needs to have kotlin version >= 1.7.0
+
+```:
+buildscript {
+    ...
+    ext.kotlinVersion = '1.7.0'
+    ...
+}
+```
+
 `android/app/build.gradle`
 
 From version >= 5.0.0, you have to apply these changes:
