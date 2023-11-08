@@ -107,6 +107,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onPlaybackStalled: RCTDirectEventBlock?
     @objc var onPlaybackResume: RCTDirectEventBlock?
     @objc var onPlaybackRateChange: RCTDirectEventBlock?
+    @objc var onVolumeChange: RCTDirectEventBlock?
     @objc var onVideoPlaybackStateChanged: RCTDirectEventBlock?
     @objc var onVideoExternalPlaybackChange: RCTDirectEventBlock?
     @objc var onPictureInPictureStatusChanged: RCTDirectEventBlock?
@@ -142,6 +143,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self,
             selector: #selector(applicationWillResignActive(notification:)),
             name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+                
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive(notification:)),
+            name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
 
@@ -191,6 +199,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         _player?.pause()
         _player?.rate = 0.0
+    }
+    
+    @objc func applicationDidBecomeActive(notification: NSNotification!) {
+        if _playInBackground || _playWhenInactive || _paused { return }
+
+        // Resume the player or any other tasks that should continue when the app becomes active.
+        _player?.play()
+        _player?.rate = _rate
     }
 
     @objc func applicationDidEnterBackground(notification:NSNotification!) {
@@ -1069,11 +1085,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
     }
 
-    func dismissFullscreenPlayer(_ error:String!) {
+    func dismissFullscreenPlayer() {
         setFullscreen(false)
     }
 
-    func presentFullscreenPlayer(_ error:String!) {
+    func presentFullscreenPlayer() {
         setFullscreen(true)
     }
 
@@ -1236,6 +1252,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                "target": reactTag as Any])
             _playbackStalled = false
         }
+    }
+    
+    func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
+        guard let _player = _player else { return }
+        
+        if(player.rate == change.oldValue && change.oldValue != nil) {
+          return
+        }
+        
+        onVolumeChange?(["volume": NSNumber(value: _player.volume),
+                         "target": reactTag as Any])
     }
 
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>) {

@@ -51,6 +51,7 @@ public class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_VOLUME_CHANGE = "onVolumeChange";
     private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
@@ -77,6 +78,7 @@ public class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
@@ -106,6 +108,7 @@ public class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
@@ -139,6 +142,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
+    private static final String EVENT_PROP_VOLUME = "volume";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -373,6 +377,12 @@ public class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
+    }
+
+    public void volumeChange(float volume) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_VOLUME, volume);
+        receiveEvent(EVENT_VOLUME_CHANGE, map);
     }
 
     public void timedMetadata(ArrayList<TimedMetadata> _metadataArrayList) {

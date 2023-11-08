@@ -218,6 +218,10 @@ export type OnPlaybackData = Readonly<{
   playbackRate: number;
 }>;
 
+export type onVolumeChangeData = Readonly<{
+  volume: number;
+}>;
+
 export type OnExternalPlaybackChangeData = Readonly<{
   isExternalPlaybackActive: boolean;
 }>;
@@ -326,6 +330,7 @@ export interface VideoNativeProps extends ViewProps {
   ) => void; // ios, android
   onReadyForDisplay?: (event: NativeSyntheticEvent<Readonly<object>>) => void;
   onPlaybackRateChange?: (event: NativeSyntheticEvent<OnPlaybackData>) => void; // all
+  onVolumeChange?: (event: NativeSyntheticEvent<onVolumeChangeData>) => void; // android, ios
   onVideoExternalPlaybackChange?: (
     event: NativeSyntheticEvent<OnExternalPlaybackChangeData>,
   ) => void;

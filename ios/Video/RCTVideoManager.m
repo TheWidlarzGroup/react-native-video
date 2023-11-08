@@ -57,6 +57,7 @@ RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVolumeChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoPlaybackStateChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
@@ -80,8 +81,9 @@ RCT_EXTERN_METHOD(setLicenseResultError:(NSString *)error
 RCT_EXTERN_METHOD(setPlayerPauseState:(nonnull NSNumber *)paused
                  reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(presentFullscreenPlayer
-                 reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(presentFullscreenPlayer:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(dismissFullscreenPlayer:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer
                  reactTag:(nonnull NSNumber *)reactTag)
