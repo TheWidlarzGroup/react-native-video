@@ -36,7 +36,7 @@ def supportsNamespace() {
     return major >= 8
 }
 
-def useExoplayerIMA = getExtOrDefault("RNVUseExoplayerIMA", false)
+def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA")?.toBoolean() ?: false
 
 println "useExoplayerIMA:" + useExoplayerIMA
 
@@ -141,7 +141,7 @@ repositories {
     mavenCentral()
 }
 
-def media3_version = '1.1.1'
+def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
 
 dependencies {
