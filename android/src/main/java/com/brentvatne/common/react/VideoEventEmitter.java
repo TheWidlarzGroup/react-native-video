@@ -121,8 +121,6 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
-    private static final String EVENT_PROP_BUFFER_START = "bufferStart";
-    private static final String EVENT_PROP_BUFFER_END = "bufferEnd";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
