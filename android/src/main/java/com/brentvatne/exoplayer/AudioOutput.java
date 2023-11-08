@@ -1,17 +1,18 @@
 package com.brentvatne.exoplayer;
 
 import android.annotation.SuppressLint;
-import com.google.android.exoplayer2.C;
+
+import androidx.media3.common.C;
 
 @SuppressLint("InlinedApi")
 public enum AudioOutput {
     SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
     EARPIECE("earpiece", C.STREAM_TYPE_VOICE_CALL);
 
-    private final int streamType;
+    private final @C.StreamType int streamType;
     private final String mName;
 
-    AudioOutput(final String name, int stream) {
+    AudioOutput(final String name, @C.StreamType int stream) {
         mName = name;
         streamType = stream;
     }

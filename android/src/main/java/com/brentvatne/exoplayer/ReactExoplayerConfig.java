@@ -1,7 +1,7 @@
 package com.brentvatne.exoplayer;
 
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
+import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
 
 /**
  * Extension points to configure the Exoplayer instance

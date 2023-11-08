@@ -7,8 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
-
-import com.google.android.exoplayer2.ui.PlayerControlView;
+import androidx.media3.ui.PlayerControlView;
 
 public class FullScreenPlayerView extends Dialog {
   private final PlayerControlView playerControlView;
@@ -41,8 +40,8 @@ public class FullScreenPlayerView extends Dialog {
 
     if (playerControlView != null) {
       ImageButton imageButton = playerControlView.findViewById(com.brentvatne.react.R.id.exo_fullscreen);
-      imageButton.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_icon_fullscreen_exit);
-      imageButton.setContentDescription(getContext().getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_exit_description));
+      imageButton.setImageResource(androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit);
+      imageButton.setContentDescription(getContext().getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description));
       parent.removeView(playerControlView);
       containerView.addView(playerControlView, generateDefaultLayoutParams());
     }
@@ -57,8 +56,8 @@ public class FullScreenPlayerView extends Dialog {
 
     if (playerControlView != null) {
       ImageButton imageButton = playerControlView.findViewById(com.brentvatne.react.R.id.exo_fullscreen);
-      imageButton.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_icon_fullscreen_enter);
-      imageButton.setContentDescription(getContext().getString(com.google.android.exoplayer2.ui.R.string.exo_controls_fullscreen_enter_description));
+      imageButton.setImageResource(androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter);
+      imageButton.setContentDescription(getContext().getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description));
       containerView.removeView(playerControlView);
       parent.addView(playerControlView, generateDefaultLayoutParams());
     }

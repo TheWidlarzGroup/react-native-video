@@ -1,8 +1,8 @@
 package com.brentvatne.exoplayer;
 
-import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
-import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
-import com.google.android.exoplayer2.C;
+import androidx.media3.common.C;
+import androidx.media3.datasource.HttpDataSource.HttpDataSourceException;
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
 
 public final class ReactExoplayerLoadErrorHandlingPolicy extends DefaultLoadErrorHandlingPolicy {
   private final int minLoadRetryCount;

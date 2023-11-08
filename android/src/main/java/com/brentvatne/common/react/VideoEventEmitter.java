@@ -1,6 +1,7 @@
 package com.brentvatne.common.react;
 
 import androidx.annotation.StringDef;
+
 import android.view.View;
 
 import com.brentvatne.common.API.TimedMetadata;
@@ -235,8 +236,7 @@ public class VideoEventEmitter {
         load( duration,  currentPosition,  videoWidth,  videoHeight, waAudioTracks,  waTextTracks,  waVideoTracks, trackId);
     }
 
-
-    public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
               WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
@@ -260,8 +260,6 @@ public class VideoEventEmitter {
 
         receiveEvent(EVENT_LOAD, event);
     }
-
-
 
     WritableMap arrayToObject(String field, WritableArray array) {
         WritableMap event = Arguments.createMap();
@@ -376,7 +374,6 @@ public class VideoEventEmitter {
         map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
-
 
     public void timedMetadata(ArrayList<TimedMetadata> _metadataArrayList) {
         if (_metadataArrayList.size() == 0) {
