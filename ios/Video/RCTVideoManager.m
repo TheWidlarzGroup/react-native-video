@@ -80,8 +80,9 @@ RCT_EXTERN_METHOD(setLicenseResultError:(NSString *)error
 RCT_EXTERN_METHOD(setPlayerPauseState:(nonnull NSNumber *)paused
                  reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(presentFullscreenPlayer
-                 reactTag:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(presentFullscreenPlayer:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(dismissFullscreenPlayer:(nonnull NSNumber *)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer
                  reactTag:(nonnull NSNumber *)reactTag)

@@ -48,25 +48,25 @@ class RCTVideoManager: RCTViewManager {
         })
     }
     
-    @objc(dismissFullscreenPlayer:reactTag:)
-    func dismissFullscreenPlayer(error: NSString, reactTag: NSNumber) -> Void {
+    @objc(dismissFullscreenPlayer:)
+    func dismissFullscreenPlayer(_ reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                view.dismissFullscreenPlayer(error as String)
+                view.dismissFullscreenPlayer()
             }
         })
     }
-    @objc(presentFullscreenPlayer:reactTag:)
-    func presentFullscreenPlayer(error: NSString, reactTag: NSNumber) -> Void {
+    @objc(presentFullscreenPlayer:)
+    func presentFullscreenPlayer(_ reactTag: NSNumber) -> Void {
         bridge.uiManager.prependUIBlock({_ , viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
                 RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
             } else if let view = view as? RCTVideo {
-                view.presentFullscreenPlayer(error as String)
+                view.presentFullscreenPlayer()
             }
         })
     }
