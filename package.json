@@ -45,7 +45,8 @@
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
         "release": "release-it",
-        "test": "echo no test available"
+        "test": "echo no test available",
+        "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh"
     },
     "files": [
         "android",
