@@ -62,10 +62,9 @@ extension DorisSSAIProvider {
                 var newQueryItems = urlComps.queryItems ?? []
                 let queryItems = adUnit.adManifestParams?.compactMap {URLQueryItem(name: $0.key, value: $0.value)} ?? []
                 newQueryItems.append(contentsOf: queryItems)
-                //workaround to make any live stream live-DVR compatible for yospace
-                if isLive { newQueryItems.append(URLQueryItem(name: "yo.lpa", value: "dur")) }
                 
                 urlComps.queryItems = newQueryItems
+                
                 if let newURL = urlComps.url {
                     self = .yospace(isLive ? .dvrLive(url: newURL.absoluteString) : .vod(url: newURL.absoluteString),
                                     drm: drm)
