@@ -150,6 +150,8 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
 
+    implementation "androidx.core:core:1.9.0"
+
     // For media playback using ExoPlayer
     implementation "androidx.media3:media3-exoplayer:$media3_version"
 
