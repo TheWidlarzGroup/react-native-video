@@ -47,6 +47,11 @@
         "test": "echo no test available"
     },
     "files": [
+        ...
+        "!docs",
+        "!examples",
+        ...
+    ]
         "android",
         "ios",
         "windows",
