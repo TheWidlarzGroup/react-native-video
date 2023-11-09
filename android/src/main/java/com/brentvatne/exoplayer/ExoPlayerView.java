@@ -257,14 +257,10 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
     private final class ComponentListener implements Player.Listener {
 
-        // TextRenderer.Output implementation
-
         @Override
         public void onCues(List<Cue> cues) {
             subtitleLayout.setCues(cues);
         }
-
-        // SimpleExoPlayer.VideoListener implementation
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
@@ -281,8 +277,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         public void onRenderedFirstFrame() {
             shutterView.setVisibility(INVISIBLE);
         }
-
-        // ExoPlayer.EventListener implementation
 
         @Override
         public void onIsLoadingChanged(boolean isLoading) {
