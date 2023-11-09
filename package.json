@@ -47,11 +47,6 @@
         "test": "echo no test available"
     },
     "files": [
-        ...
-        "!docs",
-        "!examples",
-        ...
-    ]
         "android",
         "ios",
         "windows",
@@ -62,6 +57,8 @@
         "!android/buildOutput_*",
         "!android/local.properties",
         "!ios/build",
-        "!**/*.tsbuildinfo"
+        "!**/*.tsbuildinfo",
+        "!docs",
+        "!examples"
     ]
 }
