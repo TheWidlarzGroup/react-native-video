@@ -1,0 +1,27 @@
+name: Check CLang
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/check-clang.yml'
+      - 'ios/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/check-clang.yml'
+      - 'ios/**'
+
+jobs:
+  CLang-Format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get install clang-format
+      - name: Check formatting
+        run: |
+          git diff --name-only --diff-filter=d origin/main...HEAD | grep -E '\.(h|m|mm)$' | xargs clang-format -i -style=file:./ios/.clang-format
+          git diff --exit-code HEAD

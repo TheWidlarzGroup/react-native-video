@@ -1,0 +1,41 @@
+name: Check iOS
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/check-ios.yml'
+      - 'ios/**'
+  pull_request:
+    paths:
+      - '.github/workflows/check-ios.yml'
+      - 'ios/**'
+
+jobs:
+  Swift-Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint with SwiftLint
+        uses: norio-nomura/action-swiftlint@master
+        with:
+          args: --strict
+        env:
+          WORKING_DIRECTORY: ios
+  Swift-Format:
+    runs-on: macOS-latest
+    defaults:
+      run:
+        working-directory: ./ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      - name: Format Swift code
+        run: swiftformat --verbose .
+
+      - name: Verify formatted code is unchanged
+        run: git diff --exit-code HEAD
