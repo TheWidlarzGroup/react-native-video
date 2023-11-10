@@ -21,7 +21,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install clang-format
         run: sudo apt-get install clang-format
-      - name: Check formatting
+      - name: Check ios clang formatting
         run: |
-          git diff --name-only --diff-filter=d origin/main...HEAD | grep -E '\.(h|m|mm)$' | xargs clang-format -i -style=file:./ios/.clang-format
-          git diff --exit-code HEAD
+          find ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) -print0 | while read -d $'\0' file; do
+            clang-format -style=file:./ios/.clang-format -i "$file"
+          done
+        shell: bash
+      - name: Check for changes
+        run: git diff --exit-code HEAD
