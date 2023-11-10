@@ -7,16 +7,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.LegacyPlayerControlView;
 
 public class FullScreenPlayerView extends Dialog {
-    private final PlayerControlView playerControlView;
+    private final LegacyPlayerControlView playerControlView;
     private final ExoPlayerView exoPlayerView;
     private ViewGroup parent;
     private final FrameLayout containerView;
     private final OnBackPressedCallback onBackPressedCallback;
 
-    public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, PlayerControlView playerControlView, OnBackPressedCallback onBackPressedCallback) {
+    public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, LegacyPlayerControlView playerControlView, OnBackPressedCallback onBackPressedCallback) {
         super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         this.playerControlView = playerControlView;
         this.exoPlayerView = exoPlayerView;

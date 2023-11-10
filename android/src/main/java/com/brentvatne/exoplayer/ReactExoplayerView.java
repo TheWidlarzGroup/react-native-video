@@ -85,7 +85,7 @@ import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
-import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.API.ResizeMode;
 import com.brentvatne.common.API.SubtitleStyle;
@@ -147,7 +147,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
-    private PlayerControlView playerControlView;
+    private LegacyPlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.Listener eventListener;
 
@@ -391,7 +391,7 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     private void initializePlayerControl() {
         if (playerControlView == null) {
-            playerControlView = new PlayerControlView(getContext());
+            playerControlView = new LegacyPlayerControlView(getContext());
         }
 
         if (fullScreenPlayerView == null) {
