@@ -49,6 +49,8 @@ target 'videoplayer' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'react-native-video', path: '../../..'
+
   target 'videoplayerTests' do
     inherit! :complete
     # Pods for testing
