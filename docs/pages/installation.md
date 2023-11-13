@@ -37,7 +37,7 @@ Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios
 
 [See the example ios project for reference](examples/basic/ios/Podfile#L5)
 
-### Using CocoaPods (required to enable caching)
+### Using CocoaPods
 
 Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
 
@@ -50,15 +50,17 @@ Video only:
 +  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
   end
 ```
-
-Video with caching ([more info](other/caching.md)):
-
-```diff
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
-  end
-```
 ### Enable custom feature in podfile file
+
+### Video caching
+
+To enable Video caching usage, add following line in your podfile:
+([more info here](other/caching.md))
+
+```podfile
+# enable Video caching
++ $RNVideoUseVideoCaching=true
+```
 
 #### Google IMA
 

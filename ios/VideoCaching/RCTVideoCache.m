@@ -30,7 +30,7 @@
     options.useDirectorySeparation = NO;
 #ifdef DEBUG
     options.debugOutput = ^(NSString *string) {
-      RCTLog(@"Video Cache: %@", string);
+      NSLog(@"VideoCache: debug %@", string);
     };
 #endif
     [self createTemporaryPath];
@@ -48,7 +48,7 @@
                                                                  error:&error];
 #ifdef DEBUG
   if (!success || error) {
-    RCTLog(@"Error while! %@", error);
+    NSLog(@"VideoCache: Error while! %@", error);
   }
 #endif
 }
@@ -64,7 +64,7 @@
   [self.videoCache storeData:data forKey:key locked:NO withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
     if (response.error) {
 #ifdef DEBUG
-      RCTLog(@"An error occured while saving the video into the cache: %@", [response.error localizedDescription]);
+        NSLog(@"VideoCache: An error occured while saving the video into the cache: %@", [response.error localizedDescription]);
 #endif
       handler(NO);
       return;
