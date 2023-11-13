@@ -68,7 +68,7 @@ public class ReactTVPropsParser {
             return Pair.create(imaCsai.normalize(), null);
         }
 
-        YoVideoType videoType = isLive ? YoVideoType.LIVE : YoVideoType.VOD;
+        YoVideoType videoType = isLive ? YoVideoType.DVRLIVE : YoVideoType.VOD;
         YoSsaiProperties.Builder yoSsaiBuilder = new YoSsaiProperties.Builder();
         ReadableArray adUnits = ReadableMapUtils.getArray(adsMap, "adUnits");
         int adUnitCount = adUnits == null ? 0 : adUnits.size();
