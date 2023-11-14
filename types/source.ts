@@ -27,6 +27,15 @@ export interface IVideoPlayerSourceLimitedSeekableRange {
   seekToStart?: boolean;
 }
 
+export interface ITrackPolicyPair {
+  audio: string;
+  subtitle: string;
+}
+
+export interface ITracksPolicy {
+  items: ITrackPolicyPair[];
+}
+
 export interface IVideoPlayerSource {
   ads?: IAdsConfiguration;
   contentType?: ContentTypes;
@@ -57,4 +66,5 @@ export interface IVideoPlayerSource {
   thumbnailsPreview?: string;
   selectedSubtitleTrack?: string;
   preferredAudioTracks?: string[];
+  tracksPolicy?: ITracksPolicy;
 }

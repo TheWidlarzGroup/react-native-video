@@ -9,12 +9,17 @@ import AVDoris
 import AVKit
 
 class JSDorisFactory {
-    static func build(jsProps: JSProps, containerView: UIView, jsInput: JSInputProtocol, bridge: RCTBridge?) -> JSDoris? {
+    static func build(jsProps: JSProps, containerView: UIView, jsInput: JSInputProtocol, bridge: RCTBridge?, tracksPolicy: JSTracksPolicy?) -> JSDoris? {
         let controller = JSDoris()
         let player = AVPlayer()
         
+        var dorisPlaybackConfig = DorisPlaybackConfig()
+        if let tracksPolicy = tracksPolicy {
+            dorisPlaybackConfig.tracksPolicy = DorisTracksPolicy(model: tracksPolicy)
+        }
         let doris = DorisFactory.create(player: player,
-                                        output: controller)
+                                        output: controller,
+                                         playerConfig: dorisPlaybackConfig)
         
         controller.doris = doris
         controller.output = jsInput

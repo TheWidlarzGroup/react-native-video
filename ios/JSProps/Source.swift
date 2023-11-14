@@ -28,6 +28,7 @@ struct Source: SuperCodable {
     let nowPlaying: JSNowPlaying?
     let selectedSubtitleTrack: String?
     let preferredAudioTracks: [String]?
+    var tracksPolicy: JSTracksPolicy?
 }
 
 

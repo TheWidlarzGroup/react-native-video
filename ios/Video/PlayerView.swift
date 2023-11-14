@@ -127,7 +127,8 @@ class PlayerView: UIView, JSInputProtocol {
         jsDoris = JSDorisFactory.build(jsProps: jsProps,
                                        containerView: self,
                                        jsInput: self,
-                                       bridge: jsBridge)
+                                       bridge: jsBridge, 
+                                       tracksPolicy: jsProps.source.value?.tracksPolicy)
         
         jsDoris?.setup(with: jsProps)
     }
