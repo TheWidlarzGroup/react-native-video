@@ -14,7 +14,7 @@
     },
     "hooks": {
         "before:init": [
-            "rm -Rf lib", 
+            "rm -Rf lib tsconfig.tsbuildinfo",
             "yarn install --frozen-lockfile --non-interactive --production=false", 
             "yarn run lint", 
             "yarn run build"
