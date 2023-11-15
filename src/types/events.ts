@@ -118,13 +118,22 @@ export type OnReceiveAdEventData = Readonly<{
 }>;
 
 export type OnVideoErrorData = Readonly<{
-  errorString: string;
-  errorException: string;
-  errorStackTrace: string;
-  errorCode: string;
-  error: string;
+  error: OnVideoErrorDataDetails;
+  target?: number; // ios
 }>;
 
+export type OnVideoErrorDataDetails = Readonly<{
+  errorString?: string; // android
+  errorException?: string; // android
+  errorStackTrace?: string; // android
+  errorCode?: string; // android
+  error?: string; // ios
+  code?: number; // ios
+  localizedDescription?: string; // ios
+  localizedFailureReason?: string; // ios
+  localizedRecoverySuggestion?: string; // ios
+  domain?: string; // ios
+}>;
 export type OnAudioFocusChangedData = Readonly<{
   hasAudioFocus: boolean;
 }>;
