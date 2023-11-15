@@ -32,7 +32,10 @@ Pod::Spec.new do |s|
       Pod::UI.puts "RNVideo: enable Video caching"
       ss.dependency "SPTPersistentCache", "~> 1.1.0"
       ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
-      ss.source_files = "ios/Video/**/*.{h,m,swift}" "ios/VideoCaching/**/*.{h,m,swift}"
+      ss.source_files = "ios/*/**/*.{h,m,swift}"
+      ss.pod_target_xcconfig = {
+        'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_VIDEO_CACHING'
+      }
     end
   end
 

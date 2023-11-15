@@ -77,8 +77,8 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     
     // MARK: - DVAssetLoaderDelegate
     
-    func dvAssetLoaderDelegate(loaderDelegate:DVAssetLoaderDelegate!, didLoadData data:NSData!, forURL url:NSURL!) {
-        _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
+    func dvAssetLoaderDelegate(_ loaderDelegate: DVAssetLoaderDelegate!, didLoad data: Data!, for url: URL!) {
+            _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
             DebugLog("Cache data stored successfully 🎉")
         })
     }
