@@ -691,6 +691,14 @@ source={{
 
 Platforms: tvOS
 
+### `startPosition`
+The start time of video
+* **1** - 1s
+* **0** - ignore
+* **Negative values** - ignore
+
+Platforms: Android, iOS
+
 ### `subtitleStyle`
 
 Property | Description | Platforms
