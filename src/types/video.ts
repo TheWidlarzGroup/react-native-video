@@ -208,6 +208,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
+  startPosition?: number;
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
   trackId?: string; // Android

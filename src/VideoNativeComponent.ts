@@ -274,6 +274,7 @@ export interface VideoNativeProps extends ViewProps {
   textTracks?: TextTracks;
   selectedTextTrack?: SelectedTextTrack;
   selectedAudioTrack?: SelectedAudioTrack;
+  startPosition?: number;
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
