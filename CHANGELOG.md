@@ -27,6 +27,8 @@
 
 ## Next
 - Android, iOS: add onVolumeChange event #3322
+- Fix types for ReactVideoSource to also allow require(..) sources
+
 
 ### Version 6.0.0-alpha.9
 - All: add built-in typescript support [#3266](https://github.com/react-native-video/react-native-video/pull/3266)
