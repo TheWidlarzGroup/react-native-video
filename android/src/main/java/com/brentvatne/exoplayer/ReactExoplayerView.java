@@ -207,6 +207,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean disableFocus;
     private boolean focusable = true;
     private boolean disableBuffering;
+    private long startPosition = -1L;
     private long contentStartTime = -1L;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
@@ -721,7 +722,12 @@ public class ReactExoplayerView extends FrameLayout implements
         if (haveResumePosition) {
             player.seekTo(resumeWindow, resumePosition);
         }
-        player.prepare(mediaSource, !haveResumePosition, false);
+        if (startPosition >= 0) {
+            player.setMediaSource(mediaSource, startPosition);
+        } else {
+            player.setMediaSource(mediaSource, !haveResumePosition);
+        }
+        player.prepare();
         playerNeedsSource = false;
 
         reLayout(exoPlayerView);
@@ -1939,6 +1945,10 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         this.backBufferDurationMs = backBufferDurationMs;
+    }
+
+    public void setStartPosition(long startPosition) {
+        this.startPosition = startPosition;
     }
 
     public void setContentStartTime(int contentStartTime) {

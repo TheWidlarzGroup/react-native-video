@@ -74,6 +74,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
+    private static final String PROP_START_POSITION = "startPosition";
     private static final String PROP_CONTENT_START_TIME = "contentStartTime";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
@@ -343,6 +344,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_BACK_BUFFER_DURATION_MS, defaultInt = 0)
     public void setBackBufferDurationMs(final ReactExoplayerView videoView, final int backBufferDurationMs) {
         videoView.setBackBufferDurationMs(backBufferDurationMs);
+    }
+
+    @ReactProp(name = PROP_START_POSITION, defaultFloat = -1.0f)
+    public void setStartPosition(final ReactExoplayerView videoView, final float startPosition) {
+        videoView.setStartPosition(Math.round(startPosition * 1000f));
     }
 
     @ReactProp(name = PROP_CONTENT_START_TIME, defaultInt = -1)
