@@ -8,6 +8,7 @@ import androidx.media3.common.endeavor.LimitedSeekRange;
 
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class RNSource {
     private final ImaCsaiProperties imaCsai;
     private final YoSsaiProperties yoSsai;
     private final LimitedSeekRange limitedSeekRange;
+    private final TracksPolicy tracksPolicy;
 
     public RNSource(
             @NonNull String url,
@@ -59,7 +61,9 @@ public class RNSource {
             boolean apsTestFlag,
             @Nullable ImaCsaiProperties imaCsai,
             @Nullable YoSsaiProperties yoSsai,
-            @Nullable LimitedSeekRange limitedSeekRange) {
+            @Nullable LimitedSeekRange limitedSeekRange,
+            TracksPolicy tracksPolicy) {
+
         this.id = id;
         this.url = url;
         this.mimeType = mimeType;
@@ -81,6 +85,7 @@ public class RNSource {
         this.imaCsai = imaCsai;
         this.yoSsai = yoSsai;
         this.limitedSeekRange = limitedSeekRange;
+        this.tracksPolicy = tracksPolicy;
     }
 
     @NonNull
@@ -193,5 +198,9 @@ public class RNSource {
 
     public LimitedSeekRange getLimitedSeekRange() {
         return limitedSeekRange;
+    }
+
+    public TracksPolicy getTracksPolicy() {
+        return tracksPolicy;
     }
 }

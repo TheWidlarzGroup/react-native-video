@@ -3,7 +3,6 @@ package com.brentvatne.exoplayer;
 import static androidx.media3.common.util.Assertions.checkNotNull;
 
 import android.content.Context;
-import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +12,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
+import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLiveBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
@@ -29,7 +29,8 @@ public final class ReactTVExoDorisFactory {
             int loadBufferMs,
             long forwardIncrementMs,
             long rewindIncrementMs,
-            @Nullable AdViewProvider adViewProvider) {
+            @Nullable AdViewProvider adViewProvider,
+            TracksPolicy tracksPolicy) {
         return createPlayer(
                 context,
                 adType,
@@ -40,7 +41,8 @@ public final class ReactTVExoDorisFactory {
                 rewindIncrementMs,
                 null,
                 null,
-                adViewProvider);
+                adViewProvider,
+                tracksPolicy);
     }
 
     public ExoDoris createPlayer(
@@ -53,7 +55,8 @@ public final class ReactTVExoDorisFactory {
             long rewindIncrementMs,
             @Nullable List<Plugin> plugins,
             @Nullable Parameters.Builder parametersBuilder,
-            @Nullable AdViewProvider adViewProvider) {
+            @Nullable AdViewProvider adViewProvider,
+            @Nullable TracksPolicy tracksPolicy) {
         final ExoDorisBuilder builder;
         if (adType == AdType.YO_SSAI) {
             builder = new ExoDorisYoSsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
@@ -75,6 +78,7 @@ public final class ReactTVExoDorisFactory {
                 .setRewindIncrementMs(rewindIncrementMs)
                 .setPlugins(plugins)
                 .setParamsBuilder(parametersBuilder)
+                .setTracksPolicy(tracksPolicy)
                 .build();
     }
 }

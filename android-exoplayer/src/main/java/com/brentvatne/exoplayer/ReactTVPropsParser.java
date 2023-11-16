@@ -8,10 +8,14 @@ import androidx.annotation.NonNull;
 
 import com.brentvatne.util.ReadableMapUtils;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
+import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.entity.YoSsaiProperties.YoVideoType;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +23,24 @@ public class ReactTVPropsParser {
 
     private ReactTVPropsParser() {
         // prevent instantiation.
+    }
+
+    @Nullable
+    public static TracksPolicy parseTracksPolicy(@Nullable ReadableMap tracksPolicy) {
+        List<TracksPolicy.TrackPolicy> trackPolicyList = new ArrayList<>();
+        ReadableArray array = ReadableMapUtils.getArray(tracksPolicy, "items");
+        if (array == null) {
+            return null;
+        }
+        for (int i = 0; i < array.size(); i++) {
+            ReadableMap map = array.getMap(i);
+            String audio = ReadableMapUtils.getString(map, "audio");
+            String subtitle = ReadableMapUtils.getString(map, "subtitle");
+            if (audio != null && subtitle != null) {
+                trackPolicyList.add(new TracksPolicy.TrackPolicy(audio, subtitle));
+            }
+        }
+        return trackPolicyList.isEmpty() ? null : new TracksPolicy(trackPolicyList);
     }
 
     /**

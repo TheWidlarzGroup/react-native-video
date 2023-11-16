@@ -79,6 +79,7 @@ import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
@@ -483,7 +484,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     MAX_LOAD_BUFFER_MS,
                     exoDorisPlayerView.getFastForwardIncrementMs(),
                     exoDorisPlayerView.getRewindIncrementMs(),
-                    adViewProvider);
+                    adViewProvider,
+                    src.getTracksPolicy());
 
             player.setDorisListener(dorisListener);
             trackSelector = player.getTrackSelector();
@@ -1231,7 +1233,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             LimitedSeekRange limitedSeekRange,
             boolean shouldSaveSubtitleSelection,
             String selectedSubtitleTrack,
-            List<String> preferredAudioTracks) {
+            List<String> preferredAudioTracks,
+            TracksPolicy tracksPolicy) {
+
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
             boolean isOriginalSourceNull = srcUrl == null;
@@ -1272,7 +1276,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     apsTestFlag,
                     imaCsai,
                     yoSsai,
-                    limitedSeekRange);
+                    limitedSeekRange,
+                    tracksPolicy);
             this.actionToken = actionToken;
             if (watermarkWidget != null) {
                 watermarkWidget.setWatermark(watermark);

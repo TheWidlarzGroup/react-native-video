@@ -25,6 +25,7 @@ import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
+import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.internal.ResumePositionHandler;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -288,6 +289,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
             // Ads
             Pair<ImaCsaiProperties, YoSsaiProperties> adProperties = ReactTVPropsParser.parseAdUnitsV2(videoView.isLive(), src);
+            TracksPolicy tracksPolicy = ReactTVPropsParser.parseTracksPolicy(src);
 
             Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, mimeType %s, isYoSsai %b, isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
                     channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
@@ -323,7 +325,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     limitedSeekRange,
                     shouldSaveSubtitleSelection,
                     selectedSubtitleTrack,
-                    preferredAudioTracks);
+                    preferredAudioTracks,
+                    tracksPolicy);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,
