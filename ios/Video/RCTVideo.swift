@@ -66,6 +66,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
     private var _pictureInPictureEnabled = false
+    private var _startPosition:Float = -1
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -598,6 +599,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }.catch{_ in }
 
         _pendingSeek = false
+    }
+
+    @objc
+    func setStartPosition(_ startPosition:Float) {
+        _startPosition = startPosition
     }
 
     @objc
@@ -1178,6 +1184,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "tolerance": NSNumber(value: 100)
             ])
             _pendingSeek = false
+        }
+
+        if _startPosition > 0 {
+            setSeek([
+                "time": NSNumber(value: _cursor),
+                "tolerance": NSNumber(value: 100)
+            ])
+            _startPosition = -1
         }
 
         if _videoLoadStarted {
