@@ -8,20 +8,20 @@ export type Headers = Record<string, string>;
 
 export type ReactVideoSource =
   | Readonly<{
-      uri?: string
-      isNetwork?: boolean
-      isAsset?: boolean
-      shouldCache?: boolean
-      type?: string
-      mainVer?: number
-      patchVer?: number
-      headers?: Headers
-      startTime?: number
-      endTime?: number
-      title?: string
-      subtitle?: string
-      description?: string
-      customImageUri?: string
+      uri?: string;
+      isNetwork?: boolean;
+      isAsset?: boolean;
+      shouldCache?: boolean;
+      type?: string;
+      mainVer?: number;
+      patchVer?: number;
+      headers?: Headers;
+      startTime?: number;
+      endTime?: number;
+      title?: string;
+      subtitle?: string;
+      description?: string;
+      customImageUri?: string;
     }>
   | NodeRequire;
 
