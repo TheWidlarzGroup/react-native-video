@@ -708,6 +708,7 @@ subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
 
 ### `textTracks`
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
+> ⚠️ This feature does not work with HLS playlists (e.g m3u8) on iOS
 
 Property | Description
 --- | ---
