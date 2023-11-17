@@ -594,6 +594,8 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 #### Asset loaded via require
 
+> ⚠️ on iOS, you file name must not contain spaces eg. `my video.mp4` will not work, use `my-video.mp4` instead
+
 Example: 
 ```javascript
 const sintel = require('./sintel.mp4');
