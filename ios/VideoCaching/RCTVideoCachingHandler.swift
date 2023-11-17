@@ -6,7 +6,7 @@ import Promises
 class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     
     private var _videoCache:RCTVideoCache! = RCTVideoCache.sharedInstance()
-    var playerItemPrepareText: ((AVAsset?, NSDictionary?) -> AVPlayerItem, uri: String)?
+    var playerItemPrepareText: ((AVAsset?, NSDictionary?, String) -> AVPlayerItem)?
     
     override init() {
         super.init()
