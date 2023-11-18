@@ -50,7 +50,7 @@ export interface VideoRef {
   restoreUserInterfaceForPictureInPictureStopCompleted: (
     restore: boolean,
   ) => void;
-  save: () => Promise<VideoSaveData>;
+  save: (options: object) => Promise<VideoSaveData>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -241,8 +241,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setIsFullscreen(false);
     }, [setIsFullscreen]);
 
-    const save = useCallback(() => {
-      return VideoManager.save(getReactTag(nativeRef));
+    const save = useCallback((options: object) => {
+      return VideoManager.save(options, getReactTag(nativeRef));
     }, []);
 
     const pause = useCallback(() => {

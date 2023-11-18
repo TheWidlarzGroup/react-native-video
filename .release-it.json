@@ -1,0 +1,27 @@
+{
+    "git": {
+        "commitMessage": "chore: release v${version}",
+        "requireCleanWorkingDir": true,
+        "tagAnnotation": "Release v${version}",
+        "tagName": "v${version}"
+    },
+    
+    "plugins": {
+        "@release-it/conventional-changelog": {
+            "preset": "angular",
+            "infile": "CHANGELOG.md"
+        }
+    },
+    "hooks": {
+        "before:init": [
+            "rm -Rf lib tsconfig.tsbuildinfo",
+            "yarn install --frozen-lockfile --non-interactive --production=false", 
+            "yarn run lint", 
+            "yarn run build"
+        ],
+        "after:release": "echo Successfully released ${name} v${version} from repository ${repo.repository}."
+    },
+    "npm": {
+        "skipChecks": false
+    }
+}

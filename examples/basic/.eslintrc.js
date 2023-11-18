@@ -1,11 +1,16 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
-
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {};
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ['./tsconfig.json'],
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 2018,
+    sourceType: 'module',
+  },
+  ignorePatterns: ['babel.config.js', 'metro.config.js', '.eslintrc.js'],
+  plugins: ['@typescript-eslint'],
+  extends: ['plugin:@typescript-eslint/recommended', '@react-native'],
+};

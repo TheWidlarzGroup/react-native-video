@@ -86,11 +86,24 @@ Payload:
 Property | Type | Description
 --- | --- | ---
 bitrate | number | The estimated bitrate in bits/sec
+width | number | The width of the video (android only)
+height | number | The height of the video (android only)
+trackId | string | The track ID of the video track (android only)
 
-Example:
+Example on iOS:
 ```javascript
 {
   bitrate: 1000000
+}
+```
+
+Example on Android:
+```javascript
+{
+  bitrate: 1000000
+  width: 1920
+  height: 1080
+  trackId: 'some-track-id'
 }
 ```
 
