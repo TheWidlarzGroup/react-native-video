@@ -6,24 +6,26 @@ import type FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
 
-export type ReactVideoSource =
-  | Readonly<{
-      uri?: string;
-      isNetwork?: boolean;
-      isAsset?: boolean;
-      shouldCache?: boolean;
-      type?: string;
-      mainVer?: number;
-      patchVer?: number;
-      headers?: Headers;
-      startTime?: number;
-      endTime?: number;
-      title?: string;
-      subtitle?: string;
-      description?: string;
-      customImageUri?: string;
-    }>
-  | NodeRequire;
+export type ReactVideoSourceProperties = {
+  uri?: string;
+  isNetwork?: boolean;
+  isAsset?: boolean;
+  shouldCache?: boolean;
+  type?: string;
+  mainVer?: number;
+  patchVer?: number;
+  headers?: Headers;
+  startTime?: number;
+  endTime?: number;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  customImageUri?: string;
+};
+
+export type ReactVideoSource = Readonly<
+  ReactVideoSourceProperties | NodeRequire
+>;
 
 export type DebugConfig = Readonly<{
   enable?: boolean;
