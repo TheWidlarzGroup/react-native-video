@@ -1,11 +1,11 @@
 # react-native-video
 🎬 `<Video>` component for React Native
 
-> **Note:** version 5.2.1 won't have any updates. We are currently working on making a alpha 6.0.0 stable
+> **Note:** version 5.2.1 won't have any updates. We are currently working on making a 6.0.0 fully stable
 
 ## Documentation
 Old version of documentation can be found [here](https://github.com/react-native-video/react-native-video/tree/v6.0.0-alpha.8)
-New documentation will be available soon at [react-native-video.github.io/react-native-video](https://react-native-video.github.io/react-native-video/), if you find some issue with new version, don't hesitate to open a ticket!
+New documentation is available at [react-native-video.github.io/react-native-video](https://react-native-video.github.io/react-native-video/), if you find some issue with new version, don't hesitate to open a ticket!
 
 ## Usage
 
