@@ -6,7 +6,7 @@ import type FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
 
-export type ReactVideoSource = Readonly<{
+export type ReactVideoSourceProperties = {
   uri?: string;
   isNetwork?: boolean;
   isAsset?: boolean;
@@ -21,7 +21,11 @@ export type ReactVideoSource = Readonly<{
   subtitle?: string;
   description?: string;
   customImageUri?: string;
-}>;
+};
+
+export type ReactVideoSource = Readonly<
+  ReactVideoSourceProperties | NodeRequire
+>;
 
 export type DebugConfig = Readonly<{
   enable?: boolean;
