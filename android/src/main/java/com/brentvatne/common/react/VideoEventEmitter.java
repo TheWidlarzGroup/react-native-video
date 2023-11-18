@@ -1,6 +1,7 @@
 package com.brentvatne.common.react;
 
 import androidx.annotation.StringDef;
+
 import android.view.View;
 
 import com.brentvatne.common.API.TimedMetadata;
@@ -12,10 +13,10 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class VideoEventEmitter {
@@ -124,8 +125,6 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_STEP_FORWARD = "canStepForward";
     private static final String EVENT_PROP_STEP_BACKWARD = "canStepBackward";
 
-    private static final String EVENT_PROP_BUFFER_START = "bufferStart";
-    private static final String EVENT_PROP_BUFFER_END = "bufferEnd";
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
@@ -241,8 +240,7 @@ public class VideoEventEmitter {
         load( duration,  currentPosition,  videoWidth,  videoHeight, waAudioTracks,  waTextTracks,  waVideoTracks, trackId);
     }
 
-
-    public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
+    void load(double duration, double currentPosition, int videoWidth, int videoHeight,
               WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
@@ -266,8 +264,6 @@ public class VideoEventEmitter {
 
         receiveEvent(EVENT_LOAD, event);
     }
-
-
 
     WritableMap arrayToObject(String field, WritableArray array) {
         WritableMap event = Arguments.createMap();

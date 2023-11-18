@@ -30,7 +30,7 @@ public class ReactVideoPackage implements ReactPackage {
 
         modules.add(new VideoDecoderPropertiesModule(reactContext));
         modules.add(new VideoManagerModule(reactContext));
-        
+
         return modules;
     }
 

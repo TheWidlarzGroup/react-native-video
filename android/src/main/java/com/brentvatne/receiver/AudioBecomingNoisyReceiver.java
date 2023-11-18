@@ -2,10 +2,11 @@ package com.brentvatne.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+
+import androidx.core.content.ContextCompat;
 
 public class AudioBecomingNoisyReceiver extends BroadcastReceiver {
 
