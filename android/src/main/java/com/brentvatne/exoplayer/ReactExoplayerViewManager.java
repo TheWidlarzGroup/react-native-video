@@ -1,10 +1,14 @@
 package com.brentvatne.exoplayer;
 
-import android.graphics.Color;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.media3.common.util.Util;
+import androidx.media3.datasource.RawResourceDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
 
 import com.brentvatne.common.API.ResizeMode;
 import com.brentvatne.common.API.SubtitleStyle;
@@ -19,9 +23,6 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -202,7 +203,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
         videoView.setAdTagUrl(adTagUrl);
     }
-
 
     @ReactProp(name = PROP_RESIZE_MODE)
     public void setResizeMode(final ReactExoplayerView videoView, final String resizeMode) {

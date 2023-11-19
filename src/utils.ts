@@ -1,17 +1,19 @@
 import type {Component, RefObject, ComponentClass} from 'react';
 import {Image, findNodeHandle} from 'react-native';
 import type {ImageSourcePropType} from 'react-native';
-import type {ReactVideoSource} from './types/video';
+import type {ReactVideoSource, ReactVideoSourceProperties} from './types/video';
 
 type Source = ImageSourcePropType | ReactVideoSource;
 
-export function resolveAssetSourceForVideo(source: Source): ReactVideoSource {
+export function resolveAssetSourceForVideo(
+  source: Source,
+): ReactVideoSourceProperties {
   if (typeof source === 'number') {
     return {
       uri: Image.resolveAssetSource(source).uri,
     };
   }
-  return source as ReactVideoSource;
+  return source as ReactVideoSourceProperties;
 }
 
 export function getReactTag(

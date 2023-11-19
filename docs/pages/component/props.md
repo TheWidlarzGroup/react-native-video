@@ -596,6 +596,8 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 #### Asset loaded via require
 
+> ⚠️ on iOS, you file name must not contain spaces eg. `my video.mp4` will not work, use `my-video.mp4` instead
+
 Example: 
 ```javascript
 const sintel = require('./sintel.mp4');
@@ -718,6 +720,7 @@ subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
 
 ### `textTracks`
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
+> ⚠️ This feature does not work with HLS playlists (e.g m3u8) on iOS
 
 Property | Description
 --- | ---

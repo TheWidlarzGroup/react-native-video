@@ -19,28 +19,24 @@ def safeExtGet(prop) {
     return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : project.properties["RNVideo_" + prop]
 }
 
-def getExtOrDefault(name, defaultValue) {
-    return rootProject.ext.has(name) ? rootProject.ext.get(name) : defaultValue
-}
-
 def isNewArchitectureEnabled() {
     return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
 }
 
 def supportsNamespace() {
-  def parsed = Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
-  def major = parsed[0].toInteger()
-  def minor = parsed[1].toInteger()
+    def parsed = Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+    def major = parsed[0].toInteger()
+    def minor = parsed[1].toInteger()
 
-  // Namespace support was added in 7.3.0
-  if (major == 7 && minor >= 3) {
-    return true
-  }
+    // Namespace support was added in 7.3.0
+    if (major == 7 && minor >= 3) {
+        return true
+    }
 
-  return major >= 8
+    return major >= 8
 }
 
-def useExoplayerIMA = getExtOrDefault("RNVUseExoplayerIMA", false)
+def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA")?.toBoolean() ?: false
 
 println "useExoplayerIMA:" + useExoplayerIMA
 
@@ -58,13 +54,13 @@ if (isNewArchitectureEnabled()) {
 
 android {
     if (supportsNamespace()) {
-      namespace 'com.brentvatne.react'
+        namespace 'com.brentvatne.react'
 
-      sourceSets {
-        main {
-          manifest.srcFile "src/main/AndroidManifestNew.xml"
+        sourceSets {
+            main {
+                manifest.srcFile "src/main/AndroidManifestNew.xml"
+            }
         }
-      }
     }
 
     compileSdkVersion safeExtGet('compileSdkVersion')
@@ -72,14 +68,14 @@ android {
 
     def agpVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION
     if (agpVersion.tokenize('.')[0].toInteger() < 8) {
-      compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-      }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_11
+            targetCompatibility JavaVersion.VERSION_11
+        }
 
-      kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.majorVersion
-      }
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_11.majorVersion
+        }
     }
 
     defaultConfig {
@@ -119,12 +115,12 @@ android {
         java {
             if (isNewArchitectureEnabled()) {
                 srcDirs += [
-                    "src/fabric/java",
-                    "${project.buildDir}/generated/source/codegen/java"
+                        "src/fabric/java",
+                        "${project.buildDir}/generated/source/codegen/java"
                 ]
             } else {
                 srcDirs += [
-                    "src/oldarch/java"
+                        "src/oldarch/java"
                 ]
             }
         }
@@ -145,6 +141,7 @@ repositories {
     mavenCentral()
 }
 
+def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
 
 dependencies {
@@ -152,22 +149,36 @@ dependencies {
     // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
-    implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
-        exclude group: 'com.android.support'
-    }
 
-    implementation "androidx.annotation:annotation:1.7.0"
     implementation "androidx.core:core:1.9.0"
-    implementation "androidx.media:media:1.6.0"
-    implementation "androidx.activity:activity:1.6.0"
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.18.1') {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
+    // For media playback using ExoPlayer
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
 
+    // For Smooth Streaming playback support with ExoPlayer
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
+    // For DASH playback support with ExoPlayer
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    // For HLS playback support with ExoPlayer
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    // For ad insertion using the Interactive Media Ads SDK with ExoPlayer
     if (useExoplayerIMA) {
-        implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
+        implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
     }
-    implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
+
+    // For loading data using the OkHttp network stack
+    implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+
+    // For building media playback UIs
+    implementation "androidx.media3:media3-ui:$media3_version"
+
+    // For exposing and controlling media sessions
+    implementation "androidx.media3:media3-session:$media3_version"
+
+    // Common functionality for loading data
+    implementation "androidx.media3:media3-datasource:$media3_version"
+    // Common functionality used across multiple media libraries
+    implementation "androidx.media3:media3-common:$media3_version"
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

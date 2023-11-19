@@ -184,24 +184,24 @@ enum RCTVideoUtils {
         let mixComposition:AVMutableComposition = AVMutableComposition()
         
         let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
-        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try videoCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: videoAsset,
-                at: .zero)
-        } catch {
+        
+        // we need videoAsset asset to be not null to get durration later
+        if videoAsset == nil {
+            return mixComposition
         }
+        
+        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
+        try? videoCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+            of: videoAsset,
+            at: .zero)
         
         let audioAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
         let audioCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try audioCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: audioAsset,
-                at: .zero)
-        } catch {
-        }
+        try? audioCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
+            of: audioAsset,
+            at: .zero)
         
         return mixComposition
     }
@@ -226,12 +226,11 @@ enum RCTVideoUtils {
                 validTextTracks.append(textTracks[i])
                 let textCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                               preferredTrackID:kCMPersistentTrackID_Invalid)
-                do {
-                    try textCompTrack.insertTimeRange(
-                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                if videoAsset != nil {
+                    try? textCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: videoAsset!.timeRange.duration),
                         of: textTrackAsset,
                         at: .zero)
-                } catch {
                 }
             }
         }
@@ -322,7 +321,7 @@ enum RCTVideoUtils {
     }
 
     static func createMetadataItem(for identifier: AVMetadataIdentifier,
-                                    value: Any) -> AVMetadataItem {
+                                   value: Any) -> AVMetadataItem {
         let item = AVMutableMetadataItem()
         item.identifier = identifier
         item.value = value as? NSCopying & NSObjectProtocol

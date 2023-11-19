@@ -11,12 +11,16 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.uimanager.UIManagerModule;
 
 public class VideoManagerModule extends ReactContextBaseJavaModule {
-    ReactApplicationContext reactContext;
+    private static final String REACT_CLASS = "VideoManager";
+
+    public VideoManagerModule(ReactApplicationContext reactContext) {
+        super(reactContext);
+    }
 
     @NonNull
     @Override
     public String getName() {
-        return "VideoManager";
+        return REACT_CLASS;
     }
 
     @ReactMethod
@@ -30,10 +34,5 @@ public class VideoManagerModule extends ReactContextBaseJavaModule {
                 videoView.setPausedModifier(paused);
             }
         });
-    }
-
-    public VideoManagerModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.reactContext = reactContext;
     }
 }
