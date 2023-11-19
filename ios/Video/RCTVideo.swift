@@ -66,7 +66,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
     private var _pictureInPictureEnabled = false
-    private var _startPosition:Float = -1
+    private var _startPosition:Float64 = -1
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -252,8 +252,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         var currentTime = _player?.currentTime()
-        if (currentTime != nil && _source?.startTime != nil) {
-            currentTime = CMTimeSubtract(currentTime!, CMTimeMake(value: _source?.startTime ?? 0, timescale: 1000))
+        if (currentTime != nil && _source?.cropStart != nil) {
+            currentTime = CMTimeSubtract(currentTime!, CMTimeMake(value: _source?.cropStart ?? 0, timescale: 1000))
         }
         let currentPlaybackTime = _player?.currentItem?.currentDate()
         let duration = CMTimeGetSeconds(playerDuration)
@@ -317,6 +317,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         throw NSError(domain: "", code: 0, userInfo: nil)
                     }
 
+                    if let startPosition = self._source?.startPosition {
+                        self._startPosition = Float64(startPosition) / 1000
+                    }
+
 #if USE_VIDEO_CACHING
                     if self._videoCache.shouldCache(source:source, textTracks:self._textTracks) {
                         return self._videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions:assetOptions)
@@ -342,7 +346,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem = playerItem
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
-                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.startTime, withVideoEnd: self._source?.endTime)
+                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -602,10 +606,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _pendingSeek = false
     }
 
-    @objc
-    func setStartPosition(_ startPosition:Float) {
-        _startPosition = startPosition
-    }
 
     @objc
     func setRate(_ rate:Float) {
@@ -1185,7 +1185,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _startPosition > 0 {
             setSeek([
-                "time": NSNumber(value: _cursor),
+                "time": NSNumber(value: _startPosition),
                 "tolerance": NSNumber(value: 100)
             ])
             _startPosition = -1

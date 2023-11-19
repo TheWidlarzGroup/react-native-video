@@ -15,8 +15,9 @@ export type ReactVideoSourceProperties = {
   mainVer?: number;
   patchVer?: number;
   headers?: Headers;
-  startTime?: number;
-  endTime?: number;
+  startPosition?: number;
+  cropStart?: number;
+  cropEnd?: number;
   title?: string;
   subtitle?: string;
   description?: string;
@@ -212,7 +213,6 @@ export interface ReactVideoProps extends ReactVideoEvents {
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
-  startPosition?: number;
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
   trackId?: string; // Android
