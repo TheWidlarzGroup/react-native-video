@@ -658,18 +658,24 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+#### Start playback at a specific point in time
+
+Provide an optional `startPosition` for video. Value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
+(If it is zero or negative, it is ignored)
+
+Platforms: Android, iOS
 
 #### Playing only a portion of the video (start & end time)
 
-Provide an optional `startTime` and/or `endTime` for the video. Value is in milliseconds. Useful when you want to play only a portion of a large video.
+Provide an optional `cropStart` and/or `cropEnd` for the video. Value is in milliseconds. Useful when you want to play only a portion of a large video.
 
 Example
 ```javascript
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012, endTime: 48500 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012, cropEnd: 48500 }}
 
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012 }}
 
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', endTime: 48500 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropEnd: 48500 }}
 ```
 
 Platforms: iOS, Android
@@ -692,14 +698,6 @@ source={{
 ```
 
 Platforms: tvOS
-
-### `startPosition`
-The start time of video
-* **1** - 1s
-* **0** - ignore
-* **Negative values** - ignore
-
-Platforms: Android, iOS
 
 ### `subtitleStyle`
 
