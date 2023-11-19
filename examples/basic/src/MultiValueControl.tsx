@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, {FunctionComponent} from 'react';
 
 import {
   StyleSheet,
@@ -7,21 +7,26 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {ResizeMode} from 'react-native-video';
+
+export type MultiValueControlPropType = number | string | ResizeMode;
 
 /*
-* MultiValueControl displays a list clickable text view
-*/
+ * MultiValueControl displays a list clickable text view
+ */
 
 interface MultiValueControlType<T> {
   // a list a string or number to be displayed
-  values: Array<T>
+  values: Array<T>;
   // The selected value in values
-  selected?: T
+  selected?: T;
   // callback to press onPress
-  onPress: (arg: T) => any
+  onPress: (arg: MultiValueControlPropType) => void;
 }
 
-const MultiValueControl: FunctionComponent<MultiValueControlType<any>> = ({ values, selected, onPress }) => {
+const MultiValueControl: FunctionComponent<
+  MultiValueControlType<MultiValueControlPropType>
+> = ({values, selected, onPress}) => {
   const selectedStyle: TextStyle = StyleSheet.flatten([
     styles.option,
     {fontWeight: 'bold'},
@@ -32,20 +37,23 @@ const MultiValueControl: FunctionComponent<MultiValueControlType<any>> = ({ valu
     {fontWeight: 'normal'},
   ]);
 
-    return <View style={styles.container}>
-      {values.map((value: string | number) => {
-          const _style = value === selected ? selectedStyle : unselectedStyle
-          return (
-            <TouchableOpacity
-              key={value}
-              onPress={() => {
-                onPress?.(value)
-              }}>
+  return (
+    <View style={styles.container}>
+      {values.map((value: MultiValueControlPropType) => {
+        const _style = value === selected ? selectedStyle : unselectedStyle;
+        return (
+          <TouchableOpacity
+            key={value}
+            onPress={() => {
+              onPress?.(value);
+            }}>
             <Text style={_style}>{value}</Text>
-            </TouchableOpacity>)
-        })}
-      </View>
-}
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   option: {

@@ -5,6 +5,6 @@
       "react-native-video": ["../../src/index"]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "**/*.js"],
+  "exclude": ["node_modules"],
 }
