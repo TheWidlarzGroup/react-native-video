@@ -1183,7 +1183,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeek = false
         }
 
-        if _startPosition > 0 {
+        if _startPosition >= 0 {
             setSeek([
                 "time": NSNumber(value: _startPosition),
                 "tolerance": NSNumber(value: 100)

@@ -148,7 +148,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         mainVer: resolvedSource.mainVer || 0,
         patchVer: resolvedSource.patchVer || 0,
         requestHeaders: resolvedSource.headers || {},
-        startPosition: resolvedSource.startPosition || -1,
+        startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         title: resolvedSource.title,

@@ -661,7 +661,7 @@ The following other types are supported on some platforms, but aren't fully docu
 #### Start playback at a specific point in time
 
 Provide an optional `startPosition` for video. Value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
-(If it is zero or negative, it is ignored)
+(If it is negative or undefined or null, it is ignored)
 
 Platforms: Android, iOS
 
