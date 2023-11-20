@@ -47,6 +47,9 @@ class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
     func setupPipController(_ playerLayer: AVPlayerLayer?) {
         // Create new controller passing reference to the AVPlayerLayer
         _pipController = AVPictureInPictureController(playerLayer:playerLayer!)
+        if #available(iOS 14.2, *) {
+            _pipController?.canStartPictureInPictureAutomaticallyFromInline = true
+        }
         _pipController?.delegate = self
     }
     
