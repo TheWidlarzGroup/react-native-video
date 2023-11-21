@@ -564,6 +564,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 player.load(source);
             }
 
+            exoDorisPlayerView.setExtraAdGroupMarkers(null, null);
             exoDorisPlayerView.setLimitedSeekRange(limitedSeekRange);
 
             playerNeedsSource = false;

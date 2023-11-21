@@ -268,7 +268,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
         int uriHash = uriString.hashCode();
         if (currentSrcUrls.get(uriHash) != null) {
-            Log.d(WebUtil.DEBUG, "Same source URL, skip initialization, url " + uriString);
+            Log.i(WebUtil.DEBUG, "Same source URL, skip initialization, url " + uriString);
             return;
         } else {
             currentSrcUrls.put(uriHash, uriString);
@@ -291,7 +291,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             Pair<ImaCsaiProperties, YoSsaiProperties> adProperties = ReactTVPropsParser.parseAdUnitsV2(videoView.isLive(), src);
             TracksPolicy tracksPolicy = ReactTVPropsParser.parseTracksPolicy(ReadableMapUtils.getMap(src, "tracksPolicy"));
 
-            Log.d(WebUtil.DEBUG, String.format("setSrc - title %s, mimeType %s, isYoSsai %b, isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
+            Log.i(WebUtil.DEBUG, String.format("setSrc - title %s, mimeType %s, isYoSsai %b, isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
                     channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
                     mimeType,
                     adProperties.second != null,
@@ -653,12 +653,12 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         // This will be called whenever a command is sent from react-native.
         switch (commandId) {
             case COMMAND_SEEK_TO_NOW:
-                Log.d(WebUtil.DEBUG, "resumeToNow");
+                Log.i(WebUtil.DEBUG, "resumeToNow");
                 root.resumeTo(C.TIME_UNSET);
                 break;
             case COMMAND_SEEK_TO_TIMESTAMP:
                 String timestamp = args.getString(0);
-                Log.d(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
+                Log.i(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
                 long positionMs = root.parseTimestamp(timestamp);
                 if (positionMs != ResumePositionHandler.RESUME_UNSET) {
                     root.resumeTo(positionMs);
@@ -666,7 +666,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 break;
             case COMMAND_SEEK_TO_RESUME_POSITION:
                 long resumeMs = args.getInt(0) * 1000;
-                Log.d(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
+                Log.i(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
                 root.resumeTo(resumeMs);
                 break;
             case COMMAND_SEEK_TO_POSITION:
