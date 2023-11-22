@@ -1,4 +1,4 @@
-package com.google.android.exoplayer2.ext.ima;
+package androidx.media3.exoplayer.ima;
 
 import androidx.annotation.Nullable;
 import androidx.media3.common.AdViewProvider;
