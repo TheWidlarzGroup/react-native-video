@@ -1,5 +1,13 @@
 
 
+# [6.0.0-beta.1](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.0...v6.0.0-beta.1) (2023-??-??)
+
+
+### Bug Fixes
+
+* **android:** remove ads files only if not used ([#3372](https://github.com/react-native-video/react-native-video/pull/3372))
+
+
 # [6.0.0-beta.0](https://github.com/react-native-video/react-native-video/compare/v6.0.0-alpha.11...v6.0.0-beta.0) (2023-11-18)
 
 
