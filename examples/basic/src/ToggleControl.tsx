@@ -9,23 +9,29 @@ import {
 } from 'react-native';
 
 /*
-* ToggleControl displays a 2 states clickable text
-*/
+ * ToggleControl displays a 2 states clickable text
+ */
 
 interface ToggleControlType {
   // boolean indicating if text is selected state
-  isSelected?: boolean
+  isSelected?: boolean;
   // value of text when selected
-  selectedText?: string
+  selectedText?: string;
   // value of text when NOT selected
-  unselectedText?: string
+  unselectedText?: string;
   // default text if no only one text field is needed
-  text?: string
+  text?: string;
   // callback called when pressing the component
-  onPress: () => any
+  onPress: () => void;
 }
 
-const ToggleControl = ({ isSelected, selectedText, unselectedText, text, onPress }: ToggleControlType) => {
+const ToggleControl = ({
+  isSelected,
+  selectedText,
+  unselectedText,
+  text,
+  onPress,
+}: ToggleControlType) => {
   const selectedStyle: TextStyle = StyleSheet.flatten([
     styles.controlOption,
     {fontWeight: 'bold'},
@@ -36,17 +42,16 @@ const ToggleControl = ({ isSelected, selectedText, unselectedText, text, onPress
     {fontWeight: 'normal'},
   ]);
 
-    const style = isSelected ? selectedStyle : unselectedStyle;
-    const _text = text ? text : isSelected ? selectedText : unselectedText;
-    return (
-      <View style={styles.resizeModeControl}>
-      <TouchableOpacity
-        onPress={onPress}>
+  const style = isSelected ? selectedStyle : unselectedStyle;
+  const _text = text ? text : isSelected ? selectedText : unselectedText;
+  return (
+    <View style={styles.resizeModeControl}>
+      <TouchableOpacity onPress={onPress}>
         <Text style={style}>{_text}</Text>
       </TouchableOpacity>
-      </View>
-    );
-}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   controlOption: {

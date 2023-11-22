@@ -1,17 +1,16 @@
 'use strict';
 
-import React, {
-  Component
-} from 'react';
+import React, {Component} from 'react';
 
 import {
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import Video from 'react-native-video';
+import Video, {ResizeMode} from 'react-native-video';
 
 class VideoPlayer extends Component {
   constructor(props: any) {
@@ -24,10 +23,10 @@ class VideoPlayer extends Component {
     rate: 1,
     volume: 1,
     muted: false,
-    resizeMode: 'contain',
+    resizeMode: ResizeMode.CONTAIN,
     duration: 0.0,
     currentTime: 0.0,
-    paused: 0,
+    paused: false,
   };
 
   onLoad(data: any) {
@@ -47,39 +46,54 @@ class VideoPlayer extends Component {
   }
 
   renderRateControl(rate: number) {
-    const isSelected = (this.state.rate == rate);
+    const isSelected = this.state.rate === rate;
+    const style: TextStyle = StyleSheet.flatten([
+      styles.controlOption,
+      {fontWeight: isSelected ? 'bold' : 'normal'},
+    ]);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({rate: rate}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
-          {rate}x
-        </Text>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({rate: rate});
+        }}>
+        <Text style={style}>{rate}x</Text>
       </TouchableOpacity>
-    )
+    );
   }
 
   renderResizeModeControl(resizeMode: string) {
-    const isSelected = (this.state.resizeMode == resizeMode);
+    const isSelected = this.state.resizeMode === resizeMode;
+    const style: TextStyle = StyleSheet.flatten([
+      styles.controlOption,
+      {fontWeight: isSelected ? 'bold' : 'normal'},
+    ]);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({resizeMode: resizeMode}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
-          {resizeMode}
-        </Text>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({resizeMode: resizeMode});
+        }}>
+        <Text style={style}>{resizeMode}</Text>
       </TouchableOpacity>
-    )
+    );
   }
 
   renderVolumeControl(volume: number) {
-    const isSelected = (this.state.volume == volume);
+    const isSelected = this.state.volume === volume;
+    const style: TextStyle = StyleSheet.flatten([
+      styles.controlOption,
+      {fontWeight: isSelected ? 'bold' : 'normal'},
+    ]);
 
     return (
-      <TouchableOpacity onPress={() => { this.setState({volume: volume}) }}>
-        <Text style={[styles.controlOption, {fontWeight: isSelected ? "bold" : "normal"}]}>
-          {volume * 100}%
-        </Text>
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({volume: volume});
+        }}>
+        <Text style={style}>{volume * 100}%</Text>
       </TouchableOpacity>
-    )
+    );
   }
 
   render() {
@@ -88,18 +102,26 @@ class VideoPlayer extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <Video source={require('./broadchurch.mp4')}
-                 style={styles.fullScreen}
-                 rate={this.state.rate}
-                 paused={this.state.paused}
-                 volume={this.state.volume}
-                 muted={this.state.muted}
-                 resizeMode={this.state.resizeMode}
-                 onLoad={this.onLoad}
-                 onProgress={this.onProgress}
-                 onEnd={() => { console.log('Done!') }}
-                 repeat={true} />
+        <TouchableOpacity
+          style={styles.fullScreen}
+          onPress={() => {
+            this.setState({paused: !this.state.paused});
+          }}>
+          <Video
+            source={require('./broadchurch.mp4')}
+            style={styles.fullScreen}
+            rate={this.state.rate}
+            paused={this.state.paused}
+            volume={this.state.volume}
+            muted={this.state.muted}
+            resizeMode={this.state.resizeMode}
+            onLoad={this.onLoad}
+            onProgress={this.onProgress}
+            onEnd={() => {
+              console.log('Done!');
+            }}
+            repeat={true}
+          />
         </TouchableOpacity>
 
         <View style={styles.controls}>
@@ -127,8 +149,12 @@ class VideoPlayer extends Component {
 
           <View style={styles.trackingControls}>
             <View style={styles.progress}>
-              <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
-              <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
+              <View
+                style={[styles.innerProgressCompleted, {flex: flexCompleted}]}
+              />
+              <View
+                style={[styles.innerProgressRemaining, {flex: flexRemaining}]}
+              />
             </View>
           </View>
         </View>
@@ -136,7 +162,6 @@ class VideoPlayer extends Component {
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -153,7 +178,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   controls: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderRadius: 5,
     position: 'absolute',
     bottom: 20,
@@ -200,7 +225,7 @@ const styles = StyleSheet.create({
   controlOption: {
     alignSelf: 'center',
     fontSize: 11,
-    color: "white",
+    color: 'white',
     paddingLeft: 2,
     paddingRight: 2,
     lineHeight: 12,
@@ -212,4 +237,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-export default VideoPlayer
+export default VideoPlayer;

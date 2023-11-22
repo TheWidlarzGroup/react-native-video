@@ -30,13 +30,42 @@ import Video, {
   OnAudioFocusChangedData,
   OnVideoErrorData,
   VideoRef,
-  ResizeMode
+  ResizeMode,
+  SelectedTrack,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
-import MultiValueControl from './MultiValueControl';
+import MultiValueControl, {
+  MultiValueControlPropType,
+} from './MultiValueControl';
+
+interface StateType {
+  rate: number;
+  volume: number;
+  muted: boolean;
+  resizeMode: ResizeMode;
+  duration: number;
+  currentTime: number;
+  videoWidth: number;
+  videoHeight: number;
+  paused: boolean;
+  fullscreen: true;
+  decoration: true;
+  isLoading: boolean;
+  seekerFillWidth: number;
+  seekerPosition: number;
+  seekerOffset: number;
+  seeking: boolean;
+  audioTracks: Array<AudioTrack>;
+  textTracks: Array<TextTrack>;
+  selectedAudioTrack: SelectedTrack | undefined;
+  selectedTextTrack: SelectedTrack | undefined;
+  srcListId: number;
+  loop: boolean;
+  showRNVControls: boolean;
+}
 
 class VideoPlayer extends Component {
-  state = {
+  state: StateType = {
     rate: 1,
     volume: 1,
     muted: false,
@@ -86,12 +115,11 @@ class VideoPlayer extends Component {
     },
     {
       description: 'another bunny (can be saved)',
-      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4'
-    }
+      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+    },
   ];
 
-  srcIosList = [
-  ]
+  srcIosList = [];
 
   srcAndroidList = [
     {
@@ -119,9 +147,8 @@ class VideoPlayer extends Component {
     },
   ];
 
-  
   srcList = this.srcAllPlatformList.concat(
-      Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
+    Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
   );
 
   video?: VideoRef;
@@ -135,11 +162,11 @@ class VideoPlayer extends Component {
             this.toast(
               true,
               'Widevine level: ' +
-              widevineLevel +
-              '\n hevc: ' +
-              hevc +
-              '\n avc: ' +
-              avc,
+                widevineLevel +
+                '\n hevc: ' +
+                hevc +
+                '\n avc: ' +
+                avc,
             );
           },
         );
@@ -276,7 +303,7 @@ class VideoPlayer extends Component {
     }
   }
 
-  goToChannel(channel: any) {
+  goToChannel(channel: number) {
     this.setState({
       srcListId: channel,
       duration: 0.0,
@@ -500,15 +527,15 @@ class VideoPlayer extends Component {
     );
   }
 
-  onRateSelected = (value: string | number) => {
+  onRateSelected = (value: MultiValueControlPropType) => {
     this.setState({rate: value});
-  }
-  onVolumeSelected = (value: string | number) => {
+  };
+  onVolumeSelected = (value: MultiValueControlPropType) => {
     this.setState({volume: value});
-  }
-  onResizeModeSelected = (value: ResizeMode) => {
+  };
+  onResizeModeSelected = (value: MultiValueControlPropType) => {
     this.setState({resizeMode: value});
-  }
+  };
 
   renderOverlay() {
     return (
@@ -526,7 +553,7 @@ class VideoPlayer extends Component {
                 onPress={() => {
                   this.channelDown();
                 }}
-                text='ChDown'
+                text="ChDown"
               />
             </View>
             <View style={styles.rightControls}>
@@ -534,8 +561,8 @@ class VideoPlayer extends Component {
                 onPress={() => {
                   this.channelUp();
                 }}
-                text='ChUp'
-              /> 
+                text="ChUp"
+              />
             </View>
             <View style={styles.bottomControls}>
               <View style={styles.generalControls}>
@@ -545,38 +572,38 @@ class VideoPlayer extends Component {
                       onPress={() => {
                         this.popupInfo();
                       }}
-                      text='decoderInfo'
+                      text="decoderInfo"
                     />
-                </View>
+                  </View>
                 ) : null}
                 <ToggleControl
                   isSelected={this.state.paused}
                   onPress={() => {
                     this.setState({paused: !this.state.paused});
                   }}
-                  selectedText='pause'
-                  unselectedText='playing'
+                  selectedText="pause"
+                  unselectedText="playing"
                 />
                 <ToggleControl
                   isSelected={this.state.loop}
                   onPress={() => {
                     this.setState({loop: !this.state.loop});
                   }}
-                  selectedText='loop enable'
-                  unselectedText='loop disable'
+                  selectedText="loop enable"
+                  unselectedText="loop disable"
                 />
                 <ToggleControl
                   onPress={() => {
                     this.toggleFullscreen();
                   }}
-                  text='fullscreen'
+                  text="fullscreen"
                 />
                 <ToggleControl
                   onPress={() => {
                     this.toggleDecoration();
                   }}
-                  text='decoration'
-                /> 
+                  text="decoration"
+                />
               </View>
               <View style={styles.generalControls}>
                 <MultiValueControl
@@ -590,21 +617,27 @@ class VideoPlayer extends Component {
                   selected={this.state.volume}
                 />
                 <MultiValueControl
-                  values={[ResizeMode.COVER, ResizeMode.CONTAIN, ResizeMode.STRETCH]}
+                  values={[
+                    ResizeMode.COVER,
+                    ResizeMode.CONTAIN,
+                    ResizeMode.STRETCH,
+                  ]}
                   onPress={this.onResizeModeSelected}
                   selected={this.state.resizeMode}
                 />
                 <ToggleControl
                   isSelected={this.state.paused}
                   onPress={() => {
-                      this.video?.save({}).then((response) => {
+                    this.video
+                      ?.save({})
+                      .then(response => {
                         console.log('Downloaded URI', response);
-                      }).catch((error) => {
-                        console.log('error during save ', error)
+                      })
+                      .catch(error => {
+                        console.log('error during save ', error);
                       });
-                    }
-                  }
-                  text='save'
+                  }}
+                  text="save"
                 />
               </View>
               {this.renderSeekBar()}
@@ -616,7 +649,7 @@ class VideoPlayer extends Component {
                   <Picker
                     style={styles.picker}
                     selectedValue={this.state.selectedAudioTrack?.value}
-                    onValueChange={(itemValue, itemIndex) => {
+                    onValueChange={itemValue => {
                       console.log('on audio value change ' + itemValue);
                       this.setState({
                         selectedAudioTrack: {
@@ -643,7 +676,7 @@ class VideoPlayer extends Component {
                   <Picker
                     style={styles.picker}
                     selectedValue={this.state.selectedTextTrack?.value}
-                    onValueChange={(itemValue, itemIndex) => {
+                    onValueChange={itemValue => {
                       console.log('on value change ' + itemValue);
                       this.setState({
                         selectedTextTrack: {
@@ -701,7 +734,7 @@ class VideoPlayer extends Component {
           onAudioBecomingNoisy={this.onAudioBecomingNoisy}
           onAudioFocusChanged={this.onAudioFocusChanged}
           onLoadStart={this.onVideoLoadStart}
-          onVideoAspectRatio={this.onAspectRatio}
+          onAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
           repeat={this.state.loop}
