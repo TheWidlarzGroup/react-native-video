@@ -1,4 +1,5 @@
 import type Orientation from './Orientation';
+import type {AdEvent} from './Ads';
 
 export type OnLoadData = Readonly<{
   currentTime: number;
@@ -114,7 +115,7 @@ export type OnPictureInPictureStatusChangedData = Readonly<{
 }>;
 
 export type OnReceiveAdEventData = Readonly<{
-  event: string;
+  event: AdEvent;
 }>;
 
 export type OnVideoErrorData = Readonly<{
