@@ -86,6 +86,7 @@ import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.ui.LegacyPlayerControlView;
+import androidx.media3.exoplayer.ima.ImaAdsLoader;
 
 import com.brentvatne.common.API.ResizeMode;
 import com.brentvatne.common.API.SubtitleStyle;
@@ -103,7 +104,6 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.common.collect.ImmutableList;
 
 import java.net.CookieHandler;
