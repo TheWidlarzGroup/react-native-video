@@ -160,7 +160,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
                 result = "CLICK";
                 break;
             case .COMPLETE:
-                result = "COMPLETE";
+                result = "COMPLETED";
                 break;
             case .CUEPOINTS_CHANGED:
                 result = "CUEPOINTS_CHANGED";
