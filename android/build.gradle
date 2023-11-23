@@ -105,7 +105,7 @@ android {
             java {
                 if (useExoplayerIMA) {
                     exclude 'com/google/ads/interactivemedia/v3/api'
-                    exclude 'com/google/android/exoplayer2/ext/ima'
+                    exclude 'androidx/media3/exoplayer/ima'
                 }
             }
         }
