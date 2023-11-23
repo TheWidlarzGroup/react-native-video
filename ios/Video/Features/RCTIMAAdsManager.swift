@@ -100,6 +100,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
 
             _video.onReceiveAdEvent?([
                 "event": type,
+                "adData": event.adData ?? [String](),
                 "target": _video.reactTag!
             ]);
         }
