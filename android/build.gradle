@@ -143,7 +143,7 @@ repositories {
 
 def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
-def androidxCode_version = safeExtGet('androidxCore')
+def androidxCode_version = safeExtGet('androidxCoreVersion')
 
 dependencies {
     // For < 0.71, this will be from the local maven repo
