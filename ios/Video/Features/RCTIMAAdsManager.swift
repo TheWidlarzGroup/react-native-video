@@ -98,11 +98,18 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
         if _video.onReceiveAdEvent != nil {
             let type = convertEventToString(event: event.type)
 
-            _video.onReceiveAdEvent?([
-                "event": type,
-                "adData": event.adData ?? [String](),
-                "target": _video.reactTag!
-            ]);
+            if (event.adData != nil) {
+                _video.onReceiveAdEvent?([
+                    "event": type,
+                    "adData": event.adData ?? [String](),
+                    "target": _video.reactTag!
+                ]);
+            } else {
+                _video.onReceiveAdEvent?([
+                    "event": type,
+                    "target": _video.reactTag!
+                ]);
+            }
         }
     }
 

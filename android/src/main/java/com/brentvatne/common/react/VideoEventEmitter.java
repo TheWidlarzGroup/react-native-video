@@ -427,7 +427,10 @@ public class VideoEventEmitter {
     }
 
     public void receiveAdEvent(String event) {
-        this.receiveAdEvent(event, Map.of());
+        WritableMap map = Arguments.createMap();
+        map.putString("event", event);
+
+        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {

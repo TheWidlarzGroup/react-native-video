@@ -237,7 +237,7 @@ export type OnPictureInPictureStatusChangedData = Readonly<{
 }>;
 
 export type OnReceiveAdEventData = Readonly<{
-  adData: Record<string, string>;
+  adData?: Record<string, string>;
   event: AdEvent;
 }>;
 
