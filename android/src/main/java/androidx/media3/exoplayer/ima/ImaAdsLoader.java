@@ -1,5 +1,7 @@
 package androidx.media3.exoplayer.ima;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.AdViewProvider;
@@ -45,7 +47,7 @@ public class ImaAdsLoader implements AdsLoader {
     }
 
     public static class Builder {
-        public Builder(ThemedReactContext ignoredThemedReactContext) {
+        public Builder(Context ignoredThemedReactContext) {
         }
 
         public Builder setAdEventListener(Object ignoredReactExoplayerView) {
