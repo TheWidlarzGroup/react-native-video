@@ -13,10 +13,10 @@ import NativeVideoComponent, {
 } from './VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import type {ReactVideoProps} from './types/video';
 import {getReactTag, resolveAssetSourceForVideo} from './utils';
 import {VideoManager} from './VideoNativeComponent';
 import type {
+  OnAdErrorData,
   OnAudioFocusChangedData,
   OnAudioTracksData,
   OnBandwidthUpdateData,
@@ -35,7 +35,8 @@ import type {
   OnVideoAspectRatioData,
   OnVideoErrorData,
   OnVideoTracksData,
-} from './types/events';
+  ReactVideoProps,
+} from './types';
 
 export type VideoSaveData = {
   uri: string;
@@ -83,6 +84,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onReadyForDisplay,
       onPlaybackRateChange,
       onVolumeChange,
+      onAdError,
       onAudioBecomingNoisy,
       onPictureInPictureStatusChanged,
       onRestoreUserInterfaceForPictureInPictureStop,
@@ -400,6 +402,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onReceiveAdEvent],
     );
 
+    const _onAdError = useCallback(
+      (e: NativeSyntheticEvent<OnAdErrorData>) => {
+        onAdError?.(e.nativeEvent);
+      },
+      [onAdError],
+    );
+
     const _onVideoAspectRatio = useCallback(
       (e: NativeSyntheticEvent<OnVideoAspectRatioData>) => {
         onAspectRatio?.(e.nativeEvent);
@@ -495,6 +504,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
+          onAdError={_onAdError}
           onGetLicense={onGetLicense}
           onVideoLoad={onVideoLoad}
           onVideoLoadStart={onVideoLoadStart}

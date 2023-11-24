@@ -119,6 +119,12 @@ export type OnReceiveAdEventData = Readonly<{
   event: AdEvent;
 }>;
 
+export type OnAdErrorData = Readonly<{
+  code: string;
+  message: string;
+  type: string;
+}>;
+
 export type OnVideoErrorData = Readonly<{
   error: OnVideoErrorDataDetails;
   target?: number; // ios
@@ -153,6 +159,7 @@ export type OnBandwidthUpdateData = Readonly<
 >;
 
 export interface ReactVideoEvents {
+  onAdError?: (error: OnAdErrorData) => void; // Android, iOS
   onAudioBecomingNoisy?: () => void; //Android, iOS
   onAudioFocusChanged?: (e: OnAudioFocusChangedData) => void; // Android
   onIdle?: () => void; // Android

@@ -57,6 +57,7 @@ public class VideoEventEmitter {
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
+    private static final String EVENT_ON_AD_ERROR = "onAdError";
 
     static public final String[] Events = {
             EVENT_LOAD_START,
@@ -84,7 +85,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_ON_AD_ERROR
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -114,7 +116,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_ON_AD_ERROR
     })
     @interface VideoEvents {
     }
@@ -432,6 +435,15 @@ public class VideoEventEmitter {
         map.putString("event", event);
 
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
+    }
+
+    public void receiveAdErrorEvent(AdError error) {
+        WritableMap map = Arguments.createMap();
+        map.putString("message", error.getMessage());
+        map.putString("code", String.valueOf(error.getErrorCode()));
+        map.putString("type", String.valueOf(error.getErrorType()));
+
+        receiveEvent(EVENT_ON_AD_ERROR, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {

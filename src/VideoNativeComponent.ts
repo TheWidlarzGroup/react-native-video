@@ -7,7 +7,7 @@ import {NativeModules, requireNativeComponent} from 'react-native';
 import type ResizeMode from './types/ResizeMode';
 import type FilterType from './types/FilterType';
 import type Orientation from './types/Orientation';
-import type {AdEvent, OnTextTracksTypeData} from './types';
+import type {AdEvent, OnAdErrorData, OnTextTracksTypeData} from './types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -356,6 +356,7 @@ export interface VideoNativeProps extends ViewProps {
   onReceiveAdEvent?: (
     event: NativeSyntheticEvent<OnReceiveAdEventData>,
   ) => void;
+  onAdError?: (event: NativeSyntheticEvent<OnAdErrorData>) => void;
   onVideoPlaybackStateChanged?: (
     event: NativeSyntheticEvent<OnPlaybackStateChangedData>,
   ) => void; // android only

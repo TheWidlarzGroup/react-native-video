@@ -64,6 +64,7 @@ RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onReceiveAdEvent, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onAdError, RCTDirectEventBlock);
 
 RCT_EXTERN_METHOD(save:(NSDictionary *)options
         reactTag:(nonnull NSNumber *)reactTag

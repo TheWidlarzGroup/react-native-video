@@ -118,8 +118,19 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
             print("AdsManager error: " + error.message!)
         }
 
+        guard let _video = _video else {return}
+
+        if _video.onAdError != nil {
+            _video.onAdError?([
+                "message": error.message ?? "",
+                "code": error.code,
+                "type": error.type,
+                "target": _video.reactTag!
+            ])
+        }
+
         // Fall back to playing content
-        _video?.setPaused(false)
+        _video.setPaused(false)
     }
 
     func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
