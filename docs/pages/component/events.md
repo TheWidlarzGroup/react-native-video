@@ -4,6 +4,7 @@ This page shows the list of available callbacks to handle player notifications
 ## List
 | Name                                                                                            | Platforms Support         | 
 |-------------------------------------------------------------------------------------------------|---------------------------|
+| [onAdError](#onaderror)                                                                         | Android, iOS              |
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
 | [onAudioFocusChanged](#onaudiofocuschanged)                                                     | Android                   |
 | [onAudioTracks](#onaudiotracks)                                                                 | Android                   |
@@ -33,6 +34,19 @@ This page shows the list of available callbacks to handle player notifications
 
 
 ## Details
+### `onAdError`
+Callback function that is called when an ad from the IMA's sdk fails to launch.
+
+Payload:
+
+| Property | Type   | Description       |
+|----------|--------|-------------------|
+| code     | string | The error code    |
+| message  | string | The error message |
+| type     | string | The error type    |
+
+Platforms: Android, iOS
+
 ### `onAudioBecomingNoisy`
 Callback function that is called when the audio is about to become 'noisy' due to a change in audio outputs. Typically this is called when audio output is being switched from an external source like headphones back to the internal speaker. It's a good idea to pause the media when this happens so the speaker doesn't start blasting sound.
 
