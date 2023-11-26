@@ -9,9 +9,12 @@ import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -25,6 +28,7 @@ import android.widget.ImageButton;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
+import androidx.fragment.app.FragmentActivity;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
@@ -98,11 +102,13 @@ import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.receiver.PictureInPictureReceiver;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.views.view.ReactViewGroup;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.common.collect.ImmutableList;
 
@@ -168,6 +174,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
+    private boolean pictureInPictureEnabled = false;
+    private PictureInPictureParams.Builder pictureInPictureParamsBuilder;
     private boolean hasAudioFocus = false;
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
@@ -178,7 +186,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-
+    private int storedUiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -211,7 +219,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
-    private boolean playInBackground = false;
+    protected boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
     private UUID drmUUID = null;
@@ -223,8 +231,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // React
     private final ThemedReactContext themedReactContext;
+    private final ReactExoplayerFragment reactExoplayerFragment;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
+    private final PictureInPictureReceiver pictureInPictureReceiver;
     private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
 
     // store last progress event values to avoid sending unnecessary messages
@@ -273,6 +283,7 @@ public class ReactExoplayerView extends FrameLayout implements
         super(context);
         this.themedReactContext = context;
         this.eventEmitter = new VideoEventEmitter(context);
+        this.reactExoplayerFragment = new ReactExoplayerFragment(this);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
@@ -282,6 +293,11 @@ public class ReactExoplayerView extends FrameLayout implements
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
+        pictureInPictureReceiver = new PictureInPictureReceiver(this, themedReactContext);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && pictureInPictureParamsBuilder == null) {
+            pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+        }
     }
 
     private boolean isPlayingAd() {
@@ -318,11 +334,26 @@ public class ReactExoplayerView extends FrameLayout implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         initializePlayer();
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity) {
+            ((FragmentActivity) themedReactContext.getCurrentActivity())
+                    .getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(((ReactViewGroup) getParent()).getId(), reactExoplayerFragment)
+                    .commitAllowingStateLoss();
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity && themedReactContext != null && reactExoplayerFragment != null) {
+            ((FragmentActivity) activity).getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(reactExoplayerFragment)
+                    .commitAllowingStateLoss();
+        }
         /* We want to be able to continue playing audio when switching tabs.
          * Leave this here in case it causes issues.
          */
@@ -330,6 +361,20 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     // LifecycleEventListener implementation
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (isFullscreen) return;
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) return;
+        View decorView = activity.getWindow().getDecorView();
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(storedUiOptions);
+        } else {
+            storedUiOptions = decorView.getSystemUiVisibility();
+        }
+    }
+
     @Override
     public void onHostResume() {
         if (!playInBackground || !isInBackground) {
@@ -341,6 +386,10 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
+        if (pictureInPictureEnabled) {
+            enterPictureInPictureMode();
+            return;
+        }
         if (playInBackground) {
             return;
         }
@@ -639,6 +688,7 @@ public class ReactExoplayerView extends FrameLayout implements
             adsLoader.setPlayer(player);
         }
         audioBecomingNoisyReceiver.setListener(self);
+        pictureInPictureReceiver.setListener();
         bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
         playerNeedsSource = true;
@@ -893,6 +943,7 @@ public class ReactExoplayerView extends FrameLayout implements
         adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
+        pictureInPictureReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
 
         if (mainHandler != null && mainRunnable != null) {
@@ -1830,7 +1881,37 @@ public class ReactExoplayerView extends FrameLayout implements
             } else {
                 pausePlayback();
             }
+            updatePictureInPictureActions(paused);
         }
+    }
+
+    public void setPictureInPicture(boolean pictureInPictureEnabled) {
+        this.pictureInPictureEnabled = pictureInPictureEnabled;
+    }
+
+    protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
+        eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
+    }
+
+    private void updatePictureInPictureActions(boolean isPaused) {
+        if (pictureInPictureParamsBuilder == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.Companion.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            pictureInPictureParamsBuilder.setActions(actions);
+            PictureInPictureParams pipParams = pictureInPictureParamsBuilder.build();
+            PictureInPictureUtil.Companion.updatePictureInPictureActions(themedReactContext, pipParams);
+        }
+    }
+
+    protected void enterPictureInPictureMode() {
+        if (!pictureInPictureEnabled) return;
+        PictureInPictureParams _pipParams = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.Companion.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            pictureInPictureParamsBuilder.setActions(actions);
+            _pipParams = pictureInPictureParamsBuilder.build();
+        }
+        PictureInPictureUtil.Companion.enterPictureInPictureMode(themedReactContext, _pipParams);
     }
 
     public void setMutedModifier(boolean muted) {

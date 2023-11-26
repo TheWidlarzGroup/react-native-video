@@ -56,6 +56,7 @@ public class VideoEventEmitter {
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
+    private static final String EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED = "onPictureInPictureStatusChanged";
 
     static public final String[] Events = {
             EVENT_LOAD_START,
@@ -83,7 +84,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -113,7 +115,8 @@ public class VideoEventEmitter {
             EVENT_TEXT_TRACKS,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
-            EVENT_ON_RECEIVE_AD_EVENT
+            EVENT_ON_RECEIVE_AD_EVENT,
+            EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED
     })
     @interface VideoEvents {
     }
@@ -155,6 +158,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_BITRATE = "bitrate";
 
     private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
+    private static final String EVENT_PROP_IS_ACTIVE = "isActive";
 
     public void setViewId(int viewId) {
         this.viewId = viewId;
@@ -383,6 +387,12 @@ public class VideoEventEmitter {
         WritableMap map = Arguments.createMap();
         map.putDouble(EVENT_PROP_VOLUME, volume);
         receiveEvent(EVENT_VOLUME_CHANGE, map);
+    }
+
+    public void onPictureInPictureStatusChanged(boolean isActive) {
+        WritableMap map = Arguments.createMap();
+        map.putBoolean(EVENT_PROP_IS_ACTIVE, isActive);
+        receiveEvent(EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED, map);
     }
 
     public void timedMetadata(ArrayList<TimedMetadata> _metadataArrayList) {
