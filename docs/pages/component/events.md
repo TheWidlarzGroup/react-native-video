@@ -18,7 +18,7 @@ This page shows the list of available callbacks to handle player notifications
 | [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)                                   | Android, iOS              |
 | [onLoad](#onload)                                                                               | All                       |
 | [onLoadStart](#onloadstart)                                                                     | All                       |
-| [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)                             | iOS                       |
+| [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)                             | Android, iOS              |
 | [onPlaybackRateChange](#onplaybackratechange)                                                   | All                       |
 | [onPlaybackStateChanged](#onplaybackstatechanged)                                               | Android, iOS              |
 | [onProgress](#onprogress)                                                                       | All                       |

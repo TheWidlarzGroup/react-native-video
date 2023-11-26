@@ -32,7 +32,7 @@ This page shows the list of available properties to configure player
 | [mixWithOthers](#mixwithothers)                                                     | iOS                       |
 | [muted](#muted)                                                                     | All                       |
 | [paused](#paused)                                                                   | All                       |
-| [pictureInPicture](#pictureinpicture)                                               | iOS                       |
+| [pictureInPicture](#pictureinpicture)                                               | Android, iOS              |
 | [playInBackground](#playinbackground)                                               | Android, iOS              |
 | [playWhenInactive](#playwheninactive)                                               | iOS                       |
 | [poster](#poster)                                                                   | All                       |
@@ -362,7 +362,7 @@ Determine whether the media should played as picture in picture.
 
 NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must hide your PIP button when you receive the ```STARTED``` event from ```onReceiveAdEvent``` and show it again when you receive the ```ALL_ADS_COMPLETED``` event.
 
-Platforms: iOS
+Platforms: Android, iOS
 
 ### `playInBackground`
 Determine whether the media should continue playing while the app is in the background. This allows customers to continue listening to the audio.
