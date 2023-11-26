@@ -160,10 +160,12 @@ Note on iOS, controls are always shown when in fullscreen mode.
 Note on Android, native controls are available by default.
 If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Project](/projects).
 
+Platforms: Android, iOS
+
 ### `contentStartTime`
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
 
-Platforms: Android, iOS
+Platforms: Android
 
 ### `debug`
 
@@ -656,18 +658,24 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+#### Start playback at a specific point in time
+
+Provide an optional `startPosition` for video. Value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
+(If it is negative or undefined or null, it is ignored)
+
+Platforms: Android, iOS
 
 #### Playing only a portion of the video (start & end time)
 
-Provide an optional `startTime` and/or `endTime` for the video. Value is in milliseconds. Useful when you want to play only a portion of a large video.
+Provide an optional `cropStart` and/or `cropEnd` for the video. Value is in milliseconds. Useful when you want to play only a portion of a large video.
 
 Example
 ```javascript
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012, endTime: 48500 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012, cropEnd: 48500 }}
 
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', startTime: 36012 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012 }}
 
-source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', endTime: 48500 }}
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropEnd: 48500 }}
 ```
 
 Platforms: iOS, Android

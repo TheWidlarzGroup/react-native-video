@@ -1,4 +1,6 @@
 
+# [6.0.0-beta.1](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.0...v6.0.0-beta.1) (WIP)
+* **android:** fix leak caused by removing lifecycle listener too early ([#3380](https://github.com/react-native-video/react-native-video/pull/3380))
 
 # [6.0.0-beta.0](https://github.com/react-native-video/react-native-video/compare/v6.0.0-alpha.11...v6.0.0-beta.0) (2023-11-18)
 
@@ -56,7 +58,7 @@
 - iOS: Fix audio session category when not using the audioOutput prop
 - iOS: implement onPlaybackStateChanged callback [#3307](https://github.com/react-native-video/react-native-video/pull/3307)
 - iOS: remove false calls at onPlaybackRateChange [#3306](https://github.com/react-native-video/react-native-video/pull/3306)
-- iOS: audio does not work with headphones [#3284](https://github.com/react-native-video/react-native-video/pull/3284) 
+- iOS: audio does not work with headphones [#3284](https://github.com/react-native-video/react-native-video/pull/3284)
 - iOS: Resuming video ad after closing the in-app browser on iOS [#3275](https://github.com/react-native-video/react-native-video/pull/3275)
 - iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
 - tvOS: fix build: [#3276](https://github.com/react-native-video/react-native-video/pull/3276)
