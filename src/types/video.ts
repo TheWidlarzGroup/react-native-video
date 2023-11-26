@@ -198,7 +198,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   mixWithOthers?: MixWithOthersType; // iOS
   muted?: boolean;
   paused?: boolean;
-  pictureInPicture?: boolean; // iOS
+  pictureInPicture?: boolean;
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   poster?: string;
