@@ -414,15 +414,15 @@ public class VideoEventEmitter {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
     }
 
-    public void receiveAdEvent(String event, Map<String, String> adData) {
+    public void receiveAdEvent(String event, Map<String, String> data) {
         WritableMap map = Arguments.createMap();
         map.putString("event", event);
 
-        WritableMap adDataMap = Arguments.createMap();
-        for (Map.Entry<String, String> entry : adData.entrySet()) {
-            adDataMap.putString(entry.getKey(), entry.getValue());
+        WritableMap dataMap = Arguments.createMap();
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            dataMap.putString(entry.getKey(), entry.getValue());
         }
-        map.putMap("adData", adDataMap);
+        map.putMap("data", dataMap);
 
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
