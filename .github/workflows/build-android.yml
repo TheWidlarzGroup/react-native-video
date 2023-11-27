@@ -49,8 +49,7 @@ jobs:
       - name: Run Gradle Build for basic example
         run: cd examples/basic/android && ./gradlew assembleDebug --build-cache && cd ../../..
 
-        jobs:
-  build:
+  build-without-ads:
     name: Build Android Example App Without Ads
     runs-on: ubuntu-latest
     steps:
