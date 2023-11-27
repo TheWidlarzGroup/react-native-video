@@ -98,10 +98,18 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
         if _video.onReceiveAdEvent != nil {
             let type = convertEventToString(event: event.type)
 
-            _video.onReceiveAdEvent?([
-                "event": type,
-                "target": _video.reactTag!
-            ]);
+            if (event.adData != nil) {
+                _video.onReceiveAdEvent?([
+                    "event": type,
+                    "data": event.adData ?? [String](),
+                    "target": _video.reactTag!
+                ]);
+            } else {
+                _video.onReceiveAdEvent?([
+                    "event": type,
+                    "target": _video.reactTag!
+                ]);
+            }
         }
     }
 
@@ -160,7 +168,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
                 result = "CLICK";
                 break;
             case .COMPLETE:
-                result = "COMPLETE";
+                result = "COMPLETED";
                 break;
             case .CUEPOINTS_CHANGED:
                 result = "CUEPOINTS_CHANGED";

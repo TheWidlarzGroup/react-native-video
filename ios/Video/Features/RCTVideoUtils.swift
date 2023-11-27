@@ -19,8 +19,8 @@ enum RCTVideoUtils {
             return 0
         }
         
-        if (source?.startTime != nil && source?.endTime != nil) {
-            return NSNumber(value: (Float64(source?.endTime ?? 0) - Float64(source?.startTime ?? 0)) / 1000)
+        if (source?.cropStart != nil && source?.cropEnd != nil) {
+            return NSNumber(value: (Float64(source?.cropEnd ?? 0) - Float64(source?.cropStart ?? 0)) / 1000)
         }
         
         var effectiveTimeRange:CMTimeRange?
@@ -35,8 +35,8 @@ enum RCTVideoUtils {
         if let effectiveTimeRange = effectiveTimeRange {
             let playableDuration:Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))
             if playableDuration > 0 {
-                if (source?.startTime != nil) {
-                    return NSNumber(value: (playableDuration - Float64(source?.startTime ?? 0) / 1000))
+                if (source?.cropStart != nil) {
+                    return NSNumber(value: (playableDuration - Float64(source?.cropStart ?? 0) / 1000))
                 }
                 
                 return playableDuration as NSNumber
@@ -299,7 +299,7 @@ enum RCTVideoUtils {
         var asset:AVURLAsset!
         let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
         let url = source.isNetwork || source.isAsset
-        ? URL(string: source.uri ?? "")
+        ? URL(string: source.uri?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
         : URL(fileURLWithPath: bundlePath)
         let assetOptions:NSMutableDictionary! = NSMutableDictionary()
         

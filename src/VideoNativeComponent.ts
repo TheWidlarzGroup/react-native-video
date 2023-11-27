@@ -7,7 +7,7 @@ import {NativeModules, requireNativeComponent} from 'react-native';
 import type ResizeMode from './types/ResizeMode';
 import type FilterType from './types/FilterType';
 import type Orientation from './types/Orientation';
-import type {OnTextTracksTypeData} from './types';
+import type {AdEvent, OnTextTracksTypeData} from './types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -23,8 +23,9 @@ type VideoSrc = Readonly<{
   mainVer?: number;
   patchVer?: number;
   requestHeaders?: Headers;
-  startTime?: number;
-  endTime?: number;
+  startPosition?: number;
+  cropStart?: number;
+  cropEnd?: number;
   title?: string;
   subtitle?: string;
   description?: string;
@@ -237,7 +238,8 @@ export type OnPictureInPictureStatusChangedData = Readonly<{
 }>;
 
 export type OnReceiveAdEventData = Readonly<{
-  event: string;
+  data?: Record<string, string>;
+  event: AdEvent;
 }>;
 
 export type OnVideoErrorData = Readonly<{

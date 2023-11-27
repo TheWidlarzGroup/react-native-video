@@ -105,7 +105,7 @@ android {
             java {
                 if (useExoplayerIMA) {
                     exclude 'com/google/ads/interactivemedia/v3/api'
-                    exclude 'com/google/android/exoplayer2/ext/ima'
+                    exclude 'androidx/media3/exoplayer/ima'
                 }
             }
         }
@@ -143,6 +143,7 @@ repositories {
 
 def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
+def androidxCode_version = safeExtGet('androidxCoreVersion')
 
 dependencies {
     // For < 0.71, this will be from the local maven repo
@@ -150,7 +151,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
 
-    implementation "androidx.core:core:1.9.0"
+    implementation "androidx.core:core:$androidxCode_version"
 
     // For media playback using ExoPlayer
     implementation "androidx.media3:media3-exoplayer:$media3_version"

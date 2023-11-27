@@ -715,7 +715,7 @@ class VideoPlayer extends Component {
             this.video = ref;
           }}
           source={this.srcList[this.state.srcListId]}
-          //adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
+          adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
           style={viewStyle}
           rate={this.state.rate}
           paused={this.state.paused}
