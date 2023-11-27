@@ -77,4 +77,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Run Gradle Build for basic example
-        run: cd examples/basic/android && export RNV_SAMPLE_DISABLE_ADS=true && ./gradlew assembleDebug --build-cache && cd ../../..
+        run: cd examples/basic/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..
