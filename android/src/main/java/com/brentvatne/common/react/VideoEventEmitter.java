@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class VideoEventEmitter {
 
@@ -411,6 +412,19 @@ public class VideoEventEmitter {
 
     public void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
+    }
+
+    public void receiveAdEvent(String event, Map<String, String> data) {
+        WritableMap map = Arguments.createMap();
+        map.putString("event", event);
+
+        WritableMap dataMap = Arguments.createMap();
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            dataMap.putString(entry.getKey(), entry.getValue());
+        }
+        map.putMap("data", dataMap);
+
+        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
     public void receiveAdEvent(String event) {

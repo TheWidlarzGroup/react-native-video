@@ -2100,6 +2100,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
-        eventEmitter.receiveAdEvent(adEvent.getType().name());
+        if (adEvent.getAdData() != null) {
+            eventEmitter.receiveAdEvent(adEvent.getType().name(), adEvent.getAdData());
+        } else {
+            eventEmitter.receiveAdEvent(adEvent.getType().name());
+        }
     }
 }

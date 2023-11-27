@@ -32,7 +32,7 @@ export enum AdEvent {
    */
   AD_PERIOD_STARTED = 'AD_PERIOD_STARTED',
   /**
-   * Android only: Fires when the ad's current time value changes. Calling getAdData() on this event will return an AdProgressData object.
+   * Android only: Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.
    */
   AD_PROGRESS = 'AD_PROGRESS',
   /**

@@ -362,10 +362,10 @@ Enum `AdEvent` possible values for [Android](https://developers.google.com/inter
 | `AD_METADATA`              | Android       | Fires when an ads list is loaded.                                                                                                                                                                           |
 | `AD_PERIOD_ENDED`          | iOS           | Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
 | `AD_PERIOD_STARTED`        | iOS           | Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
-| `AD_PROGRESS`              | Android       | Fires when the ad's current time value changes. Calling getAdData() on this event will return an AdProgressData object.                                                                                     |
+| `AD_PROGRESS`              | Android       | Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.                                                                                           |
 | `ALL_ADS_COMPLETED`        | Android, iOS  | Fires when the ads manager is done playing all the valid ads in the ads response, or when the response doesn't return any valid ads.                                                                        |
 | `CLICK`                    | Android, iOS  | Fires when the ad is clicked.                                                                                                                                                                               |
-| `COMPLETE`                 | Android, iOS  | Fires when the ad completes playing.                                                                                                                                                                        |
+| `COMPLETED`                | Android, iOS  | Fires when the ad completes playing.                                                                                                                                                                        |
 | `CONTENT_PAUSE_REQUESTED`  | Android       | Fires when content should be paused. This usually happens right before an ad is about to cover the content.                                                                                                 |
 | `CONTENT_RESUME_REQUESTED` | Android       | Fires when content should be resumed. This usually happens when an ad finishes or collapses.                                                                                                                |
 | `CUEPOINTS_CHANGED`        | iOS           | Cuepoints changed for VOD stream (only used for dynamic ad insertion).                                                                                                                                      |
@@ -395,14 +395,18 @@ Enum `AdEvent` possible values for [Android](https://developers.google.com/inter
 
 Payload:
 
-| Property | Type    | Description           |
-|----------|---------|-----------------------|
-|  event   | AdEvent | The ad event received |
+| Property | Type                                | Description           |
+|----------|-------------------------------------|-----------------------|
+| event    | AdEvent                             | The ad event received |
+| data     | Record<string, string> \| undefined | The ad event data     |
 
 Example:
-```javascript
+```json
 {
-  "event": "LOADED"
+  "data": {
+    "key": "value"
+  },
+  "event": "LOG"
 }
 ```
 

@@ -174,7 +174,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
-  adTagUrl?: string; // iOS
+  adTagUrl?: string;
   audioOnly?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   backBufferDurationMs?: number; // Android
