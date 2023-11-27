@@ -115,7 +115,7 @@ jobs:
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
 
-build-with-caching:
+  build-with-caching:
     name: Build iOS Example App With Caching
     runs-on: macOS-latest
     defaults:
