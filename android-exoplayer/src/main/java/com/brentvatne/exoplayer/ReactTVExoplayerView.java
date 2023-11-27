@@ -1460,9 +1460,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            ExoPlayer exoPlayer = player.getExoPlayer();
-            eventEmitter.seek(exoPlayer.getCurrentPosition(), positionMs);
-            exoPlayer.seekTo(exoPlayer.getCurrentMediaItemIndex(), positionMs);
+            eventEmitter.seek(player.getExoPlayer().getCurrentPosition(), positionMs);
+            player.seekTo(positionMs);
         } else {
             resumePosition = positionMs;
         }

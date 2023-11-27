@@ -39,8 +39,6 @@ import com.google.gson.Gson;
 import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -671,6 +669,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 break;
             case COMMAND_SEEK_TO_POSITION:
                 long seekToMs = args.getInt(0) * 1000;
+                Log.i(WebUtil.DEBUG, "seekToPosition " + seekToMs);
                 root.seekTo(seekToMs);
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
