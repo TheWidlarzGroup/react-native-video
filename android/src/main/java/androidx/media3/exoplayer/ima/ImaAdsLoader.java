@@ -54,6 +54,10 @@ public class ImaAdsLoader implements AdsLoader {
             return this;
         }
 
+        public Builder setAdErrorListener(Object ignoredReactExoplayerView) {
+            return this;
+        }
+
         public ImaAdsLoader build() {
             return null;
         }

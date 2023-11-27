@@ -6,5 +6,5 @@ public abstract class AdError {
     public abstract InspectableProperty getErrorCode();
     public abstract InspectableProperty getErrorCodeNumber();
     public abstract InspectableProperty getErrorType();
-    public abstract InspectableProperty getMessage();
+    public abstract String getMessage();
 }

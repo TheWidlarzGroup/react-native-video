@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.ads.interactivemedia.v3.api.AdError;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
