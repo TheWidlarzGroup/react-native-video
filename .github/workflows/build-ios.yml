@@ -101,7 +101,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
       - name: Install Pods
-        run: pod install
+        run:  export RNV_SAMPLE_ENABLE_ADS=true && pod install
       - name: Install xcpretty
         run: gem install xcpretty
       - name: Build App
@@ -150,7 +150,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
       - name: Install Pods
-        run: pod install
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
       - name: Install xcpretty
         run: gem install xcpretty
       - name: Build App
