@@ -36,8 +36,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
-    private static final String PROP_SRC_START_TIME = "startTime";
-    private static final String PROP_SRC_END_TIME = "endTime";
+    private static final String PROP_SRC_START_POSITION = "startPosition";
+    private static final String PROP_SRC_CROP_START = "cropStart";
+    private static final String PROP_SRC_CROP_END = "cropEnd";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
@@ -75,6 +76,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
+    private static final String PROP_START_POSITION = "startPosition";
     private static final String PROP_CONTENT_START_TIME = "contentStartTime";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
@@ -151,8 +153,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         String uriString = ReactBridgeUtils.safeGetString(src, PROP_SRC_URI, null);
-        int startTimeMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_START_TIME, -1);
-        int endTimeMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_END_TIME, -1);
+        int startPositionMs = ReactBridgeUtils.safeGetInt(src, PROP_START_POSITION, -1);
+        int cropStartMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_START, -1);
+        int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
 
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? ReactBridgeUtils.toStringMap(src.getMap(PROP_SRC_HEADERS)) : new HashMap<>();
@@ -166,7 +169,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, startTimeMs, endTimeMs, extension, headers);
+                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers);
             }
         } else {
             int identifier = context.getResources().getIdentifier(

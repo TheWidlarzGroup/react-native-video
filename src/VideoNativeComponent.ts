@@ -23,8 +23,9 @@ type VideoSrc = Readonly<{
   mainVer?: number;
   patchVer?: number;
   requestHeaders?: Headers;
-  startTime?: number;
-  endTime?: number;
+  startPosition?: number;
+  cropStart?: number;
+  cropEnd?: number;
   title?: string;
   subtitle?: string;
   description?: string;

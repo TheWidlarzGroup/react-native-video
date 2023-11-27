@@ -15,8 +15,9 @@ export type ReactVideoSourceProperties = {
   mainVer?: number;
   patchVer?: number;
   headers?: Headers;
-  startTime?: number;
-  endTime?: number;
+  startPosition?: number;
+  cropStart?: number;
+  cropEnd?: number;
   title?: string;
   subtitle?: string;
   description?: string;
