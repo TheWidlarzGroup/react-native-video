@@ -120,11 +120,14 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, I
 
         guard let _video = _video else {return}
 
-        if _video.onAdError != nil {
-            _video.onAdError?([
-                "message": error.message ?? "",
-                "code": error.code,
-                "type": error.type,
+        if _video.onReceiveAdEvent != nil {
+            _video.onReceiveAdEvent?([
+                "event": "ERROR",
+                "data": [
+                    "message": error.message ?? "",
+                    "code": error.code,
+                    "type": error.type,
+                ],
                 "target": _video.reactTag!
             ])
         }

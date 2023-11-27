@@ -64,6 +64,10 @@ export enum AdEvent {
    */
   DURATION_CHANGE = 'DURATION_CHANGE',
   /**
+   * Fires when an error is encountered and the ad can't be played.
+   */
+  ERROR = 'ERROR',
+  /**
    * Fires when the ad playhead crosses first quartile.
    */
   FIRST_QUARTILE = 'FIRST_QUARTILE',

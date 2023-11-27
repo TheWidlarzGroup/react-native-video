@@ -115,7 +115,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
-    @objc var onAdError: RCTDirectEventBlock?
 
     @objc func _onPictureInPictureStatusChanged() {
         onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: true)])
