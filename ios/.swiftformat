@@ -1,0 +1,13 @@
+--allman false
+--indent 2
+--exclude Pods,Generated
+
+--disable andOperator
+--disable redundantReturn
+--disable wrapMultilineStatementBraces
+--disable organizeDeclarations
+--disable redundantSelf
+
+--enable markTypes
+
+--enable isEmpty
