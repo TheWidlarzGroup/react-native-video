@@ -4,9 +4,9 @@ import androidx.annotation.StringDef;
 
 import android.view.View;
 
-import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.API.Track;
-import com.brentvatne.common.API.VideoTrack;
+import com.brentvatne.common.api.TimedMetadata;
+import com.brentvatne.common.api.Track;
+import com.brentvatne.common.api.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;

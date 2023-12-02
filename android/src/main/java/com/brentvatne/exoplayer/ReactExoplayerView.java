@@ -91,11 +91,11 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.ui.LegacyPlayerControlView;
 
-import com.brentvatne.common.API.ResizeMode;
-import com.brentvatne.common.API.SubtitleStyle;
-import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.API.Track;
-import com.brentvatne.common.API.VideoTrack;
+import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.api.TimedMetadata;
+import com.brentvatne.common.api.Track;
+import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.R;

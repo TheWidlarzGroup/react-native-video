@@ -25,8 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.brentvatne.common.API.ResizeMode;
-import com.brentvatne.common.API.SubtitleStyle;
+import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SubtitleStyle;
 
 import java.util.List;
 
