@@ -6,6 +6,9 @@ disabled_rules:
   - file_length
   - cyclomatic_complexity
   - function_body_length
+  # TODO: Remove this once all force casts are removed
+  - force_cast
+  
 opt_in_rules:
   - contains_over_filter_count
   - contains_over_filter_is_empty

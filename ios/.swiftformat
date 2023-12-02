@@ -11,3 +11,5 @@
 --enable markTypes
 
 --enable isEmpty
+
+--funcattributes "prev-line"

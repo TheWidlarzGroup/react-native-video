@@ -117,11 +117,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
   @objc var onGetLicense: RCTDirectEventBlock?
   @objc var onReceiveAdEvent: RCTDirectEventBlock?
 
-  @objc func _onPictureInPictureStatusChanged() {
+  @objc
+  func _onPictureInPictureStatusChanged() {
     onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
   }
 
-  @objc func _onRestoreUserInterfaceForPictureInPictureStop() {
+  @objc
+  func _onRestoreUserInterfaceForPictureInPictureStop() {
     onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
   }
 
@@ -196,14 +198,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
   // MARK: - App lifecycle handlers
 
-  @objc func applicationWillResignActive(notification _: NSNotification!) {
+  @objc
+  func applicationWillResignActive(notification _: NSNotification!) {
     if _playInBackground || _playWhenInactive || _paused { return }
 
     _player?.pause()
     _player?.rate = 0.0
   }
 
-  @objc func applicationDidBecomeActive(notification _: NSNotification!) {
+  @objc
+  func applicationDidBecomeActive(notification _: NSNotification!) {
     if _playInBackground || _playWhenInactive || _paused { return }
 
     // Resume the player or any other tasks that should continue when the app becomes active.
@@ -211,7 +215,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     _player?.rate = _rate
   }
 
-  @objc func applicationDidEnterBackground(notification _: NSNotification!) {
+  @objc
+  func applicationDidEnterBackground(notification _: NSNotification!) {
     if !_playInBackground {
       // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
       _playerLayer?.player = nil
@@ -219,7 +224,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
   }
 
-  @objc func applicationWillEnterForeground(notification _: NSNotification!) {
+  @objc
+  func applicationWillEnterForeground(notification _: NSNotification!) {
     self.applyModifiers()
     if !_playInBackground {
       _playerLayer?.player = _player
@@ -229,7 +235,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
   // MARK: - Audio events
 
-  @objc func audioRouteChanged(notification: NSNotification!) {
+  @objc
+  func audioRouteChanged(notification: NSNotification!) {
     if let userInfo = notification.userInfo {
       let reason: AVAudioSession.RouteChangeReason! = userInfo[AVAudioSessionRouteChangeReasonKey] as? AVAudioSession.RouteChangeReason
       //            let previousRoute:NSNumber! = userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? NSNumber
@@ -1303,7 +1310,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
   }
 
-  @objc func handleDidFailToFinishPlaying(notification: NSNotification!) {
+  @objc
+  func handleDidFailToFinishPlaying(notification: NSNotification!) {
     let error: NSError! = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? NSError
     onVideoError?(
       [
@@ -1318,12 +1326,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
       ])
   }
 
-  @objc func handlePlaybackStalled(notification _: NSNotification!) {
+  @objc
+  func handlePlaybackStalled(notification _: NSNotification!) {
     onPlaybackStalled?(["target": reactTag as Any])
     _playbackStalled = true
   }
 
-  @objc func handlePlayerItemDidReachEnd(notification: NSNotification!) {
+  @objc
+  func handlePlayerItemDidReachEnd(notification: NSNotification!) {
     onVideoEnd?(["target": reactTag as Any])
     #if USE_GOOGLE_IMA
       if notification.object as? AVPlayerItem == _player?.currentItem {
@@ -1340,7 +1350,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
   }
 
-  @objc func handleAVPlayerAccess(notification: NSNotification!) {
+  @objc
+  func handleAVPlayerAccess(notification: NSNotification!) {
     let accessLog: AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
     let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
 
