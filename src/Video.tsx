@@ -13,7 +13,6 @@ import NativeVideoComponent, {
 } from './VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import type {ReactVideoProps} from './types/video';
 import {getReactTag, resolveAssetSourceForVideo} from './utils';
 import {VideoManager} from './VideoNativeComponent';
 import type {
@@ -35,7 +34,8 @@ import type {
   OnVideoAspectRatioData,
   OnVideoErrorData,
   OnVideoTracksData,
-} from './types/events';
+  ReactVideoProps,
+} from './types';
 
 export type VideoSaveData = {
   uri: string;

@@ -108,6 +108,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
+import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.common.collect.ImmutableList;
 
 import java.net.CookieHandler;
@@ -132,7 +133,8 @@ public class ReactExoplayerView extends FrameLayout implements
         BandwidthMeter.EventListener,
         BecomingNoisyListener,
         DrmSessionEventListener,
-        AdEvent.AdEventListener {
+        AdEvent.AdEventListener,
+        AdErrorEvent.AdErrorListener {
 
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
     public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
@@ -621,8 +623,10 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
         // Create an AdsLoader.
-        adsLoader = new ImaAdsLoader.Builder(themedReactContext)
+        adsLoader = new ImaAdsLoader
+                .Builder(themedReactContext)
                 .setAdEventListener(this)
+                .setAdErrorListener(this)
                 .build();
 
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
@@ -2102,5 +2106,10 @@ public class ReactExoplayerView extends FrameLayout implements
         } else {
             eventEmitter.receiveAdEvent(adEvent.getType().name());
         }
+    }
+
+    @Override
+    public void onAdError(AdErrorEvent adErrorEvent) {
+        eventEmitter.receiveAdErrorEvent(adErrorEvent.getError());
     }
 }
