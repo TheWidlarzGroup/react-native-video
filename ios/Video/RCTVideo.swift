@@ -295,7 +295,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
   func setSrc(_ source: NSDictionary!) {
     let dispatchClosure = {
       self._source = VideoSource(source)
-      if self._source?.uri == nil || self._source?.uri.isEmpty {
+      if self._source?.uri == nil || self._source?.uri == "" {
         self._player?.replaceCurrentItem(with: nil)
         return
       }

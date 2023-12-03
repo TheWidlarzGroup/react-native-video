@@ -1,10 +1,7 @@
 import AVFoundation
 import Promises
 
-struct RCTVideoDRM {
-  @available(*, unavailable)
-  private init() {}
-
+enum RCTVideoDRM {
   static func fetchLicense(
     licenseServer: String,
     spcData: Data?,
