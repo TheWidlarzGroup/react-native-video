@@ -295,7 +295,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
   func setSrc(_ source: NSDictionary!) {
     let dispatchClosure = {
       self._source = VideoSource(source)
-      if self._source?.uri == nil || self._source?.uri == "" {
+      if self._source?.uri == nil || self._source?.uri.isEmpty {
         self._player?.replaceCurrentItem(with: nil)
         return
       }
@@ -931,7 +931,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
   // MARK: - RCTVideoPlayerViewControllerDelegate
 
   func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController) {
-    if _playerViewController == playerViewController && _fullscreenPlayerPresented, let onVideoFullscreenPlayerWillDismiss = onVideoFullscreenPlayerWillDismiss {
+    if _playerViewController == playerViewController
+      && _fullscreenPlayerPresented,
+      let onVideoFullscreenPlayerWillDismiss = onVideoFullscreenPlayerWillDismiss {
       _playerObserver.removePlayerViewControllerObservers()
       onVideoFullscreenPlayerWillDismiss(["target": reactTag as Any])
     }
@@ -1064,6 +1066,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     _eventDispatcher = nil
+    // swiftlint:disable:next notification_center_detachment
     NotificationCenter.default.removeObserver(self)
 
     super.removeFromSuperview()
@@ -1223,12 +1226,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         "error": [
           "code": NSNumber(value: (_playerItem.error! as NSError).code),
           "localizedDescription": _playerItem.error?.localizedDescription == nil ? "" : _playerItem.error?.localizedDescription,
-          "localizedFailureReason": ((_playerItem.error! as NSError).localizedFailureReason == nil ? "" : (_playerItem.error! as NSError).localizedFailureReason) ?? "",
-          "localizedRecoverySuggestion": ((_playerItem.error! as NSError).localizedRecoverySuggestion == nil ? "" : (_playerItem.error! as NSError).localizedRecoverySuggestion) ?? "",
+          "localizedFailureReason": ((_playerItem.error! as NSError).localizedFailureReason == nil ?
+            "" : (_playerItem.error! as NSError).localizedFailureReason) ?? "",
+          "localizedRecoverySuggestion": ((_playerItem.error! as NSError).localizedRecoverySuggestion == nil ?
+            "" : (_playerItem.error! as NSError).localizedRecoverySuggestion) ?? "",
           "domain": (_playerItem.error as! NSError).domain,
         ],
         "target": reactTag,
-      ])
+      ]
+    )
   }
 
   func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
@@ -1323,7 +1329,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
           "domain": (error as NSError).domain,
         ],
         "target": reactTag,
-      ])
+      ]
+    )
   }
 
   @objc

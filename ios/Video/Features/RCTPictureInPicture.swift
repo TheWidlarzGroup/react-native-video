@@ -29,7 +29,10 @@ import React
       _onPictureInPictureStatusChanged()
     }
 
-    func pictureInPictureController(_: AVPictureInPictureController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
+    func pictureInPictureController(
+      _: AVPictureInPictureController,
+      restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
+    ) {
       guard let _onRestoreUserInterfaceForPictureInPictureStop = _onRestoreUserInterfaceForPictureInPictureStop else { return }
 
       _onRestoreUserInterfaceForPictureInPictureStop()

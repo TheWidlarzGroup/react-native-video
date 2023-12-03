@@ -23,7 +23,7 @@ enum RCTVideoUtils {
     }
 
     var effectiveTimeRange: CMTimeRange?
-    for (_, value) in video.loadedTimeRanges.enumerated() {
+    for value in video.loadedTimeRanges {
       let timeRange: CMTimeRange = value.timeRangeValue
       if CMTimeRangeContainsTime(timeRange, time: video.currentTime()) {
         effectiveTimeRange = timeRange
@@ -188,7 +188,10 @@ enum RCTVideoUtils {
       return mixComposition
     }
 
-    let videoCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid)
+    let videoCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
+      withMediaType: AVMediaType.video,
+      preferredTrackID: kCMPersistentTrackID_Invalid
+    )
     try? videoCompTrack.insertTimeRange(
       CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
       of: videoAsset,
@@ -196,7 +199,10 @@ enum RCTVideoUtils {
     )
 
     let audioAsset: AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
-    let audioCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+    let audioCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
+      withMediaType: AVMediaType.audio,
+      preferredTrackID: kCMPersistentTrackID_Invalid
+    )
     try? audioCompTrack.insertTimeRange(
       CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
       of: audioAsset,
@@ -245,7 +251,7 @@ enum RCTVideoUtils {
   }
 
   /*
-   * Create an useless / almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
+   * Create an useless/almost empty VTT file in the list with available tracks. This track gets selected when you give type: "disabled" as the selectedTextTrack
    * This is needed because there is a bug where sideloaded texttracks cannot be disabled in the AVPlayer. Loading this VTT file instead solves that problem.
    * For more info see: https://github.com/react-native-community/react-native-video/issues/1144
    */
@@ -296,7 +302,7 @@ enum RCTVideoUtils {
   }
 
   static func prepareAsset(source: VideoSource) -> (asset: AVURLAsset?, assetOptions: NSMutableDictionary?)? {
-    guard let sourceUri = source.uri, sourceUri != "" else { return nil }
+    guard let sourceUri = source.uri, sourceUri.isEmpty else { return nil }
     var asset: AVURLAsset!
     let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
     let url = source.isNetwork || source.isAsset

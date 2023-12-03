@@ -221,7 +221,10 @@ enum RCTPlayerOperations {
           if #available(iOS 16.0, *) {
             do {
               debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
-              try audioSession.setCategory(audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
+              try audioSession.setCategory(
+                audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback,
+                options: AVAudioSession.CategoryOptions.defaultToSpeaker
+              )
             } catch {
               debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
             }

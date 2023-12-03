@@ -58,7 +58,13 @@ struct RCTVideoDRM {
     }
 
     let spcEncoded = spcData?.base64EncodedString(options: [])
-    let spcUrlEncoded = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, spcEncoded as? CFString? as! CFString, nil, "?=&+" as CFString, CFStringBuiltInEncodings.UTF8.rawValue) as? String
+    let spcUrlEncoded = CFURLCreateStringByAddingPercentEscapes(
+      kCFAllocatorDefault,
+      spcEncoded as? CFString? as! CFString,
+      nil,
+      "?=&+" as CFString,
+      CFStringBuiltInEncodings.UTF8.rawValue
+    ) as? String
     let post = String(format: "spc=%@&%@", spcUrlEncoded as! CVarArg, contentId)
     let postData = post.data(using: String.Encoding.utf8, allowLossyConversion: true)
     request.httpBody = postData
@@ -118,7 +124,8 @@ struct RCTVideoDRM {
     }
   }
 
-  static func handleWithOnGetLicense(loadingRequest: AVAssetResourceLoadingRequest, contentId: String?, certificateUrl: String?, base64Certificate: Bool?) -> Promise<Data> {
+  static func handleWithOnGetLicense(loadingRequest: AVAssetResourceLoadingRequest, contentId: String?, certificateUrl: String?,
+                                     base64Certificate: Bool?) -> Promise<Data> {
     let contentIdData = contentId?.data(using: .utf8)
 
     return RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
@@ -135,7 +142,14 @@ struct RCTVideoDRM {
       }
   }
 
-  static func handleInternalGetLicense(loadingRequest: AVAssetResourceLoadingRequest, contentId: String?, licenseServer: String?, certificateUrl: String?, base64Certificate: Bool?, headers: [String: Any]?) -> Promise<Data> {
+  static func handleInternalGetLicense(
+    loadingRequest: AVAssetResourceLoadingRequest,
+    contentId: String?,
+    licenseServer: String?,
+    certificateUrl: String?,
+    base64Certificate: Bool?,
+    headers: [String: Any]?
+  ) -> Promise<Data> {
     let url = loadingRequest.request.url
 
     guard let contentId = contentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with: "") else {

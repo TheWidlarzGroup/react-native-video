@@ -13,3 +13,4 @@
 --enable isEmpty
 
 --funcattributes "prev-line"
+--maxwidth 160
