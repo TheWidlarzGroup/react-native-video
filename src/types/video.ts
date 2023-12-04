@@ -221,4 +221,5 @@ export interface ReactVideoProps extends ReactVideoEvents {
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
+  allowsExternalPlayback?: boolean; // iOS
 }
