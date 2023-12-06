@@ -5,6 +5,6 @@ package com.brentvatne.common.api
 */
 
 class TimedMetadata(_identifier: String? = null, _value: String? = null) {
-  var identifier: String? = _identifier
-  var value: String? = _value
+    var identifier: String? = _identifier
+    var value: String? = _value
 }

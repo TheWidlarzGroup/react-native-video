@@ -1,5 +1,5 @@
 --allman false
---indent 2
+--indent 4
 --exclude Pods,Generated
 
 --disable andOperator

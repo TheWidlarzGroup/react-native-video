@@ -5,11 +5,11 @@ package com.brentvatne.common.api
 */
 
 class VideoTrack {
-  var width = 0
-  var height = 0
-  var bitrate = 0
-  var codecs = ""
-  var id = -1
-  var trackId = ""
-  var isSelected = false
+    var width = 0
+    var height = 0
+    var bitrate = 0
+    var codecs = ""
+    var id = -1
+    var trackId = ""
+    var isSelected = false
 }
