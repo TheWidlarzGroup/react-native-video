@@ -198,6 +198,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_AD_TAG_URL)
     public void setAdTagUrl(final ReactExoplayerView videoView, final String uriString) {
         if (TextUtils.isEmpty(uriString)) {
+            videoView.setAdTagUrl(null);
             return;
         }
 
