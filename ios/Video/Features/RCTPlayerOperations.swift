@@ -4,49 +4,48 @@ import Promises
 
 let RCTVideoUnset = -1
 
+// MARK: - RCTPlayerOperations
+
 /*!
  * Collection of mutating functions
  */
 enum RCTPlayerOperations {
-
-    static func setSideloadedText(player:AVPlayer?, textTracks:[TextTrack]?, criteria:SelectedTrackCriteria?) {
+    static func setSideloadedText(player: AVPlayer?, textTracks: [TextTrack]?, criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
-        let textTracks:[TextTrack]! = textTracks ?? RCTVideoUtils.getTextTrackInfo(player)
-        let trackCount:Int! = player?.currentItem?.tracks.count ?? 0
+        let textTracks: [TextTrack]! = textTracks ?? RCTVideoUtils.getTextTrackInfo(player)
+        let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
 
         // The first few tracks will be audio & video track
-        var firstTextIndex:Int = 0
-        for i in 0..<(trackCount) {
-            if player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
-                firstTextIndex = i
-                break
-            }
+        var firstTextIndex = 0
+        for i in 0 ..< trackCount where (player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible)) != nil {
+            firstTextIndex = i
+            break
         }
 
-        var selectedTrackIndex:Int = RCTVideoUnset
+        var selectedTrackIndex: Int = RCTVideoUnset
 
-        if (type == "disabled") {
+        if type == "disabled" {
             // Select the last text index which is the disabled text track
             selectedTrackIndex = trackCount - firstTextIndex
-        } else if (type == "language") {
+        } else if type == "language" {
             let selectedValue = criteria?.value as? String
-            for i in 0..<textTracks.count {
+            for i in 0 ..< textTracks.count {
                 let currentTextTrack = textTracks[i]
-                if (selectedValue == currentTextTrack.language) {
+                if selectedValue == currentTextTrack.language {
                     selectedTrackIndex = i
                     break
                 }
             }
-        } else if (type == "title") {
+        } else if type == "title" {
             let selectedValue = criteria?.value as? String
-            for i in 0..<textTracks.count {
+            for i in 0 ..< textTracks.count {
                 let currentTextTrack = textTracks[i]
-                if (selectedValue == currentTextTrack.title) {
+                if selectedValue == currentTextTrack.title {
                     selectedTrackIndex = i
                     break
                 }
             }
-        } else if (type == "index") {
+        } else if type == "index" {
             if let value = criteria?.value, let index = value as? Int {
                 if textTracks.count > index {
                     selectedTrackIndex = index
@@ -58,10 +57,10 @@ enum RCTPlayerOperations {
         if (type != "disabled") && selectedTrackIndex == RCTVideoUnset {
             let captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(.user)
             let captionSettings = captioningMediaCharacteristics as? [AnyHashable]
-            if ((captionSettings?.contains(AVMediaCharacteristic.transcribesSpokenDialogForAccessibility)) != nil) {
+            if (captionSettings?.contains(AVMediaCharacteristic.transcribesSpokenDialogForAccessibility)) != nil {
                 selectedTrackIndex = 0 // If we can't find a match, use the first available track
                 let systemLanguage = NSLocale.preferredLanguages.first
-                for i in 0..<textTracks.count {
+                for i in 0 ..< textTracks.count {
                     let currentTextTrack = textTracks[i]
                     if systemLanguage == currentTextTrack.language {
                         selectedTrackIndex = i
@@ -71,7 +70,7 @@ enum RCTPlayerOperations {
             }
         }
 
-        for i in firstTextIndex..<(trackCount) {
+        for i in firstTextIndex ..< trackCount {
             var isEnabled = false
             if selectedTrackIndex != RCTVideoUnset {
                 isEnabled = i == selectedTrackIndex + firstTextIndex
@@ -81,31 +80,31 @@ enum RCTPlayerOperations {
     }
 
     // UNUSED
-    static func setStreamingText(player:AVPlayer?, criteria:SelectedTrackCriteria?) {
+    static func setStreamingText(player: AVPlayer?, criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
-        let group:AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: AVMediaCharacteristic.legible)
-        var mediaOption:AVMediaSelectionOption!
+        let group: AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: AVMediaCharacteristic.legible)
+        var mediaOption: AVMediaSelectionOption!
 
-        if (type == "disabled") {
+        if type == "disabled" {
             // Do nothing. We want to ensure option is nil
         } else if (type == "language") || (type == "title") {
             let value = criteria?.value as? String
-            for i in 0..<group.options.count {
-                let currentOption:AVMediaSelectionOption! = group.options[i]
-                var optionValue:String!
-                if (type == "language") {
+            for i in 0 ..< group.options.count {
+                let currentOption: AVMediaSelectionOption! = group.options[i]
+                var optionValue: String!
+                if type == "language" {
                     optionValue = currentOption.extendedLanguageTag
                 } else {
                     optionValue = currentOption.commonMetadata.map(\.value)[0] as! String
                 }
-                if (value == optionValue) {
+                if value == optionValue {
                     mediaOption = currentOption
                     break
                 }
             }
-            //} else if ([type isEqualToString:@"default"]) {
+            // } else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
-        } else if (type == "index") {
+        } else if type == "index" {
             if let value = criteria?.value, let index = value as? Int {
                 if group.options.count > index {
                     mediaOption = group.options[index]
@@ -113,7 +112,7 @@ enum RCTPlayerOperations {
             }
         } else { // default. invalid type or "system"
             #if os(tvOS)
-                // Do noting. Fix for tvOS native audio menu language selector
+            // Do noting. Fix for tvOS native audio menu language selector
             #else
                 player?.currentItem?.selectMediaOptionAutomatically(in: group)
                 return
@@ -121,38 +120,38 @@ enum RCTPlayerOperations {
         }
 
         #if os(tvOS)
-            // Do noting. Fix for tvOS native audio menu language selector
+        // Do noting. Fix for tvOS native audio menu language selector
         #else
             // If a match isn't found, option will be nil and text tracks will be disabled
-            player?.currentItem?.select(mediaOption, in:group)
+            player?.currentItem?.select(mediaOption, in: group)
         #endif
     }
 
-    static func setMediaSelectionTrackForCharacteristic(player:AVPlayer?, characteristic:AVMediaCharacteristic, criteria:SelectedTrackCriteria?) {
+    static func setMediaSelectionTrackForCharacteristic(player: AVPlayer?, characteristic: AVMediaCharacteristic, criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
-        let group:AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: characteristic)
-        var mediaOption:AVMediaSelectionOption!
+        let group: AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: characteristic)
+        var mediaOption: AVMediaSelectionOption!
 
         guard group != nil else { return }
 
-        if (type == "disabled") {
+        if type == "disabled" {
             // Do nothing. We want to ensure option is nil
         } else if (type == "language") || (type == "title") {
             let value = criteria?.value as? String
-            for i in 0..<group.options.count {
-                let currentOption:AVMediaSelectionOption! = group.options[i]
-                var optionValue:String!
-                if (type == "language") {
+            for i in 0 ..< group.options.count {
+                let currentOption: AVMediaSelectionOption! = group.options[i]
+                var optionValue: String!
+                if type == "language" {
                     optionValue = currentOption.extendedLanguageTag
                 } else {
                     optionValue = currentOption.commonMetadata.map(\.value)[0] as? String
                 }
-                if (value == optionValue) {
+                if value == optionValue {
                     mediaOption = currentOption
                     break
                 }
             }
-            //} else if ([type isEqualToString:@"default"]) {
+            // } else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
         } else if type == "index" {
             if let value = criteria?.value, let index = value as? Int {
@@ -167,16 +166,15 @@ enum RCTPlayerOperations {
 
         if let group = group {
             // If a match isn't found, option will be nil and text tracks will be disabled
-            player?.currentItem?.select(mediaOption, in:group)
+            player?.currentItem?.select(mediaOption, in: group)
         }
-
     }
 
-    static func seek(player: AVPlayer, playerItem:AVPlayerItem, paused:Bool, seekTime:Float, seekTolerance:Float) -> Promise<Bool> {
-        let timeScale:Int = 1000
-        let cmSeekTime:CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
-        let current:CMTime = playerItem.currentTime()
-        let tolerance:CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
+    static func seek(player: AVPlayer, playerItem: AVPlayerItem, paused: Bool, seekTime: Float, seekTolerance: Float) -> Promise<Bool> {
+        let timeScale = 1000
+        let cmSeekTime: CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
+        let current: CMTime = playerItem.currentTime()
+        let tolerance: CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
 
         return Promise<Bool>(on: .global()) { fulfill, reject in
             guard CMTimeCompare(current, cmSeekTime) != 0 else {
@@ -185,26 +183,26 @@ enum RCTPlayerOperations {
             }
             if !paused { player.pause() }
 
-            player.seek(to: cmSeekTime, toleranceBefore:tolerance, toleranceAfter:tolerance, completionHandler:{ (finished:Bool) in
+            player.seek(to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance, completionHandler: { (finished: Bool) in
                 fulfill(finished)
             })
         }
     }
 
-    static func configureAudio(ignoreSilentSwitch:String, mixWithOthers:String, audioOutput:String) {
-        let audioSession:AVAudioSession! = AVAudioSession.sharedInstance()
-        var category:AVAudioSession.Category? = nil
-        var options:AVAudioSession.CategoryOptions? = nil
+    static func configureAudio(ignoreSilentSwitch: String, mixWithOthers: String, audioOutput: String) {
+        let audioSession: AVAudioSession! = AVAudioSession.sharedInstance()
+        var category: AVAudioSession.Category?
+        var options: AVAudioSession.CategoryOptions?
 
-        if (ignoreSilentSwitch == "ignore") {
+        if ignoreSilentSwitch == "ignore" {
             category = audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback
-        } else if (ignoreSilentSwitch == "obey") {
+        } else if ignoreSilentSwitch == "obey" {
             category = AVAudioSession.Category.ambient
         }
 
-        if (mixWithOthers == "mix") {
+        if mixWithOthers == "mix" {
             options = .mixWithOthers
-        } else if (mixWithOthers == "duck") {
+        } else if mixWithOthers == "duck" {
             options = .duckOthers
         }
 
@@ -214,18 +212,21 @@ enum RCTPlayerOperations {
             } catch {
                 debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category and options. Error: \(error).")
                 #if !os(tvOS)
-                // Handle specific set category and option combination error
-                // setCategory:AVAudioSessionCategoryPlayback withOptions:mixWithOthers || duckOthers
-                // Failed to set category, error: 'what' Error Domain=NSOSStatusErrorDomain
-                // https://developer.apple.com/forums/thread/714598
-                if #available(iOS 16.0, *) {
-                    do {
-                        debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
-                        try audioSession.setCategory(audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
-                    } catch {
-                        debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
+                    // Handle specific set category and option combination error
+                    // setCategory:AVAudioSessionCategoryPlayback withOptions:mixWithOthers || duckOthers
+                    // Failed to set category, error: 'what' Error Domain=NSOSStatusErrorDomain
+                    // https://developer.apple.com/forums/thread/714598
+                    if #available(iOS 16.0, *) {
+                        do {
+                            debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
+                            try audioSession.setCategory(
+                                audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback,
+                                options: AVAudioSession.CategoryOptions.defaultToSpeaker
+                            )
+                        } catch {
+                            debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
+                        }
                     }
-                }
                 #endif
             }
         } else if let category = category, options == nil {

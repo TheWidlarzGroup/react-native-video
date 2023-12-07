@@ -6,6 +6,11 @@ disabled_rules:
   - file_length
   - cyclomatic_complexity
   - function_body_length
+  - function_parameter_count
+  - empty_string
+  # TODO: Remove this once all force casts are removed
+  - force_cast
+  
 opt_in_rules:
   - contains_over_filter_count
   - contains_over_filter_is_empty
@@ -13,7 +18,6 @@ opt_in_rules:
   - contains_over_range_nil_comparison
   - empty_collection_literal
   - empty_count
-  - empty_string
   - first_where
   - flatmap_over_map_reduce
   - last_where

@@ -1,5 +1,5 @@
 --allman false
---indent 2
+--indent 4
 --exclude Pods,Generated
 
 --disable andOperator
@@ -11,3 +11,6 @@
 --enable markTypes
 
 --enable isEmpty
+
+--funcattributes "prev-line"
+--maxwidth 160

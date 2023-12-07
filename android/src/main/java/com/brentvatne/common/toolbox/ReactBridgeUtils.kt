@@ -1,8 +1,8 @@
 package com.brentvatne.common.toolbox
 
 import com.facebook.react.bridge.Dynamic
-import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import java.util.HashMap
 
 /*
@@ -53,17 +53,19 @@ object ReactBridgeUtils {
 
     @JvmStatic
     fun safeGetInt(map: ReadableMap?, key: String?): Int {
-        return safeGetInt(map, key, 0);
+        return safeGetInt(map, key, 0)
     }
 
     @JvmStatic
     fun safeGetDouble(map: ReadableMap?, key: String?, fallback: Double): Double {
         return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key) else fallback
     }
+
     @JvmStatic
     fun safeGetDouble(map: ReadableMap?, key: String?): Double {
-        return safeGetDouble(map, key, 0.0);
+        return safeGetDouble(map, key, 0.0)
     }
+
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.
      *
@@ -116,17 +118,16 @@ object ReactBridgeUtils {
         if (str1 == null || str2 == null) return false // only 1 is null
         if (str1.size != str2.size) return false // only 1 is null
         for (i in str1.indices) {
-            if (str1[i] == str2[i]) // standard check
+            if (str1[i] == str2[i]) {
+                // standard check
                 return false
+            }
         }
         return true
     }
 
     @JvmStatic
-    fun safeStringMapEquals(
-        first: Map<String?, String?>?,
-        second: Map<String?, String?>?
-    ): Boolean {
+    fun safeStringMapEquals(first: Map<String?, String?>?, second: Map<String?, String?>?): Boolean {
         if (first == null && second == null) return true // both are null
         if (first == null || second == null) return false // only 1 is null
         if (first.size != second.size) {

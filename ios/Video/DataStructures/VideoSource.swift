@@ -1,11 +1,10 @@
-
 struct VideoSource {
     let type: String?
     let uri: String?
     let isNetwork: Bool
     let isAsset: Bool
     let shouldCache: Bool
-    let requestHeaders: Dictionary<String,Any>?
+    let requestHeaders: [String: Any]?
     let startPosition: Int64?
     let cropStart: Int64?
     let cropEnd: Int64?
@@ -14,9 +13,9 @@ struct VideoSource {
     let subtitle: String?
     let description: String?
     let customImageUri: String?
-    
+
     let json: NSDictionary?
-    
+
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil
@@ -41,7 +40,7 @@ struct VideoSource {
         self.isNetwork = json["isNetwork"] as? Bool ?? false
         self.isAsset = json["isAsset"] as? Bool ?? false
         self.shouldCache = json["shouldCache"] as? Bool ?? false
-        self.requestHeaders = json["requestHeaders"] as? Dictionary<String,Any>
+        self.requestHeaders = json["requestHeaders"] as? [String: Any]
         self.startPosition = json["startPosition"] as? Int64
         self.cropStart = json["cropStart"] as? Int64
         self.cropEnd = json["cropEnd"] as? Int64
