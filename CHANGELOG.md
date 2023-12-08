@@ -1,5 +1,15 @@
 
 
+# [6.0.0-beta.2](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.1...v6.0.0-beta.2) (2023-12-08)
+
+
+### Bug Fixes
+
+* add allowsExternalPlayback missing on ReactVideoProps ([#3398](https://github.com/react-native-video/react-native-video/issues/3398)) ([72679a7](https://github.com/react-native-video/react-native-video/commit/72679a7d639b9c000e060af0dbab7c862c180b00))
+* **android:** add explicitly dependancy to androidx.activity ([#3410](https://github.com/react-native-video/react-native-video/issues/3410)) ([908e30f](https://github.com/react-native-video/react-native-video/commit/908e30f9b8d950fa1423a10d4b08135b6cc4d43a))
+* **android:** ensure adTagUrl can be reset ([#3408](https://github.com/react-native-video/react-native-video/issues/3408)) ([f9bcaac](https://github.com/react-native-video/react-native-video/commit/f9bcaac5158ea2d835dd3177b62ad0446eb30d67))
+* revert drm type definition change ([#3409](https://github.com/react-native-video/react-native-video/issues/3409)) ([fbb5654](https://github.com/react-native-video/react-native-video/commit/fbb5654a8e075a2b33ae17bd322bb79b1f459d53))
+
 # [6.0.0-beta.1](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.0...v6.0.0-beta.1) (2023-12-02)
 
 
