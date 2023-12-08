@@ -32,6 +32,7 @@ import Video, {
   VideoRef,
   ResizeMode,
   SelectedTrack,
+  DRMType,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -144,6 +145,24 @@ class VideoPlayer extends Component {
       adTagUrl:
         'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
       uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+    },
+    {
+      description: 'WV: Secure SD & HD (cbcs,MP4,H264)',
+      uri: 'https://storage.googleapis.com/wvmedia/cbcs/h264/tears/tears_aes_cbcs.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
+    },
+    {
+      description: 'Secure UHD (cenc)',
+      uri: 'https://storage.googleapis.com/wvmedia/cenc/h264/tears/tears_uhd.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
     },
   ];
 
@@ -716,6 +735,7 @@ class VideoPlayer extends Component {
           }}
           source={this.srcList[this.state.srcListId]}
           adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
+          drm={this.srcList[this.state.srcListId]?.drm}
           style={viewStyle}
           rate={this.state.rate}
           paused={this.state.paused}

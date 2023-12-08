@@ -33,7 +33,7 @@ export type DebugConfig = Readonly<{
   thread?: boolean;
 }>;
 
-export enum DrmType {
+export enum DRMType {
   WIDEVINE = 'widevine',
   PLAYREADY = 'playready',
   CLEARKEY = 'clearkey',
@@ -41,7 +41,7 @@ export enum DrmType {
 }
 
 export type Drm = Readonly<{
-  type?: DrmType;
+  type?: DRMType;
   licenseServer?: string;
   headers?: Headers;
   contentId?: string; // ios
