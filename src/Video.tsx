@@ -243,7 +243,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [setIsFullscreen]);
 
     const save = useCallback((options: object) => {
-      return VideoManager.save(options, getReactTag(nativeRef));
+      // VideoManager.save can be null on android & windows
+      return VideoManager.save?.(options, getReactTag(nativeRef));
     }, []);
 
     const pause = useCallback(() => {
