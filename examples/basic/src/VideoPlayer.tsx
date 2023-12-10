@@ -644,20 +644,22 @@ class VideoPlayer extends Component {
                   onPress={this.onResizeModeSelected}
                   selected={this.state.resizeMode}
                 />
-                <ToggleControl
-                  isSelected={this.state.paused}
-                  onPress={() => {
-                    this.video
-                      ?.save({})
-                      .then(response => {
-                        console.log('Downloaded URI', response);
-                      })
-                      .catch(error => {
-                        console.log('error during save ', error);
-                      });
-                  }}
-                  text="save"
-                />
+                {Platform.OS === 'ios' ? (
+                  <ToggleControl
+                    isSelected={this.state.paused}
+                    onPress={() => {
+                      this.video
+                        ?.save({})
+                        ?.then(response => {
+                          console.log('Downloaded URI', response);
+                        })
+                        .catch(error => {
+                          console.log('error during save ', error);
+                        });
+                    }}
+                    text="save"
+                  />
+                ) : null}
               </View>
               {this.renderSeekBar()}
               <View style={styles.generalControls}>
