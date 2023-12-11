@@ -41,11 +41,10 @@ extension Metadata {
             let logoPlayerSizeRatio = logoPlayerSizeRatio
         else { return nil }
         
-        var watermarkViewModel = WatermarkViewModel()
-        watermarkViewModel.watermarkURL = logoUrl
-        watermarkViewModel.watermarkPosition = AVDoris.WatermarkPosition(rawValue: logoPosition.rawValue) ?? .topRight
-        watermarkViewModel.watermarkStaticDimention = AVDoris.WatermarkStaticDimention(rawValue: logoStaticDimension.rawValue) ?? .height
-        watermarkViewModel.watermarkSuperviewRatio = logoPlayerSizeRatio
+        var watermarkViewModel = WatermarkViewModel(watermarkURL: logoUrl,
+                                                    watermarkPosition: AVDoris.WatermarkPosition(rawValue: logoPosition.rawValue) ?? .topRight,
+                                                    watermarkStaticDimention: AVDoris.WatermarkStaticDimention(rawValue: logoStaticDimension.rawValue) ?? .height,
+                                                    watermarkSuperviewRatio: logoPlayerSizeRatio)
         
         return watermarkViewModel
     }
