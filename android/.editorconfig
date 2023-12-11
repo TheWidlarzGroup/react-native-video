@@ -1,0 +1,14 @@
+[*.{kt,kts}]
+indent_style=space
+indent_size=4
+continuation_indent_size=4
+insert_final_newline=true
+max_line_length=160
+ktlint_code_style=android_studio
+ktlint_standard=enabled
+ktlint_experimental=enabled
+ktlint_standard_filename=disabled # dont require PascalCase filenames
+ktlint_standard_no-wildcard-imports=disabled # allow .* imports
+ktlint_function_signature_body_expression_wrapping=multiline
+ij_kotlin_allow_trailing_comma_on_call_site=false
+ij_kotlin_allow_trailing_comma=false

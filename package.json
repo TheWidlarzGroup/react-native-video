@@ -1,8 +1,10 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-alpha.4",
+    "version": "6.0.0-beta.2",
     "description": "A <Video /> element for react-native",
-    "main": "Video.js",
+    "main": "lib/index",
+    "source": "src/index",
+    "react-native": "src/index",
     "license": "MIT",
     "author": "Community Contributors",
     "homepage": "https://github.com/react-native-video/react-native-video#readme",
@@ -10,31 +12,56 @@
         "type": "git",
         "url": "git@github.com:react-native-video/react-native-video.git"
     },
-    "devDependencies": {
-        "@react-native-community/eslint-config": "^0.0.5",
-        "eslint": "^6.5.1",
-        "react": "16.9.0",
-        "react-native": "0.61.5",
-        "react-native-windows": "^0.61.0-0"
+    "resolutions": {
+        "@types/react": "~18.0.0"
     },
-    "dependencies": {
-        "deprecated-react-native-prop-types": "^2.2.0",
-        "keymirror": "^0.1.1",
-        "prop-types": "^15.7.2"
+    "devDependencies": {
+        "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
+        "@react-native/eslint-config": "^0.72.2",
+        "@release-it/conventional-changelog": "^7.0.2",
+        "@types/jest": "^28.1.2",
+        "@types/react": "~18.0.0",
+        "@types/react-native": "0.72.3",
+        "@typescript-eslint/eslint-plugin": "^6.7.4",
+        "eslint": "^8.19.0",
+        "eslint-plugin-jest": "^27.4.2",
+        "jest": "^29.7.0",
+        "prettier": "^2.4.1",
+        "react": "18.2.0",
+        "react-native": "0.72.5",
+        "react-native-windows": "^0.61.0-0",
+        "release-it": "^16.2.1",
+        "typescript": "5.1.6"
+    },
+    "dependencies": {},
+    "peerDependencies": {
+        "react": "*",
+        "react-native": "*"
     },
     "scripts": {
         "lint": "yarn eslint .",
-        "xbasic": "yarn --cwd examples/basic"
+        "build": "yarn tsc",
+        "prepare": "yarn build",
+        "xbasic": "yarn --cwd examples/basic",
+        "docs": "yarn --cwd docs build",
+        "release": "release-it",
+        "test": "echo no test available",
+        "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
+        "check-android": "scripts/kotlin-lint.sh"
     },
     "files": [
         "android",
         "ios",
         "windows",
-        "FilterType.js",
-        "DRMType.js",
-        "TextTrackType.js",
-        "VideoResizeMode.js",
+        "src",
+        "lib",
         "react-native-video.podspec",
-        "docs"
+        "!android/build",
+        "!android/buildOutput_*",
+        "!android/local.properties",
+        "!ios/build",
+        "!**/*.tsbuildinfo",
+        "!docs",
+        "!examples"
     ]
 }

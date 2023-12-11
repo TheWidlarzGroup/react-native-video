@@ -19,6 +19,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
+import com.brentvatne.common.api.ResizeMode;
+
 /**
  * A {@link FrameLayout} that resizes itself to match a specified aspect ratio.
  */

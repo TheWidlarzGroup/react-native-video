@@ -1,0 +1,34 @@
+name: setup bun
+description: Setup bun and install dependencies
+
+inputs:
+  working-directory:
+    description: 'working directory for bun install'
+    default: ./
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: 1.0.4
+    
+    - name: Cache dependencies
+      id: bun-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}-${{ hashFiles('**/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      working-directory: ${{ inputs.working-directory }}
+      if: steps.bun-cache.outputs.cache-hit != 'true'
+      run: bun install
+      shell: bash
+      

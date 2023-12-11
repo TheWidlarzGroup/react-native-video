@@ -54,3 +54,9 @@ android/keystores/debug.keystore
 # windows
 Deploy.binlog
 msbuild.binlog
+android/buildOutput_*
+
+# lib build
+lib/
+!src/lib
+*.tsbuildinfo

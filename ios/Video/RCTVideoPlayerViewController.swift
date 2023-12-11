@@ -1,15 +1,13 @@
 import AVKit
 
 class RCTVideoPlayerViewController: AVPlayerViewController {
-    
-    var rctDelegate:RCTVideoPlayerViewControllerDelegate!
-    
-    // Optional paramters
-    var preferredOrientation:String?
-    var autorotate:Bool?
-    
-    func shouldAutorotate() -> Bool {
+    weak var rctDelegate: RCTVideoPlayerViewControllerDelegate?
 
+    // Optional paramters
+    var preferredOrientation: String?
+    var autorotate: Bool?
+
+    func shouldAutorotate() -> Bool {
         if autorotate! || preferredOrientation == nil || (preferredOrientation!.lowercased() == "all") {
             return true
         }
@@ -20,28 +18,27 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        if rctDelegate != nil {
-            rctDelegate.videoPlayerViewControllerWillDismiss(playerViewController: self)
-            rctDelegate.videoPlayerViewControllerDidDismiss(playerViewController: self)
+        rctDelegate?.videoPlayerViewControllerWillDismiss(playerViewController: self)
+        rctDelegate?.videoPlayerViewControllerDidDismiss(playerViewController: self)
+    }
+
+    #if !os(tvOS)
+
+        func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
+            return .all
         }
-    }
 
-    #if !TARGET_OS_TV
-
-    func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return .all
-    }
-
-    func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
-        if preferredOrientation?.lowercased() == "landscape" {
-            return .landscapeRight
-        } else if preferredOrientation?.lowercased() == "portrait" {
-            return .portrait
-        } else {
-            // default case
-            let orientation = UIApplication.shared.statusBarOrientation
-            return orientation
+        func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
+            if preferredOrientation?.lowercased() == "landscape" {
+                return .landscapeRight
+            } else if preferredOrientation?.lowercased() == "portrait" {
+                return .portrait
+            } else {
+                // default case
+                let orientation = UIApplication.shared.statusBarOrientation
+                return orientation
+            }
         }
-    }
+
     #endif
 }

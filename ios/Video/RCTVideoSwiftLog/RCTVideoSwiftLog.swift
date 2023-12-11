@@ -1,5 +1,5 @@
 //
-//  RCTLog.swift
+//  RCTVideoSwiftLog.swift
 //  WebViewExample
 //
 //  Created by Jimmy Dee on 4/5/17.
@@ -25,29 +25,30 @@
  * way into one or the other eventually. Feel free to reuse it as desired.
  */
 
-func RCTLogError(_ message: String, _ file: String=#file, _ line: UInt=#line) {
-    RCTVideoSwiftLog.error(message, file: file, line: line)
+let logHeader: String = "RNV:"
+
+func RCTLogError(_ message: String, _ file: String = #file, _ line: UInt = #line) {
+    RCTVideoSwiftLog.error(logHeader + message, file: file, line: line)
 }
 
-func RCTLogWarn(_ message: String, _ file: String=#file, _ line: UInt=#line) {
-    RCTVideoSwiftLog.warn(message, file: file, line: line)
+func RCTLogWarn(_ message: String, _ file: String = #file, _ line: UInt = #line) {
+    RCTVideoSwiftLog.warn(logHeader + message, file: file, line: line)
 }
 
-func RCTLogInfo(_ message: String, _ file: String=#file, _ line: UInt=#line) {
-    RCTVideoSwiftLog.info(message, file: file, line: line)
+func RCTLogInfo(_ message: String, _ file: String = #file, _ line: UInt = #line) {
+    RCTVideoSwiftLog.info(logHeader + message, file: file, line: line)
 }
 
-func RCTLog(_ message: String, _ file: String=#file, _ line: UInt=#line) {
-    RCTVideoSwiftLog.log(message, file: file, line: line)
+func RCTLog(_ message: String, _ file: String = #file, _ line: UInt = #line) {
+    RCTVideoSwiftLog.log(logHeader + message, file: file, line: line)
 }
 
-func RCTLogTrace(_ message: String, _ file: String=#file, _ line: UInt=#line) {
-    RCTVideoSwiftLog.trace(message, file: file, line: line)
+func RCTLogTrace(_ message: String, _ file: String = #file, _ line: UInt = #line) {
+    RCTVideoSwiftLog.trace(logHeader + message, file: file, line: line)
 }
 
 func DebugLog(_ message: String) {
-#if DEBUG
-    print(message)
-#endif
+    #if DEBUG
+        print(logHeader + message)
+    #endif
 }
-

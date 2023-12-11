@@ -1,12 +1,11 @@
-
 struct TextTrack {
     let type: String
     let language: String
     let title: String
     let uri: String
-    
+
     let json: NSDictionary?
-    
+
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil
