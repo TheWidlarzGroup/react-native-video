@@ -173,7 +173,7 @@ dependencies {
 
     // For loading data using the OkHttp network stack
     implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
-    
+
     // For building media playback UIs
     implementation "androidx.media3:media3-ui:$media3_version"
 

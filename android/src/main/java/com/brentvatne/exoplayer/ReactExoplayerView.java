@@ -832,9 +832,6 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 mediaSourceFactory = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 );
                 break;
             case CONTENT_TYPE_RTSP:
