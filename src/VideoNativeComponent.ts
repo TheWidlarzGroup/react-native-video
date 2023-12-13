@@ -12,7 +12,12 @@ import type {AdEvent, OnTextTracksTypeData} from './types';
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
 
-type Headers = Record<string, string>;
+type Headers = ReadonlyArray<
+  Readonly<{
+    key: string;
+    value: string;
+  }>
+>;
 
 type VideoSrc = Readonly<{
   uri?: string;

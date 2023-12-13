@@ -13,7 +13,11 @@ import NativeVideoComponent, {
 } from './VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import {getReactTag, resolveAssetSourceForVideo} from './utils';
+import {
+  generateHeaderForNative,
+  getReactTag,
+  resolveAssetSourceForVideo,
+} from './utils';
 import {VideoManager} from './VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
@@ -146,12 +150,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         isAsset,
         shouldCache: resolvedSource.shouldCache || false,
         requestHeaders: generateHeaderForNative(resolvedSource?.headers),
-        startTime: resolvedSource.startTime || 0,
-        endTime: resolvedSource.endTime,
+        startTime: resolvedSource.startPosition || 0,
         type: resolvedSource.type || '',
         mainVer: resolvedSource.mainVer || 0,
         patchVer: resolvedSource.patchVer || 0,
-        // requestHeaders: resolvedSource.headers || {},
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,

@@ -1,8 +1,3 @@
-
-
-
-
-
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewStyle} from 'react-native';
