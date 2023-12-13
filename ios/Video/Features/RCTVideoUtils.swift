@@ -19,8 +19,8 @@ enum RCTVideoUtils {
             return 0
         }
         
-        if (source?.startTime != nil && source?.endTime != nil) {
-            return NSNumber(value: (Float64(source?.endTime ?? 0) - Float64(source?.startTime ?? 0)) / 1000)
+        if (source?.cropStart != nil && source?.cropEnd != nil) {
+            return NSNumber(value: (Float64(source?.cropEnd ?? 0) - Float64(source?.cropStart ?? 0)) / 1000)
         }
         
         var effectiveTimeRange:CMTimeRange?
@@ -35,8 +35,8 @@ enum RCTVideoUtils {
         if let effectiveTimeRange = effectiveTimeRange {
             let playableDuration:Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))
             if playableDuration > 0 {
-                if (source?.startTime != nil) {
-                    return NSNumber(value: (playableDuration - Float64(source?.startTime ?? 0) / 1000))
+                if (source?.cropStart != nil) {
+                    return NSNumber(value: (playableDuration - Float64(source?.cropStart ?? 0) / 1000))
                 }
                 
                 return playableDuration as NSNumber
@@ -184,24 +184,24 @@ enum RCTVideoUtils {
         let mixComposition:AVMutableComposition = AVMutableComposition()
         
         let videoAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
-        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try videoCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: videoAsset,
-                at: .zero)
-        } catch {
+        
+        // we need videoAsset asset to be not null to get durration later
+        if videoAsset == nil {
+            return mixComposition
         }
+        
+        let videoCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID:kCMPersistentTrackID_Invalid)
+        try? videoCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+            of: videoAsset,
+            at: .zero)
         
         let audioAsset:AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
         let audioCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID:kCMPersistentTrackID_Invalid)
-        do {
-            try audioCompTrack.insertTimeRange(
-                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                of: audioAsset,
-                at: .zero)
-        } catch {
-        }
+        try? audioCompTrack.insertTimeRange(
+            CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
+            of: audioAsset,
+            at: .zero)
         
         return mixComposition
     }
@@ -226,12 +226,11 @@ enum RCTVideoUtils {
                 validTextTracks.append(textTracks[i])
                 let textCompTrack:AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                               preferredTrackID:kCMPersistentTrackID_Invalid)
-                do {
-                    try textCompTrack.insertTimeRange(
-                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                if videoAsset != nil {
+                    try? textCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: videoAsset!.timeRange.duration),
                         of: textTrackAsset,
                         at: .zero)
-                } catch {
                 }
             }
         }
@@ -300,7 +299,7 @@ enum RCTVideoUtils {
         var asset:AVURLAsset!
         let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
         let url = source.isNetwork || source.isAsset
-        ? URL(string: source.uri ?? "")
+        ? URL(string: source.uri?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
         : URL(fileURLWithPath: bundlePath)
         let assetOptions:NSMutableDictionary! = NSMutableDictionary()
         
@@ -315,5 +314,30 @@ enum RCTVideoUtils {
             asset = AVURLAsset(url: url!)
         }
         return (asset, assetOptions)
+    }
+    
+    static func createMetadataItems(for mapping: [AVMetadataIdentifier: Any]) -> [AVMetadataItem] {
+        return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
+    }
+
+    static func createMetadataItem(for identifier: AVMetadataIdentifier,
+                                   value: Any) -> AVMetadataItem {
+        let item = AVMutableMetadataItem()
+        item.identifier = identifier
+        item.value = value as? NSCopying & NSObjectProtocol
+        // Specify "und" to indicate an undefined language.
+        item.extendedLanguageTag = "und"
+        return item.copy() as! AVMetadataItem
+    }
+    
+    static func createImageMetadataItem(imageUri: String)  -> Data? {
+        if let uri = URL(string: imageUri),
+           let imgData = try? Data(contentsOf: uri),
+           let image = UIImage(data: imgData),
+           let pngData = image.pngData() {
+            return pngData
+        }
+        
+        return nil
     }
 }

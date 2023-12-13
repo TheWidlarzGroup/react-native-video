@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "rootDir": "./src",
+    "outDir": "lib",
     "paths": {
       "react-native-video": ["./src/index"]
     },
+    "composite": true,
+    "declaration": true,
+    "sourceMap": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "lib": ["esnext"],
@@ -23,7 +27,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "verbatimModuleSyntax": true
   },
-  "exclude": ["./examples/**"]
+  "exclude": ["examples", "lib", "docs"]
 }

@@ -6,7 +6,7 @@ import Promises
 class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     
     private var _videoCache:RCTVideoCache! = RCTVideoCache.sharedInstance()
-    var playerItemPrepareText: ((AVAsset?, NSDictionary?) -> AVPlayerItem)?
+    var playerItemPrepareText: ((AVAsset?, NSDictionary?, String) -> AVPlayerItem)?
     
     override init() {
         super.init()
@@ -33,12 +33,12 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
             case .missingFileExtension:
                 DebugLog("Could not generate cache key for uri '\(uri)'. It is currently not supported to cache urls that do not include a file extension. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
                 let asset:AVURLAsset! = AVURLAsset(url: url!, options:options as! [String : Any])
-                return playerItemPrepareText(asset, options)
+                return playerItemPrepareText(asset, options, "")
                 
             case .unsupportedFileExtension:
                 DebugLog("Could not generate cache key for uri '\(uri)'. The file extension of that uri is currently not supported. The video file will not be cached. Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md")
                 let asset:AVURLAsset! = AVURLAsset(url: url!, options:options as! [String : Any])
-                return playerItemPrepareText(asset, options)
+                return playerItemPrepareText(asset, options, "")
                 
             default:
                 if let cachedAsset = cachedAsset {
@@ -77,8 +77,8 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     
     // MARK: - DVAssetLoaderDelegate
     
-    func dvAssetLoaderDelegate(loaderDelegate:DVAssetLoaderDelegate!, didLoadData data:NSData!, forURL url:NSURL!) {
-        _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
+    func dvAssetLoaderDelegate(_ loaderDelegate: DVAssetLoaderDelegate!, didLoad data: Data!, for url: URL!) {
+            _videoCache.storeItem(data as Data?, forUri:url.absoluteString, withCallback:{ (success:Bool) in
             DebugLog("Cache data stored successfully 🎉")
         })
     }

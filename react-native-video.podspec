@@ -13,10 +13,10 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/react-native-video/react-native-video.git", :tag => "v#{s.version}" }
 
   s.ios.deployment_target = "9.0"
-  s.tvos.deployment_target = "9.0"
+  s.tvos.deployment_target = "10.0"
 
   s.subspec "Video" do |ss|
-    ss.source_files  = "ios/Video/**/*.{h,m,swift}"
+    ss.source_files = "ios/Video/**/*.{h,m,swift}"
     ss.dependency "PromisesSwift"
 
     if defined?($RNVideoUseGoogleIMA)
@@ -28,22 +28,20 @@ Pod::Spec.new do |s|
         'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_GOOGLE_IMA'
       }
     end
-  end
-
-  s.subspec "VideoCaching" do |ss|
-    ss.dependency "react-native-video/Video"
-    ss.dependency "SPTPersistentCache", "~> 1.1.0"
-    ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
-
-    ss.source_files = "ios/VideoCaching/**/*.{h,m,swift}"
+    if defined?($RNVideoUseVideoCaching)
+      Pod::UI.puts "RNVideo: enable Video caching"
+      ss.dependency "SPTPersistentCache", "~> 1.1.0"
+      ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
+      ss.source_files = "ios/*/**/*.{h,m,swift}"
+      ss.pod_target_xcconfig = {
+        'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_VIDEO_CACHING'
+      }
+    end
   end
 
   s.dependency "React-Core"
-
   s.default_subspec = "Video"
-
   s.static_framework = true
-
   s.xcconfig = {
     'OTHER_LDFLAGS': '-ObjC',
   }

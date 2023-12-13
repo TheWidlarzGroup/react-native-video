@@ -14,6 +14,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
     private var _playerLayer:AVPlayerLayer?
+    private var _chapters:[Chapter]?
 
     private var _playerViewController:RCTVideoPlayerViewController?
     private var _videoURL:NSURL?
@@ -35,6 +36,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _controls:Bool = false
 
     /* Keep track of any modifiers, need to be applied after each play */
+    private var _audioOutput: String = "speaker"
     private var _volume:Float = 1.0
     private var _rate:Float = 1.0
     private var _maxBitRate:Float?
@@ -54,7 +56,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playWhenInactive:Bool = false
     private var _ignoreSilentSwitch:String! = "inherit" // inherit, ignore, obey
     private var _mixWithOthers:String! = "inherit" // inherit, mix, duck
-    private var _resizeMode:String! = "AVLayerVideoGravityResizeAspectFill"
+    private var _resizeMode:String! = "cover"
     private var _fullscreen:Bool = false
     private var _fullscreenAutorotate:Bool = true
     private var _fullscreenOrientation:String! = "all"
@@ -63,6 +65,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
+    private var _pictureInPictureEnabled = false
+    private var _startPosition:Float64 = -1
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -77,12 +81,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
     private var _playerObserver: RCTPlayerObserver = RCTPlayerObserver()
 
-#if canImport(RCTVideoCache)
+#if USE_VIDEO_CACHING
     private let _videoCache:RCTVideoCachingHandler = RCTVideoCachingHandler()
 #endif
 
-#if TARGET_OS_IOS
-    private let _pip:RCTPictureInPicture = RCTPictureInPicture(self.onPictureInPictureStatusChanged, self.onRestoreUserInterfaceForPictureInPictureStop)
+#if os(iOS)
+    private var _pip:RCTPictureInPicture? = nil
 #endif
 
     // Events
@@ -91,7 +95,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onVideoBuffer: RCTDirectEventBlock?
     @objc var onVideoError: RCTDirectEventBlock?
     @objc var onVideoProgress: RCTDirectEventBlock?
-    @objc var onBandwidthUpdate: RCTDirectEventBlock?
+    @objc var onVideoBandwidthUpdate: RCTDirectEventBlock?
     @objc var onVideoSeek: RCTDirectEventBlock?
     @objc var onVideoEnd: RCTDirectEventBlock?
     @objc var onTimedMetadata: RCTDirectEventBlock?
@@ -104,24 +108,49 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onPlaybackStalled: RCTDirectEventBlock?
     @objc var onPlaybackResume: RCTDirectEventBlock?
     @objc var onPlaybackRateChange: RCTDirectEventBlock?
+    @objc var onVolumeChange: RCTDirectEventBlock?
+    @objc var onVideoPlaybackStateChanged: RCTDirectEventBlock?
     @objc var onVideoExternalPlaybackChange: RCTDirectEventBlock?
     @objc var onPictureInPictureStatusChanged: RCTDirectEventBlock?
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
 
+    @objc func _onPictureInPictureStatusChanged() {
+        onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: true)])
+    }
+
+    @objc func _onRestoreUserInterfaceForPictureInPictureStop() {
+        onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: false)])
+    }
+
+    func isPipEnabled () -> Bool {
+        return _pictureInPictureEnabled
+    }
+
     init(eventDispatcher:RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 #if USE_GOOGLE_IMA
-        _imaAdsManager = RCTIMAAdsManager(video: self)
+        _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
 #endif
 
         _eventDispatcher = eventDispatcher
+
+#if os(iOS)
+        _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
+#endif
 
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationWillResignActive(notification:)),
             name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+                
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive(notification:)),
+            name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
 
@@ -146,7 +175,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             object: nil
         )
         _playerObserver._handlers = self
-#if canImport(RCTVideoCache)
+#if USE_VIDEO_CACHING
         _videoCache.playerItemPrepareText = playerItemPrepareText
 #endif
     }
@@ -154,7 +183,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 #if USE_GOOGLE_IMA
-        _imaAdsManager = RCTIMAAdsManager(video: self)
+        _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
 #endif
     }
 
@@ -173,8 +202,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player?.rate = 0.0
     }
 
+    @objc func applicationDidBecomeActive(notification: NSNotification!) {
+        if _playInBackground || _playWhenInactive || _paused { return }
+
+        // Resume the player or any other tasks that should continue when the app becomes active.
+        _player?.play()
+        _player?.rate = _rate
+    }
+
     @objc func applicationDidEnterBackground(notification:NSNotification!) {
-        if _playInBackground {
+        if !_playInBackground {
             // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
             _playerLayer?.player = nil
             _playerViewController?.player = nil
@@ -183,7 +220,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc func applicationWillEnterForeground(notification:NSNotification!) {
         self.applyModifiers()
-        if _playInBackground {
+        if !_playInBackground {
             _playerLayer?.player = _player
             _playerViewController?.player = _player
         }
@@ -215,8 +252,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         var currentTime = _player?.currentTime()
-        if (currentTime != nil && _source?.startTime != nil) {
-            currentTime = CMTimeSubtract(currentTime!, CMTimeMake(value: _source?.startTime ?? 0, timescale: 1000))
+        if (currentTime != nil && _source?.cropStart != nil) {
+            currentTime = CMTimeSubtract(currentTime!, CMTimeMake(value: _source?.cropStart ?? 0, timescale: 1000))
         }
         let currentPlaybackTime = _player?.currentItem?.currentDate()
         let duration = CMTimeGetSeconds(playerDuration)
@@ -247,8 +284,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
-        DispatchQueue.global(qos: .default).async { [weak self] in
-            guard let self = self else {return}
+        let dispatchClosure = {
             self._source = VideoSource(source)
             if (self._source?.uri == nil || self._source?.uri == "") {
                 self._player?.replaceCurrentItem(with: nil)
@@ -270,22 +306,26 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     if let uri = source.uri, uri.starts(with: "ph://") {
                         return Promise {
                             RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
-                                return self.playerItemPrepareText(asset:asset, assetOptions:nil)
+                                return self.playerItemPrepareText(asset:asset, assetOptions:nil, uri: source.uri ?? "")
                             }
                         }
                     }
                     guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
-                        let asset = assetResult.asset,
-                        let assetOptions = assetResult.assetOptions else {
-                        DebugLog("Could not find video URL in source '\(self._source)'")
+                          let asset = assetResult.asset,
+                          let assetOptions = assetResult.assetOptions else {
+                        DebugLog("Could not find video URL in source '\(String(describing: self._source))'")
                         throw NSError(domain: "", code: 0, userInfo: nil)
                     }
 
-    #if canImport(RCTVideoCache)
+                    if let startPosition = self._source?.startPosition {
+                        self._startPosition = Float64(startPosition) / 1000
+                    }
+
+#if USE_VIDEO_CACHING
                     if self._videoCache.shouldCache(source:source, textTracks:self._textTracks) {
                         return self._videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions:assetOptions)
                     }
-    #endif
+#endif
 
                     if self._drm != nil || self._localSourceEncryptionKeyScheme != nil {
                         self._resouceLoaderDelegate = RCTResourceLoaderDelegate(
@@ -297,7 +337,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                             reactTag: self.reactTag
                         )
                     }
-                    return Promise{self.playerItemPrepareText(asset: asset, assetOptions:assetOptions)}
+
+                    return Promise{self.playerItemPrepareText(asset: asset, assetOptions:assetOptions, uri: source.uri ?? "")}
                 }.then{[weak self] (playerItem:AVPlayerItem!) in
                     guard let self = self else {throw  NSError(domain: "", code: 0, userInfo: nil)}
 
@@ -305,7 +346,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem = playerItem
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
-                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.startTime, withVideoEnd: self._source?.endTime)
+                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -342,6 +383,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }.catch{_ in }
             self._videoLoadStarted = true
         }
+        DispatchQueue.global(qos: .default).async(execute: dispatchClosure)
     }
 
     @objc
@@ -354,9 +396,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _localSourceEncryptionKeyScheme = keyScheme
     }
 
-    func playerItemPrepareText(asset:AVAsset!, assetOptions:NSDictionary?) -> AVPlayerItem {
-        if (_textTracks == nil) || _textTracks?.count==0 {
-            return AVPlayerItem(asset: asset)
+    func playerItemPrepareText(asset:AVAsset!, assetOptions:NSDictionary?, uri: String) -> AVPlayerItem {
+        if (_textTracks == nil) || _textTracks?.count==0 || (uri.hasSuffix(".m3u8"))  {
+            return self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
         // AVPlayer can't airplay AVMutableCompositions
@@ -371,18 +413,71 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             setTextTracks(validTextTracks)
         }
 
-        return AVPlayerItem(asset: mixComposition)
+        return self.playerItemPropegateMetadata(AVPlayerItem(asset: mixComposition))
+    }
+
+    func playerItemPropegateMetadata(_ playerItem: AVPlayerItem!) -> AVPlayerItem {
+        var mapping: [AVMetadataIdentifier: Any] = [:]
+
+        if let title = _source?.title {
+            mapping[.commonIdentifierTitle] = title
+        }
+
+        if let subtitle = _source?.subtitle {
+            mapping[.iTunesMetadataTrackSubTitle] = subtitle
+        }
+
+        if let description = _source?.description {
+            mapping[.commonIdentifierDescription] = description
+        }
+
+        if let customImageUri = _source?.customImageUri,
+           let imageData = RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
+            mapping[.commonIdentifierArtwork] = imageData
+        }
+
+        if #available(iOS 12.2, *), !mapping.isEmpty {
+            playerItem.externalMetadata = RCTVideoUtils.createMetadataItems(for: mapping)
+        }
+
+#if os(tvOS)
+        if let chapters = _chapters {
+            playerItem.navigationMarkerGroups = RCTVideoTVUtils.makeNavigationMarkerGroups(chapters)
+        }
+#endif
+
+        return playerItem
     }
 
     // MARK: - Prop setters
 
     @objc
-    func setResizeMode(_ mode: String?) {
-        if _controls {
-            _playerViewController?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
-        } else {
-            _playerLayer?.videoGravity = AVLayerVideoGravity(rawValue: mode ?? "")
+    func setResizeMode(_ mode: String) {
+        var resizeMode: AVLayerVideoGravity = .resizeAspect
+
+        switch mode {
+        case "contain":
+            resizeMode = .resizeAspect
+            break
+        case "none":
+            resizeMode = .resizeAspect
+            break
+        case "cover":
+            resizeMode = .resizeAspectFill
+            break
+        case "stretch":
+            resizeMode = .resize
+            break
+        default:
+            resizeMode = .resizeAspect
         }
+
+        if _controls {
+            _playerViewController?.videoGravity = resizeMode
+        } else {
+            _playerLayer?.videoGravity = resizeMode
+        }
+
         _resizeMode = mode
     }
 
@@ -410,22 +505,33 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setPictureInPicture(_ pictureInPicture:Bool) {
-#if TARGET_OS_IOS
-        _pip.setPictureInPicture(pictureInPicture)
+#if os(iOS)
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback)
+            try audioSession.setActive(true, options: [])
+        } catch {
+        }
+        if (pictureInPicture) {
+            _pictureInPictureEnabled = true
+        } else {
+            _pictureInPictureEnabled = false
+        }
+        _pip?.setPictureInPicture(pictureInPicture)
 #endif
     }
 
     @objc
     func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore:Bool) {
-#if TARGET_OS_IOS
-        _pip.setRestoreUserInterfaceForPIPStopCompletionHandler(restore)
+#if os(iOS)
+        _pip?.setRestoreUserInterfaceForPIPStopCompletionHandler(restore)
 #endif
     }
 
     @objc
     func setIgnoreSilentSwitch(_ ignoreSilentSwitch:String?) {
         _ignoreSilentSwitch = ignoreSilentSwitch
-        RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
+        RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers, audioOutput:_audioOutput)
         applyModifiers()
     }
 
@@ -447,7 +553,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _player?.rate = 0.0
             }
         } else {
-            RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers)
+            RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers, audioOutput:_audioOutput)
 
             if _adPlaying {
 #if USE_GOOGLE_IMA
@@ -485,20 +591,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             paused:wasPaused,
             seekTime:seekTime.floatValue,
             seekTolerance:seekTolerance.floatValue)
-            .then{ [weak self] (finished:Bool) in
-                guard let self = self else { return }
+        .then{ [weak self] (finished:Bool) in
+            guard let self = self else { return }
 
-                self._playerObserver.addTimeObserverIfNotSet()
-                if !wasPaused {
-                    self.setPaused(false)
-                }
-                self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
-                                   "seekTime": seekTime,
-                                   "target": self.reactTag])
-            }.catch{_ in }
+            self._playerObserver.addTimeObserverIfNotSet()
+            if !wasPaused {
+                self.setPaused(false)
+            }
+            self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
+                               "seekTime": seekTime,
+                               "target": self.reactTag])
+        }.catch{_ in }
 
         _pendingSeek = false
     }
+
 
     @objc
     func setRate(_ rate:Float) {
@@ -515,6 +622,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setMuted(_ muted:Bool) {
         _muted = muted
         applyModifiers()
+    }
+
+    @objc
+    func setAudioOutput(_ audioOutput:String) {
+        _audioOutput = audioOutput
+        RCTPlayerOperations.configureAudio(ignoreSilentSwitch:_ignoreSilentSwitch, mixWithOthers:_mixWithOthers, audioOutput:_audioOutput)
+        do {
+            if audioOutput == "speaker" {
+#if os(iOS)
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
+#endif
+            } else if audioOutput == "earpiece" {
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
+            }
+        } catch {
+            print("Error occurred: \(error.localizedDescription)")
+        }
     }
 
     @objc
@@ -548,7 +672,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // Fallback on earlier versions
         }
     }
-    
+
     func setPlaybackRange(_ item:AVPlayerItem!, withVideoStart videoStart:Int64?, withVideoEnd videoEnd:Int64?) {
         if (videoStart != nil) {
             let start = CMTimeMake(value: videoStart!, timescale: 1000)
@@ -561,10 +685,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-
     func applyModifiers() {
         if let video = _player?.currentItem,
-            video == nil || video.status != AVPlayerItem.Status.readyToPlay {
+           video == nil || video.status != AVPlayerItem.Status.readyToPlay {
             return
         }
         if _muted {
@@ -577,7 +700,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.isMuted = false
         }
 
-        if #available(iOS 12.0, *) {
+        if #available(iOS 12.0, tvOS 12.0, *) {
             _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
         } else {
             // Fallback on earlier versions
@@ -587,6 +710,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             setMaxBitRate(_maxBitRate)
         }
 
+        setAudioOutput(_audioOutput)
         setSelectedAudioTrack(_selectedAudioTrackCriteria)
         setSelectedTextTrack(_selectedTextTrackCriteria)
         setResizeMode(_resizeMode)
@@ -600,8 +724,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setRepeat(_ `repeat`: Bool) {
         _repeat = `repeat`
     }
-
-
 
     @objc
     func setSelectedAudioTrack(_ selectedAudioTrack:NSDictionary?) {
@@ -642,10 +764,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
+    func setChapters(_ chapters:[NSDictionary]?) {
+        setChapters(chapters?.map { Chapter($0) })
+    }
+
+    func setChapters(_ chapters:[Chapter]?) {
+        _chapters = chapters
+    }
+
+    @objc
     func setFullscreen(_ fullscreen:Bool) {
         if fullscreen && !_fullscreenPlayerPresented && _player != nil {
             // Ensure player view controller is not null
-            if _playerViewController == nil && _controls {
+            // Controls will be displayed even if it is disabled in configuration
+            if _playerViewController == nil {
                 self.usePlayerViewController()
             }
 
@@ -675,7 +807,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     viewController.present(playerViewController, animated:true, completion:{ [weak self] in
                         guard let self = self else {return}
-                        self._playerViewController?.showsPlaybackControls = self._controls
+                        // In fullscreen we must display controls
+                        self._playerViewController?.showsPlaybackControls = true
                         self._fullscreenPlayerPresented = fullscreen
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
 
@@ -737,6 +870,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         viewController.view.frame = self.bounds
         viewController.player = player
+        if #available(tvOS 14.0, *) {
+            viewController.allowsPictureInPicturePlayback = true
+        }
         return viewController
     }
 
@@ -755,8 +891,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self.layer.addSublayer(_playerLayer)
             }
             self.layer.needsDisplayOnBoundsChange = true
-#if TARGET_OS_IOS
-            _pip.setupPipController(_playerLayer)
+#if os(iOS)
+            _pip?.setupPipController(_playerLayer)
 #endif
         }
     }
@@ -801,7 +937,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             onVideoFullscreenPlayerWillDismiss(["target": reactTag as Any])
         }
     }
-
 
     func videoPlayerViewControllerDidDismiss(playerViewController:AVPlayerViewController) {
         if _playerViewController == playerViewController && _fullscreenPlayerPresented {
@@ -945,12 +1080,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func setLicenseResult(_ license:String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license)
+    func setLicenseResult(_ license:String!, _ licenseUrl: String!) {
+        _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
     }
 
-    func setLicenseResultError(_ error:String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error)
+    func setLicenseResultError(_ error:String!, _ licenseUrl: String!) {
+        _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
+    }
+
+    func dismissFullscreenPlayer() {
+        setFullscreen(false)
+    }
+
+    func presentFullscreenPlayer() {
+        setFullscreen(true)
     }
 
     // MARK: - RCTPlayerObserverHandler
@@ -1040,6 +1183,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeek = false
         }
 
+        if _startPosition >= 0 {
+            setSeek([
+                "time": NSNumber(value: _startPosition),
+                "tolerance": NSNumber(value: 100)
+            ])
+            _startPosition = -1
+        }
+
         if _videoLoadStarted {
             let audioTracks = RCTVideoUtils.getAudioTrackInfo(_player)
             let textTracks = RCTVideoUtils.getTextTrackInfo(_player).map(\.json)
@@ -1087,7 +1238,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>) {
-        if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) != nil) {
+        if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) == true) {
             setPaused(_paused)
         }
         _playerBufferEmpty = false
@@ -1096,13 +1247,33 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
         guard let _player = _player else { return }
+
+        if(player.rate == change.oldValue && change.oldValue != nil) {
+            return
+        }
+
         onPlaybackRateChange?(["playbackRate": NSNumber(value: _player.rate),
                                "target": reactTag as Any])
+
+        onVideoPlaybackStateChanged?(["isPlaying": _player.rate != 0,
+                                      "target": reactTag as Any])
+
         if _playbackStalled && _player.rate > 0 {
             onPlaybackResume?(["playbackRate": NSNumber(value: _player.rate),
                                "target": reactTag as Any])
             _playbackStalled = false
         }
+    }
+
+    func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
+        guard let _player = _player else { return }
+
+        if(player.rate == change.oldValue && change.oldValue != nil) {
+          return
+        }
+
+        onVolumeChange?(["volume": NSNumber(value: _player.volume),
+                         "target": reactTag as Any])
     }
 
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>) {
@@ -1175,16 +1346,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerObserver.removePlayerTimeObserver()
         }
     }
-
-    //unused
-    //    @objc func handleAVPlayerAccess(notification:NSNotification!) {
-    //        let accessLog:AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
-    //        let lastEvent:AVPlayerItemAccessLogEvent! = accessLog.events.last
-    //
-    //        /* TODO: get this working
-    //         if (self.onBandwidthUpdate) {
-    //         self.onBandwidthUpdate(@{@"bitrate": [NSNumber numberWithFloat:lastEvent.observedBitrate]});
-    //         }
-    //         */
-    //    }
+    
+    @objc func handleAVPlayerAccess(notification:NSNotification!) {
+        let accessLog:AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
+        let lastEvent:AVPlayerItemAccessLogEvent! = accessLog.events.last
+        
+        onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
+    }
 }
