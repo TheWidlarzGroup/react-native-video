@@ -38,7 +38,7 @@ export type DebugConfig = Readonly<{
   thread?: boolean;
 }>;
 
-export enum DrmType {
+export enum DRMType {
   WIDEVINE = 'widevine',
   PLAYREADY = 'playready',
   CLEARKEY = 'clearkey',
@@ -46,7 +46,7 @@ export enum DrmType {
 }
 
 export type Drm = Readonly<{
-  type?: DrmType;
+  type?: DRMType;
   licenseServer?: string;
   headers?: Headers;
   contentId?: string; // ios
@@ -179,7 +179,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
-  adTagUrl?: string; // iOS
+  adTagUrl?: string;
   audioOnly?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   backBufferDurationMs?: number; // Android
@@ -226,4 +226,5 @@ export interface ReactVideoProps extends ReactVideoEvents {
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
+  allowsExternalPlayback?: boolean; // iOS
 }

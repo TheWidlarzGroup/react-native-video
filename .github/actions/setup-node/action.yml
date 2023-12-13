@@ -1,0 +1,34 @@
+name: Setup node_modules
+description: Setup Node.js and install dependencies
+
+inputs:
+  working-directory:
+    description: 'working directory for yarn install'
+    default: ./
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+
+    - name: Cache dependencies
+      id: yarn-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/node_modules
+          .yarn/install-state.gz
+        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/package.json', '!node_modules/**') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          ${{ runner.os }}-yarn-
+    - name: Install dependencies
+      working-directory: ${{ inputs.working-directory }}
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+      run: yarn install --immutable --ignore-scripts
+      shell: bash
+      

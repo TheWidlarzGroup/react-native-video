@@ -1,7 +1,7 @@
 struct DRMParams {
     let type: String?
     let licenseServer: String?
-    let headers: Dictionary<String,Any>?
+    let headers: [String: Any]?
     let contentId: String?
     let certificateUrl: String?
     let base64Certificate: Bool?
@@ -25,6 +25,6 @@ struct DRMParams {
         self.contentId = json["contentId"] as? String
         self.certificateUrl = json["certificateUrl"] as? String
         self.base64Certificate = json["base64Certificate"] as? Bool
-        self.headers = json["headers"] as? Dictionary<String,Any>
+        self.headers = json["headers"] as? [String: Any]
     }
 }

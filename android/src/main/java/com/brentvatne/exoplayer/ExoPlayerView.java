@@ -25,8 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.brentvatne.common.API.ResizeMode;
-import com.brentvatne.common.API.SubtitleStyle;
+import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SubtitleStyle;
 
 import java.util.List;
 
@@ -279,53 +279,8 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
 
         @Override
-        public void onIsLoadingChanged(boolean isLoading) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onPlaybackStateChanged(int playbackState) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onPlayerError(PlaybackException e) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onTimelineChanged(Timeline timeline, int reason) {
-            // Do nothing.
-        }
-
-        @Override
         public void onTracksChanged(Tracks tracks) {
             updateForCurrentTrackSelections();
-        }
-
-        @Override
-        public void onPlaybackParametersChanged(PlaybackParameters params) {
-            // Do nothing
-        }
-
-        @Override
-        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onRepeatModeChanged(int repeatMode) {
-            // Do nothing.
         }
     }
 

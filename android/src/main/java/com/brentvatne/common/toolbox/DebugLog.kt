@@ -12,8 +12,10 @@ import java.lang.Exception
 object DebugLog {
     // log level to display
     private var level = Log.WARN
+
     // enable thread display in logs
     private var displayThread = true
+
     // add a common prefix for easy filtering
     private const val TAG_PREFIX = "RNV"
 
@@ -24,16 +26,15 @@ object DebugLog {
     }
 
     @JvmStatic
-    private fun getTag(tag: String): String {
-        return TAG_PREFIX + tag
-    }
+    private fun getTag(tag: String): String = TAG_PREFIX + tag
 
     @JvmStatic
-    private fun getMsg(msg: String): String {
-        return if (displayThread) {
+    private fun getMsg(msg: String): String =
+        if (displayThread) {
             "[" + Thread.currentThread().name + "] " + msg
-        } else msg
-    }
+        } else {
+            msg
+        }
 
     @JvmStatic
     fun v(tag: String, msg: String) {

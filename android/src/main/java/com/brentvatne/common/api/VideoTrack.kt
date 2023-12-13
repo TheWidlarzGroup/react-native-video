@@ -1,4 +1,4 @@
-package com.brentvatne.common.API
+package com.brentvatne.common.api
 
 /*
 * internal representation of audio & text tracks
