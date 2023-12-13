@@ -155,13 +155,25 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
+        Map<String, String> headers = new HashMap<>();
+        ReadableArray propSrcHeadersArray = (src.hasKey(PROP_SRC_HEADERS)) ? src.getArray(PROP_SRC_HEADERS) : null;
+        if (propSrcHeadersArray != null) {
+            if (propSrcHeadersArray.size() > 0) {
+                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
+                    ReadableMap current = propSrcHeadersArray.getMap(i);
+                    String key = current.hasKey("key") ? current.getString("key") : null;
+                    String value = current.hasKey("value") ? current.getString("value") : null;
+                    if (key != null && value != null) {
+                        headers.put(key, value);
+                    }
+                }
+            }
+        }
         String uriString = ReactBridgeUtils.safeGetString(src, PROP_SRC_URI, null);
         int startPositionMs = ReactBridgeUtils.safeGetInt(src, PROP_START_POSITION, -1);
         int cropStartMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_START, -1);
         int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
-
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? ReactBridgeUtils.toStringMap(src.getMap(PROP_SRC_HEADERS)) : new HashMap<>();
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
