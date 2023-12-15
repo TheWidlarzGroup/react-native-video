@@ -4,8 +4,9 @@
 > **Note:** version 5.2.1 won't have any updates. We are currently working on making a 6.0.0 fully stable
 
 ## Documentation
-Old version of documentation can be found [here](https://github.com/react-native-video/react-native-video/tree/v6.0.0-alpha.8)
-New documentation is available at [react-native-video.github.io/react-native-video](https://react-native-video.github.io/react-native-video/), if you find some issue with new version, don't hesitate to open a ticket!
+documentation is available at [react-native-video.github.io/react-native-video](https://react-native-video.github.io/react-native-video/)
+
+> if you find some issue with new version, don't hesitate to open a ticket! Also Old version can be found [here](https://github.com/react-native-video/react-native-video/tree/v6.0.0-alpha.8)
 
 ## Usage
 
@@ -49,3 +50,14 @@ var styles = StyleSheet.create({
 });
 ```
 
+## Supported by
+<p>
+    📱 TWG provides both free and commercial support for this project. Feel free to contact us 🤝 to build something awesome together! 🚀
+</p>
+<a href="https://thewidlarzgroup.com/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/baners/twg-dark.png" />
+    <source media="(prefers-color-scheme: light)" srcset="./docs/assets/baners/twg-light.png" />
+    <img alt="TheWidlarzGroup" src="./docs/assets/baners/twg-light-1.png" />
+  </picture>
+</a>
