@@ -91,6 +91,9 @@ public class DataSourceUtil {
 
         if (requestHeaders != null) {
             okHttpDataSourceFactory.setDefaultRequestProperties(requestHeaders);
+            if (!requestHeaders.containsKey("User-Agent")) {
+                okHttpDataSourceFactory.setUserAgent(getUserAgent(context));
+            }
         } else {
             okHttpDataSourceFactory.setUserAgent(getUserAgent(context));
         }
