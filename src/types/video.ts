@@ -1,6 +1,6 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {StyleProp, ViewStyle} from 'react-native';
+import type {AccessibilityProps, StyleProp, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 
@@ -170,7 +170,7 @@ export enum PosterResizeModeType {
   STRETCH = 'stretch',
 }
 
-export interface ReactVideoProps extends ReactVideoEvents {
+export interface ReactVideoProps extends ReactVideoEvents, AccessibilityProps {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
@@ -215,6 +215,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
+  testID?: string;
   trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
