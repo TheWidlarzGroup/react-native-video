@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer.events
 
-import com.brentvatne.common.Track
+import com.brentvatne.common.api.Track
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
@@ -35,10 +35,10 @@ class OnTextTracksEvent(viewTag: Int, private val textTracks:  ArrayList<Track>)
                 val format = textTracks[i]
                 val textTrack = Arguments.createMap()
                 textTrack.putInt("index", i)
-                textTrack.putString("title", if (format.m_title != null) format.m_title else "")
-                textTrack.putString("type", if (format.m_mimeType != null) format.m_mimeType else "")
-                textTrack.putString("language", if (format.m_language != null) format.m_language else "")
-                textTrack.putBoolean("selected", format.m_isSelected)
+                textTrack.putString("title", if (format.title != null) format.title else "")
+                textTrack.putString("type", if (format.mimeType != null) format.mimeType else "")
+                textTrack.putString("language", if (format.language != null) format.language else "")
+                textTrack.putBoolean("selected", format.isSelected)
                 waTextTracks.pushMap(textTrack)
             }
         }

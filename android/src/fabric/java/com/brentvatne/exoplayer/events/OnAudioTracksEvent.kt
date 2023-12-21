@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer.events
 
-import com.brentvatne.common.Track
+import com.brentvatne.common.api.Track
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
@@ -35,11 +35,11 @@ class OnAudioTracksEvent(viewTag: Int, private val audioTracks: ArrayList<Track>
                 val format = audioTracks[i]
                 val audioTrack = Arguments.createMap()
                 audioTrack.putInt("index", i)
-                audioTrack.putString("title", if (format.m_title != null) format.m_title else "")
-                audioTrack.putString("type", if (format.m_mimeType != null) format.m_mimeType else "")
-                audioTrack.putString("language", if (format.m_language != null) format.m_language else "")
-                audioTrack.putInt("bitrate", format.m_bitrate)
-                audioTrack.putBoolean("selected", format.m_isSelected)
+                audioTrack.putString("title", if (format.title != null) format.title else "")
+                audioTrack.putString("type", if (format.mimeType != null) format.mimeType else "")
+                audioTrack.putString("language", if (format.language != null) format.language else "")
+                audioTrack.putInt("bitrate", format.bitrate)
+                audioTrack.putBoolean("selected", format.isSelected)
                 waAudioTracks.pushMap(audioTrack)
             }
         }

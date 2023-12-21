@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer.events
 
-import com.brentvatne.common.VideoTrack
+import com.brentvatne.common.api.VideoTrack
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
@@ -34,12 +34,12 @@ class OnVideoTracksEvent(viewTag: Int, private val videoTracks: ArrayList<VideoT
             for (i in videoTracks.indices) {
                 val vTrack = videoTracks[i]
                 val videoTrack = Arguments.createMap()
-                videoTrack.putInt("width", vTrack.m_width)
-                videoTrack.putInt("height", vTrack.m_height)
-                videoTrack.putInt("bitrate", vTrack.m_bitrate)
-                videoTrack.putString("codecs", vTrack.m_codecs)
-                videoTrack.putInt("trackId", vTrack.m_id)
-                videoTrack.putBoolean("selected", vTrack.m_isSelected)
+                videoTrack.putInt("width", vTrack.width)
+                videoTrack.putInt("height", vTrack.height)
+                videoTrack.putInt("bitrate", vTrack.bitrate)
+                videoTrack.putString("codecs", vTrack.codecs)
+                videoTrack.putInt("trackId", vTrack.id)
+                videoTrack.putBoolean("selected", vTrack.isSelected)
                 waVideoTracks.pushMap(videoTrack)
             }
         }

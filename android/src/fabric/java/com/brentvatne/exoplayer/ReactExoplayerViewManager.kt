@@ -2,7 +2,14 @@ package com.brentvatne.exoplayer;
 
 import android.net.Uri
 import android.text.TextUtils
+import androidx.media3.common.util.Util
+import androidx.media3.datasource.RawResourceDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
+import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
+import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.brentvatne.exoplayer.events.*
+import com.brentvatne.common.api.ResizeMode
+import com.brentvatne.common.api.SubtitleStyle
 import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
@@ -14,9 +21,6 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.RNCVideoManagerDelegate
 import com.facebook.react.viewmanagers.RNCVideoManagerInterface
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.upstream.RawResourceDataSource
-import com.google.android.exoplayer2.util.Util
 import java.util.*
 import javax.annotation.Nullable
 
@@ -30,8 +34,9 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     private val REACT_CLASS = "RNCVideo"
 
     private val PROP_SRC_URI = "uri"
-    private val PROP_SRC_START_TIME = "startTime"
-    private val PROP_SRC_END_TIME = "endTime"
+    private val PROP_START_POSITION = "startPosition"
+    private val PROP_SRC_CROP_START = "cropStart"
+    private val PROP_SRC_CROP_END = "cropEnd"
     private val PROP_SRC_TYPE = "type"
     private val PROP_SRC_HEADERS = "requestHeaders"
 
@@ -108,10 +113,11 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     @ReactProp(name = "src")
     override fun setSrc(view: ReactExoplayerView?, src: ReadableMap?) {
         if (view != null && src != null) {
-            val uriString: String? = if (src.hasKey(PROP_SRC_URI)) src.getString(PROP_SRC_URI) else null
-            val startTimeMs = if (src.hasKey(PROP_SRC_START_TIME)) src.getInt(PROP_SRC_START_TIME) else -1
-            val endTimeMs = if (src.hasKey(PROP_SRC_END_TIME)) src.getInt(PROP_SRC_END_TIME) else -1
-            val extension: String? = if (src.hasKey(PROP_SRC_TYPE)) src.getString(PROP_SRC_TYPE) else null
+            val uriString = safeGetString(src, PROP_SRC_URI, null)
+            val startPositionMs = safeGetInt(src, PROP_START_POSITION, -1)
+            val cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
+            val cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
+            val extension = safeGetString(src, PROP_SRC_TYPE, null)
             val headers: MutableMap<String, String> = mutableMapOf()
             val propSrcHeadersArray = if (src.hasKey(PROP_SRC_HEADERS)) src.getArray(PROP_SRC_HEADERS) else null
             propSrcHeadersArray?.let {
@@ -133,7 +139,7 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
             if (startsWithValidScheme(uriString ?: "")) {
                 val srcUri: Uri = Uri.parse(uriString)
                 if (srcUri != null) {
-                    view.setSrc(srcUri, startTimeMs.toLong(), endTimeMs.toLong(), extension, headers)
+                    view.setSrc(srcUri, startPositionMs.toLong(), cropStartMs.toLong(), cropEndMs.toLong(), extension, headers)
                 }
             } else {
                 val context = view.context
@@ -490,5 +496,9 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     @ReactProp(name = "useSecureView", defaultBoolean = true)
     override fun setUseSecureView(view: ReactExoplayerView?, value: Boolean) {
         view?.useSecureView(value)
+    }
+
+    override fun setDebug(view: ReactExoplayerView?, value: ReadableMap?) {
+        TODO("Not yet implemented")
     }
 }

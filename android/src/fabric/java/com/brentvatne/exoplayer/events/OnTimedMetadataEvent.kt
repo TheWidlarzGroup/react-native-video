@@ -1,13 +1,14 @@
 package com.brentvatne.exoplayer.events
 
+import androidx.media3.common.Metadata
+import androidx.media3.extractor.metadata.emsg.EventMessage
+import androidx.media3.extractor.metadata.id3.Id3Frame
+import androidx.media3.extractor.metadata.id3.TextInformationFrame
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.events.Event
 import com.facebook.react.uimanager.events.RCTEventEmitter
-import com.google.android.exoplayer2.metadata.emsg.EventMessage
-import com.google.android.exoplayer2.metadata.id3.Id3Frame
-import com.google.android.exoplayer2.metadata.id3.TextInformationFrame
 
-class OnTimedMetadataEvent(viewTag: Int, private val metadata: com.google.android.exoplayer2.metadata.Metadata): Event<OnTimedMetadataEvent>(viewTag) {
+class OnTimedMetadataEvent(viewTag: Int, private val metadata: Metadata): Event<OnTimedMetadataEvent>(viewTag) {
     private val EVENT_PROP_TIMED_METADATA = "metadata"
     override fun getEventName(): String {
         return EVENT_NAME
