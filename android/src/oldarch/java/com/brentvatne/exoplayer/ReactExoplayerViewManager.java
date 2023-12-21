@@ -131,7 +131,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
             String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
-            ReadableMap drmHeaders = ReactBridgeUtils.safeGetMap(drm, PROP_DRM_HEADERS);
+            ReadableArray drmHeadersArray = (drm.hasKey(PROP_DRM_HEADERS)) ? drm.getArray(PROP_DRM_HEADERS) : null;
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
                 videoView.setDrmType(drmUUID);
