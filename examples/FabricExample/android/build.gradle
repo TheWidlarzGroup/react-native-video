@@ -3,9 +3,9 @@
 buildscript {
     ext {
         buildToolsVersion = "31.0.0"
-        kotlinVersion = "1.6.20"
+        kotlinVersion = "1.8.0"
         minSdkVersion = 21
-        compileSdkVersion = 31
+        compileSdkVersion = 33
         targetSdkVersion = 31
 
         // We use NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
