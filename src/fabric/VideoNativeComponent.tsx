@@ -288,7 +288,9 @@ export interface VideoNativeProps extends ViewProps {
   onVideoExternalPlaybackChange?: DirectEventHandler<OnExternalPlaybackChangeData>;
   onGetLicense?: DirectEventHandler<OnGetLicenseData>;
   onPictureInPictureStatusChanged?: DirectEventHandler<OnPictureInPictureStatusChangedData>;
-  onRestoreUserInterfaceForPictureInPictureStop?: DirectEventHandler<Readonly<{}>>;
+  onRestoreUserInterfaceForPictureInPictureStop?: DirectEventHandler<
+    Readonly<{}>
+  >;
   onReceiveAdEvent?: DirectEventHandler<OnReceiveAdEventData>;
   onVideoPlaybackStateChanged?: DirectEventHandler<OnPlaybackStateChangedData>; // android only
   onVideoIdle?: DirectEventHandler<{}>; // android only (nowhere in document, so do not use as props. just type declaration)
@@ -317,6 +319,6 @@ export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
   ],
 });
 
-export default codegenNativeComponent<VideoNativeProps>('RNCVideo') as VideoComponentType;
-
-
+export default codegenNativeComponent<VideoNativeProps>(
+  'RNCVideo',
+) as VideoComponentType;
