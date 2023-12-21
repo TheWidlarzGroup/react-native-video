@@ -1,10 +1,13 @@
 package com.brentvatne.exoplayer;
 
 import androidx.annotation.StringDef;
+import androidx.media3.common.Metadata;
+
 import android.view.View;
 
-import com.brentvatne.common.Track;
-import com.brentvatne.common.VideoTrack;
+import com.brentvatne.common.api.TimedMetadata;
+import com.brentvatne.common.api.Track;
+import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.exoplayer.events.OnAudioFocusChangedEvent;
 import com.brentvatne.exoplayer.events.OnAudioTracksEvent;
 import com.brentvatne.exoplayer.events.OnPlaybackRateChangeEvent;
@@ -35,7 +38,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerHelper;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.android.exoplayer2.metadata.Metadata;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -156,11 +158,11 @@ class VideoEventEmitter {
                 Track format = audioTracks.get(i);
                 WritableMap audioTrack = Arguments.createMap();
                 audioTrack.putInt("index", i);
-                audioTrack.putString("title", format.m_title != null ? format.m_title : "");
-                audioTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                audioTrack.putString("language", format.m_language != null ? format.m_language : "");
-                audioTrack.putInt("bitrate", format.m_bitrate);
-                audioTrack.putBoolean("selected", format.m_isSelected);
+                audioTrack.putString("title", format.getTitle() != null ? format.getTitle() : "");
+                audioTrack.putString("type", format.getMimeType() != null ? format.getMimeType() : "");
+                audioTrack.putString("language", format.getLanguage() != null ? format.getLanguage() : "");
+                audioTrack.putInt("bitrate", format.getBitrate());
+                audioTrack.putBoolean("selected", format.isSelected());
                 waAudioTracks.pushMap(audioTrack);
             }
         }
@@ -173,12 +175,12 @@ class VideoEventEmitter {
             for (int i = 0; i < videoTracks.size(); ++i) {
                 VideoTrack vTrack = videoTracks.get(i);
                 WritableMap videoTrack = Arguments.createMap();
-                videoTrack.putInt("width", vTrack.m_width);
-                videoTrack.putInt("height",vTrack.m_height);
-                videoTrack.putInt("bitrate", vTrack.m_bitrate);
-                videoTrack.putString("codecs", vTrack.m_codecs);
-                videoTrack.putInt("trackId",vTrack.m_id);
-                videoTrack.putBoolean("selected", vTrack.m_isSelected);
+                videoTrack.putInt("width", vTrack.getWidth());
+                videoTrack.putInt("height",vTrack.getHeight());
+                videoTrack.putInt("bitrate", vTrack.getBitrate());
+                videoTrack.putString("codecs", vTrack.getCodecs());
+                videoTrack.putInt("trackId",vTrack.getId());
+                videoTrack.putBoolean("selected", vTrack.isSelected());
                 waVideoTracks.pushMap(videoTrack);
             }
         }
@@ -192,10 +194,10 @@ class VideoEventEmitter {
                 Track format = textTracks.get(i);
                 WritableMap textTrack = Arguments.createMap();
                 textTrack.putInt("index", i);
-                textTrack.putString("title", format.m_title != null ? format.m_title : "");
-                textTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
-                textTrack.putString("language", format.m_language != null ? format.m_language : "");
-                textTrack.putBoolean("selected", format.m_isSelected);
+                textTrack.putString("title", format.getTitle() != null ? format.getTitle() : "");
+                textTrack.putString("type", format.getMimeType() != null ? format.getMimeType() : "");
+                textTrack.putString("language", format.getLanguage() != null ? format.getLanguage() : "");
+                textTrack.putBoolean("selected", format.isSelected());
                 waTextTracks.pushMap(textTrack);
             }
         }
