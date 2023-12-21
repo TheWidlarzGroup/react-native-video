@@ -9,6 +9,25 @@ import React, {
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
 import NativeVideoComponent, {
+  Commands,
+  type OnAudioFocusChangedData,
+  type OnAudioTracksData,
+  type OnBandwidthUpdateData,
+  type OnBufferData,
+  type OnExternalPlaybackChangeData,
+  type OnGetLicenseData,
+  type OnLoadData,
+  type OnLoadStartData,
+  type OnPictureInPictureStatusChangedData,
+  type OnPlaybackStateChangedData,
+  type OnProgressData,
+  type OnReceiveAdEventData,
+  type OnSeekData,
+  type OnTextTracksData,
+  type OnTimedMetadataData,
+  type OnVideoAspectRatioData,
+  type OnVideoErrorData,
+  type OnVideoTracksData,
   type VideoComponentType,
 } from './VideoNativeComponent';
 
@@ -19,27 +38,7 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import {VideoManager} from './VideoNativeComponent';
-import type {
-  OnAudioFocusChangedData,
-  OnAudioTracksData,
-  OnBandwidthUpdateData,
-  OnBufferData,
-  OnExternalPlaybackChangeData,
-  OnGetLicenseData,
-  OnLoadData,
-  OnLoadStartData,
-  OnPictureInPictureStatusChangedData,
-  OnPlaybackStateChangedData,
-  OnProgressData,
-  OnReceiveAdEventData,
-  OnSeekData,
-  OnTextTracksData,
-  OnTimedMetadataData,
-  OnVideoAspectRatioData,
-  OnVideoErrorData,
-  OnVideoTracksData,
-  ReactVideoProps,
-} from './types';
+import type {ReactVideoProps} from './types/video';
 
 export type VideoSaveData = {
   uri: string;
@@ -181,23 +180,29 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [drm]);
 
     const _selectedTextTrack = useMemo(() => {
-      if (!selectedTextTrack) {
-        return;
+      if (!selectedTextTrack) return;
+      if (typeof selectedTextTrack?.value === 'number') {
+        return {
+          seletedTextType: selectedTextTrack?.type,
+          index: selectedTextTrack?.value,
+        };
       }
-
       return {
-        type: selectedTextTrack?.type,
+        selectedTextType: selectedTextTrack?.type,
         value: selectedTextTrack?.value,
       };
     }, [selectedTextTrack]);
 
     const _selectedAudioTrack = useMemo(() => {
-      if (!selectedAudioTrack) {
-        return;
+      if (!selectedAudioTrack) return;
+      if (typeof selectedAudioTrack?.value === 'number') {
+        return {
+          selectedAudioType: selectedAudioTrack?.type,
+          index: selectedAudioTrack?.value,
+        };
       }
-
       return {
-        type: selectedAudioTrack?.type,
+        selectedAudioType: selectedAudioTrack?.type,
         value: selectedAudioTrack?.value,
       };
     }, [selectedAudioTrack]);
@@ -213,31 +218,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       };
     }, [selectedVideoTrack]);
 
-    const seek = useCallback(async (time: number, tolerance?: number) => {
-      if (isNaN(time)) {
-        throw new Error('Specified time is not a number');
-      }
-
-      if (!nativeRef.current) {
-        console.warn('Video Component is not mounted');
-        return;
-      }
-
-      Platform.select({
-        ios: () => {
-          nativeRef.current?.setNativeProps({
-            seek: {
-              time,
-              tolerance: tolerance || 0,
-            },
-          });
-        },
-        default: () => {
-          nativeRef.current?.setNativeProps({
-            seek: time,
-          });
-        },
-      })();
+    const seek = useCallback((time: number, tolerance?: number) => {
+      if (isNaN(time)) throw new Error('Specified time is not a number');
+      if (!nativeRef.current) return;
+      Commands.seek(nativeRef.current, time, tolerance ?? 100);
     }, []);
 
     const presentFullscreenPlayer = useCallback(() => {
@@ -277,9 +261,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoLoad = useCallback(
       (e: NativeSyntheticEvent<OnLoadData>) => {
-        if (Platform.OS === 'windows') {
-          setShowPoster(false);
-        }
+        if (Platform.OS === 'windows') setShowPoster(false);
         onLoad?.(e.nativeEvent);
       },
       [onLoad, setShowPoster],

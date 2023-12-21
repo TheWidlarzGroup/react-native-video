@@ -2,7 +2,24 @@ import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
-import type FilterType from './FilterType';
+
+export type Filter =
+  | 'None'
+  | 'CIColorInvert'
+  | 'CIColorMonochrome'
+  | 'CIColorPosterize'
+  | 'CIFalseColor'
+  | 'CIMaximumComponent'
+  | 'CIMinimumComponent'
+  | 'CIPhotoEffectChrome'
+  | 'CIPhotoEffectFade'
+  | 'CIPhotoEffectInstant'
+  | 'CIPhotoEffectMono'
+  | 'CIPhotoEffectNoir'
+  | 'CIPhotoEffectProcess'
+  | 'CIPhotoEffectTonal'
+  | 'CIPhotoEffectTransfer'
+  | 'CISepiaTone';
 
 export type Headers = Record<string, string>;
 
@@ -185,7 +202,7 @@ export interface ReactVideoProps extends ReactVideoEvents {
   currentPlaybackTime?: number; // Android
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
-  filter?: FilterType; // iOS
+  filter?: Filter; // iOS
   filterEnabled?: boolean; // iOS
   focusable?: boolean; // Android
   fullscreen?: boolean; // iOS
