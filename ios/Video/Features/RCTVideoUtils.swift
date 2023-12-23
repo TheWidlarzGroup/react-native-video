@@ -307,7 +307,7 @@ enum RCTVideoUtils {
         var asset: AVURLAsset!
         let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
         let url = source.isNetwork || source.isAsset
-            ? URL(string: source.uri?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
+            ? URL(string: source.uri ?? "")
             : URL(fileURLWithPath: bundlePath)
         let assetOptions: NSMutableDictionary! = NSMutableDictionary()
 
