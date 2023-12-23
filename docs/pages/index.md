@@ -3,8 +3,8 @@
 ## About
 `react-native-video` is a React Native library that provides a Video component that renders media content such as videos and streams
 
-## Alpha Information
-> ⚠️ **Version 6 Alpha**: The following documentation may refer to features only available through the v6.0.0 alpha releases, [please see version 5.2.x](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md) for the current documentation!
+## Beta Information
+> ⚠️ **Version 6 Beta**: The following documentation may refer to features only available through the v6.0.0 alpha releases, [please see version 5.2.x](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md) for the current documentation!
 
 Version 6.x recommends react-native >= 0.68.2.
 
@@ -56,15 +56,15 @@ var styles = StyleSheet.create({
 
 Version 6.0.0 is introducing dozens of breaking changes, mostly through updated dependencies and significant refactoring. While the API remains compatible, the significant internal changes require full testing with your app to ensure all functionality remains operational. Please view the [Changelog](CHANGELOG.md) for specific breaking changes.  
 
-### Installing Version 6.0.0 Alphas
+### Installing Version 6.0.0 Beta
 
-Whilst we finalise version 6.0.0 you can install the latest alpha from npm
+Whilst we finalise version 6.0.0 you can install the latest beta from npm
 
 Using npm:
 
 ```bash
 
-npm install --save react-native-video@alpha
+npm install --save react-native-video@beta
 
 ```
 
@@ -72,6 +72,6 @@ using yarn:
 
 ```bash
 
-yarn add react-native-video@alpha
+yarn add react-native-video@beta
 
 ```
