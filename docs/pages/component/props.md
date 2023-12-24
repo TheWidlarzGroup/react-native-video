@@ -609,6 +609,9 @@ source={sintel}
 
 A number of URI schemes are supported by passing an object with a `uri` attribute.
 
+All uri string shall be url encoded.
+For exemple 'www.myurl.com/blabla?q=test uri' is invalid, where 'www.myurl.com/blabla?q=test%20uri' is valid
+
 ##### Web address (http://, https://)
 
 Example:
