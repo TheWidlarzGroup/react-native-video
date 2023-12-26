@@ -2,6 +2,41 @@ import AVFoundation
 import Photos
 import Promises
 
+// MARK: - RCTVideoAssetsUtils
+
+enum RCTVideoAssetsUtils {
+    static func getMediaSelectionGroup(
+        asset: AVAsset?,
+        for mediaCharacteristic: AVMediaCharacteristic
+    ) -> Promise<AVMediaSelectionGroup?> {
+        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
+            return wrap { handler in
+                asset?.loadMediaSelectionGroup(for: mediaCharacteristic, completionHandler: handler)
+            }
+        } else {
+            #if !os(visionOS)
+                return Promise { fulfill, _ in
+                    fulfill(asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic))
+                }
+            #endif
+        }
+    }
+
+    static func getTracks(asset: AVAsset, withMediaType: AVMediaType) -> Promise<[AVAssetTrack]?> {
+        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
+            return wrap { handler in
+                asset.loadTracks(withMediaType: withMediaType, completionHandler: handler)
+            }
+        } else {
+            return Promise { fulfill, _ in
+                fulfill(asset.tracks(withMediaType: withMediaType))
+            }
+        }
+    }
+}
+
+// MARK: - RCTVideoUtils
+
 /*!
  * Collection of pure functions
  */
@@ -94,62 +129,73 @@ enum RCTVideoUtils {
         return 0
     }
 
-    static func getAudioTrackInfo(_ player: AVPlayer?) -> [AnyObject]! {
-        guard let player else {
-            return []
-        }
-
-        let audioTracks: NSMutableArray! = NSMutableArray()
-        let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .audible)
-        for i in 0 ..< (group?.options.count ?? 0) {
-            let currentOption = group?.options[i]
-            var title = ""
-            let values = currentOption?.commonMetadata.map(\.value)
-            if (values?.count ?? 0) > 0, let value = values?[0] {
-                title = value as! String
+    static func getAudioTrackInfo(_ player: AVPlayer?) -> Promise<[AnyObject]> {
+        return Promise { fulfill, _ in
+            guard let player, let asset = player.currentItem?.asset else {
+                fulfill([])
+                return
             }
-            let language: String! = currentOption?.extendedLanguageTag ?? ""
 
-            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+            let audioTracks: NSMutableArray! = NSMutableArray()
 
-            let audioTrack = [
-                "index": NSNumber(value: i),
-                "title": title,
-                "language": language ?? "",
-                "selected": currentOption?.displayName == selectedOption?.displayName,
-            ] as [String: Any]
-            audioTracks.add(audioTrack)
+            RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .audible).then { group in
+                for i in 0 ..< (group?.options.count ?? 0) {
+                    let currentOption = group?.options[i]
+                    var title = ""
+                    let values = currentOption?.commonMetadata.map(\.value)
+                    if (values?.count ?? 0) > 0, let value = values?[0] {
+                        title = value as! String
+                    }
+                    let language: String! = currentOption?.extendedLanguageTag ?? ""
+
+                    let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+
+                    let audioTrack = [
+                        "index": NSNumber(value: i),
+                        "title": title,
+                        "language": language ?? "",
+                        "selected": currentOption?.displayName == selectedOption?.displayName,
+                    ] as [String: Any]
+                    audioTracks.add(audioTrack)
+                }
+
+                fulfill(audioTracks as [AnyObject])
+            }
         }
-        return audioTracks as [AnyObject]?
     }
 
-    static func getTextTrackInfo(_ player: AVPlayer?) -> [TextTrack]! {
-        guard let player else {
-            return []
-        }
-
-        // if streaming video, we extract the text tracks
-        var textTracks: [TextTrack] = []
-        let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .legible)
-        for i in 0 ..< (group?.options.count ?? 0) {
-            let currentOption = group?.options[i]
-            var title = ""
-            let values = currentOption?.commonMetadata.map(\.value)
-            if (values?.count ?? 0) > 0, let value = values?[0] {
-                title = value as! String
+    static func getTextTrackInfo(_ player: AVPlayer?) -> Promise<[TextTrack]> {
+        return Promise { fulfill, _ in
+            guard let player, let asset = player.currentItem?.asset else {
+                fulfill([])
+                return
             }
-            let language: String! = currentOption?.extendedLanguageTag ?? ""
-            let selectedOpt = player.currentItem?.currentMediaSelection
-            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
-            let textTrack = TextTrack([
-                "index": NSNumber(value: i),
-                "title": title,
-                "language": language,
-                "selected": currentOption?.displayName == selectedOption?.displayName,
-            ])
-            textTracks.append(textTrack)
+
+            // if streaming video, we extract the text tracks
+            var textTracks: [TextTrack] = []
+            RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .legible).then { group in
+                for i in 0 ..< (group?.options.count ?? 0) {
+                    let currentOption = group?.options[i]
+                    var title = ""
+                    let values = currentOption?.commonMetadata.map(\.value)
+                    if (values?.count ?? 0) > 0, let value = values?[0] {
+                        title = value as! String
+                    }
+                    let language: String! = currentOption?.extendedLanguageTag ?? ""
+                    let selectedOpt = player.currentItem?.currentMediaSelection
+                    let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+                    let textTrack = TextTrack([
+                        "index": NSNumber(value: i),
+                        "title": title,
+                        "language": language,
+                        "selected": currentOption?.displayName == selectedOption?.displayName,
+                    ])
+                    textTracks.append(textTrack)
+                }
+
+                fulfill(textTracks)
+            }
         }
-        return textTracks
     }
 
     // UNUSED
@@ -178,76 +224,102 @@ enum RCTVideoUtils {
         return Data(base64Encoded: adoptURL.absoluteString)
     }
 
-    static func generateMixComposition(_ asset: AVAsset) -> AVMutableComposition {
-        let mixComposition = AVMutableComposition()
+    static func generateMixComposition(_ asset: AVAsset) -> Promise<AVMutableComposition> {
+        return Promise { fulfill, _ in
+            all(
+                RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .video),
+                RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .audio)
+            ).then { tracks in
+                let mixComposition = AVMutableComposition()
 
-        let videoAsset: AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
-
-        // we need videoAsset asset to be not null to get durration later
-        if videoAsset == nil {
-            return mixComposition
-        }
-
-        let videoCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
-            withMediaType: AVMediaType.video,
-            preferredTrackID: kCMPersistentTrackID_Invalid
-        )
-        try? videoCompTrack.insertTimeRange(
-            CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-            of: videoAsset,
-            at: .zero
-        )
-
-        let audioAsset: AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.audio).first
-        let audioCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
-            withMediaType: AVMediaType.audio,
-            preferredTrackID: kCMPersistentTrackID_Invalid
-        )
-        try? audioCompTrack.insertTimeRange(
-            CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
-            of: audioAsset,
-            at: .zero
-        )
-
-        return mixComposition
-    }
-
-    static func getValidTextTracks(asset: AVAsset, assetOptions: NSDictionary?, mixComposition: AVMutableComposition, textTracks: [TextTrack]?) -> [TextTrack] {
-        let videoAsset: AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
-        var validTextTracks: [TextTrack] = []
-
-        if let textTracks, !textTracks.isEmpty {
-            for i in 0 ..< textTracks.count {
-                var textURLAsset: AVURLAsset!
-                let textUri: String = textTracks[i].uri
-                if textUri.lowercased().hasPrefix("http") {
-                    textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options: (assetOptions as! [String: Any]))
-                } else {
-                    let isDisabledTrack: Bool! = textTracks[i].type == "disabled"
-                    let searchPath: FileManager.SearchPathDirectory = isDisabledTrack ? .cachesDirectory : .documentDirectory
-                    textURLAsset = AVURLAsset(url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?, searchPath: searchPath) as URL, options: nil)
-                }
-                let textTrackAsset: AVAssetTrack! = textURLAsset.tracks(withMediaType: AVMediaType.text).first
-                if textTrackAsset == nil { continue } // fix when there's no textTrackAsset
-                validTextTracks.append(textTracks[i])
-                let textCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
-                                                                                               preferredTrackID: kCMPersistentTrackID_Invalid)
-                if videoAsset != nil {
-                    try? textCompTrack.insertTimeRange(
-                        CMTimeRangeMake(start: .zero, duration: videoAsset!.timeRange.duration),
-                        of: textTrackAsset,
+                if let videoAsset = tracks.0?.first, let audioAsset = tracks.1?.first {
+                    let videoCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
+                        withMediaType: AVMediaType.video,
+                        preferredTrackID: kCMPersistentTrackID_Invalid
+                    )
+                    try? videoCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                        of: videoAsset,
                         at: .zero
                     )
+
+                    let audioCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(
+                        withMediaType: AVMediaType.audio,
+                        preferredTrackID: kCMPersistentTrackID_Invalid
+                    )
+
+                    try? audioCompTrack.insertTimeRange(
+                        CMTimeRangeMake(start: .zero, duration: audioAsset.timeRange.duration),
+                        of: audioAsset,
+                        at: .zero
+                    )
+
+                    fulfill(mixComposition)
+                } else {
+                    fulfill(mixComposition)
                 }
             }
         }
+    }
 
-        let emptyVttFile: TextTrack? = self.createEmptyVttFile()
-        if emptyVttFile != nil {
-            validTextTracks.append(emptyVttFile!)
+    static func getValidTextTracks(asset: AVAsset, assetOptions: NSDictionary?, mixComposition: AVMutableComposition,
+                                   textTracks: [TextTrack]?) -> Promise<[TextTrack]> {
+        var validTextTracks: [TextTrack] = []
+        var queue: [Promise<[AVAssetTrack]?>] = []
+
+        return Promise { fulfill, _ in
+            RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .video).then { tracks in
+                guard let videoAsset = tracks?.first else {
+                    return
+                }
+
+                if let textTracks, !textTracks.isEmpty {
+                    for track in textTracks {
+                        var textURLAsset: AVURLAsset!
+                        let textUri: String = track.uri
+
+                        if textUri.lowercased().hasPrefix("http") {
+                            textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options: (assetOptions as! [String: Any]))
+                        } else {
+                            let isDisabledTrack: Bool! = track.type == "disabled"
+                            let searchPath: FileManager.SearchPathDirectory = isDisabledTrack ? .cachesDirectory : .documentDirectory
+                            textURLAsset = AVURLAsset(
+                                url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?, searchPath: searchPath) as URL,
+                                options: nil
+                            )
+                        }
+
+                        queue.append(RCTVideoAssetsUtils.getTracks(asset: textURLAsset, withMediaType: .text))
+                    }
+                }
+
+                all(queue).then { tracks in
+                    if let textTracks {
+                        for i in 0 ..< tracks.count {
+                            guard let track = tracks[i]?.first else { continue } // fix when there's no textTrackAsset
+                            validTextTracks.append(textTracks[i])
+
+                            let textCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
+                                                                                                           preferredTrackID: kCMPersistentTrackID_Invalid)
+                            try? textCompTrack.insertTimeRange(
+                                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                                of: track,
+                                at: .zero
+                            )
+                        }
+                    }
+
+                    return
+                }.then {
+                    let emptyVttFile: TextTrack? = self.createEmptyVttFile()
+                    if emptyVttFile != nil {
+                        validTextTracks.append(emptyVttFile!)
+                    }
+
+                    fulfill(validTextTracks)
+                }
+            }
         }
-
-        return validTextTracks
     }
 
     /*
@@ -357,6 +429,41 @@ enum RCTVideoUtils {
         } else {
             #if !os(visionOS)
                 return UIApplication.shared.keyWindow
+            #endif
+        }
+    }
+
+    static func generateVideoComposition(asset: AVAsset, filter: CIFilter) -> Promise<AVVideoComposition?> {
+        if #available(iOS 16, tvOS 16, visionOS 1.0, *) {
+            return wrap { handler in
+                AVVideoComposition.videoComposition(with: asset, applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
+                    if filter == nil {
+                        request.finish(with: request.sourceImage, context: nil)
+                    } else {
+                        let image: CIImage! = request.sourceImage.clampedToExtent()
+                        filter.setValue(image, forKey: kCIInputImageKey)
+                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                        request.finish(with: output, context: nil)
+                    }
+                }, completionHandler: handler)
+            }
+        } else {
+            #if !os(visionOS)
+                return Promise { fulfill, _ in
+                    fulfill(AVVideoComposition(
+                        asset: asset,
+                        applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
+                            if filter == nil {
+                                request.finish(with: request.sourceImage, context: nil)
+                            } else {
+                                let image: CIImage! = request.sourceImage.clampedToExtent()
+                                filter.setValue(image, forKey: kCIInputImageKey)
+                                let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                                request.finish(with: output, context: nil)
+                            }
+                        }
+                    ))
+                }
             #endif
         }
     }
