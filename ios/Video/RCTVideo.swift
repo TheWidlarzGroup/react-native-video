@@ -508,7 +508,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setAllowsExternalPlayback(_ allowsExternalPlayback: Bool) {
         _allowsExternalPlayback = allowsExternalPlayback
-        _player?.allowsExternalPlayback = _allowsExternalPlayback
+        #if !os(visionOS)
+            _player?.allowsExternalPlayback = _allowsExternalPlayback
+        #endif
     }
 
     @objc
@@ -713,7 +715,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if #available(iOS 12.0, tvOS 12.0, *) {
-            _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
+            #if !os(visionOS)
+                _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
+            #endif
         } else {
             // Fallback on earlier versions
         }
@@ -1280,9 +1284,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
-        guard let _player else { return }
-        onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
-                                        "target": reactTag as Any])
+        #if !os(visionOS)
+            guard let _player else { return }
+            onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
+                                            "target": reactTag as Any])
+        #endif
     }
 
     func handleViewControllerOverlayViewFrameChange(overlayView _: UIView, change: NSKeyValueObservedChange<CGRect>) {
