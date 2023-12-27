@@ -17,7 +17,7 @@ protocol RCTPlayerObserverHandlerObjc {
 protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleTimeUpdate(time: CMTime)
     func handleReadyForDisplay(changeObject: Any, change: NSKeyValueObservedChange<Bool>)
-    func handleTimeMetadataChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVMetadataItem]?>)
+    func handleTimeMetadataChange(timedMetadata: [AVMetadataItem])
     func handlePlayerItemStatusChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<AVPlayerItem.Status>)
     func handlePlaybackBufferKeyEmpty(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<Bool>)
     func handlePlaybackLikelyToKeepUp(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<Bool>)
@@ -29,7 +29,7 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
 
 // MARK: - RCTPlayerObserver
 
-class RCTPlayerObserver: NSObject {
+class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     weak var _handlers: RCTPlayerObserverHandler?
 
     var player: AVPlayer? {
@@ -50,9 +50,14 @@ class RCTPlayerObserver: NSObject {
             removePlayerItemObservers()
         }
         didSet {
-            if playerItem != nil {
-                addPlayerItemObservers()
-            }
+            guard let playerItem = playerItem else { return }
+
+            addPlayerItemObservers()
+
+            // handle timedMetadata
+            let metadataOutput = AVPlayerItemMetadataOutput()
+            playerItem.add(metadataOutput)
+            metadataOutput.setDelegate(self, queue: .global())
         }
     }
 
@@ -98,6 +103,12 @@ class RCTPlayerObserver: NSObject {
         }
     }
 
+    func metadataOutput(_: AVPlayerItemMetadataOutput, didOutputTimedMetadataGroups groups: [AVTimedMetadataGroup], from _: AVPlayerItemTrack?) {
+        for metadataGroup in groups {
+            _handlers?.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
+        }
+    }
+
     func addPlayerObservers() {
         guard let player = player, let _handlers = _handlers else {
             return
@@ -126,7 +137,6 @@ class RCTPlayerObserver: NSObject {
             options: [.new, .old],
             changeHandler: _handlers.handlePlaybackLikelyToKeepUp
         )
-        _playerTimedMetadataObserver = playerItem.observe(\.timedMetadata, options: [.new], changeHandler: _handlers.handleTimeMetadataChange)
     }
 
     func removePlayerItemObservers() {

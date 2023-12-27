@@ -1113,13 +1113,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // When timeMetadata is read the event onTimedMetadata is triggered
-    func handleTimeMetadataChange(playerItem _: AVPlayerItem, change: NSKeyValueObservedChange<[AVMetadataItem]?>) {
-        guard let newValue = change.newValue, let _items = newValue, !_items.isEmpty else {
-            return
-        }
-
+    func handleTimeMetadataChange(timedMetadata: [AVMetadataItem]) {
         var metadata: [[String: String?]?] = []
-        for item in _items {
+        for item in timedMetadata {
             let value = item.value as? String
             let identifier = item.identifier?.rawValue
 
