@@ -792,7 +792,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // Find the nearest view controller
             var viewController: UIViewController! = self.firstAvailableUIViewController()
             if viewController == nil {
-                let keyWindow: UIWindow! = UIApplication.shared.keyWindow
+                guard let keyWindow = RCTVideoUtils.getCurrentWindow() else { return }
+
                 viewController = keyWindow.rootViewController
                 if !viewController.children.isEmpty {
                     viewController = viewController.children.last
@@ -1291,9 +1292,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func handleViewControllerOverlayViewFrameChange(overlayView _: UIView, change: NSKeyValueObservedChange<CGRect>) {
         let oldRect = change.oldValue
         let newRect = change.newValue
+
+        guard let bounds = RCTVideoUtils.getCurrentWindow()?.bounds else { return }
+
         if !oldRect!.equalTo(newRect!) {
             // https://github.com/react-native-video/react-native-video/issues/3085#issuecomment-1557293391
-            if newRect!.equalTo(UIScreen.main.bounds) {
+            if newRect!.equalTo(bounds) {
                 RCTLog("in fullscreen")
                 if !_fullscreenUncontrolPlayerPresented {
                     _fullscreenUncontrolPlayerPresented = true
@@ -1311,7 +1315,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             }
 
-            self.reactViewController().view.frame = UIScreen.main.bounds
+            self.reactViewController().view.frame = bounds
             self.reactViewController().view.setNeedsLayout()
         }
     }
