@@ -348,6 +348,7 @@ enum RCTVideoUtils {
 
         return nil
     }
+
     static func getCurrentWindow() -> UIWindow? {
         if #available(iOS 13.0, tvOS 13, *) {
             return UIApplication.shared.connectedScenes
@@ -359,5 +360,4 @@ enum RCTVideoUtils {
             #endif
         }
     }
-
 }
