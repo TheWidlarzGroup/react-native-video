@@ -348,4 +348,16 @@ enum RCTVideoUtils {
 
         return nil
     }
+
+    static func getCurrentWindow() -> UIWindow? {
+        if #available(iOS 13.0, tvOS 13, *) {
+            return UIApplication.shared.connectedScenes
+                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+                .last { $0.isKeyWindow }
+        } else {
+            #if !os(visionOS)
+                return UIApplication.shared.keyWindow
+            #endif
+        }
+    }
 }
