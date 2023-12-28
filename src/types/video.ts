@@ -170,12 +170,15 @@ export enum PosterResizeModeType {
   STRETCH = 'stretch',
 }
 
+export type AudioOutput = 'speaker' | 'earpiece';
+
 export interface ReactVideoProps extends ReactVideoEvents, AccessibilityProps {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
   audioOnly?: boolean;
+  audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   backBufferDurationMs?: number; // Android
   bufferConfig?: BufferConfig; // Android
