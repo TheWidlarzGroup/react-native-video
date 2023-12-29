@@ -1,10 +1,14 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {AccessibilityProps, StyleProp, ViewStyle} from 'react-native';
+import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
+
+export type EnumValues<T extends string | number> = T extends string
+  ? `${T}` | T
+  : T;
 
 export type ReactVideoSourceProperties = {
   uri?: string;
@@ -172,7 +176,7 @@ export enum PosterResizeModeType {
 
 export type AudioOutput = 'speaker' | 'earpiece';
 
-export interface ReactVideoProps extends ReactVideoEvents, AccessibilityProps {
+export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
@@ -188,31 +192,31 @@ export interface ReactVideoProps extends ReactVideoEvents, AccessibilityProps {
   currentPlaybackTime?: number; // Android
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
-  filter?: FilterType; // iOS
+  filter?: EnumValues<FilterType>; // iOS
   filterEnabled?: boolean; // iOS
   focusable?: boolean; // Android
   fullscreen?: boolean; // iOS
   fullscreenAutorotate?: boolean; // iOS
-  fullscreenOrientation?: FullscreenOrientationType; // iOS
+  fullscreenOrientation?: EnumValues<FullscreenOrientationType>; // iOS
   hideShutterView?: boolean; //	Android
-  ignoreSilentSwitch?: IgnoreSilentSwitchType; // iOS
+  ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
-  mixWithOthers?: MixWithOthersType; // iOS
+  mixWithOthers?: EnumValues<MixWithOthersType>; // iOS
   muted?: boolean;
   paused?: boolean;
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   poster?: string;
-  posterResizeMode?: PosterResizeModeType;
+  posterResizeMode?: EnumValues<PosterResizeModeType>;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
-  resizeMode?: VideoResizeMode;
+  resizeMode?: EnumValues<VideoResizeMode>;
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
