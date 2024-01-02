@@ -38,7 +38,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String REACT_CLASS = "RNCVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
-    private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
     private static final String PROP_SRC_CROP_END = "cropEnd";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
@@ -327,6 +326,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SEEK)
     public void setSeek(final ReactExoplayerView videoView, final float seek) {
         videoView.seekTo(Math.round(seek * 1000f));
+    }
+
+    @Override
+    public void receiveCommand(@NonNull ReactExoplayerView root, String commandId, @androidx.annotation.Nullable ReadableArray args) {
+        switch (commandId) {
+            case "seek":
+                this.setSeek(root, args.getInt(0));
+                break;
+            default:
+                break;
+        }
     }
 
     @ReactProp(name = PROP_RATE)
