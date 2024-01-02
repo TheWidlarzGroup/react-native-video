@@ -96,6 +96,7 @@ import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
+import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -1491,30 +1492,30 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onMetadata(@NonNull Metadata metadata) {
-//        ArrayList<TimedMetadata> metadataArray = new ArrayList<>();
-//        for (int i = 0; i < metadata.length(); i++) {
-//            Metadata.Entry entry = metadata.get(i);
-//
-//            if (entry instanceof Id3Frame) {
-//                Id3Frame frame = (Id3Frame) metadata.get(i);
-//
-//                String value = "";
-//
-//                if (frame instanceof TextInformationFrame) {
-//                    TextInformationFrame txxxFrame = (TextInformationFrame) frame;
-//                    value = txxxFrame.value;
-//                }
-//                TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
-//                metadataArray.add(timedMetadata);
-//            } else if (entry instanceof EventMessage) {
-//                EventMessage eventMessage = (EventMessage) entry;
-//                TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
-//                metadataArray.add(timedMetadata);
-//            } else {
-//                DebugLog.d(TAG, "unhandled metadata " + entry.toString());
-//            }
-//        }
-        eventEmitter.timedMetadata(metadata);
+        ArrayList<TimedMetadata> metadataArray = new ArrayList<>();
+        for (int i = 0; i < metadata.length(); i++) {
+            Metadata.Entry entry = metadata.get(i);
+
+            if (entry instanceof Id3Frame) {
+                Id3Frame frame = (Id3Frame) metadata.get(i);
+
+                String value = "";
+
+                if (frame instanceof TextInformationFrame) {
+                    TextInformationFrame txxxFrame = (TextInformationFrame) frame;
+                    value = txxxFrame.value;
+                }
+                TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
+                metadataArray.add(timedMetadata);
+            } else if (entry instanceof EventMessage) {
+                EventMessage eventMessage = (EventMessage) entry;
+                TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
+                metadataArray.add(timedMetadata);
+            } else {
+                DebugLog.d(TAG, "unhandled metadata " + entry.toString());
+            }
+        }
+        eventEmitter.timedMetadata(metadataArray);
     }
 
     // ReactExoplayerViewManager public api
