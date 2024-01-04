@@ -18,13 +18,13 @@ import React
         }
 
         func pictureInPictureControllerDidStartPictureInPicture(_: AVPictureInPictureController) {
-            guard let _onPictureInPictureStatusChanged = _onPictureInPictureStatusChanged else { return }
+            guard let _onPictureInPictureStatusChanged else { return }
 
             _onPictureInPictureStatusChanged()
         }
 
         func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
-            guard let _onPictureInPictureStatusChanged = _onPictureInPictureStatusChanged else { return }
+            guard let _onPictureInPictureStatusChanged else { return }
 
             _onPictureInPictureStatusChanged()
         }
@@ -33,7 +33,7 @@ import React
             _: AVPictureInPictureController,
             restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
         ) {
-            guard let _onRestoreUserInterfaceForPictureInPictureStop = _onRestoreUserInterfaceForPictureInPictureStop else { return }
+            guard let _onRestoreUserInterfaceForPictureInPictureStop else { return }
 
             _onRestoreUserInterfaceForPictureInPictureStop()
 
@@ -41,7 +41,7 @@ import React
         }
 
         func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore: Bool) {
-            guard let _restoreUserInterfaceForPIPStopCompletionHandler = _restoreUserInterfaceForPIPStopCompletionHandler else { return }
+            guard let _restoreUserInterfaceForPIPStopCompletionHandler else { return }
             _restoreUserInterfaceForPIPStopCompletionHandler(restore)
             self._restoreUserInterfaceForPIPStopCompletionHandler = nil
         }
@@ -61,7 +61,7 @@ import React
             }
             _isActive = isActive
 
-            guard let _pipController = _pipController else { return }
+            guard let _pipController else { return }
 
             if _isActive && !_pipController.isPictureInPictureActive {
                 DispatchQueue.main.async {

@@ -30,7 +30,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
         let url = URL(string: uri)
         return getItemForUri(uri)
             .then { [weak self] (videoCacheStatus: RCTVideoCacheStatus, cachedAsset: AVAsset?) -> AVPlayerItem in
-                guard let self = self, let playerItemPrepareText = self.playerItemPrepareText else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                guard let self, let playerItemPrepareText = self.playerItemPrepareText else { throw NSError(domain: "", code: 0, userInfo: nil) }
                 switch videoCacheStatus {
                 case .missingFileExtension:
                     DebugLog("""
@@ -53,7 +53,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
                     return playerItemPrepareText(asset, options, "")
 
                 default:
-                    if let cachedAsset = cachedAsset {
+                    if let cachedAsset {
                         DebugLog("Playing back uri '\(uri)' from cache")
                         // See note in playerItemForSource about not being able to support text tracks & caching
                         return AVPlayerItem(asset: cachedAsset)

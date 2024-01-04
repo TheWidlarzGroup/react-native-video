@@ -98,7 +98,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     private var _playerViewControllerOverlayFrameObserver: NSKeyValueObservation?
 
     deinit {
-        if let _handlers = _handlers {
+        if let _handlers {
             NotificationCenter.default.removeObserver(_handlers)
         }
     }
@@ -206,7 +206,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     }
 
     func replaceTimeObserverIfSet(_ newUpdateInterval: Float64? = nil) {
-        if let newUpdateInterval = newUpdateInterval {
+        if let newUpdateInterval {
             _progressUpdateInterval = newUpdateInterval
         }
         if _timeObserver != nil {
