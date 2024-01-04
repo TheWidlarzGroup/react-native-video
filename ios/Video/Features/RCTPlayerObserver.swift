@@ -57,7 +57,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
             // handle timedMetadata
             let metadataOutput = AVPlayerItemMetadataOutput()
             playerItem.add(metadataOutput)
-            metadataOutput.setDelegate(self, queue: .global())
+            metadataOutput.setDelegate(self, queue: .main)
         }
     }
 
