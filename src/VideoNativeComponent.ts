@@ -7,7 +7,7 @@ import {NativeModules, requireNativeComponent} from 'react-native';
 import type ResizeMode from './types/ResizeMode';
 import type FilterType from './types/FilterType';
 import type Orientation from './types/Orientation';
-import type {AdEvent, OnTextTracksTypeData} from './types';
+import type {AdEvent, EnumValues, OnTextTracksTypeData} from './types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -270,7 +270,7 @@ export interface VideoNativeProps extends ViewProps {
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: number;
-  resizeMode?: ResizeMode;
+  resizeMode?: EnumValues<ResizeMode>;
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
@@ -279,7 +279,7 @@ export interface VideoNativeProps extends ViewProps {
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
-  filter?: FilterType;
+  filter?: EnumValues<FilterType>;
   filterEnabled?: boolean;
   volume?: number; // default 1.0
   playInBackground?: boolean;
