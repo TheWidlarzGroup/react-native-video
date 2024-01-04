@@ -113,7 +113,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
 
     func handleEmbeddedKey(_ loadingRequest: AVAssetResourceLoadingRequest!) -> Bool {
         guard let url = loadingRequest.request.url,
-              let _localSourceEncryptionKeyScheme = _localSourceEncryptionKeyScheme,
+              let _localSourceEncryptionKeyScheme,
               let persistentKeyData = RCTVideoUtils.extractDataFromCustomSchemeUrl(from: url, scheme: _localSourceEncryptionKeyScheme)
         else {
             return false
@@ -139,7 +139,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
 
         _loadingRequests[requestKey] = loadingRequest
 
-        guard let _drm = _drm, let drmType = _drm.type, drmType == "fairplay" else {
+        guard let _drm, let drmType = _drm.type, drmType == "fairplay" else {
             return finishLoadingWithError(error: RCTVideoErrorHandler.noDRMData, licenseUrl: requestKey)
         }
 

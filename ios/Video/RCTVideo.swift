@@ -240,7 +240,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if let userInfo = notification.userInfo {
             let reason: AVAudioSession.RouteChangeReason! = userInfo[AVAudioSessionRouteChangeReasonKey] as? AVAudioSession.RouteChangeReason
             //            let previousRoute:NSNumber! = userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? NSNumber
-            if reason == .oldDeviceUnavailable, let onVideoAudioBecomingNoisy = onVideoAudioBecomingNoisy {
+            if reason == .oldDeviceUnavailable, let onVideoAudioBecomingNoisy {
                 onVideoAudioBecomingNoisy(["target": reactTag as Any])
             }
         }
@@ -307,7 +307,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // perform on next run loop, otherwise other passed react-props may not be set
             RCTVideoUtils.delay()
                 .then { [weak self] in
-                    guard let self = self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
                     guard let source = self._source else {
                         DebugLog("The source not exist")
                         throw NSError(domain: "", code: 0, userInfo: nil)
@@ -349,7 +349,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     return Promise { self.playerItemPrepareText(asset: asset, assetOptions: assetOptions, uri: source.uri ?? "") }
                 }.then { [weak self] (playerItem: AVPlayerItem!) in
-                    guard let self = self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
 
                     self._player?.pause()
                     self._playerItem = playerItem
@@ -583,7 +583,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let seekTime: NSNumber! = info["time"] as! NSNumber
         let seekTolerance: NSNumber! = info["tolerance"] as! NSNumber
         let item: AVPlayerItem? = _player?.currentItem
-        guard item != nil, let player = _player, let item = item, item.status == AVPlayerItem.Status.readyToPlay else {
+        guard item != nil, let player = _player, let item, item.status == AVPlayerItem.Status.readyToPlay else {
             _pendingSeek = true
             _pendingSeekTime = seekTime.floatValue
             return
@@ -598,7 +598,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             seekTolerance: seekTolerance.floatValue
         )
         .then { [weak self] (_: Bool) in
-            guard let self = self else { return }
+            guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
             if !wasPaused {
@@ -711,7 +711,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // Fallback on earlier versions
         }
 
-        if let _maxBitRate = _maxBitRate {
+        if let _maxBitRate {
             setMaxBitRate(_maxBitRate)
         }
 
@@ -811,7 +811,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     viewController.present(playerViewController, animated: true, completion: { [weak self] in
-                        guard let self = self else { return }
+                        guard let self else { return }
                         // In fullscreen we must display controls
                         self._playerViewController?.showsPlaybackControls = true
                         self._fullscreenPlayerPresented = fullscreen
@@ -821,7 +821,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     })
                 }
             }
-        } else if !fullscreen && _fullscreenPlayerPresented, let _playerViewController = _playerViewController {
+        } else if !fullscreen && _fullscreenPlayerPresented, let _playerViewController {
             self.videoPlayerViewControllerWillDismiss(playerViewController: _playerViewController)
             _presentingViewController?.dismiss(animated: true, completion: { [weak self] in
                 self?.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
@@ -846,7 +846,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func usePlayerViewController() {
-        guard let _player = _player, let _playerItem = _playerItem else { return }
+        guard let _player, let _playerItem else { return }
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player: _player, withPlayerItem: _playerItem)
@@ -855,7 +855,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
 
-        guard let _playerViewController = _playerViewController else { return }
+        guard let _playerViewController else { return }
 
         if _controls {
             let viewController: UIViewController! = self.reactViewController()
@@ -881,7 +881,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func usePlayerLayer() {
-        if let _player = _player {
+        if let _player {
             _playerLayer = AVPlayerLayer(player: _player)
             _playerLayer?.frame = self.bounds
             _playerLayer?.needsDisplayOnBoundsChange = true
@@ -891,7 +891,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             setResizeMode(_resizeMode)
             _playerObserver.playerLayer = _playerLayer
 
-            if let _playerLayer = _playerLayer {
+            if let _playerLayer {
                 self.layer.addSublayer(_playerLayer)
             }
             self.layer.needsDisplayOnBoundsChange = true
@@ -934,7 +934,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController) {
         if _playerViewController == playerViewController
             && _fullscreenPlayerPresented,
-            let onVideoFullscreenPlayerWillDismiss = onVideoFullscreenPlayerWillDismiss {
+            let onVideoFullscreenPlayerWillDismiss {
             _playerObserver.removePlayerViewControllerObservers()
             onVideoFullscreenPlayerWillDismiss(["target": reactTag as Any])
         }
@@ -965,7 +965,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         let filter: CIFilter! = CIFilter(name: filterName)
-        if #available(iOS 9.0, *), let _playerItem = _playerItem {
+        if #available(iOS 9.0, *), let _playerItem {
             self._playerItem?.videoComposition = AVVideoComposition(
                 asset: _playerItem.asset,
                 applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
@@ -1032,7 +1032,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        if _controls, let _playerViewController = _playerViewController {
+        if _controls, let _playerViewController {
             _playerViewController.view.frame = bounds
 
             // also adjust all subviews of contentOverlayView
@@ -1057,7 +1057,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         self.removePlayerLayer()
 
-        if let _playerViewController = _playerViewController {
+        if let _playerViewController {
             _playerViewController.view.removeFromSuperview()
             _playerViewController.removeFromParent()
             _playerViewController.rctDelegate = nil
@@ -1120,7 +1120,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             let value = item.value as? String
             let identifier = item.identifier?.rawValue
 
-            if let value = value {
+            if let value {
                 metadata.append(["value": value, "identifier": identifier])
             }
         }
@@ -1133,7 +1133,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // Handle player item status change.
     func handlePlayerItemStatusChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<AVPlayerItem.Status>) {
-        guard let _playerItem = _playerItem else {
+        guard let _playerItem else {
             return
         }
 
@@ -1145,7 +1145,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyToPlay() {
-        guard let _playerItem = _playerItem else { return }
+        guard let _playerItem else { return }
         var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
 
         if duration.isNaN {
@@ -1217,7 +1217,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackFailed() {
-        guard let _playerItem = _playerItem else { return }
+        guard let _playerItem else { return }
         onVideoError?(
             [
                 "error": [
@@ -1249,7 +1249,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
-        guard let _player = _player else { return }
+        guard let _player else { return }
 
         if player.rate == change.oldValue && change.oldValue != nil {
             return
@@ -1269,7 +1269,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
-        guard let _player = _player else { return }
+        guard let _player else { return }
 
         if player.rate == change.oldValue && change.oldValue != nil {
             return
@@ -1280,7 +1280,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
-        guard let _player = _player else { return }
+        guard let _player else { return }
         onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
                                         "target": reactTag as Any])
     }

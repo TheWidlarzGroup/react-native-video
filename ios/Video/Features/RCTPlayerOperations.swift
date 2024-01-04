@@ -159,12 +159,12 @@ enum RCTPlayerOperations {
                     mediaOption = group.options[index]
                 }
             }
-        } else if let group = group { // default. invalid type or "system"
+        } else if let group { // default. invalid type or "system"
             player?.currentItem?.selectMediaOptionAutomatically(in: group)
             return
         }
 
-        if let group = group {
+        if let group {
             // If a match isn't found, option will be nil and text tracks will be disabled
             player?.currentItem?.select(mediaOption, in: group)
         }
@@ -206,7 +206,7 @@ enum RCTPlayerOperations {
             options = .duckOthers
         }
 
-        if let category = category, let options = options {
+        if let category, let options {
             do {
                 try audioSession.setCategory(category, options: options)
             } catch {
@@ -229,13 +229,13 @@ enum RCTPlayerOperations {
                     }
                 #endif
             }
-        } else if let category = category, options == nil {
+        } else if let category, options == nil {
             do {
                 try audioSession.setCategory(category)
             } catch {
                 debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category. Error: \(error).")
             }
-        } else if category == nil, let options = options {
+        } else if category == nil, let options {
             do {
                 try audioSession.setCategory(audioSession.category, options: options)
             } catch {

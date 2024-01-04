@@ -12,7 +12,7 @@ enum RCTVideoUtils {
      * \returns The playable duration of the current player item in seconds.
      */
     static func calculatePlayableDuration(_ player: AVPlayer?, withSource source: VideoSource?) -> NSNumber {
-        guard let player = player,
+        guard let player,
               let video: AVPlayerItem = player.currentItem,
               video.status == AVPlayerItem.Status.readyToPlay else {
             return 0
@@ -31,7 +31,7 @@ enum RCTVideoUtils {
             }
         }
 
-        if let effectiveTimeRange = effectiveTimeRange {
+        if let effectiveTimeRange {
             let playableDuration: Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))
             if playableDuration > 0 {
                 if source?.cropStart != nil {
@@ -95,7 +95,7 @@ enum RCTVideoUtils {
     }
 
     static func getAudioTrackInfo(_ player: AVPlayer?) -> [AnyObject]! {
-        guard let player = player else {
+        guard let player else {
             return []
         }
 
@@ -124,7 +124,7 @@ enum RCTVideoUtils {
     }
 
     static func getTextTrackInfo(_ player: AVPlayer?) -> [TextTrack]! {
-        guard let player = player else {
+        guard let player else {
             return []
         }
 
@@ -158,7 +158,7 @@ enum RCTVideoUtils {
     }
 
     static func base64DataFromBase64String(base64String: String?) -> Data? {
-        if let base64String = base64String {
+        if let base64String {
             return Data(base64Encoded: base64String)
         }
         return nil
@@ -216,7 +216,7 @@ enum RCTVideoUtils {
         let videoAsset: AVAssetTrack! = asset.tracks(withMediaType: AVMediaType.video).first
         var validTextTracks: [TextTrack] = []
 
-        if let textTracks = textTracks, !textTracks.isEmpty {
+        if let textTracks, !textTracks.isEmpty {
             for i in 0 ..< textTracks.count {
                 var textURLAsset: AVURLAsset!
                 let textUri: String = textTracks[i].uri
