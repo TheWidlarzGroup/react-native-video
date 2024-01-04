@@ -104,8 +104,10 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     }
 
     func metadataOutput(_: AVPlayerItemMetadataOutput, didOutputTimedMetadataGroups groups: [AVTimedMetadataGroup], from _: AVPlayerItemTrack?) {
+        guard let _handlers else { return }
+
         for metadataGroup in groups {
-            _handlers?.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
+            _handlers.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
         }
     }
 
