@@ -29,6 +29,7 @@ protocol JSInputProtocol: AnyObject {
     var onRequireAdParameters: RCTBubblingEventBlock? { get }
     var onVideoAboutToEnd: RCTBubblingEventBlock? { get }
     var onFavouriteButtonClick: RCTBubblingEventBlock? { get }
+    var onWatchlistButtonClick: RCTBubblingEventBlock? { get }
     var onRelatedVideoClicked: RCTBubblingEventBlock? { get }
     var onRelatedVideosIconClicked: RCTBubblingEventBlock? { get }
     var onStatsIconClick: RCTBubblingEventBlock? { get }

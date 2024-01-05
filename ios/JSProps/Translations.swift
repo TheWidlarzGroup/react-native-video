@@ -16,6 +16,8 @@ struct Translations: SuperCodable {
     var goLive: String?
     var favourite: String?
     var watchlist: String?
+    var addToWatchlist: String?
+    var removeFromWatchlist: String?
     var moreVideos: String?
     var captions: String?
     var rewind: String?

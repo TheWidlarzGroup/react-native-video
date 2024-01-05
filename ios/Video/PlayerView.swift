@@ -32,6 +32,7 @@ class PlayerView: UIView, JSInputProtocol {
     @objc var onRequireAdParameters: RCTBubblingEventBlock?
     @objc var onVideoAboutToEnd: RCTBubblingEventBlock?
     @objc var onFavouriteButtonClick: RCTBubblingEventBlock?
+    @objc var onWatchlistButtonClick: RCTBubblingEventBlock?
     @objc var onRelatedVideoClicked: RCTBubblingEventBlock?
     @objc var onRelatedVideosIconClicked: RCTBubblingEventBlock?
     @objc var onStatsIconClick: RCTBubblingEventBlock?
@@ -64,6 +65,8 @@ class PlayerView: UIView, JSInputProtocol {
         didSet { jsProps.overlayConfig.value = try? OverlayConfig(dict: overlayConfig) } }
     @objc var isFavourite: Bool = false {
         didSet { jsProps.isFavourite.value = isFavourite } }
+    @objc var isInWatchlist: Bool = false {
+        didSet { jsProps.isInWatchlist.value = isInWatchlist } }
     @objc var controls: Bool = false {
         didSet { jsProps.controls.value = controls } }
     @objc var nowPlaying: NSDictionary? {

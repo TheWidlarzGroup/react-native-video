@@ -1777,7 +1777,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onWatchlistButtonClicked() {
-        // Todo: Once the watchlist button has been implemented, fire an event here when user clicks it
+        eventEmitter.watchlistButtonClick();
     }
 
     @Override

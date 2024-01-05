@@ -53,6 +53,7 @@ class JSDoris {
             guard let buttons = buttons else { return }
             
             self.doris?.viewModel.toggles.isFavouriteButtonHidden = !buttons.favourite
+            self.doris?.viewModel.toggles.isWatchlistButtonHidden = !(buttons.watchlist ?? false)
             self.doris?.viewModel.toggles.isScheduleButtonHidden = !(buttons.epg ?? false)
             self.doris?.viewModel.toggles.isStatsButtonHidden = !buttons.stats
             self.doris?.viewModel.toggles.isAnnotationsButtonHidden = !(buttons.annotations ?? false)
@@ -77,6 +78,11 @@ class JSDoris {
         props.isFavourite.bindAndFire { [weak self] isFavourite in
             guard let self = self else { return }
             self.doris?.viewModel.toggles.isFavourite = isFavourite
+        }
+        
+        props.isInWatchlist.bindAndFire { [weak self] isInWatchlist in
+            guard let self = self else { return }
+            self.doris?.viewModel.toggles.isInWatchlist = isInWatchlist
         }
         
         props.source.bindAndFire { [weak self] source in
@@ -267,6 +273,8 @@ extension JSDoris: DorisOutputProtocol {
             }
         case .favouritesButtonTap:
             output?.onFavouriteButtonClick?(nil)
+        case .watchlistButtonTap:
+            output?.onWatchlistButtonClick?(nil)
         case .statsButtonTap:
             output?.onStatsIconClick?(nil)
         case .scheduleButtonTap:

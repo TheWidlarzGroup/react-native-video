@@ -10,6 +10,8 @@ export interface IVideoPlayerTranslations {
   playingLive: string;
   favourite: string;
   watchlist: string;
+  addToWatchlist: string;
+  removeFromWatchlist: string;
   moreVideos: string;
   captions: string;
   rewind: string;

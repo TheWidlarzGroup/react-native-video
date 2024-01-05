@@ -121,6 +121,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onFavouriteButtonClick?.(event.nativeEvent);
   };
 
+  onWatchlistButtonClick = (event) => {
+    this.props.onWatchlistButtonClick?.(event.nativeEvent);
+  };
+
   replaceAdTagParameters = (payload: IVideoReplaceAdTagParametersPayload) => {
     let command = 'replaceAdTagParameters';
 
@@ -219,6 +223,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onRelatedVideosIconClicked: this.onRelatedVideosIconClicked,
       onVideoAboutToEnd: this.onVideoAboutToEnd,
       onFavouriteButtonClick: this.onFavouriteButtonClick,
+      onWatchlistButtonClick: this.onWatchlistButtonClick,
       onReloadCurrentSource: this.onReloadCurrentSource,
       onBehindLiveWindowError: this.onBehindLiveWindowError,
     };

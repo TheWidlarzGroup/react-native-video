@@ -22,6 +22,7 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   hasStats?: boolean;
   height?: number;
   isFavourite?: boolean;
+  isInWatchlist?: boolean;
   labelFontName?: string;
   locale?: string;
   live?: boolean;

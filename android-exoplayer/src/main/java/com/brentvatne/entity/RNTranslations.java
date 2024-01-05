@@ -12,7 +12,7 @@ public class RNTranslations {
     private static final String KEY_PAUSE_LABEL = "player_pause_button";
     private static final String KEY_LIVE_LABEL = "goLive";
     private static final String KEY_FAVORITE_LABEL = "favourite";
-    private static final String KEY_WATCHLIST_LABEL = "watchlist";
+    private static final String KEY_WATCHLIST_LABEL = "addToWatchlist";
     private static final String KEY_MORE_VIDEOS_LABEL = "moreVideos";
     private static final String KEY_CAPTIONS_LABEL = "captions";
     private static final String KEY_REWIND_LABEL = "rewind";
@@ -33,7 +33,7 @@ public class RNTranslations {
     private static final String DEFAULT_LIVE_LABEL = "Go Live";
     private static final String DEFAULT_FAVORITE_LABEL = "Favourite";
     private static final String DEFAULT_MORE_VIDEOS_LABEL = "More Videos";
-    private static final String DEFAULT_WATCHLIST_LABEL = "Watchlist";
+    private static final String DEFAULT_WATCHLIST_LABEL = "Add to watchlist";
     private static final String DEFAULT_CAPTIONS_LABEL = "Subtitles";
     private static final String DEFAULT_REWIND_LABEL = "Rewind";
     private static final String DEFAULT_FAST_FORWARD_LABEL = "Fast Forward";

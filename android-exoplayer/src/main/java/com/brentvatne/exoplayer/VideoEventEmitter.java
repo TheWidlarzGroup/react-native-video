@@ -59,6 +59,7 @@ class VideoEventEmitter {
     private static final String EVENT_RELATED_VIDEO_CLICKED = "onRelatedVideoClicked";
     private static final String EVENT_RELATED_VIDEOS_ICON_CLICKED = "onRelatedVideosIconClicked";
     private static final String EVENT_FAVOURITE_BUTTON_CLICK = "onFavouriteButtonClick";
+    private static final String EVENT_WATCHLIST_BUTTON_CLICK = "onWatchlistButtonClick";
     private static final String EVENT_ANNOTATIONS_BUTTON_CLICK = "onAnnotationsButtonClick";
     private static final String EVENT_SUBTITLE_TRACK_CHANGED = "onSubtitleTrackChanged";
 
@@ -92,6 +93,7 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_WATCHLIST_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
             EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
@@ -130,6 +132,7 @@ class VideoEventEmitter {
             EVENT_RELATED_VIDEOS_ICON_CLICKED,
             EVENT_VIDEO_ABOUT_TO_END,
             EVENT_FAVOURITE_BUTTON_CLICK,
+            EVENT_WATCHLIST_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
             EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
@@ -380,6 +383,10 @@ class VideoEventEmitter {
 
     void favouriteButtonClick() {
         receiveEvent(EVENT_FAVOURITE_BUTTON_CLICK, null);
+    }
+
+    void watchlistButtonClick() {
+        receiveEvent(EVENT_WATCHLIST_BUTTON_CLICK, null);
     }
 
     void annotationsButtonClick() {
