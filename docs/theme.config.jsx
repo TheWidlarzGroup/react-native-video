@@ -16,7 +16,7 @@ export default {
         content="https://react-native-video.github.io/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:card" content="summary_large_image" />
-      <meat name="twitter:title" content="React Native Video" />
+      <meta name="twitter:title" content="React Native Video" />
       <meta
         name="twitter:description"
         content="A Video component for React Native"
