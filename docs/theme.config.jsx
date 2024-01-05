@@ -11,6 +11,15 @@ export default {
         name="og:description"
         content="A Video component for React Native"
       />
+      <meta
+        name="og:image"
+        content="https://react-native-video.github.io/react-native-video/thumbnail.jpg"
+      />
+      <meta
+        name="twitter:image"
+        content="https://react-native-video.github.io/react-native-video/thumbnail.jpg"
+      />
+      <meta name="twitter:image:alt" content="React Native Video" />
     </>
   ),
   logo: (
