@@ -11,7 +11,6 @@ export interface IVideoPlayerTranslations {
   favourite: string;
   watchlist: string;
   addToWatchlist: string;
-  removeFromWatchlist: string;
   moreVideos: string;
   captions: string;
   rewind: string;

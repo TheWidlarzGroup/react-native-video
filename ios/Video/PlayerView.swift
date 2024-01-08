@@ -65,8 +65,6 @@ class PlayerView: UIView, JSInputProtocol {
         didSet { jsProps.overlayConfig.value = try? OverlayConfig(dict: overlayConfig) } }
     @objc var isFavourite: Bool = false {
         didSet { jsProps.isFavourite.value = isFavourite } }
-    @objc var isInWatchlist: Bool = false {
-        didSet { jsProps.isInWatchlist.value = isInWatchlist } }
     @objc var controls: Bool = false {
         didSet { jsProps.controls.value = controls } }
     @objc var nowPlaying: NSDictionary? {

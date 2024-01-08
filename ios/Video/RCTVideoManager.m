@@ -23,7 +23,6 @@ RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(isFavourite, BOOL);
-RCT_EXPORT_VIEW_PROPERTY(isInWatchlist, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(buttons, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(theme, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(translations, NSDictionary);

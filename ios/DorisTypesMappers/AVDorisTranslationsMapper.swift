@@ -16,7 +16,6 @@ extension DorisTranslationsViewModel {
         self.live = translations.goLive
         self.favourites = translations.favourite
         self.addToWatchlist = translations.addToWatchlist
-        self.removeFromWatchlist = translations.removeFromWatchlist
         self.moreVideos = translations.moreVideos
         self.subtitles = translations.captions
         self.rewind = translations.rewind
