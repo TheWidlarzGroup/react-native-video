@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name        = 'PromisesSwift'
-  s.version     = '2.3.1.1'
+  s.version     = '2.3.1'
   s.authors     = 'Google Inc.'
   s.license     = { :type => 'Apache-2.0', :file => 'LICENSE' }
   s.homepage    = 'https://github.com/google/promises'
-  s.source      = { :git => 'https://github.com/google/promises.git', :tag => s.version }
+  s.source      = { :git => 'https://github.com/google/promises.git', :tag => '2.3.1' }
   s.summary     = 'Synchronization construct for Swift'
   s.description = <<-DESC
 
@@ -16,5 +16,6 @@ Pod::Spec.new do |s|
   s.swift_versions = ['5.0', '5.2']
 
   s.module_name = 'Promises'
+  s.source_files = "Sources/#{s.module_name}/*.{swift}"
   s.dependency 'PromisesObjC', "#{s.version}"
 end
