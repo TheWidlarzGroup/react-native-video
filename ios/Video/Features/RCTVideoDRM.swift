@@ -79,22 +79,14 @@ enum RCTVideoDRM {
     ) -> Promise<Data> {
         return Promise<Data>(on: .global()) { fulfill, reject in
             #if os(visionOS)
-                // DRM is not supported yet on visionOS
+                // TODO: DRM is not supported yet on visionOS. See #3467
                 reject(NSError(domain: "DRM is not supported yet on visionOS", code: 0, userInfo: nil))
             #else
-                var spcError: NSError!
-                var spcData: Data?
-                do {
-                    spcData = try loadingRequest.streamingContentKeyRequestData(forApp: certificateData, contentIdentifier: contentIdData as Data, options: nil)
-                } catch _ {
-                    print("SPC error")
-                }
-
-                if spcError != nil {
-                    reject(spcError)
-                }
-
-                guard let spcData else {
+                guard let spcData = try? loadingRequest.streamingContentKeyRequestData(
+                    forApp: certificateData,
+                    contentIdentifier: contentIdData as Data,
+                    options: nil
+                ) else {
                     reject(RCTVideoErrorHandler.noSPC)
                     return
                 }

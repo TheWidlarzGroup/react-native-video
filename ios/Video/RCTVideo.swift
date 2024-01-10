@@ -644,7 +644,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         RCTPlayerOperations.configureAudio(ignoreSilentSwitch: _ignoreSilentSwitch, mixWithOthers: _mixWithOthers, audioOutput: _audioOutput)
         do {
             if audioOutput == "speaker" {
-                #if os(iOS)
+                #if os(iOS) || os(visionOS)
                     try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
                 #endif
             } else if audioOutput == "earpiece" {
@@ -976,12 +976,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         let filter: CIFilter! = CIFilter(name: filterName)
-        if #available(iOS 9.0, *), let _playerItem {
-            RCTVideoUtils.generateVideoComposition(asset: _playerItem.asset, filter: filter).then { [weak self] composition in
-                self?._playerItem?.videoComposition = composition
-            }
-        } else {
-            // Fallback on earlier versions
+        RCTVideoUtils.generateVideoComposition(asset: _playerItem!.asset, filter: filter).then { [weak self] composition in
+            self?._playerItem?.videoComposition = composition
         }
     }
 
