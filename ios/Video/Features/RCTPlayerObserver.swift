@@ -155,9 +155,9 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
         #if !os(visionOS)
             _playerViewControllerReadyForDisplayObserver = playerViewController.observe(
-              \.isReadyForDisplay,
-              options: [.new],
-              changeHandler: _handlers.handleReadyForDisplay
+                \.isReadyForDisplay,
+                options: [.new],
+                changeHandler: _handlers.handleReadyForDisplay
             )
         #endif
 

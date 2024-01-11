@@ -30,7 +30,7 @@ enum RCTVideoAssetsUtils {
         } else {
             #if !os(visionOS)
                 return Promise { fulfill, _ in
-                fulfill(asset.tracks(withMediaType: withMediaType))
+                    fulfill(asset.tracks(withMediaType: withMediaType))
                 }
             #endif
         }
