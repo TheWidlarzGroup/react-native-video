@@ -232,17 +232,17 @@ extension JSDoris: DorisOutputProtocol {
             }
         case .finishedPlaying(endTime: _):
             output?.onVideoEnd?(nil)
-        case .currentTimeChanged(let seconds, _):
-            if seconds > 0 {
-                output?.onVideoProgress?(["currentTime": seconds])
+        case .currentTimeChanged(let contentPosition, _, _):
+            if contentPosition > 0 {
+                output?.onVideoProgress?(["currentTime": contentPosition])
             }
             
             if let duration = currentPlayingItemDuration {
-                let isAboutToEnd = seconds >= duration - 5
+                let isAboutToEnd = contentPosition >= duration - 5
                 output?.onVideoAboutToEnd?(["isAboutToEnd": isAboutToEnd]);
             }
-        case .itemDurationChanged(duration: let duration):
-            currentPlayingItemDuration = duration
+        case .itemDurationChanged(let contentDuration, _):
+            currentPlayingItemDuration = contentDuration
         case .playerItemFailed:
             output?.onVideoError?(nil)
         default: break
