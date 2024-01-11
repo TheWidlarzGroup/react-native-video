@@ -153,11 +153,13 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     func addPlayerViewControllerObservers() {
         guard let playerViewController, let _handlers else { return }
 
-        _playerViewControllerReadyForDisplayObserver = playerViewController.observe(
-            \.isReadyForDisplay,
-            options: [.new],
-            changeHandler: _handlers.handleReadyForDisplay
-        )
+        #if !os(visionOS)
+            _playerViewControllerReadyForDisplayObserver = playerViewController.observe(
+              \.isReadyForDisplay,
+              options: [.new],
+              changeHandler: _handlers.handleReadyForDisplay
+            )
+        #endif
 
         _playerViewControllerOverlayFrameObserver = playerViewController.contentOverlayView?.observe(
             \.frame,
