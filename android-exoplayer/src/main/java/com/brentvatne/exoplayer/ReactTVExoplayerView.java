@@ -227,9 +227,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (msg.what == SHOW_JS_PROGRESS) {
                 ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
                 if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
-                    long position = player.getCurrentPosition();
-                    long bufferedDuration = player.getBufferedPosition();
-                    long duration = player.getDuration();
+                    long position = player.getContentPosition();
+                    long bufferedDuration = player.getContentBufferedPosition();
+                    long duration = player.getContentDuration();
 
                     if (!isLive) {
                         boolean isAboutToEnd = duration - position <= VIDEO_ABOUT_TO_END_TIME_MS;
