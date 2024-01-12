@@ -18,7 +18,7 @@ import type {
   OnVideoErrorData,
   OnVideoTracksData,
   OnVolumeChangeData,
-} from 'src/VideoNativeComponent';
+} from '../VideoNativeComponent';
 
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void; //Android, iOS

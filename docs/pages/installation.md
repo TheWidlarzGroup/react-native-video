@@ -23,36 +23,17 @@ Then follow the instructions for your platform to link react-native-video into y
 
 ### Standard Method
 
-**React Native 0.60 and above**
-
-Run `npx pod-install`. Linking is not required in React Native 0.60 and above.
-
-**React Native 0.59 and below**
-
-Run `react-native link react-native-video` to link the react-native-video library.
-
 ### Enable Static Linking for dependencies in your ios project Podfile
 
 Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios project Podfile.
 
-[See the example ios project for reference](examples/basic/ios/Podfile#L5)
+[See the example ios project for reference](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L31C38-L31C38)
 
-### Using CocoaPods
-
-Setup your Podfile like it is described in the [react-native documentation](https://facebook.github.io/react-native/docs/integration-with-existing-apps#configuring-cocoapods-dependencies). 
-
-Depending on your requirements you have to choose between the two possible subpodspecs:
-
-Video only:
-
-```diff
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-+  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
-  end
-```
 ### Enable custom feature in podfile file
 
-### Video caching
+Samples available in sample app see [sample pod file](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34)
+
+#### Video caching
 
 To enable Video caching usage, add following line in your podfile:
 ([more info here](other/caching.md))
@@ -77,25 +58,6 @@ $RNVideoUseGoogleIMA=true
 
 ## Android
 
-### Autolinking
-
-Linking is not required in React Native 0.60 and above.
-
-If your project is using React Native < 0.60, run `react-native link react-native-video` to link the react-native-video library.
-
-If you have trouble, make the following additions to the given files manually:
-
-`android/settings.gradle`
-
-Add player source in build configuration
-
-```gradle
-include ':react-native-video'
-project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
-```
-
-`android/build.gradle`
-
 From version >= 6.0.0, your application needs to have kotlin version >= 1.7.0
 
 ```:
@@ -103,53 +65,6 @@ buildscript {
     ...
     ext.kotlinVersion = '1.7.0'
     ...
-}
-```
-
-`android/app/build.gradle`
-
-From version >= 5.0.0, you have to apply these changes:
-
-```diff
-dependencies {
-   ...
-    compile project(':react-native-video')
-+   implementation "androidx.appcompat:appcompat:1.0.0"
--   implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-
-}
-```
-
-`android/gradle.properties`
-
-Migrating to AndroidX (needs version >= 5.0.0):
-
-```gradle.properties
-android.useAndroidX=true
-android.enableJetifier=true
-```
-
-`MainApplication.java`
-
-If using com.facebook.react.PackageList to auto import native dependencies, there are no updates required here. Please see the [android example project](https://github.com/react-native-video/react-native-video/tree/master/examples/basic/android/app/src/main/java/com/videoplayer/MainApplication.java) for more details.
-
-### For manual linking
-
-On top, where imports are:
-
-```java
-import com.brentvatne.react.ReactVideoPackage;
-```
-
-Add the `ReactVideoPackage` class to your list of exported packages.
-
-```java
-@Override
-protected List<ReactPackage> getPackages() {
-    return Arrays.asList(
-            new MainReactPackage(),
-            new ReactVideoPackage()
-    );
 }
 ```
 
@@ -167,6 +82,8 @@ buildscript {
   }
 }
 ```
+
+See [sample app](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5)
 
 </details>
 <details>

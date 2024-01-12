@@ -1,27 +1,14 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {StyleProp, ViewStyle} from 'react-native';
+import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
-
-export type Filter =
-  | 'None'
-  | 'CIColorInvert'
-  | 'CIColorMonochrome'
-  | 'CIColorPosterize'
-  | 'CIFalseColor'
-  | 'CIMaximumComponent'
-  | 'CIMinimumComponent'
-  | 'CIPhotoEffectChrome'
-  | 'CIPhotoEffectFade'
-  | 'CIPhotoEffectInstant'
-  | 'CIPhotoEffectMono'
-  | 'CIPhotoEffectNoir'
-  | 'CIPhotoEffectProcess'
-  | 'CIPhotoEffectTonal'
-  | 'CIPhotoEffectTransfer'
-  | 'CISepiaTone';
+import FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
+
+export type EnumValues<T extends string | number> = T extends string
+  ? `${T}` | T
+  : T;
 
 export type ReactVideoSourceProperties = {
   uri?: string;
@@ -187,12 +174,15 @@ export enum PosterResizeModeType {
   STRETCH = 'stretch',
 }
 
-export interface ReactVideoProps extends ReactVideoEvents {
+export type AudioOutput = 'speaker' | 'earpiece';
+
+export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
   audioOnly?: boolean;
+  audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   backBufferDurationMs?: number; // Android
   bufferConfig?: BufferConfig; // Android
@@ -202,36 +192,37 @@ export interface ReactVideoProps extends ReactVideoEvents {
   currentPlaybackTime?: number; // Android
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
-  filter?: Filter; // iOS
+  filter?: EnumValues<FilterType>; // iOS
   filterEnabled?: boolean; // iOS
   focusable?: boolean; // Android
   fullscreen?: boolean; // iOS
   fullscreenAutorotate?: boolean; // iOS
-  fullscreenOrientation?: FullscreenOrientationType; // iOS
+  fullscreenOrientation?: EnumValues<FullscreenOrientationType>; // iOS
   hideShutterView?: boolean; //	Android
-  ignoreSilentSwitch?: IgnoreSilentSwitchType; // iOS
+  ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
-  mixWithOthers?: MixWithOthersType; // iOS
+  mixWithOthers?: EnumValues<MixWithOthersType>; // iOS
   muted?: boolean;
   paused?: boolean;
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   poster?: string;
-  posterResizeMode?: PosterResizeModeType;
+  posterResizeMode?: EnumValues<PosterResizeModeType>;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
-  resizeMode?: VideoResizeMode;
+  resizeMode?: EnumValues<VideoResizeMode>;
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
+  testID?: string;
   trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android

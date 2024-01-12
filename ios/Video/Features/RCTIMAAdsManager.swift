@@ -24,7 +24,7 @@
         }
 
         func requestAds() {
-            guard let _video = _video else { return }
+            guard let _video else { return }
             // Create ad display container for ad rendering.
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video, viewController: _video.reactViewController())
 
@@ -57,7 +57,7 @@
         // MARK: - IMAAdsLoaderDelegate
 
         func adsLoader(_: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
-            guard let _video = _video else { return }
+            guard let _video else { return }
             // Grab the instance of the IMAAdsManager and set yourself as the delegate.
             adsManager = adsLoadedData.adsManager
             adsManager?.delegate = self
@@ -81,7 +81,7 @@
         // MARK: - IMAAdsManagerDelegate
 
         func adsManager(_ adsManager: IMAAdsManager, didReceive event: IMAAdEvent) {
-            guard let _video = _video else { return }
+            guard let _video else { return }
             // Mute ad if the main player is muted
             if _video.isMuted() {
                 adsManager.volume = 0
@@ -117,7 +117,7 @@
                 print("AdsManager error: " + error.message!)
             }
 
-            guard let _video = _video else { return }
+            guard let _video else { return }
 
             if _video.onReceiveAdEvent != nil {
                 _video.onReceiveAdEvent?([

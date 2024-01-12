@@ -40,6 +40,7 @@ opt_in_rules:
   - redundant_nil_coalescing
   - attributes
   - convenience_type
+  - shorthand_optional_binding
 analyzer_rules:
   - explicit_self
   - unused_declaration
