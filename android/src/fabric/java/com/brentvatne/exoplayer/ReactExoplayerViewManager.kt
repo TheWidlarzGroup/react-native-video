@@ -58,7 +58,7 @@ internal class ReactExoplayerViewManager() : ViewGroupManager<ReactExoplayerView
     private val PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent"
     private val PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent"
 
-    private val PROP_SELECTED_VIDEO_TRACK_TYPE = "type"
+    private val PROP_SELECTED_VIDEO_TRACK_TYPE = "selectedVideoType"
     private val PROP_SELECTED_VIDEO_TRACK_VALUE = "value"
 
     constructor(config: ReactExoplayerConfig) : this() {

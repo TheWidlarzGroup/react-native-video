@@ -125,8 +125,13 @@ type BufferConfig = Readonly<{
   minBufferMemoryReservePercent?: Float;
 }>;
 
+type VideoTrackType = WithDefault<
+  'auto' | 'disabled' | 'resolution' | 'index',
+  'auto'
+>;
+
 type SelectedVideoTrack = Readonly<{
-  type?: WithDefault<'auto' | 'disabled' | 'resolution' | 'index', 'auto'>;
+  selectedVideoType?: VideoTrackType;
   value?: Int32;
 }>;
 
