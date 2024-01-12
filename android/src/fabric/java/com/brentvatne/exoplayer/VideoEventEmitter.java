@@ -337,7 +337,7 @@ class VideoEventEmitter {
         eventDispatcher.dispatchEvent(new OnPlaybackRateChangeEvent(viewId, rate));
     }
 
-    void timedMetadata(Metadata metadata) {
+    void timedMetadata(ArrayList<TimedMetadata> metadata) {
         EventDispatcher eventDispatcher =
                 UIManagerHelper.getEventDispatcherForReactTag(this.context, viewId);
         eventDispatcher.dispatchEvent(new OnTimedMetadataEvent(viewId, metadata));
