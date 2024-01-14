@@ -81,6 +81,4 @@ RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
-RCT_EXTERN_METHOD(dismissFullscreenPlayer reactTag : (nonnull NSNumber*)reactTag)
-
 @end
