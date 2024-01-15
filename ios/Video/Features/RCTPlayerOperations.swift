@@ -18,7 +18,7 @@ enum RCTPlayerOperations {
 
             // The first few tracks will be audio & video track
             var firstTextIndex = 0
-            for i in 0 ..< trackCount where (player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible)) != nil {
+            for i in 0 ..< trackCount where player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
                 firstTextIndex = i
                 break
             }
