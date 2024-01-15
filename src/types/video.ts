@@ -2,7 +2,7 @@ import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
-import type FilterType from './FilterType';
+import FilterType from './FilterType';
 
 export type Headers = Record<string, string>;
 

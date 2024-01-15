@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
@@ -33,26 +35,25 @@ import javax.annotation.Nullable;
 
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
 
-    private static final String REACT_CLASS = "RCTVideo";
+    private static final String REACT_CLASS = "RNCVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
-    private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
     private static final String PROP_SRC_CROP_END = "cropEnd";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
-    private static final String PROP_DRM_TYPE = "type";
+    private static final String PROP_DRM_TYPE = "drmType";
     private static final String PROP_DRM_LICENSESERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
-    private static final String PROP_SELECTED_AUDIO_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_AUDIO_TRACK_TYPE = "selectedAudioType";
     private static final String PROP_SELECTED_AUDIO_TRACK_VALUE = "value";
     private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
-    private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
+    private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "selectedTextType";
     private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_TEXT_TRACKS = "textTracks";
     private static final String PROP_PAUSED = "paused";
@@ -129,18 +130,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
             String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
-            ReadableMap drmHeaders = ReactBridgeUtils.safeGetMap(drm, PROP_DRM_HEADERS);
+            ReadableArray drmHeadersArray = (drm.hasKey(PROP_DRM_HEADERS)) ? drm.getArray(PROP_DRM_HEADERS) : null;
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
                 videoView.setDrmType(drmUUID);
                 videoView.setDrmLicenseUrl(drmLicenseServer);
-                if (drmHeaders != null) {
+                if (drmHeadersArray != null) {
                     ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-                    ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
-                    while (itr.hasNextKey()) {
-                        String key = itr.nextKey();
+                    for (int i = 0; i < drmHeadersArray.size(); i++) {
+                        ReadableMap current = drmHeadersArray.getMap(i);
+                        String key = current.hasKey("key") ? current.getString("key") : null;
+                        String value = current.hasKey("value") ? current.getString("value") : null;
                         drmKeyRequestPropertiesList.add(key);
-                        drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
+                        drmKeyRequestPropertiesList.add(value);
                     }
                     videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
                 }
@@ -152,13 +154,25 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
+        Map<String, String> headers = new HashMap<>();
+        ReadableArray propSrcHeadersArray = (src.hasKey(PROP_SRC_HEADERS)) ? src.getArray(PROP_SRC_HEADERS) : null;
+        if (propSrcHeadersArray != null) {
+            if (propSrcHeadersArray.size() > 0) {
+                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
+                    ReadableMap current = propSrcHeadersArray.getMap(i);
+                    String key = current.hasKey("key") ? current.getString("key") : null;
+                    String value = current.hasKey("value") ? current.getString("value") : null;
+                    if (key != null && value != null) {
+                        headers.put(key, value);
+                    }
+                }
+            }
+        }
         String uriString = ReactBridgeUtils.safeGetString(src, PROP_SRC_URI, null);
         int startPositionMs = ReactBridgeUtils.safeGetInt(src, PROP_START_POSITION, -1);
         int cropStartMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_START, -1);
         int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
-
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? ReactBridgeUtils.toStringMap(src.getMap(PROP_SRC_HEADERS)) : new HashMap<>();
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
@@ -314,6 +328,17 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.seekTo(Math.round(seek * 1000f));
     }
 
+    @Override
+    public void receiveCommand(@NonNull ReactExoplayerView root, String commandId, @androidx.annotation.Nullable ReadableArray args) {
+        switch (commandId) {
+            case "seek":
+                this.setSeek(root, args.getInt(0));
+                break;
+            default:
+                break;
+        }
+    }
+
     @ReactProp(name = PROP_RATE)
     public void setRate(final ReactExoplayerView videoView, final float rate) {
         videoView.setRateModifier(rate);
@@ -440,5 +465,44 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 || lowerCaseUri.startsWith("content://")
                 || lowerCaseUri.startsWith("file://")
                 || lowerCaseUri.startsWith("asset://");
+    }
+
+    private @ResizeMode.Mode int convertToIntDef(String resizeModeOrdinalString) {
+        if (!TextUtils.isEmpty(resizeModeOrdinalString)) {
+            if (resizeModeOrdinalString.equals("none")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("contain")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FIT);
+            } else if (resizeModeOrdinalString.equals("cover")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_CENTER_CROP);
+            } else if (resizeModeOrdinalString.equals("stretch")) {
+                return ResizeMode.toResizeMode(ResizeMode.RESIZE_MODE_FILL);
+            }
+        }
+        return ResizeMode.RESIZE_MODE_FIT;
+    }
+
+    /**
+     * toStringMap converts a {@link ReadableMap} into a HashMap.
+     *
+     * @param readableMap The ReadableMap to be conveted.
+     * @return A HashMap containing the data that was in the ReadableMap.
+     * @see 'Adapted from https://github.com/artemyarulin/react-native-eval/blob/master/android/src/main/java/com/evaluator/react/ConversionUtil.java'
+     */
+    public static Map<String, String> toStringMap(@Nullable ReadableMap readableMap) {
+        if (readableMap == null)
+            return null;
+
+        com.facebook.react.bridge.ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+        if (!iterator.hasNextKey())
+            return null;
+
+        Map<String, String> result = new HashMap<>();
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            result.put(key, readableMap.getString(key));
+        }
+
+        return result;
     }
 }

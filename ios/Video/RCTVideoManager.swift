@@ -22,7 +22,6 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-
     @objc(setLicenseResult:licenseUrl:reactTag:)
     func setLicenseResult(license: NSString, licenseUrl: NSString, reactTag: NSNumber) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in

@@ -96,7 +96,6 @@ import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
-import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -1397,8 +1396,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onPlaybackStateChanged(int playbackState) {
+        // seek finished
         if (playbackState == Player.STATE_READY && seekTime != C.TIME_UNSET) {
-            eventEmitter.seek(player.getCurrentPosition(), seekTime);
+            eventEmitter.seek(player.getCurrentPosition(), seekTime, true);
             seekTime = C.TIME_UNSET;
             if (isUsingContentResolution) {
                 // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
@@ -1431,8 +1431,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onVolumeChanged(float volume) {
-        eventEmitter.volumeChange(volume);
-    }
+//        todo
+//        eventEmitter.volumeChange(volume);
+    };
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
@@ -1882,8 +1883,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
+            seekTime = positionMs;
+            eventEmitter.seek(player.getCurrentPosition(), seekTime, false);
             player.seekTo(positionMs);
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
         }
     }
 
@@ -2102,7 +2104,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onAdEvent(AdEvent adEvent) {
         if (adEvent.getAdData() != null) {
-            eventEmitter.receiveAdEvent(adEvent.getType().name(), adEvent.getAdData());
+            eventEmitter.receiveAdEvent(adEvent.getType().name());
         } else {
             eventEmitter.receiveAdEvent(adEvent.getType().name());
         }
@@ -2110,6 +2112,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAdError(AdErrorEvent adErrorEvent) {
-        eventEmitter.receiveAdErrorEvent(adErrorEvent.getError());
+//        todo
+//        eventEmitter.receiveAdErrorEvent(adErrorEvent.getError());
     }
 }

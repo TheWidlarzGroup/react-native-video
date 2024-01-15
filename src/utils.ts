@@ -5,6 +5,12 @@ import type {ReactVideoSource, ReactVideoSourceProperties} from './types/video';
 
 type Source = ImageSourcePropType | ReactVideoSource;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function generateHeaderForNative(obj?: Record<string, any>) {
+  if (!obj) return [];
+  return Object.entries(obj).map(([key, value]) => ({key, value}));
+}
+
 export function resolveAssetSourceForVideo(
   source: Source,
 ): ReactVideoSourceProperties {
