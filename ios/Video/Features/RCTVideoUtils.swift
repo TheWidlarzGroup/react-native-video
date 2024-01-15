@@ -28,9 +28,11 @@ enum RCTVideoAssetsUtils {
                 asset.loadTracks(withMediaType: withMediaType, completionHandler: handler)
             }
         } else {
-            return Promise { fulfill, _ in
-                fulfill(asset.tracks(withMediaType: withMediaType))
-            }
+            #if !os(visionOS)
+                return Promise { fulfill, _ in
+                    fulfill(asset.tracks(withMediaType: withMediaType))
+                }
+            #endif
         }
     }
 }

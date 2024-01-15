@@ -508,7 +508,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setAllowsExternalPlayback(_ allowsExternalPlayback: Bool) {
         _allowsExternalPlayback = allowsExternalPlayback
-        _player?.allowsExternalPlayback = _allowsExternalPlayback
+        #if !os(visionOS)
+            _player?.allowsExternalPlayback = _allowsExternalPlayback
+        #endif
     }
 
     @objc
@@ -642,7 +644,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         RCTPlayerOperations.configureAudio(ignoreSilentSwitch: _ignoreSilentSwitch, mixWithOthers: _mixWithOthers, audioOutput: _audioOutput)
         do {
             if audioOutput == "speaker" {
-                #if os(iOS)
+                #if os(iOS) || os(visionOS)
                     try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
                 #endif
             } else if audioOutput == "earpiece" {
@@ -713,7 +715,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if #available(iOS 12.0, tvOS 12.0, *) {
-            _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
+            #if !os(visionOS)
+                _player?.preventsDisplaySleepDuringVideoPlayback = _preventsDisplaySleepDuringVideoPlayback
+            #endif
         } else {
             // Fallback on earlier versions
         }
@@ -972,12 +976,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         let filter: CIFilter! = CIFilter(name: filterName)
-        if #available(iOS 9.0, *), let _playerItem {
-            RCTVideoUtils.generateVideoComposition(asset: _playerItem.asset, filter: filter).then { [weak self] composition in
-                self?._playerItem?.videoComposition = composition
-            }
-        } else {
-            // Fallback on earlier versions
+        RCTVideoUtils.generateVideoComposition(asset: _playerItem!.asset, filter: filter).then { [weak self] composition in
+            self?._playerItem?.videoComposition = composition
         }
     }
 
@@ -1280,9 +1280,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
-        guard let _player else { return }
-        onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
-                                        "target": reactTag as Any])
+        #if !os(visionOS)
+            guard let _player else { return }
+            onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
+                                            "target": reactTag as Any])
+        #endif
     }
 
     func handleViewControllerOverlayViewFrameChange(overlayView _: UIView, change: NSKeyValueObservedChange<CGRect>) {
