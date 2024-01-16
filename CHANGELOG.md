@@ -1,4 +1,17 @@
+# [6.0.0-beta.4](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.3...v6.0.0-beta.4) (2024-01-15)
 
+
+### Bug Fixes
+* add missing audioOutput prop (#3450) (f20d68b)
+* **android**: support opacity properly (#3464) (11e5b75)
+* **ios**: currentPlaybackTime in ms and not seconds (#3472) (3f63c16)
+* **ios**: remove extra dismissFullscreenPlayer declaration (#3474) (045f5fa)
+
+### Features
+* add visionOS support (#3425) (cf3ebb7)
+* **ios**: migrate from deprecated methods (#3444) (5aaa53d)
+* **ios**: update the way to get keyWindow (#3448) (f35727f)
+* **ios**: update timed metadata handler (#3449) (481cc71)
 
 # [6.0.0-beta.3](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.2...v6.0.0-beta.3) (2023-12-24)
 
