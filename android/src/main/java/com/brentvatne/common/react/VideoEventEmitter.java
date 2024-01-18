@@ -4,20 +4,22 @@ import androidx.annotation.StringDef;
 
 import android.view.View;
 
-import com.brentvatne.common.API.TimedMetadata;
-import com.brentvatne.common.API.Track;
-import com.brentvatne.common.API.VideoTrack;
+import com.brentvatne.common.api.TimedMetadata;
+import com.brentvatne.common.api.Track;
+import com.brentvatne.common.api.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.ads.interactivemedia.v3.api.AdError;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class VideoEventEmitter {
 
@@ -423,9 +425,35 @@ public class VideoEventEmitter {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
     }
 
+    public void receiveAdEvent(String event, Map<String, String> data) {
+        WritableMap map = Arguments.createMap();
+        map.putString("event", event);
+
+        WritableMap dataMap = Arguments.createMap();
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            dataMap.putString(entry.getKey(), entry.getValue());
+        }
+        map.putMap("data", dataMap);
+
+        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
+    }
+
     public void receiveAdEvent(String event) {
         WritableMap map = Arguments.createMap();
         map.putString("event", event);
+
+        receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
+    }
+
+    public void receiveAdErrorEvent(AdError error) {
+        WritableMap map = Arguments.createMap();
+        map.putString("event", "ERROR");
+
+        WritableMap dataMap = Arguments.createMap();
+        dataMap.putString("message", error.getMessage());
+        dataMap.putString("code", String.valueOf(error.getErrorCode()));
+        dataMap.putString("type", String.valueOf(error.getErrorType()));
+        map.putMap("data", dataMap);
 
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }

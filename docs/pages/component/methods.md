@@ -3,15 +3,15 @@ This page shows the list of available methods
 
 ## Component methods
 
-| Name                                                                                      |Platforms Support  | 
-|-------------------------------------------------------------------------------------------|-------------------|
-|[dismissFullscreenPlayer](#dismissfullscreenplayer)                                        |Android, iOS       |
-|[presentFullscreenPlayer](#presentfullscreenplayer)                                        |Android, iOS       |
-|[pause](#pause)                                                                            |Android, iOS       |
-|[play](#play)                                                                              |Android, iOS       |
-|[save](#save)                                                                              |iOS                |
-|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS                |
-|[seek](#seek)                                                                              |All                |
+| Name                                                                                      |Platforms Support      | 
+|-------------------------------------------------------------------------------------------|-----------------------|
+|[dismissFullscreenPlayer](#dismissfullscreenplayer)                                        |Android, iOS           |
+|[presentFullscreenPlayer](#presentfullscreenplayer)                                        |Android, iOS           |
+|[pause](#pause)                                                                            |Android, iOS           |
+|[play](#play)                                                                              |Android, iOS           |
+|[save](#save)                                                                              |iOS                    |
+|[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS                    |
+|[seek](#seek)                                                                              |All                    |
 
 ### `dismissFullscreenPlayer`
 `dismissFullscreenPlayer(): Promise<void>`

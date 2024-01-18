@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-beta.0",
+    "version": "6.0.0-beta.4",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index",
@@ -16,6 +16,7 @@
         "@types/react": "~18.0.0"
     },
     "devDependencies": {
+        "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
         "@react-native/eslint-config": "^0.72.2",
         "@release-it/conventional-changelog": "^7.0.2",
         "@types/jest": "^28.1.2",
@@ -44,7 +45,9 @@
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
         "release": "release-it",
-        "test": "echo no test available"
+        "test": "echo no test available",
+        "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
+        "check-android": "scripts/kotlin-lint.sh"
     },
     "files": [
         "android",

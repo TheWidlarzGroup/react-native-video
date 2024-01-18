@@ -1,12 +1,11 @@
-
 struct Chapter {
     let title: String
     let uri: String?
     let startTime: Double
     let endTime: Double
-    
+
     let json: NSDictionary?
-    
+
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil

@@ -1,0 +1,80 @@
+name: Build Android
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-android.yml'
+      - 'android/**'
+      - 'examples/basic/android/**'
+      - 'yarn.lock'
+      - 'examples/basic/yarn.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/build-android.yml'
+      - 'android/**'
+      - 'examples/basic/android/**'
+      - 'yarn.lock'
+      - 'examples/basic/yarn.lock'
+
+jobs:
+  build:
+    name: Build Android Example App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 17
+          java-package: jdk
+
+      - name: Install node_modules
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/basic
+
+      - name: Restore Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Run Gradle Build for basic example
+        run: cd examples/basic/android && ./gradlew assembleDebug --build-cache && cd ../../..
+
+  build-without-ads:
+    name: Build Android Example App Without Ads
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 17
+          java-package: jdk
+
+      - name: Install node_modules
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/basic
+
+      - name: Restore Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Run Gradle Build for basic example
+        run: cd examples/basic/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..

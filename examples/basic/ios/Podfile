@@ -29,8 +29,13 @@ target 'videoplayer' do
   config = use_native_modules!
 
   use_frameworks! :linkage => :static
-  # $RNVideoUseGoogleIMA = true
-  $RNVideoUseVideoCaching = true
+
+  if ENV['RNV_SAMPLE_ENABLE_ADS']
+    $RNVideoUseGoogleIMA = true
+  end
+  if ENV['RNV_SAMPLE_VIDEO_CACHING']
+    $RNVideoUseVideoCaching = true
+  end
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -63,6 +68,5 @@ target 'videoplayer' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end

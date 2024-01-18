@@ -143,7 +143,8 @@ repositories {
 
 def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
-def androidxCode_version = safeExtGet('androidxCoreVersion')
+def androidxCore_version = safeExtGet('androidxCoreVersion')
+def androidxActivity_version = safeExtGet('androidxActivityVersion')
 
 dependencies {
     // For < 0.71, this will be from the local maven repo
@@ -151,7 +152,8 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
 
-    implementation "androidx.core:core:$androidxCode_version"
+    implementation "androidx.core:core:$androidxCore_version"
+    implementation "androidx.activity:activity-ktx:$androidxActivity_version"
 
     // For media playback using ExoPlayer
     implementation "androidx.media3:media3-exoplayer:$media3_version"

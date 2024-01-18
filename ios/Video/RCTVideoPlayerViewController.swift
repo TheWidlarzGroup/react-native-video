@@ -1,15 +1,13 @@
 import AVKit
 
 class RCTVideoPlayerViewController: AVPlayerViewController {
-
     weak var rctDelegate: RCTVideoPlayerViewControllerDelegate?
 
     // Optional paramters
-    var preferredOrientation:String?
-    var autorotate:Bool?
+    var preferredOrientation: String?
+    var autorotate: Bool?
 
     func shouldAutorotate() -> Bool {
-
         if autorotate! || preferredOrientation == nil || (preferredOrientation!.lowercased() == "all") {
             return true
         }
@@ -26,21 +24,26 @@ class RCTVideoPlayerViewController: AVPlayerViewController {
 
     #if !os(tvOS)
 
-    func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return .all
-    }
-
-    func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
-        if preferredOrientation?.lowercased() == "landscape" {
-            return .landscapeRight
-        } else if preferredOrientation?.lowercased() == "portrait" {
-            return .portrait
-        } else {
-            // default case
-            let orientation = UIApplication.shared.statusBarOrientation
-            return orientation
+        func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
+            return .all
         }
-    }
-    
+
+        func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
+            if preferredOrientation?.lowercased() == "landscape" {
+                return .landscapeRight
+            } else if preferredOrientation?.lowercased() == "portrait" {
+                return .portrait
+            } else {
+                // default case
+                if #available(iOS 13, tvOS 13, *) {
+                    return RCTVideoUtils.getCurrentWindow()?.windowScene?.interfaceOrientation ?? .unknown
+                } else {
+                    #if !os(visionOS)
+                        return UIApplication.shared.statusBarOrientation
+                    #endif
+                }
+            }
+        }
+
     #endif
 }

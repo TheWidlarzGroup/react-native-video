@@ -1,4 +1,4 @@
-package com.brentvatne.common.API
+package com.brentvatne.common.api
 
 /*
 * class to handle timedEvent retrieved from the stream

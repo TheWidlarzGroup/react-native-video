@@ -1,4 +1,4 @@
-package com.brentvatne.common.API
+package com.brentvatne.common.api
 
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.facebook.react.bridge.ReadableMap
@@ -24,6 +24,7 @@ class SubtitleStyle private constructor() {
         private const val PROP_PADDING_TOP = "paddingTop"
         private const val PROP_PADDING_LEFT = "paddingLeft"
         private const val PROP_PADDING_RIGHT = "paddingRight"
+
         @JvmStatic
         fun parse(src: ReadableMap?): SubtitleStyle {
             val subtitleStyle = SubtitleStyle()
