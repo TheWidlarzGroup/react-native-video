@@ -63,5 +63,10 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ]
+    ],
+    "codegenConfig": {
+        "name": "RNCVideo",
+        "type": "components",
+        "jsSrcsDir": "src"
+    }
 }
