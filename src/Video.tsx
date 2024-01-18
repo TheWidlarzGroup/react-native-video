@@ -10,11 +10,11 @@ import React, {
 import {View, StyleSheet, Image, Platform} from 'react-native';
 import NativeVideoComponent, {
   type VideoComponentType,
-} from './VideoNativeComponent';
+} from './specs/VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
 import {getReactTag, resolveAssetSourceForVideo} from './utils';
-import {VideoManager} from './VideoNativeComponent';
+import {VideoManager} from './specs/VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,

@@ -4,10 +4,10 @@ import type {
   ViewProps,
 } from 'react-native';
 import {NativeModules, requireNativeComponent} from 'react-native';
-import type ResizeMode from './types/ResizeMode';
-import type FilterType from './types/FilterType';
-import type Orientation from './types/Orientation';
-import type {AdEvent, EnumValues, OnTextTracksTypeData} from './types';
+import type ResizeMode from '../types/ResizeMode';
+import type FilterType from '../types/FilterType';
+import type Orientation from '../types/Orientation';
+import type {AdEvent, EnumValues, OnTextTracksTypeData} from '../types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
