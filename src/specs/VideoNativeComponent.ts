@@ -38,7 +38,7 @@ type VideoSrc = Readonly<{
   customImageUri?: string;
 }>;
 
-type DRMType = WithDefault<
+export type DRMType = WithDefault<
   'widevine' | 'playready' | 'clearkey' | 'fairplay',
   'widevine'
 >;
@@ -87,7 +87,7 @@ type SelectedAudioTrack = Readonly<{
   value?: string;
 }>;
 
-type Seek = Readonly<{
+export type Seek = Readonly<{
   time: Float;
   tolerance?: Float;
 }>;
@@ -120,7 +120,7 @@ type SubtitleStyle = Readonly<{
   paddingRight?: WithDefault<Float, 0>;
 }>;
 
-type OnLoadData = Readonly<{
+export type OnLoadData = Readonly<{
   currentTime: Float;
   duration: Float;
   naturalSize: Readonly<{
@@ -132,46 +132,46 @@ type OnLoadData = Readonly<{
   textTracks: Readonly<{}>;
 }>;
 
-type OnLoadStartData = Readonly<{
+export type OnLoadStartData = Readonly<{
   isNetwork: boolean;
   type: string;
   uri: string;
 }>;
 
-type OnVideoAspectRatioData = Readonly<{
+export type OnVideoAspectRatioData = Readonly<{
   width: Float;
   height: Float;
 }>;
 
-type OnBufferData = Readonly<{isBuffering: boolean}>;
+export type OnBufferData = Readonly<{isBuffering: boolean}>;
 
-type OnProgressData = Readonly<{
+export type OnProgressData = Readonly<{
   currentTime: Float;
   playableDuration: Float;
   seekableDuration: Float;
 }>;
 
-type OnBandwidthUpdateData = Readonly<{
+export type OnBandwidthUpdateData = Readonly<{
   bitrate: Int32;
   width?: Float;
   height?: Float;
   trackId?: Int32;
 }>;
 
-type OnSeekData = Readonly<{
+export type OnSeekData = Readonly<{
   currentTime: Float;
   seekTime: Float;
 }>;
 
-type OnPlaybackStateChangedData = Readonly<{
+export type OnPlaybackStateChangedData = Readonly<{
   isPlaying: boolean;
 }>;
 
-type OnTimedMetadataData = Readonly<{
+export type OnTimedMetadataData = Readonly<{
   metadata: Readonly<{}>;
 }>;
 // TODO fix type after RN 0.73
-// type OnTimedMetadataData = Readonly<{
+// export type OnTimedMetadataData = Readonly<{
 //   metadata: ReadonlyArray<
 //     Readonly<{
 //       value?: string;
@@ -180,7 +180,7 @@ type OnTimedMetadataData = Readonly<{
 //   >;
 // }>;
 
-type OnAudioTracksData = Readonly<{
+export type OnAudioTracksData = Readonly<{
   audioTracks: Readonly<{}>;
 }>;
 
@@ -198,12 +198,12 @@ type OnAudioTracksData = Readonly<{
 //   >;
 // }>;
 
-type OnTextTracksData = Readonly<{
+export type OnTextTracksData = Readonly<{
   textTracks: Readonly<{}>;
 }>;
 
 // TODO fix type after RN 0.73
-// type OnTextTracksData = Readonly<{
+// export type OnTextTracksData = Readonly<{
 //   textTracks: ReadonlyArray<
 //     Readonly<{
 //       index: Int32;
@@ -218,12 +218,12 @@ type OnTextTracksData = Readonly<{
 //   >;
 // }>;
 
-type OnVideoTracksData = Readonly<{
+export type OnVideoTracksData = Readonly<{
   videoTracks: Readonly<{}>;
 }>;
 
 // TODO fix type after RN 0.73
-// type OnVideoTracksData = Readonly<{
+// export type OnVideoTracksData = Readonly<{
 //   videoTracks: ReadonlyArray<
 //     Readonly<{
 //       trackId: Int32;
@@ -236,29 +236,29 @@ type OnVideoTracksData = Readonly<{
 //   >;
 // }>;
 
-type OnPlaybackData = Readonly<{
+export type OnPlaybackData = Readonly<{
   playbackRate: Float;
 }>;
 
-type OnVolumeChangeData = Readonly<{
+export type OnVolumeChangeData = Readonly<{
   volume: Float;
 }>;
 
-type OnExternalPlaybackChangeData = Readonly<{
+export type OnExternalPlaybackChangeData = Readonly<{
   isExternalPlaybackActive: boolean;
 }>;
 
-type OnGetLicenseData = Readonly<{
+export type OnGetLicenseData = Readonly<{
   licenseUrl: string;
   contentId: string;
   spcBase64: string;
 }>;
 
-type OnPictureInPictureStatusChangedData = Readonly<{
+export type OnPictureInPictureStatusChangedData = Readonly<{
   isActive: boolean;
 }>;
 
-type OnReceiveAdEventData = Readonly<{
+export type OnReceiveAdEventData = Readonly<{
   data?: {};
   event: WithDefault<
     /**
@@ -416,7 +416,7 @@ type OnReceiveAdEventData = Readonly<{
   >;
 }>;
 
-type OnVideoErrorData = Readonly<{
+export type OnVideoErrorData = Readonly<{
   error: Readonly<{
     errorString?: string; // android
     errorException?: string; // android
@@ -432,7 +432,7 @@ type OnVideoErrorData = Readonly<{
   target?: Int32; // ios
 }>;
 
-type OnAudioFocusChangedData = Readonly<{
+export type OnAudioFocusChangedData = Readonly<{
   hasAudioFocus: boolean;
 }>;
 
