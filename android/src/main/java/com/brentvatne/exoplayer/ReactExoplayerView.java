@@ -165,6 +165,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
+    private FullScreenPlayerView pipFullScreenPlayerView;
     private ImaAdsLoader adsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
@@ -1886,6 +1887,32 @@ public class ReactExoplayerView extends FrameLayout implements
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
         this.isInPictureInPicture = isInPictureInPicture;
         eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
+        if (isInPictureInPicture) {
+            if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
+                fullScreenPlayerView.dismiss();
+            }
+            if (pipFullScreenPlayerView == null) {
+                pipFullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, null, new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() { }
+                });
+            }
+            pipFullScreenPlayerView.show();
+        } else {
+            if (pipFullScreenPlayerView != null && pipFullScreenPlayerView.isShowing())  {
+                pipFullScreenPlayerView.dismiss();
+            }
+            if (controls) {
+                fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        setFullscreen(false);
+                    }
+                });
+                fullScreenPlayerView.show();
+                updateFullScreenButtonVisbility();
+            }
+        }
     }
 
     private void updatePictureInPictureActions(boolean isPaused) {
