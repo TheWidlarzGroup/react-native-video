@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import androidx.core.content.ContextCompat
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.uimanager.ThemedReactContext
 
@@ -39,12 +40,12 @@ class PictureInPictureReceiver(private val view: ReactExoplayerView, private val
     }
 
     fun setListener() {
-        context.currentActivity?.registerReceiver(this, IntentFilter(ACTION_MEDIA_CONTROL))
+        ContextCompat.registerReceiver(context, this, IntentFilter(ACTION_MEDIA_CONTROL), ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     fun removeListener() {
         try {
-            context.currentActivity?.unregisterReceiver(this)
+            context.unregisterReceiver(this)
         } catch (e: Exception) {
             // ignore if already unregistered
         }
@@ -65,6 +66,7 @@ class PictureInPictureReceiver(private val view: ReactExoplayerView, private val
             EXTRA_CONTROL_TYPE,
             controlType
         )
+        intent.setPackage(context.packageName)
         return PendingIntent.getBroadcast(context, requestCode, intent, flag)
     }
 }
