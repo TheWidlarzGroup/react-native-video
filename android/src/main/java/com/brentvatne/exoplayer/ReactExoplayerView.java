@@ -192,7 +192,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-    private int storedUiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -367,20 +366,6 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     // LifecycleEventListener implementation
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (isFullscreen) return;
-        Activity activity = themedReactContext.getCurrentActivity();
-        if (activity == null) return;
-        View decorView = activity.getWindow().getDecorView();
-        if (hasFocus) {
-            decorView.setSystemUiVisibility(storedUiOptions);
-        } else {
-            storedUiOptions = decorView.getSystemUiVisibility();
-        }
-    }
-
     @Override
     public void onHostResume() {
         if (!playInBackground || !isInBackground) {
