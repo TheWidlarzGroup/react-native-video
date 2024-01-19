@@ -3,9 +3,7 @@ package com.brentvatne.exoplayer
 import android.view.View
 import androidx.fragment.app.Fragment
 
-class ReactExoplayerFragment constructor(private val view: ReactExoplayerView) : Fragment() {
-
-    private val TAG = "ReactExoplayerFragment"
+class ReactExoplayerFragment(private val view: ReactExoplayerView) : Fragment() {
 
     private var mIsOnStopCalled = false
     private var mStoredUiOptions = View.SYSTEM_UI_FLAG_VISIBLE

@@ -354,7 +354,7 @@ public class ReactExoplayerView extends FrameLayout implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Activity activity = themedReactContext.getCurrentActivity();
-        if (activity instanceof FragmentActivity && themedReactContext != null && reactExoplayerFragment != null) {
+        if (activity instanceof FragmentActivity && reactExoplayerFragment != null) {
             ((FragmentActivity) activity).getSupportFragmentManager()
                     .beginTransaction()
                     .remove(reactExoplayerFragment)
@@ -1894,7 +1894,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setPictureInPicture(boolean pictureInPictureEnabled) {
-        this.pictureInPictureEnabled = pictureInPictureEnabled;
+        this.pictureInPictureEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && pictureInPictureEnabled;
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
