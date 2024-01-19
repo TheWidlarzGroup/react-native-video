@@ -47,7 +47,8 @@
         "release": "release-it",
         "test": "echo no test available",
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
-        "check-android": "scripts/kotlin-lint.sh"
+        "check-android": "scripts/kotlin-lint.sh",
+        "codegen": "node ./node_modules/react-native/scripts/generate-codegen-artifacts.js --path ./ ./output"
     },
     "files": [
         "android",
@@ -67,6 +68,6 @@
     "codegenConfig": {
         "name": "RNCVideo",
         "type": "components",
-        "jsSrcsDir": "src"
+        "jsSrcsDir": "./src/specs"
     }
 }
