@@ -559,5 +559,5 @@ export const VideoDecoderProperties =
   NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
 
 export default codegenNativeComponent<VideoNativeProps>(
-  'RNCVideo',
+  'RCTVideo',
 ) as VideoComponentType;
