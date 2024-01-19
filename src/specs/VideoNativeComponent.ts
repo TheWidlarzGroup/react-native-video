@@ -38,24 +38,6 @@ type VideoSrc = Readonly<{
   customImageUri?: string;
 }>;
 
-export type Filter =
-  | 'None'
-  | 'CIColorInvert'
-  | 'CIColorMonochrome'
-  | 'CIColorPosterize'
-  | 'CIFalseColor'
-  | 'CIMaximumComponent'
-  | 'CIMinimumComponent'
-  | 'CIPhotoEffectChrome'
-  | 'CIPhotoEffectFade'
-  | 'CIPhotoEffectInstant'
-  | 'CIPhotoEffectMono'
-  | 'CIPhotoEffectNoir'
-  | 'CIPhotoEffectProcess'
-  | 'CIPhotoEffectTonal'
-  | 'CIPhotoEffectTransfer'
-  | 'CISepiaTone';
-
 export type DRMType = WithDefault<
   'widevine' | 'playready' | 'clearkey' | 'fairplay',
   'widevine'
