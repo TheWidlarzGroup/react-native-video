@@ -9,33 +9,36 @@ import React, {
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
 import NativeVideoComponent, {
+  type OnAudioFocusChangedData,
+  type OnAudioTracksData,
+  type OnBandwidthUpdateData,
+  type OnBufferData,
+  type OnExternalPlaybackChangeData,
+  type OnGetLicenseData,
+  type OnLoadData,
+  type OnLoadStartData,
+  type OnPictureInPictureStatusChangedData,
+  type OnPlaybackStateChangedData,
+  type OnProgressData,
+  type OnReceiveAdEventData,
+  type OnSeekData,
+  type OnTextTracksData,
+  type OnTimedMetadataData,
+  type OnVideoAspectRatioData,
+  type OnVideoErrorData,
+  type OnVideoTracksData,
   type VideoComponentType,
+  type VideoSrc,
 } from './specs/VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import {getReactTag, resolveAssetSourceForVideo} from './utils';
+import {
+  generateHeaderForNative,
+  getReactTag,
+  resolveAssetSourceForVideo,
+} from './utils';
 import {VideoManager} from './specs/VideoNativeComponent';
-import type {
-  OnAudioFocusChangedData,
-  OnAudioTracksData,
-  OnBandwidthUpdateData,
-  OnBufferData,
-  OnExternalPlaybackChangeData,
-  OnGetLicenseData,
-  OnLoadData,
-  OnLoadStartData,
-  OnPictureInPictureStatusChangedData,
-  OnPlaybackStateChangedData,
-  OnProgressData,
-  OnReceiveAdEventData,
-  OnSeekData,
-  OnTextTracksData,
-  OnTimedMetadataData,
-  OnVideoAspectRatioData,
-  OnVideoErrorData,
-  OnVideoTracksData,
-  ReactVideoProps,
-} from './types';
+import type {ReactVideoProps} from './types/video';
 
 export type VideoSaveData = {
   uri: string;
@@ -118,11 +121,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [posterResizeMode],
     );
 
-    const src = useMemo(() => {
-      if (!source) {
-        return undefined;
-      }
-
+    const src = useMemo<VideoSrc>(() => {
       const resolvedSource = resolveAssetSourceForVideo(source);
       let uri = resolvedSource.uri || '';
       if (uri && uri.match(/^\//)) {
@@ -147,7 +146,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         type: resolvedSource.type || '',
         mainVer: resolvedSource.mainVer || 0,
         patchVer: resolvedSource.patchVer || 0,
-        requestHeaders: resolvedSource.headers || {},
+        requestHeaders: generateHeaderForNative(resolvedSource.headers),
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
@@ -166,7 +165,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return {
         type: drm.type,
         licenseServer: drm.licenseServer,
-        headers: drm.headers,
+        headers: generateHeaderForNative(drm.headers),
         contentId: drm.contentId,
         certificateUrl: drm.certificateUrl,
         base64Certificate: drm.base64Certificate,

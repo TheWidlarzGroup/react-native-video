@@ -20,7 +20,7 @@ type Headers = ReadonlyArray<
   }>
 >;
 
-type VideoSrc = Readonly<{
+export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
   isAsset?: boolean;
@@ -67,23 +67,13 @@ type TextTracks = ReadonlyArray<
   }>
 >;
 
-type TextTrackType = WithDefault<
+type SelectedTrack = WithDefault<
   'system' | 'disabled' | 'title' | 'language' | 'index',
   'system'
 >;
 
-type SelectedTextTrack = Readonly<{
-  type?: TextTrackType;
-  value?: string;
-}>;
-
-type AudioTrackType = WithDefault<
-  'system' | 'disabled' | 'title' | 'language' | 'index',
-  'system'
->;
-
-type SelectedAudioTrack = Readonly<{
-  type?: AudioTrackType;
+export type SelectedTrackType = Readonly<{
+  type?: SelectedTrack;
   value?: string;
 }>;
 
@@ -102,13 +92,13 @@ type BufferConfig = Readonly<{
   minBufferMemoryReservePercent?: Float;
 }>;
 
-type VideoTrackType = WithDefault<
+type SelectedVideoTrack = WithDefault<
   'auto' | 'disabled' | 'resolution' | 'index',
   'auto'
 >;
 
-type SelectedVideoTrack = Readonly<{
-  type?: VideoTrackType;
+export type SelectedVideoTrackType = Readonly<{
+  type?: SelectedVideoTrack;
   value?: Int32;
 }>;
 
@@ -212,7 +202,7 @@ export type OnTextTracksData = Readonly<{
 //       /**
 //        * iOS only supports VTT, Android supports all 3
 //        */
-//       type?: OnTextTracksTypeCodegenData;
+//       type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
 //       selected?: boolean;
 //     }>
 //   >;
@@ -446,8 +436,8 @@ export interface VideoNativeProps extends ViewProps {
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
-  selectedTextTrack?: SelectedTextTrack;
-  selectedAudioTrack?: SelectedAudioTrack;
+  selectedTextTrack?: SelectedTrackType;
+  selectedAudioTrack?: SelectedTrackType;
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
@@ -497,7 +487,7 @@ export interface VideoNativeProps extends ViewProps {
   hideShutterView?: boolean; //	Android
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
-  selectedVideoTrack?: SelectedVideoTrack; // android
+  selectedVideoTrack?: SelectedVideoTrackType; // android
   subtitleStyle?: SubtitleStyle; // android
   trackId?: string; // Android
   useTextureView?: boolean; // Android
@@ -522,7 +512,7 @@ export interface VideoNativeProps extends ViewProps {
   onVideoExternalPlaybackChange?: DirectEventHandler<OnExternalPlaybackChangeData>;
   onGetLicense?: DirectEventHandler<OnGetLicenseData>;
   onPictureInPictureStatusChanged?: DirectEventHandler<OnPictureInPictureStatusChangedData>;
-  onRestoreUserInterfaceForPictureInPictureSto: DirectEventHandler<{}>;
+  onRestoreUserInterfaceForPictureInPictureStop?: DirectEventHandler<{}>;
   onReceiveAdEvent?: DirectEventHandler<OnReceiveAdEventData>;
   onVideoPlaybackStateChanged?: DirectEventHandler<OnPlaybackStateChangedData>; // android only
   onVideoIdle?: DirectEventHandler<{}>; // android only (nowhere in document, so do not use as props. just type declaration)

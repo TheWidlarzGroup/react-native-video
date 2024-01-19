@@ -3,6 +3,10 @@ import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
+import type {
+  SelectedTrackType,
+  SelectedVideoTrackType,
+} from '../specs/VideoNativeComponent';
 
 export type Headers = Record<string, string>;
 
@@ -68,31 +72,6 @@ export type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
-};
-
-export enum SelectedTrackType {
-  SYSTEM = 'system',
-  DISABLED = 'disabled',
-  TITLE = 'title',
-  LANGUAGE = 'language',
-  INDEX = 'index',
-}
-
-export type SelectedTrack = {
-  type: SelectedTrackType;
-  value?: string | number;
-};
-
-export enum SelectedVideoTrackType {
-  AUDO = 'auto',
-  DISABLED = 'disabled',
-  RESOLUTION = 'resolution',
-  IUNDEX = 'index',
-}
-
-export type SelectedVideoTrack = {
-  type: SelectedVideoTrackType;
-  value?: number;
 };
 
 export type SubtitleStyle = {
@@ -177,7 +156,7 @@ export enum PosterResizeModeType {
 export type AudioOutput = 'speaker' | 'earpiece';
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
-  source?: ReactVideoSource;
+  source: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
@@ -217,9 +196,9 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
-  selectedAudioTrack?: SelectedTrack;
-  selectedTextTrack?: SelectedTrack;
-  selectedVideoTrack?: SelectedVideoTrack; // android
+  selectedAudioTrack?: SelectedTrackType;
+  selectedTextTrack?: SelectedTrackType;
+  selectedVideoTrack?: SelectedVideoTrackType; // android
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
   testID?: string;
