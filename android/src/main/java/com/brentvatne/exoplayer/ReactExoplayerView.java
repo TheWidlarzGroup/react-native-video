@@ -181,6 +181,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isBuffering;
     private boolean muted = false;
     private boolean pictureInPictureEnabled = false;
+    private boolean isInPictureInPicture = false;
     private PictureInPictureParams.Builder pictureInPictureParamsBuilder;
     private boolean hasAudioFocus = false;
     private float rate = 1f;
@@ -377,11 +378,11 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (pictureInPictureEnabled) {
+        if (pictureInPictureEnabled && !isInPictureInPicture) {
             enterPictureInPictureMode();
             return;
         }
-        if (playInBackground) {
+        if (playInBackground || isInPictureInPicture) {
             return;
         }
         setPlayWhenReady(false);
@@ -1883,6 +1884,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
+        this.isInPictureInPicture = isInPictureInPicture;
         eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
     }
 
