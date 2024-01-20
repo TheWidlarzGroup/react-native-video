@@ -1995,6 +1995,7 @@ public class ReactExoplayerView extends FrameLayout implements
             if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayout(exoPlayerView);
+                reLayout(playerControlView);
             }
             UiThreadUtil.runOnUiThread(() -> {
                 WindowCompat.setDecorFitsSystemWindows(window, true);
