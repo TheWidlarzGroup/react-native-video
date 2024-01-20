@@ -16,6 +16,8 @@ import com.facebook.react.uimanager.ThemedReactContext
 
 class PictureInPictureUtil {
     companion object {
+        private const val FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000
+
         fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
             if (!isSupportPictureInPicture(context)) return
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && pictureInPictureParams != null) {
@@ -27,6 +29,7 @@ class PictureInPictureUtil {
 
         fun updatePictureInPictureActions(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!isSupportPictureInPicture(context)) return
                 context.currentActivity?.setPictureInPictureParams(pictureInPictureParams)
             }
         }
@@ -42,14 +45,25 @@ class PictureInPictureUtil {
         }
 
         private fun isSupportPictureInPicture(context: ThemedReactContext): Boolean =
-            checkIsApiSupport() &&
-                checkIsUserAllowPIP(
-                    context
-                ) &&
-                checkIsSystemSupportPIP(context)
+            checkIsApiSupport() && checkIsSystemSupportPIP(context) && checkIsUserAllowPIP(context)
 
         @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.N)
         private fun checkIsApiSupport(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        private fun checkIsSystemSupportPIP(context: ThemedReactContext): Boolean {
+            val activity = context.currentActivity ?: return false
+
+            val activityInfo = activity.packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
+            // detect current activity's android:supportsPictureInPicture value defined within AndroidManifest.xml
+            // https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/content/pm/ActivityInfo.java;l=1090-1093;drc=7651f0a4c059a98f32b0ba30cd64500bf135385f
+            val isActivitySupportPip = activityInfo.flags and FLAG_SUPPORTS_PICTURE_IN_PICTURE != 0
+
+            // PIP might be disabled on devices that have low RAM.
+            val isPipAvailable = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+
+            return isActivitySupportPip && isPipAvailable
+        }
 
         private fun checkIsUserAllowPIP(context: ThemedReactContext): Boolean {
             val activity = context.currentActivity ?: return false
@@ -67,13 +81,6 @@ class PictureInPictureUtil {
             } else {
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.O && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
             }
-        }
-
-        // PIP might be disabled on devices that have low RAM.
-        @RequiresApi(Build.VERSION_CODES.N)
-        private fun checkIsSystemSupportPIP(context: ThemedReactContext): Boolean {
-            val activity = context.currentActivity ?: return false
-            return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         }
     }
 }
