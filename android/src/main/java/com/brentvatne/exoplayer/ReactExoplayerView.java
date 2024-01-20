@@ -1910,7 +1910,8 @@ public class ReactExoplayerView extends FrameLayout implements
                         setFullscreen(false);
                     }
                 });
-                fullScreenPlayerView.show();
+                addPlayerControl();
+                if (isFullscreen) fullScreenPlayerView.show();
                 updateFullScreenButtonVisbility();
             }
         }
