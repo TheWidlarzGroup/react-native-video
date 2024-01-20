@@ -397,6 +397,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void cleanUpResources() {
         stopPlayback();
+        themedReactContext.removeLifecycleEventListener(this);
     }
 
     //BandwidthMeter.EventListener implementation
