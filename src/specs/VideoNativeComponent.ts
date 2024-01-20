@@ -158,73 +158,46 @@ export type OnPlaybackStateChangedData = Readonly<{
 }>;
 
 export type OnTimedMetadataData = Readonly<{
-  metadata: Readonly<{}>;
+  metadata: {
+    value?: string;
+    identifier: string;
+  }[];
 }>;
-// TODO fix type after RN 0.73
-// export type OnTimedMetadataData = Readonly<{
-//   metadata: ReadonlyArray<
-//     Readonly<{
-//       value?: string;
-//       identifier: string;
-//     }>
-//   >;
-// }>;
 
 export type OnAudioTracksData = Readonly<{
-  audioTracks: Readonly<{}>;
+  audioTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    bitrate?: Float;
+    type?: string;
+    selected?: boolean;
+  }[];
 }>;
-
-// TODO fix type after RN 0.73
-// export type OnAudioTracksData = Readonly<{
-//   audioTracks: ReadonlyArray<
-//     Readonly<{
-//       index: Int32;
-//       title?: string;
-//       language?: string;
-//       bitrate?: Float;
-//       type?: string;
-//       selected?: boolean;
-//     }>
-//   >;
-// }>;
 
 export type OnTextTracksData = Readonly<{
-  textTracks: Readonly<{}>;
+  textTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    /**
+     * iOS only supports VTT, Android supports all 3
+     */
+    type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
+    selected?: boolean;
+  }[];
 }>;
-
-// TODO fix type after RN 0.73
-// export type OnTextTracksData = Readonly<{
-//   textTracks: ReadonlyArray<
-//     Readonly<{
-//       index: Int32;
-//       title?: string;
-//       language?: string;
-//       /**
-//        * iOS only supports VTT, Android supports all 3
-//        */
-//       type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
-//       selected?: boolean;
-//     }>
-//   >;
-// }>;
 
 export type OnVideoTracksData = Readonly<{
-  videoTracks: Readonly<{}>;
+  videoTracks: {
+    trackId: Int32;
+    codecs?: string;
+    width?: Float;
+    height?: Float;
+    bitrate?: Float;
+    selected?: boolean;
+  }[];
 }>;
-
-// TODO fix type after RN 0.73
-// export type OnVideoTracksData = Readonly<{
-//   videoTracks: ReadonlyArray<
-//     Readonly<{
-//       trackId: Int32;
-//       codecs?: string;
-//       width?: Float;
-//       height?: Float;
-//       bitrate?: Float;
-//       selected?: boolean;
-//     }>
-//   >;
-// }>;
 
 export type OnPlaybackData = Readonly<{
   playbackRate: Float;
