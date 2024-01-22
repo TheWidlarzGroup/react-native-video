@@ -121,7 +121,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [posterResizeMode],
     );
 
-    const src = useMemo<VideoSrc>(() => {
+    const src = useMemo<VideoSrc | undefined>(() => {
+      if (!source) {
+        return undefined;
+      }
       const resolvedSource = resolveAssetSourceForVideo(source);
       let uri = resolvedSource.uri || '';
       if (uri && uri.match(/^\//)) {

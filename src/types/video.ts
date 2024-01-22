@@ -156,7 +156,7 @@ export enum PosterResizeModeType {
 export type AudioOutput = 'speaker' | 'earpiece';
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
-  source: ReactVideoSource;
+  source?: ReactVideoSource;
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
