@@ -48,7 +48,7 @@ import React
 
         func setupPipController(_ playerLayer: AVPlayerLayer?) {
             guard let playerLayer else { return }
-            if (!AVPictureInPictureController.isPictureInPictureSupported()) { return }
+            if !AVPictureInPictureController.isPictureInPictureSupported() { return }
             // Create new controller passing reference to the AVPlayerLayer
             _pipController = AVPictureInPictureController(playerLayer: playerLayer)
             if #available(iOS 14.2, *) {
