@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer
 
+import android.os.Build
 import androidx.fragment.app.Fragment
 
 class ReactExoplayerFragment(private val view: ReactExoplayerView) : Fragment() {
@@ -17,6 +18,11 @@ class ReactExoplayerFragment(private val view: ReactExoplayerView) : Fragment() 
         super.onStop()
         if (!view.playInBackground) view.setPausedModifier(true)
         mIsOnStopCalled = true
+
+        // Handling when onStop is called while in multi-window mode
+        if (Build.VERSION.SDK_INT >= 24 && activity?.isInMultiWindowMode == true && activity?.isInPictureInPictureMode != true && !view.playInBackground) {
+            view.setPausedModifier(true)
+        }
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
