@@ -160,7 +160,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_BITRATE = "bitrate";
 
     private static final String EVENT_PROP_IS_PLAYING = "isPlaying";
-    private static final String EVENT_PROP_IS_ACTIVE = "isActive";
+    private static final String EVENT_PROP_IS_PICTURE_IN_PICTURE_ACTIVE = "isActive";
 
     public void setViewId(int viewId) {
         this.viewId = viewId;
@@ -393,7 +393,7 @@ public class VideoEventEmitter {
 
     public void onPictureInPictureStatusChanged(boolean isActive) {
         WritableMap map = Arguments.createMap();
-        map.putBoolean(EVENT_PROP_IS_ACTIVE, isActive);
+        map.putBoolean(EVENT_PROP_IS_PICTURE_IN_PICTURE_ACTIVE, isActive);
         receiveEvent(EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED, map);
     }
 
