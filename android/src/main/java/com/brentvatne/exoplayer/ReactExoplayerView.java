@@ -383,7 +383,9 @@ public class ReactExoplayerView extends FrameLayout implements
             enterPictureInPictureMode();
             return;
         }
-        if (playInBackground || isInPictureInPicture) {
+        Activity activity = themedReactContext.getCurrentActivity();
+        boolean isInMultiWindowMode = Util.SDK_INT >= 24 && activity != null && activity.isInMultiWindowMode();
+        if (playInBackground || isInPictureInPicture || isInMultiWindowMode) {
             return;
         }
         setPlayWhenReady(false);
