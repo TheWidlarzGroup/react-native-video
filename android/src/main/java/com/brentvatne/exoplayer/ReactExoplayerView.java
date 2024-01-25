@@ -1922,10 +1922,10 @@ public class ReactExoplayerView extends FrameLayout implements
     private void updatePictureInPictureActions(boolean isPaused) {
         if (pictureInPictureParamsBuilder == null) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArrayList<RemoteAction> actions = PictureInPictureUtil.Companion.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
             PictureInPictureParams pipParams = pictureInPictureParamsBuilder.build();
-            PictureInPictureUtil.Companion.updatePictureInPictureActions(themedReactContext, pipParams);
+            PictureInPictureUtil.updatePictureInPictureActions(themedReactContext, pipParams);
         }
     }
 
@@ -1933,11 +1933,11 @@ public class ReactExoplayerView extends FrameLayout implements
         if (!pictureInPictureEnabled) return;
         PictureInPictureParams _pipParams = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArrayList<RemoteAction> actions = PictureInPictureUtil.Companion.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
             _pipParams = pictureInPictureParamsBuilder.build();
         }
-        PictureInPictureUtil.Companion.enterPictureInPictureMode(themedReactContext, _pipParams);
+        PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
     }
 
     public void setMutedModifier(boolean muted) {
