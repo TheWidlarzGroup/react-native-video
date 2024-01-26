@@ -387,7 +387,7 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     private void togglePlayerControlVisibility() {
         if (player == null) return;
-        reLayout(playerControlView);
+        reLayoutControls();
         if (playerControlView.isVisible()) {
             playerControlView.hide();
         } else {
@@ -498,6 +498,11 @@ public class ReactExoplayerView extends FrameLayout implements
         view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
+    }
+
+    private void reLayoutControls() {
+        reLayout(exoPlayerView);
+        reLayout(playerControlView);
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
@@ -725,7 +730,8 @@ public class ReactExoplayerView extends FrameLayout implements
         player.prepare();
         playerNeedsSource = false;
 
-        reLayout(exoPlayerView);
+        reLayoutControls();
+
         eventEmitter.loadStart();
         loadVideoStarted = true;
 
@@ -1992,7 +1998,7 @@ public class ReactExoplayerView extends FrameLayout implements
             eventEmitter.fullscreenWillDismiss();
             if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
-                reLayout(exoPlayerView);
+                reLayoutControls();
             }
             UiThreadUtil.runOnUiThread(() -> {
                 WindowCompat.setDecorFitsSystemWindows(window, true);
