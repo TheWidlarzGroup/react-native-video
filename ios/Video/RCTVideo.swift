@@ -250,9 +250,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     /// Tracks notifications is handled here.
     override func observeValue(forKeyPath keyPath: String?,
-                               of object: Any?,
-                               change: [NSKeyValueChangeKey : Any]?,
-                               context: UnsafeMutableRawPointer?) {
+                               of _: Any?,
+                               change _: [NSKeyValueChangeKey: Any]?,
+                               context _: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(AVPlayerItem.tracks) {
             all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
                 self.onTextTracks?(["textTracks": textTracks])
@@ -381,9 +381,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     // observe tracks update
                     self._player?.currentItem?.addObserver(self,
-                                            forKeyPath: #keyPath(AVPlayerItem.tracks),
-                                            options: [.old, .new],
-                                            context: nil)
+                                                           forKeyPath: #keyPath(AVPlayerItem.tracks),
+                                                           options: [.old, .new],
+                                                           context: nil)
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
