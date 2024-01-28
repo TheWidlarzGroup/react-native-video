@@ -116,6 +116,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onTextTracks: RCTDirectEventBlock?
+    @objc var onAudioTracks: RCTDirectEventBlock?
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -246,6 +248,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    /// Tracks notifications is handled here.
+    override func observeValue(forKeyPath keyPath: String?,
+                               of object: Any?,
+                               change: [NSKeyValueChangeKey : Any]?,
+                               context: UnsafeMutableRawPointer?) {
+        if keyPath == #keyPath(AVPlayerItem.tracks) {
+            all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
+                self.onTextTracks?(["textTracks": textTracks])
+                self.onAudioTracks?(["audioTracks": audioTracks])
+            }
+        }
+    }
+
     // MARK: - Progress
 
     func sendProgressUpdate() {
@@ -363,6 +378,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     self._player = self._player ?? AVPlayer()
                     self._player?.replaceCurrentItem(with: playerItem)
+
+                    // observe tracks update
+                    self._player?.currentItem?.addObserver(self,
+                                            forKeyPath: #keyPath(AVPlayerItem.tracks),
+                                            options: [.old, .new],
+                                            context: nil)
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
