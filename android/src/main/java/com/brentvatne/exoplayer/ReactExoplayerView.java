@@ -931,6 +931,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 case AudioManager.AUDIOFOCUS_LOSS:
                     view.hasAudioFocus = false;
                     view.eventEmitter.audioFocusChanged(false);
+                    // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
+                    view.pausePlayback();
                     view.audioManager.abandonAudioFocus(this);
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
