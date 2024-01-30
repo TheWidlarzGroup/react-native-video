@@ -140,7 +140,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
+            _pip = RCTPictureInPicture({ [weak self] in
+                self?._onPictureInPictureStatusChanged()
+            }, { [weak self] in
+                self?._onRestoreUserInterfaceForPictureInPictureStop()
+            })
         #endif
 
         NotificationCenter.default.addObserver(
@@ -193,6 +197,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     deinit {
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
+        _pip = nil
         _playerObserver.clearPlayer()
     }
 
