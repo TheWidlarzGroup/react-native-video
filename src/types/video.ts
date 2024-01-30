@@ -3,10 +3,6 @@ import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
-import type {
-  SelectedTrackType,
-  SelectedVideoTrackType,
-} from '../specs/VideoNativeComponent';
 
 export type Headers = Record<string, string>;
 
@@ -72,6 +68,31 @@ export type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
+};
+
+export enum SelectedTrackType {
+  SYSTEM = 'system',
+  DISABLED = 'disabled',
+  TITLE = 'title',
+  LANGUAGE = 'language',
+  INDEX = 'index',
+}
+
+export type SelectedTrack = {
+  type: SelectedTrackType;
+  value?: string;
+};
+
+export enum SelectedVideoTrackType {
+  AUTO = 'auto',
+  DISABLED = 'disabled',
+  RESOLUTION = 'resolution',
+  INDEX = 'index',
+}
+
+export type SelectedVideoTrack = {
+  type: SelectedVideoTrackType;
+  value?: number;
 };
 
 export type SubtitleStyle = {
@@ -196,9 +217,9 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
-  selectedAudioTrack?: SelectedTrackType;
-  selectedTextTrack?: SelectedTrackType;
-  selectedVideoTrack?: SelectedVideoTrackType; // android
+  selectedAudioTrack?: SelectedTrack;
+  selectedTextTrack?: SelectedTrack;
+  selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
   textTracks?: TextTracks;
   testID?: string;

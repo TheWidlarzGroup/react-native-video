@@ -38,7 +38,7 @@ export type VideoSrc = Readonly<{
   customImageUri?: string;
 }>;
 
-export type DRMType = WithDefault<
+type DRMType = WithDefault<
   'widevine' | 'playready' | 'clearkey' | 'fairplay',
   'widevine'
 >;
@@ -67,14 +67,34 @@ type TextTracks = ReadonlyArray<
   }>
 >;
 
-type SelectedTrack = WithDefault<
+type SelectedTextTrackType = WithDefault<
   'system' | 'disabled' | 'title' | 'language' | 'index',
   'system'
 >;
 
-export type SelectedTrackType = Readonly<{
-  type?: SelectedTrack;
+type SelectedAudioTrackType = WithDefault<
+  'system' | 'disabled' | 'title' | 'language' | 'index',
+  'system'
+>;
+
+type SelectedTextTrack = Readonly<{
+  type?: SelectedTextTrackType;
   value?: string;
+}>;
+
+type SelectedAudioTrack = Readonly<{
+  type?: SelectedAudioTrackType;
+  value?: string;
+}>;
+
+type SelectedVideoTrackType = WithDefault<
+  'auto' | 'disabled' | 'resolution' | 'index',
+  'auto'
+>;
+
+type SelectedVideoTrack = Readonly<{
+  type?: SelectedVideoTrackType;
+  value?: Int32;
 }>;
 
 export type Seek = Readonly<{
@@ -90,16 +110,6 @@ type BufferConfig = Readonly<{
   maxHeapAllocationPercent?: Float;
   minBackBufferMemoryReservePercent?: Float;
   minBufferMemoryReservePercent?: Float;
-}>;
-
-type SelectedVideoTrack = WithDefault<
-  'auto' | 'disabled' | 'resolution' | 'index',
-  'auto'
->;
-
-export type SelectedVideoTrackType = Readonly<{
-  type?: SelectedVideoTrack;
-  value?: Int32;
 }>;
 
 type SubtitleStyle = Readonly<{
@@ -118,8 +128,24 @@ export type OnLoadData = Readonly<{
     height: Float;
     orientation: WithDefault<'landscape' | 'portrait', 'landscape'>;
   }>;
-  audioTracks: Readonly<{}>;
-  textTracks: Readonly<{}>;
+  audioTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    bitrate?: Float;
+    type?: string;
+    selected?: boolean;
+  }[];
+  textTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    /**
+     * iOS only supports VTT, Android supports all 3
+     */
+    type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
+    selected?: boolean;
+  }[];
 }>;
 
 export type OnLoadStartData = Readonly<{
@@ -409,8 +435,9 @@ export interface VideoNativeProps extends ViewProps {
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
-  selectedTextTrack?: SelectedTrackType;
-  selectedAudioTrack?: SelectedTrackType;
+  selectedTextTrack?: SelectedTextTrack;
+  selectedAudioTrack?: SelectedAudioTrack;
+  selectedVideoTrack?: SelectedVideoTrack; // android
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
@@ -460,7 +487,6 @@ export interface VideoNativeProps extends ViewProps {
   hideShutterView?: boolean; //	Android
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
-  selectedVideoTrack?: SelectedVideoTrackType; // android
   subtitleStyle?: SubtitleStyle; // android
   trackId?: string; // Android
   useTextureView?: boolean; // Android

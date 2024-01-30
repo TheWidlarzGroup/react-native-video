@@ -20,6 +20,9 @@ import type {
   OnVolumeChangeData,
 } from '../specs/VideoNativeComponent';
 
+export type AudioTrack = OnAudioTracksData['audioTracks'][number];
+export type TextTrack = OnTextTracksData['textTracks'][number];
+
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void; //Android, iOS
   onAudioFocusChanged?: (e: OnAudioFocusChangedData) => void; // Android
