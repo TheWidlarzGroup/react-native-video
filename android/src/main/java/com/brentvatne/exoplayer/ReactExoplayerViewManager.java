@@ -18,7 +18,6 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
@@ -128,7 +127,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
             String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
-            ReadableArray drmHeadersArray = (drm.hasKey(PROP_DRM_HEADERS)) ? drm.getArray(PROP_DRM_HEADERS) : null;
+            ReadableArray drmHeadersArray = ReactBridgeUtils.safeGetArray(drm, PROP_DRM_HEADERS);
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
                 videoView.setDrmType(drmUUID);
@@ -159,7 +158,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
 
         Map<String, String> headers = new HashMap<>();
-        ReadableArray propSrcHeadersArray = (src.hasKey(PROP_SRC_HEADERS)) ? src.getArray(PROP_SRC_HEADERS) : null;
+        ReadableArray propSrcHeadersArray = ReactBridgeUtils.safeGetArray(src, PROP_SRC_HEADERS);
         if (propSrcHeadersArray != null) {
             if (propSrcHeadersArray.size() > 0) {
                 for (int i = 0; i < propSrcHeadersArray.size(); i++) {
