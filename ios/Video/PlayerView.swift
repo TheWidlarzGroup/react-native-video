@@ -7,6 +7,7 @@
 
 import AVDoris
 import AVKit
+import React
 
 class PlayerView: UIView, JSInputProtocol {
     var jsBridge: RCTBridge?

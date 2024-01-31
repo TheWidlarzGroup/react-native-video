@@ -18,6 +18,7 @@ Pod::Spec.new do |s|
   # s.static_framework = true
   s.source_files = "ios/**/*"
   
-  s.dependency 'React'
+  s.dependency 'React-Core'
   s.dependency 'AVDoris'
+  s.dependency 'RNDReactNativeDiceVideo'
 end

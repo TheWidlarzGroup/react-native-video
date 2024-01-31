@@ -5,6 +5,7 @@
 //  Created by Yaroslav Lvov on 11.03.2022.
 //
 
+import React
 import AVDoris
 
 struct OverlayConfig: SuperCodable {

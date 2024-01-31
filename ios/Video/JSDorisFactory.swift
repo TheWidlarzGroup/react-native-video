@@ -5,8 +5,10 @@
 //  Created by Yaroslav Lvov on 11.03.2022.
 //
 
+import React
 import AVDoris
 import AVKit
+
 
 class JSDorisFactory {
     static func build(jsProps: JSProps, containerView: UIView, jsInput: JSInputProtocol, bridge: RCTBridge?, tracksPolicy: JSTracksPolicy?) -> JSDoris? {
