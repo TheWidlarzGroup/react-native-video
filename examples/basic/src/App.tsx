@@ -1,5 +1,3 @@
-'use strict';
-
 import React, {Component} from 'react';
 
 import {
@@ -34,10 +32,10 @@ import Video, {
   SelectedTrack,
   DRMType,
 } from 'react-native-video';
-import ToggleControl from './ToggleControl';
+import ToggleControl from './components/ToggleControl';
 import MultiValueControl, {
   MultiValueControlPropType,
-} from './MultiValueControl';
+} from './components/MultiValueControl';
 
 interface StateType {
   rate: number;

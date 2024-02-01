@@ -1,6 +1,7 @@
 package com.videoplayer
 
 import android.app.Application
+import com.brentvatne.react.ReactVideoPackage
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -11,7 +12,6 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.flipper.ReactNativeFlipper
 import com.facebook.soloader.SoLoader
-import com.brentvatne.react.ReactVideoPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -21,10 +21,10 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
-              add(ReactVideoPackage())
+                add(ReactVideoPackage())
             }
 
-        override fun getJSMainModuleName(): String = "src/index"
+        override fun getJSMainModuleName(): String = "index"
 
         override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
