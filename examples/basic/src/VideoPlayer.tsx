@@ -95,6 +95,10 @@ class VideoPlayer extends Component {
   seekerWidth = 0;
 
   srcAllPlatformList = [
+    {
+      description: 'another bunny (can be saved)',
+      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+    },
     require('./broadchurch.mp4'),
     {
       description: '(hls|live) red bull tv',
@@ -113,10 +117,6 @@ class VideoPlayer extends Component {
     {
       description: 'Another live sample',
       uri: 'https://live.forstreet.cl/live/livestream.m3u8',
-    },
-    {
-      description: 'another bunny (can be saved)',
-      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
     },
   ];
 
@@ -303,7 +303,7 @@ class VideoPlayer extends Component {
   };
 
   onEnd = () => {
-    this.channelUp();
+    // this.channelUp();
   };
 
   toggleFullscreen() {
@@ -759,10 +759,17 @@ class VideoPlayer extends Component {
           onAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
-          repeat={this.state.loop}
+          repeat
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          bufferConfig={{
+            minBufferMs: 15000,
+            maxBufferMs: 50000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+            bufferSize: 200,
+          }}
         />
       </TouchableOpacity>
     );

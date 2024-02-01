@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -42,6 +43,10 @@ import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.util.Util;
+import androidx.media3.database.StandaloneDatabaseProvider;
+import androidx.media3.datasource.cache.CacheDataSource;
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor;
+import androidx.media3.datasource.cache.SimpleCache;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.HttpDataSource;
@@ -111,6 +116,7 @@ import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.common.collect.ImmutableList;
 
+import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -185,6 +191,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
 
+    private DataSource.Factory cacheDataSourceFactory;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -634,8 +641,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdEventListener(this)
                 .setAdErrorListener(this)
                 .build();
-
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+        if (cacheDataSourceFactory != null) {
+            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        }
+
         if (adsLoader != null) {
             mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
         }
@@ -830,9 +840,16 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                        mediaDataSourceFactory
-                );
+                if (cacheDataSourceFactory == null) {
+                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                            mediaDataSourceFactory
+                    );
+                } else {
+                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                            cacheDataSourceFactory
+                    );
+
+                }
                 break;
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
@@ -2025,7 +2042,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setHideShutterView(hideShutterView);
     }
 
-    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent) {
+    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int bufferSize) {
         minBufferMs = newMinBufferMs;
         maxBufferMs = newMaxBufferMs;
         bufferForPlaybackMs = newBufferForPlaybackMs;
@@ -2033,6 +2050,11 @@ public class ReactExoplayerView extends FrameLayout implements
         maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
+        SimpleCache simpleCache = new SimpleCache(new File(this.getContext().getCacheDir(), "RNVCache"), new LeastRecentlyUsedCacheEvictor((long) bufferSize*1024*1024), new StandaloneDatabaseProvider(this.getContext()));
+        cacheDataSourceFactory =
+                new CacheDataSource.Factory()
+                        .setCache(simpleCache)
+                        .setUpstreamDataSourceFactory(buildHttpDataSourceFactory(false));
         releasePlayer();
         initializePlayer();
     }
