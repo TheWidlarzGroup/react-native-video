@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: ["feature"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this feature report!
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Tell us your idea and why will concern if we implement it. You can also create a PR 😄
+      placeholder: Tell us your idea!
+      value: "Very cool idea!"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: why-it-is-needed
+    attributes:
+      label: Why it is needed ?
+      description: Tell us your why it is needed!
+      placeholder: Why it is needed ?
+      value: "Because it is cool!"
+    validations:
+      required: true
+
+  - type: textarea
+    id: possible-implementation
+    attributes:
+      label: Possible implementation
+      description: |
+        Tell us your possible implementation! It really helps if you could describe from a technical POV how this new feature would work, which code it rely on, etc
+      placeholder: How to implement ?
+      value: "Technical POV how to do it"
+    validations:
+      required: false
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Code sample
+      description: Please show how the new code could work, if doable
+      placeholder: Code sample
+      value: "Code sample"
+    validations:
+      required: false
+
+  
