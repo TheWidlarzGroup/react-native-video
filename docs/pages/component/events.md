@@ -6,7 +6,7 @@ This page shows the list of available callbacks to handle player notifications
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
 | [onAudioFocusChanged](#onaudiofocuschanged)                                                     | Android                   |
-| [onAudioTracks](#onaudiotracks)                                                                 | Android                   |
+| [onAudioTracks](#onaudiotracks)                                                                 | Android, iOS              |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
@@ -27,7 +27,7 @@ This page shows the list of available callbacks to handle player notifications
 | [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS, visionOS             |
 | [onSeek](#onseek)                                                                               | All                       |
 | [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS, visionOS    |
-| [onTextTracks](#ontexttracks)                                                                   | Android                   |
+| [onTextTracks](#ontexttracks)                                                                   | Android, iOS              |
 | [onVideoTracks](#onvideotracks)                                                                 | Android                   |
 | [onVolumeChange](#onvolumechange)                                                               | Android, iOS, visionOS    |
 

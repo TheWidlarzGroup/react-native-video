@@ -25,6 +25,7 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>)
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>)
     func handleViewControllerOverlayViewFrameChange(overlayView: UIView, change: NSKeyValueObservedChange<CGRect>)
+    func handleTracksChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVPlayerItemTrack]>)
 }
 
 // MARK: - RCTPlayerObserver
@@ -96,6 +97,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     private var _playerViewControllerReadyForDisplayObserver: NSKeyValueObservation?
     private var _playerLayerReadyForDisplayObserver: NSKeyValueObservation?
     private var _playerViewControllerOverlayFrameObserver: NSKeyValueObservation?
+    private var _playerTracksObserver: NSKeyValueObservation?
 
     deinit {
         if let _handlers {
@@ -141,6 +143,13 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
             options: [.new, .old],
             changeHandler: _handlers.handlePlaybackLikelyToKeepUp
         )
+
+        // observe tracks update
+        _playerTracksObserver = playerItem.observe(
+            \.tracks,
+            options: [.new, .old],
+            changeHandler: _handlers.handleTracksChange
+        )
     }
 
     func removePlayerItemObservers() {
@@ -148,6 +157,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         _playerPlaybackBufferEmptyObserver?.invalidate()
         _playerPlaybackLikelyToKeepUpObserver?.invalidate()
         _playerTimedMetadataObserver?.invalidate()
+        _playerTracksObserver?.invalidate()
     }
 
     func addPlayerViewControllerObservers() {

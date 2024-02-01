@@ -116,6 +116,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onTextTracks: RCTDirectEventBlock?
+    @objc var onAudioTracks: RCTDirectEventBlock?
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -367,7 +369,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     self._player = self._player ?? AVPlayer()
+
                     self._player?.replaceCurrentItem(with: playerItem)
+
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
@@ -1370,5 +1374,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
 
         onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
+    }
+
+    func handleTracksChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<[AVPlayerItemTrack]>) {
+        all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
+            self.onTextTracks?(["textTracks": textTracks])
+            self.onAudioTracks?(["audioTracks": audioTracks])
+        }
     }
 }
