@@ -39,7 +39,6 @@ body:
       description: What architecture are you using?
       options:
         - Old architecture
-        - New architecture
         - New architecture with interop layer
     validations:
       required: true
