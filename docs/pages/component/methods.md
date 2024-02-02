@@ -8,7 +8,7 @@ This page shows the list of available methods
 |[dismissFullscreenPlayer](#dismissfullscreenplayer)                                        |Android, iOS           |
 |[presentFullscreenPlayer](#presentfullscreenplayer)                                        |Android, iOS           |
 |[pause](#pause)                                                                            |Android, iOS           |
-|[play](#play)                                                                              |Android, iOS           |
+|[resume](#resume)                                                                          |Android, iOS           |
 |[save](#save)                                                                              |iOS                    |
 |[restoreUserInterfaceForPictureInPictureStop](#restoreuserinterfaceforpictureinpicturestop)|iOS                    |
 |[seek](#seek)                                                                              |All                    |
@@ -39,10 +39,10 @@ Pause the video.
 
 Platforms: Android, iOS
 
-### `play`
-`play(): Promise<void>`
+### `resume`
+`resume(): Promise<void>`
 
-Play the video.
+Resume the video.
 
 
 Platforms: Android, iOS
