@@ -6,6 +6,6 @@
       "react": ["./node_modules/@types/react"]
     }
   },
-  "include": ["./src/**/*", "**/*.js"],
+  "include": ["./src/**/*", "**/*.js", "metro.config.js"],
   "exclude": ["node_modules"]
 }

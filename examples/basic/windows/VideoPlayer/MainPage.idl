@@ -1,0 +1,10 @@
+#include "NamespaceRedirect.h"
+
+namespace VideoPlayer
+{
+    [default_interface]
+    runtimeclass MainPage : XAML_NAMESPACE.Controls.Page
+    {
+        MainPage();
+    }
+}
