@@ -68,7 +68,6 @@ export type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
-  bufferSize?: number;
 };
 
 export enum SelectedTrackType {
