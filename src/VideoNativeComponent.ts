@@ -103,7 +103,7 @@ type BufferConfig = Readonly<{
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
-  bufferSize?: number;
+  cacheSizeMB?: number;
 }>;
 
 type SelectedVideoTrack = Readonly<{

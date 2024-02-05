@@ -303,7 +303,7 @@ class VideoPlayer extends Component {
   };
 
   onEnd = () => {
-    // this.channelUp();
+    !this.state.loop && this.channelUp();
   };
 
   toggleFullscreen() {
@@ -759,7 +759,7 @@ class VideoPlayer extends Component {
           onAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
-          repeat
+          repeat={this.state.loop}
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
@@ -768,7 +768,7 @@ class VideoPlayer extends Component {
             maxBufferMs: 50000,
             bufferForPlaybackMs: 2500,
             bufferForPlaybackAfterRebufferMs: 5000,
-            bufferSize: 200,
+            cacheSizeMB: 200,
           }}
         />
       </TouchableOpacity>

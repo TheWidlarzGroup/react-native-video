@@ -118,6 +118,7 @@ bufferForPlaybackAfterRebufferMs | number | The default duration of media that m
 maxHeapAllocationPercent | number | The percentage of available heap that the video can use to buffer, between 0 and 1
 minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1
 minBufferMemoryReservePercent | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1
+cacheSizeMB | number | Cache size in MB, it will allow applications to store video data for a while in the cache folder, it is useful to decrease bandwidth usage when repeating small videos. Android only.
 
 This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 

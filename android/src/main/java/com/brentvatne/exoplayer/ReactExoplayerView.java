@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -2042,7 +2041,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setHideShutterView(hideShutterView);
     }
 
-    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int bufferSize) {
+    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int cacheSize) {
         minBufferMs = newMinBufferMs;
         maxBufferMs = newMaxBufferMs;
         bufferForPlaybackMs = newBufferForPlaybackMs;
@@ -2050,11 +2049,15 @@ public class ReactExoplayerView extends FrameLayout implements
         maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
-        SimpleCache simpleCache = new SimpleCache(new File(this.getContext().getCacheDir(), "RNVCache"), new LeastRecentlyUsedCacheEvictor((long) bufferSize*1024*1024), new StandaloneDatabaseProvider(this.getContext()));
-        cacheDataSourceFactory =
-                new CacheDataSource.Factory()
-                        .setCache(simpleCache)
-                        .setUpstreamDataSourceFactory(buildHttpDataSourceFactory(false));
+        if (cacheSize == 0) {
+            cacheDataSourceFactory = null;
+        } else {
+            SimpleCache simpleCache = new SimpleCache(new File(this.getContext().getCacheDir(), "RNVCache"), new LeastRecentlyUsedCacheEvictor((long) cacheSize*1024*1024), new StandaloneDatabaseProvider(this.getContext()));
+            cacheDataSourceFactory =
+                    new CacheDataSource.Factory()
+                            .setCache(simpleCache)
+                            .setUpstreamDataSourceFactory(buildHttpDataSourceFactory(false));
+        }
         releasePlayer();
         initializePlayer();
     }
