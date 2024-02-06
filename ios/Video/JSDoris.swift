@@ -11,7 +11,6 @@ import AVDoris
 class JSDoris {
     private let muxDataMapper: AVDorisMuxDataMapper = AVDorisMuxDataMapper()
     private let sourceMapper: AVDorisSourceMapper = AVDorisSourceMapper()
-    private var adTagParametersModifier = AdTagParametersModifier()
     
     private var currentPlayerState: DorisPlayerState = .initialization
     private var currentPlayingItemDuration: Double?
@@ -108,15 +107,6 @@ class JSDoris {
         props.nowPlaying.bindAndFire { [weak self] nowPlaying in
             guard let self = self else { return }
             self.setupNowPlaying(nowPlaying: nowPlaying)
-        }
-    }
-    
-    func replaceAdTagParameters(parameters: AdTagParameters, extraInfo: AdTagParametersModifierInfo) {
-        adTagParametersModifier.prepareAdTagParameters(adTagParameters: parameters.adTagParameters,
-                                                       info: extraInfo) { [weak self] newAdTagParameters in
-            guard let self = self else { return }
-            guard let newAdTagParameters = newAdTagParameters else { return }
-            self.doris?.player.replaceAdTagParameters(adTagParameters: newAdTagParameters, validFrom: parameters.startDate, validUntil: parameters.endDate)
         }
     }
     

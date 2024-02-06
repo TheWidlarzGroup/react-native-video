@@ -106,6 +106,8 @@ class PlayerView: UIView, JSInputProtocol {
     var jsDoris: JSDoris?
     var jsProps = JSProps()
     
+    private var adTagParametersModifier = AdTagParametersModifier()
+
     func seekToNow() {
         //TODO
     }
@@ -119,10 +121,16 @@ class PlayerView: UIView, JSInputProtocol {
         jsDoris?.doris?.player.seek(.position(position))
     }
     
-    func replaceAdTagParameters(payload: NSDictionary) {
-        jsDoris?.replaceAdTagParameters(parameters: AdTagParameters(payload: payload),
-                                        extraInfo: AdTagParametersModifierInfo(viewWidth: frame.width,
-                                                                               viewHeight: frame.height))
+    func replaceAdTagParameters(adTagParameters: [String: Any], validFrom: Date?, validUntil: Date?) {        
+        adTagParametersModifier.prepareAdTagParameters(adTagParameters: adTagParameters,
+                                                       info: AdTagParametersModifierInfo(viewWidth: self.frame.width,
+                                                                                         viewHeight: self.frame.height)) { [weak self] newAdTagParameters in
+            guard let self = self else { return }
+            guard let newAdTagParameters = newAdTagParameters else { return }
+            jsDoris?.doris?.player.replaceAdTagParameters(adTagParameters: newAdTagParameters,
+                                                          validFrom: validFrom,
+                                                          validUntil: validUntil)
+        }
     }
     
     private func setupDoris() {

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AVDoris
 
 struct Source: SuperCodable {
     let id: String?
@@ -29,6 +30,7 @@ struct Source: SuperCodable {
     let selectedSubtitleTrack: String?
     let preferredAudioTracks: [String]?
     var tracksPolicy: JSTracksPolicy?
+    var skipMarkers: [RNSkipMarker]?
 }
 
 
@@ -103,5 +105,27 @@ extension Source.Config {
         let subPropertyId: String
         let videoIsLive: Bool
         let experimentName: String?
+    }
+}
+
+
+extension Source {
+    public struct RNSkipMarker: SuperCodable {
+        let startTime: Double
+        let stopTime: Double
+        let type: RNSkipMarkerType
+
+        enum RNSkipMarkerType: String, Codable {
+            case SKIP_INTRO
+            case SKIP_CREDITS
+        }
+    }
+}
+
+extension SkipMarker {
+    init(jsSkipMarker: Source.RNSkipMarker) {
+        self.init(start: Float(jsSkipMarker.startTime),
+                  stop: Float(jsSkipMarker.stopTime),
+                  type: SkipMarkerType(stringValue: jsSkipMarker.type.rawValue))
     }
 }

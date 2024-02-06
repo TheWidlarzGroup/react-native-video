@@ -186,6 +186,19 @@ class PlayerViewProxy {
         return jsPlaylist
     }
     
+    private static func convertRNVideoSkipMarkersToRNDV(skipMarkers: [Source.RNSkipMarker]?) -> [JSSkipMarker]? {
+        return skipMarkers?.map {
+            let rndvType: JSSkipMarker.JSSkipMarkerType
+            
+            switch $0.type {
+            case .SKIP_CREDITS: rndvType = .SKIP_CREDITS
+            case .SKIP_INTRO: rndvType = .SKIP_INTRO
+            }
+            
+            return JSSkipMarker(startTime: $0.startTime, stopTime: $0.stopTime, type: rndvType)
+        }
+    }
+    
     static func convertRNVideoJSPropsToRNDV(jsProps: JSProps) -> RNDReactNativeDiceVideo.JSProps {
         let rndvJsProps = RNDReactNativeDiceVideo.JSProps()
         rndvJsProps.isFullScreen.value = true
@@ -243,16 +256,12 @@ class PlayerViewProxy {
         }
 
         let jsTranslations = PlayerViewProxy.convertRNVideoTranslationsToRNDV(translations: jsProps.translations.value)
-        
         let jsButtons = PlayerViewProxy.convertRNVideoButtonsToRNDV(buttons: jsProps.buttons.value)
-        
         let jsTheme = PlayerViewProxy.convertRNVideoThemeToRNDV(theme: jsProps.theme.value)
-        
         let jsOverlayConfig = PlayerViewProxy.convertRNVideoOverlayConfigToRNDV(overlayConfig: jsProps.overlayConfig.value)
-        
         let jsTracksPolicy = PlayerViewProxy.convertRNVideoTracksPolicyToRNDV(tracksPolicy: jsProps.source.value?.tracksPolicy)
-        
         let jsPlaylist = PlayerViewProxy.convertRNVideoReleatedVideosToRNDV(relatedVideos: jsProps.relatedVideos.value)
+        let skipMarkers = PlayerViewProxy.convertRNVideoSkipMarkersToRNDV(skipMarkers: jsProps.source.value?.skipMarkers)
         
         let rndvJSVideoDataConfig = RNDReactNativeDiceVideo.JSVideoData.JSVideoDataConfig(
             translations: jsTranslations,
@@ -269,7 +278,8 @@ class PlayerViewProxy {
             isPipEnabled: false,
             canShareplay: false,
             isPlaybackQualityChangeAllowed: false,
-            isAutoPlayNextEnabled: false)
+            isAutoPlayNextEnabled: false,
+            skipMarkers: skipMarkers)
         
         if let rndvJSSource = rndvJSSource {
             let jsVideoData = RNDReactNativeDiceVideo.JSVideoData(source: rndvJSSource, config: rndvJSVideoDataConfig)

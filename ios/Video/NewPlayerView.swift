@@ -68,18 +68,30 @@ class NewPlayerView: UIView, JSInputProtocol {
         didSet { jsProps.metadata.value = try? Metadata(dict: metadata) } }
     @objc var overlayConfig: NSDictionary? {
         didSet { jsProps.overlayConfig.value = try? OverlayConfig(dict: overlayConfig) } }
+    
+    //new separate prop
     @objc var isFavourite: Bool = false {
         didSet {
-            jsPlayerView?.dorisGlue?.doris?.viewModel.toggles.isFavourite = isFavourite
+            jsPlayerView?.isFavourite = isFavourite
             jsProps.isFavourite.value = isFavourite
         }
     }
+    
+    //new separate prop
     @objc var controls: Bool = false {
         didSet {
-            jsPlayerView?.dorisGlue?.doris?.viewModel.toggles.isUIEnabled = controls
+            jsPlayerView?.controls = controls
             jsProps.controls.value = controls
         }
     }
+
+    //new separate prop
+    @objc var paused: Bool = false {
+        didSet {
+            jsPlayerView?.isPaused = paused
+        }
+    }
+
     @objc var nowPlaying: NSDictionary? {
         didSet {
             jsPlayerView?.nowPlaying = nowPlaying
@@ -115,81 +127,70 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var playWhenInactive: Bool = true
     @objc var fullscreen: Bool = false
     @objc var `repeat`: Bool = false
-    @objc var paused: Bool = false {
-        didSet { paused ? jsPlayerView?.dorisGlue?.doris?.player.pause() : jsPlayerView?.dorisGlue?.doris?.player.play() }
-    }
     var jsProps = JSProps()
     var jsPlayerView: RNDReactNativeDiceVideo.JSPlayerView?
     
     func seekToNow() {
-        //TODO
+        jsPlayerView?.seekNow()
     }
     
     func seekToTimestamp(isoDate: String) {
-        //TODO
+        jsPlayerView?.seek(isoDate)
     }
     
     //TODO: pass this value as part of source
     func seekToPosition(position: Double) {
-        jsPlayerView?.dorisGlue?.doris?.player.seek(.position(position))
+        jsPlayerView?.seek(position)
     }
     
-    func replaceAdTagParameters(payload: NSDictionary) {
-        if let payload = payload as? Dictionary<String, Any> {
-            jsPlayerView?.replaceAdTagParameters(adTagParameters: payload, validFrom: nil, validUntil: nil)
-        }
+    func replaceAdTagParameters(adTagParameters: [String: Any], validFrom: Date?, validUntil: Date?) {            jsPlayerView?.replaceAdTagParameters(adTagParameters: adTagParameters, validFrom: validFrom, validUntil: validUntil)
     }
 
     private func setupDoris() {
         DorisLogger.logFilter = DorisLogType.allCases
         if let jsBridge = self.jsBridge {
-            let jsProbs = PlayerViewProxy.convertRNVideoJSPropsToRNDV(jsProps: self.jsProps)
-            let jsPlayerView = RNDReactNativeDiceVideo.JSPlayerView(overlayBuilder: JSOverlayBuilder(bridge: jsBridge), jsProps: jsProbs)
+            let rndvJSProps = PlayerViewProxy.convertRNVideoJSPropsToRNDV(jsProps: self.jsProps)
+            let jsPlayerView = RNDReactNativeDiceVideo.JSPlayerView(overlayBuilder: RNVJSOverlayBuilder(bridge: jsBridge), jsProps: rndvJSProps)
             self.addSubview(jsPlayerView)
             
-            jsPlayerView.onVideoProgress = { [weak self] value in
-                if let currentTime = value?["currentTime"] as? Double {
-                    self?.onVideoProgress?(["currentTime": currentTime])
-                }
-            }
+            jsPlayerView.onVideoProgress = self.onVideoProgress
             jsPlayerView.onBackButton = self.onBackButton
             jsPlayerView.onVideoError = self.onVideoError
-            jsPlayerView.onRequestPlayNextSource = { [weak self] value in
-                if let id = value?["id"] as? String, let type = value?["type"] as? String {
-                    self?.onRelatedVideoClicked?(["id": id, "type": type])
-               }
-            }
-            jsPlayerView.onVideoEnded = self.onVideoEnd
-            jsPlayerView.onVideoPaused = { [weak self] value in
-                if let isPaused = value?["isPaused"] as? Bool {
-                    self?.onPlaybackRateChange?(["playbackRate": isPaused ? 0.0 : 1.0])
-               }
-            }
             jsPlayerView.onRequireAdParameters = self.onRequireAdParameters
             jsPlayerView.onVideoLoad = self.onVideoLoad
             jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
+            
+            //api diff
+            jsPlayerView.onRequestPlayNextSource = self.onRelatedVideoClicked
+            jsPlayerView.onVideoEnded = self.onVideoEnd
+            jsPlayerView.onVideoPaused = self.onPlaybackRateChange
+            
+            //new props
+            jsPlayerView.onFavouriteButtonClick = self.onFavouriteButtonClick
+            jsPlayerView.onRelatedVideosIconClicked = self.onRelatedVideosIconClicked
+            jsPlayerView.onStatsIconClick = self.onStatsIconClick
+            jsPlayerView.onEpgIconClick = self.onEpgIconClick
+            jsPlayerView.onAnnotationsButtonClick = self.onAnnotationsButtonClick
+            jsPlayerView.onWatchlistButtonClick = self.onWatchlistButtonClick
             jsPlayerView.onVideoBuffer = self.onVideoBuffer
             jsPlayerView.onVideoAboutToEnd = self.onVideoAboutToEnd
-            jsPlayerView.onFavouritesButton =  self.onFavouriteButtonClick
-            jsPlayerView.onRelatedVideosIcon =  self.onRelatedVideosIconClicked
-            jsPlayerView.onStatsIcon =  self.onStatsIconClick
-            jsPlayerView.onEpgIcon =  self.onEpgIconClick
-            jsPlayerView.onAnnotationsButton =  self.onAnnotationsButtonClick
-            jsPlayerView.onWatchlistButton =  self.onWatchlistButtonClick
             
             jsPlayerView.translatesAutoresizingMaskIntoConstraints = false
             jsPlayerView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 0).isActive = true
             jsPlayerView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
             jsPlayerView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0).isActive = true
             jsPlayerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0).isActive = true
+            
             self.jsPlayerView = jsPlayerView
         }
     }
     
+    //moved to source
     func setInitialSeek(position: Double) {
         jsProps.startAt.value = position
     }
     
+    //moved to source
     func setupLimitedSeekableRange(with range: Source.LimitedSeekableRange?) {
         let start = Date(timeIntervalSince1970InMilliseconds: range?.start)
         let end = Date(timeIntervalSince1970InMilliseconds: range?.end)
@@ -209,4 +210,3 @@ class NewPlayerView: UIView, JSInputProtocol {
         }
     }
 }
-

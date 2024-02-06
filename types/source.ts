@@ -36,6 +36,17 @@ export interface ITracksPolicy {
   items: ITrackPolicyPair[];
 }
 
+export interface IVideoPlayerSkipMarker {
+  startTime: number; // startTime in seconds
+  stopTime: number; // stopTime in seconds
+  type: SkipMarkerType;
+}
+
+export enum SkipMarkerType {
+  SKIP_INTRO = 'SKIP_INTRO',
+  SKIP_CREDITS = 'SKIP_CREDITS',
+}
+
 export interface IVideoPlayerSource {
   ads?: IAdsConfiguration;
   contentType?: ContentTypes;
@@ -67,4 +78,5 @@ export interface IVideoPlayerSource {
   selectedSubtitleTrack?: string;
   preferredAudioTracks?: string[];
   tracksPolicy?: ITracksPolicy;
+  skipMarkers?: IVideoPlayerSkipMarker[];
 }
