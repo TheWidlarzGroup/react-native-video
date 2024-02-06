@@ -50,6 +50,8 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var src: NSDictionary? {
         didSet {
             if let source = try? Source(dict: src), source.uri.absoluteString != jsProps.source.value?.uri.absoluteString {
+                jsPlayerView?.removeFromSuperview()
+                jsPlayerView = nil
                 jsProps.source.value = try? Source(dict: src)
             }
         }
@@ -127,6 +129,7 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var playWhenInactive: Bool = true
     @objc var fullscreen: Bool = false
     @objc var `repeat`: Bool = false
+    
     var jsProps = JSProps()
     var jsPlayerView: RNDReactNativeDiceVideo.JSPlayerView?
     
@@ -147,42 +150,41 @@ class NewPlayerView: UIView, JSInputProtocol {
     }
 
     private func setupDoris() {
-        DorisLogger.logFilter = DorisLogType.allCases
-        if let jsBridge = self.jsBridge {
-            let rndvJSProps = PlayerViewProxy.convertRNVideoJSPropsToRNDV(jsProps: self.jsProps)
-            let jsPlayerView = RNDReactNativeDiceVideo.JSPlayerView(overlayBuilder: RNVJSOverlayBuilder(bridge: jsBridge), jsProps: rndvJSProps)
-            self.addSubview(jsPlayerView)
-            
-            jsPlayerView.onVideoProgress = self.onVideoProgress
-            jsPlayerView.onBackButton = self.onBackButton
-            jsPlayerView.onVideoError = self.onVideoError
-            jsPlayerView.onRequireAdParameters = self.onRequireAdParameters
-            jsPlayerView.onVideoLoad = self.onVideoLoad
-            jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
-            
-            //api diff
-            jsPlayerView.onRequestPlayNextSource = self.onRelatedVideoClicked
-            jsPlayerView.onVideoEnded = self.onVideoEnd
-            jsPlayerView.onVideoPaused = self.onPlaybackRateChange
-            
-            //new props
-            jsPlayerView.onFavouriteButtonClick = self.onFavouriteButtonClick
-            jsPlayerView.onRelatedVideosIconClicked = self.onRelatedVideosIconClicked
-            jsPlayerView.onStatsIconClick = self.onStatsIconClick
-            jsPlayerView.onEpgIconClick = self.onEpgIconClick
-            jsPlayerView.onAnnotationsButtonClick = self.onAnnotationsButtonClick
-            jsPlayerView.onWatchlistButtonClick = self.onWatchlistButtonClick
-            jsPlayerView.onVideoBuffer = self.onVideoBuffer
-            jsPlayerView.onVideoAboutToEnd = self.onVideoAboutToEnd
-            
-            jsPlayerView.translatesAutoresizingMaskIntoConstraints = false
-            jsPlayerView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 0).isActive = true
-            jsPlayerView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
-            jsPlayerView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0).isActive = true
-            jsPlayerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0).isActive = true
-            
-            self.jsPlayerView = jsPlayerView
-        }
+        guard let jsBridge = self.jsBridge else { return }
+        
+        let rndvJSProps = PlayerViewProxy.convertRNVideoJSPropsToRNDV(jsProps: self.jsProps)
+        let jsPlayerView = RNDReactNativeDiceVideo.JSPlayerView(overlayBuilder: RNVJSOverlayBuilder(bridge: jsBridge), jsProps: rndvJSProps)
+        self.addSubview(jsPlayerView)
+        
+        jsPlayerView.onVideoProgress = self.onVideoProgress
+        jsPlayerView.onBackButton = self.onBackButton
+        jsPlayerView.onVideoError = self.onVideoError
+        jsPlayerView.onRequireAdParameters = self.onRequireAdParameters
+        jsPlayerView.onVideoLoad = self.onVideoLoad
+        jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
+        
+        //api diff
+        jsPlayerView.onRequestPlayNextSource = self.onRelatedVideoClicked
+        jsPlayerView.onVideoEnded = self.onVideoEnd
+        jsPlayerView.onVideoPaused = self.onPlaybackRateChange
+        
+        //new props
+        jsPlayerView.onFavouriteButtonClick = self.onFavouriteButtonClick
+        jsPlayerView.onRelatedVideosIconClicked = self.onRelatedVideosIconClicked
+        jsPlayerView.onStatsIconClick = self.onStatsIconClick
+        jsPlayerView.onEpgIconClick = self.onEpgIconClick
+        jsPlayerView.onAnnotationsButtonClick = self.onAnnotationsButtonClick
+        jsPlayerView.onWatchlistButtonClick = self.onWatchlistButtonClick
+        jsPlayerView.onVideoBuffer = self.onVideoBuffer
+        jsPlayerView.onVideoAboutToEnd = self.onVideoAboutToEnd
+        
+        jsPlayerView.translatesAutoresizingMaskIntoConstraints = false
+        jsPlayerView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 0).isActive = true
+        jsPlayerView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
+        jsPlayerView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0).isActive = true
+        jsPlayerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0).isActive = true
+        
+        self.jsPlayerView = jsPlayerView
     }
     
     //moved to source
