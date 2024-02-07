@@ -80,7 +80,7 @@ export enum SelectedTrackType {
 
 export type SelectedTrack = {
   type: SelectedTrackType;
-  value?: string;
+  value?: string | number;
 };
 
 export enum SelectedVideoTrackType {

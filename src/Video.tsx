@@ -180,10 +180,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
+      const value = selectedTextTrack.value
+        ? `${selectedTextTrack.value}`
+        : undefined;
 
       return {
         type: selectedTextTrack?.type,
-        value: selectedTextTrack?.value,
+        value,
       };
     }, [selectedTextTrack]);
 
@@ -191,10 +194,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
+      const value = selectedAudioTrack.value
+        ? `${selectedAudioTrack.value}`
+        : undefined;
 
       return {
         type: selectedAudioTrack?.type,
-        value: selectedAudioTrack?.value,
+        value,
       };
     }, [selectedAudioTrack]);
 
