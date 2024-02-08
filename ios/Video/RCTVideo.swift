@@ -199,8 +199,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     deinit {
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
-        _pip = nil
         _playerObserver.clearPlayer()
+
+        #if os(iOS)
+            _pip = nil
+        #endif
     }
 
     // MARK: - App lifecycle handlers
