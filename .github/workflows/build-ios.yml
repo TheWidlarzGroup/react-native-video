@@ -1,9 +1,10 @@
 name: Build iOS
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main
+      - master
     paths:
       - '.github/workflows/build-ios.yml'
       - 'ios/**'
@@ -19,7 +20,7 @@ on:
 jobs:
   build:
     name: Build iOS Example App
-    runs-on: macOS-latest
+    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
     defaults:
       run:
         working-directory: examples/basic/ios
@@ -62,13 +63,13 @@ jobs:
           -scheme videoplayer \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 11 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 14' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
 
   build-with-ads:
     name: Build iOS Example App With Ads
-    runs-on: macOS-latest
+    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
     defaults:
       run:
         working-directory: examples/basic/ios
@@ -111,13 +112,13 @@ jobs:
           -scheme videoplayer \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 11 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 14' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
 
   build-with-caching:
     name: Build iOS Example App With Caching
-    runs-on: macOS-latest
+    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
     defaults:
       run:
         working-directory: examples/basic/ios
@@ -160,6 +161,6 @@ jobs:
           -scheme videoplayer \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 11 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 14' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
