@@ -41,16 +41,43 @@ struct JSAds: SuperCodable {
         enum AdInsertionType: String, Codable {
             case csai = "CSAI"
             case ssai = "SSAI"
+            case unknown
+
+            public init(from decoder: Decoder) throws {
+                guard let value = try? decoder.singleValueContainer().decode(String.self) else{
+                    self = .unknown
+                    return
+                }
+                self = AdInsertionType(rawValue: value) ?? .unknown
+            }
         }
 
         enum AdProvider: String, Codable {
             case yospace = "YOSPACE"
+            case unknown
+            
+            public init(from decoder: Decoder) throws {
+                guard let value = try? decoder.singleValueContainer().decode(String.self) else{
+                    self = .unknown
+                    return
+                }
+                self = AdProvider(rawValue: value) ?? .unknown
+            }
         }
 
         enum AdFormat: String, Codable {
             case vmap = "VOD_VMAP"
             case preroll = "PREROLL"
             case midroll = "MIDROLL"
+            case unknown
+            
+            public init(from decoder: Decoder) throws {
+                guard let value = try? decoder.singleValueContainer().decode(String.self) else{
+                    self = .unknown
+                    return
+                }
+                self = AdFormat(rawValue: value) ?? .unknown
+            }
         }
     }
 }

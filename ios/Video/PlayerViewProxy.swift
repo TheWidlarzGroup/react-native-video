@@ -87,12 +87,10 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.pause = translationsValue.playerPauseButton
             dorisTranslationsViewModel.stats = translationsValue.playerStatsButton
             dorisTranslationsViewModel.audioAndSubtitles = translationsValue.playerAudioAndSubtitlesButton
-            dorisTranslationsViewModel.live = translationsValue.live
-//            dorisTranslationsViewModel.goLive = translationsValue.goLive
+            dorisTranslationsViewModel.live = translationsValue.goLive
             dorisTranslationsViewModel.favourites = translationsValue.favourite
-//            dorisTranslationsViewModel.watchlist = translationsValue.watchlist
+            dorisTranslationsViewModel.addToWatchlist = translationsValue.watchlist
             dorisTranslationsViewModel.moreVideos = translationsValue.moreVideos
-//            dorisTranslationsViewModel.captions = translationsValue.captions
             dorisTranslationsViewModel.rewind = translationsValue.rewind
             dorisTranslationsViewModel.fastForward = translationsValue.fastForward
             dorisTranslationsViewModel.audio = translationsValue.audioTracks
@@ -102,7 +100,6 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.annotations = translationsValue.annotations
             dorisTranslationsViewModel.playingLive = translationsValue.playingLive
             dorisTranslationsViewModel.nowPlaying = translationsValue.nowPlaying
-//            dorisTranslationsViewModel.tvPlayerEPG = translationsValue.tvPlayerEPG
             jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
         }
         return jsTranslations
@@ -204,12 +201,17 @@ class PlayerViewProxy {
         rndvJsProps.isFullScreen.value = true
         rndvJsProps.isMinimised.value = false
         rndvJsProps.highlightUrl.value = nil
+        rndvJsProps.isFavourite.value = jsProps.isFavourite.value
+
+        print(jsProps.source.value)
+        print(jsProps.metadata.value)
         
         var rndvJSSource: RNDReactNativeDiceVideo.JSSource?
         if let sourceValue = jsProps.source.value {
             rndvJsProps.nowPlaying.value = RNDReactNativeDiceVideo.JSNowPlaying(
-                title: sourceValue.nowPlaying?.title,
+                title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title,
                 channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl,
+                episodeInfo: jsProps.metadata.value?.episodeInfo, //tvos new
                 startDate: sourceValue.nowPlaying?.startDate,
                 endDate: sourceValue.nowPlaying?.endDate)
             
@@ -228,7 +230,13 @@ class PlayerViewProxy {
                 }
             }
             let jsLimitedSeekableRange = RNDReactNativeDiceVideo.JSLimitedSeekableRange(start: sourceValue.limitedSeekableRange?.start, end: sourceValue.limitedSeekableRange?.end, seekToStart: sourceValue.limitedSeekableRange?.seekToStart)
-            let jsNowPlaying = RNDReactNativeDiceVideo.JSNowPlaying(title: sourceValue.nowPlaying?.title, channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl, startDate: sourceValue.nowPlaying?.startDate, endDate: sourceValue.nowPlaying?.endDate)
+            let jsNowPlaying = RNDReactNativeDiceVideo.JSNowPlaying(title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title, channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl, episodeInfo: jsProps.metadata.value?.episodeInfo, startDate: sourceValue.nowPlaying?.startDate, endDate: sourceValue.nowPlaying?.endDate)
+            
+            let metadata = JSMetadata(logoUrl: jsProps.metadata.value?.logoUrl,
+                                      logoStaticDimension: .init(dimention: jsProps.metadata.value?.logoStaticDimension),
+                                      logoPlayerSizeRatio: jsProps.metadata.value?.logoPlayerSizeRatio,
+                                      logoPosition: .init(position: jsProps.metadata.value?.logoPosition))
+
             rndvJSSource = RNDReactNativeDiceVideo.JSSource(
                 id: sourceValue.id ?? "",
                 ima: rndvJSIma,
@@ -237,22 +245,24 @@ class PlayerViewProxy {
                 progressUpdateInterval: sourceValue.progressUpdateInterval ?? 6,
                 type: sourceValue.type,
                 title: sourceValue.title ?? "",
+                description: jsProps.metadata.value?.description, //tvos new
                 live: sourceValue.live,
                 partialVideoInformation: jsPartialVideoInformation,
                 isAudioOnly: sourceValue.isAudioOnly,
                 config: jsConfig,
-                imageUri: sourceValue.imageUri,
+                imageUri: jsProps.metadata.value?.thumbnailUrl,
                 thumbnailsPreview: sourceValue.thumbnailsPreview,
                 resumePosition: jsProps.startAt.value,
                 delay: nil,
                 ads: jsAds,
+                metadata: metadata,
                 subtitles: jsSubtitles,
                 limitedSeekableRange: jsLimitedSeekableRange,
                 selectedAudioTrack: nil,
                 selectedSubtitleTrack: sourceValue.selectedSubtitleTrack,
                 selectedPlaybackQuality: nil,
                 nowPlaying: jsNowPlaying,
-                preferredAudioTracks: sourceValue.preferredAudioTracks)
+                preferredAudioTracks: sourceValue.preferredAudioTracks) //tvos new
         }
 
         let jsTranslations = PlayerViewProxy.convertRNVideoTranslationsToRNDV(translations: jsProps.translations.value)

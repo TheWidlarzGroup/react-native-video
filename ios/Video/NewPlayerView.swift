@@ -49,10 +49,14 @@ class NewPlayerView: UIView, JSInputProtocol {
     //MARK: Differs (source)
     @objc var src: NSDictionary? {
         didSet {
-            if let source = try? Source(dict: src), source.uri.absoluteString != jsProps.source.value?.uri.absoluteString {
+            do {
+                let source = try Source(dict: src)
+                guard source.uri.absoluteString != jsProps.source.value?.uri.absoluteString else { return }
                 jsPlayerView?.removeFromSuperview()
                 jsPlayerView = nil
-                jsProps.source.value = try? Source(dict: src)
+                jsProps.source.value = source
+            } catch {
+                onVideoError?(["value": self.src ?? [:], "error": (error as NSError).userInfo])
             }
         }
     }

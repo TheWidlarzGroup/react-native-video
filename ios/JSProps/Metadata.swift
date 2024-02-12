@@ -6,6 +6,7 @@
 //
 
 import AVDoris
+import RNDReactNativeDiceVideo
 
 struct Metadata: SuperCodable {
     let type: String
@@ -41,11 +42,33 @@ extension Metadata {
             let logoPlayerSizeRatio = logoPlayerSizeRatio
         else { return nil }
         
-        var watermarkViewModel = WatermarkViewModel(watermarkURL: logoUrl,
+        let watermarkViewModel = WatermarkViewModel(watermarkURL: logoUrl,
                                                     watermarkPosition: AVDoris.WatermarkPosition(rawValue: logoPosition.rawValue) ?? .topRight,
                                                     watermarkStaticDimention: AVDoris.WatermarkStaticDimention(rawValue: logoStaticDimension.rawValue) ?? .height,
                                                     watermarkSuperviewRatio: logoPlayerSizeRatio)
         
         return watermarkViewModel
+    }
+}
+
+extension JSMetadata.JSWatermarkDimension {
+    init?(dimention: Metadata.WatermarkDimension?) {
+        switch dimention {
+        case .width: self = .width
+        case .height: self = .height
+        default: return nil
+        }
+    }
+}
+
+extension JSMetadata.JSWatermarkPosition {
+    init?(position: Metadata.WatermarkPosition?) {
+        switch position {
+        case .topLeft: self = .topLeft
+        case .topRight: self = .topRight
+        case .bottomLeft: self = .bottomLeft
+        case .bottomRight: self = .bottomRight
+        default: return nil
+        }
     }
 }
