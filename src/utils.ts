@@ -17,6 +17,7 @@ export function resolveAssetSourceForVideo(
 ): ReactVideoSourceProperties {
   if (typeof source.uri === 'number') {
     return {
+      ...source,
       uri: Image.resolveAssetSource(source.uri).uri,
     };
   }
