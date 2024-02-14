@@ -1,9 +1,7 @@
 import type {Component, RefObject, ComponentClass} from 'react';
 import {Image, findNodeHandle} from 'react-native';
-import type {ImageSourcePropType} from 'react-native';
 import type {ReactVideoSource, ReactVideoSourceProperties} from './types/video';
 
-type Source = ImageSourcePropType | ReactVideoSource;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function generateHeaderForNative(obj?: Record<string, any>) {
@@ -13,12 +11,13 @@ export function generateHeaderForNative(obj?: Record<string, any>) {
   return Object.entries(obj).map(([key, value]) => ({key, value}));
 }
 
+type Source = ImageSourcePropType | ReactVideoSource;
 export function resolveAssetSourceForVideo(
-  source: Source,
+  source: ReactVideoSource,
 ): ReactVideoSourceProperties {
-  if (typeof source === 'number') {
+  if (typeof source.uri === 'number') {
     return {
-      uri: Image.resolveAssetSource(source).uri,
+      uri: Image.resolveAssetSource(source.uri).uri,
     };
   }
   return source as ReactVideoSourceProperties;
