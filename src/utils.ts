@@ -15,12 +15,20 @@ type Source = ImageSourcePropType | ReactVideoSource;
 export function resolveAssetSourceForVideo(
   source: ReactVideoSource,
 ): ReactVideoSourceProperties {
+  // This is deprecated, but we need to support it for backward compatibility
+  if (typeof source === 'number') {
+    return {
+      uri: Image.resolveAssetSource(source).uri,
+    };
+  }
+
   if (typeof source.uri === 'number') {
     return {
       ...source,
       uri: Image.resolveAssetSource(source.uri).uri,
     };
   }
+
   return source as ReactVideoSourceProperties;
 }
 
