@@ -97,7 +97,10 @@ class VideoPlayer extends Component {
   seekerWidth = 0;
 
   srcAllPlatformList = [
-    require('./broadchurch.mp4'),
+    {
+      description: 'local file',
+      uri: require('./broadchurch.mp4'),
+    },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
