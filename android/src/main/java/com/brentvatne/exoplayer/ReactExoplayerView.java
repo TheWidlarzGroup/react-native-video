@@ -42,10 +42,6 @@ import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.util.Util;
-import androidx.media3.database.StandaloneDatabaseProvider;
-import androidx.media3.datasource.cache.CacheDataSource;
-import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor;
-import androidx.media3.datasource.cache.SimpleCache;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.HttpDataSource;
@@ -102,6 +98,7 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.common.toolbox.RNVSimpleCache;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -115,7 +112,6 @@ import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.common.collect.ImmutableList;
 
-import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -189,8 +185,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-
-    private DataSource.Factory cacheDataSourceFactory;
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -641,8 +635,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (cacheDataSourceFactory != null) {
-            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        if (RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() != null) {
+            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheDataSourceFactory());
         }
 
         if (adsLoader != null) {
@@ -839,13 +833,13 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                if (cacheDataSourceFactory == null) {
+                if (RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            cacheDataSourceFactory
+                            RNVSimpleCache.INSTANCE.getCacheDataSourceFactory()
                     );
 
                 }
@@ -2049,15 +2043,11 @@ public class ReactExoplayerView extends FrameLayout implements
         maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
-        if (cacheSize == 0) {
-            cacheDataSourceFactory = null;
-        } else {
-            SimpleCache simpleCache = new SimpleCache(new File(this.getContext().getCacheDir(), "RNVCache"), new LeastRecentlyUsedCacheEvictor((long) cacheSize*1024*1024), new StandaloneDatabaseProvider(this.getContext()));
-            cacheDataSourceFactory =
-                    new CacheDataSource.Factory()
-                            .setCache(simpleCache)
-                            .setUpstreamDataSourceFactory(buildHttpDataSourceFactory(false));
-        }
+        RNVSimpleCache.INSTANCE.setSimpleCache(
+                this.getContext(),
+                cacheSize,
+                buildHttpDataSourceFactory(false)
+        );
         releasePlayer();
         initializePlayer();
     }
