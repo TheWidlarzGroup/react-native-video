@@ -7,6 +7,7 @@ import androidx.media3.common.Metadata;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 
+import com.facebook.react.ReactApplication;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
@@ -18,12 +19,11 @@ import java.lang.annotation.RetentionPolicy;
 
 class VideoEventEmitter {
 
-    private final RCTEventEmitter eventEmitter;
-
     private int viewId = View.NO_ID;
+    private ReactContext reactContext;
 
     VideoEventEmitter(ReactContext reactContext) {
-        this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        this.reactContext = reactContext;
     }
 
     private static final String EVENT_LOAD_START = "onVideoLoadStart";
@@ -372,7 +372,9 @@ class VideoEventEmitter {
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
-        eventEmitter.receiveEvent(viewId, type, event);
+        // Using current react context to create RCTEventEmitter solves broken bridge issue after JS reload
+        ((ReactApplication) reactContext.getApplicationContext()).getReactNativeHost().getReactInstanceManager()
+                .getCurrentReactContext().getJSModule(RCTEventEmitter.class).receiveEvent(viewId, type, event);
     }
 
     void videoAboutToEnd(boolean isAboutToEnd) {
