@@ -56,7 +56,7 @@ class NewPlayerView: UIView, JSInputProtocol {
                 jsPlayerView = nil
                 jsProps.source.value = source
             } catch {
-                onVideoError?(["value": self.src ?? [:], "error": (error as NSError).userInfo])
+                onVideoError?(["value": self.src ?? [:], "error": (error as NSError).description])
             }
         }
     }
