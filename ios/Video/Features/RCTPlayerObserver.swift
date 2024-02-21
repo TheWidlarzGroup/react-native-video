@@ -26,11 +26,12 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>)
     func handleViewControllerOverlayViewFrameChange(overlayView: UIView, change: NSKeyValueObservedChange<CGRect>)
     func handleTracksChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVPlayerItemTrack]>)
+    func handleLegibleOutput(strings: [NSAttributedString])
 }
 
 // MARK: - RCTPlayerObserver
 
-class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
+class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPlayerItemLegibleOutputPushDelegate {
     weak var _handlers: RCTPlayerObserverHandler?
 
     var player: AVPlayer? {
@@ -57,9 +58,11 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
             // handle timedMetadata
             let metadataOutput = AVPlayerItemMetadataOutput()
+            let legibleOutput = AVPlayerItemLegibleOutput()
             playerItem.add(metadataOutput)
+            playerItem.add(legibleOutput)
             metadataOutput.setDelegate(self, queue: .main)
-        }
+            legibleOutput.setDelegate(self, queue: .main)        }
     }
 
     var playerViewController: AVPlayerViewController? {
@@ -111,6 +114,11 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         for metadataGroup in groups {
             _handlers.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
         }
+    }
+    
+    func legibleOutput(_: AVPlayerItemLegibleOutput, didOutputAttributedStrings strings: [NSAttributedString], nativeSampleBuffers _: [Any], forItemTime _: CMTime) {
+        guard let _handlers else { return }
+        _handlers.handleLegibleOutput(strings: strings)
     }
 
     func addPlayerObservers() {
