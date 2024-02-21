@@ -1389,15 +1389,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
     
     func handleLegibleOutput(strings: [NSAttributedString]) {
-        let subtitles = strings.map { subtitle in
-            Dictionary(subtitle.string
-                .split(separator: "\n")
-                .compactMap { line -> (String, String)? in
-                    let parts = line.split(separator: "=", maxSplits: 1).map(String.init)
-                    return parts.count == 2 ? (parts[0], parts[1]) : nil
-                }, uniquingKeysWith: { _, last in last })
+        if let subtitles = strings.first {
+            self.onSubtitleTracks?(["subtitleTracks": subtitles.string])
         }
-
-        self.onSubtitleTracks?(["subtitleTracks": subtitles])
     }
 }
