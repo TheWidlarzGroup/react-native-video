@@ -29,6 +29,7 @@ import type {
   OnProgressData,
   OnReceiveAdEventData,
   OnSeekData,
+  OnSubtitleTracksData,
   OnTextTracksData,
   OnTimedMetadataData,
   OnVideoAspectRatioData,
@@ -93,6 +94,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onTimedMetadata,
       onAudioTracks,
       onTextTracks,
+      onSubtitleTracks,
       onVideoTracks,
       onAspectRatio,
       ...rest
@@ -333,6 +335,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onTextTracks],
     );
 
+    const _onSubtitleTracks = useCallback(
+      (e: NativeSyntheticEvent<OnSubtitleTracksData>) => {
+        onSubtitleTracks?.(e.nativeEvent);
+      },
+      [onSubtitleTracks],
+    );
+
     const _onVideoTracks = useCallback(
       (e: NativeSyntheticEvent<OnVideoTracksData>) => {
         onVideoTracks?.(e.nativeEvent);
@@ -509,6 +518,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onTimedMetadata={_onTimedMetadata}
           onAudioTracks={_onAudioTracks}
           onTextTracks={_onTextTracks}
+          onSubtitleTracks={_onSubtitleTracks}
           onVideoTracks={_onVideoTracks}
           onVideoFullscreenPlayerDidDismiss={onFullscreenPlayerDidDismiss}
           onVideoFullscreenPlayerDidPresent={onFullscreenPlayerDidPresent}
