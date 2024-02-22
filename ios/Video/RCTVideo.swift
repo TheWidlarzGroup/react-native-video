@@ -1387,7 +1387,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.onAudioTracks?(["audioTracks": audioTracks])
         }
     }
-    
+
     func handleLegibleOutput(strings: [NSAttributedString]) {
         if let subtitles = strings.first {
             self.onSubtitleTracks?(["subtitleTracks": subtitles.string])

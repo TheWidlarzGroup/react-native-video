@@ -62,7 +62,8 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
             playerItem.add(metadataOutput)
             playerItem.add(legibleOutput)
             metadataOutput.setDelegate(self, queue: .main)
-            legibleOutput.setDelegate(self, queue: .main)        }
+            legibleOutput.setDelegate(self, queue: .main)
+        }
     }
 
     var playerViewController: AVPlayerViewController? {
@@ -115,8 +116,11 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
             _handlers.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
         }
     }
-    
-    func legibleOutput(_: AVPlayerItemLegibleOutput, didOutputAttributedStrings strings: [NSAttributedString], nativeSampleBuffers _: [Any], forItemTime _: CMTime) {
+
+    func legibleOutput(_: AVPlayerItemLegibleOutput,
+                       didOutputAttributedStrings strings: [NSAttributedString],
+                       nativeSampleBuffers _: [Any],
+                       forItemTime _: CMTime) {
         guard let _handlers else { return }
         _handlers.handleLegibleOutput(strings: strings)
     }
