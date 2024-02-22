@@ -493,7 +493,24 @@ Example:
 }
 ```
 
-Platforms: Android
+### `onSubtitleTracks`
+Callback function that is called when subtitles are available. This provides the actual subtitle content.
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+`subtitleTracks` | `string` | The subtitles text content in a compatible format.
+
+
+Example:
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.",
+}
+```
+
+Platforms: iOS
 
 ### `onVideoTracks`
 Callback function that is called when video tracks change
