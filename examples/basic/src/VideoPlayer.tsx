@@ -33,7 +33,7 @@ import Video, {
   ResizeMode,
   SelectedTrack,
   DRMType,
-  OnSubtitleTracksData,
+  OnTextTrackDataChangedData,
   SelectedTrackType,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
@@ -124,7 +124,7 @@ class VideoPlayer extends Component {
 
   srcIosList = [
     {
-      description: 'example to get subtitles',
+      description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
   ];
@@ -255,7 +255,7 @@ class VideoPlayer extends Component {
     }
   };
 
-  onSubtitleTracks = (data: OnSubtitleTracksData) => {
+  onTextTrackDataChanged = (data: OnTextTrackDataChangedData) => {
     console.log(`Subtitles: ${JSON.stringify(data, null, 2)}`);
   };
 
@@ -760,7 +760,7 @@ class VideoPlayer extends Component {
           onLoad={this.onLoad}
           onAudioTracks={this.onAudioTracks}
           onTextTracks={this.onTextTracks}
-          onSubtitleTracks={this.onSubtitleTracks}
+          onTextTrackDataChanged={this.onTextTrackDataChanged}
           onProgress={this.onProgress}
           onEnd={this.onEnd}
           progressUpdateInterval={1000}

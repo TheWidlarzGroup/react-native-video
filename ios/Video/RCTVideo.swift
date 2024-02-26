@@ -118,7 +118,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
     @objc var onTextTracks: RCTDirectEventBlock?
     @objc var onAudioTracks: RCTDirectEventBlock?
-    @objc var onSubtitleTracks: RCTDirectEventBlock?
+    @objc var onTextTrackDataChanged: RCTDirectEventBlock?
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -1390,7 +1390,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleLegibleOutput(strings: [NSAttributedString]) {
         if let subtitles = strings.first {
-            self.onSubtitleTracks?(["subtitleTracks": subtitles.string])
+            self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
 }

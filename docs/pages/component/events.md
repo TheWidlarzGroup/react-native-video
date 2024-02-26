@@ -493,8 +493,8 @@ Example:
 }
 ```
 
-### `onSubtitleTracks`
-Callback function that is called when subtitles are available. This provides the actual subtitle content.
+### `onTextTrackDataChanged`
+Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT). 
 
 Payload:
 

@@ -79,7 +79,7 @@ export type OnTextTracksData = Readonly<{
   textTracks: ReadonlyArray<TextTrack>;
 }>;
 
-export type OnSubtitleTracksData = Readonly<{
+export type OnTextTrackDataChangedData = Readonly<{
   subtitleTracks: string;
 }>;
 
@@ -185,7 +185,7 @@ export interface ReactVideoEvents {
   onTimedMetadata?: (e: OnTimedMetadataData) => void; //Android, iOS
   onAudioTracks?: (e: OnAudioTracksData) => void; // Android
   onTextTracks?: (e: OnTextTracksData) => void; //Android
-  onSubtitleTracks?: (e: OnSubtitleTracksData) => void; // iOS
+  onTextTrackDataChanged?: (e: OnTextTrackDataChangedData) => void; // iOS
   onVideoTracks?: (e: OnVideoTracksData) => void; //Android
   onAspectRatio?: (e: OnVideoAspectRatioData) => void;
 }

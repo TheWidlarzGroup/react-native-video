@@ -10,7 +10,7 @@ import type Orientation from './types/Orientation';
 import type {
   AdEvent,
   EnumValues,
-  OnSubtitleTracksData,
+  OnTextTrackDataChangedData,
   OnTextTracksTypeData,
 } from './types';
 
@@ -371,7 +371,9 @@ export interface VideoNativeProps extends ViewProps {
   onTimedMetadata?: (event: NativeSyntheticEvent<OnTimedMetadataData>) => void; // ios, android
   onAudioTracks?: (event: NativeSyntheticEvent<OnAudioTracksData>) => void; // android
   onTextTracks?: (event: NativeSyntheticEvent<OnTextTracksData>) => void; // android
-  onSubtitleTracks?: (e: NativeSyntheticEvent<OnSubtitleTracksData>) => void; // iOS
+  onTextTrackDataChanged?: (
+    event: NativeSyntheticEvent<OnTextTrackDataChangedData>,
+  ) => void; // iOS
   onVideoTracks?: (event: NativeSyntheticEvent<OnVideoTracksData>) => void; // android
 }
 
