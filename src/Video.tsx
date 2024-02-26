@@ -336,8 +336,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const _onTextTrackDataChanged = useCallback(
-      (e: NativeSyntheticEvent<OnTextTrackDataChangedData>) => {
-        onTextTrackDataChanged?.(e.nativeEvent);
+      (
+        e: NativeSyntheticEvent<OnTextTrackDataChangedData & {target?: number}>,
+      ) => {
+        const {...eventData} = e.nativeEvent;
+        delete eventData.target;
+        onTextTrackDataChanged?.(eventData as OnTextTrackDataChangedData);
       },
       [onTextTrackDataChanged],
     );
