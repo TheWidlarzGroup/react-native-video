@@ -27,6 +27,7 @@ struct Source: SuperCodable {
     let thumbnailsPreview: URL?
     let limitedSeekableRange: LimitedSeekableRange?
     let nowPlaying: JSNowPlaying?
+    let metadata: WatermarkMetadata?
     let selectedSubtitleTrack: String?
     let preferredAudioTracks: [String]?
     var tracksPolicy: JSTracksPolicy?

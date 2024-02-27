@@ -203,9 +203,6 @@ class PlayerViewProxy {
         rndvJsProps.highlightUrl.value = nil
         rndvJsProps.isFavourite.value = jsProps.isFavourite.value
 
-        print(jsProps.source.value)
-        print(jsProps.metadata.value)
-        
         var rndvJSSource: RNDReactNativeDiceVideo.JSSource?
         if let sourceValue = jsProps.source.value {
             rndvJsProps.nowPlaying.value = RNDReactNativeDiceVideo.JSNowPlaying(
@@ -232,10 +229,7 @@ class PlayerViewProxy {
             let jsLimitedSeekableRange = RNDReactNativeDiceVideo.JSLimitedSeekableRange(start: sourceValue.limitedSeekableRange?.start, end: sourceValue.limitedSeekableRange?.end, seekToStart: sourceValue.limitedSeekableRange?.seekToStart)
             let jsNowPlaying = RNDReactNativeDiceVideo.JSNowPlaying(title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title, channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl, episodeInfo: jsProps.metadata.value?.episodeInfo, startDate: sourceValue.nowPlaying?.startDate, endDate: sourceValue.nowPlaying?.endDate)
             
-            let metadata = JSMetadata(logoUrl: jsProps.metadata.value?.logoUrl,
-                                      logoStaticDimension: .init(dimention: jsProps.metadata.value?.logoStaticDimension),
-                                      logoPlayerSizeRatio: jsProps.metadata.value?.logoPlayerSizeRatio,
-                                      logoPosition: .init(position: jsProps.metadata.value?.logoPosition))
+            let metadata = JSMetadata(metadata: sourceValue.metadata)
 
             rndvJSSource = RNDReactNativeDiceVideo.JSSource(
                 id: sourceValue.id ?? "",
