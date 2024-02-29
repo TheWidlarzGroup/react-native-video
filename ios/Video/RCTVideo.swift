@@ -1374,9 +1374,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
-        let accessLog: AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
-        let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
+        guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
+            return
+        }
 
+        guard let lastEvent = accessLog.events.last else { return }
         onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
     }
 
