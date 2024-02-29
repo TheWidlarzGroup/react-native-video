@@ -33,6 +33,8 @@ import Video, {
   ResizeMode,
   SelectedTrack,
   DRMType,
+  OnTextTrackDataChangedData,
+  SelectedTrackType,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -120,7 +122,12 @@ class VideoPlayer extends Component {
     },
   ];
 
-  srcIosList = [];
+  srcIosList = [
+    {
+      description: 'sintel with subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    },
+  ];
 
   srcAndroidList = [
     {
@@ -231,7 +238,7 @@ class VideoPlayer extends Component {
 
   onTextTracks = (data: OnTextTracksData) => {
     const selectedTrack = data.textTracks?.find((x: TextTrack) => {
-      return x.selected;
+      return x?.selected;
     });
 
     this.setState({
@@ -246,6 +253,10 @@ class VideoPlayer extends Component {
         },
       });
     }
+  };
+
+  onTextTrackDataChanged = (data: OnTextTrackDataChangedData) => {
+    console.log(`Subtitles: ${JSON.stringify(data, null, 2)}`);
   };
 
   onAspectRatio = (data: OnVideoAspectRatioData) => {
@@ -749,6 +760,7 @@ class VideoPlayer extends Component {
           onLoad={this.onLoad}
           onAudioTracks={this.onAudioTracks}
           onTextTracks={this.onTextTracks}
+          onTextTrackDataChanged={this.onTextTrackDataChanged}
           onProgress={this.onProgress}
           onEnd={this.onEnd}
           progressUpdateInterval={1000}

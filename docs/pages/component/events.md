@@ -493,7 +493,24 @@ Example:
 }
 ```
 
-Platforms: Android
+### `onTextTrackDataChanged`
+Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT). 
+
+Payload:
+
+Property | Type | Description
+--- | --- | ---
+`subtitleTracks` | `string` | The subtitles text content in a compatible format.
+
+
+Example:
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.",
+}
+```
+
+Platforms: iOS
 
 ### `onVideoTracks`
 Callback function that is called when video tracks change
