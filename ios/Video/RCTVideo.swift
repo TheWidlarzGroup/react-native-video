@@ -118,6 +118,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
     @objc var onTextTracks: RCTDirectEventBlock?
     @objc var onAudioTracks: RCTDirectEventBlock?
+    @objc var onTextTrackDataChanged: RCTDirectEventBlock?
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -1374,9 +1375,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
-        let accessLog: AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
-        let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
+        guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
+            return
+        }
 
+        guard let lastEvent = accessLog.events.last else { return }
         onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
     }
 
@@ -1384,6 +1387,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
             self.onTextTracks?(["textTracks": textTracks])
             self.onAudioTracks?(["audioTracks": audioTracks])
+        }
+    }
+
+    func handleLegibleOutput(strings: [NSAttributedString]) {
+        if let subtitles = strings.first {
+            self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
 }

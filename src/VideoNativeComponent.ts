@@ -7,7 +7,12 @@ import {NativeModules, requireNativeComponent} from 'react-native';
 import type ResizeMode from './types/ResizeMode';
 import type FilterType from './types/FilterType';
 import type Orientation from './types/Orientation';
-import type {AdEvent, EnumValues, OnTextTracksTypeData} from './types';
+import type {
+  AdEvent,
+  EnumValues,
+  OnTextTrackDataChangedData,
+  OnTextTracksTypeData,
+} from './types';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -367,6 +372,9 @@ export interface VideoNativeProps extends ViewProps {
   onTimedMetadata?: (event: NativeSyntheticEvent<OnTimedMetadataData>) => void; // ios, android
   onAudioTracks?: (event: NativeSyntheticEvent<OnAudioTracksData>) => void; // android
   onTextTracks?: (event: NativeSyntheticEvent<OnTextTracksData>) => void; // android
+  onTextTrackDataChanged?: (
+    event: NativeSyntheticEvent<OnTextTrackDataChangedData>,
+  ) => void; // iOS
   onVideoTracks?: (event: NativeSyntheticEvent<OnVideoTracksData>) => void; // android
 }
 
