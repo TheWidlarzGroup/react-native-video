@@ -1,0 +1,64 @@
+name: Bug report
+description: Create a report to help us improve
+title: "[BUG]: "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: What version are you using?
+      options:
+        - v6 (Beta)
+        - v5 (Stable)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: What platforms are you having the problem on?
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Windows
+        - visionOS
+        - Android TV
+        - Apple tvOS
+  
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architecture
+      description: What architecture are you using?
+      options:
+        - Old architecture
+        - New architecture with interop layer
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+      value: "A bug happened!"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Tell us how can we reproduce this bug
+      placeholder: Reproduction
+      value: "Step to reproduce this bug are: "
+    validations:
+      required: true
