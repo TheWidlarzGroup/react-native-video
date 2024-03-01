@@ -12,6 +12,7 @@ import type {
   OnProgressData,
   OnReceiveAdEventData,
   OnSeekData,
+  OnTextTrackDataChangedData,
   OnTextTracksData,
   OnTimedMetadataData,
   OnVideoAspectRatioData,
@@ -52,6 +53,7 @@ export interface ReactVideoEvents {
   onTimedMetadata?: (e: OnTimedMetadataData) => void; //Android, iOS
   onAudioTracks?: (e: OnAudioTracksData) => void; // Android
   onTextTracks?: (e: OnTextTracksData) => void; //Android
+  onTextTrackDataChanged?: (e: OnTextTrackDataChangedData) => void; // iOS
   onVideoTracks?: (e: OnVideoTracksData) => void; //Android
   onAspectRatio?: (e: OnVideoAspectRatioData) => void;
 }

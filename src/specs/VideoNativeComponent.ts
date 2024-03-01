@@ -214,6 +214,10 @@ export type OnTextTracksData = Readonly<{
   }[];
 }>;
 
+export type OnTextTrackDataChangedData = Readonly<{
+  subtitleTracks: string;
+}>;
+
 export type OnVideoTracksData = Readonly<{
   videoTracks: {
     trackId: Int32;
@@ -519,6 +523,7 @@ export interface VideoNativeProps extends ViewProps {
   onTimedMetadata?: DirectEventHandler<OnTimedMetadataData>; // ios, android
   onAudioTracks?: DirectEventHandler<OnAudioTracksData>; // android
   onTextTracks?: DirectEventHandler<OnTextTracksData>; // android
+  onTextTrackDataChanged?: DirectEventHandler<OnTextTrackDataChangedData>; // iOS
   onVideoTracks?: DirectEventHandler<OnVideoTracksData>; // android
 }
 

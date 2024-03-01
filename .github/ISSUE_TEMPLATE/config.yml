@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/react-native-video/react-native-video/discussions
+    about: Please ask and answer questions here.
+  - name: Slack Channel
+    url: https://join.slack.com/t/video-dev/shared_invite/zt-24kgmctuv-2z0O9J_v6q_rg~x1RujdOA
+    about: You can find us on the VideoDev Slack in the react-native-video channel.
+  - name: TheWidlarzGroup Discord
+    url: https://discord.gg/7Y6eE62hXM
+    about: Feel free to join our Discord server and ask questions there.

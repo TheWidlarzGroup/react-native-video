@@ -116,6 +116,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onTextTracks: RCTDirectEventBlock?
+    @objc var onAudioTracks: RCTDirectEventBlock?
+    @objc var onTextTrackDataChanged: RCTDirectEventBlock?
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -140,7 +143,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
+            _pip = RCTPictureInPicture({ [weak self] in
+                self?._onPictureInPictureStatusChanged()
+            }, { [weak self] in
+                self?._onRestoreUserInterfaceForPictureInPictureStop()
+            })
         #endif
 
         NotificationCenter.default.addObserver(
@@ -194,6 +201,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
         _playerObserver.clearPlayer()
+
+        #if os(iOS)
+            _pip = nil
+        #endif
     }
 
     // MARK: - App lifecycle handlers
@@ -362,7 +373,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     self._player = self._player ?? AVPlayer()
+
                     self._player?.replaceCurrentItem(with: playerItem)
+
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
@@ -1351,7 +1364,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #endif
         if _repeat {
             let item: AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero, completionHandler: nil)
+
+            item.seek(to: _source?.cropStart != nil ? CMTime(value: _source!.cropStart!, timescale: 1000) : CMTime.zero, completionHandler: nil)
             self.applyModifiers()
         } else {
             self.setPaused(true)
@@ -1361,9 +1375,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
-        let accessLog: AVPlayerItemAccessLog! = (notification.object as! AVPlayerItem).accessLog()
-        let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
+        guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
+            return
+        }
 
+        guard let lastEvent = accessLog.events.last else { return }
         onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
+    }
+
+    func handleTracksChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<[AVPlayerItemTrack]>) {
+        all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
+            self.onTextTracks?(["textTracks": textTracks])
+            self.onAudioTracks?(["audioTracks": audioTracks])
+        }
+    }
+
+    func handleLegibleOutput(strings: [NSAttributedString]) {
+        if let subtitles = strings.first {
+            self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
+        }
     }
 }

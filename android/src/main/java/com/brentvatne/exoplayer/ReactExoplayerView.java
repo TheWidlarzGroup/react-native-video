@@ -387,7 +387,7 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     private void togglePlayerControlVisibility() {
         if (player == null) return;
-        reLayout(playerControlView);
+        reLayoutControls();
         if (playerControlView.isVisible()) {
             playerControlView.hide();
         } else {
@@ -498,6 +498,11 @@ public class ReactExoplayerView extends FrameLayout implements
         view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
+    }
+
+    private void reLayoutControls() {
+        reLayout(exoPlayerView);
+        reLayout(playerControlView);
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
@@ -725,7 +730,8 @@ public class ReactExoplayerView extends FrameLayout implements
         player.prepare();
         playerNeedsSource = false;
 
-        reLayout(exoPlayerView);
+        reLayoutControls();
+
         eventEmitter.loadStart();
         loadVideoStarted = true;
 
@@ -925,6 +931,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 case AudioManager.AUDIOFOCUS_LOSS:
                     view.hasAudioFocus = false;
                     view.eventEmitter.audioFocusChanged(false);
+                    // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
+                    view.pausePlayback();
                     view.audioManager.abandonAudioFocus(this);
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -1881,8 +1889,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
+            seekTime = positionMs;
             player.seekTo(positionMs);
-            eventEmitter.seek(player.getCurrentPosition(), positionMs);
         }
     }
 
@@ -1992,7 +2000,7 @@ public class ReactExoplayerView extends FrameLayout implements
             eventEmitter.fullscreenWillDismiss();
             if (controls && fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
-                reLayout(exoPlayerView);
+                reLayoutControls();
             }
             UiThreadUtil.runOnUiThread(() -> {
                 WindowCompat.setDecorFitsSystemWindows(window, true);

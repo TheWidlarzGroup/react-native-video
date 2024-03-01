@@ -9,8 +9,11 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.UIManager;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.common.ViewUtil;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.google.ads.interactivemedia.v3.api.AdError;
 
@@ -23,12 +26,12 @@ import java.util.Map;
 
 public class VideoEventEmitter {
 
-    private final RCTEventEmitter eventEmitter;
+    private final ReactContext mReactContext;
 
     private int viewId = View.NO_ID;
 
     public VideoEventEmitter(ReactContext reactContext) {
-        this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        this.mReactContext = reactContext;
     }
 
     private static final String EVENT_LOAD_START = "onVideoLoadStart";
@@ -449,6 +452,10 @@ public class VideoEventEmitter {
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
-        eventEmitter.receiveEvent(viewId, type, event);
+        UIManager uiManager = UIManagerHelper.getUIManager(mReactContext, ViewUtil.getUIManagerType(viewId));
+
+        if(uiManager != null) {
+           uiManager.receiveEvent(UIManagerHelper.getSurfaceId(mReactContext), viewId, type, event);
+        }
     }
 }
