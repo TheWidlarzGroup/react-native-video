@@ -833,7 +833,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                if (RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() == null) {
+                if (uri.toString().startsWith("file://") ||
+                RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
