@@ -299,23 +299,32 @@ enum RCTVideoUtils {
                     if let textTracks {
                         for i in 0 ..< tracks.count {
                             guard let track = tracks[i]?.first else { continue } // fix when there's no textTrackAsset
-                            validTextTracks.append(textTracks[i])
 
                             let textCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                                            preferredTrackID: kCMPersistentTrackID_Invalid)
-                            try? textCompTrack.insertTimeRange(
-                                CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
-                                of: track,
-                                at: .zero
-                            )
+
+                            do {
+                                try textCompTrack.insertTimeRange(
+                                    CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
+                                    of: track,
+                                    at: .zero
+                                )
+                                validTextTracks.append(textTracks[i])
+                            } catch {
+                                // TODO: upgrade error by call some props callback to better inform user
+                                print("Error occurred on textTrack insert attempt: \(error.localizedDescription)")
+                                continue
+                            }
                         }
                     }
 
                     return
                 }.then {
-                    let emptyVttFile: TextTrack? = self.createEmptyVttFile()
-                    if emptyVttFile != nil {
-                        validTextTracks.append(emptyVttFile!)
+                    if !validTextTracks.isEmpty {
+                        let emptyVttFile: TextTrack? = self.createEmptyVttFile()
+                        if emptyVttFile != nil {
+                            validTextTracks.append(emptyVttFile!)
+                        }
                     }
 
                     fulfill(validTextTracks)
