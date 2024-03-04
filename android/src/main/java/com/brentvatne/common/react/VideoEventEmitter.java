@@ -59,6 +59,8 @@ public class VideoEventEmitter {
     private static final String EVENT_VOLUME_CHANGE = "onVolumeChange";
     private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
+
+    private static final String EVENT_TEXT_TRACK_DATA_CHANGED = "onTextTrackDataChanged";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
@@ -86,6 +88,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT
@@ -116,6 +119,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT
@@ -144,6 +148,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
     private static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
     private static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+    private static final String EVENT_PROP_TEXT_TRACK_DATA = "subtitleTracks";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
@@ -185,7 +190,7 @@ public class VideoEventEmitter {
 
     WritableArray audioTracksToArray(ArrayList<Track> audioTracks) {
         WritableArray waAudioTracks = Arguments.createArray();
-        if( audioTracks != null ){
+        if (audioTracks != null) {
             for (int i = 0; i < audioTracks.size(); ++i) {
                 Track format = audioTracks.get(i);
                 WritableMap audioTrack = Arguments.createMap();
@@ -203,15 +208,15 @@ public class VideoEventEmitter {
 
     WritableArray videoTracksToArray(ArrayList<VideoTrack> videoTracks) {
         WritableArray waVideoTracks = Arguments.createArray();
-        if( videoTracks != null ){
+        if (videoTracks != null) {
             for (int i = 0; i < videoTracks.size(); ++i) {
                 VideoTrack vTrack = videoTracks.get(i);
                 WritableMap videoTrack = Arguments.createMap();
                 videoTrack.putInt("width", vTrack.getWidth());
-                videoTrack.putInt("height",vTrack.getHeight());
+                videoTrack.putInt("height", vTrack.getHeight());
                 videoTrack.putInt("bitrate", vTrack.getBitrate());
                 videoTrack.putString("codecs", vTrack.getCodecs());
-                videoTrack.putInt("trackId",vTrack.getId());
+                videoTrack.putInt("trackId", vTrack.getId());
                 videoTrack.putBoolean("selected", vTrack.isSelected());
                 waVideoTracks.pushMap(videoTrack);
             }
@@ -237,12 +242,12 @@ public class VideoEventEmitter {
     }
 
     public void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-                     ArrayList<Track> audioTracks, ArrayList<Track> textTracks, ArrayList<VideoTrack> videoTracks, String trackId){
+                     ArrayList<Track> audioTracks, ArrayList<Track> textTracks, ArrayList<VideoTrack> videoTracks, String trackId) {
         WritableArray waAudioTracks = audioTracksToArray(audioTracks);
         WritableArray waVideoTracks = videoTracksToArray(videoTracks);
         WritableArray waTextTracks = textTracksToArray(textTracks);
 
-        load( duration,  currentPosition,  videoWidth,  videoHeight, waAudioTracks,  waTextTracks,  waVideoTracks, trackId);
+        load(duration, currentPosition, videoWidth, videoHeight, waAudioTracks, waTextTracks, waVideoTracks, trackId);
     }
 
     void load(double duration, double currentPosition, int videoWidth, int videoHeight,
@@ -276,15 +281,21 @@ public class VideoEventEmitter {
         return event;
     }
 
-    public void audioTracks(ArrayList<Track> audioTracks){
+    public void audioTracks(ArrayList<Track> audioTracks) {
         receiveEvent(EVENT_AUDIO_TRACKS, arrayToObject(EVENT_PROP_AUDIO_TRACKS, audioTracksToArray(audioTracks)));
     }
 
-    public void textTracks(ArrayList<Track> textTracks){
+    public void textTracks(ArrayList<Track> textTracks) {
         receiveEvent(EVENT_TEXT_TRACKS, arrayToObject(EVENT_PROP_TEXT_TRACKS, textTracksToArray(textTracks)));
     }
 
-    public void videoTracks(ArrayList<VideoTrack> videoTracks){
+    public void textTrackDataChanged(String textTrackData) {
+        WritableMap event = Arguments.createMap();
+        event.putString(EVENT_PROP_TEXT_TRACK_DATA, textTrackData);
+        receiveEvent(EVENT_TEXT_TRACK_DATA_CHANGED, event);
+    }
+
+    public void videoTracks(ArrayList<VideoTrack> videoTracks) {
         receiveEvent(EVENT_VIDEO_TRACKS, arrayToObject(EVENT_PROP_VIDEO_TRACKS, videoTracksToArray(videoTracks)));
     }
 
@@ -380,7 +391,7 @@ public class VideoEventEmitter {
 
     public void playbackRateChange(float rate) {
         WritableMap map = Arguments.createMap();
-        map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double)rate);
+        map.putDouble(EVENT_PROP_PLAYBACK_RATE, (double) rate);
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
 
@@ -454,8 +465,8 @@ public class VideoEventEmitter {
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
         UIManager uiManager = UIManagerHelper.getUIManager(mReactContext, ViewUtil.getUIManagerType(viewId));
 
-        if(uiManager != null) {
-           uiManager.receiveEvent(UIManagerHelper.getSurfaceId(mReactContext), viewId, type, event);
+        if (uiManager != null) {
+            uiManager.receiveEvent(UIManagerHelper.getSurfaceId(mReactContext), viewId, type, event);
         }
     }
 }
