@@ -108,6 +108,10 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
+    public boolean isPlaying() {
+        return player != null && player.isPlaying();
+    }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         // ensure we reset subtile style before reapplying it
         subtitleLayout.setUserDefaultStyle();
