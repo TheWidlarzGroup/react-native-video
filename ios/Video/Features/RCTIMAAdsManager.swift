@@ -23,11 +23,16 @@
             adsLoader.delegate = self
         }
 
-        func requestAds() {
-            guard let _video else { return }
-            // Create ad display container for ad rendering.
-            let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video, viewController: _video.reactViewController())
+        func requestAds() -> Bool {
+            guard let _video else { return false }
+            guard let pv = _video._playerViewController else { return false }
 
+            // Create ad display container for ad rendering.
+            #if os(iOS)
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.view, viewController: _video._playerViewController)
+            #else
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.contentOverlayView!, viewController: _video._playerViewController!)
+            #endif
             let adTagUrl = _video.getAdTagUrl()
             let contentPlayhead = _video.getContentPlayhead()
 
@@ -41,7 +46,9 @@
                 )
 
                 adsLoader.requestAds(with: request)
+                return true
             }
+            return false
         }
 
         // MARK: - Getters
@@ -110,6 +117,7 @@
                     ])
                 }
             }
+            _video.handleAdEvent(event.type)
         }
 
         func adsManager(_: IMAAdsManager, didReceive error: IMAAdError) {
@@ -136,12 +144,20 @@
         }
 
         func adsManagerDidRequestContentPause(_: IMAAdsManager) {
+            // Prevent seeking while AD is playing
+            #if os(tvOS)
+            _video._playerViewController?.showsPlaybackControls = false
+            #endif
             // Pause the content for the SDK to play ads.
             _video?.setPaused(true)
             _video?.setAdPlaying(true)
         }
 
         func adsManagerDidRequestContentResume(_: IMAAdsManager) {
+            // Allow seeking while video is playing
+            #if os(tvOS)
+            _video._playerViewController?.showsPlaybackControls = true
+            #endif
             // Resume the content since the SDK is done playing ads (at least for now).
             _video?.setAdPlaying(false)
             _video?.setPaused(false)

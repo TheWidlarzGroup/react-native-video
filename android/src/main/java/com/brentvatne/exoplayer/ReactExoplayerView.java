@@ -126,6 +126,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+// BEGIN FORK\
+import android.view.KeyEvent;
+import android.content.pm.PackageManager;
+import android.util.TypedValue;
+import android.view.KeyEvent;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.IdRes;
+import androidx.media3.ui.DefaultTimeBar;
+// END FORK
+
 @SuppressLint("ViewConstructor")
 public class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
@@ -238,15 +250,215 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    // BEGIN: FORK
+    public static final long DEFAULT_SKIP_DURATION = 15000;
+    public static final int DEFAULT_TV_CONTROLLER_PADDING = 50;
+    public static final int DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE= 18;
+    public static final int DEFAULT_TV_CONTROLLER_DURATION_WIDHT= 65;
+    public static final long DEFAULT_INCREMENT_DURATION = 15000;
+
+    // Switch between live indicator and duration indicator
+    private void refreshDurationIndicatorType() {
+        themedReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(player != null && playerControlView != null){
+                    TextView exo_duration_indicator = playerControlView.findViewById(R.id.exo_duration);
+                    TextView exo_live_indicator = playerControlView.findViewById(R.id.exo_duration_live);
+                    int oldLiveIndicatorVisibility = exo_live_indicator.getVisibility();
+                    int newLiveIndicatorVisibility = player.isCurrentMediaItemLive()? VISIBLE: GONE;
+
+                    // Toggle live indicator
+                    if(oldLiveIndicatorVisibility != newLiveIndicatorVisibility){
+                        exo_live_indicator.setVisibility(newLiveIndicatorVisibility);
+                        exo_duration_indicator.setVisibility(newLiveIndicatorVisibility == VISIBLE? GONE: VISIBLE);
+                        reLayout(playerControlView);
+                    }
+                }
+            }
+        });
+    }
+
+    public void setControllerFocusByID(@IdRes int buttonID){
+        final View button = playerControlView.findViewById(buttonID);
+        if(button != null){
+            setControllerFocus(button);
+        }
+    }
+
+    public void setControllerFocusPlayPause(){
+        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        if (playButton.getVisibility() == View.VISIBLE) {
+            setControllerFocus(playButton);
+        } else {
+            setControllerFocusByID(R.id.exo_pause);
+        }
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        int keyAction = event.getAction();
+        int keyRepeatCount = event.getRepeatCount();
+        boolean handled = false;
+
+        // Toggle controller visibility
+        boolean controllerWasVisible = playerControlView.isVisible();
+        switch(keyCode){
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.ACTION_DOWN:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_SPACE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                playerControlView.show();
+
+                if(!controllerWasVisible){
+                    handled = true;
+                }
+
+                // Ensure the controls are focused
+                View focusedChild = this.getFocusedChild();
+                if(focusedChild instanceof LegacyPlayerControlView == false){
+                    setControllerFocusPlayPause();
+                }
+
+                break;
+        }
+
+        // Switch to handle buttons clicks
+        if(keyAction == KeyEvent.ACTION_DOWN && keyRepeatCount == 0){
+            switch(keyCode){
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_SPACE:
+                    togglePause();
+                    setControllerFocusPlayPause();
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                    setPausedModifier(false);
+                    setControllerFocusPlayPause();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                    setPausedModifier(true);
+                    setControllerFocusPlayPause();
+                    break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if(controllerWasVisible){ break; }
+                    setControllerFocusByID(R.id.exo_progress);
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+                    skipTime(DEFAULT_SKIP_DURATION);
+                    setControllerFocusByID(R.id.exo_progress);
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                    skipTime(-DEFAULT_SKIP_DURATION);
+                    setControllerFocusByID(R.id.exo_progress);
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_BACK:
+                case KeyEvent.KEYCODE_MENU:
+                    // Hide controller if it's visible. Otherwise revert to default logic.
+                    if(controllerWasVisible){
+                        playerControlView.hide();
+                        handled = true;
+                    }
+                    break;
+            }
+        }
+
+        return handled || super.dispatchKeyEvent(event);
+    }
+
+    public void setControllerFocus(View button){
+        button.requestFocus();
+    }
+
+    private boolean isTelevision() {
+        return(themedReactContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+                || themedReactContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
+    }
+
+    private void skipTime(long stepDuration){
+        if(player == null){ return; }
+
+        long playerPosition = player.getCurrentPosition();
+        player.seekTo(playerPosition + stepDuration);
+    }
+
+    public void togglePause(){
+        if(player == null){ return; }
+
+        boolean isPlaying = player.isPlaying();
+        setPausedModifier(isPlaying);
+    }
+
+    public void onAdEvent_fork(AdEvent adEvent) {
+        // Display player controller when AD is tapped
+        String adEventName = adEvent.getType().name();
+        if(adEventName.equals("TAPPED")){
+            togglePlayerControlVisibility();
+        }
+    }
+
+    public void initializePlayerControlsTV_fork(LegacyPlayerControlView playerControlView){
+        if(!isTelevision()){ return; }
+        
+        // Controller padding to account for overscan
+        LinearLayout exoControllerLayout = playerControlView.findViewById(R.id.exo_controller);
+        exoControllerLayout.setPadding(
+                DEFAULT_TV_CONTROLLER_PADDING,
+                0,
+                DEFAULT_TV_CONTROLLER_PADDING,
+                DEFAULT_TV_CONTROLLER_PADDING
+        );
+
+        //DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE
+        TextView durationView = playerControlView.findViewById(R.id.exo_duration);
+        TextView positionView = playerControlView.findViewById(R.id.exo_position);
+        durationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+        positionView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+
+        // Calculate label view widths from dp to pixels
+        final float dipScale = getContext().getResources().getDisplayMetrics().density;
+        int durPosWidth = (int) (DEFAULT_TV_CONTROLLER_DURATION_WIDHT * dipScale + 0.5f);
+
+        // Set duration view width
+        ViewGroup.LayoutParams durLayout = durationView.getLayoutParams();
+        durLayout.width = durPosWidth;
+        durationView.setLayoutParams(durLayout);
+
+        // Set position view width
+        ViewGroup.LayoutParams posLayout = positionView.getLayoutParams();
+        posLayout.width = durPosWidth;
+        positionView.setLayoutParams(posLayout);
+    }
+    // END: FORK
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW_PROGRESS:
+                    refreshDurationIndicatorType(); // FORK
                     if (player != null) {
-                        if (playerControlView != null && isPlayingAd() && controls) {
-                            playerControlView.hide();
-                        }
+                        // FORK: Removed control hide logic for ads. If not would be immediately dismissed after showing
                         long pos = player.getCurrentPosition();
                         long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
                         long duration = player.getDuration();
@@ -257,7 +469,10 @@ public class ReactExoplayerView extends FrameLayout implements
                             lastPos = pos;
                             lastBufferDuration = bufferedDuration;
                             lastDuration = duration;
-                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                            // FORK: Fix bug where ads are triggering progress updates
+                            if(!isPlayingAd()){
+                                eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                            }
                         }
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
@@ -400,6 +615,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new LegacyPlayerControlView(getContext());
+
+            // FORK: Apply TV specific Styling
+            initializePlayerControlsTV_fork(playerControlView);
         }
 
         if (fullScreenPlayerView == null) {
@@ -417,9 +635,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
         // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener((View v) -> {
-            if (!isPlayingAd()) {
-                togglePlayerControlVisibility();
-            }
+            // FORK: Allow controls to toggle while Ads are playing
+            togglePlayerControlVisibility();
         });
 
         //Handling the playButton click event
@@ -441,6 +658,14 @@ public class ReactExoplayerView extends FrameLayout implements
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisbility();
+        //BEGIN: FORK
+        // Ensure that view is in focus (necessary for listening to remote dispatches)
+        setControllerFocusPlayPause();
+
+        // Define the increment value of the DefaultTimeBar when using a remote or accessibility buttons
+        final DefaultTimeBar timeBar = playerControlView.findViewById(R.id.exo_progress);
+        timeBar.setKeyTimeIncrement(DEFAULT_INCREMENT_DURATION);
+        //END: FORK
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -483,6 +708,8 @@ public class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+        // FORK: Ensure controls are on top of IMA player
+        playerControlView.bringToFront();
         reLayout(playerControlView);
     }
 
@@ -604,7 +831,9 @@ public class ReactExoplayerView extends FrameLayout implements
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
         self.trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);
         self.trackSelector.setParameters(trackSelector.buildUponParameters()
-                .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
+                .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate)
+                .setRendererDisabled(C.TRACK_TYPE_VIDEO, true)); // FORK
+
 
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         RNVLoadControl loadControl = new RNVLoadControl(
@@ -2101,6 +2330,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
+        onAdEvent_fork(adEvent); // FORK
         if (adEvent.getAdData() != null) {
             eventEmitter.receiveAdEvent(adEvent.getType().name(), adEvent.getAdData());
         } else {

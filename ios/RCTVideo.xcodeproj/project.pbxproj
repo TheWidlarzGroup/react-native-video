@@ -49,6 +49,7 @@
 		0177D39827170A7A00F5BE18 /* RCTVideo-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTVideo-Bridging-Header.h"; path = "Video/RCTVideo-Bridging-Header.h"; sourceTree = "<group>"; };
 		0177D39927170A7A00F5BE18 /* RCTVideo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RCTVideo.swift; path = Video/RCTVideo.swift; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+    	4D89763029E76CAC003266A4 /* CustomPlayerController */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CustomPlayerController; path = Video/CustomPlayerController; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +85,13 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+    	4D89763129E76E67003266A4 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+			);
+      	path = Icons.bundle;
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
@@ -100,6 +108,8 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 				49E995712048B4CE00EA7890 /* Frameworks */,
 				01450CB5271D5738005D8F6B /* libRCTVideo.a */,
+        		4D89763129E76E67003266A4 /* Icons.bundle */,
+				4D89763029E76CAC003266A4 /* CustomPlayerController */,
 			);
 			sourceTree = "<group>";
 		};

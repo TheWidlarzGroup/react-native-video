@@ -39,6 +39,7 @@ Pod::Spec.new do |s|
   end
 
   s.dependency "React-Core"
+  s.resource_bundles = {'IconBundle' => ['ios/Icons.bundle/*.png']}
   s.default_subspec = "Video"
   s.static_framework = true
   s.xcconfig = {

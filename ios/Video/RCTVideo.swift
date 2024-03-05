@@ -10,14 +10,14 @@ import React
 // MARK: - RCTVideo
 
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
-    private var _player: AVPlayer?
-    private var _playerItem: AVPlayerItem?
+    public var _player: AVPlayer?
+    public var _playerItem: AVPlayerItem?
     private var _source: VideoSource?
     private var _playerBufferEmpty = true
     private var _playerLayer: AVPlayerLayer?
     private var _chapters: [Chapter]?
 
-    private var _playerViewController: RCTVideoPlayerViewController?
+    public var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
 
     /* DRM */
@@ -61,7 +61,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _fullscreen = false
     private var _fullscreenAutorotate = true
     private var _fullscreenOrientation: String! = "all"
-    private var _fullscreenPlayerPresented = false
+    public var _fullscreenPlayerPresented = false
     private var _fullscreenUncontrolPlayerPresented = false // to call events switching full screen mode from player controls
     private var _filterName: String!
     private var _filterEnabled = false
@@ -116,6 +116,131 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+
+    // BEGIN: FORK
+    private var _rctPlaybackControls: RCTPlaybackController?
+    private var _wrapperViewController: UIViewController = UIViewController()
+    private var _adsCompleted = true
+    private var _videoEnded = false
+
+    @objc func onPlayerPressed(_ sender: UITapGestureRecognizer? = nil) {
+        // Toggle playback controls
+        _rctPlaybackControls?.toggleControlVisibility(visible: nil)
+    }
+
+    #if USE_GOOGLE_IMA
+    func handleAdEvent(_ type: IMAAdEventType) {
+        switch(type){
+        case .LOADED:
+            _adsCompleted = false
+            
+        case .TAPPED:
+            _rctPlaybackControls?.toggleControlVisibility(visible: nil)
+
+        case .STARTED:
+            _rctPlaybackControls?.setUI_isAdDisplaying(adDisplayed: true)
+
+        case .COMPLETE:
+            _rctPlaybackControls?.setUI_isAdDisplaying(adDisplayed: false)
+
+        case .ALL_ADS_COMPLETED:
+            self._adsCompleted = true
+            if(_videoEnded){ handleVideoFinished() }
+
+        case .PAUSE:
+            _rctPlaybackControls?.setAdPlaying(playing: false)
+
+        case .RESUME:
+            _rctPlaybackControls?.setAdPlaying(playing: true)
+
+        default:
+            break
+        }
+    }
+    
+    func requestAds(){
+        if !self._didRequestAds && self._adTagUrl != nil{
+            self._didRequestAds = true
+            
+            if self._imaAdsManager.requestAds() {
+                //Pause if ads will show.
+                self.setPaused(true); // If the request fails the admanager will automatically resume the video
+            }
+        }
+    }
+    #endif
+
+    func videoFullscreenPlayerWillPresent(){
+        onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
+        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: true)
+    }
+
+    func videoFullscreenPlayerDidPresent(){
+        self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
+    }
+
+    func videoFullscreenPlayerDidDismiss(){
+        self.onVideoFullscreenPlayerDidDismiss?(["target": reactTag as Any])
+        _rctPlaybackControls?.setUI_isFullscreen(_isFullscreen: false)
+    }
+
+    @objc func togglePlaybackController(){
+        _rctPlaybackControls?.toggleControlVisibility(visible: true)
+    }
+
+    func resetWrapperViewController() -> UIViewController{
+        // Clean wrapper
+        _wrapperViewController.removeFromParent()
+
+        for viewContoller in _wrapperViewController.children{
+            viewContoller.willMove(toParent: nil)
+            viewContoller.view.removeFromSuperview()
+            viewContoller.removeFromParent()
+        }
+
+        // Init wrapper
+        _wrapperViewController.view.frame = self.bounds
+        self.addSubview(_wrapperViewController.view)
+
+        _wrapperViewController.addChild(_playerViewController!)
+        _wrapperViewController.view.addSubview(_playerViewController!.view)
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.onPlayerPressed(_:)))
+        _playerViewController?.view.addGestureRecognizer(tap)
+
+        // Add the custom playback controller
+        #if os(iOS)
+        useCustomPlaybackController()
+        #endif
+            
+        return _wrapperViewController
+    }
+
+    // Initiate custom playback controller (seekbar, play, pause etc)
+    func useCustomPlaybackController() {
+        _rctPlaybackControls = RCTPlaybackController(video: self)
+        _wrapperViewController.view.addSubview(_rctPlaybackControls!)
+
+        // Configure sizing
+        _rctPlaybackControls?.translatesAutoresizingMaskIntoConstraints = false
+        _rctPlaybackControls?.topAnchor.constraint(equalTo: _wrapperViewController.view.topAnchor).isActive = true
+        _rctPlaybackControls?.bottomAnchor.constraint(equalTo: _wrapperViewController.view.bottomAnchor).isActive = true
+        _rctPlaybackControls?.leftAnchor.constraint(equalTo: _wrapperViewController.view.leftAnchor).isActive = true
+        _rctPlaybackControls?.rightAnchor.constraint(equalTo: _wrapperViewController.view.rightAnchor).isActive = true
+    }
+
+    func handleVideoFinished(){
+        onVideoEnd?(["target": reactTag as Any])
+
+        if _repeat {
+            _playerItem!.seek(to: CMTime.zero, completionHandler: nil)
+            self.applyModifiers()
+        } else {
+            self.setPaused(true);
+            _playerObserver.removePlayerTimeObserver()
+        }
+    }
+    // END: FORK
 
     @objc
     func _onPictureInPictureStatusChanged() {
@@ -272,12 +397,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if currentTimeSecs >= 0 {
-            #if USE_GOOGLE_IMA
-                if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
-                    _imaAdsManager.requestAds()
-                    _didRequestAds = true
-                }
-            #endif
+            // FORK: Moved request ads functionality to different location
+            self._videoEnded = false
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
@@ -294,6 +415,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setSrc(_ source: NSDictionary!) {
         let dispatchClosure = {
+            self._didRequestAds = false
+            self._adsCompleted = true
             self._source = VideoSource(source)
             if self._source?.uri == nil || self._source?.uri == "" {
                 self._player?.replaceCurrentItem(with: nil)
@@ -572,6 +695,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if _adPlaying {
                 #if USE_GOOGLE_IMA
                     _imaAdsManager.getAdsManager()?.resume()
+                    // FORK: Ensure normal video is paused when ads resume
+                    _player?.pause()
+                    _player?.rate = 0.0
                 #endif
             } else {
                 if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
@@ -798,7 +924,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
 
             // Set presentation style to fullscreen
-            _playerViewController?.modalPresentationStyle = .fullScreen
+            _wrapperViewController.modalPresentationStyle = .fullScreen
 
             // Find the nearest view controller
             var viewController: UIViewController! = self.firstAvailableUIViewController()
@@ -812,28 +938,33 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             if viewController != nil {
                 _presentingViewController = viewController
+                _fullscreenPlayerPresented = true
 
-                self.onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
+                self.videoFullscreenPlayerWillPresent()
 
                 if let playerViewController = _playerViewController {
                     if _controls {
                         // prevents crash https://github.com/react-native-video/react-native-video/issues/3040
-                        self._playerViewController?.removeFromParent()
+                        self._wrapperViewController.removeFromParent()
                     }
 
-                    viewController.present(playerViewController, animated: true, completion: { [weak self] in
+                    viewController.present(_wrapperViewController, animated: true, completion: { [weak self] in
                         guard let self else { return }
                         // In fullscreen we must display controls
+                        #if os(tvOS)
                         self._playerViewController?.showsPlaybackControls = true
+                        #else
+                        self._playerViewController?.showsPlaybackControls = false
+                        #endif
                         self._fullscreenPlayerPresented = fullscreen
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
 
-                        self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag])
+                        self.videoFullscreenPlayerDidPresent()
                     })
                 }
             }
         } else if !fullscreen && _fullscreenPlayerPresented, let _playerViewController {
-            self.videoPlayerViewControllerWillDismiss(playerViewController: _playerViewController)
+            onVideoFullscreenPlayerWillDismiss?(["target": reactTag as Any])
             _presentingViewController?.dismiss(animated: true, completion: { [weak self] in
                 self?.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
             })
@@ -861,25 +992,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player: _player, withPlayerItem: _playerItem)
+            resetWrapperViewController()
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
 
         guard let _playerViewController else { return }
-
-        if _controls {
-            let viewController: UIViewController! = self.reactViewController()
-            viewController?.addChild(_playerViewController)
-            self.addSubview(_playerViewController.view)
-        }
-
+        // FORK: Children are now added in the resetWrapperViewController function
         _playerObserver.playerViewController = _playerViewController
     }
 
     func createPlayerViewController(player: AVPlayer, withPlayerItem _: AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
+        #if os(tvOS)
         viewController.showsPlaybackControls = self._controls
+        #else
+        viewController.showsPlaybackControls = false
+        #endif
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
@@ -955,11 +1085,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _playerViewController == playerViewController && _fullscreenPlayerPresented {
             _fullscreenPlayerPresented = false
             _presentingViewController = nil
-            _playerViewController = nil
-            _playerObserver.playerViewController = nil
-            self.applyModifiers()
-
-            onVideoFullscreenPlayerDidDismiss?(["target": reactTag as Any])
+            _wrapperViewController.modalPresentationStyle = .automatic
+            self.addSubview(_wrapperViewController.view)
+            self.videoFullscreenPlayerDidDismiss()
         }
     }
 
@@ -1030,11 +1158,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     override func layoutSubviews() {
         super.layoutSubviews()
         if _controls, let _playerViewController {
-            _playerViewController.view.frame = bounds
+            // FORK: Fixes the sizing of the custom controls. Might be a bit overkill
+            let newBounds = _fullscreenPlayerPresented ? UIScreen.main.bounds: bounds
+            _wrapperViewController.view.frame = newBounds
+            _playerViewController.view.frame = newBounds
+
+            // Adjust all children of wrapperView
+            for viewContoller in _wrapperViewController.children {
+                viewContoller.view.frame = newBounds
+            }
+            _rctPlaybackControls?.frame = newBounds
 
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
-                subview.frame = bounds
+                subview.frame = newBounds
             }
         } else {
             CATransaction.begin()
@@ -1061,6 +1198,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerViewController.player = nil
             self._playerViewController = nil
             _playerObserver.playerViewController = nil
+            // FORK: Ensure Ads are not playing after video is closed
+            #if USE_GOOGLE_IMA
+                _imaAdsManager.getAdsManager()?.pause()
+                _imaAdsManager.getAdsManager()?.destroy()
+                _imaAdsManager.getAdsLoader()?.contentComplete()
+                _imaAdsManager = nil
+            #endif
         }
 
         _eventDispatcher = nil
@@ -1153,7 +1297,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         var height: Float?
         var orientation = "undefined"
 
-        RCTVideoAssetsUtils.getTracks(asset: _playerItem.asset, withMediaType: .video).then { [weak self] tracks in
+        RCTVideoAssetsUtils.getTracks(asset: _playerItem.asset, withMediaType: .video).then { [weak self] tracks -> Void in
             guard let self else { return }
 
             if let videoTrack = tracks?.first {
@@ -1213,6 +1357,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self._videoLoadStarted = false
             self._playerObserver.attachPlayerEventListeners()
             self.applyModifiers()
+
+            #if USE_GOOGLE_IMA
+                requestAds()
+            #endif
         }
     }
 
@@ -1242,7 +1390,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
         if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) == true) {
-            setPaused(_paused)
+            // setPaused(_paused)
         }
         _playerBufferEmpty = false
         onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
@@ -1313,7 +1461,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             }
 
-            self.reactViewController().view.frame = bounds
+            self.reactViewController().view.frame = newRect!
             self.reactViewController().view.setNeedsLayout()
         }
     }
@@ -1343,20 +1491,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handlePlayerItemDidReachEnd(notification: NSNotification!) {
-        onVideoEnd?(["target": reactTag as Any])
+        self._videoEnded = true
         #if USE_GOOGLE_IMA
-            if notification.object as? AVPlayerItem == _player?.currentItem {
+            let waitForAds = !self._adsCompleted && notification.object as? AVPlayerItem == _player?.currentItem
+            if waitForAds {
                 _imaAdsManager.getAdsLoader()?.contentComplete()
+                return
             }
         #endif
-        if _repeat {
-            let item: AVPlayerItem! = notification.object as? AVPlayerItem
-            item.seek(to: CMTime.zero, completionHandler: nil)
-            self.applyModifiers()
-        } else {
-            self.setPaused(true)
-            _playerObserver.removePlayerTimeObserver()
-        }
+        handleVideoFinished()
     }
 
     @objc
