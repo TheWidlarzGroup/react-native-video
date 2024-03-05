@@ -17,6 +17,8 @@ class SubtitleStyle private constructor() {
         private set
     var paddingBottom = 0
         private set
+    var showSubtitles = true
+        private set
 
     companion object {
         private const val PROP_FONT_SIZE_TRACK = "fontSize"
@@ -24,6 +26,7 @@ class SubtitleStyle private constructor() {
         private const val PROP_PADDING_TOP = "paddingTop"
         private const val PROP_PADDING_LEFT = "paddingLeft"
         private const val PROP_PADDING_RIGHT = "paddingRight"
+        private const val PROP_SHOW_SUBTITLES = "showSubtitles"
 
         @JvmStatic
         fun parse(src: ReadableMap?): SubtitleStyle {
@@ -33,6 +36,7 @@ class SubtitleStyle private constructor() {
             subtitleStyle.paddingTop = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_TOP, 0)
             subtitleStyle.paddingLeft = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_LEFT, 0)
             subtitleStyle.paddingRight = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_RIGHT, 0)
+            subtitleStyle.showSubtitles = ReactBridgeUtils.safeGetBool(src, PROP_SHOW_SUBTITLES, true)
             return subtitleStyle
         }
     }
