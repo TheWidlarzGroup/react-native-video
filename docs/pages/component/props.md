@@ -47,7 +47,7 @@ This page shows the list of available properties to configure player
 | [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS, visionOS    |
 | [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS  visionOS    |
 | [selectedVideoTrack](#selectedvideotrack)                                           | Android                   |
-| [shutterColor](#shutterColor)                                                       | Android                   |
+| [shutterColor](#shuttercolor)                                                       | Android                   |
 | [source](#source)                                                                   | All                       |
 | [subtitleStyle](#subtitlestyle)                                                     | Android                   |
 | [textTracks](#texttracks)                                                           | Android, iOS, visionOS    |
