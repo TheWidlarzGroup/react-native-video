@@ -31,6 +31,8 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import android.view.View; // FORK
+
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
 
     private static final String REACT_CLASS = "RCTVideo";
@@ -93,6 +95,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_DEBUG = "debug";
+
+    @Override
+    public void addView(ReactExoplayerView parent, View child, int index) {
+        parent.addView(child, 1);
+    }
 
     private ReactExoplayerConfig config;
 

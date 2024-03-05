@@ -180,7 +180,7 @@ enum RCTPlayerOperations {
         let current: CMTime = playerItem.currentTime()
         let tolerance: CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
 
-        return Promise<Bool>(on: .global()) { fulfill, reject in
+        return Promise<Bool>(on: .main) { fulfill, reject in
             guard CMTimeCompare(current, cmSeekTime) != 0 else {
                 reject(NSError(domain: "", code: 0, userInfo: nil))
                 return
