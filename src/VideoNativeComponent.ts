@@ -314,6 +314,7 @@ export interface VideoNativeProps extends ViewProps {
   reportBandwidth?: boolean; //Android
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
+  shutterColor?: string; // Android
   trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
