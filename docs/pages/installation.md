@@ -157,6 +157,22 @@ Select RCTVideo-tvOS
 </details>
 </details>
 
+<details>
+<summary>visionOS</summary>
+
+## visionOS
+Add patch for `promises` pods to your pod files to make it work with `visionOS` target.
+> This patch is required only for `visionOS` target and will be removed in future.
+```diff
++ pod 'PromisesSwift', :podspec => '../node_modules/react-native-video/ios/patches/PromisesSwift.podspec'
++ pod 'PromisesObjC', :podspec => '../node_modules/react-native-video/ios/patches/PromisesObjC.podspec'
+```
+
+**Remember** to run `pod install` after adding this patch.
+
+After this you can follow the same steps as for `iOS` target.
+</details>
+
 ## Examples
 
 Run `yarn xbasic install` in the root directory before running any of the examples.

@@ -1,5 +1,42 @@
 
 
+# [6.0.0-beta.5](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.4...v6.0.0-beta.5) (2024-02-02)
+
+
+### Bug Fixes
+
+* **android:** fix crash with interop layer ([#3509](https://github.com/react-native-video/react-native-video/issues/3509)) ([41e9bcb](https://github.com/react-native-video/react-native-video/commit/41e9bcb1ef28c1532863186c83423814fcaf2372))
+* **android:** re-layout controls after fullscreen dismiss ([#3490](https://github.com/react-native-video/react-native-video/issues/3490)) ([135d97c](https://github.com/react-native-video/react-native-video/commit/135d97ce506bf1a0226042e0f29f4de5bcc10972))
+* fix typo ([#3497](https://github.com/react-native-video/react-native-video/issues/3497)) ([336eb44](https://github.com/react-native-video/react-native-video/commit/336eb44dc6061dad9cdc3382eb05d0a0effbef64))
+* **ios:** fix pip memory leak ([#3506](https://github.com/react-native-video/react-native-video/issues/3506)) ([53068dd](https://github.com/react-native-video/react-native-video/commit/53068ddd41218bb615cd129eba2c36d6347ccf25))
+* remove lifecycle listener after component unmount ([#3489](https://github.com/react-native-video/react-native-video/issues/3489)) ([3858a15](https://github.com/react-native-video/react-native-video/commit/3858a15b4268ae54d5b97c036d86b05aaf31bcf9)), closes [#3488](https://github.com/react-native-video/react-native-video/issues/3488)
+* remove pausePlayback when audio focus loss event ([#3496](https://github.com/react-native-video/react-native-video/issues/3496)) ([b1ab0f2](https://github.com/react-native-video/react-native-video/commit/b1ab0f24a3efbcc3be49005060f50b34a117664e))
+
+
+### Features
+
+* implement onAudioTracks and onTextTracks on ios ([#3503](https://github.com/react-native-video/react-native-video/issues/3503)) ([6a49cba](https://github.com/react-native-video/react-native-video/commit/6a49cba273fa0a47e106f4abb8caeb4ab6dbe4c8))
+
+
+### Reverts
+
+* Revert "fix: remove pausePlayback when audio focus loss event (#3496)" (#3504) ([aec7db6](https://github.com/react-native-video/react-native-video/commit/aec7db63901c42dd7a591b030bfc69daa8860341)), closes [#3496](https://github.com/react-native-video/react-native-video/issues/3496) [#3504](https://github.com/react-native-video/react-native-video/issues/3504)
+
+# [6.0.0-beta.4](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.3...v6.0.0-beta.4) (2024-01-15)
+
+
+### Bug Fixes
+* add missing audioOutput prop (#3450) (f20d68b)
+* **android**: support opacity properly (#3464) (11e5b75)
+* **ios**: currentPlaybackTime in ms and not seconds (#3472) (3f63c16)
+* **ios**: remove extra dismissFullscreenPlayer declaration (#3474) (045f5fa)
+
+### Features
+* add visionOS support (#3425) (cf3ebb7)
+* **ios**: migrate from deprecated methods (#3444) (5aaa53d)
+* **ios**: update the way to get keyWindow (#3448) (f35727f)
+* **ios**: update timed metadata handler (#3449) (481cc71)
+
 # [6.0.0-beta.3](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.2...v6.0.0-beta.3) (2023-12-24)
 
 
