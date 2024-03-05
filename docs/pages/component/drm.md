@@ -1,5 +1,7 @@
 # DRM
 
+> **Note:** DRM is not supported on visionOS yet.
+
 ## Provide DRM data (only tested with http/https assets)
 
 You can provide some configuration to allow DRM playback.

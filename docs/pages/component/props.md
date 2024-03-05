@@ -8,49 +8,49 @@ This page shows the list of available properties to configure player
 | [adTagUrl](#adtagurl)                                                               | Android, iOS              |
 | [allowsExternalPlayback](#allowsexternalplayback)                                   | iOS                       |
 | [audioOnly](#audioonly)                                                             | All                       |
-| [audioOutput](#audioOutput)                                                         | Android, iOS              |
-| [automaticallyWaitsToMinimizeStalling](#automaticallywaitstominimizestalling)       | iOS                       |
+| [audioOutput](#audioOutput)                                                         | Android, iOS, visionOS    |
+| [automaticallyWaitsToMinimizeStalling](#automaticallywaitstominimizestalling)       | iOS, visionOS             |
 | [backBufferDurationMs](#backbufferdurationms)                                       | Android                   |
 | [bufferConfig](#bufferconfig)                                                       | Android                   |
 | [contentStartTime](#contentstarttime)                                               | Android                   |
-| [controls](#controls)                                                               | Android, iOS              |
+| [controls](#controls)                                                               | Android, iOS, visionOS    |
 | [currentPlaybackTime](#currentplaybacktime)                                         | Android                   |
 | [debug](#debug)                                                                     | Android                   |
-| [disableFocus](#disablefocus)                                                       | Android, iOS              |
+| [disableFocus](#disablefocus)                                                       | Android                   |
 | [disableDisconnectError](#disabledisconnecterror)                                   | Android                   |
-| [filter](#filter)                                                                   | iOS                       |
-| [filterEnabled](#filterenabled)                                                     | iOS                       |
+| [filter](#filter)                                                                   | iOS, visionOS             |
+| [filterEnabled](#filterenabled)                                                     | iOS, visionOS             |
 | [focusable](#focusable)                                                             | Android                   |
 | [fullscreen](#fullscreen)                                                           | Android, iOS              |
-| [fullscreenAutorotate](#fullscreenautorotate)                                       | iOS                       |
-| [fullscreenOrientation](#fullscreenorientation)                                     | iOS                       |
+| [fullscreenAutorotate](#fullscreenautorotate)                                       | iOS, visionOS             |
+| [fullscreenOrientation](#fullscreenorientation)                                     | iOS, visionOS             |
 | [headers](#headers)                                                                 | Android                   |
 | [hideShutterView](#hideshutterview)                                                 | Android                   |
-| [ignoreSilentSwitch](#ignoresilentswitch)                                           | iOS                       |
-| [maxBitRate](#maxbitrate)                                                           | Android, iOS              |
+| [ignoreSilentSwitch](#ignoresilentswitch)                                           | iOS, visionOS             |
+| [maxBitRate](#maxbitrate)                                                           | Android, iOS, visionOS    |
 | [minLoadRetryCount](#minloadretrycount)                                             | Android                   |
-| [mixWithOthers](#mixwithothers)                                                     | iOS                       |
+| [mixWithOthers](#mixwithothers)                                                     | iOS, visionOS             |
 | [muted](#muted)                                                                     | All                       |
 | [paused](#paused)                                                                   | All                       |
 | [pictureInPicture](#pictureinpicture)                                               | iOS                       |
-| [playInBackground](#playinbackground)                                               | Android, iOS              |
-| [playWhenInactive](#playwheninactive)                                               | iOS                       |
+| [playInBackground](#playinbackground)                                               | Android, iOS, visionOS    |
+| [playWhenInactive](#playwheninactive)                                               | iOS, visionOS             |
 | [poster](#poster)                                                                   | All                       |
 | [posterResizeMode](#posterresizemode)                                               | All                       |
-| [preferredForwardBufferDuration](#preferredforwardbufferduration)                   | iOS                       |
+| [preferredForwardBufferDuration](#preferredforwardbufferduration)                   | iOS, visionOS             |
 | [preventsDisplaySleepDuringVideoPlayback](#preventsdisplaysleepduringvideoplayback) | iOS, Android              |
 | [progressUpdateInterval](#progressupdateinterval)                                   | All                       |
 | [rate](#rate)                                                                       | All                       |
 | [repeat](#repeat)                                                                   | All                       |
 | [reportBandwidth](#reportbandwidth)                                                 | Android                   |
-| [resizeMode](#resizemode)                                                           | Android, iOS, Windows UWP |
-| [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS              |
-| [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS              |
+| [resizeMode](#resizemode)                                                           | All                       |
+| [selectedAudioTrack](#selectedaudiotrack)                                           | Android, iOS, visionOS    |
+| [selectedTextTrack](#selectedtexttrack)                                             | Android, iOS  visionOS    |
 | [selectedVideoTrack](#selectedvideotrack)                                           | Android                   |
 | [shutterColor](#shutterColor)                                                       | Android                   |
 | [source](#source)                                                                   | All                       |
 | [subtitleStyle](#subtitlestyle)                                                     | Android                   |
-| [textTracks](#texttracks)                                                           | Android, iOS              |
+| [textTracks](#texttracks)                                                           | Android, iOS, visionOS    |
 | [trackId](#trackid)                                                                 | Android                   |
 | [useTextureView](#usetextureview)                                                   | Android                   |
 | [useSecureView](#usesecureview)                                                     | Android                   |
@@ -66,7 +66,7 @@ Example:
 adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
 ```
 
-Note: On android, you need enable IMA SDK in gradle file, see: [enable client side ads insertion](#enable-client-side-ads-insertion)
+Note: You need enable IMA SDK in gradle or pod file - [enable client side ads insertion](/installation)
 
 
 Platforms: Android, iOS
@@ -92,14 +92,14 @@ Changes the audio output.
 * **speaker (default)** - plays through speaker
 * **earpiece** - plays through earpiece
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `automaticallyWaitsToMinimizeStalling`
 A Boolean value that indicates whether the player should automatically delay playback in order to minimize stalling. For clients linked against iOS 10.0 and later
 * **false** - Immediately starts playback
 * **true (default)** - Delays playback in order to minimize stalling
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `backBufferDurationMs`
 The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.
@@ -160,7 +160,7 @@ Note on iOS, controls are always shown when in fullscreen mode.
 Note on Android, native controls are available by default.
 If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Project](/projects).
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `contentStartTime`
 The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have SSAI stream where ads resolution is not the same as content resolution.
@@ -210,6 +210,7 @@ Platforms: Android
 To setup DRM please follow [this guide](/component/drm)
 
 Platforms: Android, iOS
+> ⚠️ DRM is not supported on visionOS yet
 
 ### `filter`
 Add video filter
@@ -237,7 +238,7 @@ Notes:
 2. Video filter is currently not supported on HLS playlists.
 3. `filterEnabled` must be set to `true`
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `filterEnabled`
 Enable video filter. 
@@ -245,7 +246,7 @@ Enable video filter.
 * **false (default)** - Don't enable filter
 * **true** - Enable filter
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `Focusable`
 Whether this video view should be focusable with a non-touch input device, eg. receive focus with a hardware keyboard.
@@ -262,12 +263,12 @@ See [presentFullscreenPlayer](#presentfullscreenplayer) for details.
 * **false (default)** - Don't display the video in fullscreen
 * **true** - Display the video in fullscreen
 
-Platforms: iOS, Android
+Platforms: iOS, Android, visionOS
 
 ### `fullscreenAutorotate`
 If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes the video to rotate to that orientation but permits rotation of the screen to orientation held by user. Defaults to TRUE.
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `fullscreenOrientation`
 
@@ -275,7 +276,7 @@ Platforms: iOS
 * **landscape**
 * **portrait**
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `headers`
 Pass headers to the HTTP client. Can be used for authorization. Headers must be a part of the source object.
@@ -307,7 +308,7 @@ Controls the iOS silent switch behavior
 * **"ignore"** - Play audio even if the silent switch is set
 * **"obey"** - Don't play audio if the silent switch is set
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `maxBitRate`
 Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
@@ -319,7 +320,7 @@ Example:
 maxBitRate={2000000} // 2 megabits
 ```
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `minLoadRetryCount`
 Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
@@ -339,7 +340,7 @@ Controls how Audio mix with other apps.
 * **"mix"** - Audio from this video mixes with audio from other apps.
 * **"duck"** - Reduces the volume of other apps while audio from this video plays.
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `muted`
 Controls whether the audio is muted
@@ -373,14 +374,14 @@ To use this feature on iOS, you must:
 * [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3) in your Xcode project
 * Set the ignoreSilentSwitch prop to "ignore"
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `playWhenInactive`
 Determine whether the media should continue playing when notifications or the Control Center are in front of the video.
 * **false (default)** - Don't continue playing the media
 * **true** - Continue playing the media
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `poster`
 An image to display while the video is loading
@@ -404,7 +405,7 @@ The duration the player should buffer media from the network ahead of the playhe
 
 Default: 0
 
-Platforms: iOS
+Platforms: iOS, visionOS
 
 ### `preventsDisplaySleepDuringVideoPlayback`
 Controls whether or not the display should be allowed to sleep while playing the video. Default is not to allow display to sleep.
@@ -508,7 +509,7 @@ Type | Value | Description
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, the first audio track will be played. If multiple tracks match the criteria, the first match will be used.
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `selectedTextTrack`
 Configure which text track (caption or subtitle), if any, is shown.
@@ -540,7 +541,7 @@ Both iOS & Android (only 4.4 and higher) offer Settings to enable Captions for h
 
 If a track matching the specified Type (and Value if appropriate) is unavailable, no text track will be displayed. If multiple tracks match the criteria, the first match will be used.
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `selectedVideoTrack`
 Configure which video track should be played. By default, the player uses Adaptive Bitrate Streaming to automatically select the stream it thinks will perform best based on available bandwidth.
@@ -755,7 +756,7 @@ textTracks={[
 ```
 
 
-Platforms: Android, iOS
+Platforms: Android, iOS, visionOS
 
 ### `trackId`
 Configure an identifier for the video stream to link the playback context to the events emitted.

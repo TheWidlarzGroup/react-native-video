@@ -6,30 +6,30 @@ This page shows the list of available callbacks to handle player notifications
 |-------------------------------------------------------------------------------------------------|---------------------------|
 | [onAudioBecomingNoisy](#onaudiobecomingnoisy)                                                   | Android, iOS              |
 | [onAudioFocusChanged](#onaudiofocuschanged)                                                     | Android                   |
-| [onAudioTracks](#onaudiotracks)                                                                 | Android                   |
+| [onAudioTracks](#onaudiotracks)                                                                 | Android, iOS              |
 | [onBandwidthUpdate](#onbandwidthupdate)                                                         | Android                   |
 | [onBuffer](#onbuffer)                                                                           | Android, iOS              |
 | [onEnd](#onend)                                                                                 | All                       |
-| [onError](#onerror)                                                                             | Android, iOS, Windows UWP |
+| [onError](#onerror)                                                                             | All                       |
 | [onExternalPlaybackChange](#onexternalplaybackchange)                                           | iOS                       |
-| [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS              |
-| [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS              |
-| [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)                                 | Android, iOS              |
-| [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)                                   | Android, iOS              |
+| [onFullscreenPlayerWillPresent](#onfullscreenplayerwillpresent)                                 | Android, iOS, visionOS    |
+| [onFullscreenPlayerDidPresent](#onfullscreenplayerdidpresent)                                   | Android, iOS, visionOS    |
+| [onFullscreenPlayerWillDismiss](#onfullscreenplayerwilldismiss)                                 | Android, iOS, visionOS    |
+| [onFullscreenPlayerDidDismiss](#onfullscreenplayerdiddismiss)                                   | Android, iOS, visionOS    |
 | [onLoad](#onload)                                                                               | All                       |
 | [onLoadStart](#onloadstart)                                                                     | All                       |
 | [onPictureInPictureStatusChanged](#onpictureinpicturestatuschanged)                             | iOS                       |
 | [onPlaybackRateChange](#onplaybackratechange)                                                   | All                       |
-| [onPlaybackStateChanged](#onplaybackstatechanged)                                               | Android, iOS              |
+| [onPlaybackStateChanged](#onplaybackstatechanged)                                               | Android, iOS, visionOS    |
 | [onProgress](#onprogress)                                                                       | All                       |
-| [onReadyForDisplay](#onreadyfordisplay)                                                         | Android, iOS, Web         |
+| [onReadyForDisplay](#onreadyfordisplay)                                                         | Android, iOS              |
 | [onReceiveAdEvent](#onreceiveadevent)                                                           | Android, iOS              |
-| [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS                       |
-| [onSeek](#onseek)                                                                               | Android, iOS, Windows UWP |
-| [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS              |
-| [onTextTracks](#ontexttracks)                                                                   | Android                   |
+| [onRestoreUserInterfaceForPictureInPictureStop](#onrestoreuserinterfaceforpictureinpicturestop) | iOS, visionOS             |
+| [onSeek](#onseek)                                                                               | All                       |
+| [onTimedMetadata](#ontimedmetadata)                                                             | Android, iOS, visionOS    |
+| [onTextTracks](#ontexttracks)                                                                   | Android, iOS              |
 | [onVideoTracks](#onvideotracks)                                                                 | Android                   |
-| [onVolumeChange](#onvolumechange)                                                               | Android, iOS              |
+| [onVolumeChange](#onvolumechange)                                                               | Android, iOS, visionOS    |
 
 
 ## Details

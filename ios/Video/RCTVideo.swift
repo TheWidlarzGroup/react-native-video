@@ -116,6 +116,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
+    @objc var onTextTracks: RCTDirectEventBlock?
+    @objc var onAudioTracks: RCTDirectEventBlock?
 
     // BEGIN: FORK
     private var _rctPlaybackControls: RCTPlaybackController?
@@ -265,7 +267,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            _pip = RCTPictureInPicture(self._onPictureInPictureStatusChanged, self._onRestoreUserInterfaceForPictureInPictureStop)
+            _pip = RCTPictureInPicture({ [weak self] in
+                self?._onPictureInPictureStatusChanged()
+            }, { [weak self] in
+                self?._onRestoreUserInterfaceForPictureInPictureStop()
+            })
         #endif
 
         NotificationCenter.default.addObserver(
@@ -318,6 +324,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     deinit {
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
+        _pip = nil
         _playerObserver.clearPlayer()
     }
 
@@ -485,7 +492,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     self._player = self._player ?? AVPlayer()
+
                     self._player?.replaceCurrentItem(with: playerItem)
+
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
@@ -1508,5 +1517,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let lastEvent: AVPlayerItemAccessLogEvent! = accessLog.events.last
 
         onVideoBandwidthUpdate?(["bitrate": lastEvent.observedBitrate, "target": reactTag])
+    }
+
+    func handleTracksChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<[AVPlayerItemTrack]>) {
+        all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
+            self.onTextTracks?(["textTracks": textTracks])
+            self.onAudioTracks?(["audioTracks": audioTracks])
+        }
     }
 }
