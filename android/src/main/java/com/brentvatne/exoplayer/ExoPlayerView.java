@@ -129,7 +129,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         if (!useTextureView || useSecureView) {
             view = new SurfaceView(context);
             if (useSecureView) {
-                ((SurfaceView) view).setSecure(true);
+                ((SurfaceView)view).setSecure(true);
             }
         } else {
             view = new TextureView(context);
