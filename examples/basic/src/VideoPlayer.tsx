@@ -120,14 +120,13 @@ class VideoPlayer extends Component {
       description: 'another bunny (can be saved)',
       uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
     },
-  ];
-
-  srcIosList = [
     {
       description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
   ];
+
+  srcIosList = [];
 
   srcAndroidList = [
     {
