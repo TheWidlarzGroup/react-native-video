@@ -43,6 +43,10 @@ const config = {
       acc[name] = path.join(__dirname, 'node_modules', name);
       return acc;
     }, {}),
+    nodeModulesPaths: [
+      path.resolve(path.join(__dirname, './node_modules')),
+      path.resolve(path.join(__dirname, '../../node_modules'))
+    ],
     transformer: {
       getTransformOptions: async () => ({
         transform: {
