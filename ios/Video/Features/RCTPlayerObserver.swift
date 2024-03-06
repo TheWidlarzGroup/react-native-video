@@ -140,6 +140,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
     func removePlayerObservers() {
         _playerRateChangeObserver?.invalidate()
         _playerExternalPlaybackActiveObserver?.invalidate()
+        _playerVolumeChangeObserver?.invalidate()
     }
 
     func addPlayerItemObservers() {
