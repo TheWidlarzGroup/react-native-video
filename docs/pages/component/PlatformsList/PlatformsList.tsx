@@ -1,7 +1,14 @@
 import React from 'react';
 import styles from './PlatformsList.module.css';
 
-type Platform = 'Android' | 'iOS' | 'visionOS' | 'tvOS' | 'Windows UWP' | 'All';
+type Platform =
+  | 'Android'
+  | 'iOS'
+  | 'visionOS'
+  | 'tvOS'
+  | 'Windows UWP'
+  | 'Web'
+  | 'All';
 
 interface Platforms {
   types: Platform[];
@@ -10,7 +17,9 @@ interface Platforms {
 function PlatformsList({types}: Platforms) {
   return (
     <p className={styles.paragraphStyle}>
-      Platforms:
+      {types.length === 1 && !types.includes('All')
+        ? 'Platform:'
+        : 'Platforms:'}
       <span className={styles.spanStyle}>{' ' + types.join(' | ')}</span>
     </p>
   );
