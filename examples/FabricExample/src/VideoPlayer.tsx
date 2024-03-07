@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import Video, {FilterType, VideoRef} from 'react-native-video';
+import Video, {FilterType, VideoRef, ResizeMode, IgnoreSilentSwitchType, MixWithOthersType} from 'react-native-video';
 
 const filterTypes = [
   FilterType.NONE,
@@ -32,7 +32,26 @@ const filterTypes = [
   FilterType.SEPIA,
 ];
 
-class VideoPlayer extends Component {
+type SkinType = 'custom' | 'native' | 'embed'
+
+type State = {
+  rate: number,
+  volume: number,
+  muted: boolean,
+  resizeMode: ResizeMode,
+  duration: number,
+  currentTime: number,
+  controls: boolean,
+  paused: boolean,
+  skin: SkinType,
+  ignoreSilentSwitch: IgnoreSilentSwitchType,
+  mixWithOthers: MixWithOthersType,
+  isBuffering: boolean,
+  filter: FilterType,
+  filterEnabled: boolean,
+}
+
+class VideoPlayer extends Component<{}, State> {
   controlRef: React.RefObject<TouchableOpacity>;
   videoRef: React.RefObject<VideoRef>;
   constructor(props: any) {
@@ -44,18 +63,18 @@ class VideoPlayer extends Component {
     this.controlRef = createRef();
     this.videoRef = createRef();
   }
-  state = {
+  state: State = {
     rate: 1,
     volume: 1,
     muted: false,
-    resizeMode: 'contain',
+    resizeMode: ResizeMode.CONTAIN,
     duration: 0.0,
     currentTime: 0.0,
     controls: false,
     paused: true,
     skin: 'custom',
-    ignoreSilentSwitch: null,
-    mixWithOthers: null,
+    ignoreSilentSwitch: IgnoreSilentSwitchType.IGNORE,
+    mixWithOthers: MixWithOthersType.DUCK,
     isBuffering: false,
     filter: FilterType.NONE,
     filterEnabled: true,
@@ -110,7 +129,7 @@ class VideoPlayer extends Component {
     });
   }
 
-  renderSkinControl(skin) {
+  renderSkinControl(skin: 'custom' | 'native' | 'embed') {
     const isSelected = this.state.skin == skin;
     const selectControls = skin == 'native' || skin == 'embed';
     return (
@@ -151,7 +170,7 @@ class VideoPlayer extends Component {
     );
   }
 
-  renderResizeModeControl(resizeMode: string) {
+  renderResizeModeControl(resizeMode: ResizeMode) {
     const isSelected = this.state.resizeMode == resizeMode;
 
     return (
@@ -189,7 +208,7 @@ class VideoPlayer extends Component {
     );
   }
 
-  renderIgnoreSilentSwitchControl(ignoreSilentSwitch: string) {
+  renderIgnoreSilentSwitchControl(ignoreSilentSwitch: IgnoreSilentSwitchType) {
     const isSelected = this.state.ignoreSilentSwitch == ignoreSilentSwitch;
 
     return (
@@ -208,7 +227,7 @@ class VideoPlayer extends Component {
     );
   }
 
-  renderMixWithOthersControl(mixWithOthers: string) {
+  renderMixWithOthersControl(mixWithOthers: MixWithOthersType) {
     const isSelected = this.state.mixWithOthers == mixWithOthers;
 
     return (
@@ -302,21 +321,21 @@ class VideoPlayer extends Component {
             </View>
 
             <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl('cover')}
-              {this.renderResizeModeControl('contain')}
-              {this.renderResizeModeControl('stretch')}
+              {this.renderResizeModeControl(ResizeMode.COVER)}
+              {this.renderResizeModeControl(ResizeMode.CONTAIN)}
+              {this.renderResizeModeControl(ResizeMode.STRETCH)}
             </View>
           </View>
           <View style={styles.generalControls}>
             {Platform.OS === 'ios' ? (
               <>
                 <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
+                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.IGNORE)}
+                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.OBEY)}
                 </View>
                 <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl('mix')}
-                  {this.renderMixWithOthersControl('duck')}
+                  {this.renderMixWithOthersControl(MixWithOthersType.MIX)}
+                  {this.renderMixWithOthersControl(MixWithOthersType.DUCK)}
                 </View>
               </>
             ) : null}
@@ -410,21 +429,21 @@ class VideoPlayer extends Component {
             </View>
 
             <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl('cover')}
-              {this.renderResizeModeControl('contain')}
-              {this.renderResizeModeControl('stretch')}
+              {this.renderResizeModeControl(ResizeMode.COVER)}
+              {this.renderResizeModeControl(ResizeMode.CONTAIN)}
+              {this.renderResizeModeControl(ResizeMode.STRETCH)}
             </View>
           </View>
           <View style={styles.generalControls}>
             {Platform.OS === 'ios' ? (
               <>
                 <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl('ignore')}
-                  {this.renderIgnoreSilentSwitchControl('obey')}
+                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.IGNORE)}
+                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.OBEY)}
                 </View>
                 <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl('mix')}
-                  {this.renderMixWithOthersControl('duck')}
+                  {this.renderMixWithOthersControl(MixWithOthersType.MIX)}
+                  {this.renderMixWithOthersControl(MixWithOthersType.DUCK)}
                 </View>
               </>
             ) : null}

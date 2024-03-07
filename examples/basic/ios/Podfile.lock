@@ -889,10 +889,10 @@ PODS:
   - React-Mapbuffer (0.73.2):
     - glog
     - React-debug
-  - react-native-video (6.0.0-beta.3):
+  - react-native-video (6.0.0-beta.4):
     - React-Core
-    - react-native-video/Video (= 6.0.0-beta.3)
-  - react-native-video/Video (6.0.0-beta.3):
+    - react-native-video/Video (= 6.0.0-beta.4)
+  - react-native-video/Video (6.0.0-beta.4):
     - PromisesSwift
     - React-Core
   - React-nativeconfig (0.73.2)
@@ -1235,11 +1235,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
-  DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
+  DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   FBLazyVector: fbc4957d9aa695250b55d879c1d86f79d7e69ab4
   FBReactNativeSpec: 86de768f89901ef6ed3207cd686362189d64ac88
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: b361c9ef5ef3cda53f66e195599b47e1f84ffa35
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
@@ -1265,7 +1265,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 03644c063fc3621c9a4e8bf263a8150909129618
   React-logger: 66b168e2b2bee57bd8ce9e69f739d805732a5570
   React-Mapbuffer: f40e0ea0df8161075390332dfcb0496442c09371
-  react-native-video: 60ecad11b7179ec0e2012dea643775b4fca9b224
+  react-native-video: 6078b448c21630b0a2937436527ad54fd2a1fdd8
   React-nativeconfig: 4dda3cbbdd1c4ce38450bb10b34b3e54120e4a91
   React-NativeModulesApple: d25a530c61e94fb317a0124b1cde1c459e4a47d3
   React-perflogger: 29efe63b7ef5fbaaa50ef6eaa92482f98a24b97e
