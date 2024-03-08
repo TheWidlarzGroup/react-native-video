@@ -18,7 +18,6 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
@@ -129,18 +128,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
             String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
-            ReadableMap drmHeaders = ReactBridgeUtils.safeGetMap(drm, PROP_DRM_HEADERS);
+            ReadableArray drmHeadersArray = ReactBridgeUtils.safeGetArray(drm, PROP_DRM_HEADERS);
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
                 videoView.setDrmType(drmUUID);
                 videoView.setDrmLicenseUrl(drmLicenseServer);
-                if (drmHeaders != null) {
+                if (drmHeadersArray != null) {
                     ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-                    ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
-                    while (itr.hasNextKey()) {
-                        String key = itr.nextKey();
+                    for (int i = 0; i < drmHeadersArray.size(); i++) {
+                        ReadableMap current = drmHeadersArray.getMap(i);
+                        String key = current.hasKey("key") ? current.getString("key") : null;
+                        String value = current.hasKey("value") ? current.getString("value") : null;
                         drmKeyRequestPropertiesList.add(key);
-                        drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
+                        drmKeyRequestPropertiesList.add(value);
                     }
                     videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
                 }
@@ -158,7 +158,20 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
 
-        Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? ReactBridgeUtils.toStringMap(src.getMap(PROP_SRC_HEADERS)) : new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+        ReadableArray propSrcHeadersArray = ReactBridgeUtils.safeGetArray(src, PROP_SRC_HEADERS);
+        if (propSrcHeadersArray != null) {
+            if (propSrcHeadersArray.size() > 0) {
+                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
+                    ReadableMap current = propSrcHeadersArray.getMap(i);
+                    String key = current.hasKey("key") ? current.getString("key") : null;
+                    String value = current.hasKey("value") ? current.getString("value") : null;
+                    if (key != null && value != null) {
+                        headers.put(key, value);
+                    }
+                }
+            }
+        }
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();

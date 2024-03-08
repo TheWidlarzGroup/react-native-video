@@ -40,7 +40,17 @@ struct VideoSource {
         self.isNetwork = json["isNetwork"] as? Bool ?? false
         self.isAsset = json["isAsset"] as? Bool ?? false
         self.shouldCache = json["shouldCache"] as? Bool ?? false
-        self.requestHeaders = json["requestHeaders"] as? [String: Any]
+        if let requestHeaders = json["requestHeaders"] as? [[String: Any]] {
+            var _requestHeaders: [String: Any] = [:]
+            for requestHeader in requestHeaders {
+                if let key = requestHeader["key"] as? String, let value = requestHeader["value"] {
+                    _requestHeaders[key] = value
+                }
+            }
+            self.requestHeaders = _requestHeaders
+        } else {
+            self.requestHeaders = nil
+        }
         self.startPosition = json["startPosition"] as? Int64
         self.cropStart = json["cropStart"] as? Int64
         self.cropEnd = json["cropEnd"] as? Int64
