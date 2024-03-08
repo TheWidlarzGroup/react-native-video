@@ -84,10 +84,10 @@ export type SelectedTrack = {
 };
 
 export enum SelectedVideoTrackType {
-  AUDO = 'auto',
+  AUTO = 'auto',
   DISABLED = 'disabled',
   RESOLUTION = 'resolution',
-  IUNDEX = 'index',
+  INDEX = 'index',
 }
 
 export type SelectedVideoTrack = {
