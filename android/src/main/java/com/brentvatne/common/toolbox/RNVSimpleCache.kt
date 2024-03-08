@@ -22,7 +22,7 @@ object RNVSimpleCache {
                 cacheSize.toLong() * 1024 * 1024
             ),
             StandaloneDatabaseProvider(context)
-        );
+        )
         cacheDataSourceFactory =
             CacheDataSource.Factory()
                 .setCache(simpleCache!!)
