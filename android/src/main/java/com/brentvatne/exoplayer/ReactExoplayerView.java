@@ -1008,9 +1008,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } else {
             initializePlayer();
         }
-        if (!disableFocus) {
-            setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
-        }
+        setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
     }
 
     private void pausePlayback() {
