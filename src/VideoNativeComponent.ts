@@ -397,6 +397,7 @@ export interface VideoManagerType {
     licenseUrl: string,
     reactTag: number,
   ) => Promise<void>;
+  getCurrentPlaybackTime: (reactTag: number) => Promise<number>;
 }
 
 export interface VideoDecoderPropertiesType {

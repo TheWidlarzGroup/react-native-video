@@ -567,6 +567,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _mixWithOthers = mixWithOthers
         applyModifiers()
     }
+    
+    @objc
+    func getCurrentPlaybackTime(_ resolve: @escaping RCTPromiseResolveBlock) {
+        let currentTime = RCTVideoUtils.getCurrentTime(playerItem: _playerItem)
+        
+        resolve(currentTime)
+    }
 
     @objc
     func setPaused(_ paused: Bool) {
