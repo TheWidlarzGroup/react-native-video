@@ -1365,8 +1365,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _repeat {
             let item: AVPlayerItem! = notification.object as? AVPlayerItem
 
-            item.seek(to: _source?.cropStart != nil ? CMTime(value: _source!.cropStart!, timescale: 1000) : CMTime.zero, completionHandler: nil)
-            self.applyModifiers()
+            item.seek(
+                to: _source?.cropStart != nil ? CMTime(value: _source!.cropStart!, timescale: 1000) : CMTime.zero,
+                toleranceBefore: CMTime.zero,
+                toleranceAfter: CMTime.zero,
+                completionHandler: { [weak self] _ in
+                    guard let self else { return }
+                    self.applyModifiers()
+                }
+            )
         } else {
             self.setPaused(true)
             _playerObserver.removePlayerTimeObserver()
