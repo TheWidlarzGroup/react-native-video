@@ -23,12 +23,6 @@ Then follow the instructions for your platform to link react-native-video into y
 
 ### Standard Method
 
-### Enable Static Linking for dependencies in your ios project Podfile
-
-Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios project Podfile.
-
-[See the example ios project for reference](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L31C38-L31C38)
-
 ### Enable custom feature in podfile file
 
 Samples available in sample app see [sample pod file](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34)

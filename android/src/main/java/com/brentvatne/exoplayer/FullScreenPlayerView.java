@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageButton;
 import androidx.activity.OnBackPressedCallback;
 import androidx.media3.ui.LegacyPlayerControlView;
 
+@SuppressLint("PrivateResource")
 public class FullScreenPlayerView extends Dialog {
     private final LegacyPlayerControlView playerControlView;
     private final ExoPlayerView exoPlayerView;

@@ -24,7 +24,7 @@ jobs:
         env:
           WORKING_DIRECTORY: ios
   Swift-Format:
-    runs-on: macOS-latest
+    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
     defaults:
       run:
         working-directory: ./ios
