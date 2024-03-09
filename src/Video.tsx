@@ -54,6 +54,7 @@ export interface VideoRef {
   save: (options: object) => Promise<VideoSaveData>;
   getCurrentPlaybackTime: () => Promise<number>;
   getCurrentPlaybackRate: () => Promise<number>;
+  setPlaybackRate: (rate: number) => Promise<void>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -261,6 +262,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const getCurrentPlaybackRate = useCallback(() => {
       return VideoManager.getCurrentPlaybackRate(getReactTag(nativeRef));
+    }, []);
+
+    const setPlaybackRate = useCallback((rate: number) => {
+      return VideoManager.setPlaybackRate(rate, getReactTag(nativeRef));
     }, []);
 
     const resume = useCallback(() => {
@@ -492,6 +497,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
+        setPlaybackRate,
       }),
       [
         seek,
@@ -503,6 +509,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
+        setPlaybackRate,
       ],
     );
 

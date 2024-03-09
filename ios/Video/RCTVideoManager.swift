@@ -108,6 +108,18 @@ class RCTVideoManager: RCTViewManager {
         }
     }
     
+    @objc(setPlaybackRate:reactTag:)
+    func setPlaybackRate(rate: Float, reactTag: NSNumber) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                view.setRate(rate)
+            }
+        }
+    }
+    
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

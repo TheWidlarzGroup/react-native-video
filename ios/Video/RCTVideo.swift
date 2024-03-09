@@ -648,6 +648,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setRate(_ rate: Float) {
+        _player?.rate = rate
         _rate = rate
         applyModifiers()
     }
