@@ -574,6 +574,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         
         resolve(currentTime)
     }
+    
+    @objc
+    func getCurrentPlaybackRate(_ resolve: @escaping RCTPromiseResolveBlock) {
+        resolve(_player?.rate ?? .zero)
+    }
 
     @objc
     func setPaused(_ paused: Bool) {

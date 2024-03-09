@@ -86,4 +86,6 @@ RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(getCurrentPlaybackTime : (nonnull NSNumber*)reactTag resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(getCurrentPlaybackRate : (nonnull NSNumber*)reactTag resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
+
 @end

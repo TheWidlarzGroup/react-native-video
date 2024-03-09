@@ -398,6 +398,7 @@ export interface VideoManagerType {
     reactTag: number,
   ) => Promise<void>;
   getCurrentPlaybackTime: (reactTag: number) => Promise<number>;
+  getCurrentPlaybackRate: (reactTag: number) => Promise<number>;
 }
 
 export interface VideoDecoderPropertiesType {

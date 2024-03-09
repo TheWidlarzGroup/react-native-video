@@ -200,10 +200,10 @@ enum RCTVideoUtils {
         }
     }
 
-    // UNUSED
     static func getCurrentTime(playerItem: AVPlayerItem?) -> Float {
         return Float(CMTimeGetSeconds(playerItem?.currentTime() ?? .zero))
     }
+    
 
     static func base64DataFromBase64String(base64String: String?) -> Data? {
         if let base64String {
