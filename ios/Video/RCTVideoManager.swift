@@ -84,6 +84,18 @@ class RCTVideoManager: RCTViewManager {
         }
     }
 
+    @objc(capture:resolver:rejecter:)
+    func capture(_ reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                view.capture(resolve: resolve, reject: reject)
+            }
+        }
+    }
+
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

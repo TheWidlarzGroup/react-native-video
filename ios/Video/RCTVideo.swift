@@ -68,6 +68,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _presentingViewController: UIViewController?
     private var _pictureInPictureEnabled = false
     private var _startPosition: Float64 = -1
+    private var _playerOutput:AVPlayerItemVideoOutput?
 
     /* IMA Ads */
     private var _adTagUrl: String?
@@ -364,6 +365,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     self._player?.pause()
                     self._playerItem = playerItem
+
+                    // for capture
+                    let settings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+                    self._playerOutput = AVPlayerItemVideoOutput.init(pixelBufferAttributes: settings)
+
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
                     self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
@@ -1121,6 +1127,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onReadyForDisplay?([
             "target": reactTag,
         ])
+        // for capture
+        if let playerOutput = self._playerOutput, self._drm == nil {
+            self._playerItem?.add(playerOutput)
+        }
     }
 
     // When timeMetadata is read the event onTimedMetadata is triggered
@@ -1371,6 +1381,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.setPaused(true)
             _playerObserver.removePlayerTimeObserver()
         }
+    }
+
+    @objc
+    func capture(resolve: @escaping RCTPromiseResolveBlock, reject:@escaping RCTPromiseRejectBlock) {
+        RCTVideoCapture.capture(resolve: resolve, reject: reject, playerItem: _playerItem, playerOutput: _playerOutput)
     }
 
     @objc
