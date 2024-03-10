@@ -267,8 +267,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, []);
 
     const capture = useCallback(() => {
-      return VideoManager.capture(getReactTag(nativeRef));
-    }, []);
+      if (drm) {
+        throw Error('"capture" method can not be called with "drm" prop');
+      }
+      return VideoManager.capture?.(getReactTag(nativeRef));
+    }, [drm]);
 
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(
       (restored: boolean) => {
