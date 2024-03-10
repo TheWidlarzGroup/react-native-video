@@ -55,6 +55,7 @@ export interface VideoRef {
     restore: boolean,
   ) => void;
   save: (options: object) => Promise<VideoSaveData>;
+  capture: () => Promise<void>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -263,6 +264,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const resume = useCallback(() => {
       return VideoManager.setPlayerPauseState(false, getReactTag(nativeRef));
+    }, []);
+
+    const capture = useCallback(() => {
+      return VideoManager.capture(getReactTag(nativeRef));
     }, []);
 
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(
@@ -485,6 +490,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         presentFullscreenPlayer,
         dismissFullscreenPlayer,
         save,
+        capture,
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
@@ -494,6 +500,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         presentFullscreenPlayer,
         dismissFullscreenPlayer,
         save,
+        capture,
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
