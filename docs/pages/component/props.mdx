@@ -732,7 +732,6 @@ source={{
 
 ### `subtitleStyle`
 
-<<<<<<< HEAD:docs/pages/component/props.mdx
 | Property      | Description                                                             | Platforms |
 | ------------- | ----------------------------------------------------------------------- | --------- |
 | fontSize      | Adjust the font size of the subtitles. Default: font size of the device | Android   |
@@ -740,22 +739,11 @@ source={{
 | paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                  | Android   |
 | paddingLeft   | Adjust the left padding of the subtitles. Default: 0                    | Android   |
 | paddingRight  | Adjust the right padding of the subtitles. Default: 0                   | Android   |
-=======
-Property | Description | Platforms
---- | --- | ---
-fontSize | Adjust the font size of the subtitles. Default: font size of the device | Android
-paddingTop | Adjust the top padding of the subtitles. Default: 0| Android
-paddingBottom | Adjust the bottom padding of the subtitles. Default: 0| Android
-paddingLeft | Adjust the left padding of the subtitles. Default: 0| Android
-paddingRight | Adjust the right padding of the subtitles. Default: 0| Android
-showSubtitles | Toggle the visibility of subtitles. Default: true| Android
-
->>>>>>> 1ce9dce (chore: update documentation):docs/pages/component/props.md
 
 Example:
 
 ```javascript
-subtitleStyle={{ paddingBottom: 50, fontSize: 20, showSubtitles: false }}
+subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
 ```
 
 >📌 **Note**: The `showSubtitles` property is intended for controlling the display of subtitles. It should be used in conjunction with the `selectedTextTrack` prop to manage subtitle data via `onTextTrackDataChanged` while deciding on their visibility.
