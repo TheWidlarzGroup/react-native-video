@@ -4,11 +4,17 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.brentvatne.common.toolbox.CaptureUtil;
+import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.exoplayer.ExoPlayerView;
 import com.brentvatne.exoplayer.ReactExoplayerView;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.uimanager.UIManagerModule;
+
+import java.util.Objects;
 
 public class VideoManagerModule extends ReactContextBaseJavaModule {
     private static final String REACT_CLASS = "VideoManager";
@@ -34,5 +40,25 @@ public class VideoManagerModule extends ReactContextBaseJavaModule {
                 videoView.setPausedModifier(paused);
             }
         });
+    }
+
+    @ReactMethod
+    public void capture(int reactTag, Promise promise) {
+        final ReactApplicationContext context = getReactApplicationContext();
+        final UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
+        uiManager.prependUIBlock(manager -> {
+                View view = manager.resolveView(reactTag);
+                if (view instanceof ReactExoplayerView) {
+                    try {
+                        ReactExoplayerView videoView = (ReactExoplayerView) view;
+                        ExoPlayerView exoPlayerView = videoView.exoPlayerView;
+                        CaptureUtil.capture(context, exoPlayerView);
+                        promise.resolve(null);
+                    } catch (Exception e) {
+                        promise.reject("CAPTURE_ERROR", e);
+                    }
+                }
+            }
+        );
     }
 }
