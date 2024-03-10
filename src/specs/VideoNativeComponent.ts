@@ -243,6 +243,7 @@ export type OnExternalPlaybackChangeData = Readonly<{
 
 export type OnGetLicenseData = Readonly<{
   licenseUrl: string;
+  loadedLicenseUrl: string;
   contentId: string;
   spcBase64: string;
 }>;

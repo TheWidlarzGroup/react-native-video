@@ -54,6 +54,7 @@ export type Drm = Readonly<{
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     licenseUrl: string,
+    loadedLicenseUrl: string,
     contentId: string,
     spcBase64: string,
   ) => void; // ios

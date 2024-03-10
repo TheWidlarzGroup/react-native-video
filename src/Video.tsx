@@ -438,6 +438,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
+              data.loadedLicenseUrl,
             );
             const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
             getLicensePromise
