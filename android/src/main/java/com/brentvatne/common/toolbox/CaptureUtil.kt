@@ -16,7 +16,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import java.io.IOException
 import java.io.OutputStream
 
-
 object CaptureUtil {
     @JvmStatic
     fun capture(reactContext: ReactApplicationContext, view: View) {

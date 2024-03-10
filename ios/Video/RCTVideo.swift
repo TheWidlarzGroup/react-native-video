@@ -68,7 +68,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _presentingViewController: UIViewController?
     private var _pictureInPictureEnabled = false
     private var _startPosition: Float64 = -1
-    private var _playerOutput:AVPlayerItemVideoOutput?
+    private var _playerOutput: AVPlayerItemVideoOutput?
 
     /* IMA Ads */
     private var _adTagUrl: String?
@@ -368,7 +368,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                     // for capture
                     let settings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
-                    self._playerOutput = AVPlayerItemVideoOutput.init(pixelBufferAttributes: settings)
+                    self._playerOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: settings)
 
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
@@ -1384,7 +1384,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func capture(resolve: @escaping RCTPromiseResolveBlock, reject:@escaping RCTPromiseRejectBlock) {
+    func capture(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         RCTVideoCapture.capture(resolve: resolve, reject: reject, playerItem: _playerItem, playerOutput: _playerOutput)
     }
 
