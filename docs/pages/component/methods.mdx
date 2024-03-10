@@ -64,6 +64,23 @@ Future:
 - Will support more formats in the future through options
 - Will support custom directory and file name through options
 
+### `capture`
+
+<PlatformsList types={['iOS', 'Android']} />
+
+`capture(): Promise<void>`
+
+Save current frame as a PNG file. Returns promise.
+
+Notes:
+
+- For Android API level 29+ you will need to request the [WRITE_EXTERNAL_STORAGE permission](https://developer.android.com/reference/android/Manifest.permission#WRITE_EXTERNAL_STORAGE) manually using either the built-in react-native `PermissionsAndroid` APIs or a related module such as `react-native-permissions`
+- Also you have to define below code within your `AndroidManifest.xml` file
+
+```xml
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
 ### `restoreUserInterfaceForPictureInPictureStopCompleted`
 
 <PlatformsList types={['iOS']} />
