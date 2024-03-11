@@ -301,10 +301,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     var isSetSourceOngoing = false
-    var nextSource: NSDictionary? = nil
+    var nextSource: NSDictionary?
 
     func applyNextSource() {
-        if (self.nextSource != nil) {
+        if self.nextSource != nil {
             DebugLog("apply next source")
             self.isSetSourceOngoing = false
             let nextSrc = self.nextSource
@@ -317,7 +317,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setSrc(_ source: NSDictionary!) {
-        if (self.isSetSourceOngoing || self.nextSource != nil) {
+        if self.isSetSourceOngoing || self.nextSource != nil {
             DebugLog("setSrc buffer request")
             self._player?.replaceCurrentItem(with: nil)
             nextSource = source
@@ -391,7 +391,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     return self.playerItemPrepareText(asset: asset, assetOptions: assetOptions, uri: source.uri ?? "")
                 }.then { [weak self] (playerItem: AVPlayerItem!) in
                     guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
-                    if (!self.isSetSourceOngoing) {
+                    if !self.isSetSourceOngoing {
                         DebugLog("setSrc has been canceled last step")
                         return
                     }

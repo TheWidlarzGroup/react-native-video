@@ -364,9 +364,9 @@ enum RCTVideoUtils {
 
     static func delay(seconds: Int = 0) -> Promise<Void> {
         return Promise<Void>(on: .global()) { fulfill, _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(seconds), execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(seconds)) {
                 fulfill(())
-            })
+            }
         }
     }
 
