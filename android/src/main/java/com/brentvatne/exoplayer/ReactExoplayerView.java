@@ -1817,6 +1817,10 @@ public class ReactExoplayerView extends FrameLayout implements
         return groupIndex;
     }
 
+    public ExoPlayerView getExoPlayerView() {
+        return this.exoPlayerView;
+    }
+
     public void setSelectedVideoTrack(String type, Dynamic value) {
         videoTrackType = type;
         videoTrackValue = value;
