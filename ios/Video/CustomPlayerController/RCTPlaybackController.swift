@@ -5,7 +5,7 @@ import MediaPlayer
 
 //MARK: Extensions
 extension UIColor {
-    static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
+    static let lighterGray = UIColor(red: 1.00, green: 1.00, blue: 0.99, alpha: 1.00)
 }
 
 @objc class UISliderDummy: UIControl {
