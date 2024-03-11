@@ -372,34 +372,33 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func onProgress(progressTime: CMTime){
-        var duration:CMTime? = self._player?.currentItem?.asset.duration
+        var assetDuration:CMTime? = self._player?.currentItem?.asset.duration
         
-        self.updateLiveState(duration: duration ?? CMTime.indefinite)
+        self.updateLiveState(duration: assetDuration ?? CMTime.indefinite)
         
-        var progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-        var newDurationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
+        var progress: Float = Float(CMTimeGetSeconds(progressTime))
+        var duration: Float = Float(CMTimeGetSeconds(assetDuration ?? CMTime(value: 0, timescale: 1))) ?? progress
         
         var secondsFromSeekStart : Float = 0.0
         if(_isLive){
             let liveData = self.getLiveDuration()
-            newDurationFloat = liveData.livePosition
+            duration = liveData.livePosition
             secondsFromSeekStart = liveData.secondsBehindLive
             self.seekBar.minimumValue = liveData.seekableStart
         }else{
             self.seekBar.minimumValue = 0
         }
         
-        self.seekBar.maximumValue = newDurationFloat
+        self.seekBar.maximumValue = duration
         
         // Update UI when user is not dragging or seeking
         if(self._isTracking == false && self._isSeeking == false){
-            let isAnimated = _isLive ? false : true
-            self.seekBar.setValue(progressFloat, animated: isAnimated)
-            self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progressFloat)
+            self.seekBar.setValue(progress, animated: !_isLive)
+            self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progress)
             
             // Check if duration changed
-            if (abs(newDurationFloat - _duration) > .ulpOfOne) {
-                onDurationChange(duration: newDurationFloat)
+            if (abs(duration - _duration) > .ulpOfOne) {
+                onDurationChange(duration: duration)
             }
         }
     }
