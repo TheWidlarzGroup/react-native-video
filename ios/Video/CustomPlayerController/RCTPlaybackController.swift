@@ -108,6 +108,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.text = "--:--"
         curTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        curTimeLabel.font = UIFont.systemFont(ofSize: 13)
         
         // Width constraint
         curTimeLabel.lineBreakMode = .byClipping
@@ -117,6 +118,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     func initDurTimeLabel(){
         durTimeLabel.text = "--:--"
         durTimeLabel.textColor = UIColor.white
+        durTimeLabel.font = UIFont.systemFont(ofSize: 13)
         
         // Width constraint
         durTimeLabel.addConstraint(NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
@@ -128,8 +130,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Width constraint
         fullscreenButtonTop.translatesAutoresizingMaskIntoConstraints = false
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
         
         fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
         fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
@@ -179,8 +182,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Width constraint
         playButton.translatesAutoresizingMaskIntoConstraints = false
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        playButton.imageView?.contentMode = .scaleAspectFit
         
         playButton.setImage(UIImage(named: "play", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
         playButton.setImage(UIImage(named: "pause", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
