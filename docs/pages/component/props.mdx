@@ -739,11 +739,12 @@ source={{
 | paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                  | Android   |
 | paddingLeft   | Adjust the left padding of the subtitles. Default: 0                    | Android   |
 | paddingRight  | Adjust the right padding of the subtitles. Default: 0                   | Android   |
+| opacity       | Adjust the visibility of subtitles. `0` will not render the subtitles, while `1` will make them fully visible. Default: 1. | Android   |
 
 Example:
 
 ```javascript
-subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0 }}
 ```
 
 ### `textTracks`
