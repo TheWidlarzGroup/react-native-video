@@ -1,8 +1,10 @@
 import AVFoundation
+import Photos
 
 // MARK: - CaptureError
 
 enum CaptureError: Error {
+    case permissionDenied
     case emptyPlayerItem
     case emptyPlayerItemOutput
     case emptyBuffer
@@ -22,12 +24,11 @@ enum RCTVideoCapture {
     ) {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
+                try RCTVideoCapture.checkPhotoAddPermission()
                 let playerItem = try playerItem ?? { throw CaptureError.emptyPlayerItem }()
                 let playerOutput = try playerOutput ?? { throw CaptureError.emptyPlayerItemOutput }()
 
                 let currentTime = playerItem.currentTime()
-                let settings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
-                let output = AVPlayerItemVideoOutput(pixelBufferAttributes: settings)
                 let buffer = try playerOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) ?? { throw CaptureError.emptyBuffer }()
 
                 let ciImage = CIImage(cvPixelBuffer: buffer)
@@ -48,6 +49,21 @@ enum RCTVideoCapture {
             } catch {
                 reject("RCTVideoCapture Error", "Capture failed: \(error)", nil)
             }
+        }
+    }
+
+    static private func checkPhotoAddPermission() throws {
+        var status: PHAuthorizationStatus?
+        if #available(iOS 14, *) {
+            status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        } else {
+            status = PHPhotoLibrary.authorizationStatus()
+        }
+        switch status {
+            case .restricted, .denied:
+                throw CaptureError.permissionDenied
+            default:
+                return;
         }
     }
 }
