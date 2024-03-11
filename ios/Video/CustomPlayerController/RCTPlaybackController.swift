@@ -221,6 +221,13 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         seekBar.maximumTrackTintColor = .darkGray
         seekBar.thumbTintColor = .lighterGray
         
+        // Custom thumb
+        let circleImageNormal = createCircleImage(size: CGSize(width: 10, height: 10), backgroundColor: .lighterGray)
+        let circleImageHighlight = createCircleImage(size: CGSize(width: 15, height: 15), backgroundColor: .lighterGray)
+        
+        seekBar.setThumbImage(circleImageNormal, for: .normal)
+        seekBar.setThumbImage(circleImageHighlight, for: .highlighted)
+        
         seekBar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
     }
     
@@ -432,6 +439,19 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     
     
     //MARK: Playback functions
+    func createCircleImage(size: CGSize, backgroundColor: UIColor) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(backgroundColor.cgColor)
+        context?.setStrokeColor(UIColor.clear.cgColor)
+        let bounds = CGRect(origin: .zero, size: size)
+        context?.addEllipse(in: bounds)
+        context?.drawPath(using: .fill)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+    
     func clearPlayerListeners(){
         if let timeObserverToken = _timeObserverToken {
             _player?.removeTimeObserver(timeObserverToken)
