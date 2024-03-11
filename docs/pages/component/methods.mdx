@@ -76,8 +76,7 @@ Notes:
 
 - this method can not be used with encrypted video contents (with DRM)
 - On Android API level 23 and below capture couldn't support Android `SurfaceView`. if you use SurfaceView, method will be throw an error (`useSurfaceView`, `useSecureView` and `drm` props are internally use SurfaceView).
-- For Android API level 29+ you will need to request the [WRITE_EXTERNAL_STORAGE permission](https://developer.android.com/reference/android/Manifest.permission#WRITE_EXTERNAL_STORAGE) manually using either the built-in react-native `PermissionsAndroid` APIs or a related module such as `react-native-permissions`
-- Also you have to define below code within your `AndroidManifest.xml` file
+- On Android API level 28 and below you will need to request the [WRITE_EXTERNAL_STORAGE permission](https://developer.android.com/reference/android/Manifest.permission#WRITE_EXTERNAL_STORAGE) manually using either the built-in react-native `PermissionsAndroid` APIs or a related module such as `react-native-permissions`. also you have to define below code within your `AndroidManifest.xml` file
 
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
