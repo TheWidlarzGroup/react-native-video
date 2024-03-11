@@ -19,6 +19,7 @@ extension UILabel {
 let TIME_LABEL_SIZE_MINUTES: CGFloat = 44
 let TIME_LABEL_SIZE_HOURS: CGFloat = 56
 let TIME_LABEL_SIZE_LIVE_OFFSET: CGFloat = 6
+let ICON_SIZE: CGFloat = 20
 
 @objc class UISliderDummy: UIControl {
     enum TargetType {
@@ -137,8 +138,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Width constraint
         fullscreenButtonTop.translatesAutoresizingMaskIntoConstraints = false
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
+        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
         fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
         
         fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
@@ -189,8 +190,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Width constraint
         playButton.translatesAutoresizingMaskIntoConstraints = false
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20))
+        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
+        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
         playButton.imageView?.contentMode = .scaleAspectFit
         
         playButton.setImage(UIImage(named: "play", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
