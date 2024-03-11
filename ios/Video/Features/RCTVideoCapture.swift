@@ -52,7 +52,7 @@ enum RCTVideoCapture {
         }
     }
 
-    static private func checkPhotoAddPermission() throws {
+    private static func checkPhotoAddPermission() throws {
         var status: PHAuthorizationStatus?
         if #available(iOS 14, *) {
             status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
@@ -60,10 +60,10 @@ enum RCTVideoCapture {
             status = PHPhotoLibrary.authorizationStatus()
         }
         switch status {
-            case .restricted, .denied:
-                throw CaptureError.permissionDenied
-            default:
-                return;
+        case .restricted, .denied:
+            throw CaptureError.permissionDenied
+        default:
+            return
         }
     }
 }
