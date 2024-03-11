@@ -8,6 +8,11 @@ extension UIColor {
     static let lighterGray = UIColor(red: 1.00, green: 1.00, blue: 0.99, alpha: 1.00)
 }
 
+// HELPER CONSTANTS
+let TIME_LABEL_SIZE_MINUTES: CGFloat = 44
+let TIME_LABEL_SIZE_HOURS: CGFloat = 56
+let TIME_LABEL_SIZE_LIVE_OFFSET: CGFloat = 6
+
 @objc class UISliderDummy: UIControl {
     enum TargetType {
         case valueChanged
@@ -40,6 +45,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _timeObserverToken: Any?
     private var _video: RCTVideo?
     private var _visibilityTimer: Timer?
+    private var _duration: Float = 0
 
     
     //Elements
@@ -47,6 +53,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var centerControlStack: UIView = UIView()
     private var curTimeLabel: UILabel = UILabel()
     private var curTimeWidthConstraint: NSLayoutConstraint?
+    private var durTimeWidthConstraint: NSLayoutConstraint?
     private var durTimeLabel: UILabel = UILabel()
     private var fullscreenButtonTop: UIButton = UIButton()
     private var gradienceLayer: CAGradientLayer = CAGradientLayer()
@@ -109,20 +116,15 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         curTimeLabel.font = UIFont.systemFont(ofSize: 13)
-        
-        // Width constraint
         curTimeLabel.lineBreakMode = .byClipping
-        setUI_isLive(_isLive)
     }
     
     func initDurTimeLabel(){
         durTimeLabel.text = "--:--"
         durTimeLabel.textColor = UIColor.white
+        curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         durTimeLabel.font = UIFont.systemFont(ofSize: 13)
-        
-        // Width constraint
-        durTimeLabel.addConstraint(NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
-        durTimeLabel.lineBreakMode = .byClipping
+        curTimeLabel.lineBreakMode = .byClipping
     }
     
     func initFullscreenButtonTop(){
@@ -268,6 +270,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.initGradienceLayer()
         self.initCurTimeLabel()
         self.initDurTimeLabel()
+        self.setTimeLabelSize(isHours: false)
         self.initPlayButton()
         self.initFullscreenButtonTop()
         
@@ -363,32 +366,41 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
+    func onDurationChange(duration: Float){
+        _duration = duration
+        self.setUi_durationTime(seconds: duration)
+    }
+    
     func onProgress(progressTime: CMTime){
         var duration:CMTime? = self._player?.currentItem?.asset.duration
         
         self.updateLiveState(duration: duration ?? CMTime.indefinite)
         
         var progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-        var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
+        var newDurationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
         
         var secondsFromSeekStart : Float = 0.0
         if(_isLive){
             let liveData = self.getLiveDuration()
-            durationFloat = liveData.livePosition
+            newDurationFloat = liveData.livePosition
             secondsFromSeekStart = liveData.secondsBehindLive
             self.seekBar.minimumValue = liveData.seekableStart
-            self.seekBar.maximumValue = durationFloat
         }else{
             self.seekBar.minimumValue = 0
-            self.seekBar.maximumValue = durationFloat
         }
+        
+        self.seekBar.maximumValue = newDurationFloat
         
         // Update UI when user is not dragging or seeking
         if(self._isTracking == false && self._isSeeking == false){
             let isAnimated = _isLive ? false : true
             self.seekBar.setValue(progressFloat, animated: isAnimated)
             self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progressFloat)
-            self.setUi_durationTime(seconds: durationFloat)
+            
+            // Check if duration changed
+            if (abs(newDurationFloat - _duration) > .ulpOfOne) {
+                onDurationChange(duration: newDurationFloat)
+            }
         }
     }
     
@@ -503,17 +515,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func updateLiveState(duration: CMTime?){
-        var duration: CMTime? = duration
-        if(duration == nil){
-            duration = _player?.currentItem?.duration
-        }
-        
-        let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
-        
-        if _isLive != isLive {
-            _isLive = isLive
-            setUI_isLive(isLive)
-        }
+        var duration: CMTime? = duration ?? _player?.currentItem?.duration
+        _isLive = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
     }
     
     func manualSeekToProgress(seconds: Float){
@@ -608,19 +611,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         resetVisibilityTimer(_timeInterval: timerInterval)
     }
     
-    func setUI_isLive(_ isLive: Bool){
-        let newWidth: CGFloat = isLive ? 53 : 47
-        
-        if curTimeWidthConstraint != nil {
-            curTimeWidthConstraint?.constant = newWidth
-        }else{
-            curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: newWidth)
-            curTimeLabel.addConstraint(curTimeWidthConstraint!)
-        }
-
-        curTimeLabel.setNeedsLayout()
-    }
-    
     @objc func togglePaused(){
         guard let _video = _video else { return }
         let toggleValue = _isAdDisplaying == true ? _isAdPlaying: isPlaying
@@ -640,12 +630,43 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
-    func setUi_durationTime(seconds: Float){
-        if(_isLive){
-            self.durTimeLabel.text = "Live"
-        }else{
-            self.durTimeLabel.text = secondsToTimeLabel(seconds)
+    func setTimeLabelSize(isHours: Bool){
+        let width = isHours ? TIME_LABEL_SIZE_HOURS: TIME_LABEL_SIZE_MINUTES
+        let curTimeWidth = _isLive ? width + TIME_LABEL_SIZE_LIVE_OFFSET : width
+        
+        // Create width constraint for current time label if it doesn't exist
+        if curTimeWidthConstraint == nil {
+            curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 0)
+            curTimeLabel.addConstraint(curTimeWidthConstraint!)
         }
+        
+        // Create width constraint for duration label if it doesn't exist and it's not a live stream
+        if durTimeWidthConstraint == nil && !_isLive {
+            durTimeWidthConstraint = NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: width)
+            durTimeLabel.addConstraint(durTimeWidthConstraint!)
+        }
+        
+        // If live stream, remove width constraint and let duration label shrink to the text width
+        if let durTimeWidthConstraint = durTimeWidthConstraint, _isLive {
+            durTimeLabel.removeConstraint(durTimeWidthConstraint)
+            self.durTimeWidthConstraint = nil
+        }
+    
+        // Set the width of the constraints
+        curTimeWidthConstraint?.constant = curTimeWidth
+        durTimeWidthConstraint?.constant = width
+        
+        // Trigger layout update
+        curTimeLabel.layoutIfNeeded()
+        durTimeLabel.layoutIfNeeded()
+    }
+    
+    func setUi_durationTime(seconds: Float){
+        self.durTimeLabel.text = _isLive ? "Live": secondsToTimeLabel(seconds)
+        
+        // Resize time labels based on HH:MM:SS and MM:SS
+        let durationInHours = seconds / 3600
+        setTimeLabelSize(isHours: durationInHours >= 1)
     }
     
     func setUI_isAdDisplaying(adDisplayed: Bool){
