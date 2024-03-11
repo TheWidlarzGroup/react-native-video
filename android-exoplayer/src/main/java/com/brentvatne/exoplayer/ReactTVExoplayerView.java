@@ -1358,6 +1358,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void selectTrack(int trackType, @Nullable List<String> preferredLanguages) {
+        // If we have tracks policy then do not select any initial subtitle.
+        if (trackType == C.TRACK_TYPE_TEXT && src.getTracksPolicy() != null) {
+            return;
+        }
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
