@@ -101,7 +101,7 @@ export type SubtitleStyle = {
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
-  opacity?: number;
+  opacity?: 0 | 1;
 };
 
 export enum TextTracksType {
