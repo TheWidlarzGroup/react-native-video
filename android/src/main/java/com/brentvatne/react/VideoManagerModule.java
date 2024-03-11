@@ -49,7 +49,7 @@ public class VideoManagerModule extends ReactContextBaseJavaModule {
                     try {
                         ReactExoplayerView videoView = (ReactExoplayerView) view;
                         ExoPlayerView exoPlayerView = videoView.getExoPlayerView();
-                        CaptureUtil.capture(context, exoPlayerView);
+                        CaptureUtil.capture(context, exoPlayerView.getVideoSurfaceView());
                         promise.resolve(null);
                     } catch (Exception e) {
                         promise.reject("CAPTURE_ERROR", e);
