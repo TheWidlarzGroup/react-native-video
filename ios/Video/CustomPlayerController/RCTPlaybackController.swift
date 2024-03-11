@@ -8,6 +8,13 @@ extension UIColor {
     static let lighterGray = UIColor(red: 1.00, green: 1.00, blue: 0.99, alpha: 1.00)
 }
 
+extension UILabel {
+    convenience init(ofSize: CGFloat) {
+        self.init()
+        self.font = UIFont.systemFont(ofSize: ofSize)
+    }
+}
+
 // HELPER CONSTANTS
 let TIME_LABEL_SIZE_MINUTES: CGFloat = 44
 let TIME_LABEL_SIZE_HOURS: CGFloat = 56
@@ -51,10 +58,10 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     //Elements
     private var bottomControlStack: UIStackView = UIStackView()
     private var centerControlStack: UIView = UIView()
-    private var curTimeLabel: UILabel = UILabel()
+    private var curTimeLabel: UILabel = UILabel(ofSize: 13)
     private var curTimeWidthConstraint: NSLayoutConstraint?
     private var durTimeWidthConstraint: NSLayoutConstraint?
-    private var durTimeLabel: UILabel = UILabel()
+    private var durTimeLabel: UILabel = UILabel(ofSize: 13)
     private var fullscreenButtonTop: UIButton = UIButton()
     private var gradienceLayer: CAGradientLayer = CAGradientLayer()
     private var iconBundle: Bundle? = Bundle()
@@ -115,7 +122,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.text = "--:--"
         curTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
-        curTimeLabel.font = UIFont.systemFont(ofSize: 13)
         curTimeLabel.lineBreakMode = .byClipping
     }
     
@@ -123,7 +129,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         durTimeLabel.text = "--:--"
         durTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
-        durTimeLabel.font = UIFont.systemFont(ofSize: 13)
         curTimeLabel.lineBreakMode = .byClipping
     }
     
