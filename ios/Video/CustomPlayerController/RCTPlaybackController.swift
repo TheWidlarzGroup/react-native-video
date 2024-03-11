@@ -396,7 +396,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 switch touchEvent.phase {
                 case .began:
                     // Start slider interaction
-                    curTimeLabel.alpha = 0.4
+                    curTimeLabel.alpha = 0.8
                     self._isTracking = true
                     invalidateVisibilityTimer()
                     break
