@@ -691,6 +691,9 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     {this.state.audioTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
                       return (
                         <Picker.Item
                           label={track.language}
@@ -718,13 +721,18 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map(track => (
-                      <Picker.Item
-                        label={track.language}
-                        value={track.language}
-                        key={track.language}
-                      />
-                    ))}
+                    {this.state.textTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
+                      return (
+                        <Picker.Item
+                          label={track.language}
+                          value={track.language}
+                          key={track.language}
+                        />
+                      );
+                    })}
                   </Picker>
                 )}
               </View>
