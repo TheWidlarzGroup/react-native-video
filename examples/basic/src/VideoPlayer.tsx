@@ -120,14 +120,17 @@ class VideoPlayer extends Component {
       description: 'Another live sample',
       uri: 'https://live.forstreet.cl/live/livestream.m3u8',
     },
-  ];
-
-  srcIosList = [
+    {
+      description: 'another bunny (can be saved)',
+      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+    },
     {
       description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
   ];
+
+  srcIosList = [];
 
   srcAndroidList = [
     {
