@@ -10,11 +10,11 @@ import androidx.media3.datasource.cache.SimpleCache
 import java.io.File
 
 object RNVSimpleCache {
-    // TODO: when to release? hwo to check if cache is released?
+    // TODO: when to release? how to check if cache is released?
     var simpleCache: SimpleCache? = null
     var cacheDataSourceFactory: DataSource.Factory? = null
 
-    fun setSimpleCache(context: Context, cacheSize: Int, factory:  HttpDataSource.Factory) {
+    fun setSimpleCache(context: Context, cacheSize: Int, factory: HttpDataSource.Factory) {
         if (cacheDataSourceFactory != null || cacheSize == 0) return
         simpleCache = SimpleCache(
             File(context.cacheDir, "RNVCache"),
