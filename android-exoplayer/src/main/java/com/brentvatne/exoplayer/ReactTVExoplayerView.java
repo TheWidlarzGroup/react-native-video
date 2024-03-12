@@ -1,7 +1,5 @@
 package com.brentvatne.exoplayer;
 
-import static com.diceplatform.doris.entity.DorisPlayerEvent.Event.TIMELINE_ADJUSTER_CHANGED;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioManager;
@@ -926,7 +924,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onDrmSessionManagerError(EventTime eventTime, Exception e) {
-        handleDrmSessionManagerError(e);
+        // Not need redundant error handle, we use dorisListener to handle all ERROR events of internal doris player.
+        // handleDrmSessionManagerError(e);
     }
 
     @Override
@@ -1137,19 +1136,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onPlayerError(@NonNull PlaybackException error) {
+        // Not need redundant error handle, we use dorisListener to handle all ERROR events of internal doris player.
+        playerNeedsSource = true;
+        if (!DorisExceptionUtil.isBehindLiveWindow(error)) {
+            updateResumePosition();
+        }
+    }
+
+    private void handlePlaybackError(PlaybackException error) {
         String errorString = null;
         Exception ex = error;
         @ExoPlaybackException.Type int errorType = DorisExceptionUtil.getErrorType(error);
         if (DorisExceptionUtil.isBehindLiveWindow(error)) {
-            ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
-            if (exoPlayer != null) {
-                clearResumePosition();
-                exoPlayer.seekToDefaultPosition();
-                exoPlayer.prepare();
-            }
+          // We handle behind-live-window error in internal doris player.
         } else if (!hasReloadedCurrentSource && DorisExceptionUtil.isUnauthorizedException(error)) {
             hasReloadedCurrentSource = true;
-            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+            reloadCurrentSource();
             resetSourceUrl();
         } else if (errorType == ExoPlaybackException.TYPE_RENDERER) {
             Exception cause = (Exception) error.getCause();
@@ -1181,10 +1183,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             resetSourceUrl();
             eventEmitter.error("Playback exception: " + errorString, ex);
         }
-        playerNeedsSource = true;
-        if (!DorisExceptionUtil.isBehindLiveWindow(error)) {
-            updateResumePosition();
+    }
+
+    private void reloadCurrentSource() {
+        if (src != null && metadata != null) {
+            Log.i(TAG, "Reload current source, id " + src.getId() + ", type " + metadata.getType());
+            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+            return;
         }
+        Log.i(TAG, "Reload current source, ignored for src or metadata is null");
     }
 
     private void resetSourceUrl() {
@@ -1844,8 +1851,27 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     }
                     break;
             }
-            if (playerEvent.event == TIMELINE_ADJUSTER_CHANGED && exoDorisPlayerView != null) {
-                exoDorisPlayerView.setExtraTimelineAdjuster(playerEvent.details.timelineAdjuster);
+
+            switch (playerEvent.event) {
+                case TIMELINE_ADJUSTER_CHANGED:
+                    if (exoDorisPlayerView != null) {
+                        exoDorisPlayerView.setExtraTimelineAdjuster(playerEvent.details.timelineAdjuster);
+                    }
+                    break;
+                case RELOAD_WITH_DRM_L3:
+                    reloadCurrentSource();
+                    break;
+                case ERROR:
+                    Exception error = playerEvent.details.error;
+                    if (error instanceof PlaybackException) {
+                        handlePlaybackError((PlaybackException) error);
+                    } else if (error != null) {
+                        resetSourceUrl();
+                        eventEmitter.error("Player exception", error);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -1907,7 +1933,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                         if (!hasReloadedCurrentSource && isUnauthorizedAdError(error)) {
                             hasReloadedCurrentSource = true;
                             ignoreAdError = true;
-                            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+                            reloadCurrentSource();
                         }
                     }
                     if (!ignoreAdError) {
