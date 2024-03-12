@@ -1368,7 +1368,7 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RCT-Folly: 045d6ecaa59d826c5736dfba0b2f4083ff8d79df
-  RCTDeprecation: 6cc9677aab2e9af79e75f2eeea9be22adbc657d9
+  RCTDeprecation: a6392cb4842ae80e6f13ea460517170be529c301
   RCTRequired: 1c308285f5125d3e65fd864d1ffbd51c84f19be0
   RCTTypeSafety: c66cf0ffe89d4c3a6f74c38a8b1396d9a06bd5f2
   React: 525ec60174ace50c7cc60fe92982e580b0b26cfb
@@ -1397,9 +1397,9 @@ SPEC CHECKSUMS:
   React-perflogger: bc4cdc9440a5ba3b462813447a5a6633010b1cc8
   React-RCTActionSheet: 8b27811da488f196167ca1756453cc1feacbed8f
   React-RCTAnimation: aba9dcc5c6c0213cd1e747076300261aa8d23845
-  React-RCTAppDelegate: bf765fc52328ba350794f1ca16d48e757278d2aa
+  React-RCTAppDelegate: f8d6afca137f95bac028b631c89c9648ae2e864d
   React-RCTBlob: 843bb240adc3bc28cf8893a5fad4b4d41c0b89ad
-  React-RCTFabric: e79eaae738addada21b4b728fd77f95a3255c2af
+  React-RCTFabric: 176ba2d8c621a38090b7759eafc046e8f76d081f
   React-RCTImage: 67ea59e43e222cde321675e49416e21b5adc52e6
   React-RCTLinking: 73f14ccf9ce161d5f7b61c4d18eb01876897fe17
   React-RCTNetwork: 157786ee39743278756977b8161631646bcf9770
@@ -1421,4 +1421,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: bbe1bd5f521b6b9366288dbaf8af1cec85c0a95a
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.12.0
