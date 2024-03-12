@@ -19,7 +19,7 @@ class SubtitleStyle private constructor() {
         private set
     var opacity = 1
         private set
-        
+
     companion object {
         private const val PROP_FONT_SIZE_TRACK = "fontSize"
         private const val PROP_PADDING_BOTTOM = "paddingBottom"
