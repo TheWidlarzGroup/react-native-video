@@ -952,6 +952,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerLayer = nil
         _playerObserver.playerLayer = nil
     }
+    
+    @objc
+    func setSubtitleStyle(_ style: [String: Any]) {
+        let subtitleStyle = SubtitleStyle.parse(from: style)
+        _playerObserver.subtitleStyle = subtitleStyle
+    }
 
     // MARK: - RCTVideoPlayerViewControllerDelegate
 
