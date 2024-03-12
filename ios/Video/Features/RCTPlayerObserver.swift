@@ -46,9 +46,9 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
             }
         }
     }
-    
+
     var subtitleStyle: SubtitleStyle?
-    
+
     var playerItem: AVPlayerItem? {
         willSet {
             removePlayerItemObservers()
