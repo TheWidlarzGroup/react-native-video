@@ -117,7 +117,12 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
             subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.getFontSize());
         }
         subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
-        subtitleLayout.setVisibility(style.getOpacity() == 0 ? View.GONE : View.VISIBLE);
+        if (style.getOpacity() != 0) {
+            subtitleLayout.setAlpha(style.getOpacity());
+        } else {
+            subtitleLayout.setVisibility(View.GONE);
+        }
+
     }
 
     public void setShutterColor(Integer color) {
