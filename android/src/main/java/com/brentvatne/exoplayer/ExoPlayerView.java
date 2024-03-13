@@ -119,6 +119,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
         if (style.getOpacity() != 0) {
             subtitleLayout.setAlpha(style.getOpacity());
+            subtitleLayout.setVisibility(View.VISIBLE);
         } else {
             subtitleLayout.setVisibility(View.GONE);
         }
