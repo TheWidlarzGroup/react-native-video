@@ -29,7 +29,9 @@ export type ReactVideoSourceProperties = {
 };
 
 export type ReactVideoSource = Readonly<
-  ReactVideoSourceProperties | NodeRequire
+  Omit<ReactVideoSourceProperties, 'uri'> & {
+    uri?: string | NodeRequire;
+  }
 >;
 
 export type DebugConfig = Readonly<{
