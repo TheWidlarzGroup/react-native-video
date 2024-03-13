@@ -622,11 +622,20 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 Example:
 
+Pass directly the asset to play (deprecated)
+
 ```javascript
 const sintel = require('./sintel.mp4');
+source={ sintel };
+```
 
+Or by using an uri (starting from 6.0.0-beta.6)
+
+```javascript
+const sintel = require('./sintel.mp4');
 source={{ uri: sintel }}
 ```
+
 
 #### URI string
 
