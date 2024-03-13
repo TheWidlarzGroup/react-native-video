@@ -69,7 +69,7 @@ class PlayerViewProxy {
             }
             return RNDReactNativeDiceVideo.JSAds.AdUnit(
                 insertionType: RNDReactNativeDiceVideo.JSAds.AdUnit.AdInsertionType(rawValue: adUnit.insertionType.rawValue)!,
-                adFormat: RNDReactNativeDiceVideo.JSAds.AdUnit.AdFormat(rawValue: adUnit.adFormat.rawValue)!,
+                adFormat: RNDReactNativeDiceVideo.JSAds.AdUnit.AdFormat(rawValue: adUnit.adFormat?.rawValue ?? ""),
                 adProvider: RNDReactNativeDiceVideo.JSAds.AdUnit.AdProvider(rawValue: adUnit.adProvider?.rawValue ?? ""),
                 adTagUrl: adUnit.adTagUrl,
                 adManifestParams: queryParams)

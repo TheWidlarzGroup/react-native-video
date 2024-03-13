@@ -28,7 +28,7 @@ struct JSAds: SuperCodable {
         
     struct AdUnit: SuperCodable {
         let insertionType: AdInsertionType
-        let adFormat: AdFormat
+        let adFormat: AdFormat?
         let adProvider: AdProvider?
         let adTagUrl: String?
         let adManifestParams: [QueryParam]?
