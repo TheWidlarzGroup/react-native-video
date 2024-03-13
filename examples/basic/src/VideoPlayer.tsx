@@ -98,10 +98,9 @@ class VideoPlayer extends Component {
 
   srcAllPlatformList = [
     {
-      description: 'another bunny (can be saved)',
-      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+      description: 'local file',
+      uri: require('./broadchurch.mp4'),
     },
-    require('./broadchurch.mp4'),
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',

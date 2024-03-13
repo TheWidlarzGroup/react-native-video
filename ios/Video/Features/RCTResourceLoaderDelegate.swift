@@ -153,7 +153,8 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                 base64Certificate: _drm.base64Certificate
             ).then { spcData in
                 self._requestingCertificate = true
-                self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? loadingRequest.request.url?.absoluteString ?? "",
+                self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? "",
+                                     "loadedLicenseUrl": loadingRequest.request.url?.absoluteString ?? "",
                                      "contentId": contentId ?? "",
                                      "spcBase64": spcData.base64EncodedString(options: []),
                                      "target": self._reactTag])
