@@ -414,15 +414,18 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         var duration = Float(CMTimeGetSeconds(assetDuration ?? CMTime(value: 0, timescale: 1))) ?? progress
         
         var secondsFromSeekStart : Float = 0.0
+        var startPosition: Float = 0.0
+        
+        // Is this a live stream?
         if(_isLive){
             let liveData = self.getLiveDuration()
             duration = liveData.livePosition
             secondsFromSeekStart = liveData.secondsBehindLive
-            self.seekBar.minimumValue = liveData.seekableStart
-        }else{
-            self.seekBar.minimumValue = 0
+            startPosition = liveData.seekableStart
         }
         
+        // Configure the seek bar
+        self.seekBar.minimumValue = startPosition
         self.seekBar.maximumValue = duration
         
         // Update UI when user is not dragging or seeking
