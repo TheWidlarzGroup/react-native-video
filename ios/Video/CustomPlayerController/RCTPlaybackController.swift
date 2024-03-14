@@ -8,6 +8,16 @@ extension UIColor {
     static let lighterGray = UIColor(red: 1.00, green: 1.00, blue: 0.99, alpha: 1.00)
 }
 
+extension Bundle {
+    func image(named imageName: String, withTintColor tintColor: UIColor?) -> UIImage? {
+        var image = UIImage(named: imageName, in: self, compatibleWith: nil)
+        if let tintColor = tintColor {
+            image = image?.withTintColor(tintColor)
+        }
+        return image
+    }
+}
+
 extension UIImage {
     static func ellipsis(height: Double, width: Double, color: UIColor) -> UIImage? {
       let size = CGSize(width: width, height: height)
@@ -155,8 +165,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func initFullscreenButtonTop(){
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(.white), for: .normal)
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: iconBundle, compatibleWith: nil)?.withTintColor(.white), for: .selected)
+        fullscreenButtonTop.setImage(iconBundle?.image(named: "fullscreen", withTintColor: .white), for: .normal)
+        fullscreenButtonTop.setImage(iconBundle?.image(named: "fullscreen_exit", withTintColor: .white), for: .selected)
         fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
         fullscreenButtonTop.tintColor = .white
         
@@ -215,8 +225,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
         playButton.imageView?.contentMode = .scaleAspectFit
         
-        playButton.setImage(UIImage(named: "play", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
-        playButton.setImage(UIImage(named: "pause", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
+        playButton.setImage(iconBundle?.image(named: "play", withTintColor: .white), for: .normal)
+        playButton.setImage(iconBundle?.image(named: "pause", withTintColor: .white), for: .selected)
         
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
     }
