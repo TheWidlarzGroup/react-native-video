@@ -71,20 +71,23 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _visibilityTimer: Timer?
     private var _duration: Float = 0
 
-    
-    //Elements
+    // UI Stacks
     private var bottomControlStack = UIStackView()
     private var centerControlStack = UIView()
+    private var mainStack = UIStackView()
+    private var topControlStack = UIStackView()
+    
+    // UI Elements
     private var curTimeLabel = UILabel(withFontSize: 13)
     private var curTimeWidthConstraint: NSLayoutConstraint?
-    private var durTimeWidthConstraint: NSLayoutConstraint?
     private var durTimeLabel = UILabel(withFontSize: 13)
+    private var durTimeWidthConstraint: NSLayoutConstraint?
     private var fullscreenButtonTop = UIButton()
     private var gradienceLayer = CAGradientLayer()
-    private var iconBundle: Bundle?
-    private var mainStack = UIStackView()
     private var playButton = UIButton()
-    private var topControlStack = UIStackView()
+    
+    // Misc
+    private var iconBundle: Bundle?
 
     // Platform dependent UI components
     #if os(iOS)
@@ -92,8 +95,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     #else
     private var seekBar = UISliderDummy()
     #endif
-
-
 
     
     //MARK: Helper variables
@@ -140,27 +141,31 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         curTimeLabel.lineBreakMode = .byClipping
+        curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: TIME_LABEL_SIZE_MINUTES)
+        curTimeLabel.addConstraint(curTimeWidthConstraint!)
     }
     
     func initDurTimeLabel(){
         durTimeLabel.text = "--:--"
         durTimeLabel.textColor = UIColor.white
-        curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
-        curTimeLabel.lineBreakMode = .byClipping
+        durTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        durTimeLabel.lineBreakMode = .byClipping
+        durTimeWidthConstraint = NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: TIME_LABEL_SIZE_MINUTES)
+        durTimeLabel.addConstraint(durTimeWidthConstraint!)
     }
     
     func initFullscreenButtonTop(){
+        fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(.white), for: .normal)
+        fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: iconBundle, compatibleWith: nil)?.withTintColor(.white), for: .selected)
+        fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
         fullscreenButtonTop.tintColor = .white
         
-        // Width constraint
+        // Size configuration
         fullscreenButtonTop.translatesAutoresizingMaskIntoConstraints = false
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
-        fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
+        fullscreenButtonTop.widthAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
+        fullscreenButtonTop.heightAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
         
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
-        
+        // Add button press callback
         fullscreenButtonTop.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
     }
     
@@ -289,7 +294,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.initGradienceLayer()
         self.initCurTimeLabel()
         self.initDurTimeLabel()
-        self.setTimeLabelSize(isHours: false)
+        self.updateTimeLabelSize(isHours: false)
         self.initPlayButton()
         self.initFullscreenButtonTop()
         
@@ -395,8 +400,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         self.updateLiveState(duration: assetDuration ?? CMTime.indefinite)
         
-        var progress: Float = Float(CMTimeGetSeconds(progressTime))
-        var duration: Float = Float(CMTimeGetSeconds(assetDuration ?? CMTime(value: 0, timescale: 1))) ?? progress
+        var progress = Float(CMTimeGetSeconds(progressTime))
+        var duration = Float(CMTimeGetSeconds(assetDuration ?? CMTime(value: 0, timescale: 1))) ?? progress
         
         var secondsFromSeekStart : Float = 0.0
         if(_isLive){
@@ -635,35 +640,19 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
-    func setTimeLabelSize(isHours: Bool){
+    func updateTimeLabelSize(isHours: Bool){
         let width = isHours ? TIME_LABEL_SIZE_HOURS: TIME_LABEL_SIZE_MINUTES
-        let curTimeWidth = _isLive ? width + TIME_LABEL_SIZE_LIVE_OFFSET : width
-        
-        // Create width constraint for current time label if it doesn't exist
-        if curTimeWidthConstraint == nil {
-            curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 0)
-            curTimeLabel.addConstraint(curTimeWidthConstraint!)
-        }
-        
-        // Create width constraint for duration label if it doesn't exist and it's not a live stream
-        if durTimeWidthConstraint == nil && !_isLive {
-            durTimeWidthConstraint = NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: width)
-            durTimeLabel.addConstraint(durTimeWidthConstraint!)
-        }
-        
-        // If live stream, remove width constraint and let duration label shrink to the text width
-        if let durTimeWidthConstraint = durTimeWidthConstraint, _isLive {
-            durTimeLabel.removeConstraint(durTimeWidthConstraint)
-            self.durTimeWidthConstraint = nil
-        }
-    
-        // Set the width of the constraints
-        curTimeWidthConstraint?.constant = curTimeWidth
+        let liveOffset = _isLive ? TIME_LABEL_SIZE_LIVE_OFFSET : 0
+
+        // Set time label width
+        curTimeWidthConstraint?.constant = width + liveOffset
         durTimeWidthConstraint?.constant = width
         
+        // Autosize duration label if its displaying a static text value
+        durTimeWidthConstraint?.isActive = !_isLive
+        
         // Trigger layout update
-        curTimeLabel.layoutIfNeeded()
-        durTimeLabel.layoutIfNeeded()
+        bottomControlStack.layoutIfNeeded()
     }
     
     func setUi_durationTime(seconds: Float){
@@ -671,7 +660,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Resize time labels based on HH:MM:SS and MM:SS
         let durationInHours = seconds / 3600
-        setTimeLabelSize(isHours: durationInHours >= 1)
+        updateTimeLabelSize(isHours: durationInHours >= 1)
     }
     
     func setUI_isAdDisplaying(adDisplayed: Bool){
