@@ -219,10 +219,10 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     func initPlayButton(){
         playButton.tintColor = .white
         
-        // Width constraint
+        // Size configuration
         playButton.translatesAutoresizingMaskIntoConstraints = false
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: ICON_SIZE))
+        playButton.widthAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
+        playButton.heightAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
         playButton.imageView?.contentMode = .scaleAspectFit
         
         playButton.setImage(iconBundle?.image(named: "play", withTintColor: .white), for: .normal)
