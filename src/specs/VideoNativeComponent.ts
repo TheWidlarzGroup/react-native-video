@@ -118,6 +118,7 @@ type SubtitleStyle = Readonly<{
   paddingBottom?: WithDefault<Float, 0>;
   paddingLeft?: WithDefault<Float, 0>;
   paddingRight?: WithDefault<Float, 0>;
+  opacity?: WithDefault<Float, 1>;
 }>;
 
 export type OnLoadData = Readonly<{
