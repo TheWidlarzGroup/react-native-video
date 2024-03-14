@@ -9,9 +9,9 @@ extension UIColor {
 }
 
 extension UILabel {
-    convenience init(ofSize: CGFloat) {
+    convenience init(withFontSize fontSize: CGFloat) {
         self.init()
-        self.font = UIFont.systemFont(ofSize: ofSize)
+        self.font = UIFont.systemFont(ofSize: fontSize)
     }
 }
 
@@ -45,9 +45,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
     private var _isAdPlaying = true
     private var _isContentPlaying = false // Content play status
-    private var _isLive: Bool = false
-    private var _isSeeking: Bool = false
-    private var _isTracking: Bool = false // Is dragging seekbar
+    private var _isLive = false
+    private var _isSeeking = false
+    private var _isTracking = false // Is dragging seekbar
     private var _isVisible = false
     private var _playerItemContext = 0
     private var _timeObserverToken: Any?
@@ -57,24 +57,24 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
 
     
     //Elements
-    private var bottomControlStack: UIStackView = UIStackView()
-    private var centerControlStack: UIView = UIView()
-    private var curTimeLabel: UILabel = UILabel(ofSize: 13)
+    private var bottomControlStack = UIStackView()
+    private var centerControlStack = UIView()
+    private var curTimeLabel = UILabel(withFontSize: 13)
     private var curTimeWidthConstraint: NSLayoutConstraint?
     private var durTimeWidthConstraint: NSLayoutConstraint?
-    private var durTimeLabel: UILabel = UILabel(ofSize: 13)
-    private var fullscreenButtonTop: UIButton = UIButton()
-    private var gradienceLayer: CAGradientLayer = CAGradientLayer()
-    private var iconBundle: Bundle? = Bundle()
-    private var mainStack: UIStackView = UIStackView()
-    private var playButton: UIButton = UIButton()
-    private var topControlStack: UIStackView = UIStackView()
+    private var durTimeLabel = UILabel(withFontSize: 13)
+    private var fullscreenButtonTop = UIButton()
+    private var gradienceLayer = CAGradientLayer()
+    private var iconBundle: Bundle?
+    private var mainStack = UIStackView()
+    private var playButton = UIButton()
+    private var topControlStack = UIStackView()
 
     // Platform dependent UI components
     #if os(iOS)
-    private var seekBar: UISlider = UISlider()
+    private var seekBar = UISlider()
     #else
-    private var seekBar: UISliderDummy = UISliderDummy()
+    private var seekBar = UISliderDummy()
     #endif
 
 
