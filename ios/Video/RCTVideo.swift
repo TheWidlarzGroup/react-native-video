@@ -13,7 +13,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _player: AVPlayer?
     private var _playerItem: AVPlayerItem?
     private var _source: VideoSource?
-    private var _playerBufferEmpty = true
     private var _playerLayer: AVPlayerLayer?
     private var _chapters: [Chapter]?
 
@@ -1165,6 +1164,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyForDisplay(changeObject _: Any, change _: NSKeyValueObservedChange<Bool>) {
+        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
         onReadyForDisplay?([
             "target": reactTag,
         ])
@@ -1295,16 +1295,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        _playerBufferEmpty = true
         onVideoBuffer?(["isBuffering": true, "target": reactTag as Any])
     }
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) == true) {
-            setPaused(_paused)
-        }
-        _playerBufferEmpty = false
         onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
     }
 
@@ -1422,7 +1417,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             )
         } else {
-            self.setPaused(true)
             _playerObserver.removePlayerTimeObserver()
         }
     }
