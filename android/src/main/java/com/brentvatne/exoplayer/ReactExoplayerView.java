@@ -41,6 +41,7 @@ import androidx.media3.common.Timeline;
 import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
@@ -626,7 +627,8 @@ public class ReactExoplayerView extends FrameLayout implements
         );
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
-                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+                        .setEnableDecoderFallback(true);
 
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
@@ -1519,6 +1521,13 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         }
         eventEmitter.timedMetadata(metadataArray);
+    }
+
+    public void onCues(CueGroup cueGroup) {
+        if (!cueGroup.cues.isEmpty() && cueGroup.cues.get(0).text != null) {
+            String subtitleText = cueGroup.cues.get(0).text.toString();
+            eventEmitter.textTrackDataChanged(subtitleText);
+        }
     }
 
     // ReactExoplayerViewManager public api
