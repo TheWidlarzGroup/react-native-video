@@ -516,7 +516,7 @@ Example:
 
 ### `onTextTrackDataChanged`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['Android', 'iOS']} />
 
 Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
 
@@ -533,6 +533,8 @@ Example:
   subtitleTracks: "This blade has a dark past.",
 }
 ```
+
+For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
 
 ### `onVideoTracks`
 

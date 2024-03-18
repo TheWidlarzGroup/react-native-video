@@ -59,6 +59,8 @@ public class VideoEventEmitter {
     private static final String EVENT_VOLUME_CHANGE = "onVolumeChange";
     private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
+
+    private static final String EVENT_TEXT_TRACK_DATA_CHANGED = "onTextTrackDataChanged";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
     private static final String EVENT_PICTURE_IN_PICTURE_STATUS_CHANGED = "onPictureInPictureStatusChanged";
@@ -87,6 +89,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT,
@@ -118,6 +121,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT,
@@ -147,6 +151,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
     private static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
     private static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+    private static final String EVENT_PROP_TEXT_TRACK_DATA = "subtitleTracks";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
@@ -286,6 +291,12 @@ public class VideoEventEmitter {
 
     public void textTracks(ArrayList<Track> textTracks){
         receiveEvent(EVENT_TEXT_TRACKS, arrayToObject(EVENT_PROP_TEXT_TRACKS, textTracksToArray(textTracks)));
+    }
+
+    public void textTrackDataChanged(String textTrackData){
+        WritableMap event = Arguments.createMap();
+        event.putString(EVENT_PROP_TEXT_TRACK_DATA, textTrackData);
+        receiveEvent(EVENT_TEXT_TRACK_DATA_CHANGED, event);
     }
 
     public void videoTracks(ArrayList<VideoTrack> videoTracks){

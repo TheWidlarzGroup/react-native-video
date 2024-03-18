@@ -66,6 +66,14 @@ object ReactBridgeUtils {
         return safeGetDouble(map, key, 0.0)
     }
 
+    @JvmStatic fun safeGetFloat(map: ReadableMap?, key: String?, fallback: Float): Float {
+        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key).toFloat() else fallback
+    }
+
+    @JvmStatic fun safeGetFloat(map: ReadableMap?, key: String?): Float {
+        return safeGetFloat(map, key, 0.0f)
+    }
+
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.
      *

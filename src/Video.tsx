@@ -438,6 +438,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
+              data.loadedLicenseUrl,
             );
             const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
             getLicensePromise
@@ -446,14 +447,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
                   nativeRef.current &&
                     VideoManager.setLicenseResult(
                       result,
-                      data.licenseUrl,
+                      data.loadedLicenseUrl,
                       getReactTag(nativeRef),
                     );
                 } else {
                   nativeRef.current &&
                     VideoManager.setLicenseResultError(
                       'Empty license result',
-                      data.licenseUrl,
+                      data.loadedLicenseUrl,
                       getReactTag(nativeRef),
                     );
                 }
@@ -462,14 +463,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
                 nativeRef.current &&
                   VideoManager.setLicenseResultError(
                     'fetch error',
-                    data.licenseUrl,
+                    data.loadedLicenseUrl,
                     getReactTag(nativeRef),
                   );
               });
           } else {
             VideoManager.setLicenseResultError(
               'No spc received',
-              data.licenseUrl,
+              data.loadedLicenseUrl,
               getReactTag(nativeRef),
             );
           }

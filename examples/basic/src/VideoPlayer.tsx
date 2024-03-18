@@ -97,7 +97,10 @@ class VideoPlayer extends Component {
   seekerWidth = 0;
 
   srcAllPlatformList = [
-    require('./broadchurch.mp4'),
+    {
+      description: 'local file',
+      uri: require('./broadchurch.mp4'),
+    },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
@@ -120,14 +123,13 @@ class VideoPlayer extends Component {
       description: 'another bunny (can be saved)',
       uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
     },
-  ];
-
-  srcIosList = [
     {
       description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
   ];
+
+  srcIosList = [];
 
   srcAndroidList = [
     {
@@ -691,6 +693,9 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     {this.state.audioTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
                       return (
                         <Picker.Item
                           label={track.language}
@@ -718,13 +723,18 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map(track => (
-                      <Picker.Item
-                        label={track.language}
-                        value={track.language}
-                        key={track.language}
-                      />
-                    ))}
+                    {this.state.textTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
+                      return (
+                        <Picker.Item
+                          label={track.language}
+                          value={track.language}
+                          key={track.language}
+                        />
+                      );
+                    })}
                   </Picker>
                 )}
               </View>

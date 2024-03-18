@@ -29,7 +29,9 @@ export type ReactVideoSourceProperties = {
 };
 
 export type ReactVideoSource = Readonly<
-  ReactVideoSourceProperties | NodeRequire
+  Omit<ReactVideoSourceProperties, 'uri'> & {
+    uri?: string | NodeRequire;
+  }
 >;
 
 export type DebugConfig = Readonly<{
@@ -54,6 +56,7 @@ export type Drm = Readonly<{
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     licenseUrl: string,
+    loadedLicenseUrl: string,
     contentId: string,
     spcBase64: string,
   ) => void; // ios
@@ -101,6 +104,7 @@ export type SubtitleStyle = {
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
+  opacity?: number;
 };
 
 export enum TextTracksType {
