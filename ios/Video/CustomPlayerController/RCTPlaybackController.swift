@@ -5,8 +5,47 @@ import MediaPlayer
 
 //MARK: Extensions
 extension UIColor {
-    static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
+    static let lighterGray = UIColor(red: 1.00, green: 1.00, blue: 0.99, alpha: 1.00)
 }
+
+extension Bundle {
+    func image(named imageName: String, withTintColor tintColor: UIColor?) -> UIImage? {
+        var image = UIImage(named: imageName, in: self, compatibleWith: nil)
+        if let tintColor = tintColor {
+            image = image?.withTintColor(tintColor)
+        }
+        return image
+    }
+}
+
+extension UIImage {
+    static func ellipsis(height: Double, width: Double, color: UIColor) -> UIImage? {
+      let size = CGSize(width: width, height: height)
+      UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+      let context = UIGraphicsGetCurrentContext()
+      context?.setFillColor(color.cgColor)
+      context?.setStrokeColor(UIColor.clear.cgColor)
+      let bounds = CGRect(origin: .zero, size: size)
+      context?.addEllipse(in: bounds)
+      context?.drawPath(using: .fill)
+      let image = UIGraphicsGetImageFromCurrentImageContext()
+      UIGraphicsEndImageContext()
+      return image
+  }
+}
+
+extension UILabel {
+    convenience init(withFontSize fontSize: CGFloat) {
+        self.init()
+        self.font = UIFont.systemFont(ofSize: fontSize)
+    }
+}
+
+// HELPER CONSTANTS
+let TIME_LABEL_SIZE_MINUTES: CGFloat = 44
+let TIME_LABEL_SIZE_HOURS: CGFloat = 56
+let TIME_LABEL_SIZE_LIVE_OFFSET: CGFloat = 6
+let ICON_SIZE: CGFloat = 20
 
 @objc class UISliderDummy: UIControl {
     enum TargetType {
@@ -32,37 +71,40 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
     private var _isAdPlaying = true
     private var _isContentPlaying = false // Content play status
-    private var _isLive: Bool = false
-    private var _isSeeking: Bool = false
-    private var _isTracking: Bool = false // Is dragging seekbar
+    private var _isLive = false
+    private var _isSeeking = false
+    private var _isTracking = false // Is dragging seekbar
     private var _isVisible = false
     private var _playerItemContext = 0
     private var _timeObserverToken: Any?
     private var _video: RCTVideo?
     private var _visibilityTimer: Timer?
+    private var _duration: Float = 0
 
+    // UI Stacks
+    private var bottomControlStack = UIStackView()
+    private var centerControlStack = UIView()
+    private var mainStack = UIStackView()
+    private var topControlStack = UIStackView()
     
-    //Elements
-    private var bottomControlStack: UIStackView = UIStackView()
-    private var centerControlStack: UIView = UIView()
-    private var curTimeLabel: UILabel = UILabel()
+    // UI Elements
+    private var curTimeLabel = UILabel(withFontSize: 13)
     private var curTimeWidthConstraint: NSLayoutConstraint?
-    private var durTimeLabel: UILabel = UILabel()
-    private var fullscreenButtonTop: UIButton = UIButton()
-    private var gradienceLayer: CAGradientLayer = CAGradientLayer()
-    private var iconBundle: Bundle? = Bundle()
-    private var mainStack: UIStackView = UIStackView()
-    private var playButton: UIButton = UIButton()
-    private var topControlStack: UIStackView = UIStackView()
+    private var durTimeLabel = UILabel(withFontSize: 13)
+    private var durTimeWidthConstraint: NSLayoutConstraint?
+    private var fullscreenButtonTop = UIButton()
+    private var gradienceLayer = CAGradientLayer()
+    private var playButton = UIButton()
+    
+    // Misc
+    private var iconBundle: Bundle?
 
     // Platform dependent UI components
     #if os(iOS)
-    private var seekBar: UISlider = UISlider()
+    private var seekBar = UISlider()
     #else
-    private var seekBar: UISliderDummy = UISliderDummy()
+    private var seekBar = UISliderDummy()
     #endif
-
-
 
     
     //MARK: Helper variables
@@ -108,32 +150,32 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.text = "--:--"
         curTimeLabel.textColor = UIColor.white
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Width constraint
         curTimeLabel.lineBreakMode = .byClipping
-        setUI_isLive(_isLive)
+        curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: TIME_LABEL_SIZE_MINUTES)
+        curTimeLabel.addConstraint(curTimeWidthConstraint!)
     }
     
     func initDurTimeLabel(){
         durTimeLabel.text = "--:--"
         durTimeLabel.textColor = UIColor.white
-        
-        // Width constraint
-        durTimeLabel.addConstraint(NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
+        durTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         durTimeLabel.lineBreakMode = .byClipping
+        durTimeWidthConstraint = NSLayoutConstraint(item: durTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: TIME_LABEL_SIZE_MINUTES)
+        durTimeLabel.addConstraint(durTimeWidthConstraint!)
     }
     
     func initFullscreenButtonTop(){
+        fullscreenButtonTop.setImage(iconBundle?.image(named: "fullscreen", withTintColor: .white), for: .normal)
+        fullscreenButtonTop.setImage(iconBundle?.image(named: "fullscreen_exit", withTintColor: .white), for: .selected)
+        fullscreenButtonTop.imageView?.contentMode = .scaleAspectFit
         fullscreenButtonTop.tintColor = .white
         
-        // Width constraint
+        // Size configuration
         fullscreenButtonTop.translatesAutoresizingMaskIntoConstraints = false
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
-        fullscreenButtonTop.addConstraint(NSLayoutConstraint(item: fullscreenButtonTop, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        fullscreenButtonTop.widthAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
+        fullscreenButtonTop.heightAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
         
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
-        fullscreenButtonTop.setImage(UIImage(named: "fullscreen_exit", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
-        
+        // Add button press callback
         fullscreenButtonTop.addTarget(self, action: #selector(toggleFullscreen), for: .touchUpInside)
     }
     
@@ -177,13 +219,14 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     func initPlayButton(){
         playButton.tintColor = .white
         
-        // Width constraint
+        // Size configuration
         playButton.translatesAutoresizingMaskIntoConstraints = false
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
-        playButton.addConstraint(NSLayoutConstraint(item: playButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 25))
+        playButton.widthAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
+        playButton.heightAnchor.constraint(equalToConstant: ICON_SIZE).isActive = true
+        playButton.imageView?.contentMode = .scaleAspectFit
         
-        playButton.setImage(UIImage(named: "play", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .normal)
-        playButton.setImage(UIImage(named: "pause", in: iconBundle, compatibleWith: nil)?.withTintColor(UIColor.white), for: .selected)
+        playButton.setImage(iconBundle?.image(named: "play", withTintColor: .white), for: .normal)
+        playButton.setImage(iconBundle?.image(named: "pause", withTintColor: .white), for: .selected)
         
         playButton.addTarget(self, action: #selector(togglePaused), for: .touchUpInside)
     }
@@ -221,6 +264,10 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         seekBar.maximumTrackTintColor = .darkGray
         seekBar.thumbTintColor = .lighterGray
         
+        // Resize seekbar thumb when dragged
+        seekBar.setThumbImage(.ellipsis(height: 10, width: 10, color: .lighterGray), for: .normal)
+        seekBar.setThumbImage(.ellipsis(height: 15, width: 15, color: .lighterGray), for: .highlighted)
+        
         seekBar.addTarget(self, action: #selector(onSeekbarChange(slider:event:)), for: .valueChanged)
     }
     
@@ -257,6 +304,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.initGradienceLayer()
         self.initCurTimeLabel()
         self.initDurTimeLabel()
+        self.updateTimeLabelSize(isHours: false)
         self.initPlayButton()
         self.initFullscreenButtonTop()
         
@@ -352,32 +400,43 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
+    func onDurationChange(duration: Float){
+        _duration = duration
+        self.setUi_durationTime(seconds: duration)
+    }
+    
     func onProgress(progressTime: CMTime){
-        var duration:CMTime? = self._player?.currentItem?.asset.duration
+        var assetDuration:CMTime? = self._player?.currentItem?.asset.duration
         
-        self.updateLiveState(duration: duration ?? CMTime.indefinite)
+        self.updateLiveState(duration: assetDuration ?? CMTime.indefinite)
         
-        var progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
-        var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
+        var progress = Float(CMTimeGetSeconds(progressTime))
+        var duration = Float(CMTimeGetSeconds(assetDuration ?? CMTime(value: 0, timescale: 1))) ?? progress
         
         var secondsFromSeekStart : Float = 0.0
+        var startPosition: Float = 0.0
+        
+        // Is this a live stream?
         if(_isLive){
             let liveData = self.getLiveDuration()
-            durationFloat = liveData.livePosition
+            duration = liveData.livePosition
             secondsFromSeekStart = liveData.secondsBehindLive
-            self.seekBar.minimumValue = liveData.seekableStart
-            self.seekBar.maximumValue = durationFloat
-        }else{
-            self.seekBar.minimumValue = 0
-            self.seekBar.maximumValue = durationFloat
+            startPosition = liveData.seekableStart
         }
+        
+        // Configure the seek bar
+        self.seekBar.minimumValue = startPosition
+        self.seekBar.maximumValue = duration
         
         // Update UI when user is not dragging or seeking
         if(self._isTracking == false && self._isSeeking == false){
-            let isAnimated = _isLive ? false : true
-            self.seekBar.setValue(progressFloat, animated: isAnimated)
-            self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progressFloat)
-            self.setUi_durationTime(seconds: durationFloat)
+            self.seekBar.setValue(progress, animated: !_isLive)
+            self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progress)
+            
+            // Check if duration changed
+            if (abs(duration - _duration) > .ulpOfOne) {
+                onDurationChange(duration: duration)
+            }
         }
     }
     
@@ -389,7 +448,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 switch touchEvent.phase {
                 case .began:
                     // Start slider interaction
-                    curTimeLabel.alpha = 0.4
+                    curTimeLabel.alpha = 0.8
                     self._isTracking = true
                     invalidateVisibilityTimer()
                     break
@@ -479,17 +538,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func updateLiveState(duration: CMTime?){
-        var duration: CMTime? = duration
-        if(duration == nil){
-            duration = _player?.currentItem?.duration
-        }
-        
-        let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
-        
-        if _isLive != isLive {
-            _isLive = isLive
-            setUI_isLive(isLive)
-        }
+        var duration: CMTime? = duration ?? _player?.currentItem?.duration
+        _isLive = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
     }
     
     func manualSeekToProgress(seconds: Float){
@@ -584,19 +634,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         resetVisibilityTimer(_timeInterval: timerInterval)
     }
     
-    func setUI_isLive(_ isLive: Bool){
-        let newWidth: CGFloat = isLive ? 53 : 47
-        
-        if curTimeWidthConstraint != nil {
-            curTimeWidthConstraint?.constant = newWidth
-        }else{
-            curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: newWidth)
-            curTimeLabel.addConstraint(curTimeWidthConstraint!)
-        }
-
-        curTimeLabel.setNeedsLayout()
-    }
-    
     @objc func togglePaused(){
         guard let _video = _video else { return }
         let toggleValue = _isAdDisplaying == true ? _isAdPlaying: isPlaying
@@ -616,12 +653,27 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
     
+    func updateTimeLabelSize(isHours: Bool){
+        let width = isHours ? TIME_LABEL_SIZE_HOURS: TIME_LABEL_SIZE_MINUTES
+        let liveOffset = _isLive ? TIME_LABEL_SIZE_LIVE_OFFSET : 0
+
+        // Set time label width
+        curTimeWidthConstraint?.constant = width + liveOffset
+        durTimeWidthConstraint?.constant = width
+        
+        // Autosize duration label if its displaying a static text value
+        durTimeWidthConstraint?.isActive = !_isLive
+        
+        // Trigger layout update
+        bottomControlStack.layoutIfNeeded()
+    }
+    
     func setUi_durationTime(seconds: Float){
-        if(_isLive){
-            self.durTimeLabel.text = "Live"
-        }else{
-            self.durTimeLabel.text = secondsToTimeLabel(seconds)
-        }
+        self.durTimeLabel.text = _isLive ? "Live": secondsToTimeLabel(seconds)
+        
+        // Resize time labels based on HH:MM:SS and MM:SS
+        let durationInHours = seconds / 3600
+        updateTimeLabelSize(isHours: durationInHours >= 1)
     }
     
     func setUI_isAdDisplaying(adDisplayed: Bool){
