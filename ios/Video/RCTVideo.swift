@@ -398,7 +398,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem = playerItem
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
-                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
+                    self.setPlaybackRange(playerItem, withCropStart: self._source?.cropStart, withCropEnd: self._source?.cropEnd)
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -740,15 +740,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    func setPlaybackRange(_ item: AVPlayerItem!, withVideoStart videoStart: Int64?, withVideoEnd videoEnd: Int64?) {
-        if videoStart != nil {
-            let start = CMTimeMake(value: videoStart!, timescale: 1000)
+    func setPlaybackRange(_ item: AVPlayerItem!, withCropStart cropStart: Int64?, withCropEnd cropEnd: Int64?) {
+        if let cropStart = cropStart {
+            let start = CMTimeMake(value: cropStart, timescale: 1000)
             item.reversePlaybackEndTime = start
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if videoEnd != nil {
-            item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
+        if let cropEnd = cropEnd {
+            item.forwardPlaybackEndTime = CMTimeMake(value: cropEnd, timescale: 1000)
         }
     }
 
