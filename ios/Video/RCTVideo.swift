@@ -367,7 +367,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     if let startPosition = self._source?.startPosition {
-                        self._startPosition = Float64(startPosition) / 1000
+                        self._startPosition = startPosition / 1000
                     }
 
                     #if USE_VIDEO_CACHING
