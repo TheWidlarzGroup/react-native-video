@@ -55,6 +55,7 @@ export interface VideoRef {
   getCurrentPlaybackTime: () => Promise<number>;
   getCurrentPlaybackRate: () => Promise<number>;
   setPlaybackRate: (rate: number) => Promise<void>;
+  checkIfLivestream: () => Promise<boolean>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -266,6 +267,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const setPlaybackRate = useCallback((rate: number) => {
       return VideoManager.setPlaybackRate(rate, getReactTag(nativeRef));
+    }, []);
+
+    const checkIfLivestream = useCallback(() => {
+      return VideoManager.checkIfLivestream(getReactTag(nativeRef));
     }, []);
 
     const resume = useCallback(() => {
@@ -498,6 +503,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
         setPlaybackRate,
+        checkIfLivestream,
       }),
       [
         seek,
@@ -510,6 +516,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
         setPlaybackRate,
+        checkIfLivestream,
       ],
     );
 

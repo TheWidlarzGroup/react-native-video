@@ -90,4 +90,6 @@ RCT_EXTERN_METHOD(getCurrentPlaybackRate : (nonnull NSNumber*)reactTag resolver 
 
 RCT_EXTERN_METHOD(setPlaybackRate : (nonnull float*)rate reactTag : (nonnull NSNumber*)reactTag)
 
+RCT_EXTERN_METHOD(checkIfLivestream : (nonnull NSNumber*)reactTag resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
+
 @end

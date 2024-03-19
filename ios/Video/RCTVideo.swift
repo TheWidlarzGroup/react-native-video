@@ -13,6 +13,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _player: AVPlayer?
     private var _playerItem: AVPlayerItem?
     private var _source: VideoSource?
+    private var _livestream = false
     private var _playerBufferEmpty = true
     private var _playerLayer: AVPlayerLayer?
     private var _chapters: [Chapter]?
@@ -578,6 +579,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func getCurrentPlaybackRate(_ resolve: @escaping RCTPromiseResolveBlock) {
         resolve(_player?.rate ?? .zero)
+    }
+    
+    @objc
+    func checkIfLivestream(_ resolve: @escaping RCTPromiseResolveBlock) {
+        resolve(_livestream)
     }
 
     @objc
@@ -1218,6 +1224,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             if self._videoLoadStarted {
                 all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
+                    self._livestream = _playerItem.duration.isIndefinite
+                    
                     self.onVideoLoad?(["duration": NSNumber(value: duration),
                                        "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
                                        "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
@@ -1226,6 +1234,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                        "canPlaySlowReverse": NSNumber(value: _playerItem.canPlaySlowReverse),
                                        "canStepBackward": NSNumber(value: _playerItem.canStepBackward),
                                        "canStepForward": NSNumber(value: _playerItem.canStepForward),
+                                       "isLivestream": NSNumber(value: self._livestream),
                                        "naturalSize": [
                                            "width": width != nil ? NSNumber(value: width!) : "undefinded",
                                            "height": width != nil ? NSNumber(value: height!) : "undefinded",

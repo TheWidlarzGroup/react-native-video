@@ -126,6 +126,7 @@ type SubtitleStyle = Readonly<{
 export type OnLoadData = Readonly<{
   currentTime: number;
   duration: number;
+  isLivestream: boolean;
   naturalSize: Readonly<{
     width: number;
     height: number;
@@ -400,6 +401,7 @@ export interface VideoManagerType {
   ) => Promise<void>;
   getCurrentPlaybackTime: (reactTag: number) => Promise<number>;
   getCurrentPlaybackRate: (reactTag: number) => Promise<number>;
+  checkIfLivestream: (reactTag: number) => Promise<boolean>;
 }
 
 export interface VideoDecoderPropertiesType {

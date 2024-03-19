@@ -120,6 +120,18 @@ class RCTVideoManager: RCTViewManager {
         }
     }
     
+    @objc(checkIfLivestream:resolver:rejecter:)
+    func checkIfLivestream(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject: @escaping RCTPromiseRejectBlock) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                view.checkIfLivestream(resolve)
+            }
+        }
+    }
+    
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

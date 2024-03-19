@@ -4,6 +4,7 @@ import type {AdEvent} from './Ads';
 export type OnLoadData = Readonly<{
   currentTime: number;
   duration: number;
+  isLivestream: boolean;
   naturalSize: Readonly<{
     width: number;
     height: number;
