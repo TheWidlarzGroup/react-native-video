@@ -741,13 +741,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func setPlaybackRange(_ item: AVPlayerItem!, withCropStart cropStart: Int64?, withCropEnd cropEnd: Int64?) {
-        if let cropStart = cropStart {
+        if let cropStart {
             let start = CMTimeMake(value: cropStart, timescale: 1000)
             item.reversePlaybackEndTime = start
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if let cropEnd = cropEnd {
+        if let cropEnd {
             item.forwardPlaybackEndTime = CMTimeMake(value: cropEnd, timescale: 1000)
         }
     }
