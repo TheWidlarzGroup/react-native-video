@@ -89,7 +89,7 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.audioAndSubtitles = translationsValue.playerAudioAndSubtitlesButton
             dorisTranslationsViewModel.live = translationsValue.goLive
             dorisTranslationsViewModel.favourites = translationsValue.favourite
-            dorisTranslationsViewModel.addToWatchlist = translationsValue.watchlist
+            dorisTranslationsViewModel.addToWatchlist = translationsValue.addToWatchlist
             dorisTranslationsViewModel.moreVideos = translationsValue.moreVideos
             dorisTranslationsViewModel.rewind = translationsValue.rewind
             dorisTranslationsViewModel.fastForward = translationsValue.fastForward
