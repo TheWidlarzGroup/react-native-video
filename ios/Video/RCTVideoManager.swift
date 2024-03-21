@@ -132,6 +132,32 @@ class RCTVideoManager: RCTViewManager {
         }
     }
     
+    @objc(setVolume:forceUnmute:reactTag:)
+    func setVolume(volume: Float, forceUnmute: NSNumber, reactTag: NSNumber) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                let forceUnmute = forceUnmute.boolValue
+                view.setVolume(volume, forceUnmute)
+            }
+        }
+    }
+    
+    @objc(setMuted:reactTag:)
+    func setMuted(muted: NSNumber, reactTag: NSNumber) {
+        bridge.uiManager.prependUIBlock { _, viewRegistry in
+            let view = viewRegistry?[reactTag]
+            if !(view is RCTVideo) {
+                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
+            } else if let view = view as? RCTVideo {
+                let muted = muted.boolValue
+                view.setMuted(muted)
+            }
+        }
+    }
+    
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }

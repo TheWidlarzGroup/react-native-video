@@ -92,4 +92,8 @@ RCT_EXTERN_METHOD(setPlaybackRate : (nonnull float*)rate reactTag : (nonnull NSN
 
 RCT_EXTERN_METHOD(checkIfLivestream : (nonnull NSNumber*)reactTag resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setVolume : (nonnull float*)volume forceUnmute : (nonnull NSNumber*)forceUnmute reactTag : (nonnull NSNumber*)reactTag)
+
+RCT_EXTERN_METHOD(setMuted : (nonnull NSNumber*)muted reactTag : (nonnull NSNumber*)reactTag)
+
 @end

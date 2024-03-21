@@ -399,6 +399,12 @@ export interface VideoManagerType {
     licenseUrl: string,
     reactTag: number,
   ) => Promise<void>;
+  setVolume: (
+    volume: number,
+    forceUnmute: boolean,
+    reactTag: number,
+  ) => Promise<void>;
+  setMuted: (muted: boolean, reactTag: number) => Promise<void>;
   getCurrentPlaybackTime: (reactTag: number) => Promise<number>;
   getCurrentPlaybackRate: (reactTag: number) => Promise<number>;
   checkIfLivestream: (reactTag: number) => Promise<boolean>;

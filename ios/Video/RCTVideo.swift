@@ -692,6 +692,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _volume = volume
         applyModifiers()
     }
+    
+    @objc
+    func setVolume(_ volume: Float, _ forceUnmute: Bool) {
+        _volume = volume
+        
+        if (forceUnmute) {
+            _muted = false
+        }
+        
+        applyModifiers()
+    }
 
     @objc
     func setMaxBitRate(_ maxBitRate: Float) {

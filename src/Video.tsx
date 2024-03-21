@@ -55,6 +55,12 @@ export interface VideoRef {
   getCurrentPlaybackTime: () => Promise<number>;
   getCurrentPlaybackRate: () => Promise<number>;
   setPlaybackRate: (rate: number) => Promise<void>;
+  /**
+   * Sets the volume for the video in the range 0 to 1.
+   * Additional parameter can be used to force unmuting the video.
+   */
+  setVolume: (volume: number, forceUnmute?: boolean) => Promise<void>;
+  setMuted: (muted: boolean) => Promise<void>;
   checkIfLivestream: () => Promise<boolean>;
 }
 
@@ -267,6 +273,18 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const setPlaybackRate = useCallback((rate: number) => {
       return VideoManager.setPlaybackRate(rate, getReactTag(nativeRef));
+    }, []);
+
+    const setVolume = useCallback((volume: number, forceUnmute = false) => {
+      return VideoManager.setVolume(
+        volume,
+        forceUnmute,
+        getReactTag(nativeRef),
+      );
+    }, []);
+
+    const setMuted = useCallback((muted: boolean) => {
+      return VideoManager.setMuted(muted, getReactTag(nativeRef));
     }, []);
 
     const checkIfLivestream = useCallback(() => {
@@ -503,6 +521,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
         setPlaybackRate,
+        setVolume,
+        setMuted,
         checkIfLivestream,
       }),
       [
@@ -516,6 +536,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPlaybackTime,
         getCurrentPlaybackRate,
         setPlaybackRate,
+        setVolume,
+        setMuted,
         checkIfLivestream,
       ],
     );
