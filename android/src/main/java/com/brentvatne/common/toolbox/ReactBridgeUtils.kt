@@ -12,59 +12,47 @@ import java.util.HashMap
 
 object ReactBridgeUtils {
     @JvmStatic
-    fun safeGetString(map: ReadableMap?, key: String?, fallback: String?): String? {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getString(key) else fallback
-    }
+    fun safeGetString(map: ReadableMap?, key: String?, fallback: String?): String? =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getString(key) else fallback
 
     @JvmStatic
-    fun safeGetString(map: ReadableMap?, key: String?): String? {
-        return safeGetString(map, key, null)
-    }
+    fun safeGetString(map: ReadableMap?, key: String?): String? = safeGetString(map, key, null)
 
     @JvmStatic
-    fun safeGetDynamic(map: ReadableMap?, key: String?, fallback: Dynamic?): Dynamic? {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDynamic(key) else fallback
-    }
+    fun safeGetDynamic(map: ReadableMap?, key: String?, fallback: Dynamic?): Dynamic? =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDynamic(key) else fallback
 
     @JvmStatic
-    fun safeGetDynamic(map: ReadableMap?, key: String?): Dynamic? {
-        return safeGetDynamic(map, key, null)
-    }
+    fun safeGetDynamic(map: ReadableMap?, key: String?): Dynamic? = safeGetDynamic(map, key, null)
 
     @JvmStatic
-    fun safeGetBool(map: ReadableMap?, key: String?, fallback: Boolean): Boolean {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getBoolean(key) else fallback
-    }
+    fun safeGetBool(map: ReadableMap?, key: String?, fallback: Boolean): Boolean =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getBoolean(key) else fallback
 
     @JvmStatic
-    fun safeGetMap(map: ReadableMap?, key: String?): ReadableMap? {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getMap(key) else null
-    }
+    fun safeGetMap(map: ReadableMap?, key: String?): ReadableMap? = if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getMap(key) else null
 
     @JvmStatic
-    fun safeGetArray(map: ReadableMap?, key: String?): ReadableArray? {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getArray(key) else null
-    }
+    fun safeGetArray(map: ReadableMap?, key: String?): ReadableArray? = if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getArray(key) else null
 
     @JvmStatic
-    fun safeGetInt(map: ReadableMap?, key: String?, fallback: Int): Int {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getInt(key) else fallback
-    }
+    fun safeGetInt(map: ReadableMap?, key: String?, fallback: Int): Int =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getInt(key) else fallback
 
     @JvmStatic
-    fun safeGetInt(map: ReadableMap?, key: String?): Int {
-        return safeGetInt(map, key, 0)
-    }
+    fun safeGetInt(map: ReadableMap?, key: String?): Int = safeGetInt(map, key, 0)
 
     @JvmStatic
-    fun safeGetDouble(map: ReadableMap?, key: String?, fallback: Double): Double {
-        return if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key) else fallback
-    }
+    fun safeGetDouble(map: ReadableMap?, key: String?, fallback: Double): Double =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key) else fallback
 
     @JvmStatic
-    fun safeGetDouble(map: ReadableMap?, key: String?): Double {
-        return safeGetDouble(map, key, 0.0)
-    }
+    fun safeGetDouble(map: ReadableMap?, key: String?): Double = safeGetDouble(map, key, 0.0)
+
+    @JvmStatic fun safeGetFloat(map: ReadableMap?, key: String?, fallback: Float): Float =
+        if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key).toFloat() else fallback
+
+    @JvmStatic fun safeGetFloat(map: ReadableMap?, key: String?): Float = safeGetFloat(map, key, 0.0f)
 
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.

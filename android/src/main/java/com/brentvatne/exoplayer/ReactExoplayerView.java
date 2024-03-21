@@ -41,6 +41,7 @@ import androidx.media3.common.Timeline;
 import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
@@ -107,6 +108,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.common.collect.ImmutableList;
@@ -626,7 +628,8 @@ public class ReactExoplayerView extends FrameLayout implements
         );
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
-                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+                        .setEnableDecoderFallback(true);
 
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
@@ -1014,9 +1017,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } else {
             initializePlayer();
         }
-        if (!disableFocus) {
-            setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
-        }
+        setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
     }
 
     private void pausePlayback() {
@@ -1523,6 +1524,13 @@ public class ReactExoplayerView extends FrameLayout implements
         eventEmitter.timedMetadata(metadataArray);
     }
 
+    public void onCues(CueGroup cueGroup) {
+        if (!cueGroup.cues.isEmpty() && cueGroup.cues.get(0).text != null) {
+            String subtitleText = cueGroup.cues.get(0).text.toString();
+            eventEmitter.textTrackDataChanged(subtitleText);
+        }
+    }
+
     // ReactExoplayerViewManager public api
 
     public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers) {
@@ -1895,6 +1903,11 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
+        if (newRate <= 0) {
+            DebugLog.w(TAG, "cannot set rate <= 0");
+            return;
+        }
+
         rate = newRate;
 
         if (player != null) {
@@ -2117,6 +2130,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAdError(AdErrorEvent adErrorEvent) {
-        eventEmitter.receiveAdErrorEvent(adErrorEvent.getError());
+        AdError error = adErrorEvent.getError();
+        eventEmitter.receiveAdErrorEvent(error.getMessage(), String.valueOf(error.getErrorCode()), String.valueOf(error.getErrorType()));
     }
 }
