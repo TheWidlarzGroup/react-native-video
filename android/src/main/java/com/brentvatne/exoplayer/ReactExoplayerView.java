@@ -406,7 +406,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
                     setFullscreen(false);
@@ -1963,6 +1963,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableBuffering(boolean disableBuffering) {
         this.disableBuffering = disableBuffering;
+    }
+
+    public boolean getPreventsDisplaySleepDuringVideoPlayback() {
+        return preventsDisplaySleepDuringVideoPlayback;
     }
 
     private void updateFullScreenButtonVisbility() {

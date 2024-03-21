@@ -21,12 +21,12 @@ import java.lang.ref.WeakReference;
 public class FullScreenPlayerView extends Dialog {
     private final LegacyPlayerControlView playerControlView;
     private final ExoPlayerView exoPlayerView;
+    private final ReactExoplayerView reactExoplayerView;
     private ViewGroup parent;
     private final FrameLayout containerView;
     private final OnBackPressedCallback onBackPressedCallback;
-    private Context mReactContext;
-    private Handler mKeepScreenOnHandler;
-    private Runnable mKeepScreenOnUpdater;
+    private final Handler mKeepScreenOnHandler;
+    private final Runnable mKeepScreenOnUpdater;
 
     private static class KeepScreenOnUpdater implements Runnable {
         private final static long UPDATE_KEEP_SCREEN_ON_FLAG_MS = 200;
@@ -59,12 +59,12 @@ public class FullScreenPlayerView extends Dialog {
         }
     }
 
-    public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, LegacyPlayerControlView playerControlView, OnBackPressedCallback onBackPressedCallback) {
+    public FullScreenPlayerView(Context context, ExoPlayerView exoPlayerView, ReactExoplayerView reactExoplayerView, LegacyPlayerControlView playerControlView, OnBackPressedCallback onBackPressedCallback) {
         super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         this.playerControlView = playerControlView;
         this.exoPlayerView = exoPlayerView;
+        this.reactExoplayerView = reactExoplayerView;
         this.onBackPressedCallback = onBackPressedCallback;
-        this.mReactContext = context;
         containerView = new FrameLayout(context);
         setContentView(containerView, generateDefaultLayoutParams());
 
@@ -120,7 +120,9 @@ public class FullScreenPlayerView extends Dialog {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mKeepScreenOnHandler.post(mKeepScreenOnUpdater);
+        if (reactExoplayerView.getPreventsDisplaySleepDuringVideoPlayback()) {
+            mKeepScreenOnHandler.post(mKeepScreenOnUpdater);
+        }
     }
 
     private FrameLayout.LayoutParams generateDefaultLayoutParams() {
