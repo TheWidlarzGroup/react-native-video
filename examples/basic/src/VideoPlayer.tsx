@@ -225,15 +225,17 @@ class VideoPlayer extends Component {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    this.setState({
-      audioTracks: data.audioTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
+        audioTracks: data.audioTracks,
         selectedAudioTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
+      });
+    } else {
+      this.setState({
+        audioTracks: data.audioTracks,
       });
     }
   };
@@ -243,16 +245,17 @@ class VideoPlayer extends Component {
       return x?.selected;
     });
 
-    this.setState({
-      textTracks: data.textTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
-        textTracks: data,
+        textTracks: data.textTracks,
         selectedTextTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
+      });
+    } else {
+      this.setState({
+        textTracks: data.textTracks,
       });
     }
   };
