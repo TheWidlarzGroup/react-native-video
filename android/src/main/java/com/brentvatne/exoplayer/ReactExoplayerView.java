@@ -624,7 +624,7 @@ public class ReactExoplayerView extends FrameLayout implements
         int backBufferMs = backBufferDurationMs;
 
         if(freeMemory < (self.enableBackBufferAvailableMemory * 1000 * 1000)) {
-            Log.w("LoadControl", "Available memory is less than required to enable back buffer, setting to 0ms!");
+            DebugLog.w("LoadControl", "Available memory is less than required to enable back buffer, setting to 0ms!");
             backBufferMs = 0;
         }
 
