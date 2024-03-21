@@ -638,11 +638,13 @@ class VideoPlayer extends Component {
                 />
               </View>
               <View style={styles.generalControls}>
+                {/* shall be replaced by slider */}
                 <MultiValueControl
-                  values={[0.25, 0.5, 1.0, 1.5, 2.0]}
+                  values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
                   onPress={this.onRateSelected}
                   selected={this.state.rate}
                 />
+                {/* shall be replaced by slider */}
                 <MultiValueControl
                   values={[0.5, 1, 1.5]}
                   onPress={this.onVolumeSelected}
