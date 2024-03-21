@@ -1902,6 +1902,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
+        if (rate < 0) return;
+
         rate = newRate;
 
         if (player != null) {
