@@ -14,8 +14,6 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerHelper;
 import com.facebook.react.uimanager.common.ViewUtil;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.ads.interactivemedia.v3.api.AdError;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -449,14 +447,14 @@ public class VideoEventEmitter {
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
-    public void receiveAdErrorEvent(AdError error) {
+    public void receiveAdErrorEvent(String message, String code, String type) {
         WritableMap map = Arguments.createMap();
         map.putString("event", "ERROR");
 
         WritableMap dataMap = Arguments.createMap();
-        dataMap.putString("message", error.getMessage());
-        dataMap.putString("code", String.valueOf(error.getErrorCode()));
-        dataMap.putString("type", String.valueOf(error.getErrorType()));
+        dataMap.putString("message", message);
+        dataMap.putString("code", code);
+        dataMap.putString("type", type);
         map.putMap("data", dataMap);
 
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
