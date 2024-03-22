@@ -253,10 +253,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSelectedVideoTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedVideoTrack) {
         String typeString = null;
-        Dynamic value = null;
+        String value = null;
         if (selectedVideoTrack != null) {
             typeString = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_TYPE);
-            value = ReactBridgeUtils.safeGetDynamic(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_VALUE);
+            value = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_VALUE);
         }
         videoView.setSelectedVideoTrack(typeString, value);
     }
@@ -265,10 +265,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSelectedAudioTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedAudioTrack) {
         String typeString = null;
-        Dynamic value = null;
+        String value = null;
         if (selectedAudioTrack != null) {
             typeString = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_TYPE);
-            value = ReactBridgeUtils.safeGetDynamic(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_VALUE);
+            value = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_VALUE);
         }
         videoView.setSelectedAudioTrack(typeString, value);
     }
@@ -277,10 +277,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSelectedTextTrack(final ReactExoplayerView videoView,
                                      @Nullable ReadableMap selectedTextTrack) {
         String typeString = null;
-        Dynamic value = null;
+        String value = null;
         if (selectedTextTrack != null) {
             typeString = ReactBridgeUtils.safeGetString(selectedTextTrack, PROP_SELECTED_TEXT_TRACK_TYPE);
-            value = ReactBridgeUtils.safeGetDynamic(selectedTextTrack, PROP_SELECTED_TEXT_TRACK_VALUE);
+            value = ReactBridgeUtils.safeGetString(selectedTextTrack, PROP_SELECTED_TEXT_TRACK_VALUE);
         }
         videoView.setSelectedTextTrack(typeString, value);
     }
