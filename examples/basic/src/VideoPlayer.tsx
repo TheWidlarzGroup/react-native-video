@@ -790,6 +790,7 @@ class VideoPlayer extends Component {
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          preventsDisplaySleepDuringVideoPlayback={true}
         />
       </TouchableOpacity>
     );
