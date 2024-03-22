@@ -108,6 +108,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.common.collect.ImmutableList;
@@ -205,11 +206,11 @@ public class ReactExoplayerView extends FrameLayout implements
     private String extension;
     private boolean repeat;
     private String audioTrackType;
-    private Dynamic audioTrackValue;
+    private String audioTrackValue;
     private String videoTrackType;
-    private Dynamic videoTrackValue;
+    private String videoTrackValue;
     private String textTrackType;
-    private Dynamic textTrackValue;
+    private String textTrackValue;
     private ReadableArray textTracks;
     private boolean disableFocus;
     private boolean focusable = true;
@@ -405,7 +406,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
                     setFullscreen(false);
@@ -1634,7 +1635,7 @@ public class ReactExoplayerView extends FrameLayout implements
         trackSelector.setParameters(disableParameters);
     }
 
-    public void setSelectedTrack(int trackType, String type, Dynamic value) {
+    public void setSelectedTrack(int trackType, String type, String value) {
         if (player == null) return;
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
@@ -1660,7 +1661,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } else if (type.equals("language")) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.language != null && format.language.equals(value.asString())) {
+                if (format.language != null && format.language.equals(value)) {
                     groupIndex = i;
                     break;
                 }
@@ -1668,17 +1669,18 @@ public class ReactExoplayerView extends FrameLayout implements
         } else if (type.equals("title")) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value.asString())) {
+                if (format.id != null && format.id.equals(value)) {
                     groupIndex = i;
                     break;
                 }
             }
         } else if (type.equals("index")) {
-            if (value.asInt() < groups.length) {
-                groupIndex = value.asInt();
+            int iValue = Integer.parseInt(value);
+            if (iValue < groups.length) {
+                groupIndex = iValue;
             }
         } else if (type.equals("resolution")) {
-            int height = value.asInt();
+            int height = Integer.parseInt(value);
             for (int i = 0; i < groups.length; ++i) { // Search for the exact height
                 TrackGroup group = groups.get(i);
                 Format closestFormat = null;
@@ -1830,19 +1832,19 @@ public class ReactExoplayerView extends FrameLayout implements
         return this.exoPlayerView;
     }
 
-    public void setSelectedVideoTrack(String type, Dynamic value) {
+    public void setSelectedVideoTrack(String type, String value) {
         videoTrackType = type;
         videoTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
     }
 
-    public void setSelectedAudioTrack(String type, Dynamic value) {
+    public void setSelectedAudioTrack(String type, String value) {
         audioTrackType = type;
         audioTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
     }
 
-    public void setSelectedTextTrack(String type, Dynamic value) {
+    public void setSelectedTextTrack(String type, String value) {
         textTrackType = type;
         textTrackValue = value;
         setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
@@ -1906,6 +1908,11 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setRateModifier(float newRate) {
+        if (newRate <= 0) {
+            DebugLog.w(TAG, "cannot set rate <= 0");
+            return;
+        }
+
         rate = newRate;
 
         if (player != null) {
@@ -1961,6 +1968,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableBuffering(boolean disableBuffering) {
         this.disableBuffering = disableBuffering;
+    }
+
+    public boolean getPreventsDisplaySleepDuringVideoPlayback() {
+        return preventsDisplaySleepDuringVideoPlayback;
     }
 
     private void updateFullScreenButtonVisbility() {
@@ -2128,6 +2139,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onAdError(AdErrorEvent adErrorEvent) {
-        eventEmitter.receiveAdErrorEvent(adErrorEvent.getError());
+        AdError error = adErrorEvent.getError();
+        eventEmitter.receiveAdErrorEvent(error.getMessage(), String.valueOf(error.getErrorCode()), String.valueOf(error.getErrorType()));
     }
 }

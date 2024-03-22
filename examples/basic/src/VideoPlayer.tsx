@@ -225,15 +225,17 @@ class VideoPlayer extends Component {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    this.setState({
-      audioTracks: data.audioTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
+        audioTracks: data.audioTracks,
         selectedAudioTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
+      });
+    } else {
+      this.setState({
+        audioTracks: data.audioTracks,
       });
     }
   };
@@ -243,16 +245,17 @@ class VideoPlayer extends Component {
       return x?.selected;
     });
 
-    this.setState({
-      textTracks: data.textTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
-        textTracks: data,
+        textTracks: data.textTracks,
         selectedTextTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
+      });
+    } else {
+      this.setState({
+        textTracks: data.textTracks,
       });
     }
   };
@@ -638,11 +641,13 @@ class VideoPlayer extends Component {
                 />
               </View>
               <View style={styles.generalControls}>
+                {/* shall be replaced by slider */}
                 <MultiValueControl
-                  values={[0.25, 0.5, 1.0, 1.5, 2.0]}
+                  values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
                   onPress={this.onRateSelected}
                   selected={this.state.rate}
                 />
+                {/* shall be replaced by slider */}
                 <MultiValueControl
                   values={[0.5, 1, 1.5]}
                   onPress={this.onVolumeSelected}
@@ -785,6 +790,7 @@ class VideoPlayer extends Component {
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          preventsDisplaySleepDuringVideoPlayback={true}
         />
       </TouchableOpacity>
     );
