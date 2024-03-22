@@ -10,6 +10,7 @@ import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 
+import com.brentvatne.common.api.LimitMode;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
@@ -392,9 +393,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.useSecureView(useSecureView);
     }
 
-    @ReactProp(name = PROP_LIMIT_MAX_RESOLUTION, defaultBoolean = false)
-    public void setLimitMaxResolution(final ReactExoplayerView videoView, final boolean limitMaxResolution) {
-        videoView.setLimitMaxResolution(limitMaxResolution);
+    @ReactProp(name = PROP_LIMIT_MAX_RESOLUTION)
+    public void setLimitMaxResolution(final ReactExoplayerView videoView, final String limitMode) {
+        videoView.setLimitMaxResolution(LimitMode.toLimitMode(limitMode));
     }
 
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)

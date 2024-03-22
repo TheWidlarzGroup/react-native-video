@@ -94,6 +94,7 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.ui.LegacyPlayerControlView;
 
+import com.brentvatne.common.api.LimitMode;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
@@ -122,6 +123,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -187,7 +189,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-    private boolean limitMaxResolutionToScreenSize = false;
+    private String limitMaxResolutionToScreenSize = LimitMode.DISABLED;
 
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
@@ -617,16 +619,6 @@ public class ReactExoplayerView extends FrameLayout implements
         self.trackSelector.setParameters(trackSelector.buildUponParameters()
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        long freeMemory = runtime.maxMemory() - usedMemory;
-        int backBufferMs = backBufferDurationMs;
-
-        if(freeMemory < (self.enableBackBufferAvailableMemory * 1000 * 1000)) {
-            DebugLog.w("LoadControl", "Available memory is less than required to enable back buffer, setting to 0ms!");
-            backBufferMs = 0;
-        }
-
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         RNVLoadControl loadControl = new RNVLoadControl(
                 allocator,
@@ -636,7 +628,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 bufferForPlaybackAfterRebufferMs,
                 -1,
                 true,
-                backBufferMs,
+                backBufferDurationMs,
                 DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
         );
         DefaultRenderersFactory renderersFactory =
@@ -929,11 +921,6 @@ public class ReactExoplayerView extends FrameLayout implements
         if (mainHandler != null && mainRunnable != null) {
             mainHandler.removeCallbacks(mainRunnable);
             mainRunnable = null;
-        }
-
-        Runtime runtime = Runtime.getRuntime();
-        if(runtime != null) {
-            runtime.gc();
         }
     }
 
@@ -1278,10 +1265,10 @@ public class ReactExoplayerView extends FrameLayout implements
                 Format format = group.getFormat(trackIndex);
 
                 int shortestFormatSide = Math.min(format.height, format.width);
-                int shortestScreenSize = this.getScreenShortestSide(this.themedReactContext);
+                int shortestScreenSize = this.getShortestSide(this.themedReactContext);
 
                 // Don't add video track that extend over screen resolution
-                if(limitMaxResolutionToScreenSize && shortestFormatSide > shortestScreenSize) {
+                if(!limitMaxResolutionToScreenSize.equals(LimitMode.DISABLED) && shortestFormatSide > shortestScreenSize) {
                     continue;
                 }
 
@@ -1294,13 +1281,24 @@ public class ReactExoplayerView extends FrameLayout implements
         return videoTracks;
     }
 
-    private int getScreenShortestSide(ThemedReactContext context) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+    private int getShortestSide(ThemedReactContext context) {
+        int width = 0;
+        int height = 0;
 
-        int width = displayMetrics.widthPixels;
-        int height = displayMetrics.heightPixels;
+        switch (limitMaxResolutionToScreenSize) {
+            case LimitMode.SCREEN_SIZE -> {
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+
+                width = displayMetrics.widthPixels;
+                height = displayMetrics.heightPixels;
+            }
+            case LimitMode.VIDEO_SURFACE -> {
+                width = exoPlayerView.getWidth();
+                height = exoPlayerView.getHeight();
+            }
+        }
 
         return Math.min(width, height);
     }
@@ -2067,7 +2065,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.useSecureView(useSecureView);
     }
 
-    public void setLimitMaxResolution(boolean limitMaxResolution) {
+    public void setLimitMaxResolution(String limitMaxResolution) {
         limitMaxResolutionToScreenSize = limitMaxResolution;
     }
 
