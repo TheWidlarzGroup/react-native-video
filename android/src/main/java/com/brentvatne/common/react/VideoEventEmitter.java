@@ -9,10 +9,11 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.UIManager;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.ads.interactivemedia.v3.api.AdError;
+import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.common.ViewUtil;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -23,12 +24,12 @@ import java.util.Map;
 
 public class VideoEventEmitter {
 
-    private final RCTEventEmitter eventEmitter;
+    private final ReactContext mReactContext;
 
     private int viewId = View.NO_ID;
 
     public VideoEventEmitter(ReactContext reactContext) {
-        this.eventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        this.mReactContext = reactContext;
     }
 
     private static final String EVENT_LOAD_START = "onVideoLoadStart";
@@ -56,6 +57,8 @@ public class VideoEventEmitter {
     private static final String EVENT_VOLUME_CHANGE = "onVolumeChange";
     private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
     private static final String EVENT_TEXT_TRACKS = "onTextTracks";
+
+    private static final String EVENT_TEXT_TRACK_DATA_CHANGED = "onTextTrackDataChanged";
     private static final String EVENT_VIDEO_TRACKS = "onVideoTracks";
     private static final String EVENT_ON_RECEIVE_AD_EVENT = "onReceiveAdEvent";
 
@@ -83,6 +86,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT
@@ -113,6 +117,7 @@ public class VideoEventEmitter {
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
             EVENT_TEXT_TRACKS,
+            EVENT_TEXT_TRACK_DATA_CHANGED,
             EVENT_VIDEO_TRACKS,
             EVENT_BANDWIDTH,
             EVENT_ON_RECEIVE_AD_EVENT
@@ -141,6 +146,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
     private static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
     private static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+    private static final String EVENT_PROP_TEXT_TRACK_DATA = "subtitleTracks";
     private static final String EVENT_PROP_HAS_AUDIO_FOCUS = "hasAudioFocus";
     private static final String EVENT_PROP_IS_BUFFERING = "isBuffering";
     private static final String EVENT_PROP_PLAYBACK_RATE = "playbackRate";
@@ -279,6 +285,12 @@ public class VideoEventEmitter {
 
     public void textTracks(ArrayList<Track> textTracks){
         receiveEvent(EVENT_TEXT_TRACKS, arrayToObject(EVENT_PROP_TEXT_TRACKS, textTracksToArray(textTracks)));
+    }
+
+    public void textTrackDataChanged(String textTrackData){
+        WritableMap event = Arguments.createMap();
+        event.putString(EVENT_PROP_TEXT_TRACK_DATA, textTrackData);
+        receiveEvent(EVENT_TEXT_TRACK_DATA_CHANGED, event);
     }
 
     public void videoTracks(ArrayList<VideoTrack> videoTracks){
@@ -435,20 +447,24 @@ public class VideoEventEmitter {
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
-    public void receiveAdErrorEvent(AdError error) {
+    public void receiveAdErrorEvent(String message, String code, String type) {
         WritableMap map = Arguments.createMap();
         map.putString("event", "ERROR");
 
         WritableMap dataMap = Arguments.createMap();
-        dataMap.putString("message", error.getMessage());
-        dataMap.putString("code", String.valueOf(error.getErrorCode()));
-        dataMap.putString("type", String.valueOf(error.getErrorType()));
+        dataMap.putString("message", message);
+        dataMap.putString("code", code);
+        dataMap.putString("type", type);
         map.putMap("data", dataMap);
 
         receiveEvent(EVENT_ON_RECEIVE_AD_EVENT, map);
     }
 
     private void receiveEvent(@VideoEvents String type, WritableMap event) {
-        eventEmitter.receiveEvent(viewId, type, event);
+        UIManager uiManager = UIManagerHelper.getUIManager(mReactContext, ViewUtil.getUIManagerType(viewId));
+
+        if(uiManager != null) {
+           uiManager.receiveEvent(UIManagerHelper.getSurfaceId(mReactContext), viewId, type, event);
+        }
     }
 }

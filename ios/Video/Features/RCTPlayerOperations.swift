@@ -10,161 +10,165 @@ let RCTVideoUnset = -1
  * Collection of mutating functions
  */
 enum RCTPlayerOperations {
-    static func setSideloadedText(player: AVPlayer?, textTracks: [TextTrack]?, criteria: SelectedTrackCriteria?) {
-        let type = criteria?.type
-        let textTracks: [TextTrack]! = textTracks ?? RCTVideoUtils.getTextTrackInfo(player)
-        let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
+    static func setSideloadedText(player: AVPlayer?, textTracks: [TextTrack], criteria: SelectedTrackCriteria?) -> Promise<Void> {
+        return Promise {
+            let type = criteria?.type
 
-        // The first few tracks will be audio & video track
-        var firstTextIndex = 0
-        for i in 0 ..< trackCount where (player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible)) != nil {
-            firstTextIndex = i
-            break
-        }
+            let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
 
-        var selectedTrackIndex: Int = RCTVideoUnset
-
-        if type == "disabled" {
-            // Select the last text index which is the disabled text track
-            selectedTrackIndex = trackCount - firstTextIndex
-        } else if type == "language" {
-            let selectedValue = criteria?.value as? String
-            for i in 0 ..< textTracks.count {
-                let currentTextTrack = textTracks[i]
-                if selectedValue == currentTextTrack.language {
-                    selectedTrackIndex = i
-                    break
-                }
+            // The first few tracks will be audio & video track
+            var firstTextIndex = 0
+            for i in 0 ..< trackCount where player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
+                firstTextIndex = i
+                break
             }
-        } else if type == "title" {
-            let selectedValue = criteria?.value as? String
-            for i in 0 ..< textTracks.count {
-                let currentTextTrack = textTracks[i]
-                if selectedValue == currentTextTrack.title {
-                    selectedTrackIndex = i
-                    break
-                }
-            }
-        } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if textTracks.count > index {
-                    selectedTrackIndex = index
-                }
-            }
-        }
 
-        // in the situation that a selected text track is not available (eg. specifies a textTrack not available)
-        if (type != "disabled") && selectedTrackIndex == RCTVideoUnset {
-            let captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(.user)
-            let captionSettings = captioningMediaCharacteristics as? [AnyHashable]
-            if (captionSettings?.contains(AVMediaCharacteristic.transcribesSpokenDialogForAccessibility)) != nil {
-                selectedTrackIndex = 0 // If we can't find a match, use the first available track
-                let systemLanguage = NSLocale.preferredLanguages.first
+            var selectedTrackIndex: Int = RCTVideoUnset
+
+            if type == "disabled" {
+                // Select the last text index which is the disabled text track
+                selectedTrackIndex = trackCount - firstTextIndex
+            } else if type == "language" {
+                let selectedValue = criteria?.value as? String
                 for i in 0 ..< textTracks.count {
                     let currentTextTrack = textTracks[i]
-                    if systemLanguage == currentTextTrack.language {
+                    if selectedValue == currentTextTrack.language {
                         selectedTrackIndex = i
                         break
                     }
                 }
+            } else if type == "title" {
+                let selectedValue = criteria?.value as? String
+                for i in 0 ..< textTracks.count {
+                    let currentTextTrack = textTracks[i]
+                    if selectedValue == currentTextTrack.title {
+                        selectedTrackIndex = i
+                        break
+                    }
+                }
+            } else if type == "index" {
+                if let value = criteria?.value, let index = value as? Int {
+                    if textTracks.count > index {
+                        selectedTrackIndex = index
+                    }
+                }
             }
-        }
 
-        for i in firstTextIndex ..< trackCount {
-            var isEnabled = false
-            if selectedTrackIndex != RCTVideoUnset {
-                isEnabled = i == selectedTrackIndex + firstTextIndex
+            // in the situation that a selected text track is not available (eg. specifies a textTrack not available)
+            if (type != "disabled") && selectedTrackIndex == RCTVideoUnset {
+                let captioningMediaCharacteristics = MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics(.user)
+                let captionSettings = captioningMediaCharacteristics as? [AnyHashable]
+                if (captionSettings?.contains(AVMediaCharacteristic.transcribesSpokenDialogForAccessibility)) != nil {
+                    selectedTrackIndex = 0 // If we can't find a match, use the first available track
+                    let systemLanguage = NSLocale.preferredLanguages.first
+                    for i in 0 ..< textTracks.count {
+                        let currentTextTrack = textTracks[i]
+                        if systemLanguage == currentTextTrack.language {
+                            selectedTrackIndex = i
+                            break
+                        }
+                    }
+                }
             }
-            player?.currentItem?.tracks[i].isEnabled = isEnabled
+
+            for i in firstTextIndex ..< trackCount {
+                var isEnabled = false
+                if selectedTrackIndex != RCTVideoUnset {
+                    isEnabled = i == selectedTrackIndex + firstTextIndex
+                }
+                player?.currentItem?.tracks[i].isEnabled = isEnabled
+            }
         }
     }
 
     // UNUSED
     static func setStreamingText(player: AVPlayer?, criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
-        let group: AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: AVMediaCharacteristic.legible)
         var mediaOption: AVMediaSelectionOption!
 
-        if type == "disabled" {
-            // Do nothing. We want to ensure option is nil
-        } else if (type == "language") || (type == "title") {
-            let value = criteria?.value as? String
-            for i in 0 ..< group.options.count {
-                let currentOption: AVMediaSelectionOption! = group.options[i]
-                var optionValue: String!
-                if type == "language" {
-                    optionValue = currentOption.extendedLanguageTag
-                } else {
-                    optionValue = currentOption.commonMetadata.map(\.value)[0] as! String
+        RCTVideoAssetsUtils.getMediaSelectionGroup(asset: player?.currentItem?.asset, for: .legible).then { group in
+            guard let group else { return }
+
+            if type == "disabled" {
+                // Do nothing. We want to ensure option is nil
+            } else if (type == "language") || (type == "title") {
+                let value = criteria?.value as? String
+                for i in 0 ..< group.options.count {
+                    let currentOption: AVMediaSelectionOption! = group.options[i]
+                    var optionValue: String!
+                    if type == "language" {
+                        optionValue = currentOption.extendedLanguageTag
+                    } else {
+                        optionValue = currentOption.commonMetadata.map(\.value)[0] as! String
+                    }
+                    if value == optionValue {
+                        mediaOption = currentOption
+                        break
+                    }
                 }
-                if value == optionValue {
-                    mediaOption = currentOption
-                    break
+                // } else if ([type isEqualToString:@"default"]) {
+                //  option = group.defaultOption; */
+            } else if type == "index" {
+                if let value = criteria?.value, let index = value as? Int {
+                    if group.options.count > index {
+                        mediaOption = group.options[index]
+                    }
                 }
+            } else { // default. invalid type or "system"
+                #if os(tvOS)
+                // Do noting. Fix for tvOS native audio menu language selector
+                #else
+                    player?.currentItem?.selectMediaOptionAutomatically(in: group)
+                    return
+                #endif
             }
-            // } else if ([type isEqualToString:@"default"]) {
-            //  option = group.defaultOption; */
-        } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if group.options.count > index {
-                    mediaOption = group.options[index]
-                }
-            }
-        } else { // default. invalid type or "system"
+
             #if os(tvOS)
             // Do noting. Fix for tvOS native audio menu language selector
             #else
-                player?.currentItem?.selectMediaOptionAutomatically(in: group)
-                return
+                // If a match isn't found, option will be nil and text tracks will be disabled
+                player?.currentItem?.select(mediaOption, in: group)
             #endif
         }
-
-        #if os(tvOS)
-        // Do noting. Fix for tvOS native audio menu language selector
-        #else
-            // If a match isn't found, option will be nil and text tracks will be disabled
-            player?.currentItem?.select(mediaOption, in: group)
-        #endif
     }
 
     static func setMediaSelectionTrackForCharacteristic(player: AVPlayer?, characteristic: AVMediaCharacteristic, criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
-        let group: AVMediaSelectionGroup! = player?.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: characteristic)
         var mediaOption: AVMediaSelectionOption!
 
-        guard group != nil else { return }
+        RCTVideoAssetsUtils.getMediaSelectionGroup(asset: player?.currentItem?.asset, for: characteristic).then { group in
+            guard let group else { return }
 
-        if type == "disabled" {
-            // Do nothing. We want to ensure option is nil
-        } else if (type == "language") || (type == "title") {
-            let value = criteria?.value as? String
-            for i in 0 ..< group.options.count {
-                let currentOption: AVMediaSelectionOption! = group.options[i]
-                var optionValue: String!
-                if type == "language" {
-                    optionValue = currentOption.extendedLanguageTag
-                } else {
-                    optionValue = currentOption.commonMetadata.map(\.value)[0] as? String
+            if type == "disabled" {
+                // Do nothing. We want to ensure option is nil
+            } else if (type == "language") || (type == "title") {
+                let value = criteria?.value as? String
+                for i in 0 ..< group.options.count {
+                    let currentOption: AVMediaSelectionOption! = group.options[i]
+                    var optionValue: String!
+                    if type == "language" {
+                        optionValue = currentOption.extendedLanguageTag
+                    } else {
+                        optionValue = currentOption.commonMetadata.map(\.value)[0] as? String
+                    }
+                    if value == optionValue {
+                        mediaOption = currentOption
+                        break
+                    }
                 }
-                if value == optionValue {
-                    mediaOption = currentOption
-                    break
+                // } else if ([type isEqualToString:@"default"]) {
+                //  option = group.defaultOption; */
+            } else if type == "index" {
+                if let value = criteria?.value, let index = value as? Int {
+                    if group.options.count > index {
+                        mediaOption = group.options[index]
+                    }
                 }
+            } else { // default. invalid type or "system"
+                player?.currentItem?.selectMediaOptionAutomatically(in: group)
+                return
             }
-            // } else if ([type isEqualToString:@"default"]) {
-            //  option = group.defaultOption; */
-        } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if group.options.count > index {
-                    mediaOption = group.options[index]
-                }
-            }
-        } else if let group = group { // default. invalid type or "system"
-            player?.currentItem?.selectMediaOptionAutomatically(in: group)
-            return
-        }
 
-        if let group = group {
             // If a match isn't found, option will be nil and text tracks will be disabled
             player?.currentItem?.select(mediaOption, in: group)
         }
@@ -206,7 +210,7 @@ enum RCTPlayerOperations {
             options = .duckOthers
         }
 
-        if let category = category, let options = options {
+        if let category, let options {
             do {
                 try audioSession.setCategory(category, options: options)
             } catch {
@@ -229,13 +233,13 @@ enum RCTPlayerOperations {
                     }
                 #endif
             }
-        } else if let category = category, options == nil {
+        } else if let category, options == nil {
             do {
                 try audioSession.setCategory(category)
             } catch {
                 debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category. Error: \(error).")
             }
-        } else if category == nil, let options = options {
+        } else if category == nil, let options {
             do {
                 try audioSession.setCategory(audioSession.category, options: options)
             } catch {

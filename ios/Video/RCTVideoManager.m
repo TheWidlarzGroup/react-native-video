@@ -37,7 +37,7 @@ RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(localSourceEncryptionKeyScheme, NSString);
-
+RCT_EXPORT_VIEW_PROPERTY(subtitleStyle, NSDictionary);
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
@@ -64,6 +64,9 @@ RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPictureInPictureStatusChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRestoreUserInterfaceForPictureInPictureStop, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onReceiveAdEvent, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onTextTracks, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onAudioTracks, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onTextTrackDataChanged, RCTDirectEventBlock);
 
 RCT_EXTERN_METHOD(save
                   : (NSDictionary*)options reactTag
@@ -80,7 +83,5 @@ RCT_EXTERN_METHOD(setPlayerPauseState : (nonnull NSNumber*)paused reactTag : (no
 RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
-
-RCT_EXTERN_METHOD(dismissFullscreenPlayer reactTag : (nonnull NSNumber*)reactTag)
 
 @end

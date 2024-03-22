@@ -48,7 +48,7 @@ enum RCTVideoDRM {
         var request = URLRequest(url: URL(string: licenseServer)!)
         request.httpMethod = "POST"
 
-        if let headers = headers {
+        if let headers {
             for item in headers {
                 guard let key = item.key as? String, let value = item.value as? String else {
                     continue
@@ -78,30 +78,27 @@ enum RCTVideoDRM {
         contentIdData: Data
     ) -> Promise<Data> {
         return Promise<Data>(on: .global()) { fulfill, reject in
-            var spcError: NSError!
-            var spcData: Data?
-            do {
-                spcData = try loadingRequest.streamingContentKeyRequestData(forApp: certificateData, contentIdentifier: contentIdData as Data, options: nil)
-            } catch _ {
-                print("SPC error")
-            }
+            #if os(visionOS)
+                // TODO: DRM is not supported yet on visionOS. See #3467
+                reject(NSError(domain: "DRM is not supported yet on visionOS", code: 0, userInfo: nil))
+            #else
+                guard let spcData = try? loadingRequest.streamingContentKeyRequestData(
+                    forApp: certificateData,
+                    contentIdentifier: contentIdData as Data,
+                    options: nil
+                ) else {
+                    reject(RCTVideoErrorHandler.noSPC)
+                    return
+                }
 
-            if spcError != nil {
-                reject(spcError)
-            }
-
-            guard let spcData = spcData else {
-                reject(RCTVideoErrorHandler.noSPC)
-                return
-            }
-
-            fulfill(spcData)
+                fulfill(spcData)
+            #endif
         }
     }
 
     static func createCertificateData(certificateStringUrl: String?, base64Certificate: Bool?) -> Promise<Data> {
         return Promise<Data>(on: .global()) { fulfill, reject in
-            guard let certificateStringUrl = certificateStringUrl,
+            guard let certificateStringUrl,
                   let certificateURL = URL(string: certificateStringUrl.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? "") else {
                 reject(RCTVideoErrorHandler.noCertificateURL)
                 return
@@ -115,7 +112,7 @@ enum RCTVideoDRM {
                 }
             } catch {}
 
-            guard let certificateData = certificateData else {
+            guard let certificateData else {
                 reject(RCTVideoErrorHandler.noCertificateData)
                 return
             }
@@ -130,7 +127,7 @@ enum RCTVideoDRM {
 
         return RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
             .then { certificateData -> Promise<Data> in
-                guard let contentIdData = contentIdData else {
+                guard let contentIdData else {
                     throw RCTVideoError.invalidContentId as! Error
                 }
 
@@ -167,7 +164,7 @@ enum RCTVideoDRM {
                 )
             }
             .then { spcData -> Promise<Data> in
-                guard let licenseServer = licenseServer else {
+                guard let licenseServer else {
                     throw RCTVideoError.noLicenseServerURL as! Error
                 }
                 return RCTVideoDRM.fetchLicense(

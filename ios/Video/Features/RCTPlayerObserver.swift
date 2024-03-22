@@ -17,7 +17,7 @@ protocol RCTPlayerObserverHandlerObjc {
 protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleTimeUpdate(time: CMTime)
     func handleReadyForDisplay(changeObject: Any, change: NSKeyValueObservedChange<Bool>)
-    func handleTimeMetadataChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVMetadataItem]?>)
+    func handleTimeMetadataChange(timedMetadata: [AVMetadataItem])
     func handlePlayerItemStatusChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<AVPlayerItem.Status>)
     func handlePlaybackBufferKeyEmpty(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<Bool>)
     func handlePlaybackLikelyToKeepUp(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<Bool>)
@@ -25,11 +25,13 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>)
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>)
     func handleViewControllerOverlayViewFrameChange(overlayView: UIView, change: NSKeyValueObservedChange<CGRect>)
+    func handleTracksChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVPlayerItemTrack]>)
+    func handleLegibleOutput(strings: [NSAttributedString])
 }
 
 // MARK: - RCTPlayerObserver
 
-class RCTPlayerObserver: NSObject {
+class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPlayerItemLegibleOutputPushDelegate {
     weak var _handlers: RCTPlayerObserverHandler?
 
     var player: AVPlayer? {
@@ -45,14 +47,25 @@ class RCTPlayerObserver: NSObject {
         }
     }
 
+    var subtitleStyle: SubtitleStyle?
+
     var playerItem: AVPlayerItem? {
         willSet {
             removePlayerItemObservers()
         }
         didSet {
-            if playerItem != nil {
-                addPlayerItemObservers()
-            }
+            guard let playerItem else { return }
+
+            addPlayerItemObservers()
+
+            // handle timedMetadata
+            let metadataOutput = AVPlayerItemMetadataOutput()
+            let legibleOutput = AVPlayerItemLegibleOutput()
+            playerItem.add(metadataOutput)
+            playerItem.add(legibleOutput)
+            metadataOutput.setDelegate(self, queue: .main)
+            legibleOutput.setDelegate(self, queue: .main)
+            legibleOutput.suppressesPlayerRendering = subtitleStyle?.opacity == 0 ? true : false
         }
     }
 
@@ -91,30 +104,50 @@ class RCTPlayerObserver: NSObject {
     private var _playerViewControllerReadyForDisplayObserver: NSKeyValueObservation?
     private var _playerLayerReadyForDisplayObserver: NSKeyValueObservation?
     private var _playerViewControllerOverlayFrameObserver: NSKeyValueObservation?
+    private var _playerTracksObserver: NSKeyValueObservation?
 
     deinit {
-        if let _handlers = _handlers {
+        if let _handlers {
             NotificationCenter.default.removeObserver(_handlers)
         }
     }
 
+    func metadataOutput(_: AVPlayerItemMetadataOutput, didOutputTimedMetadataGroups groups: [AVTimedMetadataGroup], from _: AVPlayerItemTrack?) {
+        guard let _handlers else { return }
+
+        for metadataGroup in groups {
+            _handlers.handleTimeMetadataChange(timedMetadata: metadataGroup.items)
+        }
+    }
+
+    func legibleOutput(_: AVPlayerItemLegibleOutput,
+                       didOutputAttributedStrings strings: [NSAttributedString],
+                       nativeSampleBuffers _: [Any],
+                       forItemTime _: CMTime) {
+        guard let _handlers else { return }
+        _handlers.handleLegibleOutput(strings: strings)
+    }
+
     func addPlayerObservers() {
-        guard let player = player, let _handlers = _handlers else {
+        guard let player, let _handlers else {
             return
         }
 
         _playerRateChangeObserver = player.observe(\.rate, options: [.old], changeHandler: _handlers.handlePlaybackRateChange)
         _playerVolumeChangeObserver = player.observe(\.volume, options: [.old], changeHandler: _handlers.handleVolumeChange)
-        _playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
+        #if !os(visionOS)
+            _playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, changeHandler: _handlers.handleExternalPlaybackActiveChange)
+        #endif
     }
 
     func removePlayerObservers() {
         _playerRateChangeObserver?.invalidate()
         _playerExternalPlaybackActiveObserver?.invalidate()
+        _playerVolumeChangeObserver?.invalidate()
     }
 
     func addPlayerItemObservers() {
-        guard let playerItem = playerItem, let _handlers = _handlers else { return }
+        guard let playerItem, let _handlers else { return }
         _playerItemStatusObserver = playerItem.observe(\.status, options: [.new, .old], changeHandler: _handlers.handlePlayerItemStatusChange)
         _playerPlaybackBufferEmptyObserver = playerItem.observe(
             \.isPlaybackBufferEmpty,
@@ -126,7 +159,13 @@ class RCTPlayerObserver: NSObject {
             options: [.new, .old],
             changeHandler: _handlers.handlePlaybackLikelyToKeepUp
         )
-        _playerTimedMetadataObserver = playerItem.observe(\.timedMetadata, options: [.new], changeHandler: _handlers.handleTimeMetadataChange)
+
+        // observe tracks update
+        _playerTracksObserver = playerItem.observe(
+            \.tracks,
+            options: [.new, .old],
+            changeHandler: _handlers.handleTracksChange
+        )
     }
 
     func removePlayerItemObservers() {
@@ -134,16 +173,19 @@ class RCTPlayerObserver: NSObject {
         _playerPlaybackBufferEmptyObserver?.invalidate()
         _playerPlaybackLikelyToKeepUpObserver?.invalidate()
         _playerTimedMetadataObserver?.invalidate()
+        _playerTracksObserver?.invalidate()
     }
 
     func addPlayerViewControllerObservers() {
-        guard let playerViewController = playerViewController, let _handlers = _handlers else { return }
+        guard let playerViewController, let _handlers else { return }
 
-        _playerViewControllerReadyForDisplayObserver = playerViewController.observe(
-            \.isReadyForDisplay,
-            options: [.new],
-            changeHandler: _handlers.handleReadyForDisplay
-        )
+        #if !os(visionOS)
+            _playerViewControllerReadyForDisplayObserver = playerViewController.observe(
+                \.isReadyForDisplay,
+                options: [.new],
+                changeHandler: _handlers.handleReadyForDisplay
+            )
+        #endif
 
         _playerViewControllerOverlayFrameObserver = playerViewController.contentOverlayView?.observe(
             \.frame,
@@ -158,7 +200,7 @@ class RCTPlayerObserver: NSObject {
     }
 
     func addPlayerLayerObserver() {
-        guard let _handlers = _handlers else { return }
+        guard let _handlers else { return }
         _playerLayerReadyForDisplayObserver = playerLayer?.observe(\.isReadyForDisplay, options: [.new], changeHandler: _handlers.handleReadyForDisplay)
     }
 
@@ -167,7 +209,7 @@ class RCTPlayerObserver: NSObject {
     }
 
     func addPlayerTimeObserver() {
-        guard let _handlers = _handlers else { return }
+        guard let _handlers else { return }
         removePlayerTimeObserver()
         let progressUpdateIntervalMS: Float64 = _progressUpdateInterval / 1000
         // @see endScrubbing in AVPlayerDemoPlaybackViewController.m
@@ -194,7 +236,7 @@ class RCTPlayerObserver: NSObject {
     }
 
     func replaceTimeObserverIfSet(_ newUpdateInterval: Float64? = nil) {
-        if let newUpdateInterval = newUpdateInterval {
+        if let newUpdateInterval {
             _progressUpdateInterval = newUpdateInterval
         }
         if _timeObserver != nil {
@@ -203,7 +245,7 @@ class RCTPlayerObserver: NSObject {
     }
 
     func attachPlayerEventListeners() {
-        guard let _handlers = _handlers else { return }
+        guard let _handlers else { return }
         NotificationCenter.default.removeObserver(_handlers,
                                                   name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
                                                   object: player?.currentItem)
@@ -242,7 +284,7 @@ class RCTPlayerObserver: NSObject {
     func clearPlayer() {
         player = nil
         playerItem = nil
-        if let _handlers = _handlers {
+        if let _handlers {
             NotificationCenter.default.removeObserver(_handlers)
         }
     }

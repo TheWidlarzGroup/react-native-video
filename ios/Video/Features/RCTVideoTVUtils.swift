@@ -12,7 +12,7 @@ import Foundation
             var metadataGroups = [AVTimedMetadataGroup]()
 
             // Iterate over the defined chapters and build a timed metadata group object for each.
-            chapters.forEach { chapter in
+            for chapter in chapters {
                 metadataGroups.append(makeTimedMetadataGroup(for: chapter))
             }
 
