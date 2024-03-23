@@ -120,12 +120,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onTextTrackDataChanged: RCTDirectEventBlock?
 
     @objc
-    func _onPictureInPictureStatusChanged() {
+    func _onPictureInPictureEnter() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
     }
 
     @objc
-    func _onRestoreUserInterfaceForPictureInPictureStop() {
+    func _onPictureInPictureExit() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
     }
 
@@ -143,9 +143,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         #if os(iOS)
             _pip = RCTPictureInPicture({ [weak self] in
-                self?._onPictureInPictureStatusChanged()
+                self?._onPictureInPictureEnter()
             }, { [weak self] in
-                self?._onRestoreUserInterfaceForPictureInPictureStop()
+                self?._onPictureInPictureExit()
+            }, { [weak self] in
+                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
             })
         #endif
 
