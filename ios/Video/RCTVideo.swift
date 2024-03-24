@@ -129,6 +129,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
     }
 
+    func handlePictureInPictureEnter() {
+        onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
+    }
+
+    func handlePictureInPictureExit() {
+        onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
+    }
+
     func isPipEnabled() -> Bool {
         return _pictureInPictureEnabled
     }
