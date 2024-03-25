@@ -229,17 +229,25 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
       Platform.select({
         ios: () => {
-          nativeRef.current?.setNativeProps({
-            seek: {
+          VideoManager.seek(
+            {
               time,
               tolerance: tolerance || 0,
             },
-          });
+            getReactTag(nativeRef),
+          );
+        },
+        android: () => {
+          VideoManager.seek(
+            {
+              time,
+            },
+            getReactTag(nativeRef),
+          );
         },
         default: () => {
-          nativeRef.current?.setNativeProps({
-            seek: time,
-          });
+          // TODO: Implement VideoManager.seek for windows
+          nativeRef.current?.setNativeProps({seek: time});
         },
       })();
     }, []);
