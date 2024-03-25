@@ -29,6 +29,7 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleLegibleOutput(strings: [NSAttributedString])
     func handlePictureInPictureEnter()
     func handlePictureInPictureExit()
+    func handleRestoreUserInterfaceForPictureInPictureStop()
 }
 
 // MARK: - RCTPlayerObserver
@@ -107,6 +108,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
     private var _playerLayerReadyForDisplayObserver: NSKeyValueObservation?
     private var _playerViewControllerOverlayFrameObserver: NSKeyValueObservation?
     private var _playerTracksObserver: NSKeyValueObservation?
+    private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
 
     deinit {
         if let _handlers {
@@ -304,5 +306,23 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
         guard let _handlers else { return }
 
         _handlers.handlePictureInPictureExit()
+    }
+
+    func playerViewController(
+        _: AVPlayerViewController,
+        restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
+    ) {
+        guard let _handlers else { return }
+
+        _handlers.handleRestoreUserInterfaceForPictureInPictureStop()
+
+        _restoreUserInterfaceForPIPStopCompletionHandler = completionHandler
+    }
+
+    func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore: Bool) {
+        guard let _restoreUserInterfaceForPIPStopCompletionHandler else { return }
+
+        _restoreUserInterfaceForPIPStopCompletionHandler(restore)
+        self._restoreUserInterfaceForPIPStopCompletionHandler = nil
     }
 }
