@@ -5,5 +5,7 @@
       nodePackages.yarn
       eslint_d
       prettierd
+      jdk11
+      (jdt-language-server.override { jdk = jdk11; })
     ];
   }
