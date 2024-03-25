@@ -435,10 +435,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           const data = event.nativeEvent;
           if (data && data.spcBase64) {
             const getLicenseOverride = drm.getLicense(
-              data.spcBase64,
-              data.contentId,
               data.licenseUrl,
               data.loadedLicenseUrl,
+              data.contentId,
+              data.spcBase64,
             );
             const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
             getLicensePromise
