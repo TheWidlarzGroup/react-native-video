@@ -478,7 +478,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
         }
       },
-      [drm?.getLicense, useExternalGetLicense],
+      [drm, useExternalGetLicense],
     );
 
     useImperativeHandle(
