@@ -55,10 +55,10 @@ export type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
+    spcBase64: string,
+    contentId: string,
     licenseUrl: string,
     loadedLicenseUrl: string,
-    contentId: string,
-    spcBase64: string,
   ) => void; // ios
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
