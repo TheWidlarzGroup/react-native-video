@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/black">
 
     <com.diceplatform.doris.ui.ExoDorisTvPlayerView
@@ -16,5 +17,26 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         app:use_controller="false" />
+
+    <TextView
+        android:id="@+id/skipMarkTextView"
+        style="@style/TextAppearance.SkipMarker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="45dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_skip_selector"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:paddingLeft="12dp"
+        android:paddingTop="4dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/white"
+        android:visibility="invisible"
+        tools:text="Skip"
+        tools:visibility="visible" />
 
 </FrameLayout>

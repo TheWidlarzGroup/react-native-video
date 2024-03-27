@@ -23,6 +23,8 @@ import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
+import com.diceplatform.doris.custom.ui.entity.marker.SkipMarker;
+import com.diceplatform.doris.custom.ui.entity.marker.SkipMarker.Type;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TracksPolicy;
@@ -143,6 +145,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_RELATED_VIDEOS_HAS_MORE = "hasMore";
     private static final String PROP_RELATED_VIDEOS_SUBTITLE = "subtitle";
     private static final String PROP_IS_FAVOURITE = "isFavourite";
+    private static final String PROP_SKIP_MARKERS = "skipMarkers";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -249,7 +252,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         if (src.hasKey(PROP_SRC_BIF_URL)) {
             videoView.setThumbnailsPreviewUrl(src.getString(PROP_SRC_BIF_URL));
         }
-
+        if(src !=null && src.hasKey(PROP_SKIP_MARKERS)) {
+            videoView.setSkipMarkers(parseSkipMarkers(ReadableMapUtils.getArray(src, PROP_SKIP_MARKERS)));
+        }
         String selectedSubtitleTrack = ReadableMapUtils.getString(src, PROP_SRC_SELECTED_SUBTITLE_TRACK);
         ReadableArray preferredAudioTracksArray = ReadableMapUtils.getArray(src, PROP_SRC_PREFERRED_AUDIO_TRACKS);
 
@@ -703,5 +708,34 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String dateFormat = map.hasKey("dateFormat") ? map.getString("dateFormat") : null;
         String channelLogoUrl = map.hasKey("channelLogoUrl") ? map.getString("channelLogoUrl") : null;
         return new ProgramInfo(title, startDate, endDate, dateFormat, channelLogoUrl);
+    }
+
+    public static List<SkipMarker> parseSkipMarkers(@Nullable ReadableArray skipArray) {
+        if (skipArray == null) {
+            return null;
+        }
+        List<SkipMarker> skipMarkers = new ArrayList<>();
+        for (int i = 0; i < skipArray.size(); i++) {
+            ReadableMap map = skipArray.getMap(i);
+            long startTime = map.hasKey("startTimeMs") ? ReadableMapUtils.getInt(map, "startTimeMs") : (ReadableMapUtils.getInt(map, "startTime") * 1000);
+            long stopTime = map.hasKey("stopTimeMs") ? ReadableMapUtils.getInt(map, "stopTimeMs") : (ReadableMapUtils.getInt(map, "stopTime") * 1000);
+            SkipMarker.Type type = parseSkipMarkerType(map.hasKey("skipMarkerType") ? ReadableMapUtils.getString(map, "skipMarkerType") : ReadableMapUtils.getString(map, "type"));
+            if (type != null && stopTime > startTime) {
+                skipMarkers.add(new SkipMarker(startTime, stopTime, type));
+            }
+        }
+        return skipMarkers;
+    }
+
+    private static Type parseSkipMarkerType(String type) {
+        if (type == null || type.isEmpty()) return null;
+        switch (type.toLowerCase()) {
+            case "skip_intro":
+                return Type.INTRO;
+            case "skip_credits":
+                return Type.CREDITS;
+            default:
+                return null;
+        }
     }
 }

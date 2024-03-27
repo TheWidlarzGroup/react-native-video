@@ -25,6 +25,8 @@ public class RNTranslations {
     private static final String KEY_PLAYING_LIVE = "playingLive";
     private static final String KEY_NOW_PLAYING = "nowPlaying";
     private static final String KEY_AUDIO_AND_SUBTITLES_LABEL = "player_audio_and_subtitles_button";
+    private static final String KEY_SKIP_INTRO = "skipIntro";
+    private static final String KEY_SKIP_CREDITS = "skipCredits";
 
     private static final String DEFAULT_EPG_LABEL = "Schedule";
     private static final String DEFAULT_STATS_LABEL = "Stats";
@@ -45,6 +47,8 @@ public class RNTranslations {
     private static final String DEFAULT_PLAYING_LIVE = "Playing Live";
     private static final String DEFAULT_NOW_PLAYING = "Now Playing";
     private static final String DEFAULT_AUDIO_AND_SUBTITLES = "Audio & Subtitles";
+    private static final String DEFAULT_SKIP_INTRO = "Skip Intro";
+    private static final String DEFAULT_SKIP_CREDITS = "Skip Credit";
 
     private final Map<String, Object> translations;
     private final String epgLabel;
@@ -66,6 +70,8 @@ public class RNTranslations {
     private final String playingLiveLabel;
     private final String nowPlayingLabel;
     private final String audioAndSubtitlesLabel;
+    private final String skipIntro;
+    private final String skipCredits;
 
     public RNTranslations(@NonNull Map<String, Object> translations) {
         this.translations = translations;
@@ -89,6 +95,8 @@ public class RNTranslations {
         this.playingLiveLabel = getStringFromMap(KEY_PLAYING_LIVE, DEFAULT_PLAYING_LIVE);
         this.nowPlayingLabel = getStringFromMap(KEY_NOW_PLAYING, DEFAULT_NOW_PLAYING);
         this.audioAndSubtitlesLabel = getStringFromMap(KEY_AUDIO_AND_SUBTITLES_LABEL, DEFAULT_AUDIO_AND_SUBTITLES);
+        this.skipIntro = getStringFromMap(KEY_SKIP_INTRO, DEFAULT_SKIP_INTRO);
+        this.skipCredits = getStringFromMap(KEY_SKIP_CREDITS, DEFAULT_SKIP_CREDITS);
     }
 
     private String getStringFromMap(String key, String defaultValue) {
@@ -169,5 +177,13 @@ public class RNTranslations {
 
     public String getAudioAndSubtitlesLabel() {
         return audioAndSubtitlesLabel;
+    }
+
+    public String getSkipIntroLabel() {
+        return skipIntro;
+    }
+
+    public String getSkipCreditsLabel() {
+        return skipCredits;
     }
 }

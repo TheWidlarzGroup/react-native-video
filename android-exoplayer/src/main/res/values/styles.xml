@@ -68,4 +68,13 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="TextAppearance.SkipMarker">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
 </resources>
