@@ -37,6 +37,8 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_RATE = "rate";
     public static final String PROP_FULLSCREEN = "fullscreen";
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
+    public static final String PROP_DVR_SEEK_FORWARD_INTERVAL = "dvrSeekForwardInterval";
+    public static final String PROP_DVR_SEEK_BACKWARD_INTERVAL = "dvrSeekBackwardInterval";
     public static final String PROP_CONTROLS = "controls";
 
     @Override
@@ -159,6 +161,16 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         videoView.setPlayInBackground(playInBackground);
     }
 
+    @ReactProp(name = PROP_DVR_SEEK_FORWARD_INTERVAL)
+    public void setDVRSeekForward(final ReactVideoView videoView, final float dvrSeekForwardInterval) {
+        videoView.setDVRSeekForward(playInBackground);
+    }
+
+    @ReactProp(name = PROP_DVR_SEEK_BACKWARD_INTERVAL)
+    public void setDVRSeekBackward(final ReactVideoView videoView, final float dvrSeekBackwardInterval) {
+        videoView.setDVRSeekBackward(playInBackground);
+    }
+    
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactVideoView videoView, final boolean controls) {
         videoView.setControls(controls);

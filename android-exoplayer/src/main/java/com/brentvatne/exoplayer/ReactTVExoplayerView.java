@@ -301,6 +301,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private boolean playInBackground = false;
 
+    private float dvrSeekForwardInterval;
+    private float dvrSeekBackwardInterval;
+
     //Drm
     private ActionToken actionToken;
 
@@ -481,8 +484,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     getContext(),
                     adType,
                     MAX_LOAD_BUFFER_MS,
-                    exoDorisPlayerView.getFastForwardIncrementMs(),
-                    exoDorisPlayerView.getRewindIncrementMs(),
+                    this.seekForwardMs ?? exoDorisPlayerView.getFastForwardIncrementMs(),
+                    this.seekBackwardMs ?? exoDorisPlayerView.getRewindIncrementMs(),
                     adViewProvider,
                     src.getTracksPolicy());
 
@@ -1523,6 +1526,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void setPlayInBackground(boolean playInBackground) {
         this.playInBackground = playInBackground;
+    }
+
+    public void setDVRSeekForward(long seekForwardMs) {
+        this.seekForwardMs = seekForwardMs;
+    }
+
+    public void setDVRSeekBackward(long seekBackwardMs) {
+        this.seekBackwardMs = seekBackwardMs;
+    }
+
+    public float getDVRSeekForward() {
+        return this.seekBackwardMs;
+    }
+
+    public float getDVRSeekBackward() {
+        return this.seekBackwardMs;
     }
 
     public void setDisableFocus(boolean disableFocus) {
