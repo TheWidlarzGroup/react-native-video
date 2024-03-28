@@ -53,6 +53,13 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
         }
     }
 
+    @ReactMethod
+    fun setMuted(muted: Boolean, reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.setMutedModifier(muted)
+        }
+    }
+
     companion object {
         private const val REACT_CLASS = "VideoManager"
     }
