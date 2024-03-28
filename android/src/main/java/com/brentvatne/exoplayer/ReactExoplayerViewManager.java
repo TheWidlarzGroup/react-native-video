@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
@@ -15,7 +16,6 @@ import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
-import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -92,19 +92,21 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_DEBUG = "debug";
 
-    private ReactExoplayerConfig config;
+    private final ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
         this.config = config;
     }
 
+    @NonNull
     @Override
     public String getName() {
         return REACT_CLASS;
     }
 
+    @NonNull
     @Override
-    protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
+    protected ReactExoplayerView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
         return new ReactExoplayerView(themedReactContext, config);
     }
 
@@ -198,9 +200,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
             if (identifier > 0) {
                 Uri srcUri = RawResourceDataSource.buildRawResourceUri(identifier);
-                if (srcUri != null) {
-                    videoView.setRawSrc(srcUri, extension);
-                }
+                videoView.setRawSrc(srcUri, extension);
             } else {
                 videoView.clearSrc();
             }
