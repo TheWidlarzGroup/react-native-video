@@ -70,7 +70,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
-    private static final String PROP_SEEK = "seek";
     private static final String PROP_RATE = "rate";
     private static final String PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount";
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
@@ -319,11 +318,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPORT_BANDWIDTH, defaultBoolean = false)
     public void setReportBandwidth(final ReactExoplayerView videoView, final boolean reportBandwidth) {
         videoView.setReportBandwidth(reportBandwidth);
-    }
-
-    @ReactProp(name = PROP_SEEK)
-    public void setSeek(final ReactExoplayerView videoView, final float seek) {
-        videoView.seekTo(Math.round(seek * 1000f));
     }
 
     @ReactProp(name = PROP_RATE)
