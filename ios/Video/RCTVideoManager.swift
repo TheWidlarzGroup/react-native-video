@@ -76,9 +76,9 @@ class RCTVideoManager: RCTViewManager {
             videoView?.setPaused(paused.boolValue)
         })
     }
-    
+
     @objc(getCurrentPlaybackTime:resolver:rejecter:)
-    func getCurrentPlaybackTime(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject: @escaping RCTPromiseRejectBlock) {
+    func getCurrentPlaybackTime(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
@@ -90,7 +90,7 @@ class RCTVideoManager: RCTViewManager {
     }
 
     @objc(getCurrentPlaybackRate:resolver:rejecter:)
-    func getCurrentPlaybackRate(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject: @escaping RCTPromiseRejectBlock) {
+    func getCurrentPlaybackRate(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
@@ -100,7 +100,7 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-    
+
     @objc(setPlaybackRate:reactTag:)
     func setPlaybackRate(rate: Float, reactTag: NSNumber) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
@@ -112,9 +112,9 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-    
+
     @objc(checkIfLivestream:resolver:rejecter:)
-    func checkIfLivestream(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject: @escaping RCTPromiseRejectBlock) {
+    func checkIfLivestream(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
             let view = viewRegistry?[reactTag]
             if !(view is RCTVideo) {
@@ -124,7 +124,7 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-    
+
     @objc(setVolume:forceUnmute:reactTag:)
     func setVolume(volume: Float, forceUnmute: NSNumber, reactTag: NSNumber) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
@@ -137,7 +137,7 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-    
+
     @objc(setMuted:reactTag:)
     func setMuted(muted: NSNumber, reactTag: NSNumber) {
         bridge.uiManager.prependUIBlock { _, viewRegistry in
@@ -150,7 +150,7 @@ class RCTVideoManager: RCTViewManager {
             }
         }
     }
-    
+
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }
