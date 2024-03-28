@@ -47,6 +47,8 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
         }
     }
 
+    var subtitleStyle: SubtitleStyle?
+
     var playerItem: AVPlayerItem? {
         willSet {
             removePlayerItemObservers()
@@ -63,6 +65,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
             playerItem.add(legibleOutput)
             metadataOutput.setDelegate(self, queue: .main)
             legibleOutput.setDelegate(self, queue: .main)
+            legibleOutput.suppressesPlayerRendering = subtitleStyle?.opacity == 0 ? true : false
         }
     }
 

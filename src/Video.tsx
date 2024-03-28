@@ -9,34 +9,37 @@ import React, {
 } from 'react';
 import {View, StyleSheet, Image, Platform} from 'react-native';
 import NativeVideoComponent, {
+  type OnAudioFocusChangedData,
+  type OnAudioTracksData,
+  type OnBandwidthUpdateData,
+  type OnBufferData,
+  type OnExternalPlaybackChangeData,
+  type OnGetLicenseData,
+  type OnLoadData,
+  type OnLoadStartData,
+  type OnPictureInPictureStatusChangedData,
+  type OnPlaybackStateChangedData,
+  type OnProgressData,
+  type OnReceiveAdEventData,
+  type OnSeekData,
+  type OnTextTrackDataChangedData,
+  type OnTextTracksData,
+  type OnTimedMetadataData,
+  type OnVideoAspectRatioData,
+  type OnVideoErrorData,
+  type OnVideoTracksData,
   type VideoComponentType,
-} from './VideoNativeComponent';
+  type VideoSrc,
+} from './specs/VideoNativeComponent';
 
 import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
-import {getReactTag, resolveAssetSourceForVideo} from './utils';
-import {VideoManager} from './VideoNativeComponent';
-import type {
-  OnAudioFocusChangedData,
-  OnAudioTracksData,
-  OnBandwidthUpdateData,
-  OnBufferData,
-  OnExternalPlaybackChangeData,
-  OnGetLicenseData,
-  OnLoadData,
-  OnLoadStartData,
-  OnPictureInPictureStatusChangedData,
-  OnPlaybackStateChangedData,
-  OnProgressData,
-  OnReceiveAdEventData,
-  OnSeekData,
-  OnTextTrackDataChangedData,
-  OnTextTracksData,
-  OnTimedMetadataData,
-  OnVideoAspectRatioData,
-  OnVideoErrorData,
-  OnVideoTracksData,
-  ReactVideoProps,
-} from './types';
+import {
+  generateHeaderForNative,
+  getReactTag,
+  resolveAssetSourceForVideo,
+} from './utils';
+import {VideoManager} from './specs/VideoNativeComponent';
+import type {ReactVideoProps} from './types/video';
 
 export type VideoSaveData = {
   uri: string;
@@ -130,11 +133,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [posterResizeMode],
     );
 
-    const src = useMemo(() => {
+    const src = useMemo<VideoSrc | undefined>(() => {
       if (!source) {
         return undefined;
       }
-
       const resolvedSource = resolveAssetSourceForVideo(source);
       let uri = resolvedSource.uri || '';
       if (uri && uri.match(/^\//)) {
@@ -159,7 +161,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         type: resolvedSource.type || '',
         mainVer: resolvedSource.mainVer || 0,
         patchVer: resolvedSource.patchVer || 0,
-        requestHeaders: resolvedSource.headers || {},
+        requestHeaders: generateHeaderForNative(resolvedSource.headers),
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
@@ -178,7 +180,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return {
         type: drm.type,
         licenseServer: drm.licenseServer,
-        headers: drm.headers,
+        headers: generateHeaderForNative(drm.headers),
         contentId: drm.contentId,
         certificateUrl: drm.certificateUrl,
         base64Certificate: drm.base64Certificate,
@@ -190,10 +192,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
+      const value = selectedTextTrack.value
+        ? `${selectedTextTrack.value}`
+        : undefined;
 
       return {
         type: selectedTextTrack?.type,
-        value: selectedTextTrack?.value,
+        value,
       };
     }, [selectedTextTrack]);
 
@@ -201,10 +206,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
+      const value = selectedAudioTrack.value
+        ? `${selectedAudioTrack.value}`
+        : undefined;
 
       return {
         type: selectedAudioTrack?.type,
-        value: selectedAudioTrack?.value,
+        value,
       };
     }, [selectedAudioTrack]);
 
@@ -229,19 +237,22 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         return;
       }
 
+      const callSeekFunction = () => {
+        VideoManager.seek(
+          {
+            time,
+            tolerance: tolerance || 0,
+          },
+          getReactTag(nativeRef),
+        );
+      };
+
       Platform.select({
-        ios: () => {
-          nativeRef.current?.setNativeProps({
-            seek: {
-              time,
-              tolerance: tolerance || 0,
-            },
-          });
-        },
+        ios: callSeekFunction,
+        android: callSeekFunction,
         default: () => {
-          nativeRef.current?.setNativeProps({
-            seek: time,
-          });
+          // TODO: Implement VideoManager.seek for windows
+          nativeRef.current?.setNativeProps({seek: time});
         },
       })();
     }, []);
@@ -459,15 +470,18 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAspectRatio],
     );
 
+    const useExternalGetLicense = drm?.getLicense instanceof Function;
+
     const onGetLicense = useCallback(
       (event: NativeSyntheticEvent<OnGetLicenseData>) => {
-        if (drm && drm.getLicense instanceof Function) {
+        if (useExternalGetLicense) {
           const data = event.nativeEvent;
           if (data && data.spcBase64) {
             const getLicenseOverride = drm.getLicense(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
+              data.loadedLicenseUrl,
             );
             const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
             getLicensePromise
@@ -476,14 +490,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
                   nativeRef.current &&
                     VideoManager.setLicenseResult(
                       result,
-                      data.licenseUrl,
+                      data.loadedLicenseUrl,
                       getReactTag(nativeRef),
                     );
                 } else {
                   nativeRef.current &&
                     VideoManager.setLicenseResultError(
                       'Empty license result',
-                      data.licenseUrl,
+                      data.loadedLicenseUrl,
                       getReactTag(nativeRef),
                     );
                 }
@@ -492,20 +506,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
                 nativeRef.current &&
                   VideoManager.setLicenseResultError(
                     'fetch error',
-                    data.licenseUrl,
+                    data.loadedLicenseUrl,
                     getReactTag(nativeRef),
                   );
               });
           } else {
             VideoManager.setLicenseResultError(
               'No spc received',
-              data.licenseUrl,
+              data.loadedLicenseUrl,
               getReactTag(nativeRef),
             );
           }
         }
       },
-      [drm],
+      [drm, useExternalGetLicense],
     );
 
     useImperativeHandle(
@@ -559,7 +573,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
-          onGetLicense={onGetLicense}
+          onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={onVideoLoad}
           onVideoLoadStart={onVideoLoadStart}
           onVideoError={onVideoError}

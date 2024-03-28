@@ -52,6 +52,16 @@ body:
       value: "A bug happened!"
     validations:
       required: true
+  
+  - type: input
+    id: reproduction-repo
+    attributes:
+      label: Reproduction
+      description: Provide a link to a repository with a reproduction of the bug, this is optional but it will make us to fix the bug faster
+      placeholder: Reproduction Repository
+      value: "repository link"
+    validations:
+      required: false
 
   - type: textarea
     id: reproduction

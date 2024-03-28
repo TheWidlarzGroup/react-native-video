@@ -5,7 +5,7 @@ struct VideoSource {
     let isAsset: Bool
     let shouldCache: Bool
     let requestHeaders: [String: Any]?
-    let startPosition: Int64?
+    let startPosition: Float64?
     let cropStart: Int64?
     let cropEnd: Int64?
     // Custom Metadata
@@ -40,10 +40,20 @@ struct VideoSource {
         self.isNetwork = json["isNetwork"] as? Bool ?? false
         self.isAsset = json["isAsset"] as? Bool ?? false
         self.shouldCache = json["shouldCache"] as? Bool ?? false
-        self.requestHeaders = json["requestHeaders"] as? [String: Any]
-        self.startPosition = json["startPosition"] as? Int64
-        self.cropStart = json["cropStart"] as? Int64
-        self.cropEnd = json["cropEnd"] as? Int64
+        if let requestHeaders = json["requestHeaders"] as? [[String: Any]] {
+            var _requestHeaders: [String: Any] = [:]
+            for requestHeader in requestHeaders {
+                if let key = requestHeader["key"] as? String, let value = requestHeader["value"] {
+                    _requestHeaders[key] = value
+                }
+            }
+            self.requestHeaders = _requestHeaders
+        } else {
+            self.requestHeaders = nil
+        }
+        self.startPosition = json["startPosition"] as? Float64
+        self.cropStart = (json["cropStart"] as? Float64).flatMap { Int64(round($0)) }
+        self.cropEnd = (json["cropEnd"] as? Float64).flatMap { Int64(round($0)) }
         self.title = json["title"] as? String
         self.subtitle = json["subtitle"] as? String
         self.description = json["description"] as? String
