@@ -79,76 +79,44 @@ class RCTVideoManager: RCTViewManager {
 
     @objc(getCurrentPlaybackTime:resolver:rejecter:)
     func getCurrentPlaybackTime(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.getCurrentPlaybackTime(resolve)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.getCurrentPlaybackTime(resolve)
+        })
     }
 
     @objc(getCurrentPlaybackRate:resolver:rejecter:)
     func getCurrentPlaybackRate(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.getCurrentPlaybackRate(resolve)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.getCurrentPlaybackRate(resolve)
+        })
     }
 
     @objc(setPlaybackRate:reactTag:)
     func setPlaybackRate(rate: Float, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.setRate(rate)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setRate(rate)
+        })
     }
 
     @objc(checkIfLivestream:resolver:rejecter:)
     func checkIfLivestream(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                view.checkIfLivestream(resolve)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.checkIfLivestream(resolve)
+        })
     }
 
     @objc(setVolume:forceUnmute:reactTag:)
     func setVolume(volume: Float, forceUnmute: NSNumber, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                let forceUnmute = forceUnmute.boolValue
-                view.setVolume(volume, forceUnmute)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setVolume(volume, forceUnmute.boolValue)
+        })
     }
 
     @objc(setMuted:reactTag:)
     func setMuted(muted: NSNumber, reactTag: NSNumber) {
-        bridge.uiManager.prependUIBlock { _, viewRegistry in
-            let view = viewRegistry?[reactTag]
-            if !(view is RCTVideo) {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: %@", String(describing: view))
-            } else if let view = view as? RCTVideo {
-                let muted = muted.boolValue
-                view.setMuted(muted)
-            }
-        }
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setMuted(muted.boolValue)
+        })
     }
 
     override class func requiresMainQueueSetup() -> Bool {
