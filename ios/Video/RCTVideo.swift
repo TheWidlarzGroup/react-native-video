@@ -611,19 +611,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _mixWithOthers = mixWithOthers
         applyModifiers()
     }
-    
+
     @objc
     func getCurrentPlaybackTime(_ resolve: @escaping RCTPromiseResolveBlock) {
         let currentTime = RCTVideoUtils.getCurrentTime(playerItem: _playerItem)
-        
+
         resolve(currentTime)
     }
-    
+
     @objc
     func getCurrentPlaybackRate(_ resolve: @escaping RCTPromiseResolveBlock) {
         resolve(_player?.rate ?? .zero)
     }
-    
+
     @objc
     func checkIfLivestream(_ resolve: @escaping RCTPromiseResolveBlock) {
         resolve(_livestream)
@@ -735,15 +735,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _volume = volume
         applyModifiers()
     }
-    
+
     @objc
     func setVolume(_ volume: Float, _ forceUnmute: Bool) {
         _volume = volume
-        
-        if (forceUnmute) {
+
+        if forceUnmute {
             _muted = false
         }
-        
+
         applyModifiers()
     }
 
@@ -1286,7 +1286,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if self._videoLoadStarted {
                 all(RCTVideoUtils.getAudioTrackInfo(self._player), RCTVideoUtils.getTextTrackInfo(self._player)).then { audioTracks, textTracks in
                     self._livestream = _playerItem.duration.isIndefinite
-                    
+
                     self.onVideoLoad?(["duration": NSNumber(value: duration),
                                        "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
                                        "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
