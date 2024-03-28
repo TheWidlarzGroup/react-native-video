@@ -34,11 +34,12 @@ Usually clear playback can be read with all Video player. Then you should ensure
 
 If content is protected with an access token or any other http header, ensure you can access to you data with a wget call or a rest client app. You need to provide all needed access token / authentication parameters.
 
-## Everything seems correct but content cannot be accessed
+## I need to debug network calls but I don't see them in react native debugging tools
 
-You need to record network trace to ensure communications with server is correct.
-[Charles proxy](https://www.charlesproxy.com/) is a simple and useful tool to sniff all http/https calls. 
-With this tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / video chunks, ...
+This is a react native limitation. React native tools can only see network calls done in JS.
+To achieve that, you need to record network trace to ensure communications with server is correct.
+[Charles proxy](https://www.charlesproxy.com/) or [Fiddler](https://www.telerik.com/fiddler) are a simple and useful tool to sniff all http/https calls.
+With these tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / video chunks, ...
 
 Then try to compare exchanges with previous tests you made.
 
