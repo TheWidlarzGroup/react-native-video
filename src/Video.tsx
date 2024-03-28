@@ -227,24 +227,19 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         return;
       }
 
+      const callSeekFunction = () => {
+        VideoManager.seek(
+          {
+            time,
+            tolerance: tolerance || 0,
+          },
+          getReactTag(nativeRef),
+        );
+      };
+
       Platform.select({
-        ios: () => {
-          VideoManager.seek(
-            {
-              time,
-              tolerance: tolerance || 0,
-            },
-            getReactTag(nativeRef),
-          );
-        },
-        android: () => {
-          VideoManager.seek(
-            {
-              time,
-            },
-            getReactTag(nativeRef),
-          );
-        },
+        ios: callSeekFunction,
+        android: callSeekFunction,
         default: () => {
           // TODO: Implement VideoManager.seek for windows
           nativeRef.current?.setNativeProps({seek: time});
