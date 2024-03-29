@@ -351,8 +351,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         throw NSError(domain: "", code: 0, userInfo: nil)
                     }
                     if let uri = source.uri, uri.starts(with: "ph://") {
-                        self.isSetSourceOngoing = false
-                        self.applyNextSource()
                         return Promise {
                             RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
                                 return self.playerItemPrepareText(asset: asset, assetOptions: nil, uri: source.uri ?? "")
