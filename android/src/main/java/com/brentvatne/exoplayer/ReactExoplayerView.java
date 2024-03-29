@@ -357,8 +357,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostDestroy() {
-        stopPlayback();
-        themedReactContext.removeLifecycleEventListener(this);
+        cleanUpResources();
     }
 
     public void cleanUpResources() {
@@ -998,26 +997,13 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private void startPlayback() {
+    private void resumePlayback() {
         if (player != null) {
-            switch (player.getPlaybackState()) {
-                case Player.STATE_IDLE:
-                case Player.STATE_ENDED:
-                    initializePlayer();
-                    break;
-                case Player.STATE_BUFFERING:
-                case Player.STATE_READY:
-                    if (!player.getPlayWhenReady()) {
-                        setPlayWhenReady(true);
-                    }
-                    break;
-                default:
-                    break;
+            if (!player.getPlayWhenReady()) {
+                setPlayWhenReady(true);
             }
-        } else {
-            initializePlayer();
+            setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
         }
-        setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
     }
 
     private void pausePlayback() {
@@ -1850,7 +1836,7 @@ public class ReactExoplayerView extends FrameLayout implements
         isPaused = paused;
         if (player != null) {
             if (!paused) {
-                startPlayback();
+                resumePlayback();
             } else {
                 pausePlayback();
             }
