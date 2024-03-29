@@ -357,8 +357,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostDestroy() {
-        stopPlayback();
-        themedReactContext.removeLifecycleEventListener(this);
+        cleanUpResources();
     }
 
     public void cleanUpResources() {
