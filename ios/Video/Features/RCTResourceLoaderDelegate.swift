@@ -152,7 +152,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                         certificateUrl: _drm.certificateUrl,
                         base64Certificate: _drm.base64Certificate
                     )
-                    
+
                     self._requestingCertificate = true
                     self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? "",
                                          "loadedLicenseUrl": loadingRequest.request.url?.absoluteString ?? "",
@@ -168,14 +168,14 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                         base64Certificate: _drm.base64Certificate,
                         headers: _drm.headers
                     )
-                    
+
                     guard let dataRequest = loadingRequest.dataRequest else {
                         throw RCTVideoErrorHandler.noCertificateData
                     }
                     dataRequest.respond(with: data)
                     loadingRequest.finishLoading()
                 }
-            } catch let error {
+            } catch {
                 self.finishLoadingWithError(error: error, licenseUrl: requestKey)
                 self._requestingCertificateErrored = true
             }

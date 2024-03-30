@@ -130,7 +130,7 @@ enum RCTVideoUtils {
         let audioTracks: NSMutableArray! = NSMutableArray()
 
         let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .audible)
-        
+
         for i in 0 ..< (group?.options.count ?? 0) {
             let currentOption = group?.options[i]
             var title = ""
@@ -150,7 +150,7 @@ enum RCTVideoUtils {
             ] as [String: Any]
             audioTracks.add(audioTrack)
         }
-        
+
         return audioTracks as [AnyObject]
     }
 
@@ -162,7 +162,7 @@ enum RCTVideoUtils {
         // if streaming video, we extract the text tracks
         var textTracks: [TextTrack] = []
         let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .legible)
-        
+
         for i in 0 ..< (group?.options.count ?? 0) {
             let currentOption = group?.options[i]
             var title = ""
@@ -181,7 +181,7 @@ enum RCTVideoUtils {
             ])
             textTracks.append(textTrack)
         }
-        
+
         return textTracks
     }
 
@@ -214,7 +214,7 @@ enum RCTVideoUtils {
     static func generateMixComposition(_ asset: AVAsset) async -> AVMutableComposition {
         let videoTracks = await RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .video)
         let audioTracks = await RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .audio)
-        
+
         let mixComposition = AVMutableComposition()
 
         if let videoAsset = videoTracks?.first, let audioAsset = audioTracks?.first {
@@ -239,7 +239,7 @@ enum RCTVideoUtils {
                 at: .zero
             )
         }
-        
+
         return mixComposition
     }
 
@@ -247,15 +247,15 @@ enum RCTVideoUtils {
                                    textTracks: [TextTrack]?) async -> [TextTrack] {
         var validTextTracks: [TextTrack] = []
         var tracks: [[AVAssetTrack]] = []
-        
+
         let videoTracks = await RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .video)
         guard let videoAsset = videoTracks?.first else { return validTextTracks }
-        
+
         if let textTracks, !textTracks.isEmpty {
             for textTrack in textTracks {
                 var textURLAsset: AVURLAsset!
                 let textUri: String = textTrack.uri
-                
+
                 if textUri.lowercased().hasPrefix("http") {
                     textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options: (assetOptions as! [String: Any]))
                 } else {
@@ -266,18 +266,18 @@ enum RCTVideoUtils {
                         options: nil
                     )
                 }
-                
+
                 if let track = await RCTVideoAssetsUtils.getTracks(asset: textURLAsset, withMediaType: .text) {
                     tracks.append(track)
                 }
             }
-            
+
             for i in 0 ..< tracks.count {
                 guard let track = tracks[i].first else { continue } // fix when there's no textTrackAsset
-                
+
                 let textCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
                                                                                                preferredTrackID: kCMPersistentTrackID_Invalid)
-                
+
                 do {
                     try textCompTrack.insertTimeRange(
                         CMTimeRangeMake(start: .zero, duration: videoAsset.timeRange.duration),
@@ -292,14 +292,14 @@ enum RCTVideoUtils {
                 }
             }
         }
-        
+
         if !validTextTracks.isEmpty {
             let emptyVttFile: TextTrack? = self.createEmptyVttFile()
             if emptyVttFile != nil {
                 validTextTracks.append(emptyVttFile!)
             }
         }
-        
+
         return validTextTracks
     }
 
@@ -332,7 +332,7 @@ enum RCTVideoUtils {
         ])
     }
 
-    static func delay(seconds: Int = 0, completion: @escaping () async throws -> Void) -> Void {
+    static func delay(seconds: Int = 0, completion: @escaping () async throws -> Void) {
         return DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(seconds)) {
             Task.detached(priority: .userInitiated) {
                 try await completion()
@@ -345,10 +345,10 @@ enum RCTVideoUtils {
         guard let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject else {
             return nil
         }
-        
+
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
-        
+
         return await withCheckedContinuation { continuation in
             PHCachingImageManager().requestAVAsset(forVideo: phAsset, options: options) { data, _, _ in
                 continuation.resume(returning: data)
@@ -417,16 +417,19 @@ enum RCTVideoUtils {
 
     static func generateVideoComposition(asset: AVAsset, filter: CIFilter) async -> AVVideoComposition? {
         if #available(iOS 16, tvOS 16, visionOS 1.0, *) {
-            return try? await AVVideoComposition.videoComposition(with: asset, applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
-                if filter == nil {
-                    request.finish(with: request.sourceImage, context: nil)
-                } else {
-                    let image: CIImage! = request.sourceImage.clampedToExtent()
-                    filter.setValue(image, forKey: kCIInputImageKey)
-                    let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
-                    request.finish(with: output, context: nil)
+            return try? await AVVideoComposition.videoComposition(
+                with: asset,
+                applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
+                    if filter == nil {
+                        request.finish(with: request.sourceImage, context: nil)
+                    } else {
+                        let image: CIImage! = request.sourceImage.clampedToExtent()
+                        filter.setValue(image, forKey: kCIInputImageKey)
+                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                        request.finish(with: output, context: nil)
+                    }
                 }
-            })
+            )
         } else {
             #if !os(visionOS)
                 return AVVideoComposition(

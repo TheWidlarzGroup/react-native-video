@@ -9,7 +9,7 @@ extension URLSession {
         } else {
             return try await withCheckedThrowingContinuation { continuation in
                 let task = self.dataTask(with: request, completionHandler: { data, response, error in
-                    guard let data = data, let response = response else {
+                    guard let data, let response else {
                         let error = error ?? URLError(.badServerResponse)
                         return continuation.resume(throwing: error)
                     }
@@ -18,7 +18,7 @@ extension URLSession {
                 })
 
                 task.resume()
-           }
+            }
         }
     }
 }

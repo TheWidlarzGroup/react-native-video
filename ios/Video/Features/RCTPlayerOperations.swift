@@ -9,7 +9,7 @@ let RCTVideoUnset = -1
  * Collection of mutating functions
  */
 enum RCTPlayerOperations {
-    static func setSideloadedText(player: AVPlayer?, textTracks: [TextTrack], criteria: SelectedTrackCriteria?) -> Void {
+    static func setSideloadedText(player: AVPlayer?, textTracks: [TextTrack], criteria: SelectedTrackCriteria?) {
         let type = criteria?.type
 
         let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
@@ -82,7 +82,7 @@ enum RCTPlayerOperations {
     static func setStreamingText(player: AVPlayer?, criteria: SelectedTrackCriteria?) async {
         let type = criteria?.type
         var mediaOption: AVMediaSelectionOption!
-        
+
         guard let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: player?.currentItem?.asset, for: .legible) else {
             return
         }
@@ -132,11 +132,11 @@ enum RCTPlayerOperations {
     static func setMediaSelectionTrackForCharacteristic(player: AVPlayer?, characteristic: AVMediaCharacteristic, criteria: SelectedTrackCriteria?) async {
         let type = criteria?.type
         var mediaOption: AVMediaSelectionOption!
-        
+
         guard let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: player?.currentItem?.asset, for: characteristic) else {
             return
         }
-        
+
         if type == "disabled" {
             // Do nothing. We want to ensure option is nil
         } else if (type == "language") || (type == "title") {
@@ -171,7 +171,7 @@ enum RCTPlayerOperations {
         await player?.currentItem?.select(mediaOption, in: group)
     }
 
-    static func seek(player: AVPlayer, playerItem: AVPlayerItem, paused: Bool, seekTime: Float, seekTolerance: Float, completion: @escaping (Bool) -> Void) -> Void {
+    static func seek(player: AVPlayer, playerItem: AVPlayerItem, paused: Bool, seekTime: Float, seekTolerance: Float, completion: @escaping (Bool) -> Void) {
         let timeScale = 1000
         let cmSeekTime: CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
         let current: CMTime = playerItem.currentTime()
@@ -181,7 +181,7 @@ enum RCTPlayerOperations {
             // skip if there is no diff in current time and seek time
             return
         }
-        
+
         if !paused { player.pause() }
 
         player.seek(to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance, completionHandler: { (finished: Bool) in
