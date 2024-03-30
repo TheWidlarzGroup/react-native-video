@@ -34,7 +34,8 @@ import Video, {
   SelectedTrack,
   DRMType,
   OnTextTrackDataChangedData,
-  SelectedTrackType,
+  TextTrackType,
+  ISO639_1,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -126,6 +127,18 @@ class VideoPlayer extends Component {
     {
       description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    },
+    {
+      description: 'sintel with sideLoaded subtitles',
+      uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', // this is sample video, my actual video file is MP4
+      textTracks: [
+        {
+          title: 'test',
+          language: 'en' as ISO639_1,
+          type: TextTrackType.VTT,
+          uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+        },
+      ]
     },
   ];
 
@@ -762,6 +775,7 @@ class VideoPlayer extends Component {
             this.video = ref;
           }}
           source={this.srcList[this.state.srcListId]}
+          textTracks={this.srcList[this.state.srcListId]?.textTracks}
           adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
           drm={this.srcList[this.state.srcListId]?.drm}
           style={viewStyle}

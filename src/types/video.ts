@@ -108,7 +108,7 @@ export type SubtitleStyle = {
   opacity?: number;
 };
 
-export enum TextTracksType {
+export enum TextTrackType {
   SUBRIP = 'application/x-subrip',
   TTML = 'application/ttml+xml',
   VTT = 'text/vtt',
@@ -117,11 +117,11 @@ export enum TextTracksType {
 export type TextTracks = {
   title: string;
   language: ISO639_1;
-  type: TextTracksType;
+  type: TextTrackType;
   uri: string;
 }[];
 
-export type TextTrackType =
+export type TextTrackSelectionType =
   | 'system'
   | 'disabled'
   | 'title'
@@ -129,11 +129,11 @@ export type TextTrackType =
   | 'index';
 
 export type SelectedTextTrack = Readonly<{
-  type: TextTrackType;
+  type: TextTrackSelectionType;
   value?: string | number;
 }>;
 
-export type AudioTrackType =
+export type AudioTrackSelectionType =
   | 'system'
   | 'disabled'
   | 'title'
@@ -141,7 +141,7 @@ export type AudioTrackType =
   | 'index';
 
 export type SelectedAudioTrack = Readonly<{
-  type: AudioTrackType;
+  type: AudioTrackSelectionType;
   value?: string | number;
 }>;
 
