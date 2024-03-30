@@ -38,10 +38,7 @@ export type VideoSrc = Readonly<{
   customImageUri?: string;
 }>;
 
-type DRMType = WithDefault<
-  'widevine' | 'playready' | 'clearkey' | 'fairplay',
-  'widevine'
->;
+type DRMType = WithDefault<string, 'widevine'>;
 
 type DebugConfig = Readonly<{
   enable?: boolean;
@@ -67,15 +64,9 @@ type TextTracks = ReadonlyArray<
   }>
 >;
 
-type SelectedTextTrackType = WithDefault<
-  'system' | 'disabled' | 'title' | 'language' | 'index',
-  'system'
->;
+type SelectedTextTrackType = WithDefault<string, 'system'>;
 
-type SelectedAudioTrackType = WithDefault<
-  'system' | 'disabled' | 'title' | 'language' | 'index',
-  'system'
->;
+type SelectedAudioTrackType = WithDefault<string, 'system'>;
 
 type SelectedTextTrack = Readonly<{
   type?: SelectedTextTrackType;
@@ -87,10 +78,7 @@ type SelectedAudioTrack = Readonly<{
   value?: string;
 }>;
 
-type SelectedVideoTrackType = WithDefault<
-  'auto' | 'disabled' | 'resolution' | 'index',
-  'auto'
->;
+type SelectedVideoTrackType = WithDefault<string, 'auto'>;
 
 type SelectedVideoTrack = Readonly<{
   type?: SelectedVideoTrackType;
@@ -122,13 +110,13 @@ type SubtitleStyle = Readonly<{
   opacity?: WithDefault<Float, 1>;
 }>;
 
-export type OnLoadData = Readonly<{
+type OnLoadData = Readonly<{
   currentTime: Float;
   duration: Float;
   naturalSize: Readonly<{
     width: Float;
     height: Float;
-    orientation: WithDefault<'landscape' | 'portrait', 'landscape'>;
+    orientation: WithDefault<string, 'landscape'>;
   }>;
   audioTracks: {
     index: Int32;
@@ -145,7 +133,7 @@ export type OnLoadData = Readonly<{
     /**
      * iOS only supports VTT, Android supports all 3
      */
-    type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
+    type?: WithDefault<string, 'srt'>;
     selected?: boolean;
   }[];
 }>;
@@ -203,7 +191,7 @@ export type OnAudioTracksData = Readonly<{
   }[];
 }>;
 
-export type OnTextTracksData = Readonly<{
+type OnTextTracksData = Readonly<{
   textTracks: {
     index: Int32;
     title?: string;
@@ -211,7 +199,7 @@ export type OnTextTracksData = Readonly<{
     /**
      * iOS only supports VTT, Android supports all 3
      */
-    type?: WithDefault<'srt' | 'ttml' | 'vtt', 'srt'>;
+    type?: WithDefault<string, 'srt'>;
     selected?: boolean;
   }[];
 }>;
@@ -254,162 +242,9 @@ export type OnPictureInPictureStatusChangedData = Readonly<{
   isActive: boolean;
 }>;
 
-export type OnReceiveAdEventData = Readonly<{
-  data?: {};
-  event: WithDefault<
-    /**
-     * iOS only: Fired the first time each ad break ends. Applications must reenable seeking when this occurs (only used for dynamic ad insertion).
-     */ | 'AD_BREAK_ENDED'
-    /**
-     * Fires when an ad rule or a VMAP ad break would have played if autoPlayAdBreaks is false.
-     */
-    | 'AD_BREAK_READY'
-    /**
-     * iOS only: Fired first time each ad break begins playback. If an ad break is watched subsequent times this will not be fired. Applications must disable seeking when this occurs (only used for dynamic ad insertion).
-     */
-    | 'AD_BREAK_STARTED'
-    /**
-     * Android only: Fires when the ad has stalled playback to buffer.
-     */
-    | 'AD_BUFFERING'
-    /**
-     * Android only: Fires when the ad is ready to play without buffering, either at the beginning of the ad or after buffering completes.
-     */
-    | 'AD_CAN_PLAY'
-    /**
-     * Android only: Fires when an ads list is loaded.
-     */
-    | 'AD_METADATA'
-    /**
-     * iOS only: Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).
-     */
-    | 'AD_PERIOD_ENDED'
-    /**
-     * iOS only: Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).
-     */
-    | 'AD_PERIOD_STARTED'
-    /**
-     * Android only: Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.
-     */
-    | 'AD_PROGRESS'
-    /**
-     * Fires when the ads manager is done playing all the valid ads in the ads response, or when the response doesn't return any valid ads.
-     */
-    | 'ALL_ADS_COMPLETED'
-    /**
-     * Fires when the ad is clicked.
-     */
-    | 'CLICK'
-    /**
-     * Fires when the ad completes playing.
-     */
-    | 'COMPLETED'
-    /**
-     * Android only: Fires when content should be paused. This usually happens right before an ad is about to cover the content.
-     */
-    | 'CONTENT_PAUSE_REQUESTED'
-    /**
-     * Android only: Fires when content should be resumed. This usually happens when an ad finishes or collapses.
-     */
-    | 'CONTENT_RESUME_REQUESTED'
-    /**
-     * iOS only: Cuepoints changed for VOD stream (only used for dynamic ad insertion).
-     */
-    | 'CUEPOINTS_CHANGED'
-    /**
-     * Android only: Fires when the ad's duration changes.
-     */
-    | 'DURATION_CHANGE'
-    /**
-     * Fires when an error is encountered and the ad can't be played.
-     */
-    | 'ERROR'
-    /**
-     * Fires when the ad playhead crosses first quartile.
-     */
-    | 'FIRST_QUARTILE'
-    /**
-     * Android only: Fires when the impression URL has been pinged.
-     */
-    | 'IMPRESSION'
-    /**
-     * Android only: Fires when an ad triggers the interaction callback. Ad interactions contain an interaction ID string in the ad data.
-     */
-    | 'INTERACTION'
-    /**
-     * Android only: Fires when the displayed ad changes from linear to nonlinear, or the reverse.
-     */
-    | 'LINEAR_CHANGED'
-    /**
-     * Fires when ad data is available.
-     */
-    | 'LOADED'
-    /**
-     * Fires when a non-fatal error is encountered. The user need not take any action since the SDK will continue with the same or next ad playback depending on the error situation.
-     */
-    | 'LOG'
-    /**
-     * Fires when the ad playhead crosses midpoint.
-     */
-    | 'MIDPOINT'
-    /**
-     * Fires when the ad is paused.
-     */
-    | 'PAUSED'
-    /**
-     * Fires when the ad is resumed.
-     */
-    | 'RESUMED'
-    /**
-     * Android only: Fires when the displayed ads skippable state is changed.
-     */
-    | 'SKIPPABLE_STATE_CHANGED'
-    /**
-     * Fires when the ad is skipped by the user.
-     */
-    | 'SKIPPED'
-    /**
-     * Fires when the ad starts playing.
-     */
-    | 'STARTED'
-    /**
-     * iOS only: Stream request has loaded (only used for dynamic ad insertion).
-     */
-    | 'STREAM_LOADED'
-    /**
-     * iOS only: Fires when the ad is tapped.
-     */
-    | 'TAPPED'
-    /**
-     * Fires when the ad playhead crosses third quartile.
-     */
-    | 'THIRD_QUARTILE'
-    /**
-     * iOS only: An unknown event has fired
-     */
-    | 'UNKNOWN'
-    /**
-     * Android only: Fires when the ad is closed by the user.
-     */
-    | 'USER_CLOSE'
-    /**
-     * Android only: Fires when the non-clickthrough portion of a video ad is clicked.
-     */
-    | 'VIDEO_CLICKED'
-    /**
-     * Android only: Fires when a user clicks a video icon.
-     */
-    | 'VIDEO_ICON_CLICKED'
-    /**
-     * Android only: Fires when the ad volume has changed.
-     */
-    | 'VOLUME_CHANGED'
-    /**
-     * Android only: Fires when the ad volume has been muted.
-     */
-    | 'VOLUME_MUTED',
-    'AD_BREAK_ENDED'
-  >;
+type OnReceiveAdEventData = Readonly<{
+  data?: object;
+  event: WithDefault<string, 'AD_BREAK_ENDED'>;
 }>;
 
 export type OnVideoErrorData = Readonly<{
@@ -438,7 +273,7 @@ export interface VideoNativeProps extends ViewProps {
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: Float;
-  resizeMode?: WithDefault<'none' | 'contain' | 'cover' | 'stretch', 'none'>;
+  resizeMode?: WithDefault<string, 'none'>;
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
   textTracks?: TextTracks;
@@ -448,25 +283,7 @@ export interface VideoNativeProps extends ViewProps {
   paused?: boolean;
   muted?: boolean;
   controls?: boolean;
-  filter?: WithDefault<
-    | ''
-    | 'CIColorInvert'
-    | 'CIColorMonochrome'
-    | 'CIColorPosterize'
-    | 'CIFalseColor'
-    | 'CIMaximumComponent'
-    | 'CIMinimumComponent'
-    | 'CIPhotoEffectChrome'
-    | 'CIPhotoEffectFade'
-    | 'CIPhotoEffectInstant'
-    | 'CIPhotoEffectMono'
-    | 'CIPhotoEffectNoir'
-    | 'CIPhotoEffectProcess'
-    | 'CIPhotoEffectTonal'
-    | 'CIPhotoEffectTransfer'
-    | 'CISepiaTone',
-    ''
-  >;
+  filter?: WithDefault<string, ''>;
   filterEnabled?: boolean;
   volume?: Float; // default 1.0
   playInBackground?: boolean;
@@ -474,12 +291,12 @@ export interface VideoNativeProps extends ViewProps {
   preferredForwardBufferDuration?: Float; //ios, 0
   playWhenInactive?: boolean; // ios, false
   pictureInPicture?: boolean; // ios, false
-  ignoreSilentSwitch?: WithDefault<'inherit' | 'ignore' | 'obey', 'inherit'>; // ios, 'inherit'
-  mixWithOthers?: WithDefault<'inherit' | 'mix' | 'duck', 'inherit'>; // ios, 'inherit'
+  ignoreSilentSwitch?: WithDefault<string, 'inherit'>; // ios, 'inherit'
+  mixWithOthers?: WithDefault<string, 'inherit'>; // ios, 'inherit'
   rate?: Float;
   fullscreen?: boolean; // ios, false
   fullscreenAutorotate?: boolean;
-  fullscreenOrientation?: WithDefault<'all' | 'landscape' | 'portrait', 'all'>;
+  fullscreenOrientation?: WithDefault<string, 'all'>;
   progressUpdateInterval?: Float;
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   localSourceEncryptionKeyScheme?: string;
