@@ -7,7 +7,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.UiThreadUtil
-import com.facebook.react.uimanager.UIManagerModule
+import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.common.UIManagerType
 import kotlin.math.roundToInt
 
 class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextBaseJavaModule(reactContext) {
@@ -17,14 +18,12 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
 
     private fun performOnPlayerView(reactTag: Int, callback: (ReactExoplayerView?) -> Unit) {
         UiThreadUtil.runOnUiThread {
-            val view = if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-                reactApplicationContext.fabricUIManager?.resolveView(
-                    reactTag
-                )
-            } else {
-                val uiManager = reactApplicationContext.getNativeModule(UIManagerModule::class.java)
-                uiManager?.resolveView(reactTag)
-            }
+            val uiManager = UIManagerHelper.getUIManager(
+                reactApplicationContext,
+                if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) UIManagerType.FABRIC else UIManagerType.DEFAULT
+            )
+
+            val view = uiManager?.resolveView(reactTag)
 
             if (view is ReactExoplayerView) {
                 callback(view)
