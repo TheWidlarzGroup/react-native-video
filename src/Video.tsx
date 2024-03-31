@@ -533,7 +533,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
-          onVideoLoad={onVideoLoad}
+          onVideoLoad={onVideoLoad as (e: NativeSyntheticEvent<object>) => void}
           onVideoLoadStart={onVideoLoadStart}
           onVideoError={onVideoError}
           onVideoProgress={onVideoProgress}
@@ -563,7 +563,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             onRestoreUserInterfaceForPictureInPictureStop
           }
           onVideoAspectRatio={_onVideoAspectRatio}
-          onReceiveAdEvent={_onReceiveAdEvent}
+          onReceiveAdEvent={
+            _onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void
+          }
         />
         {showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />
