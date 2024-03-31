@@ -243,7 +243,7 @@ export type OnPictureInPictureStatusChangedData = Readonly<{
 }>;
 
 type OnReceiveAdEventData = Readonly<{
-  data?: object;
+  data?: {};
   event: WithDefault<string, 'AD_BREAK_ENDED'>;
 }>;
 
