@@ -108,6 +108,7 @@ type BufferConfig = Readonly<{
   bufferForPlaybackMs?: Float;
   bufferForPlaybackAfterRebufferMs?: Float;
   maxHeapAllocationPercent?: Float;
+  backBufferDurationMs?: Float; // Android
   minBackBufferMemoryReservePercent?: Float;
   minBufferMemoryReservePercent?: Float;
 }>;
@@ -118,6 +119,7 @@ type SubtitleStyle = Readonly<{
   paddingBottom?: WithDefault<Float, 0>;
   paddingLeft?: WithDefault<Float, 0>;
   paddingRight?: WithDefault<Float, 0>;
+  opacity?: WithDefault<Float, 1>;
 }>;
 
 export type OnLoadData = Readonly<{
@@ -483,7 +485,6 @@ export interface VideoNativeProps extends ViewProps {
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
 
-  backBufferDurationMs?: Int32; // Android
   bufferConfig?: BufferConfig; // Android
   contentStartTime?: Int32; // Android
   currentPlaybackTime?: Double; // Android
@@ -536,6 +537,7 @@ export type VideoSaveData = {
 
 export interface VideoManagerType {
   save: (option: object, reactTag: number) => Promise<VideoSaveData>;
+  seek: (option: Seek, reactTag: number) => Promise<void>;
   setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
   setLicenseResult: (
     result: string,

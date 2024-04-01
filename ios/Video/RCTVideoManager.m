@@ -28,7 +28,6 @@ RCT_EXPORT_VIEW_PROPERTY(pictureInPicture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(ignoreSilentSwitch, NSString);
 RCT_EXPORT_VIEW_PROPERTY(mixWithOthers, NSString);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
-RCT_EXPORT_VIEW_PROPERTY(seek, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenAutorotate, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(fullscreenOrientation, NSString);
@@ -37,7 +36,7 @@ RCT_EXPORT_VIEW_PROPERTY(filterEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
 RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(localSourceEncryptionKeyScheme, NSString);
-
+RCT_EXPORT_VIEW_PROPERTY(subtitleStyle, NSDictionary);
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
@@ -73,6 +72,8 @@ RCT_EXTERN_METHOD(save
                   : (nonnull NSNumber*)reactTag resolver
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(seek : (NSDictionary*)info reactTag : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(setLicenseResult : (NSString*)license licenseUrl : (NSString*)licenseUrl reactTag : (nonnull NSNumber*)reactTag)
 

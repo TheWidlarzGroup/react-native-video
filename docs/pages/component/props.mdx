@@ -58,12 +58,6 @@ A Boolean value that indicates whether the player should automatically delay pla
 - **false** - Immediately starts playback
 - **true (default)** - Delays playback in order to minimize stalling
 
-### `backBufferDurationMs`
-
-<PlatformsList types={['Android']} />
-
-The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.
-
 ### `bufferConfig`
 
 <PlatformsList types={['Android']} />
@@ -76,12 +70,11 @@ Adjust the buffer settings. This prop takes an object with one or more of the pr
 | maxBufferMs                       | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.                                                                                                  |
 | bufferForPlaybackMs               | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.                                                    |
 | bufferForPlaybackAfterRebufferMs  | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action. |
+| backBufferDurationMs              | number | The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.                                                       |
 | maxHeapAllocationPercent          | number | The percentage of available heap that the video can use to buffer, between 0 and 1                                                                                                              |
 | minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1                                                                                |
 | minBufferMemoryReservePercent     | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1                                                                                   |
 | cacheSizeMB                       | number | Cache size in MB, it will allow applications to store video data for a while in the cache folder, it is useful to decrease bandwidth usage when repeating small videos. Android only.           |
-
-This prop should only be set when you are setting the source, changing it after the media is loaded will cause it to be reloaded.
 
 Example with default values:
 
@@ -90,7 +83,8 @@ bufferConfig={{
   minBufferMs: 15000,
   maxBufferMs: 50000,
   bufferForPlaybackMs: 2500,
-  bufferForPlaybackAfterRebufferMs: 5000
+  bufferForPlaybackAfterRebufferMs: 5000,
+  backBufferDurationMs: 120000,
   cacheSizeMB: 0
 }}
 ```
@@ -436,8 +430,8 @@ Default: 250.0
 
 Speed at which the media should play.
 
-- **0.0** - Pauses the video
-- **1.0** - Play at normal speed
+- **0.0** - Pauses the video (iOS only)
+- **1.0** - Play at normal speed (default)
 - **Other values** - Slow down or speed up playback
 
 ### `repeat`
@@ -628,7 +622,7 @@ Pass directly the asset to play (deprecated)
 
 ```javascript
 const sintel = require('./sintel.mp4');
-source={ sintel };
+source = {sintel};
 ```
 
 Or by using an uri (starting from 6.0.0-beta.6)
@@ -637,7 +631,6 @@ Or by using an uri (starting from 6.0.0-beta.6)
 const sintel = require('./sintel.mp4');
 source={{ uri: sintel }}
 ```
-
 
 #### URI string
 
@@ -743,18 +736,19 @@ source={{
 
 ### `subtitleStyle`
 
-| Property      | Description                                                             | Platforms |
-| ------------- | ----------------------------------------------------------------------- | --------- |
-| fontSize      | Adjust the font size of the subtitles. Default: font size of the device | Android   |
-| paddingTop    | Adjust the top padding of the subtitles. Default: 0                     | Android   |
-| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                  | Android   |
-| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                    | Android   |
-| paddingRight  | Adjust the right padding of the subtitles. Default: 0                   | Android   |
+| Property      | Description                                                                                                                                                                                        | Platforms    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop    | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity       | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
 
 Example:
 
 ```javascript
-subtitleStyle={{ paddingBottom: 50, fontSize: 20 }}
+subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0 }}
 ```
 
 ### `textTracks`

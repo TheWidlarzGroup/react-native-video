@@ -1,5 +1,59 @@
 
 
+# [6.0.0-beta.7](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.6...v6.0.0-beta.7) (2024-03-30)
+
+
+### Bug Fixes
+
+* **android:** ensure rate is never set to 0 ([#3593](https://github.com/react-native-video/react-native-video/issues/3593)) ([3d7444a](https://github.com/react-native-video/react-native-video/commit/3d7444ab25c365b36e0e8d2672b74f474bba12eb))
+* **android:** improve and backBufferDurationMs. mainly let exoplayer manage the prop ([#3619](https://github.com/react-native-video/react-native-video/issues/3619)) ([f10511d](https://github.com/react-native-video/react-native-video/commit/f10511d9534257a8fc9a4a47978d9c844428f1f7))
+* **android:** keep screen on on fullscreen ([#3563](https://github.com/react-native-video/react-native-video/issues/3563)) ([bfb76e6](https://github.com/react-native-video/react-native-video/commit/bfb76e6d15f88a7dc50c63958486375e142a26bd))
+* **android:** track selection parameter has change in last release. ([#3594](https://github.com/react-native-video/react-native-video/issues/3594)) ([d5c8b51](https://github.com/react-native-video/react-native-video/commit/d5c8b514a1af23fa473f32b434612feac46fd321))
+* fix getLicense function's type definition ([#3606](https://github.com/react-native-video/react-native-video/issues/3606)) ([89ae843](https://github.com/react-native-video/react-native-video/commit/89ae8438fa1d90700a462b117aa9af42780c6268))
+* inject onGetLicense prop properly for detect user defined or not ([#3608](https://github.com/react-native-video/react-native-video/issues/3608)) ([24c1aab](https://github.com/react-native-video/react-native-video/commit/24c1aab3f5ab6d2d753199ea16e01c993cc3ef7d))
+* **iOS:** fix iOS DRM header parser ([#3609](https://github.com/react-native-video/react-native-video/issues/3609)) ([c9a75f3](https://github.com/react-native-video/react-native-video/commit/c9a75f3cde82f55e612b9e2c30ca06db3093b283))
+* **ios:** fix PiP callback ([#3601](https://github.com/react-native-video/react-native-video/issues/3601)) ([bb9e7eb](https://github.com/react-native-video/react-native-video/commit/bb9e7eb5a5d68de1d8945be2f3fa089ca6ce2465))
+* **ios:** fix regression when playing source starting with ph:// ([#3630](https://github.com/react-native-video/react-native-video/issues/3630)) ([75d3707](https://github.com/react-native-video/react-native-video/commit/75d370742b95ddf0eb114ef48620e188e6fdfad1))
+* **ios:** fix startPosition, cropStart and cropEnd to handle float values correctly ([#3589](https://github.com/react-native-video/react-native-video/issues/3589)) ([36bd2e2](https://github.com/react-native-video/react-native-video/commit/36bd2e2d71dc6879d74b154ecc39ea7b27f4b565))
+* **iOS:** throw when content id defined with empty string ([#3612](https://github.com/react-native-video/react-native-video/issues/3612)) ([0983580](https://github.com/react-native-video/react-native-video/commit/098358076ddaba387284c1757a80bfcc5d82191f))
+* remove `setNativeProps` usage ([#3605](https://github.com/react-native-video/react-native-video/issues/3605)) ([0312afc](https://github.com/react-native-video/react-native-video/commit/0312afc8ea27f8c82ef7ba9fecbde23174e68671))
+
+
+### BREAKING CHANGES
+
+* **android:** move backBufferDurationMs from root props to bufferConfig
+
+# [6.0.0-beta.6](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.5...v6.0.0-beta.6) (2024-03-18)
+
+
+### Bug Fixes
+
+* add missing node_modules paths to metro.config.js of basic example app ([#3555](https://github.com/react-native-video/react-native-video/issues/3555)) ([d505de5](https://github.com/react-native-video/react-native-video/commit/d505de5910a22ab9a0d7429e6b88a81cd2594b9c))
+* add missing shutterColor type ([#3561](https://github.com/react-native-video/react-native-video/issues/3561)) ([ba00881](https://github.com/react-native-video/react-native-video/commit/ba00881ddcd53c2f5a4e1fc6e30cb5eb7ef674a3))
+* **android:** check disableFocus when state is ready ([#3494](https://github.com/react-native-video/react-native-video/issues/3494)) ([366c841](https://github.com/react-native-video/react-native-video/commit/366c841c0b960fd461ae7dcfdcb76a928fadf2b8))
+* **android:** enableDecoderFallback to decrease DECODER_ERROR issue ([#3416](https://github.com/react-native-video/react-native-video/issues/3416)) ([eaa72c6](https://github.com/react-native-video/react-native-video/commit/eaa72c66659b9e2a22af9ff9d43013521f6a66e3))
+* **android:** onSeek called instantly ([#3530](https://github.com/react-native-video/react-native-video/issues/3530)) ([af6aea8](https://github.com/react-native-video/react-native-video/commit/af6aea8934e19467e1ed8e21808b2dbddb6f6356))
+* **android:** suppress lint `PrivateResource` ([#3531](https://github.com/react-native-video/react-native-video/issues/3531)) ([38e3625](https://github.com/react-native-video/react-native-video/commit/38e3625541753340e912e474b753e0f4fac4e9c1))
+* **docs/ci:** add typescript ([#3572](https://github.com/react-native-video/react-native-video/issues/3572)) ([0f31271](https://github.com/react-native-video/react-native-video/commit/0f31271dcf2bfe2f4429e22040660025be8a6a3c))
+* **docs:** fix build ([#3571](https://github.com/react-native-video/react-native-video/issues/3571)) ([4fc7d27](https://github.com/react-native-video/react-native-video/commit/4fc7d2788b4d01c581a31cc3ac733c3948b65a3a))
+* **ios:** add text tracks only if we successfully insertTimeRage ([#3557](https://github.com/react-native-video/react-native-video/issues/3557)) ([b73baad](https://github.com/react-native-video/react-native-video/commit/b73baad2c2c0c6ea701d865eee32d4e94ae58178))
+* **ios:** apply `cropStart` when in repeat mode ([#3525](https://github.com/react-native-video/react-native-video/issues/3525)) ([2c0e009](https://github.com/react-native-video/react-native-video/commit/2c0e00987685875f9603ae2084ae23b3c1aebce7))
+* **ios:** current release volume change observer ([#3565](https://github.com/react-native-video/react-native-video/issues/3565)) ([16f3cdb](https://github.com/react-native-video/react-native-video/commit/16f3cdbd9a7864206feaeef29344c09792d66d56))
+* **ios:** Do not crash when accessLog return nil ([#3549](https://github.com/react-native-video/react-native-video/issues/3549)) ([4d4b56c](https://github.com/react-native-video/react-native-video/commit/4d4b56c05dd3c09fce5ddc38f56b0391c357ac85))
+* **ios:** don't crop video when in repeat mode ([#3575](https://github.com/react-native-video/react-native-video/issues/3575)) ([90b31af](https://github.com/react-native-video/react-native-video/commit/90b31af2c969b6d6d57877c71ef3a4830a76aedc))
+* **ios:** ensure playback stopped in background ([#3587](https://github.com/react-native-video/react-native-video/issues/3587)) ([41c6785](https://github.com/react-native-video/react-native-video/commit/41c6785ee8c667ebe9c6c464223f6485473d94f8))
+* **ios:** fix missing bridge in bridgeless mode ([#3570](https://github.com/react-native-video/react-native-video/issues/3570)) ([46c8c49](https://github.com/react-native-video/react-native-video/commit/46c8c498c474600a0b35ebaf744306aefa42905f))
+* **ios:** fix tvOS build ([#3524](https://github.com/react-native-video/react-native-video/issues/3524)) ([9306d9a](https://github.com/react-native-video/react-native-video/commit/9306d9a15d281a60492f6d4166598a389a56f652))
+* **ios:** split licenseUrl and loadedLicenseUrl ([#3578](https://github.com/react-native-video/react-native-video/issues/3578)) ([7c4d19f](https://github.com/react-native-video/react-native-video/commit/7c4d19fa72a35449dd11ec59278b2ea11ec629fc))
+
+
+### Features
+
+* **android:** add subtitle event ([#3566](https://github.com/react-native-video/react-native-video/issues/3566)) ([6184c10](https://github.com/react-native-video/react-native-video/commit/6184c10acc90defd63cd55af51458864dfe112d5))
+* implement opacity to control visibility of subtitles ([#3583](https://github.com/react-native-video/react-native-video/issues/3583)) ([f4cce2e](https://github.com/react-native-video/react-native-video/commit/f4cce2ecdba0668c3ecf74d2fd7956df4dd8489d))
+* **ios:** Add ios support for accessing WebVTT Subtitle Content  ([#3541](https://github.com/react-native-video/react-native-video/issues/3541)) ([253ffb5](https://github.com/react-native-video/react-native-video/commit/253ffb595633a4b18221339278f73c8416225f56))
+* move require (local files) to `source.uri` ([#3535](https://github.com/react-native-video/react-native-video/issues/3535)) ([41ac781](https://github.com/react-native-video/react-native-video/commit/41ac7814121fc70a123fa4585dc9b1bd96e9629f))
+
 # [6.0.0-beta.5](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.4...v6.0.0-beta.5) (2024-02-02)
 
 

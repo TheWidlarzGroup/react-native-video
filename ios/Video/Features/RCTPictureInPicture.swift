@@ -6,27 +6,33 @@ import React
 
 #if os(iOS)
     class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
-        private var _onPictureInPictureStatusChanged: (() -> Void)?
+        private var _onPictureInPictureEnter: (() -> Void)?
+        private var _onPictureInPictureExit: (() -> Void)?
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
         private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
         private var _pipController: AVPictureInPictureController?
         private var _isActive = false
 
-        init(_ onPictureInPictureStatusChanged: (() -> Void)? = nil, _ onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)? = nil) {
-            _onPictureInPictureStatusChanged = onPictureInPictureStatusChanged
+        init(
+            _ onPictureInPictureEnter: (() -> Void)? = nil,
+            _ onPictureInPictureExit: (() -> Void)? = nil,
+            _ onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)? = nil
+        ) {
+            _onPictureInPictureEnter = onPictureInPictureEnter
+            _onPictureInPictureExit = onPictureInPictureExit
             _onRestoreUserInterfaceForPictureInPictureStop = onRestoreUserInterfaceForPictureInPictureStop
         }
 
         func pictureInPictureControllerDidStartPictureInPicture(_: AVPictureInPictureController) {
-            guard let _onPictureInPictureStatusChanged else { return }
+            guard let _onPictureInPictureEnter else { return }
 
-            _onPictureInPictureStatusChanged()
+            _onPictureInPictureEnter()
         }
 
         func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
-            guard let _onPictureInPictureStatusChanged else { return }
+            guard let _onPictureInPictureExit else { return }
 
-            _onPictureInPictureStatusChanged()
+            _onPictureInPictureExit()
         }
 
         func pictureInPictureController(

@@ -227,19 +227,22 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         return;
       }
 
+      const callSeekFunction = () => {
+        VideoManager.seek(
+          {
+            time,
+            tolerance: tolerance || 0,
+          },
+          getReactTag(nativeRef),
+        );
+      };
+
       Platform.select({
-        ios: () => {
-          nativeRef.current?.setNativeProps({
-            seek: {
-              time,
-              tolerance: tolerance || 0,
-            },
-          });
-        },
+        ios: callSeekFunction,
+        android: callSeekFunction,
         default: () => {
-          nativeRef.current?.setNativeProps({
-            seek: time,
-          });
+          // TODO: Implement VideoManager.seek for windows
+          nativeRef.current?.setNativeProps({seek: time});
         },
       })();
     }, []);
@@ -429,9 +432,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAspectRatio],
     );
 
+    const useExternalGetLicense = drm?.getLicense instanceof Function;
+
     const onGetLicense = useCallback(
       (event: NativeSyntheticEvent<OnGetLicenseData>) => {
-        if (drm && drm.getLicense instanceof Function) {
+        if (useExternalGetLicense) {
           const data = event.nativeEvent;
           if (data && data.spcBase64) {
             const getLicenseOverride = drm.getLicense(
@@ -476,7 +481,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
         }
       },
-      [drm],
+      [drm, useExternalGetLicense],
     );
 
     useImperativeHandle(
@@ -518,7 +523,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
-          onGetLicense={onGetLicense}
+          onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={onVideoLoad}
           onVideoLoadStart={onVideoLoadStart}
           onVideoError={onVideoError}
