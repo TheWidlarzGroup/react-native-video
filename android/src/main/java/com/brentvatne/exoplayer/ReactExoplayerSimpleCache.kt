@@ -1,4 +1,4 @@
-package com.brentvatne.common.toolbox
+package com.brentvatne.exoplayer
 
 import android.content.Context
 import androidx.media3.database.StandaloneDatabaseProvider

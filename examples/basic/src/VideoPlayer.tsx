@@ -66,6 +66,7 @@ interface StateType {
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
+  useCache: boolean;
 }
 
 class VideoPlayer extends Component {
@@ -93,6 +94,7 @@ class VideoPlayer extends Component {
     srcListId: 0,
     loop: false,
     showRNVControls: false,
+    useCache: false,
   };
 
   seekerWidth = 0;
@@ -622,6 +624,12 @@ class VideoPlayer extends Component {
                       }}
                       text="decoderInfo"
                     />
+                    <ToggleControl
+                      onPress={() => {
+                        this.state.useCache = !this.state.useCache;
+                      }}
+                      text="use Cache"
+                    />
                   </View>
                 ) : null}
                 <ToggleControl
@@ -809,7 +817,7 @@ class VideoPlayer extends Component {
             maxBufferMs: 50000,
             bufferForPlaybackMs: 2500,
             bufferForPlaybackAfterRebufferMs: 5000,
-            cacheSizeMB: 200,
+            cacheSizeMB: this.state.useCache ? 200 : 0,
           }}
           preventsDisplaySleepDuringVideoPlayback={true}
         />
