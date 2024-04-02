@@ -66,6 +66,7 @@ interface StateType {
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
+  poster?: string;
 }
 
 class VideoPlayer extends Component {
@@ -93,6 +94,7 @@ class VideoPlayer extends Component {
     srcListId: 0,
     loop: false,
     showRNVControls: false,
+    poster: undefined,
   };
 
   seekerWidth = 0;
@@ -138,7 +140,7 @@ class VideoPlayer extends Component {
           type: TextTrackType.VTT,
           uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
         },
-      ]
+      ],
     },
   ];
 
@@ -187,6 +189,10 @@ class VideoPlayer extends Component {
       },
     },
   ];
+
+  // poster which can be displayed
+  samplePoster =
+    'https://upload.wikimedia.org/wikipedia/commons/1/18/React_Native_Logo.png';
 
   srcList = this.srcAllPlatformList.concat(
     Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
@@ -652,6 +658,16 @@ class VideoPlayer extends Component {
                   }}
                   text="decoration"
                 />
+                <ToggleControl
+                  isSelected={!!this.state.poster}
+                  onPress={() => {
+                    this.setState({
+                      poster: this.state.poster ? undefined : this.samplePoster,
+                    });
+                  }}
+                  selectedText="poster"
+                  unselectedText="no poster"
+                />
               </View>
               <View style={styles.generalControls}>
                 {/* shall be replaced by slider */}
@@ -805,6 +821,7 @@ class VideoPlayer extends Component {
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
           preventsDisplaySleepDuringVideoPlayback={true}
+          poster={this.state.poster}
         />
       </TouchableOpacity>
     );
