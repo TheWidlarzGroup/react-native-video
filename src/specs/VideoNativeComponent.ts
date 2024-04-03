@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type {HostComponent, ViewProps} from 'react-native';
-import {NativeModules} from 'react-native';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+import {NativeModules, requireNativeComponent} from 'react-native';
 import type {
   DirectEventHandler,
   Double,
@@ -565,6 +564,6 @@ export const VideoManager = NativeModules.VideoManager as VideoManagerType;
 export const VideoDecoderProperties =
   NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
 
-export default codegenNativeComponent<VideoNativeProps>(
+export default requireNativeComponent<VideoNativeProps>(
   'RCTVideo',
 ) as VideoComponentType;
