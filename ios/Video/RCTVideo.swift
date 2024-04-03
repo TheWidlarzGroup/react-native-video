@@ -650,12 +650,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeekTime = seekTime.floatValue
             return
         }
-        let wasPaused = _paused
 
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
-            paused: wasPaused,
+            paused: _paused,
             seekTime: seekTime.floatValue,
             seekTolerance: seekTolerance.floatValue
         )
@@ -663,9 +662,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
-            if !wasPaused {
-                self.setPaused(false)
-            }
+            self.setPaused(_paused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
                                "seekTime": seekTime,
                                "target": self.reactTag])
