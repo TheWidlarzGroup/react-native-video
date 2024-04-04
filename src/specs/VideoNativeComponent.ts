@@ -218,7 +218,7 @@ export type OnVideoTracksData = Readonly<{
   }[];
 }>;
 
-export type OnPlaybackData = Readonly<{
+export type OnPlaybackRateChangeData = Readonly<{
   playbackRate: Float;
 }>;
 
@@ -328,7 +328,7 @@ export interface VideoNativeProps extends ViewProps {
   onVideoFullscreenPlayerWillDismiss?: DirectEventHandler<{}>; // ios, android
   onVideoFullscreenPlayerDidDismiss?: DirectEventHandler<{}>; // ios, android
   onReadyForDisplay?: DirectEventHandler<{}>;
-  onPlaybackRateChange?: DirectEventHandler<OnPlaybackData>; // all
+  onPlaybackRateChange?: DirectEventHandler<OnPlaybackRateChangeData>; // all
   onVolumeChange?: DirectEventHandler<OnVolumeChangeData>; // android, ios
   onVideoExternalPlaybackChange?: DirectEventHandler<OnExternalPlaybackChangeData>;
   onGetLicense?: DirectEventHandler<OnGetLicenseData>;
