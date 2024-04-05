@@ -63,6 +63,10 @@ import React
             _pipController?.delegate = self
         }
 
+        func deinitPipController() {
+            _pipController = nil
+        }
+
         func setPictureInPicture(_ isActive: Bool) {
             if _isActive == isActive {
                 return

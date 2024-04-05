@@ -64,8 +64,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName: String!
     private var _filterEnabled = false
     private var _presentingViewController: UIViewController?
-    private var _pictureInPictureEnabled = false
     private var _startPosition: Float64 = -1
+    private var _pictureInPictureEnabled = false {
+        didSet {
+            #if os(iOS)
+                if _pictureInPictureEnabled {
+                    initPictureinPicture()
+                    _playerViewController?.allowsPictureInPicturePlayback = true
+                } else {
+                    _pip?.deinitPipController()
+                    _playerViewController?.allowsPictureInPicturePlayback = false
+                }
+            #endif
+        }
+    }
 
     /* IMA Ads */
     private var _adTagUrl: String?
@@ -144,6 +156,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         return _pictureInPictureEnabled
     }
 
+    func initPictureinPicture() {
+        #if os(iOS)
+            _pip = RCTPictureInPicture({ [weak self] in
+                self?._onPictureInPictureEnter()
+            }, { [weak self] in
+                self?._onPictureInPictureExit()
+            }, { [weak self] in
+                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
+            })
+
+            if _playerLayer != nil && !_controls {
+                _pip?.setupPipController(_playerLayer)
+            }
+        #else
+            DebugLog("Picture in Picture is not supported on this platform")
+        #endif
+    }
+
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         #if USE_GOOGLE_IMA
@@ -153,13 +183,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            _pip = RCTPictureInPicture({ [weak self] in
-                self?._onPictureInPictureEnter()
-            }, { [weak self] in
-                self?._onPictureInPictureExit()
-            }, { [weak self] in
-                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
-            })
+            if _pictureInPictureEnabled {
+                initPictureinPicture()
+                _playerViewController?.allowsPictureInPicturePlayback = true
+            } else {
+                _playerViewController?.allowsPictureInPicturePlayback = false
+            }
         #endif
 
         NotificationCenter.default.addObserver(
@@ -970,7 +999,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         viewController.view.frame = self.bounds
         viewController.player = player
         if #available(tvOS 14.0, *) {
-            viewController.allowsPictureInPicturePlayback = true
+            viewController.allowsPictureInPicturePlayback = _pictureInPictureEnabled
         }
         return viewController
     }
@@ -991,7 +1020,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.layer.needsDisplayOnBoundsChange = true
             #if os(iOS)
-                _pip?.setupPipController(_playerLayer)
+                if _pictureInPictureEnabled {
+                    _pip?.setupPipController(_playerLayer)
+                }
             #endif
         }
     }
