@@ -36,6 +36,7 @@ import Video, {
   OnTextTrackDataChangedData,
   TextTrackType,
   ISO639_1,
+  OnSeekData,
   OnPlaybackStateChangedData,
   OnPlaybackRateChangeData,
 } from 'react-native-video';
@@ -229,13 +230,25 @@ class VideoPlayer extends Component {
     this.onTextTracks(data);
   };
 
-  onProgress = (data: OnProgressData) => {
-    if (!this.state.seeking) {
+  updateSeeker = () => {
+    // put this code in timeout as because it may be put just after a setState
+    setTimeout(()=> {
       const position = this.calculateSeekerPosition();
       this.setSeekerPosition(position);
-    }
+    }, 1)
+  }
+
+  onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
+    if (!this.state.seeking) {
+      this.updateSeeker()
+    }
   };
+
+  onSeek = (data: OnSeekData) => {
+    this.setState({currentTime: data.currentTime});
+    this.updateSeeker()
+  }
 
   onVideoLoadStart = () => {
     console.log('onVideoLoadStart');
@@ -826,6 +839,7 @@ class VideoPlayer extends Component {
           onAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
+          onSeek={this.onSeek}
           repeat={this.state.loop}
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
