@@ -36,6 +36,8 @@ import Video, {
   OnTextTrackDataChangedData,
   TextTrackType,
   ISO639_1,
+  OnPlaybackStateChangedData,
+  OnPlaybackRateChangeData,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -340,6 +342,14 @@ class VideoPlayer extends Component {
   onEnd = () => {
     this.channelUp();
   };
+
+  onPlaybackRateChange = (data: OnPlaybackRateChangeData) => {
+    console.log('onPlaybackRateChange', data);
+  }
+
+  onPlaybackStateChanged = (data: OnPlaybackStateChangedData) => {
+    console.log('onPlaybackStateChanged', data);
+  }
 
   toggleFullscreen() {
     this.setState({fullscreen: !this.state.fullscreen});
@@ -822,6 +832,8 @@ class VideoPlayer extends Component {
           playInBackground={false}
           preventsDisplaySleepDuringVideoPlayback={true}
           poster={this.state.poster}
+          onPlaybackRateChange={this.onPlaybackRateChange}
+          onPlaybackStateChanged={this.onPlaybackStateChanged}
         />
       </TouchableOpacity>
     );
