@@ -706,8 +706,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setRate(_ rate: Float) {
-        _rate = rate
-        applyModifiers()
+        if _rate != 1 {
+            // This is a workaround
+            // when player change from rate != 1 to another rate != 1 we see some video blocking
+            // To bypass it we shall force the rate to 1 and apply real valut afterward
+            _player?.rate = 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self._rate = rate
+                self.applyModifiers()
+            }
+        } else {
+            // apply it directly
+            self._rate = rate
+            self.applyModifiers()
+        }
     }
 
     @objc
