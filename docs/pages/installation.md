@@ -22,6 +22,7 @@ Then follow the instructions for your platform to link react-native-video into y
 ## iOS
 
 ### Standard Method
+Run `pod install` in the `ios` directory of your project.
 
 ### Enable custom feature in podfile file
 
@@ -155,16 +156,8 @@ Select RCTVideo-tvOS
 <summary>visionOS</summary>
 
 ## visionOS
-Add patch for `promises` pods to your pod files to make it work with `visionOS` target.
-> This patch is required only for `visionOS` target and will be removed in future.
-```diff
-+ pod 'PromisesSwift', :podspec => '../node_modules/react-native-video/ios/patches/PromisesSwift.podspec'
-+ pod 'PromisesObjC', :podspec => '../node_modules/react-native-video/ios/patches/PromisesObjC.podspec'
-```
+Run `pod install` in the `visionos` directory of your project
 
-**Remember** to run `pod install` after adding this patch.
-
-After this you can follow the same steps as for `iOS` target.
 </details>
 
 ## Examples
