@@ -1,5 +1,18 @@
 # Debugging
 
+This page describe usefull tips for debugging and investigating issue in the package or in your application.
+
+## Using the sample app
+This repository contains multiple a sample implementation in example folder.
+It is always preferable to test behavior on a sample app than in a full app implementation.
+The basic sample allow to test a lot of feature.
+To use the sample you will need to do steps:
+- Clone this repository:  ``` git clone git@github.com:react-native-video/react-native-video.git```
+- Go to root folder and build it. It will generate a transpiled version of the package in lib folder: ```cd react-native-video && yarn && yarn build```
+- Go to the sample and install it: ```cd example/basic && yarn install```
+- Build it ! for android ```yarn android``` for ios ```cd ios && pod install && cd .. && yarn ios``` 
+
+
 ## HTTP playback doesn't work or  Black Screen on Release build (Android)
 If your video work on Debug mode, but on Release you see only black screen, please, check the link to your video. If you use 'http' protocol there, you will need to add next string to your AndroidManifest.xml file. [Details here](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic)
 
