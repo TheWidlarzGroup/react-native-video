@@ -706,10 +706,11 @@ class VideoPlayer extends Component {
               <View style={styles.generalControls}>
                 <Text style={styles.controlOption}>AudioTrack</Text>
                 {this.state.audioTracks?.length <= 0 ? (
-                  <Text style={styles.controlOption}>empty</Text>
+                  <Text style={styles.emptyPickerItem}>empty</Text>
                 ) : (
                   <Picker
                     style={styles.picker}
+                    itemStyle={styles.pickerItem}
                     selectedValue={this.state.selectedAudioTrack?.value}
                     onValueChange={itemValue => {
                       console.log('on audio value change ' + itemValue);
@@ -736,10 +737,11 @@ class VideoPlayer extends Component {
                 )}
                 <Text style={styles.controlOption}>TextTrack</Text>
                 {this.state.textTracks?.length <= 0 ? (
-                  <Text style={styles.controlOption}>empty</Text>
+                  <Text style={styles.emptyPickerItem}>empty</Text>
                 ) : (
                   <Picker
                     style={styles.picker}
+                    itemStyle={styles.pickerItem}
                     selectedValue={this.state.selectedTextTrack?.value}
                     onValueChange={itemValue => {
                       console.log('on value change ' + itemValue);
@@ -929,6 +931,13 @@ const styles = StyleSheet.create({
     paddingRight: 2,
     lineHeight: 12,
   },
+  pickerContainer: {
+    width: 100,
+    alignSelf: 'center',
+    color: 'white',
+    borderWidth: 1,
+    borderColor: 'red',
+  },
   IndicatorStyle: {
     flex: 1,
     justifyContent: 'center',
@@ -966,10 +975,24 @@ const styles = StyleSheet.create({
     width: 12,
   },
   picker: {
-    color: 'white',
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
+    width: 100,
+    height: 40,
+  },
+  pickerItem: {
+    color: 'white',
+    width: 100,
+    height: 40,
+  },
+  emptyPickerItem: {
+    color: 'white',
+    marginTop: 20,
+    marginLeft: 20,
+    flex: 1,
+    width: 100,
+    height: 40,
   },
 });
 

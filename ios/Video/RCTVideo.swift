@@ -1471,7 +1471,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
             let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
 
-            self.onTextTracks?(["textTracks": textTracks])
+            self.onTextTracks?(["textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.compactMap(\.json)])
             self.onAudioTracks?(["audioTracks": audioTracks])
         }
     }
