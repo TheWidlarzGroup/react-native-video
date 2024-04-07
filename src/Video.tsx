@@ -221,10 +221,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
+      const value = selectedVideoTrack?.value
+        ? `${selectedVideoTrack.value}`
+        : undefined;
 
       return {
         type: selectedVideoTrack?.type,
-        value: selectedVideoTrack?.value,
+        value,
       };
     }, [selectedVideoTrack]);
 
