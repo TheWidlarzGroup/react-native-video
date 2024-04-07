@@ -81,7 +81,7 @@ type SelectedVideoTrackType = WithDefault<string, 'auto'>;
 
 type SelectedVideoTrack = Readonly<{
   type?: SelectedVideoTrackType;
-  value?: Int32;
+  value?: string;
 }>;
 
 export type Seek = Readonly<{
