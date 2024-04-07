@@ -78,57 +78,6 @@ enum RCTPlayerOperations {
         }
     }
 
-    // UNUSED
-    static func setStreamingText(player: AVPlayer?, criteria: SelectedTrackCriteria?) async {
-        let type = criteria?.type
-        var mediaOption: AVMediaSelectionOption!
-
-        guard let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: player?.currentItem?.asset, for: .legible) else {
-            return
-        }
-
-        if type == "disabled" {
-            // Do nothing. We want to ensure option is nil
-        } else if (type == "language") || (type == "title") {
-            let value = criteria?.value as? String
-            for i in 0 ..< group.options.count {
-                let currentOption: AVMediaSelectionOption! = group.options[i]
-                var optionValue: String!
-                if type == "language" {
-                    optionValue = currentOption.extendedLanguageTag
-                } else {
-                    optionValue = currentOption.commonMetadata.map(\.value)[0] as! String
-                }
-                if value == optionValue {
-                    mediaOption = currentOption
-                    break
-                }
-            }
-            // } else if ([type isEqualToString:@"default"]) {
-            //  option = group.defaultOption; */
-        } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if group.options.count > index {
-                    mediaOption = group.options[index]
-                }
-            }
-        } else { // default. invalid type or "system"
-            #if os(tvOS)
-            // Do noting. Fix for tvOS native audio menu language selector
-            #else
-                await player?.currentItem?.selectMediaOptionAutomatically(in: group)
-                return
-            #endif
-        }
-
-        #if os(tvOS)
-        // Do noting. Fix for tvOS native audio menu language selector
-        #else
-            // If a match isn't found, option will be nil and text tracks will be disabled
-            await player?.currentItem?.select(mediaOption, in: group)
-        #endif
-    }
-
     static func setMediaSelectionTrackForCharacteristic(player: AVPlayer?, characteristic: AVMediaCharacteristic, criteria: SelectedTrackCriteria?) async {
         let type = criteria?.type
         var mediaOption: AVMediaSelectionOption!
