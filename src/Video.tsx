@@ -7,7 +7,16 @@ import React, {
   useImperativeHandle,
   type ComponentRef,
 } from 'react';
-import {View, StyleSheet, Image, Platform} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Platform,
+  type StyleProp,
+  type ImageStyle,
+  type NativeSyntheticEvent,
+} from 'react-native';
+
 import NativeVideoComponent, {
   type OnAudioFocusChangedData,
   type OnAudioTracksData,
@@ -15,15 +24,12 @@ import NativeVideoComponent, {
   type OnBufferData,
   type OnExternalPlaybackChangeData,
   type OnGetLicenseData,
-  type OnLoadData,
   type OnLoadStartData,
   type OnPictureInPictureStatusChangedData,
   type OnPlaybackStateChangedData,
   type OnProgressData,
-  type OnReceiveAdEventData,
   type OnSeekData,
   type OnTextTrackDataChangedData,
-  type OnTextTracksData,
   type OnTimedMetadataData,
   type OnVideoAspectRatioData,
   type OnVideoErrorData,
@@ -31,15 +37,18 @@ import NativeVideoComponent, {
   type VideoComponentType,
   type VideoSrc,
 } from './specs/VideoNativeComponent';
-
-import type {StyleProp, ImageStyle, NativeSyntheticEvent} from 'react-native';
 import {
   generateHeaderForNative,
   getReactTag,
   resolveAssetSourceForVideo,
 } from './utils';
 import {VideoManager} from './specs/VideoNativeComponent';
-import type {ReactVideoProps} from './types/video';
+import type {
+  OnLoadData,
+  OnTextTracksData,
+  OnReceiveAdEventData,
+  ReactVideoProps,
+} from './types';
 
 export type VideoSaveData = {
   uri: string;
@@ -111,6 +120,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
+
+    const hasPoster = !!poster;
 
     const posterStyle = useMemo<StyleProp<ImageStyle>>(
       () => ({
@@ -210,10 +221,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
+      const value = selectedVideoTrack?.value
+        ? `${selectedVideoTrack.value}`
+        : undefined;
 
       return {
         type: selectedVideoTrack?.type,
-        value: selectedVideoTrack?.value,
+        value,
       };
     }, [selectedVideoTrack]);
 
@@ -277,19 +291,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
+        hasPoster && setShowPoster(true);
         onLoadStart?.(e.nativeEvent);
       },
-      [onLoadStart],
+      [hasPoster, onLoadStart],
     );
 
     const onVideoLoad = useCallback(
       (e: NativeSyntheticEvent<OnLoadData>) => {
         if (Platform.OS === 'windows') {
-          setShowPoster(false);
+          hasPoster && setShowPoster(false);
         }
         onLoad?.(e.nativeEvent);
       },
-      [onLoad, setShowPoster],
+      [onLoad, hasPoster, setShowPoster],
     );
 
     const onVideoError = useCallback(
@@ -379,9 +394,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const _onReadyForDisplay = useCallback(() => {
-      setShowPoster(false);
+      hasPoster && setShowPoster(false);
       onReadyForDisplay?.();
-    }, [setShowPoster, onReadyForDisplay]);
+    }, [setShowPoster, hasPoster, onReadyForDisplay]);
 
     const _onPictureInPictureStatusChanged = useCallback(
       (e: NativeSyntheticEvent<OnPictureInPictureStatusChangedData>) => {
@@ -524,7 +539,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
-          onVideoLoad={onVideoLoad}
+          onVideoLoad={onVideoLoad as (e: NativeSyntheticEvent<object>) => void}
           onVideoLoadStart={onVideoLoadStart}
           onVideoError={onVideoError}
           onVideoProgress={onVideoProgress}
@@ -554,9 +569,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             onRestoreUserInterfaceForPictureInPictureStop
           }
           onVideoAspectRatio={_onVideoAspectRatio}
-          onReceiveAdEvent={_onReceiveAdEvent}
+          onReceiveAdEvent={
+            _onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void
+          }
         />
-        {showPoster ? (
+        {hasPoster && showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />
         ) : null}
       </View>

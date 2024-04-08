@@ -1,5 +1,4 @@
 import AVFoundation
-import Promises
 
 class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSessionDelegate {
     private var _loadingRequests: [String: AVAssetResourceLoadingRequest?] = [:]
@@ -135,7 +134,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
             return false
         }
 
-        var requestKey: String = loadingRequest.request.url?.absoluteString ?? ""
+        let requestKey: String = loadingRequest.request.url?.absoluteString ?? ""
 
         _loadingRequests[requestKey] = loadingRequest
 
@@ -143,42 +142,43 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
             return finishLoadingWithError(error: RCTVideoErrorHandler.noDRMData, licenseUrl: requestKey)
         }
 
-        var promise: Promise<Data>
-        if _onGetLicense != nil {
-            let contentId = _drm.contentId ?? loadingRequest.request.url?.host
-            promise = RCTVideoDRM.handleWithOnGetLicense(
-                loadingRequest: loadingRequest,
-                contentId: contentId,
-                certificateUrl: _drm.certificateUrl,
-                base64Certificate: _drm.base64Certificate
-            ).then { spcData in
-                self._requestingCertificate = true
-                self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? "",
-                                     "loadedLicenseUrl": loadingRequest.request.url?.absoluteString ?? "",
-                                     "contentId": contentId ?? "",
-                                     "spcBase64": spcData.base64EncodedString(options: []),
-                                     "target": self._reactTag])
-            }
-        } else {
-            promise = RCTVideoDRM.handleInternalGetLicense(
-                loadingRequest: loadingRequest,
-                contentId: _drm.contentId,
-                licenseServer: _drm.licenseServer,
-                certificateUrl: _drm.certificateUrl,
-                base64Certificate: _drm.base64Certificate,
-                headers: _drm.headers
-            ).then { data in
-                guard let dataRequest = loadingRequest.dataRequest else {
-                    throw RCTVideoErrorHandler.noCertificateData
-                }
-                dataRequest.respond(with: data)
-                loadingRequest.finishLoading()
-            }
-        }
+        Task {
+            do {
+                if _onGetLicense != nil {
+                    let contentId = _drm.contentId ?? loadingRequest.request.url?.host
+                    let spcData = try await RCTVideoDRM.handleWithOnGetLicense(
+                        loadingRequest: loadingRequest,
+                        contentId: contentId,
+                        certificateUrl: _drm.certificateUrl,
+                        base64Certificate: _drm.base64Certificate
+                    )
 
-        promise.catch { error in
-            self.finishLoadingWithError(error: error, licenseUrl: requestKey)
-            self._requestingCertificateErrored = true
+                    self._requestingCertificate = true
+                    self._onGetLicense?(["licenseUrl": self._drm?.licenseServer ?? "",
+                                         "loadedLicenseUrl": loadingRequest.request.url?.absoluteString ?? "",
+                                         "contentId": contentId ?? "",
+                                         "spcBase64": spcData.base64EncodedString(options: []),
+                                         "target": self._reactTag])
+                } else {
+                    let data = try await RCTVideoDRM.handleInternalGetLicense(
+                        loadingRequest: loadingRequest,
+                        contentId: _drm.contentId,
+                        licenseServer: _drm.licenseServer,
+                        certificateUrl: _drm.certificateUrl,
+                        base64Certificate: _drm.base64Certificate,
+                        headers: _drm.headers
+                    )
+
+                    guard let dataRequest = loadingRequest.dataRequest else {
+                        throw RCTVideoErrorHandler.noCertificateData
+                    }
+                    dataRequest.respond(with: data)
+                    loadingRequest.finishLoading()
+                }
+            } catch {
+                self.finishLoadingWithError(error: error, licenseUrl: requestKey)
+                self._requestingCertificateErrored = true
+            }
         }
 
         return true
