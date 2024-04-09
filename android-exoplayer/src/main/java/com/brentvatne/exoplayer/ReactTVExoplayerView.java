@@ -60,13 +60,13 @@ import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.brentvatne.skipmarker.SkipMarkerTvCompat;
+
 import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.DorisPlayerOutput;
 import com.diceplatform.doris.ExoDoris;
-import com.diceplatform.doris.custom.ui.entity.marker.SkipMarker;
+
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
@@ -89,6 +89,7 @@ import com.diceplatform.doris.ui.ExoDorisTvPlayerView;
 import com.diceplatform.doris.ui.entity.Labels;
 import com.diceplatform.doris.ui.entity.LabelsBuilder;
 import com.diceplatform.doris.ui.entity.VideoTile;
+import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.diceplatform.doris.util.DorisExceptionUtil;
 import com.diceplatform.doris.util.LocalizationService;
 import com.facebook.react.bridge.Arguments;
@@ -165,7 +166,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final ReactTVExoDorisFactory exoDorisFactory;
     private ExoDorisTvPlayerView exoDorisPlayerView;
     private DceWatermarkWidget watermarkWidget;
-    private final SkipMarkerTvCompat skipMarkerTvCompat;
     private ExoDoris player;
     private DefaultTrackSelector trackSelector;
     private Source source;
@@ -326,7 +326,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         isAmazonFireTv = isAmazonFireTv(context);
         exoDorisFactory = new ReactTVExoDorisFactory();
-        skipMarkerTvCompat = new SkipMarkerTvCompat(this);
 
         clearResumePosition();
         setPausedModifier(false);
@@ -506,7 +505,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoPlayer.addAnalyticsListener(this);
             Player realPlayer = player.createForwardPlayer();
             exoDorisPlayerView.setPlayer(realPlayer);
-            skipMarkerTvCompat.setPlayer(realPlayer, exoDorisPlayerView.findViewById(R.id.exo_controller));
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -1759,18 +1757,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setPlayingLiveLabel(translations.getPlayingLiveLabel())
                     .setNowPlayingLabel(translations.getNowPlayingLabel())
                     .setAudioAndSubtitlesLabel(translations.getAudioAndSubtitlesLabel())
+                    .setSkipCreditsLabel(translations.getSkipCreditsLabel())
+                    .setSkipIntroLabel(translations.getSkipIntroLabel())
                     .build();
             exoDorisPlayerView.setLabels(labels);
-
-            Map<SkipMarker.Type,String> skipLabels = new HashMap<>();
-            skipLabels.put(SkipMarker.Type.INTRO, translations.getSkipIntroLabel());
-            skipLabels.put(SkipMarker.Type.CREDITS, translations.getSkipCreditsLabel());
-            skipMarkerTvCompat.setLabels(skipLabels);
         }
     }
 
     public void setSkipMarkers(List<SkipMarker> skipMarkers) {
-        skipMarkerTvCompat.setSkipMarkList(skipMarkers);
+        exoDorisPlayerView.setSkipMarkList(skipMarkers);
     }
 
     private boolean isUnauthorizedAdError(Exception error) {

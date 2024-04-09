@@ -23,13 +23,12 @@ import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
-import com.diceplatform.doris.custom.ui.entity.marker.SkipMarker;
-import com.diceplatform.doris.custom.ui.entity.marker.SkipMarker.Type;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.internal.ResumePositionHandler;
+import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -727,13 +726,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         return skipMarkers;
     }
 
-    private static Type parseSkipMarkerType(String type) {
+    private static SkipMarker.Type parseSkipMarkerType(String type) {
         if (type == null || type.isEmpty()) return null;
         switch (type.toLowerCase()) {
             case "skip_intro":
-                return Type.INTRO;
+                return SkipMarker.Type.INTRO;
             case "skip_credits":
-                return Type.CREDITS;
+                return SkipMarker.Type.CREDITS;
             default:
                 return null;
         }
