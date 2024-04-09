@@ -322,12 +322,6 @@ public class ReactExoplayerView extends FrameLayout implements
         mainHandler = new Handler();
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        initializePlayer();
-    }
-
     // LifecycleEventListener implementation
     @Override
     public void onHostResume() {
