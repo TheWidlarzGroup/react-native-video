@@ -29,7 +29,9 @@ export type ReactVideoSourceProperties = {
 };
 
 export type ReactVideoSource = Readonly<
-  ReactVideoSourceProperties | NodeRequire
+  Omit<ReactVideoSourceProperties, 'uri'> & {
+    uri?: string | NodeRequire;
+  }
 >;
 
 export type DebugConfig = Readonly<{
@@ -53,9 +55,10 @@ export type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
-    licenseUrl: string,
-    contentId: string,
     spcBase64: string,
+    contentId: string,
+    licenseUrl: string,
+    loadedLicenseUrl: string,
   ) => void; // ios
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
@@ -65,6 +68,7 @@ export type BufferConfig = {
   maxBufferMs?: number;
   bufferForPlaybackMs?: number;
   bufferForPlaybackAfterRebufferMs?: number;
+  backBufferDurationMs?: number; // Android
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
@@ -101,9 +105,10 @@ export type SubtitleStyle = {
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
+  opacity?: number;
 };
 
-export enum TextTracksType {
+export enum TextTrackType {
   SUBRIP = 'application/x-subrip',
   TTML = 'application/ttml+xml',
   VTT = 'text/vtt',
@@ -112,11 +117,11 @@ export enum TextTracksType {
 export type TextTracks = {
   title: string;
   language: ISO639_1;
-  type: TextTracksType;
+  type: TextTrackType;
   uri: string;
 }[];
 
-export type TextTrackType =
+export type TextTrackSelectionType =
   | 'system'
   | 'disabled'
   | 'title'
@@ -124,11 +129,11 @@ export type TextTrackType =
   | 'index';
 
 export type SelectedTextTrack = Readonly<{
-  type: TextTrackType;
+  type: TextTrackSelectionType;
   value?: string | number;
 }>;
 
-export type AudioTrackType =
+export type AudioTrackSelectionType =
   | 'system'
   | 'disabled'
   | 'title'
@@ -136,7 +141,7 @@ export type AudioTrackType =
   | 'index';
 
 export type SelectedAudioTrack = Readonly<{
-  type: AudioTrackType;
+  type: AudioTrackSelectionType;
   value?: string | number;
 }>;
 
@@ -184,7 +189,6 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   audioOnly?: boolean;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
-  backBufferDurationMs?: number; // Android
   bufferConfig?: BufferConfig; // Android
   chapters?: Chapters[]; // iOS
   contentStartTime?: number; // Android
@@ -221,6 +225,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
+  shutterColor?: string; // Android
   textTracks?: TextTracks;
   testID?: string;
   trackId?: string; // Android
