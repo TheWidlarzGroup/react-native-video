@@ -6,12 +6,15 @@ This repository is a fork of the original [react-native-video](https://github.co
 ## Update Instructions
 To sync this fork with the upstream repository, follow these steps:
 1. Sync fork with the latest changes from the original repo
-    - a. git checkout master
-    - b. git pull upstream
+    - a. `git checkout master`
+    - c. `git pull`
+    - b. `git pull upstream` or `git merge [versionTag]`
+    - d. `git push`
 2. Update release branch with latest changes
-    - a. git checkout release
-    - b. git checkout -b sync/v6.0.0-beta.5
-    - c. git merge master
+    - a. `git checkout release`
+    - b. `git pull`
+    - b. `git checkout -b sync/v6.0.0-beta.5`
+    - c. `git merge master`
     - d. Resolve conflicts
 3. Create new PR targeting release branch
 4. Review and merge PR
