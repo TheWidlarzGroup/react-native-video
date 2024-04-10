@@ -146,7 +146,7 @@
         func adsManagerDidRequestContentPause(_: IMAAdsManager) {
             // Prevent seeking while AD is playing
             #if os(tvOS)
-            _video._playerViewController?.showsPlaybackControls = false
+            _video?._playerViewController?.showsPlaybackControls = false
             #endif
             // Pause the content for the SDK to play ads.
             _video?.setPaused(true)
@@ -156,7 +156,7 @@
         func adsManagerDidRequestContentResume(_: IMAAdsManager) {
             // Allow seeking while video is playing
             #if os(tvOS)
-            _video._playerViewController?.showsPlaybackControls = true
+            _video?._playerViewController?.showsPlaybackControls = true
             #endif
             // Resume the content since the SDK is done playing ads (at least for now).
             _video?.setAdPlaying(false)
