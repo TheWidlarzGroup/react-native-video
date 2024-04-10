@@ -17,12 +17,19 @@ To sync this fork with the upstream repository, follow these steps:
     - c. `git merge master`
     - d. Resolve conflicts
 3. Create new PR targeting release branch
+    - a. Name the PR `[v6.0.0 beta.8] Sync fork up to commit <commitHash>`
 4. Review and merge PR
 5. Draft a new release on GitHub
 6. Update GolfPass apps package.json use the new version tag
 
-## Changes Introduced
+## Commit Instructions
+- from the release branch create a feature branch
+   - `git checkout -b "feature/appletv-descriptive-name"`
+       - prefix with `[ios/appletv/android/androidtv]-decriptive-name`
+- Prefix all commits with [iOS/AppleTV/Android/AndroidTV]
+
+## Changes Introduced By Fork
 - [Specify the changes introduced with this fork here]
 
-## README.md for the current commit hash
+## README.md for the latest synced upstream
 [Click here](/README.md) to visit the root README file of this repository.
