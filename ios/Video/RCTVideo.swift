@@ -120,12 +120,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onTextTrackDataChanged: RCTDirectEventBlock?
 
     @objc
-    func _onPictureInPictureStatusChanged() {
+    func _onPictureInPictureEnter() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
     }
 
     @objc
-    func _onRestoreUserInterfaceForPictureInPictureStop() {
+    func _onPictureInPictureExit() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
     }
 
@@ -143,9 +143,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         #if os(iOS)
             _pip = RCTPictureInPicture({ [weak self] in
-                self?._onPictureInPictureStatusChanged()
+                self?._onPictureInPictureEnter()
             }, { [weak self] in
-                self?._onRestoreUserInterfaceForPictureInPictureStop()
+                self?._onPictureInPictureExit()
+            }, { [weak self] in
+                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
             })
         #endif
 
@@ -349,8 +351,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         throw NSError(domain: "", code: 0, userInfo: nil)
                     }
                     if let uri = source.uri, uri.starts(with: "ph://") {
-                        self.isSetSourceOngoing = false
-                        self.applyNextSource()
                         return Promise {
                             RCTVideoUtils.preparePHAsset(uri: uri).then { asset in
                                 return self.playerItemPrepareText(asset: asset, assetOptions: nil, uri: source.uri ?? "")
@@ -367,7 +367,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     }
 
                     if let startPosition = self._source?.startPosition {
-                        self._startPosition = Float64(startPosition) / 1000
+                        self._startPosition = startPosition / 1000
                     }
 
                     #if USE_VIDEO_CACHING
@@ -398,7 +398,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerItem = playerItem
                     self._playerObserver.playerItem = self._playerItem
                     self.setPreferredForwardBufferDuration(self._preferredForwardBufferDuration)
-                    self.setPlaybackRange(playerItem, withVideoStart: self._source?.cropStart, withVideoEnd: self._source?.cropEnd)
+                    self.setPlaybackRange(playerItem, withCropStart: self._source?.cropStart, withCropEnd: self._source?.cropEnd)
                     self.setFilter(self._filterName)
                     if let maxBitRate = self._maxBitRate {
                         self._playerItem?.preferredPeakBitRate = Double(maxBitRate)
@@ -740,15 +740,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    func setPlaybackRange(_ item: AVPlayerItem!, withVideoStart videoStart: Int64?, withVideoEnd videoEnd: Int64?) {
-        if videoStart != nil {
-            let start = CMTimeMake(value: videoStart!, timescale: 1000)
+    func setPlaybackRange(_ item: AVPlayerItem!, withCropStart cropStart: Int64?, withCropEnd cropEnd: Int64?) {
+        if let cropStart {
+            let start = CMTimeMake(value: cropStart, timescale: 1000)
             item.reversePlaybackEndTime = start
             _pendingSeekTime = Float(CMTimeGetSeconds(start))
             _pendingSeek = true
         }
-        if videoEnd != nil {
-            item.forwardPlaybackEndTime = CMTimeMake(value: videoEnd!, timescale: 1000)
+        if let cropEnd {
+            item.forwardPlaybackEndTime = CMTimeMake(value: cropEnd, timescale: 1000)
         }
     }
 

@@ -149,7 +149,9 @@ enum RCTVideoDRM {
     ) -> Promise<Data> {
         let url = loadingRequest.request.url
 
-        guard let contentId = contentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with: "") else {
+        let parsedContentId = contentId != nil && !contentId!.isEmpty ? contentId : nil
+
+        guard let contentId = parsedContentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with: "") else {
             return Promise(RCTVideoError.invalidContentId as! Error)
         }
 
