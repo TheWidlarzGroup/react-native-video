@@ -1896,7 +1896,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 fullScreenPlayerView.dismiss();
             }
             if (pipFullScreenPlayerView == null) {
-                pipFullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, null, new OnBackPressedCallback(true) {
+                pipFullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, null, new OnBackPressedCallback(true) {
                     @Override
                     public void handleOnBackPressed() { }
                 });
@@ -1907,7 +1907,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 pipFullScreenPlayerView.dismiss();
             }
             if (controls) {
-                fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, playerControlView, new OnBackPressedCallback(true) {
+                fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
                     @Override
                     public void handleOnBackPressed() {
                         setFullscreen(false);
