@@ -7,6 +7,9 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
+  "rules": {
+    "no-trailing-spaces": 1
+  },
   "parserOptions": {
     "requireConfigFile": false
   }

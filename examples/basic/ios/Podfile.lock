@@ -7,9 +7,6 @@ PODS:
   - hermes-engine (0.74.0-rc.4):
     - hermes-engine/Pre-built (= 0.74.0-rc.4)
   - hermes-engine/Pre-built (0.74.0-rc.4)
-  - PromisesObjC (2.4.0)
-  - PromisesSwift (2.4.0):
-    - PromisesObjC (= 2.4.0)
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -938,12 +935,49 @@ PODS:
   - React-Mapbuffer (0.74.0-rc.4):
     - glog
     - React-debug
-  - react-native-video (6.0.0-beta.6):
+  - react-native-video (6.0.0-beta.8):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
-    - react-native-video/Video (= 6.0.0-beta.6)
-  - react-native-video/Video (6.0.0-beta.6):
-    - PromisesSwift
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - react-native-video/Video (= 6.0.0-beta.8)
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - react-native-video/Video (6.0.0-beta.8):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - React-nativeconfig (0.74.0-rc.4)
   - React-NativeModulesApple (0.74.0-rc.4):
     - glog
@@ -1239,8 +1273,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - PromisesObjC
-    - PromisesSwift
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1365,8 +1397,6 @@ SPEC CHECKSUMS:
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: dfdcadd89a22aa872ef552b07e415d88df68af55
-  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RCT-Folly: 045d6ecaa59d826c5736dfba0b2f4083ff8d79df
   RCTDeprecation: 1c5ab5895f9fc7e8ae9fcde04859f0d246283209
   RCTRequired: 79e2e81174db06336f470c49aea7603ff29817a7
@@ -1391,7 +1421,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 50e3ea936a199a2a7fcab922f156507c97f0b88c
   React-logger: 6004e0cf41b7e9714ca26b1648e5d76fcfd638b5
   React-Mapbuffer: 9b163fa28e549d5f36f89a39a1145fcaf262d0d0
-  react-native-video: dc3118548cf8864a83f57df4345cf6c692402e8f
+  react-native-video: 64df5d2bc3bbc028cb97d87b53e42583127a9b9e
   React-nativeconfig: 3948d6fb6acfec364625cffbb1cf420346fb37c0
   React-NativeModulesApple: 46745aba687c1019983d56b6d5fa39265152f64f
   React-perflogger: 0d62c0261b6fd3920605850de91abc8135dd3ee9
