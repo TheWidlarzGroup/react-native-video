@@ -289,7 +289,7 @@ export interface VideoNativeProps extends ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   preferredForwardBufferDuration?: Float; //ios, 0
   playWhenInactive?: boolean; // ios, false
-  pictureInPicture?: boolean; // default false
+  enterPictureInPictureOnLeave?: boolean; // default false
   ignoreSilentSwitch?: WithDefault<string, 'inherit'>; // ios, 'inherit'
   mixWithOthers?: WithDefault<string, 'inherit'>; // ios, 'inherit'
   rate?: Float;
@@ -365,6 +365,8 @@ export interface VideoManagerType {
     licenseUrl: string,
     reactTag: number,
   ) => Promise<void>;
+  enterPictureInPicture: (reactTag: number) => Promise<void>;
+  exitPictureInPicture: (reactTag: number) => Promise<void>;
 }
 
 export interface VideoDecoderPropertiesType {

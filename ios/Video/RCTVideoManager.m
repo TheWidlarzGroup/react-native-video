@@ -24,7 +24,7 @@ RCT_EXPORT_VIEW_PROPERTY(playInBackground, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(preventsDisplaySleepDuringVideoPlayback, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(preferredForwardBufferDuration, float);
 RCT_EXPORT_VIEW_PROPERTY(playWhenInactive, BOOL);
-RCT_EXPORT_VIEW_PROPERTY(pictureInPicture, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(enterPictureInPictureOnLeave, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(ignoreSilentSwitch, NSString);
 RCT_EXPORT_VIEW_PROPERTY(mixWithOthers, NSString);
 RCT_EXPORT_VIEW_PROPERTY(rate, float);
@@ -84,5 +84,9 @@ RCT_EXTERN_METHOD(setPlayerPauseState : (nonnull NSNumber*)paused reactTag : (no
 RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
+
+RCT_EXTERN_METHOD(enterPictureInPicture : (nonnull NSNumber*)reactTag)
+
+RCT_EXTERN_METHOD(exitPictureInPicture : (nonnull NSNumber*)reactTag)
 
 @end

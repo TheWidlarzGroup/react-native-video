@@ -183,7 +183,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
-    private boolean pictureInPictureEnabled = false;
+    private boolean enterPictureInPictureOnLeave = false;
     private boolean isInPictureInPicture = false;
     private PictureInPictureParams.Builder pictureInPictureParamsBuilder;
     private boolean hasAudioFocus = false;
@@ -381,7 +381,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (pictureInPictureEnabled && !isInPictureInPicture) {
+        if (enterPictureInPictureOnLeave && !isInPictureInPicture) {
             enterPictureInPictureMode();
             return;
         }
@@ -1884,8 +1884,8 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setPictureInPicture(boolean pictureInPictureEnabled) {
-        this.pictureInPictureEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && pictureInPictureEnabled;
+    public void setEnterPictureInPictureOnLeave(boolean enterPictureInPictureOnLeave) {
+        this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && enterPictureInPictureOnLeave;
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
@@ -1930,8 +1930,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    protected void enterPictureInPictureMode() {
-        if (!pictureInPictureEnabled) return;
+    public void enterPictureInPictureMode() {
         PictureInPictureParams _pipParams = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
