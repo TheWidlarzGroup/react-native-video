@@ -11,8 +11,6 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.ads.AdsLoader;
 import androidx.media3.exoplayer.source.ads.AdsMediaSource;
 
-import com.facebook.react.uimanager.ThemedReactContext;
-
 import java.io.IOException;
 
 public class ImaAdsLoader implements AdsLoader {

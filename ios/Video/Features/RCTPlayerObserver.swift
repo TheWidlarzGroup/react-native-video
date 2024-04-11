@@ -26,11 +26,12 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>)
     func handleViewControllerOverlayViewFrameChange(overlayView: UIView, change: NSKeyValueObservedChange<CGRect>)
     func handleTracksChange(playerItem: AVPlayerItem, change: NSKeyValueObservedChange<[AVPlayerItemTrack]>)
+    func handleLegibleOutput(strings: [NSAttributedString])
 }
 
 // MARK: - RCTPlayerObserver
 
-class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
+class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPlayerItemLegibleOutputPushDelegate {
     weak var _handlers: RCTPlayerObserverHandler?
 
     var player: AVPlayer? {
@@ -46,6 +47,8 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         }
     }
 
+    var subtitleStyle: SubtitleStyle?
+
     var playerItem: AVPlayerItem? {
         willSet {
             removePlayerItemObservers()
@@ -57,8 +60,12 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
             // handle timedMetadata
             let metadataOutput = AVPlayerItemMetadataOutput()
+            let legibleOutput = AVPlayerItemLegibleOutput()
             playerItem.add(metadataOutput)
+            playerItem.add(legibleOutput)
             metadataOutput.setDelegate(self, queue: .main)
+            legibleOutput.setDelegate(self, queue: .main)
+            legibleOutput.suppressesPlayerRendering = subtitleStyle?.opacity == 0 ? true : false
         }
     }
 
@@ -113,6 +120,14 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         }
     }
 
+    func legibleOutput(_: AVPlayerItemLegibleOutput,
+                       didOutputAttributedStrings strings: [NSAttributedString],
+                       nativeSampleBuffers _: [Any],
+                       forItemTime _: CMTime) {
+        guard let _handlers else { return }
+        _handlers.handleLegibleOutput(strings: strings)
+    }
+
     func addPlayerObservers() {
         guard let player, let _handlers else {
             return
@@ -128,6 +143,7 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     func removePlayerObservers() {
         _playerRateChangeObserver?.invalidate()
         _playerExternalPlaybackActiveObserver?.invalidate()
+        _playerVolumeChangeObserver?.invalidate()
     }
 
     func addPlayerItemObservers() {

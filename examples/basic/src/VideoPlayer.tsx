@@ -33,6 +33,9 @@ import Video, {
   ResizeMode,
   SelectedTrack,
   DRMType,
+  OnTextTrackDataChangedData,
+  TextTrackType,
+  ISO639_1,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -95,7 +98,10 @@ class VideoPlayer extends Component {
   seekerWidth = 0;
 
   srcAllPlatformList = [
-    require('./broadchurch.mp4'),
+    {
+      description: 'local file',
+      uri: require('./broadchurch.mp4'),
+    },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
@@ -117,6 +123,22 @@ class VideoPlayer extends Component {
     {
       description: 'another bunny (can be saved)',
       uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+    },
+    {
+      description: 'sintel with subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    },
+    {
+      description: 'sintel with sideLoaded subtitles',
+      uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', // this is sample video, my actual video file is MP4
+      textTracks: [
+        {
+          title: 'test',
+          language: 'en' as ISO639_1,
+          type: TextTrackType.VTT,
+          uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+        },
+      ]
     },
   ];
 
@@ -216,36 +238,43 @@ class VideoPlayer extends Component {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    this.setState({
-      audioTracks: data.audioTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
+        audioTracks: data.audioTracks,
         selectedAudioTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
+      });
+    } else {
+      this.setState({
+        audioTracks: data.audioTracks,
       });
     }
   };
 
   onTextTracks = (data: OnTextTracksData) => {
     const selectedTrack = data.textTracks?.find((x: TextTrack) => {
-      return x.selected;
+      return x?.selected;
     });
 
-    this.setState({
-      textTracks: data.textTracks,
-    });
     if (selectedTrack?.language) {
       this.setState({
-        textTracks: data,
+        textTracks: data.textTracks,
         selectedTextTrack: {
           type: 'language',
           value: selectedTrack?.language,
         },
       });
+    } else {
+      this.setState({
+        textTracks: data.textTracks,
+      });
     }
+  };
+
+  onTextTrackDataChanged = (data: OnTextTrackDataChangedData) => {
+    console.log(`Subtitles: ${JSON.stringify(data, null, 2)}`);
   };
 
   onAspectRatio = (data: OnVideoAspectRatioData) => {
@@ -625,11 +654,13 @@ class VideoPlayer extends Component {
                 />
               </View>
               <View style={styles.generalControls}>
+                {/* shall be replaced by slider */}
                 <MultiValueControl
-                  values={[0.25, 0.5, 1.0, 1.5, 2.0]}
+                  values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
                   onPress={this.onRateSelected}
                   selected={this.state.rate}
                 />
+                {/* shall be replaced by slider */}
                 <MultiValueControl
                   values={[0.5, 1, 1.5]}
                   onPress={this.onVolumeSelected}
@@ -680,6 +711,9 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     {this.state.audioTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
                       return (
                         <Picker.Item
                           label={track.language}
@@ -707,13 +741,18 @@ class VideoPlayer extends Component {
                       });
                     }}>
                     <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map(track => (
-                      <Picker.Item
-                        label={track.language}
-                        value={track.language}
-                        key={track.language}
-                      />
-                    ))}
+                    {this.state.textTracks.map(track => {
+                      if (!track) {
+                        return;
+                      }
+                      return (
+                        <Picker.Item
+                          label={track.language}
+                          value={track.language}
+                          key={track.language}
+                        />
+                      );
+                    })}
                   </Picker>
                 )}
               </View>
@@ -736,6 +775,7 @@ class VideoPlayer extends Component {
             this.video = ref;
           }}
           source={this.srcList[this.state.srcListId]}
+          textTracks={this.srcList[this.state.srcListId]?.textTracks}
           adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
           drm={this.srcList[this.state.srcListId]?.drm}
           style={viewStyle}
@@ -749,6 +789,7 @@ class VideoPlayer extends Component {
           onLoad={this.onLoad}
           onAudioTracks={this.onAudioTracks}
           onTextTracks={this.onTextTracks}
+          onTextTrackDataChanged={this.onTextTrackDataChanged}
           onProgress={this.onProgress}
           onEnd={this.onEnd}
           progressUpdateInterval={1000}
@@ -763,6 +804,7 @@ class VideoPlayer extends Component {
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          preventsDisplaySleepDuringVideoPlayback={true}
         />
       </TouchableOpacity>
     );

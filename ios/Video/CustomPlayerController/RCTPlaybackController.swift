@@ -64,6 +64,7 @@ let ICON_SIZE: CGFloat = 20
 
     func addTarget(_ target: Any, action: Selector, for: TargetType) {}
     func setValue(_ value: Float, animated: Bool) {}
+    func setThumbImage(_ image: UIImage?, for: UIControl.State) {}
 }
 
 //MARK: Class variables
