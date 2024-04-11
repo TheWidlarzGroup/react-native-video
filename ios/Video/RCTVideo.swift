@@ -70,7 +70,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             #if os(iOS)
                 if _pictureInPictureEnabled {
                     _playerViewController?.allowsPictureInPicturePlayback = true
-                    
+
                     if _pip == nil {
                         initPictureinPicture()
                     }
