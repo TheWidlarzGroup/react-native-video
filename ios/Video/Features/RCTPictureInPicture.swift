@@ -14,6 +14,7 @@ import React
         var isInitialized: Bool {
             return _pipController != nil
         }
+
         var isPictureInPictureActive: Bool {
             return _pipController?.isPictureInPictureActive ?? false
         }
@@ -71,14 +72,14 @@ import React
         func deinitPipController() {
             _pipController = nil
         }
-        
+
         func enterPictureInPicture() {
             guard let _pipController else { return }
             if !isPictureInPictureActive {
                 _pipController.startPictureInPicture()
             }
         }
-        
+
         func exitPictureInPicture() {
             guard let _pipController else { return }
             if isPictureInPictureActive {

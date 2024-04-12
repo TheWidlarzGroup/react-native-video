@@ -218,14 +218,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(screenWillLock),
             name: UIApplication.protectedDataWillBecomeUnavailableNotification,
             object: nil
         )
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(screenDidUnlock),
@@ -285,7 +285,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func applicationDidEnterBackground(notification _: NSNotification!) {
         let isPipActive = isPipActive()
         if _playInBackground || isPipActive == true {
-            if (isPipActive) {
+            if isPipActive {
                 _player?.play()
                 _player?.rate = _rate
             }
@@ -305,7 +305,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerViewController?.player = _player
         }
     }
-    
+
     @objc
     func screenWillLock() {
         let isPipActive = isPipActive()
@@ -315,7 +315,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player?.pause()
         _player?.rate = 0.0
     }
-    
+
     @objc
     func screenDidUnlock() {
         let isPipActive = isPipActive()
@@ -1562,7 +1562,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
-    
+
     @objc
     func enterPictureInPicture() {
         if (_pip?.isInitialized ?? false) == false {
@@ -1571,7 +1571,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
         _pip?.enterPictureInPicture()
     }
-    
+
     @objc
     func exitPictureInPicture() {
         guard _pip?.isPictureInPictureActive ?? false else { return }

@@ -1,7 +1,6 @@
 package com.brentvatne.react
 
 import android.os.Build
-
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.ReactApplicationContext
@@ -14,9 +13,7 @@ import com.facebook.react.uimanager.common.UIManagerType
 import kotlin.math.roundToInt
 
 class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextBaseJavaModule(reactContext) {
-    override fun getName(): String {
-        return REACT_CLASS
-    }
+    override fun getName(): String = REACT_CLASS
 
     private fun performOnPlayerView(reactTag: Int, callback: (ReactExoplayerView?) -> Unit) {
         UiThreadUtil.runOnUiThread {
