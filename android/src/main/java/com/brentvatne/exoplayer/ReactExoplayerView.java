@@ -1326,7 +1326,7 @@ public class ReactExoplayerView extends FrameLayout implements
         track.setIndex(trackIndex);
         if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
         if (format.language != null) track.setLanguage(format.language);
-        if (format.id != null) track.setTitle(format.id);
+        if (format.label != null) track.setTitle(format.label);
         track.setSelected(isTrackSelected(selection, group, 0));
         return track;
     }
