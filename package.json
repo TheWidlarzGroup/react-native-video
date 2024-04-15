@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.0.0-beta.6",
+    "version": "6.0.0-beta.8",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index",
@@ -64,10 +64,5 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ],
-    "codegenConfig": {
-        "name": "RNCVideo",
-        "type": "components",
-        "jsSrcsDir": "./src/specs"
-    }
+    ]
 }

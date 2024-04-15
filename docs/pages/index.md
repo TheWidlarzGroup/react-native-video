@@ -6,7 +6,8 @@
 ## Beta Information
 > ⚠️ **Version 6 Beta**: The following documentation may refer to features only available through the v6.0.0 alpha releases, [please see version 5.2.x](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md) for the current documentation!
 
-Version 6.x recommends react-native >= 0.68.2.
+Version 6.x requires **react-native >= 0.68.2**
+> ⚠️ from **6.0.0-beta.8** requires also **iOS >= 13.0** (default in react-native 0.73)
 
 For older versions of react-native, [please use version 5.x](https://github.com/react-native-video/react-native-video/tree/v5.2.0).
 

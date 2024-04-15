@@ -1,5 +1,4 @@
 import AVFoundation
-import Promises
 
 enum RCTVideoDRM {
     static func fetchLicense(
@@ -7,36 +6,25 @@ enum RCTVideoDRM {
         spcData: Data?,
         contentId: String,
         headers: [String: Any]?
-    ) -> Promise<Data> {
+    ) async throws -> Data {
         let request = createLicenseRequest(licenseServer: licenseServer, spcData: spcData, contentId: contentId, headers: headers)
 
-        return Promise<Data>(on: .global()) { fulfill, reject in
-            let postDataTask = URLSession.shared.dataTask(
-                with: request as URLRequest,
-                completionHandler: { (data: Data!, response: URLResponse!, error: Error!) in
-                    let httpResponse: HTTPURLResponse! = (response as! HTTPURLResponse)
+        let (data, response) = try await URLSession.shared.data(from: request)
 
-                    guard error == nil else {
-                        print("Error getting license from \(licenseServer), HTTP status code \(httpResponse.statusCode)")
-                        reject(error)
-                        return
-                    }
-                    guard httpResponse.statusCode == 200 else {
-                        print("Error getting license from \(licenseServer), HTTP status code \(httpResponse.statusCode)")
-                        reject(RCTVideoErrorHandler.licenseRequestNotOk(httpResponse.statusCode))
-                        return
-                    }
-
-                    guard data != nil, let decodedData = Data(base64Encoded: data, options: []) else {
-                        reject(RCTVideoErrorHandler.noDataFromLicenseRequest)
-                        return
-                    }
-
-                    fulfill(decodedData)
-                }
-            )
-            postDataTask.resume()
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw RCTVideoErrorHandler.noDataFromLicenseRequest
         }
+
+        if httpResponse.statusCode != 200 {
+            print("Error getting license from \(licenseServer), HTTP status code \(httpResponse.statusCode)")
+            throw RCTVideoErrorHandler.licenseRequestNotOk(httpResponse.statusCode)
+        }
+
+        guard let decodedData = Data(base64Encoded: data, options: []) else {
+            throw RCTVideoErrorHandler.noDataFromLicenseRequest
+        }
+
+        return decodedData
     }
 
     static func createLicenseRequest(
@@ -76,67 +64,63 @@ enum RCTVideoDRM {
         loadingRequest: AVAssetResourceLoadingRequest,
         certificateData: Data,
         contentIdData: Data
-    ) -> Promise<Data> {
-        return Promise<Data>(on: .global()) { fulfill, reject in
-            #if os(visionOS)
-                // TODO: DRM is not supported yet on visionOS. See #3467
-                reject(NSError(domain: "DRM is not supported yet on visionOS", code: 0, userInfo: nil))
-            #else
-                guard let spcData = try? loadingRequest.streamingContentKeyRequestData(
-                    forApp: certificateData,
-                    contentIdentifier: contentIdData as Data,
-                    options: nil
-                ) else {
-                    reject(RCTVideoErrorHandler.noSPC)
-                    return
-                }
+    ) throws -> Data {
+        #if os(visionOS)
+            // TODO: DRM is not supported yet on visionOS. See #3467
+            throw NSError(domain: "DRM is not supported yet on visionOS", code: 0, userInfo: nil)
+        #else
+            guard let spcData = try? loadingRequest.streamingContentKeyRequestData(
+                forApp: certificateData,
+                contentIdentifier: contentIdData as Data,
+                options: nil
+            ) else {
+                throw RCTVideoErrorHandler.noSPC
+            }
 
-                fulfill(spcData)
-            #endif
-        }
+            return spcData
+        #endif
     }
 
-    static func createCertificateData(certificateStringUrl: String?, base64Certificate: Bool?) -> Promise<Data> {
-        return Promise<Data>(on: .global()) { fulfill, reject in
-            guard let certificateStringUrl,
-                  let certificateURL = URL(string: certificateStringUrl.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? "") else {
-                reject(RCTVideoErrorHandler.noCertificateURL)
-                return
-            }
-
-            var certificateData: Data?
-            do {
-                certificateData = try Data(contentsOf: certificateURL)
-                if base64Certificate != nil {
-                    certificateData = Data(base64Encoded: certificateData! as Data, options: .ignoreUnknownCharacters)
-                }
-            } catch {}
-
-            guard let certificateData else {
-                reject(RCTVideoErrorHandler.noCertificateData)
-                return
-            }
-
-            fulfill(certificateData)
+    static func createCertificateData(certificateStringUrl: String?, base64Certificate: Bool?) throws -> Data {
+        guard let certificateStringUrl,
+              let certificateURL = URL(string: certificateStringUrl.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? "") else {
+            throw RCTVideoErrorHandler.noCertificateURL
         }
+
+        var certificateData: Data?
+        do {
+            certificateData = try Data(contentsOf: certificateURL)
+            if base64Certificate != nil {
+                certificateData = Data(base64Encoded: certificateData! as Data, options: .ignoreUnknownCharacters)
+            }
+        } catch {}
+
+        guard let certificateData else {
+            throw RCTVideoErrorHandler.noCertificateData
+        }
+
+        return certificateData
     }
 
     static func handleWithOnGetLicense(loadingRequest: AVAssetResourceLoadingRequest, contentId: String?, certificateUrl: String?,
-                                       base64Certificate: Bool?) -> Promise<Data> {
+                                       base64Certificate: Bool?) throws -> Data {
         let contentIdData = contentId?.data(using: .utf8)
 
-        return RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
-            .then { certificateData -> Promise<Data> in
-                guard let contentIdData else {
-                    throw RCTVideoError.invalidContentId as! Error
-                }
+        let certificateData = try? RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
 
-                return RCTVideoDRM.fetchSpcData(
-                    loadingRequest: loadingRequest,
-                    certificateData: certificateData,
-                    contentIdData: contentIdData
-                )
-            }
+        guard let contentIdData else {
+            throw RCTVideoError.invalidContentId as! Error
+        }
+
+        guard let certificateData else {
+            throw RCTVideoError.noCertificateData as! Error
+        }
+
+        return try RCTVideoDRM.fetchSpcData(
+            loadingRequest: loadingRequest,
+            certificateData: certificateData,
+            contentIdData: contentIdData
+        )
     }
 
     static func handleInternalGetLicense(
@@ -146,33 +130,32 @@ enum RCTVideoDRM {
         certificateUrl: String?,
         base64Certificate: Bool?,
         headers: [String: Any]?
-    ) -> Promise<Data> {
+    ) async throws -> Data {
         let url = loadingRequest.request.url
 
-        guard let contentId = contentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with: "") else {
-            return Promise(RCTVideoError.invalidContentId as! Error)
+        let parsedContentId = contentId != nil && !contentId!.isEmpty ? contentId : nil
+
+        guard let contentId = parsedContentId ?? url?.absoluteString.replacingOccurrences(of: "skd://", with: "") else {
+            throw RCTVideoError.invalidContentId as! Error
         }
 
         let contentIdData = NSData(bytes: contentId.cString(using: String.Encoding.utf8), length: contentId.lengthOfBytes(using: String.Encoding.utf8)) as Data
+        let certificateData = try RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
+        let spcData = try RCTVideoDRM.fetchSpcData(
+            loadingRequest: loadingRequest,
+            certificateData: certificateData,
+            contentIdData: contentIdData
+        )
 
-        return RCTVideoDRM.createCertificateData(certificateStringUrl: certificateUrl, base64Certificate: base64Certificate)
-            .then { certificateData in
-                return RCTVideoDRM.fetchSpcData(
-                    loadingRequest: loadingRequest,
-                    certificateData: certificateData,
-                    contentIdData: contentIdData
-                )
-            }
-            .then { spcData -> Promise<Data> in
-                guard let licenseServer else {
-                    throw RCTVideoError.noLicenseServerURL as! Error
-                }
-                return RCTVideoDRM.fetchLicense(
-                    licenseServer: licenseServer,
-                    spcData: spcData,
-                    contentId: contentId,
-                    headers: headers
-                )
-            }
+        guard let licenseServer else {
+            throw RCTVideoError.noLicenseServerURL as! Error
+        }
+
+        return try await RCTVideoDRM.fetchLicense(
+            licenseServer: licenseServer,
+            spcData: spcData,
+            contentId: contentId,
+            headers: headers
+        )
     }
 }
