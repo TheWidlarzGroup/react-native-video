@@ -73,10 +73,7 @@ You can disable or enable the following features by setting the following variab
 - `useExoplayerHls` - Enable HLS support
 
 Each of these features enabled will increase the size of your APK, so only enable the features you need.
-By default enabled features are:
-- `useExoplayerSmoothStreaming`
-- `useExoplayerDash`
-- `useExoplayerHls`
+By default enabled features are: `useExoplayerSmoothStreaming`, `useExoplayerDash`, `useExoplayerHls`
 
 
 Example:
