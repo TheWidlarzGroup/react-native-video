@@ -1833,7 +1833,7 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setSelectedVideoTrack(String type, String value) {
         videoTrackType = type;
         videoTrackValue = value;
-        setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+        if (!loadVideoStarted) setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
     }
 
     public void setSelectedAudioTrack(String type, String value) {
