@@ -654,10 +654,12 @@ class VideoPlayer extends Component {
                       text="decoderInfo"
                     />
                     <ToggleControl
+                      isSelected={this.state.useCache}
                       onPress={() => {
-                        this.state.useCache = !this.state.useCache;
+                        this.setState({useCache: !this.state.useCache});
                       }}
-                      text="use Cache"
+                      selectedText="enable cache"
+                      unselectedText="disable cache"
                     />
                   </View>
                 ) : null}
