@@ -36,6 +36,7 @@ import Video, {
   OnTextTrackDataChangedData,
   TextTrackType,
   ISO639_1,
+  OnSeekData,
   OnPlaybackStateChangedData,
   OnPlaybackRateChangeData,
 } from 'react-native-video';
@@ -68,6 +69,7 @@ interface StateType {
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
+  poster?: string;
 }
 
 class VideoPlayer extends Component {
@@ -95,6 +97,7 @@ class VideoPlayer extends Component {
     srcListId: 0,
     loop: false,
     showRNVControls: false,
+    poster: undefined,
   };
 
   seekerWidth = 0;
@@ -140,7 +143,7 @@ class VideoPlayer extends Component {
           type: TextTrackType.VTT,
           uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
         },
-      ]
+      ],
     },
   ];
 
@@ -188,7 +191,16 @@ class VideoPlayer extends Component {
           'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
       },
     },
+    {
+      description: 'rtsp big bug bunny',
+      uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
+      type: 'rtsp',
+    }
   ];
+
+  // poster which can be displayed
+  samplePoster =
+    'https://upload.wikimedia.org/wikipedia/commons/1/18/React_Native_Logo.png';
 
   srcList = this.srcAllPlatformList.concat(
     Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
@@ -223,13 +235,25 @@ class VideoPlayer extends Component {
     this.onTextTracks(data);
   };
 
-  onProgress = (data: OnProgressData) => {
-    if (!this.state.seeking) {
+  updateSeeker = () => {
+    // put this code in timeout as because it may be put just after a setState
+    setTimeout(()=> {
       const position = this.calculateSeekerPosition();
       this.setSeekerPosition(position);
-    }
+    }, 1)
+  }
+
+  onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
+    if (!this.state.seeking) {
+      this.updateSeeker()
+    }
   };
+
+  onSeek = (data: OnSeekData) => {
+    this.setState({currentTime: data.currentTime});
+    this.updateSeeker()
+  }
 
   onVideoLoadStart = () => {
     console.log('onVideoLoadStart');
@@ -662,6 +686,16 @@ class VideoPlayer extends Component {
                   }}
                   text="decoration"
                 />
+                <ToggleControl
+                  isSelected={!!this.state.poster}
+                  onPress={() => {
+                    this.setState({
+                      poster: this.state.poster ? undefined : this.samplePoster,
+                    });
+                  }}
+                  selectedText="poster"
+                  unselectedText="no poster"
+                />
               </View>
               <View style={styles.generalControls}>
                 {/* shall be replaced by slider */}
@@ -812,11 +846,13 @@ class VideoPlayer extends Component {
           onAspectRatio={this.onAspectRatio}
           onReadyForDisplay={this.onReadyForDisplay}
           onBuffer={this.onVideoBuffer}
+          onSeek={this.onSeek}
           repeat={this.state.loop}
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
           preventsDisplaySleepDuringVideoPlayback={true}
+          poster={this.state.poster}
           onPlaybackRateChange={this.onPlaybackRateChange}
           onPlaybackStateChanged={this.onPlaybackStateChanged}
         />

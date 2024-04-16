@@ -935,11 +935,49 @@ PODS:
   - React-Mapbuffer (0.74.0-rc.4):
     - glog
     - React-debug
-  - react-native-video (6.0.0-beta.6):
+  - react-native-video (6.0.0-beta.8):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
-    - react-native-video/Video (= 6.0.0-beta.6)
-  - react-native-video/Video (6.0.0-beta.6):
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - react-native-video/Video (= 6.0.0-beta.8)
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - react-native-video/Video (6.0.0-beta.8):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - React-nativeconfig (0.74.0-rc.4)
   - React-NativeModulesApple (0.74.0-rc.4):
     - glog
@@ -1383,7 +1421,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 50e3ea936a199a2a7fcab922f156507c97f0b88c
   React-logger: 6004e0cf41b7e9714ca26b1648e5d76fcfd638b5
   React-Mapbuffer: 9b163fa28e549d5f36f89a39a1145fcaf262d0d0
-  react-native-video: d340c162bf7974c2935fbeec0c5dea362f9dd74a
+  react-native-video: 64df5d2bc3bbc028cb97d87b53e42583127a9b9e
   React-nativeconfig: 3948d6fb6acfec364625cffbb1cf420346fb37c0
   React-NativeModulesApple: 46745aba687c1019983d56b6d5fa39265152f64f
   React-perflogger: 0d62c0261b6fd3920605850de91abc8135dd3ee9

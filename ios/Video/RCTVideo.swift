@@ -64,8 +64,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName: String!
     private var _filterEnabled = false
     private var _presentingViewController: UIViewController?
-    private var _pictureInPictureEnabled = false
     private var _startPosition: Float64 = -1
+    private var _pictureInPictureEnabled = false {
+        didSet {
+            #if os(iOS)
+                if _pictureInPictureEnabled {
+                    initPictureinPicture()
+                    _playerViewController?.allowsPictureInPicturePlayback = true
+                } else {
+                    _pip?.deinitPipController()
+                    _playerViewController?.allowsPictureInPicturePlayback = false
+                }
+            #endif
+        }
+    }
 
     /* IMA Ads */
     private var _adTagUrl: String?
@@ -144,6 +156,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         return _pictureInPictureEnabled
     }
 
+    func initPictureinPicture() {
+        #if os(iOS)
+            _pip = RCTPictureInPicture({ [weak self] in
+                self?._onPictureInPictureEnter()
+            }, { [weak self] in
+                self?._onPictureInPictureExit()
+            }, { [weak self] in
+                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
+            })
+
+            if _playerLayer != nil && !_controls {
+                _pip?.setupPipController(_playerLayer)
+            }
+        #else
+            DebugLog("Picture in Picture is not supported on this platform")
+        #endif
+    }
+
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         #if USE_GOOGLE_IMA
@@ -153,13 +183,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            _pip = RCTPictureInPicture({ [weak self] in
-                self?._onPictureInPictureEnter()
-            }, { [weak self] in
-                self?._onPictureInPictureExit()
-            }, { [weak self] in
-                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
-            })
+            if _pictureInPictureEnabled {
+                initPictureinPicture()
+                _playerViewController?.allowsPictureInPicturePlayback = true
+            } else {
+                _playerViewController?.allowsPictureInPicturePlayback = false
+            }
         #endif
 
         NotificationCenter.default.addObserver(
@@ -681,21 +710,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pendingSeekTime = seekTime.floatValue
             return
         }
-        let wasPaused = _paused
 
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
-            paused: wasPaused,
+            paused: _paused,
             seekTime: seekTime.floatValue,
             seekTolerance: seekTolerance.floatValue
         ) { [weak self] (_: Bool) in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
-            if !wasPaused {
-                self.setPaused(false)
-            }
+            self.setPaused(_paused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
                                "seekTime": seekTime,
                                "target": self.reactTag])
@@ -706,8 +732,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setRate(_ rate: Float) {
-        _rate = rate
-        applyModifiers()
+        if _rate != 1 {
+            // This is a workaround
+            // when player change from rate != 1 to another rate != 1 we see some video blocking
+            // To bypass it we shall force the rate to 1 and apply real valut afterward
+            _player?.rate = 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self._rate = rate
+                self.applyModifiers()
+            }
+        } else {
+            // apply it directly
+            self._rate = rate
+            self.applyModifiers()
+        }
     }
 
     @objc
@@ -973,7 +1011,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         viewController.view.frame = self.bounds
         viewController.player = player
         if #available(tvOS 14.0, *) {
-            viewController.allowsPictureInPicturePlayback = true
+            viewController.allowsPictureInPicturePlayback = _pictureInPictureEnabled
         }
         return viewController
     }
@@ -994,7 +1032,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.layer.needsDisplayOnBoundsChange = true
             #if os(iOS)
-                _pip?.setupPipController(_playerLayer)
+                if _pictureInPictureEnabled {
+                    _pip?.setupPipController(_playerLayer)
+                }
             #endif
         }
     }
