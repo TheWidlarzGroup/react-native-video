@@ -126,6 +126,22 @@ android {
                     exclude 'com/google/ads/interactivemedia/v3/api'
                     exclude 'androidx/media3/exoplayer/ima'
                 }
+
+                if (ExoplayerDependencies["useExoplayerSmoothStreaming"]) {
+                    exclude 'androidx/media3/exoplayer/smoothstreaming'
+                }
+
+                if (ExoplayerDependencies["useExoplayerDash"]) {
+                    exclude 'androidx/media3/exoplayer/dash'
+                }
+
+                if (ExoplayerDependencies["useExoplayerHls"]) {
+                    exclude 'androidx/media3/exoplayer/hls'
+                }
+
+                if (ExoplayerDependencies["useExoplayerRtsp"]) {
+                    exclude 'androidx/media3/exoplayer/rtsp'
+                }
             }
         }
     }
