@@ -65,14 +65,31 @@ buildscript {
 
 ### Enable custom feature in gradle file
 
-#### Enable client side ads insertion
-To enable client side ads insertion CSAI with google IMA SDK, you need to enable it in your gradle file.
+You can disable or enable the following features by setting the following variables in your `android/build.gradle` file:
+- `useExoplayerIMA` - Enable Google IMA SDK (Ads support)
+- `useExoplayerRtsp` - Enable RTSP support
+- `useExoplayerSmoothStreaming` - Enable SmoothStreaming support
+- `useExoplayerDash` - Enable Dash support
+- `useExoplayerHls` - Enable HLS support
+
+Each of these features enabled will increase the size of your APK, so only enable the features you need.
+By default enabled features are:
+- `useExoplayerSmoothStreaming`
+- `useExoplayerDash`
+- `useExoplayerHls`
+
+
+Example:
 
 ```gradle
 buildscript {
   ext {
     ...
-    RNVUseExoplayerIMA = true
+    useExoplayerIMA = true
+    useExoplayerRtsp = true
+    useExoplayerSmoothStreaming = true
+    useExoplayerDash = true
+    useExoplayerHls = true
     ...
   }
 }
