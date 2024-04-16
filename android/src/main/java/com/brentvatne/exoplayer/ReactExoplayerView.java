@@ -101,6 +101,7 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -822,18 +823,33 @@ public class ReactExoplayerView extends FrameLayout implements
 
         switch (type) {
             case CONTENT_TYPE_SS:
+                if(!BuildConfig.USE_EXOPLAYER_SMOOTH_STREAMING) {
+                    DebugLog.e("Exo Player Exception", "Smooth Streaming is not enabled!");
+                    throw new IllegalStateException("Smooth Streaming is not enabled!");
+                }
+
                 mediaSourceFactory = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 );
                 break;
             case CONTENT_TYPE_DASH:
+                if(!BuildConfig.USE_EXOPLAYER_DASH) {
+                    DebugLog.e("Exo Player Exception", "DASH is not enabled!");
+                    throw new IllegalStateException("DASH is not enabled!");
+                }
+
                 mediaSourceFactory = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 );
                 break;
             case CONTENT_TYPE_HLS:
+                if (!BuildConfig.USE_EXOPLAYER_HLS) {
+                    DebugLog.e("Exo Player Exception", "HLS is not enabled!");
+                    throw new IllegalStateException("HLS is not enabled!");
+                }
+
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 );
@@ -844,6 +860,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_RTSP:
+                if (!BuildConfig.USE_EXOPLAYER_RTSP) {
+                    DebugLog.e("Exo Player Exception", "RTSP is not enabled!");
+                    throw new IllegalStateException("RTSP is not enabled!");
+                }
+
                 mediaSourceFactory = new RtspMediaSource.Factory();
                 break;
             default: {
