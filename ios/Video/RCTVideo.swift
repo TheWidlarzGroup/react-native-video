@@ -291,6 +291,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         } else {
             // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+            _playerLayer?.player?.pause()
+            _playerLayer?.player?.rate = 0.0
             _playerLayer?.player = nil
             _playerViewController?.player = nil
         }
