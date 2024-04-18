@@ -1533,4 +1533,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
+
+    // Workaround for #3418 - https://github.com/react-native-video/react-native-video/issues/3418#issuecomment-2043508862
+    @objc
+    func setOnClick(_: Any) {}
 }
