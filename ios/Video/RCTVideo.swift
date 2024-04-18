@@ -203,7 +203,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _wrapperViewController.removeFromParent()
     }
 
-    func resetWrapperViewController(){
+    func createWrapperViewController(){
         // Clean wrapper
         self.removeWrapperController()
 
@@ -1051,14 +1051,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player: _player, withPlayerItem: _playerItem)
-            resetWrapperViewController()
+            createWrapperViewController()
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
 
         guard let _playerViewController else { return }
-        // FORK: Children are now added in the resetWrapperViewController function
+        // FORK: Children are now added in the createWrapperViewController function
         _playerObserver.playerViewController = _playerViewController
     }
 
