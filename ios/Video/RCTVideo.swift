@@ -221,7 +221,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #if os(iOS)
         useCustomPlaybackController()
         #endif
-            
     }
 
     // Initiate custom playback controller (seekbar, play, pause etc)
