@@ -191,13 +191,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
     
     func removeWrapperController(){
-        self.setFullscreen(false) // TODO: This might be fixes by ensuring correct view is removed
+        // Toggle off full screen presentation
+        self.setFullscreen(false)
         
         for viewContoller in _wrapperViewController.children{
             viewContoller.willMove(toParent: nil)
             viewContoller.view.removeFromSuperview()
             viewContoller.removeFromParent()
         }
+                
         _wrapperViewController.removeFromParent()
     }
 
