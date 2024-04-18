@@ -1,4 +1,3 @@
-#import "RCTEventDispatcher.h"
 #import "RCTVideoSwiftLog.h"
 #import <React/RCTViewManager.h>
 

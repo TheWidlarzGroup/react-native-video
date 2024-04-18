@@ -44,6 +44,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _muted = false
     private var _paused = false
     private var _repeat = false
+    private var _isPlaying: Bool?
     private var _allowsExternalPlayback = true
     private var _textTracks: [TextTrack]?
     private var _selectedTextTrackCriteria: SelectedTrackCriteria?
@@ -1378,6 +1379,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
     }
 
+    func handleTimeControlStatusChange(player: AVPlayer, change: NSKeyValueObservedChange<AVPlayer.TimeControlStatus>) {
+        if player.timeControlStatus == change.oldValue && change.oldValue != nil {
+            return
+        }
+        guard [.paused, .playing].contains(player.timeControlStatus) else {
+            return
+        }
+        let isPlaying = player.timeControlStatus == .playing
+
+        guard _isPlaying == nil || _isPlaying! != isPlaying else { return }
+        _isPlaying = isPlaying
+        onVideoPlaybackStateChanged?(["isPlaying": isPlaying, "target": reactTag as Any])
+    }
+
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
         guard let _player else { return }
 
@@ -1387,9 +1402,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         onPlaybackRateChange?(["playbackRate": NSNumber(value: _player.rate),
                                "target": reactTag as Any])
-
-        onVideoPlaybackStateChanged?(["isPlaying": _player.rate != 0,
-                                      "target": reactTag as Any])
 
         if _playbackStalled && _player.rate > 0 {
             onPlaybackResume?(["playbackRate": NSNumber(value: _player.rate),
@@ -1521,4 +1533,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
+
+    // Workaround for #3418 - https://github.com/react-native-video/react-native-video/issues/3418#issuecomment-2043508862
+    @objc
+    func setOnClick(_: Any) {}
 }

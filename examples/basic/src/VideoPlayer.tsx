@@ -193,6 +193,11 @@ class VideoPlayer extends Component {
           'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
       },
     },
+    {
+      description: 'rtsp big bug bunny',
+      uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
+      type: 'rtsp',
+    }
   ];
 
   // poster which can be displayed
