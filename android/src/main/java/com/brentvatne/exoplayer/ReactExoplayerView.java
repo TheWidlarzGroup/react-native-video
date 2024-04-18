@@ -195,6 +195,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
     private Handler mainHandler;
     private Runnable mainRunnable;
+    private DataSource.Factory cacheDataSourceFactory;
 
     // Props from React
     private Uri srcUri;
@@ -635,8 +636,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() != null) {
-            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheDataSourceFactory());
+        if (cacheDataSourceFactory != null) {
+            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
         }
 
         if (adsLoader != null) {
@@ -834,13 +835,13 @@ public class ReactExoplayerView extends FrameLayout implements
                 break;
             case CONTENT_TYPE_OTHER:
                 if (uri.toString().startsWith("file://") ||
-                RNVSimpleCache.INSTANCE.getCacheDataSourceFactory() == null) {
+                        cacheDataSourceFactory == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            RNVSimpleCache.INSTANCE.getCacheDataSourceFactory()
+                            cacheDataSourceFactory
                     );
 
                 }
@@ -2032,11 +2033,17 @@ public class ReactExoplayerView extends FrameLayout implements
         maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
-        RNVSimpleCache.INSTANCE.setSimpleCache(
-                this.getContext(),
-                cacheSize,
-                buildHttpDataSourceFactory(false)
-        );
+        if (cacheSize > 0) {
+            RNVSimpleCache.INSTANCE.setSimpleCache(
+                    this.getContext(),
+                    cacheSize,
+                    buildHttpDataSourceFactory(false)
+            );
+            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
+        } else {
+            cacheDataSourceFactory = null;
+        }
+
         backBufferDurationMs = newBackBufferDurationMs;
         releasePlayer();
         initializePlayer();

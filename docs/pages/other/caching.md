@@ -4,7 +4,7 @@ Caching is supported on `iOS` platforms with a CocoaPods setup, and on `android`
 
 ## Android
 
-Android uses a LRU `SimpleCache` with a variable cache size that can be specified by bufferConfig - cacheSizeMB. This creates a folder named `RNVCache` in the app's `cache` folder. Do note RNV does not yet offer a native call to flush the cache yet, users can expect the cache to be flushed by cleaning the app's cache.
+Android uses a LRU `SimpleCache` with a variable cache size that can be specified by bufferConfig - cacheSizeMB. This creates a folder named `RNVCache` in the app's `cache` folder. Do note RNV does not yet offer a native call to flush the cache, it can be flushed by clearing the app's cache.
 
 In addition, this resolves RNV6's repeated source URI call problem when looping a video on Android.
 

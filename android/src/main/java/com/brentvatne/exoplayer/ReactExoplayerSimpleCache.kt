@@ -11,7 +11,7 @@ import java.io.File
 
 object RNVSimpleCache {
     // TODO: when to release? how to check if cache is released?
-    var simpleCache: SimpleCache? = null
+    private var simpleCache: SimpleCache? = null
     var cacheDataSourceFactory: DataSource.Factory? = null
 
     fun setSimpleCache(context: Context, cacheSize: Int, factory: HttpDataSource.Factory) {
