@@ -189,16 +189,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc func togglePlaybackController(){
         _rctPlaybackControls?.toggleControlVisibility(visible: true)
     }
-
-    func resetWrapperViewController() -> UIViewController{
-        // Clean wrapper
-        _wrapperViewController.removeFromParent()
-
+    
+    func removeWrapperController(){
+        self.setFullscreen(false) // TODO: This might be fixes by ensuring correct view is removed
+        
         for viewContoller in _wrapperViewController.children{
             viewContoller.willMove(toParent: nil)
             viewContoller.view.removeFromSuperview()
             viewContoller.removeFromParent()
         }
+        _wrapperViewController.removeFromParent()
+    }
+
+    func resetWrapperViewController(){
+        // Clean wrapper
+        self.removeWrapperController()
 
         // Init wrapper
         _wrapperViewController.view.frame = self.bounds
@@ -215,7 +220,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         useCustomPlaybackController()
         #endif
             
-        return _wrapperViewController
     }
 
     // Initiate custom playback controller (seekbar, play, pause etc)
@@ -1249,6 +1253,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
+        self.removeWrapperController()
 
         if let _playerViewController {
             _playerViewController.view.removeFromSuperview()
