@@ -134,7 +134,7 @@ class VideoPlayer extends Component {
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
     {
-      description: 'sintel with sideLoaded subtitles',
+      description: 'BigBugBunny sideLoaded subtitles',
       // sideloaded subtitiles wont work for streaming like HLS
       // mp4
       uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
