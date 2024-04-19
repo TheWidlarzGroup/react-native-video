@@ -135,7 +135,7 @@ class VideoPlayer extends Component {
     },
     {
       description: 'BigBugBunny sideLoaded subtitles',
-      // sideloaded subtitiles wont work for streaming like HLS
+      // sideloaded subtitles wont work for streaming like HLS on ios
       // mp4
       uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
       textTracks: [
