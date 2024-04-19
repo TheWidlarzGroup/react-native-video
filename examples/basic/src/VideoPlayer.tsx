@@ -134,8 +134,10 @@ class VideoPlayer extends Component {
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
     {
-      description: 'sintel with sideLoaded subtitles',
-      uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', // this is sample video, my actual video file is MP4
+      description: 'BigBugBunny sideLoaded subtitles',
+      // sideloaded subtitles wont work for streaming like HLS on ios
+      // mp4
+      uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
       textTracks: [
         {
           title: 'test',
@@ -195,7 +197,7 @@ class VideoPlayer extends Component {
       description: 'rtsp big bug bunny',
       uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
       type: 'rtsp',
-    }
+    },
   ];
 
   // poster which can be displayed
@@ -237,23 +239,23 @@ class VideoPlayer extends Component {
 
   updateSeeker = () => {
     // put this code in timeout as because it may be put just after a setState
-    setTimeout(()=> {
+    setTimeout(() => {
       const position = this.calculateSeekerPosition();
       this.setSeekerPosition(position);
-    }, 1)
-  }
+    }, 1);
+  };
 
   onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
     if (!this.state.seeking) {
-      this.updateSeeker()
+      this.updateSeeker();
     }
   };
 
   onSeek = (data: OnSeekData) => {
     this.setState({currentTime: data.currentTime});
-    this.updateSeeker()
-  }
+    this.updateSeeker();
+  };
 
   onVideoLoadStart = () => {
     console.log('onVideoLoadStart');
@@ -363,11 +365,11 @@ class VideoPlayer extends Component {
 
   onPlaybackRateChange = (data: OnPlaybackRateChangeData) => {
     console.log('onPlaybackRateChange', data);
-  }
+  };
 
   onPlaybackStateChanged = (data: OnPlaybackStateChangedData) => {
     console.log('onPlaybackStateChanged', data);
-  }
+  };
 
   toggleFullscreen() {
     this.setState({fullscreen: !this.state.fullscreen});
