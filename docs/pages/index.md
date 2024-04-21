@@ -55,7 +55,7 @@ var styles = StyleSheet.create({
 
 ### Version 6.0.0 breaking changes
 
-Version 6.0.0 is introducing dozens of breaking changes, mostly through updated dependencies and significant refactoring. While the API remains compatible, the significant internal changes require full testing with your app to ensure all functionality remains operational. Please view the [Changelog](CHANGELOG.md) for specific breaking changes.  
+Version 6.0.0 is introducing dozens of breaking changes, mostly through updated dependencies and significant refactoring. While the API remains compatible, the significant internal changes require full testing with your app to ensure all functionality remains operational. Please view the [Changelog](https://github.com/react-native-video/react-native-video/blob/master/CHANGELOG.md) for specific breaking changes.  
 
 ### Installing Version 6.0.0 Beta
 
