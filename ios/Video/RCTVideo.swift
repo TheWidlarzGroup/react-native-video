@@ -189,16 +189,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc func togglePlaybackController(){
         _rctPlaybackControls?.toggleControlVisibility(visible: true)
     }
-
-    func resetWrapperViewController() -> UIViewController{
-        // Clean wrapper
-        _wrapperViewController.removeFromParent()
-
+    
+    func removeWrapperController(){
+        // Toggle off full screen presentation
+        self.setFullscreen(false)
+        
         for viewContoller in _wrapperViewController.children{
             viewContoller.willMove(toParent: nil)
             viewContoller.view.removeFromSuperview()
             viewContoller.removeFromParent()
         }
+                
+        _wrapperViewController.removeFromParent()
+    }
+
+    func createWrapperViewController(){
+        // Clean wrapper
+        self.removeWrapperController()
 
         // Init wrapper
         _wrapperViewController.view.frame = self.bounds
@@ -214,8 +221,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #if os(iOS)
         useCustomPlaybackController()
         #endif
-            
-        return _wrapperViewController
     }
 
     // Initiate custom playback controller (seekbar, play, pause etc)
@@ -1045,14 +1050,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _playerViewController == nil {
             _playerViewController = createPlayerViewController(player: _player, withPlayerItem: _playerItem)
-            resetWrapperViewController()
+            createWrapperViewController()
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
 
         guard let _playerViewController else { return }
-        // FORK: Children are now added in the resetWrapperViewController function
+        // FORK: Children are now added in the createWrapperViewController function
         _playerObserver.playerViewController = _playerViewController
     }
 
@@ -1249,6 +1254,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
+        self.removeWrapperController()
 
         if let _playerViewController {
             _playerViewController.view.removeFromSuperview()
