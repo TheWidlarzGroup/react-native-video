@@ -1,5 +1,31 @@
 
 
+# [6.0.0-rc.0](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.8...v6.0.0-rc.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* **android:** catch errors in `performOnPlayerView` ([#3685](https://github.com/react-native-video/react-native-video/issues/3685)) ([3e35326](https://github.com/react-native-video/react-native-video/commit/3e3532691ad42a53b9136fd52eb7f9a578e21b91))
+* **android:** fixed bug where video would not be visible after remount and change of drm source ([#3668](https://github.com/react-native-video/react-native-video/issues/3668)) ([1af12f9](https://github.com/react-native-video/react-native-video/commit/1af12f9dfb107c58a1896ee3181cb2c1a4fe300f))
+* **android:** seek callback with controls ([#3694](https://github.com/react-native-video/react-native-video/issues/3694)) ([c730306](https://github.com/react-native-video/react-native-video/commit/c730306e3a408be753febf6e5a6e9c2984a3bbb5))
+* **android:** set title for external subtitles ([#3676](https://github.com/react-native-video/react-native-video/issues/3676)) ([336b9f0](https://github.com/react-native-video/react-native-video/commit/336b9f022065b881eb31038ea1adba9dc54b2a08))
+* ensure poster works as expected and add it to the sample ([#3643](https://github.com/react-native-video/react-native-video/issues/3643)) ([d694139](https://github.com/react-native-video/react-native-video/commit/d6941392e071f2bd50fbe832dde203b7f18da769))
+* ensure tracks are available in sample ([#3660](https://github.com/react-native-video/react-native-video/issues/3660)) ([4c7719a](https://github.com/react-native-video/react-native-video/commit/4c7719a3f537509426c366d2176895661933c63c))
+* **ios:** add workaround for `TouchableWithoutFeedback` ([#3688](https://github.com/react-native-video/react-native-video/issues/3688)) ([b5ccc48](https://github.com/react-native-video/react-native-video/commit/b5ccc48476d958f6b70d8a163a8d1209d1c3c302))
+* **ios:** apply PictureInPicture state on start ([#3655](https://github.com/react-native-video/react-native-video/issues/3655)) ([07f71c2](https://github.com/react-native-video/react-native-video/commit/07f71c2fc446b43aa9565659983f7acb36d95f0c))
+* **ios:** call PictureInPicture callbacks with native controls ([#3603](https://github.com/react-native-video/react-native-video/issues/3603)) ([051e884](https://github.com/react-native-video/react-native-video/commit/051e884c8f34755c887b66d8715a6ee38efc5f77)), closes [#3602](https://github.com/react-native-video/react-native-video/issues/3602) [#3602](https://github.com/react-native-video/react-native-video/issues/3602)
+* **ios:** do not save pause state before seeking ([#3650](https://github.com/react-native-video/react-native-video/issues/3650)) ([e992243](https://github.com/react-native-video/react-native-video/commit/e992243305af0915442c3400f6ef105c4d5cd44c))
+* **ios:** fix sideloading external subtitles ([#3690](https://github.com/react-native-video/react-native-video/issues/3690)) ([efa1c52](https://github.com/react-native-video/react-native-video/commit/efa1c52491cb069f6f4ba92ba56cf38624fecfde))
+* **ios:** update onPlaybackStateChanged implementation ([#3687](https://github.com/react-native-video/react-native-video/issues/3687)) ([042e13c](https://github.com/react-native-video/react-native-video/commit/042e13c1dc3f88a42cd9293b064f9cebacecc831))
+* **ios:** workaround for rate change ([#3657](https://github.com/react-native-video/react-native-video/issues/3657)) ([e26afac](https://github.com/react-native-video/react-native-video/commit/e26afac403e0b3675138f18569b08b4c9000cd81))
+* prevents crash from occurring when using the selected video track with resolution type ([#3664](https://github.com/react-native-video/react-native-video/issues/3664)) ([e82f9dc](https://github.com/react-native-video/react-native-video/commit/e82f9dc24b6a4a09786f5425153b53494d72b05d))
+* **ts:** onPlaybackRateChangeData was not correctly typed ([#3651](https://github.com/react-native-video/react-native-video/issues/3651)) ([2a858df](https://github.com/react-native-video/react-native-video/commit/2a858df8bce4dd6c529853bba5bac85f798c662e))
+
+
+### Features
+
+* **android:** allow to disable selected functionalities  ([#3681](https://github.com/react-native-video/react-native-video/issues/3681)) ([64e3191](https://github.com/react-native-video/react-native-video/commit/64e3191f73c828067094031a55e6868696b40a34))
+
 # [6.0.0-beta.8](https://github.com/react-native-video/react-native-video/compare/v6.0.0-beta.7...v6.0.0-beta.8) (2024-04-03)
 
 
