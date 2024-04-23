@@ -123,7 +123,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _rctPlaybackControls: RCTPlaybackController?
     private var _wrapperViewController: UIViewController = UIViewController()
     private var _adsCompleted = true
+    private var _adsBuffering = false
     private var _videoEnded = false
+    private var _loadingSpinner = UIActivityIndicatorView(style: .large)
 
     @objc func onPlayerPressed(_ sender: UITapGestureRecognizer? = nil) {
         // Toggle playback controls
@@ -171,6 +173,25 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
     #endif
+    
+    func refreshBuffering() {
+        // Set buffering for ads
+        if _adPlaying == true {
+            if _adsBuffering {
+                _loadingSpinner.startAnimating()
+            }else{
+                _loadingSpinner.stopAnimating()
+            }
+        } else {
+            // TODO: Handle animations for normal playback
+            _loadingSpinner.stopAnimating()
+        }
+    }
+    
+    func setAdBuffering(_ buffering: Bool) {
+        _adsBuffering = buffering
+        refreshBuffering()
+    }
 
     func videoFullscreenPlayerWillPresent(){
         onVideoFullscreenPlayerWillPresent?(["target": reactTag as Any])
@@ -200,6 +221,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             viewContoller.removeFromParent()
         }
                 
+        _loadingSpinner.removeFromSuperview()
         _wrapperViewController.removeFromParent()
     }
 
@@ -216,11 +238,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.onPlayerPressed(_:)))
         _playerViewController?.view.addGestureRecognizer(tap)
+        
+        // Add loading spinner
+        useBufferIndicator()
 
         // Add the custom playback controller
         #if os(iOS)
         useCustomPlaybackController()
         #endif
+    }
+    
+    // Initiates buffer indicator
+    func useBufferIndicator(){
+        _wrapperViewController.view.addSubview(_loadingSpinner)
+        
+        // Configure spinner
+        _loadingSpinner.center = _wrapperViewController.view.center
+        _loadingSpinner.hidesWhenStopped = true
+        _loadingSpinner.stopAnimating()
     }
 
     // Initiate custom playback controller (seekbar, play, pause etc)
@@ -1196,6 +1231,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     #endif
     func setAdPlaying(_ adPlaying: Bool) {
         _adPlaying = adPlaying
+        refreshBuffering()
     }
 
     // MARK: - React View Management

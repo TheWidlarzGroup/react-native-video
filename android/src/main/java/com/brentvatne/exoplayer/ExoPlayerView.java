@@ -30,11 +30,18 @@ import com.brentvatne.common.api.SubtitleStyle;
 
 import java.util.List;
 
+// BEGIN: FORK
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.widget.ProgressBar;
+// END: FORK
+
 public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
     private View surfaceView;
     private final View shutterView;
     private final SubtitleView subtitleLayout;
+    private final ProgressBar loadingSpinner;
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
     private ExoPlayer player;
@@ -81,6 +88,9 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
+        // Fork: Add loading spinner
+        loadingSpinner = createLoadingSpinner();
+
         updateSurfaceView();
 
         adOverlayFrameLayout = new FrameLayout(context);
@@ -88,8 +98,22 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         layout.addView(shutterView, 1, layoutParams);
         layout.addView(subtitleLayout, 2, layoutParams);
         layout.addView(adOverlayFrameLayout, 3, layoutParams);
+        layout.addView(loadingSpinner, 4);
 
         addViewInLayout(layout, 0, aspectRatioParams);
+    }
+
+    // Fork: Create loading spinner
+    private ProgressBar createLoadingSpinner() {
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.CENTER;
+
+        ProgressBar spinner = new ProgressBar(context, null, android.R.attr.progressBarStyle);
+        spinner.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
+        spinner.setLayoutParams(params);
+        spinner.setVisibility(GONE);
+
+        return spinner;
     }
 
     private void clearVideoView() {
@@ -294,6 +318,19 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         @Override
         public void onTracksChanged(Tracks tracks) {
             updateForCurrentTrackSelections();
+        }
+
+        // Fork: Listen for buffering and toggle loading spinner
+        @Override
+        public void onPlaybackStateChanged(@Player.State int playbackState) {
+            if(loadingSpinner == null) { return; }
+
+            // Set loading spinner visibility when buffering
+            if (playbackState == Player.STATE_BUFFERING) {
+                loadingSpinner.setVisibility(VISIBLE);
+            } else {
+                loadingSpinner.setVisibility(GONE);
+            }
         }
     }
 
