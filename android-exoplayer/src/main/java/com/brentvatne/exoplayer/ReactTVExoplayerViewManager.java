@@ -77,6 +77,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
     private static final String PROP_SRC_SELECTED_SUBTITLE_TRACK = "selectedSubtitleTrack";
     private static final String PROP_SRC_PREFERRED_AUDIO_TRACKS = "preferredAudioTracks";
+    private static final String PROP_SRC_DVR_SEEK_BACKWARD_INTERVAL = "dvrSeekBackwardInterval";
+    private static final String PROP_SRC_DVR_SEEK_FORWARD_INTERVAL = "dvrSeekForwardInterval";
     private static final String PROP_SRC_PLUGINS = "plugins";
 
     // Metadata properties
@@ -234,6 +236,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         String duration = src.hasKey(PROP_SRC_DURATION) ? src.getString(PROP_SRC_DURATION) : null;
         String channelName = src.hasKey(PROP_SRC_CHANNEL_NAME) ? src.getString(PROP_SRC_CHANNEL_NAME) : null;
 
+        long forwardInterval = src.hasKey(PROP_SRC_DVR_SEEK_FORWARD_INTERVAL) ? (long) src.getInt(PROP_SRC_DVR_SEEK_FORWARD_INTERVAL) : 0L;
+        long backwardInterval = src.hasKey(PROP_SRC_DVR_SEEK_BACKWARD_INTERVAL) ? (long) src.getInt(PROP_SRC_DVR_SEEK_BACKWARD_INTERVAL) : 0L;
+
         ReadableMap config = src.hasKey(PROP_SRC_CONFIG) ? src.getMap(PROP_SRC_CONFIG) : null;
         ReadableMap muxData = (config != null && config.hasKey(PROP_SRC_MUX_DATA)) ? config.getMap(PROP_SRC_MUX_DATA) : null;
         ReadableMap metadata = src.hasKey(PROP_SRC_METADATA) ? src.getMap(PROP_SRC_METADATA) : null;
@@ -340,7 +345,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     shouldSaveSubtitleSelection,
                     selectedSubtitleTrack,
                     preferredAudioTracks,
-                    tracksPolicy);
+                    tracksPolicy,
+                    forwardInterval,
+                    backwardInterval);
         } else {
             int identifier = context.getResources().getIdentifier(
                     uriString,

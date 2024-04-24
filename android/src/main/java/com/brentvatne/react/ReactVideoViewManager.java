@@ -158,7 +158,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public void setPlayInBackground(final ReactVideoView videoView, final boolean playInBackground) {
         videoView.setPlayInBackground(playInBackground);
     }
-
+    
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactVideoView videoView, final boolean controls) {
         videoView.setControls(controls);

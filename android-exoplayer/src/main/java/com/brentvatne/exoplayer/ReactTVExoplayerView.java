@@ -483,12 +483,16 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
+            
+            long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
+            long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
+
             player = exoDorisFactory.createPlayer(
                     getContext(),
                     adType,
                     MAX_LOAD_BUFFER_MS,
-                    exoDorisPlayerView.getFastForwardIncrementMs(),
-                    exoDorisPlayerView.getRewindIncrementMs(),
+                    dvrSeekForwardInterval != 0L ? dvrSeekForwardInterval : exoDorisPlayerView.getFastForwardIncrementMs(),
+                    dvrSeekBackwardInterval != 0L ? dvrSeekBackwardInterval : exoDorisPlayerView.getRewindIncrementMs(),
                     adViewProvider,
                     src.getTracksPolicy());
 
@@ -1254,7 +1258,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean shouldSaveSubtitleSelection,
             String selectedSubtitleTrack,
             List<String> preferredAudioTracks,
-            TracksPolicy tracksPolicy) {
+            TracksPolicy tracksPolicy,
+            long dvrSeekForwardInterval,
+            long dvrSeekBackwardInterval) {
 
         if (url != null) {
             String srcUrl = src != null ? src.getUrl() : null;
@@ -1297,7 +1303,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     imaCsai,
                     yoSsai,
                     limitedSeekRange,
-                    tracksPolicy);
+                    tracksPolicy,
+                    dvrSeekForwardInterval,
+                    dvrSeekBackwardInterval);
             this.actionToken = actionToken;
             if (watermarkWidget != null) {
                 watermarkWidget.setWatermark(watermark);

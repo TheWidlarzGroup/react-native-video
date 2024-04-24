@@ -13,6 +13,8 @@ import com.diceplatform.doris.entity.YoSsaiProperties;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 
 public class RNSource {
 
@@ -39,6 +41,8 @@ public class RNSource {
     private final YoSsaiProperties yoSsai;
     private final LimitedSeekRange limitedSeekRange;
     private final TracksPolicy tracksPolicy;
+    private final long dvrSeekForwardInterval;
+    private final long dvrSeekBackwardInterval;
 
     public RNSource(
             @NonNull String url,
@@ -62,7 +66,9 @@ public class RNSource {
             @Nullable ImaCsaiProperties imaCsai,
             @Nullable YoSsaiProperties yoSsai,
             @Nullable LimitedSeekRange limitedSeekRange,
-            TracksPolicy tracksPolicy) {
+            TracksPolicy tracksPolicy,
+            long dvrSeekForwardInterval,
+            long dvrSeekBackwardInterval) {
 
         this.id = id;
         this.url = url;
@@ -86,6 +92,8 @@ public class RNSource {
         this.yoSsai = yoSsai;
         this.limitedSeekRange = limitedSeekRange;
         this.tracksPolicy = tracksPolicy;
+        this.dvrSeekForwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekForwardInterval);
+        this.dvrSeekBackwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekBackwardInterval);
     }
 
     @NonNull
@@ -111,6 +119,14 @@ public class RNSource {
 
     public String getId() {
         return id;
+    }
+
+    public long getDvrSeekForwardInterval() {
+        return dvrSeekForwardInterval;
+    }
+
+    public long getDvrSeekBackwardInterval() {
+        return dvrSeekBackwardInterval;
     }
 
     @Nullable
