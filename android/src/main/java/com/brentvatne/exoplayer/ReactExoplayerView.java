@@ -128,7 +128,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-// BEGIN FORK\
+// BEGIN: FORK
 import android.view.KeyEvent;
 import android.content.pm.PackageManager;
 import android.util.TypedValue;
@@ -138,7 +138,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.IdRes;
 import androidx.media3.ui.DefaultTimeBar;
-// END FORK
+// END: FORK
 
 @SuppressLint("ViewConstructor")
 public class ReactExoplayerView extends FrameLayout implements
@@ -253,12 +253,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     // BEGIN: FORK
+    private String srcTitle = null;
     public static final long DEFAULT_SKIP_DURATION = 15000;
     public static final int DEFAULT_TV_CONTROLLER_PADDING = 50;
     public static final int DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE= 18;
     public static final int DEFAULT_TV_CONTROLLER_DURATION_WIDHT= 65;
     public static final long DEFAULT_INCREMENT_DURATION = 15000;
-    private String srcTitle = null;
 
     // Switch between live indicator and duration indicator
     private void refreshDurationIndicatorType() {
