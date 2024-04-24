@@ -28,6 +28,10 @@ To sync this fork with the upstream repository, follow these steps:
        - prefix with `[ios/appletv/android/androidtv]-decriptive-name`
 - Prefix all commits with [iOS/AppleTV/Android/AndroidTV]
 
+## Tech Debt
+- Remove _fork from function names as it creates more work if we want to PR this to the react-native-video team.
+   -  Add Fork comments above these functions instead
+
 ## Changes Introduced By Fork
 - [Specify the changes introduced with this fork here]
 
