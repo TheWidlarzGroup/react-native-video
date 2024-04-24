@@ -128,7 +128,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-// BEGIN FORK\
+// BEGIN: FORK
 import android.view.KeyEvent;
 import android.content.pm.PackageManager;
 import android.util.TypedValue;
@@ -138,7 +138,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.IdRes;
 import androidx.media3.ui.DefaultTimeBar;
-// END FORK
+// END: FORK
 
 @SuppressLint("ViewConstructor")
 public class ReactExoplayerView extends FrameLayout implements
@@ -253,6 +253,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     // BEGIN: FORK
+    private String srcTitle = null;
     public static final long DEFAULT_SKIP_DURATION = 15000;
     public static final int DEFAULT_TV_CONTROLLER_PADDING = 50;
     public static final int DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE= 18;
@@ -279,6 +280,22 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         });
+    }
+
+    public void refreshTitle_fork(){
+        if( playerControlView == null ){ return; }
+        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
+
+        // Hide title if it's not available
+        if( this.srcTitle == null || this.srcTitle.length() < 1 ){
+            exoTitleLayout.setVisibility(INVISIBLE);
+            return;
+        }
+
+        // Add title to the TextView and make it visible
+        TextView titleView = playerControlView.findViewById(R.id.exo_title);
+        titleView.setText(this.srcTitle);
+        exoTitleLayout.setVisibility(VISIBLE);
     }
 
     public void setControllerFocusByID(@IdRes int buttonID){
@@ -422,13 +439,22 @@ public class ReactExoplayerView extends FrameLayout implements
     public void initializePlayerControlsTV_fork(LegacyPlayerControlView playerControlView){
         if(!isTelevision()){ return; }
         
-        // Controller padding to account for overscan
-        LinearLayout exoControllerLayout = playerControlView.findViewById(R.id.exo_controller);
-        exoControllerLayout.setPadding(
-                DEFAULT_TV_CONTROLLER_PADDING,
-                0,
-                DEFAULT_TV_CONTROLLER_PADDING,
-                DEFAULT_TV_CONTROLLER_PADDING
+        // Add padding to player title to account for overscan
+        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
+        exoTitleLayout.setPadding(
+            DEFAULT_TV_CONTROLLER_PADDING,
+            DEFAULT_TV_CONTROLLER_PADDING,
+            DEFAULT_TV_CONTROLLER_PADDING,
+            DEFAULT_TV_CONTROLLER_PADDING
+        );
+
+        // Add padding to player controller to account for overscan
+        LinearLayout exoBottomBarLayout = playerControlView.findViewById(R.id.exo_bottom_bar);
+        exoBottomBarLayout.setPadding(
+            DEFAULT_TV_CONTROLLER_PADDING,
+            0,
+            DEFAULT_TV_CONTROLLER_PADDING,
+            DEFAULT_TV_CONTROLLER_PADDING
         );
 
         //DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE
@@ -1299,7 +1325,7 @@ public class ReactExoplayerView extends FrameLayout implements
     // Player.Listener implementation
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
-        // Do nothing.
+        refreshTitle_fork();
     }
 
     @Override
@@ -1748,11 +1774,12 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, final String title) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && cropStartMs == this.cropStartMs && cropEndMs == this.cropEndMs;
             hasDrmFailed = false;
             this.srcUri = uri;
+            this.srcTitle = title;
             this.startPositionMs = startPositionMs;
             this.cropStartMs = cropStartMs;
             this.cropEndMs = cropEndMs;
@@ -1773,6 +1800,7 @@ public class ReactExoplayerView extends FrameLayout implements
             player.stop();
             player.clearMediaItems();
             this.srcUri = null;
+            this.srcTitle = null;
             this.startPositionMs = -1;
             this.cropStartMs = -1;
             this.cropEndMs = -1;
