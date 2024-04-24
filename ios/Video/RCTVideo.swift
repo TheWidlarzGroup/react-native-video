@@ -1237,7 +1237,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - React View Management
 
     override func insertReactSubview(_ view: UIView!, at atIndex: Int) {
-        super.insertReactSubview(subview, at:atIndex)
+        super.insertReactSubview(view, at:atIndex)
         if _controls {
             view.frame = self.bounds
             _playerViewController?.contentOverlayView?.insertSubview(view, at: atIndex)
