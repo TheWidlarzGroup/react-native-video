@@ -16,6 +16,21 @@ class RNVJSOverlayBuilder: OverlayBuilderProtocol {
         self.bridge = bridge
     }
     
+    func buildOverlay(from config: RNDReactNativeDiceVideo.JSComponent?) -> (view: UIView?, button: String?, height: Double?, width: Double?)? {
+        guard let config = config else { return nil }
+
+        let componentView = RCTRootView(bridge: bridge,
+                                        moduleName: config.name,
+                                        initialProperties: config.initialProps)
+        componentView.backgroundColor = .clear
+        componentView.tvRemoteHandler.disableTVMenuKey()
+
+        return (view: componentView,
+                button: config.buttonIconUrl,
+                height: config.height,
+                width: config.width)
+    }
+    
     func buildOverlay(from config: JSOverlayConfig?, tvxManager: TvxManagerProtocol?) -> (type: OverlayType,
                                                                                           button: String?,
                                                                                           setupAction: (() -> Void)?,
@@ -38,12 +53,14 @@ class RNVJSOverlayBuilder: OverlayBuilderProtocol {
                                                   moduleName: sideComponent.name,
                                                   initialProperties: initialSideComponentProps)
             sideJSComponentView.backgroundColor = .clear
-            
+            sideJSComponentView.tvRemoteHandler.disableTVMenuKey()
+
             let bottomJSComponentView = RCTRootView(bridge: bridge,
                                                     moduleName: bottomComponent.name,
                                                     initialProperties: initialBottomComponentProps)
             bottomJSComponentView.backgroundColor = .clear
-            
+            bottomJSComponentView.tvRemoteHandler.disableTVMenuKey()
+
             let overlayType = OverlayType.rightAndBottom(rightView: sideJSComponentView,
                                                          bottomView: bottomJSComponentView,
                                                          closeAction: nil)
@@ -75,6 +92,7 @@ class RNVJSOverlayBuilder: OverlayBuilderProtocol {
                                                   moduleName: sideComponent.name,
                                                   initialProperties: initialSideComponentProps)
             sideJSComponentView.backgroundColor = .clear
+            sideJSComponentView.tvRemoteHandler.disableTVMenuKey()
 
             let overlayType = OverlayType.right(rightView: sideJSComponentView, closeAction: nil)
             

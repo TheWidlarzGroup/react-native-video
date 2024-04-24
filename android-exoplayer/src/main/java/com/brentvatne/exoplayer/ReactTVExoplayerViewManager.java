@@ -77,6 +77,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
     private static final String PROP_SRC_SELECTED_SUBTITLE_TRACK = "selectedSubtitleTrack";
     private static final String PROP_SRC_PREFERRED_AUDIO_TRACKS = "preferredAudioTracks";
+    private static final String PROP_SRC_PLUGINS = "plugins";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -251,8 +252,18 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         if (src.hasKey(PROP_SRC_BIF_URL)) {
             videoView.setThumbnailsPreviewUrl(src.getString(PROP_SRC_BIF_URL));
         }
-        if(src !=null && src.hasKey(PROP_SKIP_MARKERS)) {
+        if (src.hasKey(PROP_SKIP_MARKERS)) {
             videoView.setSkipMarkers(parseSkipMarkers(ReadableMapUtils.getArray(src, PROP_SKIP_MARKERS)));
+        }
+        if (src.hasKey(PROP_SRC_PLUGINS)) {
+            ReadableMap bottomPlugin = ReadableMapUtils.getMap(src.getMap(PROP_SRC_PLUGINS), "bottom");
+            if (bottomPlugin != null) {
+                videoView.setBottomOverlayComponent(
+                        uriString,
+                        ReadableMapUtils.getString(bottomPlugin, "name"),
+                        ReadableMapUtils.getInt(bottomPlugin, "width", -1),
+                        ReadableMapUtils.getInt(bottomPlugin, "height", -1));
+            }
         }
         String selectedSubtitleTrack = ReadableMapUtils.getString(src, PROP_SRC_SELECTED_SUBTITLE_TRACK);
         ReadableArray preferredAudioTracksArray = ReadableMapUtils.getArray(src, PROP_SRC_PREFERRED_AUDIO_TRACKS);
@@ -406,7 +417,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactTVExoplayerView videoView,
                                       @Nullable ReadableMap selectedAudioTrack) {
-       // Deprecated, not used.
+        // Deprecated, not used.
     }
 
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
@@ -737,4 +748,5 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 return null;
         }
     }
+
 }

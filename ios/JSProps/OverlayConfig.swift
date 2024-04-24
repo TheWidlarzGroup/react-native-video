@@ -38,10 +38,12 @@ struct OverlayConfig: SuperCodable {
             let sideJSComponentView = RCTRootView(bridge: bridge,
                                                   moduleName: sideComponent.name,
                                                   initialProperties: sideComponent.initialProps)
-            
+            sideJSComponentView.tvRemoteHandler.disableTVMenuKey()
+
             let bottomJSComponentView = RCTRootView(bridge: bridge,
                                                     moduleName: bottomComponent.name,
                                                     initialProperties: bottomComponent.initialProps)
+            bottomJSComponentView.tvRemoteHandler.disableTVMenuKey()
             return .rightAndBottom(rightView: sideJSComponentView,
                                    bottomView: bottomJSComponentView,
                                    closeAction: nil)
@@ -55,6 +57,7 @@ struct OverlayConfig: SuperCodable {
             let sideJSComponentView = RCTRootView(bridge: bridge,
                                                   moduleName: sideComponent.name,
                                                   initialProperties: sideComponent.initialProps)
+            sideJSComponentView.tvRemoteHandler.disableTVMenuKey()
             return .right(rightView: sideJSComponentView,
                           closeAction: nil)
         default: return .none

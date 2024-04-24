@@ -91,8 +91,6 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.favourites = translationsValue.favourite
             dorisTranslationsViewModel.addToWatchlist = translationsValue.addToWatchlist
             dorisTranslationsViewModel.moreVideos = translationsValue.moreVideos
-            dorisTranslationsViewModel.rewind = translationsValue.rewind
-            dorisTranslationsViewModel.fastForward = translationsValue.fastForward
             dorisTranslationsViewModel.audio = translationsValue.audioTracks
             dorisTranslationsViewModel.info = translationsValue.info
             dorisTranslationsViewModel.adsCountdownAd = translationsValue.adsCountdownAd
@@ -275,6 +273,7 @@ class PlayerViewProxy {
             testIdentifiers: nil,
             annotations: nil,
             overlayConfig: jsOverlayConfig,
+            plugins: jsProps.source.value?.plugins,
             tracksPolicy: jsTracksPolicy,
             isFullScreen: true,
             allowAirplay: false,

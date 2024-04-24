@@ -14,6 +14,7 @@ import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ColorInt;
@@ -60,13 +61,11 @@ import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-
 import com.brentvatne.util.AdTagParametersHelper;
 import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.DorisPlayerOutput;
 import com.diceplatform.doris.ExoDoris;
-
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
@@ -92,6 +91,8 @@ import com.diceplatform.doris.ui.entity.VideoTile;
 import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.diceplatform.doris.util.DorisExceptionUtil;
 import com.diceplatform.doris.util.LocalizationService;
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
@@ -99,6 +100,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.views.view.ReactViewGroup;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -113,7 +115,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -786,6 +787,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
+        exoDorisPlayerView.setTag(R.id.bottomComponentTag, null);
     }
 
     private boolean requestAudioFocus() {
@@ -1154,7 +1156,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Exception ex = error;
         @ExoPlaybackException.Type int errorType = DorisExceptionUtil.getErrorType(error);
         if (DorisExceptionUtil.isBehindLiveWindow(error)) {
-          // We handle behind-live-window error in internal doris player.
+            // We handle behind-live-window error in internal doris player.
         } else if (!hasReloadedCurrentSource && DorisExceptionUtil.isUnauthorizedException(error)) {
             hasReloadedCurrentSource = true;
             reloadCurrentSource();
@@ -1616,6 +1618,28 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setIsFavorite(isFavourite);
         }
+    }
+
+    public void setBottomOverlayComponent(String key, String component, int width, int height) {
+        if (component == null || component.isEmpty()) return;
+        if (TextUtils.equals((String) exoDorisPlayerView.getTag(R.id.bottomComponentTag), key)) return;
+        // add frameLayout to ExoPlayerView, ReactRootView load data first, move to ExoPlayerControllerView. 
+        ReactRootFrameLayout frameLayout = new ReactRootFrameLayout(getContext());
+        frameLayout.setOnSizeChangedListener((reactRootFrameLayout, childView) -> {
+            reactRootFrameLayout.removeView(childView);
+            childView.setLayoutParams(new FrameLayout.LayoutParams(
+                    width > 0 ? width : LayoutParams.WRAP_CONTENT,
+                    height > 0 ? height : LayoutParams.WRAP_CONTENT));
+            exoDorisPlayerView.setBottomComponentView(childView, view -> view instanceof ReactViewGroup);
+            exoDorisPlayerView.removeView(reactRootFrameLayout);
+        });
+        ReactRootView reactRootView = new ReactRootView(getContext());
+        reactRootView.setLayoutParams(new FrameLayout.LayoutParams(1, 1));
+        reactRootView.startReactApplication(((ReactApplication) getContext().getApplicationContext())
+                .getReactNativeHost().getReactInstanceManager(), component, null);
+        frameLayout.addView(reactRootView);
+        exoDorisPlayerView.addView(frameLayout, new LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        exoDorisPlayerView.setTag(R.id.bottomComponentTag, key);
     }
 
     public void setControlsOpacity(final float opacity) {
