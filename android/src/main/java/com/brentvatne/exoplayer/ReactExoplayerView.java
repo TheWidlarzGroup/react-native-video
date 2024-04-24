@@ -185,7 +185,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
-    private long seekTime = C.TIME_UNSET;
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
@@ -1380,7 +1379,15 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
+    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
+        if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            eventEmitter.seek(player.getCurrentPosition(), newPosition.positionMs % 1000); // time are in seconds /°\
+            if (isUsingContentResolution) {
+                // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
+                setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+            }
+        }
+
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -1402,28 +1409,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onPlaybackStateChanged(int playbackState) {
-        if (playbackState == Player.STATE_READY && seekTime != C.TIME_UNSET) {
-            eventEmitter.seek(player.getCurrentPosition(), seekTime);
-            seekTime = C.TIME_UNSET;
-            if (isUsingContentResolution) {
-                // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
-                setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
-            }
-        }
-    }
-
-    @Override
-    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onRepeatModeChanged(int repeatMode) {
         // Do nothing.
     }
 
@@ -1833,7 +1818,7 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setSelectedVideoTrack(String type, String value) {
         videoTrackType = type;
         videoTrackValue = value;
-        setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+        if (!loadVideoStarted) setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
     }
 
     public void setSelectedAudioTrack(String type, String value) {
@@ -1900,7 +1885,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            seekTime = positionMs;
             player.seekTo(positionMs);
         }
     }

@@ -459,6 +459,8 @@ Example:
 
 Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
 
+Note: on iOS, when controls are enable, this callback is not reported. This is a known limitation.
+
 ### `onTimedMetadata`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
