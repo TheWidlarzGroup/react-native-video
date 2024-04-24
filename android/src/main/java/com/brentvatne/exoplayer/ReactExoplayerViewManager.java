@@ -36,6 +36,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
+    private static final String PROP_TITLE = "title";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
@@ -163,6 +164,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         int startPositionMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_START_POSITION, -1);
         int cropStartMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_START, -1);
         int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
+        String title = ReactBridgeUtils.safeGetString(src, PROP_TITLE, null);
         String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
 
         Map<String, String> headers = new HashMap<>();
@@ -189,7 +191,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers);
+                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, title);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
