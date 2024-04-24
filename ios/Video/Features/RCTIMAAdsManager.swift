@@ -151,8 +151,17 @@
             // Pause the content for the SDK to play ads.
             _video?.setPaused(true)
             _video?.setAdPlaying(true)
+            _video?.setAdBuffering(true)
         }
 
+        func adsManagerAdDidStartBuffering(_: IMAAdsManager){
+            _video?.setAdBuffering(true)
+        }
+        
+        func adsManagerAdPlaybackReady(_: IMAAdsManager){
+            _video?.setAdBuffering(false)
+        }
+        
         func adsManagerDidRequestContentResume(_: IMAAdsManager) {
             // Allow seeking while video is playing
             #if os(tvOS)
