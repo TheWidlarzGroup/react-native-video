@@ -134,6 +134,11 @@ class VideoPlayer extends Component {
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
     {
+      description: 'sintel starts at 20sec',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+      startPosition: 20000,
+    },
+    {
       description: 'BigBugBunny sideLoaded subtitles',
       // sideloaded subtitles wont work for streaming like HLS on ios
       // mp4
