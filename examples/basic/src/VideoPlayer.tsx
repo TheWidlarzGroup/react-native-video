@@ -136,7 +136,7 @@ class VideoPlayer extends Component {
     {
       description: 'sintel starts at 20sec',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-      startPosition: 20000,
+      startPosition: 50000,
     },
     {
       description: 'BigBugBunny sideLoaded subtitles',
