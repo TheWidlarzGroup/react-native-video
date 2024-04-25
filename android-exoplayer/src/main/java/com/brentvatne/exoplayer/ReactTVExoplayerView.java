@@ -1855,7 +1855,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onAudioSelected(String language) {
-        // Do nothing.
+        eventEmitter.audioTrackChanged(language);
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
