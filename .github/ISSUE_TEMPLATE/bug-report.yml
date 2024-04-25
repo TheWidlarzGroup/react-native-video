@@ -8,14 +8,11 @@ body:
     attributes:
       value: Thanks for taking the time to fill out this bug report!
 
-  - type: dropdown
+  - type: textarea
     id: version
     attributes:
       label: Version
-      description: What version are you using?
-      options:
-        - v6 (Beta)
-        - v5 (Stable)
+      description: What version are you using? Put the exact version from your package.json
     validations:
       required: true
 
