@@ -1281,8 +1281,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard let _playerItem else { return }
         var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
 
-        if duration.isNaN {
-            duration = 0.0
+        if duration.isNaN || duration == 0 {
+            // This is a safety check for live video.
+            // AVPlayer report a 0 duration
+            duration = RCTVideoUtils.calculateSeekableDuration(_player).floatValue
+            if duration.isNaN {
+                duration = 0
+            }
         }
 
         var width: Float?
