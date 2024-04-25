@@ -1328,8 +1328,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                    "canStepBackward": NSNumber(value: _playerItem.canStepBackward),
                                    "canStepForward": NSNumber(value: _playerItem.canStepForward),
                                    "naturalSize": [
-                                       "width": width != nil ? NSNumber(value: width!) : "undefinded",
-                                       "height": width != nil ? NSNumber(value: height!) : "undefinded",
+                                       "width": width,
+                                       "height": height,
                                        "orientation": orientation,
                                    ],
                                    "audioTracks": audioTracks,
