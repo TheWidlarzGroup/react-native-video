@@ -109,6 +109,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onTextTrackDataChanged,
       onVideoTracks,
       onAspectRatio,
+      children,
       ...rest
     },
     ref,
@@ -567,9 +568,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             _onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void
           }
         />
-        {showPoster ? (
-          <Image style={posterStyle} source={{uri: poster}} />
-        ) : null}
+        <>
+          {showPoster ? (
+            <Image style={posterStyle} source={{ uri: poster }} />
+          ) : null}
+          {children}
+        </>
       </View>
     );
   },
