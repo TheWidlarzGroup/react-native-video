@@ -23,6 +23,7 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var onRequireAdParameters: RCTBubblingEventBlock?
     @objc var onRelatedVideoClicked: RCTBubblingEventBlock?
     @objc var onSubtitleTrackChanged: RCTBubblingEventBlock?
+    @objc var onAudioTrackChanged: RCTBubblingEventBlock?
     @objc var onVideoBuffer: RCTBubblingEventBlock?
     @objc var onVideoAboutToEnd: RCTBubblingEventBlock?
     @objc var onFavouriteButtonClick: RCTBubblingEventBlock?
@@ -166,6 +167,7 @@ class NewPlayerView: UIView, JSInputProtocol {
         jsPlayerView.onRequireAdParameters = self.onRequireAdParameters
         jsPlayerView.onVideoLoad = self.onVideoLoad
         jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
+        jsPlayerView.onAudioTrackChanged = self.onAudioTrackChanged
         
         //api diff
         jsPlayerView.onRequestPlayNextSource = self.onRelatedVideoClicked

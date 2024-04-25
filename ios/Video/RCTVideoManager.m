@@ -59,6 +59,7 @@ RCT_EXPORT_VIEW_PROPERTY(onStatsIconClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onEpgIconClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAnnotationsButtonClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSubtitleTrackChanged, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onAudioTrackChanged, RCTBubblingEventBlock)
 
 RCT_EXTERN_METHOD(seekToNow:(nonnull NSNumber *)node)
 RCT_EXTERN_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate)
