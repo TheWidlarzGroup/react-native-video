@@ -1642,10 +1642,10 @@ public class ReactExoplayerView extends FrameLayout implements
             type = "default";
         }
 
-        if (type.equals("disabled")) {
+        if ("disabled".equals(type)) {
             disableTrack(rendererIndex);
             return;
-        } else if (type.equals("language")) {
+        } else if ("language".equals(type)) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
                 if (format.language != null && format.language.equals(value)) {
@@ -1653,7 +1653,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
                 }
             }
-        } else if (type.equals("title")) {
+        } else if ("title".equals(type)) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
                 if (format.id != null && format.id.equals(value)) {
@@ -1661,12 +1661,12 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
                 }
             }
-        } else if (type.equals("index")) {
+        } else if ("index".equals(type)) {
             int iValue = Integer.parseInt(value);
             if (iValue < groups.length) {
                 groupIndex = iValue;
             }
-        } else if (type.equals("resolution")) {
+        } else if ("resolution".equals(type)) {
             int height = Integer.parseInt(value);
             for (int i = 0; i < groups.length; ++i) { // Search for the exact height
                 TrackGroup group = groups.get(i);
