@@ -1290,8 +1290,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         }
 
-        var width: Float?
-        var height: Float?
+        var width: Float = 0
+        var height: Float = 0
         var orientation = "undefined"
 
         Task {
@@ -1299,20 +1299,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if let videoTrack = tracks?.first {
                 width = Float(videoTrack.naturalSize.width)
                 height = Float(videoTrack.naturalSize.height)
-                let preferredTransform = videoTrack.preferredTransform
-
-                if (videoTrack.naturalSize.width == preferredTransform.tx
-                    && videoTrack.naturalSize.height == preferredTransform.ty)
-                    || (preferredTransform.tx == 0 && preferredTransform.ty == 0) {
-                    orientation = "landscape"
-                } else {
-                    orientation = "portrait"
-                }
             } else if _playerItem.presentationSize.height != 0.0 {
                 width = Float(_playerItem.presentationSize.width)
                 height = Float(_playerItem.presentationSize.height)
-                orientation = _playerItem.presentationSize.width > _playerItem.presentationSize.height ? "landscape" : "portrait"
             }
+            orientation = width > height ? "landscape" : width == height ? "square" : "portrait"
 
             if self._pendingSeek {
                 self.setSeek([
@@ -1342,8 +1333,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                    "canStepBackward": NSNumber(value: _playerItem.canStepBackward),
                                    "canStepForward": NSNumber(value: _playerItem.canStepForward),
                                    "naturalSize": [
-                                       "width": width != nil ? NSNumber(value: width!) : "undefinded",
-                                       "height": width != nil ? NSNumber(value: height!) : "undefinded",
+                                       "width": width,
+                                       "height": height,
                                        "orientation": orientation,
                                    ],
                                    "audioTracks": audioTracks,

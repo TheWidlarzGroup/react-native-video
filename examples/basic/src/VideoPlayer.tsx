@@ -104,8 +104,12 @@ class VideoPlayer extends Component {
 
   srcAllPlatformList = [
     {
-      description: 'local file',
+      description: 'local file landscape',
       uri: require('./broadchurch.mp4'),
+    },
+    {
+      description: 'local file portrait',
+      uri: require('./portrait.mp4'),
     },
     {
       description: '(hls|live) red bull tv',
