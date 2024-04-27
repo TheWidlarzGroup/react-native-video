@@ -63,7 +63,7 @@ Adjust the buffer settings. This prop takes an object with one or more of the pr
 | maxHeapAllocationPercent          | number | The percentage of available heap that the video can use to buffer, between 0 and 1                                                                                                              |
 | minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1                                                                                |
 | minBufferMemoryReservePercent     | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1                                                                                   |
-| cacheSizeMB                       | number | Cache size in MB, it will allow applications to store video data for a while in the cache folder, it is useful to decrease bandwidth usage when repeating small videos. Android only.           |
+| cacheSizeMB                       | number | Cache size in MB, enabling this to prevent new src requests and save bandwidth while repeating videos, or 0 to disable. Android only.                                                           |
 
 Example with default values:
 
@@ -77,6 +77,8 @@ bufferConfig={{
   cacheSizeMB: 0
 }}
 ```
+
+Please note that the Android cache is a global cache that is shared among all components; individual components can still opt out of caching behavior by setting cacheSizeMB to 0, but multiple components with a positive cacheSizeMB will be sharing the same one, and the cache size will always be the first value set; it will not change during the app's lifecycle.
 
 ### `chapters`
 
