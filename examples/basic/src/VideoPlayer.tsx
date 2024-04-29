@@ -104,8 +104,12 @@ class VideoPlayer extends Component {
 
   srcAllPlatformList = [
     {
-      description: 'local file',
+      description: 'local file landscape',
       uri: require('./broadchurch.mp4'),
+    },
+    {
+      description: 'local file portrait',
+      uri: require('./portrait.mp4'),
     },
     {
       description: '(hls|live) red bull tv',
@@ -132,6 +136,11 @@ class VideoPlayer extends Component {
     {
       description: 'sintel with subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    },
+    {
+      description: 'sintel starts at 20sec',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+      startPosition: 50000,
     },
     {
       description: 'BigBugBunny sideLoaded subtitles',
@@ -360,7 +369,9 @@ class VideoPlayer extends Component {
   };
 
   onEnd = () => {
-    this.channelUp();
+    if (!this.state.loop) {
+      this.channelUp();
+    }
   };
 
   onPlaybackRateChange = (data: OnPlaybackRateChangeData) => {
@@ -593,8 +604,8 @@ class VideoPlayer extends Component {
 
   renderTopControl() {
     return (
-      <>
-        <Text style={[styles.controlOption]}>
+      <View style={styles.topControlsContainer}>
+        <Text style={styles.controlOption}>
           {this.srcList[this.state.srcListId]?.description || 'local file'}
         </Text>
         <View>
@@ -602,12 +613,12 @@ class VideoPlayer extends Component {
             onPress={() => {
               this.toggleControls();
             }}>
-            <Text style={[styles.leftRightControlOption]}>
+            <Text style={styles.leftRightControlOption}>
               {this.state.showRNVControls ? 'Hide controls' : 'Show controls'}
             </Text>
           </TouchableOpacity>
         </View>
-      </>
+      </View>
     );
   }
 
@@ -1032,6 +1043,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
   },
-});
+  topControlsContainer: {
+    paddingTop: 30,
+  }
+ });
 
 export default VideoPlayer;
