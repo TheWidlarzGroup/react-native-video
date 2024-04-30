@@ -768,6 +768,39 @@ textTracks={[
 ]}
 ```
 
+### `showNotificationContorols`
+
+<PlatformsList types={['Android', 'iOS']}/>
+
+Controls whether to show media controls in the notification area. 
+For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
+
+- **false (default)** - Don't show media controls in the notification area
+- **true** - Show media controls in the notification area
+
+**For Android you have to add the following code in your `AndroidManifest.xml` file:**
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    ...
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    ...
+
+    <application>
+      ...
+      <service
+        android:name="com.brentvatne.exoplayer.VideoPlaybackService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback">
+          <intent-filter>
+            <action android:name="androidx.media3.session.MediaSessionService" />
+          </intent-filter>
+      </service>
+    </application>
+</manifest>
+```
+
 ### `useSecureView`
 
 <PlatformsList types={['Android']} />
