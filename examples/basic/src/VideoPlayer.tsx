@@ -854,6 +854,7 @@ class VideoPlayer extends Component {
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
+          showNotificationControls={true}
           ref={(ref: VideoRef) => {
             this.video = ref;
           }}

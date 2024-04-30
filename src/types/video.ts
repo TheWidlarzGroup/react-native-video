@@ -221,6 +221,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
+  showNotificationControls?: boolean; // Android, iOS
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
