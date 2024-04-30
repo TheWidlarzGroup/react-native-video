@@ -10,10 +10,15 @@ import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
@@ -92,6 +97,7 @@ import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
+import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.ResizeMode;
@@ -170,6 +176,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
+    private ServiceConnection playbackServiceConnection;
+    private PlaybackServiceBinder playbackServiceBinder;
+
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -228,6 +237,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
+
+    private boolean showNotificationControls = false;
     // \ End props
 
     // React
@@ -344,6 +355,12 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostDestroy() {
         cleanUpResources();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        cleanUpResources();
+        super.onDetachedFromWindow();
     }
 
     public void cleanUpResources() {
@@ -651,6 +668,10 @@ public class ReactExoplayerView extends FrameLayout implements
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
         changeAudioOutput(this.audioOutput);
+
+        if(showNotificationControls) {
+            setupPlaybackService();
+        }
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -734,6 +755,55 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayerControl();
         setControls(controls);
         applyModifiers();
+    }
+
+    private void setupPlaybackService() {
+        if (showNotificationControls & player != null) {
+            playbackServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    playbackServiceBinder = (PlaybackServiceBinder) service;
+
+                    try {
+                        playbackServiceBinder.getService().registerPlayer(player);
+                    } catch (Exception e) {
+                        DebugLog.e("ExoPlayer Playback", "Cloud not register ExoPlayer");
+                    }
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    playbackServiceBinder = null;
+                }
+
+                @Override
+                public void onNullBinding(ComponentName name) {
+                    DebugLog.e("ExoPlayer Playback", "Cloud not register ExoPlayer");
+                }
+            };
+
+            Intent intent = new Intent(themedReactContext, VideoPlaybackService.class);
+            intent.setAction(MediaSessionService.SERVICE_INTERFACE);
+
+            themedReactContext.startService(intent);
+
+            int flags;
+            if (Build.VERSION.SDK_INT >= 29) {
+                flags = Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES;
+            } else {
+                flags = Context.BIND_AUTO_CREATE;
+            }
+
+            themedReactContext.bindService(intent, playbackServiceConnection, flags);
+        }
+
+        if(!showNotificationControls && playbackServiceBinder != null) {
+            if(player != null) {
+                playbackServiceBinder.getService().unregisterPlayer(player);
+            }
+
+            themedReactContext.unbindService(playbackServiceConnection);
+        }
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -923,12 +993,20 @@ public class ReactExoplayerView extends FrameLayout implements
             if (adsLoader != null) {
                 adsLoader.setPlayer(null);
             }
+
+            if(playbackServiceBinder != null) {
+                playbackServiceBinder.getService().unregisterPlayer(player);
+                themedReactContext.unbindService(playbackServiceConnection);
+            }
+
             updateResumePosition();
             player.release();
             player.removeListener(this);
             trackSelector = null;
+
             player = null;
         }
+
         if (adsLoader != null) {
             adsLoader.release();
         }
@@ -1942,6 +2020,20 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setContentStartTime(int contentStartTime) {
         this.contentStartTime = contentStartTime;
+    }
+
+    public void setShowNotificationControls(boolean showNotificationControls) {
+        this.showNotificationControls = showNotificationControls;
+
+        if (playbackServiceConnection == null && showNotificationControls) {
+            setupPlaybackService();
+        }
+
+        if(!showNotificationControls && playbackServiceBinder != null) {
+            if (player != null) {
+                playbackServiceBinder.getService().unregisterPlayer(player);
+            }
+        }
     }
 
     public void setDisableBuffering(boolean disableBuffering) {
