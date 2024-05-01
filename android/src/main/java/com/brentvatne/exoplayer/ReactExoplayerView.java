@@ -105,7 +105,6 @@ import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
-import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -188,7 +187,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-
     private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
     private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
     private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
@@ -199,6 +197,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
     private Handler mainHandler;
     private Runnable mainRunnable;
+    private DataSource.Factory cacheDataSourceFactory;
 
     // Props from React
     private Uri srcUri;
@@ -623,8 +622,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdEventListener(this)
                 .setAdErrorListener(this)
                 .build();
-
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+        if (cacheDataSourceFactory != null) {
+            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        }
+
         if (adsLoader != null) {
             mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
         }
@@ -839,9 +841,17 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                        mediaDataSourceFactory
-                );
+                if (uri.toString().startsWith("file://") ||
+                        cacheDataSourceFactory == null) {
+                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                            mediaDataSourceFactory
+                    );
+                } else {
+                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                            cacheDataSourceFactory
+                    );
+
+                }
                 break;
             case CONTENT_TYPE_RTSP:
                 if (!BuildConfig.USE_EXOPLAYER_RTSP) {
@@ -2015,7 +2025,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setHideShutterView(hideShutterView);
     }
 
-    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int newBackBufferDurationMs) {
+    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int newBackBufferDurationMs, int cacheSize) {
         minBufferMs = newMinBufferMs;
         maxBufferMs = newMaxBufferMs;
         bufferForPlaybackMs = newBufferForPlaybackMs;
@@ -2023,6 +2033,17 @@ public class ReactExoplayerView extends FrameLayout implements
         maxHeapAllocationPercent = newMaxHeapAllocationPercent;
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
+        if (cacheSize > 0) {
+            RNVSimpleCache.INSTANCE.setSimpleCache(
+                    this.getContext(),
+                    cacheSize,
+                    buildHttpDataSourceFactory(false)
+            );
+            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
+        } else {
+            cacheDataSourceFactory = null;
+        }
+
         backBufferDurationMs = newBackBufferDurationMs;
         releasePlayer();
         initializePlayer();
