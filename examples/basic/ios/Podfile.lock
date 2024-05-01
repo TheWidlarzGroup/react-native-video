@@ -4,9 +4,9 @@ PODS:
   - FBLazyVector (0.74.0)
   - fmt (9.1.0)
   - glog (0.3.5)
-  - hermes-engine (0.74.0-rc.4):
-    - hermes-engine/Pre-built (= 0.74.0-rc.4)
-  - hermes-engine/Pre-built (0.74.0-rc.4)
+  - hermes-engine (0.74.0):
+    - hermes-engine/Pre-built (= 0.74.0)
+  - hermes-engine/Pre-built (0.74.0)
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -935,7 +935,7 @@ PODS:
   - React-Mapbuffer (0.74.0):
     - glog
     - React-debug
-  - react-native-video (6.0.0-beta.8):
+  - react-native-video (6.0.0-rc.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -949,7 +949,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.0.0-beta.8)
+    - react-native-video/Video (= 6.0.0-rc.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -957,7 +957,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.0.0-beta.8):
+  - react-native-video/Video (6.0.0-rc.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1396,7 +1396,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 026c8f4ae67b06e088ae01baa2271ef8a26c0e8c
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
-  hermes-engine: dfdcadd89a22aa872ef552b07e415d88df68af55
+  hermes-engine: 6eae7edb2f563ee41d7c1f91f4f2e57c26d8a5c3
   RCT-Folly: 045d6ecaa59d826c5736dfba0b2f4083ff8d79df
   RCTDeprecation: 3ca8b6c36bfb302e1895b72cfe7db0de0c92cd47
   RCTRequired: 9fc183af555fd0c89a366c34c1ae70b7e03b1dc5
@@ -1421,7 +1421,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 72dce571a387f9d085482142837222c31a8d6c3a
   React-logger: 03f2f7b955cfe24593a2b8c9705c23e142d1ad24
   React-Mapbuffer: 1ab3316cb736411bc641311b4b71e75099ae56ad
-  react-native-video: 64df5d2bc3bbc028cb97d87b53e42583127a9b9e
+  react-native-video: 3262598f55f8632e5d4dae90ba63d9d6e09bd563
   React-nativeconfig: fef0a46effa630d72f137636a990d7df2f6a5f7c
   React-NativeModulesApple: 8257dd73991f2e410b9c9d12801691439a0dc821
   React-perflogger: 271f1111779fef70f9502d1d38da5132e5585230
@@ -1451,4 +1451,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: bbe1bd5f521b6b9366288dbaf8af1cec85c0a95a
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.13.0
