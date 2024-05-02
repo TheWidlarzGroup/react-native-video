@@ -46,7 +46,7 @@ enum RCTPlayerOperations {
             }
         } else if type == "index" {
             if let value = criteria?.value { // check value is provided
-                if let indexValue: Int = Int(value as String) { // ensure value is an integer an String to Snt
+                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
                     if textTracks.count > indexValue { // ensure value is in group range
                         selectedTrackIndex = indexValue
                     }
@@ -109,7 +109,7 @@ enum RCTPlayerOperations {
             //  option = group.defaultOption; */
         } else if type == "index" {
             if let value = criteria?.value { // check value is provided
-                if let indexValue: Int = Int(value as String) { // ensure value is an integer an String to Snt
+                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
                     if group.options.count > indexValue { // ensure value is in group range
                         mediaOption = group.options[indexValue]
                     }
