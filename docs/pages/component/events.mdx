@@ -485,6 +485,28 @@ Example:
 }
 ```
 
+### `onTextTrackDataChanged`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
+
+Payload:
+
+| Property         | Type     | Description                                        |
+| ---------------- | -------- | -------------------------------------------------- |
+| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
+
+Example:
+
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.",
+}
+```
+
+For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
+
 ### `onTextTracks`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -515,28 +537,6 @@ Example:
   ];
 }
 ```
-
-### `onTextTrackDataChanged`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
-
-Payload:
-
-| Property         | Type     | Description                                        |
-| ---------------- | -------- | -------------------------------------------------- |
-| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
-
-Example:
-
-```javascript
-{
-  subtitleTracks: "This blade has a dark past.",
-}
-```
-
-For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
 
 ### `onVideoTracks`
 
