@@ -69,6 +69,7 @@ interface StateType {
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
+  useCache: boolean;
   poster?: string;
 }
 
@@ -97,6 +98,7 @@ class VideoPlayer extends Component {
     srcListId: 0,
     loop: false,
     showRNVControls: false,
+    useCache: false,
     poster: undefined,
   };
 
@@ -669,6 +671,14 @@ class VideoPlayer extends Component {
                       }}
                       text="decoderInfo"
                     />
+                    <ToggleControl
+                      isSelected={this.state.useCache}
+                      onPress={() => {
+                        this.setState({useCache: !this.state.useCache});
+                      }}
+                      selectedText="enable cache"
+                      unselectedText="disable cache"
+                    />
                   </View>
                 ) : null}
                 <ToggleControl
@@ -864,6 +874,13 @@ class VideoPlayer extends Component {
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          bufferConfig={{
+            minBufferMs: 15000,
+            maxBufferMs: 50000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+            cacheSizeMB: this.state.useCache ? 200 : 0,
+          }}
           preventsDisplaySleepDuringVideoPlayback={true}
           poster={this.state.poster}
           onPlaybackRateChange={this.onPlaybackRateChange}
