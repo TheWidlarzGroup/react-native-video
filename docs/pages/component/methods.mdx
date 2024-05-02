@@ -12,6 +12,14 @@ This page shows the list of available methods
 
 Take the player out of fullscreen mode.
 
+### `pause`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`pause(): Promise<void>`
+
+Pause the video.
+
 ### `presentFullscreenPlayer`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -24,14 +32,6 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
-### `pause`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-`pause(): Promise<void>`
-
-Pause the video.
-
 ### `resume`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -39,6 +39,14 @@ Pause the video.
 `resume(): Promise<void>`
 
 Resume the video.
+
+### `restoreUserInterfaceForPictureInPictureStopCompleted`
+
+<PlatformsList types={['iOS']} />
+
+`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
+
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
 
 ### `save`
 
@@ -63,14 +71,6 @@ Future:
 - Will support multiple qualities through options
 - Will support more formats in the future through options
 - Will support custom directory and file name through options
-
-### `restoreUserInterfaceForPictureInPictureStopCompleted`
-
-<PlatformsList types={['iOS']} />
-
-`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
-
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
 
 ### `seek`
 
@@ -143,6 +143,8 @@ Possible values are:
 
 ### `isCodecSupported`
 
+<PlatformsList types={['Android']} />
+
 Indicates whether the provided codec is supported level supported by device.
 
 parameters:
@@ -156,13 +158,11 @@ Possible results:
 - `software` - codec is supported by software only
 - `unsupported` - codec is not supported
 
-<PlatformsList types={['Android']} />
-
 ### `isHEVCSupported`
 
-Helper which Indicates whether the provided HEVC/1920\*1080 is supported level supported by device. It uses isCodecSupported internally.
-
 <PlatformsList types={['Android']} />
+
+Helper which Indicates whether the provided HEVC/1920\*1080 is supported level supported by device. It uses isCodecSupported internally.
 
 ### Example Usage
 
