@@ -1,12 +1,18 @@
 package com.brentvatne.exoplayer;
 
+import android.net.Uri;
+
+import androidx.annotation.NonNull;
 import androidx.media3.common.util.Util;
+import androidx.media3.datasource.AssetDataSource;
 import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 
+import com.brentvatne.common.toolbox.DebugLog;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
@@ -23,7 +29,6 @@ public class DataSourceUtil {
     private DataSourceUtil() {
     }
 
-    private static DataSource.Factory rawDataSourceFactory = null;
     private static DataSource.Factory defaultDataSourceFactory = null;
     private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
     private static String userAgent = null;
@@ -39,18 +44,6 @@ public class DataSourceUtil {
         return userAgent;
     }
 
-    public static DataSource.Factory getRawDataSourceFactory(ReactContext context) {
-        if (rawDataSourceFactory == null) {
-            rawDataSourceFactory = buildRawDataSourceFactory(context);
-        }
-        return rawDataSourceFactory;
-    }
-
-    public static void setRawDataSourceFactory(DataSource.Factory factory) {
-        DataSourceUtil.rawDataSourceFactory = factory;
-    }
-
-
     public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
             defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
@@ -58,23 +51,11 @@ public class DataSourceUtil {
         return defaultDataSourceFactory;
     }
 
-    public static void setDefaultDataSourceFactory(DataSource.Factory factory) {
-        DataSourceUtil.defaultDataSourceFactory = factory;
-    }
-
     public static HttpDataSource.Factory getDefaultHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultHttpDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
             defaultHttpDataSourceFactory = buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders);
         }
         return defaultHttpDataSourceFactory;
-    }
-
-    public static void setDefaultHttpDataSourceFactory(HttpDataSource.Factory factory) {
-        DataSourceUtil.defaultHttpDataSourceFactory = factory;
-    }
-
-    private static DataSource.Factory buildRawDataSourceFactory(ReactContext context) {
-        return new RawResourceDataSourceFactory(context.getApplicationContext());
     }
 
     private static DataSource.Factory buildDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
@@ -99,5 +80,18 @@ public class DataSourceUtil {
         }
 
         return okHttpDataSourceFactory;
+    }
+
+    public static DataSource.Factory buildAssetDataSourceFactory(ReactContext context, Uri srcUri) throws AssetDataSource.AssetDataSourceException {
+        DataSpec dataSpec = new DataSpec(srcUri);
+        final AssetDataSource rawResourceDataSource = new AssetDataSource(context);
+            rawResourceDataSource.open(dataSpec);
+        return new DataSource.Factory() {
+            @NonNull
+            @Override
+            public DataSource createDataSource() {
+                return rawResourceDataSource;
+            }
+        };
     }
 }

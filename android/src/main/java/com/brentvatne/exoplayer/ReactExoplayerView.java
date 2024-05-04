@@ -7,6 +7,8 @@ import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
+import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -841,7 +843,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                if (uri.toString().startsWith("file://") ||
+                if ("asset".equals(srcUri.getScheme())) {
+                    try {
+                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, srcUri);
+                        mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
+                    } catch (Exception e) {
+                        throw new IllegalStateException("cannot open input file" + srcUri);
+                    }
+                } else if ("file".equals(srcUri.getScheme()) ||
                         cacheDataSourceFactory == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
