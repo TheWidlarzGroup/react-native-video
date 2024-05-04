@@ -104,6 +104,9 @@ class VideoPlayer extends Component {
 
   seekerWidth = 0;
 
+  // internal usage change to index if you want to select tracks by index instead of lang
+  textTracksSelectionBy = 'lang';
+
   srcAllPlatformList = [
     {
       description: 'local file landscape',
@@ -300,7 +303,10 @@ class VideoPlayer extends Component {
     if (selectedTrack?.language) {
       this.setState({
         textTracks: data.textTracks,
-        selectedTextTrack: {
+        selectedTextTrack: this.textTracksSelectionBy === 'index' ? {
+          type: 'index',
+          value: selectedTrack?.index,
+        }: {
           type: 'language',
           value: selectedTrack?.language,
         },
@@ -804,7 +810,7 @@ class VideoPlayer extends Component {
                       console.log('on value change ' + itemValue);
                       this.setState({
                         selectedTextTrack: {
-                          type: 'language',
+                          type: this.textTracksSelectionBy === 'index' ? 'index': 'language',
                           value: itemValue,
                         },
                       });
@@ -814,13 +820,21 @@ class VideoPlayer extends Component {
                       if (!track) {
                         return;
                       }
-                      return (
-                        <Picker.Item
-                          label={track.language}
-                          value={track.language}
-                          key={track.language}
-                        />
-                      );
+                      if (this.textTracksSelectionBy === 'index') {
+                        return (
+                          <Picker.Item
+                            label={`${track.index}`}
+                            value={track.index}
+                            key={track.index}
+                          />);
+                      } else {
+                        return (
+                          <Picker.Item
+                            label={track.language}
+                            value={track.language}
+                            key={track.language}
+                          />);
+                      }
                     })}
                   </Picker>
                 )}
