@@ -45,20 +45,22 @@ Callback function that is called when audio tracks change
 Payload:
 
 An **array** of
-Property | Type | Description
---- | --- | ---
-index | number | Index number of the track
-title | string | Description of the track
-language | string | 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code
-type | string | Mime type of track
+| Property | Type    | Description                                                                                                |
+| -------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| index    | number  | Internal track ID                                                                                          |
+| title    | string  | Descriptive name for the track                                                                             |
+| language | string  | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language |
+| bitrate  | number  | bitrate of track                                                                                           |
+| type     | string  | Mime type of track                                                                                         |
+| selected | boolean | true if track is playing                                                                                   |
 
 Example:
 
 ```javascript
 {
   audioTracks: [
-    {language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0},
-    {language: 'en', title: 'English', type: 'audio/mpeg', index: 1},
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0, selected: true },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
   ];
 }
 ```
@@ -485,6 +487,28 @@ Example:
 }
 ```
 
+### `onTextTrackDataChanged`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
+
+Payload:
+
+| Property         | Type     | Description                                        |
+| ---------------- | -------- | -------------------------------------------------- |
+| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
+
+Example:
+
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.",
+}
+```
+
+For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
+
 ### `onTextTracks`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -515,28 +539,6 @@ Example:
   ];
 }
 ```
-
-### `onTextTrackDataChanged`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
-
-Payload:
-
-| Property         | Type     | Description                                        |
-| ---------------- | -------- | -------------------------------------------------- |
-| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
-
-Example:
-
-```javascript
-{
-  subtitleTracks: "This blade has a dark past.",
-}
-```
-
-For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
 
 ### `onVideoTracks`
 

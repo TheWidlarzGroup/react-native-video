@@ -310,7 +310,6 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;

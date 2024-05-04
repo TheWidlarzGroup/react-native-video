@@ -173,23 +173,3 @@ Select RCTVideo-tvOS
 Run `pod install` in the `visionos` directory of your project
 
 </details>
-
-## Examples
-
-Run `yarn xbasic install` in the root directory before running any of the examples.
-
-### iOS Example
-```bash
-yarn xbasic ios
-```
-
-### Android Example
-```bash
-yarn xbasic android
-```
-
-### Windows Example
-```bash
-yarn xbasic windows
-```
-
