@@ -339,10 +339,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     // android only
-    const onVideoIdle = useCallback(() => {
-      onIdle?.();
-    }, [onIdle]);
-
     const _onTimedMetadata = useCallback(
       (e: NativeSyntheticEvent<OnTimedMetadataData>) => {
         onTimedMetadata?.(e.nativeEvent);
@@ -573,7 +569,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoExternalPlaybackChange={
             onExternalPlaybackChange ? onVideoExternalPlaybackChange : undefined
           }
-          onVideoIdle={onIdle ? onVideoIdle : undefined}
+          onVideoIdle={onIdle}
           onAudioFocusChanged={
             onAudioFocusChanged ? _onAudioFocusChanged : undefined
           }
