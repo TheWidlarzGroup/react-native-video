@@ -542,38 +542,60 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
-          onVideoLoad={onVideoLoad as (e: NativeSyntheticEvent<object>) => void}
-          onVideoLoadStart={onVideoLoadStart}
-          onVideoError={onVideoError}
-          onVideoProgress={onVideoProgress}
-          onVideoSeek={onVideoSeek}
+          onVideoLoad={
+            onLoad
+              ? (onVideoLoad as (e: NativeSyntheticEvent<object>) => void)
+              : undefined
+          }
+          onVideoLoadStart={onLoadStart ? onVideoLoadStart : undefined}
+          onVideoError={onError ? onVideoError : undefined}
+          onVideoProgress={onProgress ? onVideoProgress : undefined}
+          onVideoSeek={onSeek ? onVideoSeek : undefined}
           onVideoEnd={onEnd}
-          onVideoBuffer={onVideoBuffer}
-          onVideoPlaybackStateChanged={onVideoPlaybackStateChanged}
-          onVideoBandwidthUpdate={_onBandwidthUpdate}
-          onTimedMetadata={_onTimedMetadata}
-          onAudioTracks={_onAudioTracks}
-          onTextTracks={_onTextTracks}
-          onTextTrackDataChanged={_onTextTrackDataChanged}
-          onVideoTracks={_onVideoTracks}
+          onVideoBuffer={onBuffer ? onVideoBuffer : undefined}
+          onVideoPlaybackStateChanged={
+            onPlaybackRateChange ? onVideoPlaybackStateChanged : undefined
+          }
+          onVideoBandwidthUpdate={
+            onBandwidthUpdate ? _onBandwidthUpdate : undefined
+          }
+          onTimedMetadata={onTimedMetadata ? _onTimedMetadata : undefined}
+          onAudioTracks={onAudioTracks ? _onAudioTracks : undefined}
+          onTextTracks={onTextTracks ? _onTextTracks : undefined}
+          onTextTrackDataChanged={
+            onTextTrackDataChanged ? _onTextTrackDataChanged : undefined
+          }
+          onVideoTracks={onVideoTracks ? _onVideoTracks : undefined}
           onVideoFullscreenPlayerDidDismiss={onFullscreenPlayerDidDismiss}
           onVideoFullscreenPlayerDidPresent={onFullscreenPlayerDidPresent}
           onVideoFullscreenPlayerWillDismiss={onFullscreenPlayerWillDismiss}
           onVideoFullscreenPlayerWillPresent={onFullscreenPlayerWillPresent}
-          onVideoExternalPlaybackChange={onVideoExternalPlaybackChange}
-          onVideoIdle={onVideoIdle}
-          onAudioFocusChanged={_onAudioFocusChanged}
-          onReadyForDisplay={_onReadyForDisplay}
-          onPlaybackRateChange={_onPlaybackRateChange}
-          onVolumeChange={_onVolumeChange}
+          onVideoExternalPlaybackChange={
+            onExternalPlaybackChange ? onVideoExternalPlaybackChange : undefined
+          }
+          onVideoIdle={onIdle ? onVideoIdle : undefined}
+          onAudioFocusChanged={
+            onAudioFocusChanged ? _onAudioFocusChanged : undefined
+          }
+          onReadyForDisplay={onReadyForDisplay ? _onReadyForDisplay : undefined}
+          onPlaybackRateChange={
+            onPlaybackRateChange ? _onPlaybackRateChange : undefined
+          }
+          onVolumeChange={onVolumeChange ? _onVolumeChange : undefined}
           onVideoAudioBecomingNoisy={onAudioBecomingNoisy}
-          onPictureInPictureStatusChanged={_onPictureInPictureStatusChanged}
+          onPictureInPictureStatusChanged={
+            onPictureInPictureStatusChanged
+              ? _onPictureInPictureStatusChanged
+              : undefined
+          }
           onRestoreUserInterfaceForPictureInPictureStop={
             onRestoreUserInterfaceForPictureInPictureStop
           }
-          onVideoAspectRatio={_onVideoAspectRatio}
+          onVideoAspectRatio={onAspectRatio ? _onVideoAspectRatio : undefined}
           onReceiveAdEvent={
-            _onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void
+            onReceiveAdEvent
+              ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
+              : undefined
           }
         />
         {hasPoster && showPoster ? (
