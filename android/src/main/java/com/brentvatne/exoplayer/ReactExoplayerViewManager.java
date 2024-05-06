@@ -11,6 +11,7 @@ import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 
+import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
@@ -59,15 +60,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_AUDIO_OUTPUT = "audioOutput";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
-    private static final String PROP_BUFFER_CONFIG_CACHE_SIZE = "cacheSizeMB";
-    private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs";
-    private static final String PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs";
-    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
-    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
-    private static final String PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT = "maxHeapAllocationPercent";
-    private static final String PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent";
-    private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent";
-    private static final String PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs";
     private static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
@@ -401,30 +393,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setShutterColor(color == null ? Color.BLACK : color);
     }
 
+
     @ReactProp(name = PROP_BUFFER_CONFIG)
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
-        int cacheSize = 0;
-        int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-        int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-        int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-        int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
-        int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
-        double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
-        double minBackBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE;
-        double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-
-        if (bufferConfig != null) {
-            cacheSize = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_CACHE_SIZE, 0);
-            minBufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_MIN_BUFFER_MS, minBufferMs);
-            maxBufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_MAX_BUFFER_MS, maxBufferMs);
-            bufferForPlaybackMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS, bufferForPlaybackMs);
-            bufferForPlaybackAfterRebufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS, bufferForPlaybackAfterRebufferMs);
-            maxHeapAllocationPercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT, maxHeapAllocationPercent);
-            minBackBufferMemoryReservePercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT, minBackBufferMemoryReservePercent);
-            minBufferMemoryReservePercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT, minBufferMemoryReservePercent);
-            backBufferDurationMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS, backBufferDurationMs);
-            videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, maxHeapAllocationPercent, minBackBufferMemoryReservePercent, minBufferMemoryReservePercent, backBufferDurationMs, cacheSize);
-        }
+        BufferConfig config = BufferConfig.parse(bufferConfig);
+        videoView.setBufferConfig(config);
     }
 
     @ReactProp(name = PROP_DEBUG, defaultBoolean = false)
