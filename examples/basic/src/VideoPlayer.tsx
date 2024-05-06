@@ -71,6 +71,7 @@ interface StateType {
   showRNVControls: boolean;
   useCache: boolean;
   poster?: string;
+  showNotificationControls: boolean;
 }
 
 class VideoPlayer extends Component {
@@ -100,6 +101,7 @@ class VideoPlayer extends Component {
     showRNVControls: false,
     useCache: false,
     poster: undefined,
+    showNotificationControls: false,
   };
 
   seekerWidth = 0;
@@ -404,6 +406,12 @@ class VideoPlayer extends Component {
     } else {
       this.video?.presentFullscreenPlayer();
     }
+  }
+
+  toggleShowNotificationControls() {
+    this.setState({
+      showNotificationControls: !this.state.showNotificationControls,
+    });
   }
 
   goToChannel(channel: number) {
@@ -725,6 +733,14 @@ class VideoPlayer extends Component {
                   selectedText="poster"
                   unselectedText="no poster"
                 />
+                <ToggleControl
+                  isSelected={this.state.showNotificationControls}
+                  onPress={() => {
+                    this.toggleShowNotificationControls();
+                  }}
+                  selectedText="hide notification controls"
+                  unselectedText="show notification controls"
+                />
               </View>
               <View style={styles.generalControls}>
                 {/* shall be replaced by slider */}
@@ -854,7 +870,7 @@ class VideoPlayer extends Component {
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
-          showNotificationControls={true}
+          showNotificationControls={this.state.showNotificationControls}
           ref={(ref: VideoRef) => {
             this.video = ref;
           }}
