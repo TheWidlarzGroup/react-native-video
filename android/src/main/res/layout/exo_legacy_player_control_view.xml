@@ -26,7 +26,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:textColor="#FFF"
-            android:padding="4dp"
+            android:padding="10dp"
             android:textSize="14sp"
             android:textStyle="bold"
             />
