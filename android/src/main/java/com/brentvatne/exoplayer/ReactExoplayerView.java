@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import static androidx.media3.common.C.CONTENT_TYPE_DASH;
 import static androidx.media3.common.C.CONTENT_TYPE_HLS;
 import static androidx.media3.common.C.CONTENT_TYPE_OTHER;
+import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
@@ -68,6 +69,7 @@ import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.ima.ImaAdsLoader;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
+import androidx.media3.exoplayer.rtsp.RtspMediaSource;
 import androidx.media3.exoplayer.smoothstreaming.DefaultSsChunkSource;
 import androidx.media3.exoplayer.smoothstreaming.SsMediaSource;
 import androidx.media3.exoplayer.source.ClippingMediaSource;
@@ -99,6 +101,7 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -194,7 +197,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
     private int maxBitRate = 0;
-    private long seekTime = C.TIME_UNSET;
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
@@ -561,21 +563,6 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setFocusable(this.focusable);
 
         mainHandler = new Handler();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        initializePlayer();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        /* We want to be able to continue playing audio when switching tabs.
-         * Leave this here in case it causes issues.
-         */
-        // stopPlayback();
     }
 
     // LifecycleEventListener implementation
@@ -1047,8 +1034,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
-                : uri.getLastPathSegment());
+        int type;
+        if ("rtsp".equals(overrideExtension)) {
+            type = C.TYPE_RTSP;
+        } else {
+            type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+                    : uri.getLastPathSegment());
+        }
         config.setDisableDisconnectError(this.disableDisconnectError);
 
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
@@ -1070,18 +1062,33 @@ public class ReactExoplayerView extends FrameLayout implements
 
         switch (type) {
             case CONTENT_TYPE_SS:
+                if(!BuildConfig.USE_EXOPLAYER_SMOOTH_STREAMING) {
+                    DebugLog.e("Exo Player Exception", "Smooth Streaming is not enabled!");
+                    throw new IllegalStateException("Smooth Streaming is not enabled!");
+                }
+
                 mediaSourceFactory = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 );
                 break;
             case CONTENT_TYPE_DASH:
+                if(!BuildConfig.USE_EXOPLAYER_DASH) {
+                    DebugLog.e("Exo Player Exception", "DASH is not enabled!");
+                    throw new IllegalStateException("DASH is not enabled!");
+                }
+
                 mediaSourceFactory = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 );
                 break;
             case CONTENT_TYPE_HLS:
+                if (!BuildConfig.USE_EXOPLAYER_HLS) {
+                    DebugLog.e("Exo Player Exception", "HLS is not enabled!");
+                    throw new IllegalStateException("HLS is not enabled!");
+                }
+
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 );
@@ -1090,6 +1097,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 mediaSourceFactory = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 );
+                break;
+            case CONTENT_TYPE_RTSP:
+                if (!BuildConfig.USE_EXOPLAYER_RTSP) {
+                    DebugLog.e("Exo Player Exception", "RTSP is not enabled!");
+                    throw new IllegalStateException("RTSP is not enabled!");
+                }
+
+                mediaSourceFactory = new RtspMediaSource.Factory();
                 break;
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
@@ -1581,7 +1596,7 @@ public class ReactExoplayerView extends FrameLayout implements
         track.setIndex(trackIndex);
         if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
         if (format.language != null) track.setLanguage(format.language);
-        if (format.id != null) track.setTitle(format.id);
+        if (format.label != null) track.setTitle(format.label);
         track.setSelected(isTrackSelected(selection, group, 0));
         return track;
     }
@@ -1619,7 +1634,15 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
+    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
+        if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            eventEmitter.seek(player.getCurrentPosition(), newPosition.positionMs % 1000); // time are in seconds /°\
+            if (isUsingContentResolution) {
+                // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
+                setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
+            }
+        }
+
         if (playerNeedsSource) {
             // This will only occur if the user has performed a seek whilst in the error state. Update the
             // resume position so that if the user then retries, playback will resume from the position to
@@ -1641,28 +1664,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onPlaybackStateChanged(int playbackState) {
-        if (playbackState == Player.STATE_READY && seekTime != C.TIME_UNSET) {
-            eventEmitter.seek(player.getCurrentPosition(), seekTime);
-            seekTime = C.TIME_UNSET;
-            if (isUsingContentResolution) {
-                // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
-                setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
-            }
-        }
-    }
-
-    @Override
-    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onRepeatModeChanged(int repeatMode) {
         // Do nothing.
     }
 
@@ -2141,7 +2142,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void seekTo(long positionMs) {
         if (player != null) {
-            seekTime = positionMs;
             player.seekTo(positionMs);
         }
     }

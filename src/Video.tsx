@@ -122,6 +122,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
+    const hasPoster = !!poster;
+
     const posterStyle = useMemo<StyleProp<ImageStyle>>(
       () => ({
         ...StyleSheet.absoluteFillObject,
@@ -145,7 +147,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!uri) {
         console.log('Trying to load empty source');
       }
-      const isNetwork = !!(uri && uri.match(/^https?:/));
+      const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
       const isAsset = !!(
         uri &&
         uri.match(
@@ -220,10 +222,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
+      const value = selectedVideoTrack?.value
+        ? `${selectedVideoTrack.value}`
+        : undefined;
 
       return {
         type: selectedVideoTrack?.type,
-        value: selectedVideoTrack?.value,
+        value,
       };
     }, [selectedVideoTrack]);
 
@@ -287,19 +292,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
+        hasPoster && setShowPoster(true);
         onLoadStart?.(e.nativeEvent);
       },
-      [onLoadStart],
+      [hasPoster, onLoadStart],
     );
 
     const onVideoLoad = useCallback(
       (e: NativeSyntheticEvent<OnLoadData>) => {
         if (Platform.OS === 'windows') {
-          setShowPoster(false);
+          hasPoster && setShowPoster(false);
         }
         onLoad?.(e.nativeEvent);
       },
-      [onLoad, setShowPoster],
+      [onLoad, hasPoster, setShowPoster],
     );
 
     const onVideoError = useCallback(
@@ -389,9 +395,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const _onReadyForDisplay = useCallback(() => {
-      setShowPoster(false);
+      hasPoster && setShowPoster(false);
       onReadyForDisplay?.();
-    }, [setShowPoster, onReadyForDisplay]);
+    }, [setShowPoster, hasPoster, onReadyForDisplay]);
 
     const _onPictureInPictureStatusChanged = useCallback(
       (e: NativeSyntheticEvent<OnPictureInPictureStatusChangedData>) => {
@@ -569,8 +575,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
         />
         <>
-          {showPoster ? (
-            <Image style={posterStyle} source={{ uri: poster }} />
+          {hasPoster && showPoster ? (
+            <Image style={posterStyle} source={{uri: poster}} />
           ) : null}
           {children}
         </>
