@@ -7,7 +7,7 @@ import type {
   OnExternalPlaybackChangeData,
   OnLoadStartData,
   OnPictureInPictureStatusChangedData,
-  OnPlaybackData,
+  OnPlaybackRateChangeData,
   OnPlaybackStateChangedData,
   OnProgressData,
   OnSeekData,
@@ -239,7 +239,7 @@ export interface ReactVideoEvents {
   onPictureInPictureStatusChanged?: (
     e: OnPictureInPictureStatusChangedData,
   ) => void; //iOS
-  onPlaybackRateChange?: (e: OnPlaybackData) => void; //All
+  onPlaybackRateChange?: (e: OnPlaybackRateChangeData) => void; //All
   onVolumeChange?: (e: OnVolumeChangeData) => void; //Android, iOS
   onProgress?: (e: OnProgressData) => void; //All
   onReadyForDisplay?: () => void; //Android, iOS

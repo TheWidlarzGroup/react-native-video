@@ -14,11 +14,10 @@ Pod::Spec.new do |s|
 
   s.homepage       = 'https://github.com/react-native-video/react-native-video'
   s.source         = { :git => "https://github.com/react-native-video/react-native-video.git", :tag => "v#{s.version}" }
-  s.platforms      = { :ios => "9.0", :tvos => "10.0", :visionos => "1.0" }
+  s.platforms      = { :ios => "13.0", :tvos => "13.0", :visionos => "1.0" }
 
   s.subspec "Video" do |ss|
     ss.source_files = "ios/Video/**/*.{h,m,swift}"
-    ss.dependency "PromisesSwift"
 
     if defined?($RNVideoUseGoogleIMA)
       Pod::UI.puts "RNVideo: enable IMA SDK"
