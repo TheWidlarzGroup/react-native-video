@@ -4,7 +4,7 @@ import MediaPlayer
 class NowPlayingInfoCenterManager {
     static let shared = NowPlayingInfoCenterManager()
 
-    private let SEEK_INTERVAL_SECOUNDS: Double = 10
+    private let SEEK_INTERVAL_SECONDS: Double = 10
 
     private weak var currentPlayer: AVPlayer?
     private var players = NSHashTable<AVPlayer>.weakObjects()
@@ -19,9 +19,9 @@ class NowPlayingInfoCenterManager {
     private var playbackPositionTarget: Any?
     private var seekTarget: Any?
 
-    private var recivingRemoveControlEvents = false {
+    private var receivingRemoveControlEvents = false {
         didSet {
-            if recivingRemoveControlEvents {
+            if receivingRemoveControlEvents {
                 try? AVAudioSession.sharedInstance().setCategory(.playback)
                 try? AVAudioSession.sharedInstance().setActive(true)
                 UIApplication.shared.beginReceivingRemoteControlEvents()
@@ -40,8 +40,8 @@ class NowPlayingInfoCenterManager {
             return
         }
 
-        if recivingRemoveControlEvents == false {
-            recivingRemoveControlEvents = true
+        if receivingRemoveControlEvents == false {
+            receivingRemoveControlEvents = true
         }
 
         if let oldObserver = observers[player.hashValue] {
@@ -87,10 +87,10 @@ class NowPlayingInfoCenterManager {
         }
 
         let commandCenter = MPRemoteCommandCenter.shared()
-        invalideTargets(commandCenter)
+        invalidateTargets(commandCenter)
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
-        recivingRemoveControlEvents = false
+        receivingRemoveControlEvents = false
     }
 
     private func setCurrentPlayer(player: AVPlayer) {
@@ -107,7 +107,7 @@ class NowPlayingInfoCenterManager {
 
         updateMetadata()
 
-        // one secound observer
+        // one second observer
         playbackObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(value: 1, timescale: 4),
             queue: .global(),
@@ -120,7 +120,7 @@ class NowPlayingInfoCenterManager {
     private func registerTargets() {
         let commandCenter = MPRemoteCommandCenter.shared()
 
-        invalideTargets(commandCenter)
+        invalidateTargets(commandCenter)
 
         playTarget = commandCenter.playCommand.addTarget { [weak self] _ in
             guard let self, let player = self.currentPlayer else {
@@ -179,7 +179,7 @@ class NowPlayingInfoCenterManager {
         }
     }
 
-    private func invalideTargets(_ commandCenter: MPRemoteCommandCenter) {
+    private func invalidateTargets(_ commandCenter: MPRemoteCommandCenter) {
         commandCenter.playCommand.removeTarget(playTarget)
         commandCenter.pauseCommand.removeTarget(pauseTarget)
         commandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
@@ -190,13 +190,13 @@ class NowPlayingInfoCenterManager {
     public func updateMetadata() {
         guard let player = currentPlayer, let currentItem = player.currentItem else {
             let commandCenter = MPRemoteCommandCenter.shared()
-            invalideTargets(commandCenter)
+            invalidateTargets(commandCenter)
 
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
             return
         }
 
-        // commonMetadata is metadata from asset, externalMetadata is custom metadata setted by user
+        // commonMetadata is metadata from asset, externalMetadata is custom metadata set by user
         let metadata = currentItem.asset.commonMetadata + currentItem.externalMetadata
         var nowPlayingInfo: [String: Any] = [:]
 
@@ -212,7 +212,7 @@ class NowPlayingInfoCenterManager {
             nowPlayingInfo[MPMediaItemPropertyArtist] = ""
         }
 
-        // I have some issue with this - setting artworkItem when it not setted dont return nil but also is crashing appliaction
+        // I have some issue with this - setting artworkItem when it not set dont return nil but also is crashing application
         // this is very hacky workaround for it
         if let artworkItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.value as? Data {
             if let image = UIImage(data: artworkItem) {
@@ -257,7 +257,7 @@ class NowPlayingInfoCenterManager {
         }
     }
 
-    // We will observe players rate to find last active player that info will be displayd
+    // We will observe players rate to find last active player that info will be displayed
     private func observePlayers(player: AVPlayer) -> NSKeyValueObservation {
         return player.observe(\.rate) { [weak self] player, change in
             guard let self else { return }
@@ -265,7 +265,7 @@ class NowPlayingInfoCenterManager {
             let rate = change.newValue
 
             // case where there is new player that is not paused
-            // In this case event is triggeret by non currentPlayer
+            // In this case event is triggered by non currentPlayer
             if rate != 0 && currentPlayer != player {
                 setCurrentPlayer(player: player)
                 return
