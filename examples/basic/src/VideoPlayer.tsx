@@ -171,6 +171,10 @@ class VideoPlayer extends Component {
       uri: 'https://live.forstreet.cl/live/livestream.m3u8',
     },
     {
+      description: 'asset file',
+      uri: 'asset:///broadchurch.mp4',
+    },
+    {
       description: '(dash) sintel subtitles',
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
     },

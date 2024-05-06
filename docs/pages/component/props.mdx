@@ -638,6 +638,18 @@ source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 
 Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
 
+##### File from asset folder (asset://)
+
+<PlatformsList types={['Android']} />
+
+Allows to play a video file from the asset folder from the application
+
+Example:
+
+```javascript
+source={{ uri: 'asset:///sintel.mp4' }}
+```
+
 ##### iPod Library (ipod-library://)
 
 <PlatformsList types={['iOS']} />
