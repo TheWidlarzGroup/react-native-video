@@ -94,6 +94,7 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.ui.LegacyPlayerControlView;
 
+import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
@@ -183,18 +184,11 @@ public class ReactExoplayerView extends FrameLayout implements
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
     private int minLoadRetryCount = 3;
+    private BufferConfig bufferConfig = new BufferConfig();
     private int maxBitRate = 0;
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-    private int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-    private int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-    private int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-    private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
-    private int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
-    private double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
-    private double minBackBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE;
-    private double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
     private Handler mainHandler;
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
@@ -495,19 +489,32 @@ public class ReactExoplayerView extends FrameLayout implements
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
-        public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
+        public RNVLoadControl(DefaultAllocator allocator, BufferConfig config) {
             super(allocator,
-                    minBufferMs,
-                    maxBufferMs,
-                    bufferForPlaybackMs,
-                    bufferForPlaybackAfterRebufferMs,
-                    targetBufferBytes,
-                    prioritizeTimeOverSizeThresholds,
-                    backBufferDurationMs,
-                    retainBackBufferFromKeyframe);
+                    config.getMinBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getMinBufferMs()
+                            : DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
+                    config.getMaxBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getMaxBufferMs()
+                            : DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
+                    config.getBufferForPlaybackMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getBufferForPlaybackMs()
+                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS ,
+                    config.getBufferForPlaybackAfterRebufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getBufferForPlaybackAfterRebufferMs()
+                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
+                    -1,
+                    true,
+                    config.getBackBufferDurationMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getBackBufferDurationMs()
+                            : DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
+                    DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME);
             runtime = Runtime.getRuntime();
             ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
-            availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
+            double maxHeap = config.getMaxHeapAllocationPercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
+                    ? bufferConfig.getMaxHeapAllocationPercent()
+                    : DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
+            availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeap * 1024 * 1024);
         }
 
         @Override
@@ -522,6 +529,9 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             long usedMemory = runtime.totalMemory() - runtime.freeMemory();
             long freeMemory = runtime.maxMemory() - usedMemory;
+            double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
+                    ? bufferConfig.getMinBufferMemoryReservePercent()
+                    : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
             long reserveMemory = (long)minBufferMemoryReservePercent * runtime.maxMemory();
             long bufferedMs = bufferedDurationUs / (long)1000;
             if (reserveMemory > freeMemory && bufferedMs > 2000) {
@@ -602,14 +612,7 @@ public class ReactExoplayerView extends FrameLayout implements
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         RNVLoadControl loadControl = new RNVLoadControl(
                 allocator,
-                minBufferMs,
-                maxBufferMs,
-                bufferForPlaybackMs,
-                bufferForPlaybackAfterRebufferMs,
-                -1,
-                true,
-                backBufferDurationMs,
-                DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
+                bufferConfig
         );
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
@@ -2025,26 +2028,18 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setHideShutterView(hideShutterView);
     }
 
-    public void setBufferConfig(int newMinBufferMs, int newMaxBufferMs, int newBufferForPlaybackMs, int newBufferForPlaybackAfterRebufferMs, double newMaxHeapAllocationPercent, double newMinBackBufferMemoryReservePercent, double newMinBufferMemoryReservePercent, int newBackBufferDurationMs, int cacheSize) {
-        minBufferMs = newMinBufferMs;
-        maxBufferMs = newMaxBufferMs;
-        bufferForPlaybackMs = newBufferForPlaybackMs;
-        bufferForPlaybackAfterRebufferMs = newBufferForPlaybackAfterRebufferMs;
-        maxHeapAllocationPercent = newMaxHeapAllocationPercent;
-        minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
-        minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
-        if (cacheSize > 0) {
+    public void setBufferConfig(BufferConfig config) {
+        bufferConfig = config;
+        if (bufferConfig.getCacheSize() > 0) {
             RNVSimpleCache.INSTANCE.setSimpleCache(
                     this.getContext(),
-                    cacheSize,
+                    bufferConfig.getCacheSize(),
                     buildHttpDataSourceFactory(false)
             );
             cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
         } else {
             cacheDataSourceFactory = null;
         }
-
-        backBufferDurationMs = newBackBufferDurationMs;
         releasePlayer();
         initializePlayer();
     }
