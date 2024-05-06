@@ -19,6 +19,13 @@ type Headers = ReadonlyArray<
   }>
 >;
 
+type VideoMetadata = Readonly<{
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  imageUri?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -31,10 +38,7 @@ export type VideoSrc = Readonly<{
   startPosition?: Float;
   cropStart?: Float;
   cropEnd?: Float;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  customImageUri?: string;
+  metadata?: VideoMetadata;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
