@@ -37,7 +37,7 @@ class VideoPlaybackService : MediaSessionService() {
 
     @SuppressLint("PrivateResource")
     private val seekBackwardBtn = CommandButton.Builder()
-        .setDisplayName("forward")
+        .setDisplayName("backward")
         .setSessionCommand(commandSeekBackward)
         .setIconResId(androidx.media3.ui.R.drawable.exo_notification_rewind)
         .build()
@@ -51,7 +51,7 @@ class VideoPlaybackService : MediaSessionService() {
 
         val mediaSession = MediaSession.Builder(this, player)
             .setId("RNVideoPlaybackService_" + player.hashCode())
-            .setCallback(VideoPlaybackCallback(10000L))
+            .setCallback(VideoPlaybackCallback(SEEK_INTERVAL_MS))
             .setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
             .build()
 
@@ -94,8 +94,6 @@ class VideoPlaybackService : MediaSessionService() {
         cleanup()
         super.onDestroy()
     }
-
-    // Notifications utils
 
     private fun createSessionNotification(session: MediaSession) {
         if (session.player.currentMediaItem == null) {
@@ -146,5 +144,6 @@ class VideoPlaybackService : MediaSessionService() {
         const val COMMAND_SEEK_FORWARD = "SEEK_FORWARD"
         const val COMMAND_SEEK_BACKWARD = "SEEK_BACKWARD"
         const val NOTIFICATION_CHANEL_ID = "RNVIDEO_SESSION_NOTIFICATION"
+        const val SEEK_INTERVAL_MS = 10000L
     }
 }

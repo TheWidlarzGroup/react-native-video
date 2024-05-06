@@ -30,6 +30,7 @@ import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -38,6 +39,7 @@ import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
@@ -360,7 +362,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     protected void onDetachedFromWindow() {
-        cleanUpResources();
+        cleanupPlaybackService();
         super.onDetachedFromWindow();
     }
 
@@ -759,51 +761,65 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void setupPlaybackService() {
-        if (showNotificationControls & player != null) {
-            playbackServiceConnection = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    playbackServiceBinder = (PlaybackServiceBinder) service;
-
-                    try {
-                        playbackServiceBinder.getService().registerPlayer(player);
-                    } catch (Exception e) {
-                        DebugLog.e("ExoPlayer Playback", "Cloud not register ExoPlayer");
-                    }
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    playbackServiceBinder = null;
-                }
-
-                @Override
-                public void onNullBinding(ComponentName name) {
-                    DebugLog.e("ExoPlayer Playback", "Cloud not register ExoPlayer");
-                }
-            };
-
-            Intent intent = new Intent(themedReactContext, VideoPlaybackService.class);
-            intent.setAction(MediaSessionService.SERVICE_INTERFACE);
-
-            themedReactContext.startService(intent);
-
-            int flags;
-            if (Build.VERSION.SDK_INT >= 29) {
-                flags = Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES;
-            } else {
-                flags = Context.BIND_AUTO_CREATE;
-            }
-
-            themedReactContext.bindService(intent, playbackServiceConnection, flags);
+        if (!showNotificationControls || player == null) {
+            return;
         }
 
-        if(!showNotificationControls && playbackServiceBinder != null) {
-            if(player != null) {
+        playbackServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                playbackServiceBinder = (PlaybackServiceBinder) service;
+
+                try {
+                    playbackServiceBinder.getService().registerPlayer(player);
+                } catch (Exception e) {
+                    DebugLog.e(TAG, "Cloud not register ExoPlayer");
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                try {
+                    playbackServiceBinder.getService().unregisterPlayer(player);
+                } catch (Exception ignored) {}
+
+                playbackServiceBinder = null;
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                DebugLog.e(TAG, "Cloud not register ExoPlayer");
+            }
+        };
+
+        Intent intent = new Intent(themedReactContext, VideoPlaybackService.class);
+        intent.setAction(MediaSessionService.SERVICE_INTERFACE);
+
+        themedReactContext.startService(intent);
+
+        int flags;
+        if (Build.VERSION.SDK_INT >= 29) {
+            flags = Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES;
+        } else {
+            flags = Context.BIND_AUTO_CREATE;
+        }
+
+        themedReactContext.bindService(intent, playbackServiceConnection, flags);
+    }
+
+    private void cleanupPlaybackService() {
+        try {
+            if(player != null && playbackServiceBinder != null) {
                 playbackServiceBinder.getService().unregisterPlayer(player);
             }
 
-            themedReactContext.unbindService(playbackServiceConnection);
+            playbackServiceBinder = null;
+
+            if(playbackServiceConnection != null) {
+                themedReactContext.unbindService(playbackServiceConnection);
+            }
+        } catch(Exception e) {
+            DebugLog.w(TAG, "Cloud not cleanup playback service");
         }
     }
 
@@ -2049,12 +2065,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
         if (playbackServiceConnection == null && showNotificationControls) {
             setupPlaybackService();
-        }
-
-        if(!showNotificationControls && playbackServiceBinder != null) {
-            if (player != null) {
-                playbackServiceBinder.getService().unregisterPlayer(player);
-            }
+        } else if(!showNotificationControls && playbackServiceConnection != null) {
+            cleanupPlaybackService();
         }
     }
 
