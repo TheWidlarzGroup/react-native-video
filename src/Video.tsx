@@ -539,11 +539,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={
-            onLoad
+            onLoad || hasPoster
               ? (onVideoLoad as (e: NativeSyntheticEvent<object>) => void)
               : undefined
           }
-          onVideoLoadStart={onLoadStart ? onVideoLoadStart : undefined}
+          onVideoLoadStart={
+            onLoadStart || hasPoster ? onVideoLoadStart : undefined
+          }
           onVideoError={onError ? onVideoError : undefined}
           onVideoProgress={onProgress ? onVideoProgress : undefined}
           onVideoSeek={onSeek ? onVideoSeek : undefined}
