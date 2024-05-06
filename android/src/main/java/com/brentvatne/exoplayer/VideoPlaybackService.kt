@@ -113,10 +113,8 @@ class VideoPlaybackService : MediaSessionService() {
             )
         }
 
-        val contentTitle = session.player.currentMediaItem?.mediaMetadata?.title ?: "Video with no title"
         val notificationCompact = NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
             .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
-            .setContentTitle(contentTitle)
             .setStyle(MediaStyleNotificationHelper.MediaStyle(session))
             .build()
 

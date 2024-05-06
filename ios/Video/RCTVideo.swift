@@ -435,14 +435,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _player == nil {
             _player = AVPlayer()
+            _player!.replaceCurrentItem(with: playerItem)
 
-            if _showNotificationControls {
-                NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
-            }
+            // We need to register player after we set current item and only for init
+            NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
+        } else {
+            _player?.replaceCurrentItem(with: playerItem)
+
+            // later we can just call "updateMetadata:
+            NowPlayingInfoCenterManager.shared.updateMetadata()
         }
-
-        _player?.replaceCurrentItem(with: playerItem)
-        NowPlayingInfoCenterManager.shared.updateMetadata()
 
         _playerObserver.player = _player
         applyModifiers()
@@ -544,7 +546,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func playerItemPrepareText(asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
         if (self._textTracks == nil) || self._textTracks?.isEmpty == true || (uri.hasSuffix(".m3u8")) {
-            return self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
+            return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
         // AVPlayer can't airplay AVMutableCompositions
@@ -561,26 +563,30 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.setTextTracks(validTextTracks)
         }
 
-        return self.playerItemPropegateMetadata(AVPlayerItem(asset: mixComposition))
+        return await self.playerItemPropegateMetadata(AVPlayerItem(asset: mixComposition))
     }
 
-    func playerItemPropegateMetadata(_ playerItem: AVPlayerItem!) -> AVPlayerItem {
+    func playerItemPropegateMetadata(_ playerItem: AVPlayerItem!) async -> AVPlayerItem {
         var mapping: [AVMetadataIdentifier: Any] = [:]
 
-        if let title = _source?.title {
+        if let title = _source?.customMetadata?.title {
             mapping[.commonIdentifierTitle] = title
         }
 
-        if let subtitle = _source?.subtitle {
+        if let artist = _source?.customMetadata?.artist {
+            mapping[.commonIdentifierArtist] = artist
+        }
+
+        if let subtitle = _source?.customMetadata?.subtitle {
             mapping[.iTunesMetadataTrackSubTitle] = subtitle
         }
 
-        if let description = _source?.description {
+        if let description = _source?.customMetadata?.description {
             mapping[.commonIdentifierDescription] = description
         }
 
-        if let customImageUri = _source?.customImageUri,
-           let imageData = RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
+        if let customImageUri = _source?.customMetadata?.imageUri,
+           let imageData = await RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
             mapping[.commonIdentifierArtwork] = imageData
         }
 
@@ -1081,9 +1087,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setShowNotificationControls(_ showNotificationControls: Bool) {
-        if showNotificationControls == true, let player = _player {
+        guard let player = _player else {
+            return
+        }
+
+        if showNotificationControls {
             NowPlayingInfoCenterManager.shared.registerPlayer(player: player)
-        } else if showNotificationControls == false, let player = _player {
+        } else {
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
 

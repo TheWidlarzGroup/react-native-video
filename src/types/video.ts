@@ -22,10 +22,7 @@ export type ReactVideoSourceProperties = {
   startPosition?: number;
   cropStart?: number;
   cropEnd?: number;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  customImageUri?: string;
+  metadata?: VideoMetadata;
 };
 
 export type ReactVideoSource = Readonly<
@@ -33,6 +30,14 @@ export type ReactVideoSource = Readonly<
     uri?: string | NodeRequire;
   }
 >;
+
+export type VideoMetadata = Readonly<{
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  artist?: string;
+  imageUri?: string;
+}>;
 
 export type DebugConfig = Readonly<{
   enable?: boolean;

@@ -4,6 +4,8 @@ import MediaPlayer
 class NowPlayingInfoCenterManager {
     static let shared = NowPlayingInfoCenterManager()
 
+    private let SEEK_INTERVAL_SECOUNDS: Double = 10
+
     private weak var currentPlayer: AVPlayer?
     private var players = NSHashTable<AVPlayer>.weakObjects()
 
@@ -19,7 +21,13 @@ class NowPlayingInfoCenterManager {
 
     private var recivingRemoveControlEvents = false {
         didSet {
-            recivingRemoveControlEvents ? UIApplication.shared.endReceivingRemoteControlEvents() : UIApplication.shared.beginReceivingRemoteControlEvents()
+            if recivingRemoveControlEvents {
+                try? AVAudioSession.sharedInstance().setCategory(.playback)
+                try? AVAudioSession.sharedInstance().setActive(true)
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+            } else {
+                UIApplication.shared.endReceivingRemoteControlEvents()
+            }
         }
     }
 
@@ -142,7 +150,7 @@ class NowPlayingInfoCenterManager {
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
-            let newTime = player.currentTime() - CMTime(seconds: 10, preferredTimescale: .max)
+            let newTime = player.currentTime() - CMTime(seconds: SEEK_INTERVAL_SECOUNDS, preferredTimescale: .max)
             player.seek(to: newTime)
             return .success
         }
@@ -152,7 +160,7 @@ class NowPlayingInfoCenterManager {
                 return .commandFailed
             }
 
-            let newTime = player.currentTime() + CMTime(seconds: 10, preferredTimescale: .max)
+            let newTime = player.currentTime() + CMTime(seconds: SEEK_INTERVAL_SECOUNDS, preferredTimescale: .max)
             player.seek(to: newTime)
             return .success
         }
@@ -188,7 +196,8 @@ class NowPlayingInfoCenterManager {
             return
         }
 
-        let metadata = currentItem.asset.commonMetadata
+        // commonMetadata is metadata from asset, externalMetadata is custom metadata setted by user
+        let metadata = currentItem.asset.commonMetadata + currentItem.externalMetadata
         var nowPlayingInfo: [String: Any] = [:]
 
         if let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.value {
@@ -204,18 +213,23 @@ class NowPlayingInfoCenterManager {
         }
 
         // I have some issue with this - setting artworkItem when it not setted dont return nil but also is crashing appliaction
-        // TODO: find way to check if AVPlayerItem have setted artwork to avoid crash
-//        if let artworkItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.value {
-//            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-//        } else {
-//            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize:  UIImage().size, requestHandler: { _ in
-//                UIImage()
-//            })
-//        }
+        // this is very hacky workaround for it
+        if let artworkItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.value as? Data {
+            if let image = UIImage(data: artworkItem) {
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { _ in
+                    return image
+                })
+            }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: UIImage().size, requestHandler: { _ in
+                UIImage()
+            })
+        }
 
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
@@ -227,6 +241,7 @@ class NowPlayingInfoCenterManager {
 
         // We dont want to update playback if we did not set metadata yet
         if var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds.rounded()
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
 

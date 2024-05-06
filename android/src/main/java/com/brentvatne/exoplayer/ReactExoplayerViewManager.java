@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
@@ -38,6 +39,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
     private static final String PROP_SRC_CROP_END = "cropEnd";
+    private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
@@ -175,6 +177,32 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         }
 
+        ReadableMap propMetadata = ReactBridgeUtils.safeGetMap(src, PROP_SRC_METADATA);
+        MediaMetadata customMetadata = null;
+        if (propMetadata != null) {
+            String title = ReactBridgeUtils.safeGetString(propMetadata, "title");
+            String subtitle = ReactBridgeUtils.safeGetString(propMetadata, "subtitle");
+            String description = ReactBridgeUtils.safeGetString(propMetadata, "description");
+            String artist = ReactBridgeUtils.safeGetString(propMetadata, "artist");
+            String imageUriString = ReactBridgeUtils.safeGetString(propMetadata, "imageUri");
+
+            Uri imageUri = null;
+
+            try {
+                imageUri = Uri.parse(imageUriString);
+            } catch (Exception e) {
+                DebugLog.e("ExoPlayer Warning", "Could not parse imageUri in metadata");
+            }
+
+            customMetadata = new MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setSubtitle(subtitle)
+                    .setDescription(description)
+                    .setArtist(artist)
+                    .setArtworkUri(imageUri)
+                    .build();
+        }
+
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
             return;
@@ -184,7 +212,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers);
+                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
             }
         } else {
             int identifier = context.getResources().getIdentifier(

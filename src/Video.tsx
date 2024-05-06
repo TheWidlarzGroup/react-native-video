@@ -166,10 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
-        title: resolvedSource.title,
-        subtitle: resolvedSource.subtitle,
-        description: resolvedSource.description,
-        customImageUri: resolvedSource.customImageUri,
+        metadata: resolvedSource.metadata,
       };
     }, [source]);
 

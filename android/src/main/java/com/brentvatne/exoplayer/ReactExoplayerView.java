@@ -175,6 +175,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private ExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
+    private MediaMetadata customMetadata;
 
     private ServiceConnection playbackServiceConnection;
     private PlaybackServiceBinder playbackServiceBinder;
@@ -860,7 +861,12 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         config.setDisableDisconnectError(this.disableDisconnectError);
 
-        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
+        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
+                .setUri(uri);
+
+        if (customMetadata != null) {
+            mediaItemBuilder.setMediaMetadata(customMetadata);
+        }
 
         if (adTagUrl != null) {
             mediaItemBuilder.setAdsConfiguration(
@@ -1608,7 +1614,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, MediaMetadata customMetadata) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && cropStartMs == this.cropStartMs && cropEndMs == this.cropEndMs;
             hasDrmFailed = false;
@@ -1621,6 +1627,21 @@ public class ReactExoplayerView extends FrameLayout implements
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
+
+            if (this.customMetadata != customMetadata && player != null) {
+                MediaItem currentMediaItem = player.getCurrentMediaItem();
+
+                if (currentMediaItem == null) {
+                    return;
+                }
+
+                MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+
+                // This will cause video blink/reload but won't louse progress
+                player.setMediaItem(newMediaItem, false);
+            }
+
+            this.customMetadata = customMetadata;
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1639,6 +1660,7 @@ public class ReactExoplayerView extends FrameLayout implements
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;
+            this.customMetadata = null;
             clearResumePosition();
         }
     }
