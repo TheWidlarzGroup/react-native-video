@@ -96,10 +96,6 @@ class VideoPlaybackService : MediaSessionService() {
     }
 
     private fun createSessionNotification(session: MediaSession) {
-        if (session.player.currentMediaItem == null) {
-            return
-        }
-
         val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.createNotificationChannel(
@@ -109,6 +105,11 @@ class VideoPlaybackService : MediaSessionService() {
                     NotificationManager.IMPORTANCE_LOW
                 )
             )
+        }
+
+        if (session.player.currentMediaItem == null) {
+            notificationManager.cancel(session.player.hashCode())
+            return
         }
 
         val notificationCompact = NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
