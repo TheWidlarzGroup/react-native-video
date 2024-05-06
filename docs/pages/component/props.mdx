@@ -694,20 +694,23 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 
 #### Overriding the metadata of a source
 
-<PlatformsList types={['tvOS']} />
+<PlatformsList types={['Android, iOS, tvOS']} />
 
-Provide an optional `title`, `subtitle`, `customImageUri` and/or `description` properties for the video.
-Useful when to adapt the tvOS playback experience.
+Provide an optional `title`, `subtitle`, `artist`, `imageUri` and/or `description` properties for the video.
+Useful when using notification controls on Android or iOS or to adapt the tvOS playback experience.
 
 Example:
 
 ```javascript
 source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    title: 'Custom Title',
-    subtitle: 'Custom Subtitle',
-    description: 'Custom Description',
-    customImageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+    metadata: {
+      title: 'Custom Title',
+      subtitle: 'Custom Subtitle',
+      artist: 'Custom Artist',
+      description: 'Custom Description',
+      imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+    }
   }}
 ```
 
@@ -774,6 +777,10 @@ textTracks={[
 
 Controls whether to show media controls in the notification area. 
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
+
+You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
+
+To customize the notification controls you can use `metadata` property in the `source` prop.
 
 - **false (default)** - Don't show media controls in the notification area
 - **true** - Show media controls in the notification area
