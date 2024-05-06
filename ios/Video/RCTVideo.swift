@@ -585,8 +585,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             mapping[.commonIdentifierDescription] = description
         }
 
-        if let customImageUri = _source?.customMetadata?.imageUri,
-           let imageData = await RCTVideoUtils.createImageMetadataItem(imageUri: customImageUri) {
+        if let imageUri = _source?.customMetadata?.imageUri,
+           let imageData = await RCTVideoUtils.createImageMetadataItem(imageUri: imageUri) {
             mapping[.commonIdentifierArtwork] = imageData
         }
 
