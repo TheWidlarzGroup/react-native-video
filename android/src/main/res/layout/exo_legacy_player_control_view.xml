@@ -26,6 +26,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:textColor="#FFF"
+            android:padding="4dp"
             android:textSize="14sp"
             android:textStyle="bold"
             />
@@ -54,8 +55,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_gravity="bottom"
-            android:orientation="horizontal"
-            android:paddingTop="4dp">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/exo_prev"
@@ -106,7 +106,6 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:paddingTop="4dp"
             android:paddingBottom="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
