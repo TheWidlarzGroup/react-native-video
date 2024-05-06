@@ -117,10 +117,24 @@ class VideoPlayer extends Component {
     {
       description: 'local file portrait',
       uri: require('./portrait.mp4'),
+      metadata: {
+        title: 'Test Title',
+        subtitle: 'Test Subtitle',
+        artist: 'Test Artist',
+        description: 'Test Description',
+        imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+      }
     },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
+      metadata: {
+        title: 'Custom Title',
+        subtitle: 'Custom Subtitle',
+        artist: 'Custom Artist',
+        description: 'Custom Description',
+        imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+      }
     },
     {
       description: 'invalid URL',
