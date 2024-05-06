@@ -150,7 +150,7 @@ class NowPlayingInfoCenterManager {
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
-            let newTime = player.currentTime() - CMTime(seconds: SEEK_INTERVAL_SECOUNDS, preferredTimescale: .max)
+            let newTime = player.currentTime() - CMTime(seconds: SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
             player.seek(to: newTime)
             return .success
         }
@@ -160,7 +160,7 @@ class NowPlayingInfoCenterManager {
                 return .commandFailed
             }
 
-            let newTime = player.currentTime() + CMTime(seconds: SEEK_INTERVAL_SECOUNDS, preferredTimescale: .max)
+            let newTime = player.currentTime() + CMTime(seconds: SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
             player.seek(to: newTime)
             return .success
         }
