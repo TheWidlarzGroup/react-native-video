@@ -15,7 +15,7 @@ object RNVSimpleCache {
     var cacheDataSourceFactory: DataSource.Factory? = null
 
     fun setSimpleCache(context: Context, cacheSize: Int, factory: HttpDataSource.Factory) {
-        if (cacheDataSourceFactory != null || cacheSize == 0) return
+        if (cacheDataSourceFactory != null || cacheSize <= 0) return
         simpleCache = SimpleCache(
             File(context.cacheDir, "RNVCache"),
             LeastRecentlyUsedCacheEvictor(
