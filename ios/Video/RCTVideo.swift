@@ -970,7 +970,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                 if let playerViewController = _playerViewController {
                     if _controls {
-                        // prevents crash https://github.com/react-native-video/react-native-video/issues/3040
+                        // prevents crash https://github.com/TheWidlarzGroup/react-native-video/issues/3040
                         self._playerViewController?.removeFromParent()
                     }
 
@@ -1488,7 +1488,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard let bounds = RCTVideoUtils.getCurrentWindow()?.bounds else { return }
 
         if !oldRect!.equalTo(newRect!) {
-            // https://github.com/react-native-video/react-native-video/issues/3085#issuecomment-1557293391
+            // https://github.com/TheWidlarzGroup/react-native-video/issues/3085#issuecomment-1557293391
             if newRect!.equalTo(bounds) {
                 RCTLog("in fullscreen")
                 if !_fullscreenUncontrolPlayerPresented {
@@ -1587,7 +1587,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    // Workaround for #3418 - https://github.com/react-native-video/react-native-video/issues/3418#issuecomment-2043508862
+    // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
     @objc
     func setOnClick(_: Any) {}
 }

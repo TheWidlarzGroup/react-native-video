@@ -26,7 +26,7 @@ Run `pod install` in the `ios` directory of your project.
 
 ### Enable custom feature in podfile file
 
-Samples available in sample app see [sample pod file](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34)
+Samples available in sample app see [sample pod file](https://github.com/TheWidlarzGroup/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34)
 
 #### Video caching
 
@@ -92,7 +92,7 @@ buildscript {
 }
 ```
 
-See [sample app](https://github.com/react-native-video/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5)
+See [sample app](https://github.com/TheWidlarzGroup/react-native-videoo/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5)
 
 </details>
 <details>

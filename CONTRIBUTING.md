@@ -1,7 +1,7 @@
 ## Issues
 
-* New issues are reviewed and if they require additional work will be marked with the [`triage needed`](https://github.com/react-native-video/react-native-video/labels/triage%20needed) label. This is an open call for help from the community to verify the issue and help categorize it. If an issue stays in this state for a long time, it will be closed unresolved.
-* Once an issue has been reviewed it will be labeled with [`help wanted`](https://github.com/react-native-video/react-native-video/labels/help%20wanted) to indicate it is ready to be worked on. Please wait for this label before submitting a PR to avoid spending time on something that is likely to be rejected.
+* New issues are reviewed and if they require additional work will be marked with the [`triage needed`](https://github.com/TheWidlarzGroup/react-native-video/labels/triage%20needed) label. This is an open call for help from the community to verify the issue and help categorize it. If an issue stays in this state for a long time, it will be closed unresolved.
+* Once an issue has been reviewed it will be labeled with [`help wanted`](https://github.com/TheWidlarzGroup/react-native-video/labels/help%20wanted) to indicate it is ready to be worked on. Please wait for this label before submitting a PR to avoid spending time on something that is likely to be rejected.
 
 ## Cleanup
 
@@ -22,7 +22,7 @@ For example, a single file JS code change requires 1 review while a 3 files iOS 
 
 * Reviewers will be asked to assign a risk level when they are done from 1 (super safe) to 5 (super risky). A release with any risk level 4 or 5 will be published as a major version, otherwise as a patch or minor based on the changes. Prepare for some large version increments while we get more comfortable... (but remember versions are free).
 
-* If you have time to help out, look for the [`review requested`](https://github.com/react-native-video/react-native-video/labels/review%20requested) label. It will have another numeric label with it (`1`, `2`, or `3` indicating how many more reviews are needed to merge).
+* If you have time to help out, look for the [`review requested`](https://github.com/TheWidlarzGroup/react-native-video/labels/review%20requested) label. It will have another numeric label with it (`1`, `2`, or `3` indicating how many more reviews are needed to merge).
 
 ## Releases
 
