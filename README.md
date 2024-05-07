@@ -4,7 +4,7 @@
 > **Note:** version 5.2.1 won't have any updates. We are currently working on making a 6.0.0 fully stable
 
 ## Documentation
-documentation is available at [thewidlarzgroup.github.io/react-native-video/](https://https://thewidlarzgroup.github.io/react-native-video/)
+documentation is available at [thewidlarzgroup.github.io/react-native-video/](https://thewidlarzgroup.github.io/react-native-video/)
 
 ## Usage
 
