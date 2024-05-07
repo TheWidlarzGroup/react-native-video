@@ -41,10 +41,10 @@ export default {
   ),
   faviconGlyph: '🎬',
   project: {
-    link: 'https://github.com/react-native-video/react-native-video',
+    link: 'https://github.com/TheWidlarzGroup/react-native-video',
   },
   docsRepositoryBase:
-    'https://github.com/react-native-video/react-native-video/tree/master/docs/',
+    'https://github.com/TheWidlarzGroup/react-native-video/tree/master/docs/',
   footer: {
     text: (
       <span>

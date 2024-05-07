@@ -14,7 +14,7 @@ adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/v
 > NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must hide your PIP button when you receive the ```STARTED``` event from ```onReceiveAdEvent``` and show it again when you receive the ```ALL_ADS_COMPLETED``` event.
 
 ### Events
-To receive events from IMA SDK, you need to pass `onReceiveAdEvent` prop to `Video` component. List of events, you can find [here](https://github.com/react-native-video/react-native-video/blob/master/src/types/Ads.ts)
+To receive events from IMA SDK, you need to pass `onReceiveAdEvent` prop to `Video` component. List of events, you can find [here](https://github.com/TheWidlarzGroup/react-native-video/blob/master/src/types/Ads.ts)
 
 Example:
 
