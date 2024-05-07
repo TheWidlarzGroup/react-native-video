@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
@@ -39,6 +40,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
     private static final String PROP_SRC_CROP_END = "cropEnd";
+    private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
@@ -82,6 +84,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
+    private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
 
     private final ReactExoplayerConfig config;
@@ -166,6 +169,32 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         }
 
+        ReadableMap propMetadata = ReactBridgeUtils.safeGetMap(src, PROP_SRC_METADATA);
+        MediaMetadata customMetadata = null;
+        if (propMetadata != null) {
+            String title = ReactBridgeUtils.safeGetString(propMetadata, "title");
+            String subtitle = ReactBridgeUtils.safeGetString(propMetadata, "subtitle");
+            String description = ReactBridgeUtils.safeGetString(propMetadata, "description");
+            String artist = ReactBridgeUtils.safeGetString(propMetadata, "artist");
+            String imageUriString = ReactBridgeUtils.safeGetString(propMetadata, "imageUri");
+
+            Uri imageUri = null;
+
+            try {
+                imageUri = Uri.parse(imageUriString);
+            } catch (Exception e) {
+                DebugLog.e("ExoPlayer Warning", "Could not parse imageUri in metadata");
+            }
+
+            customMetadata = new MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setSubtitle(subtitle)
+                    .setDescription(description)
+                    .setArtist(artist)
+                    .setArtworkUri(imageUri)
+                    .build();
+        }
+
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
             return;
@@ -175,7 +204,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers);
+                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -398,6 +427,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
         BufferConfig config = BufferConfig.parse(bufferConfig);
         videoView.setBufferConfig(config);
+    }
+
+    @ReactProp(name = PROP_SHOW_NOTIFICATION_CONTROLS)
+    public void setShowNotificationControls(final ReactExoplayerView videoView, final boolean showNotificationControls) {
+        videoView.setShowNotificationControls(showNotificationControls);
     }
 
     @ReactProp(name = PROP_DEBUG, defaultBoolean = false)

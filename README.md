@@ -61,6 +61,6 @@ We have an discord server where you can ask questions and get help. [Join the di
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/baners/twg-dark.png" />
     <source media="(prefers-color-scheme: light)" srcset="./docs/assets/baners/twg-light.png" />
-    <img alt="TheWidlarzGroup" src="./docs/assets/baners/twg-light-1.png" />
+    <img alt="TheWidlarzGroup" src="./docs/assets/baners/twg-light.png" />
   </picture>
 </a>

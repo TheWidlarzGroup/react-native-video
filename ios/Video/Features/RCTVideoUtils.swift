@@ -389,15 +389,21 @@ enum RCTVideoUtils {
         return item.copy() as! AVMetadataItem
     }
 
-    static func createImageMetadataItem(imageUri: String) -> Data? {
-        if let uri = URL(string: imageUri),
-           let imgData = try? Data(contentsOf: uri),
-           let image = UIImage(data: imgData),
-           let pngData = image.pngData() {
-            return pngData
+    static func createImageMetadataItem(imageUri: String) async -> Data? {
+        guard let url = URL(string: imageUri) else {
+            return nil
         }
 
-        return nil
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = UIImage(data: data), let pngData = image.pngData() else {
+                return nil
+            }
+            return pngData
+        } catch {
+            print("Error fetching image data: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func getCurrentWindow() -> UIWindow? {
