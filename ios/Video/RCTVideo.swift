@@ -307,7 +307,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Progress
 
     func sendProgressUpdate() {
-        guard onVideoProgress != nil else { return }
+        #if !USE_GOOGLE_IMA
+            // If we dont use Ads and onVideoProgress is not defined we dont need to run this code
+            guard onVideoProgress != nil else { return }
+        #endif
 
         if let video = _player?.currentItem,
            video == nil || video.status != AVPlayerItem.Status.readyToPlay {
@@ -1335,24 +1338,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func handleReadyToPlay() {
         guard let _playerItem else { return }
 
-        if self._pendingSeek {
-            self.setSeek([
-                "time": NSNumber(value: self._pendingSeekTime),
-                "tolerance": NSNumber(value: 100),
-            ])
-            self._pendingSeek = false
-        }
+        Task {
+            if self._pendingSeek {
+                self.setSeek([
+                    "time": NSNumber(value: self._pendingSeekTime),
+                    "tolerance": NSNumber(value: 100),
+                ])
+                self._pendingSeek = false
+            }
 
-        if self._startPosition >= 0 {
-            self.setSeek([
-                "time": NSNumber(value: self._startPosition),
-                "tolerance": NSNumber(value: 100),
-            ])
-            self._startPosition = -1
-        }
+            if self._startPosition >= 0 {
+                self.setSeek([
+                    "time": NSNumber(value: self._startPosition),
+                    "tolerance": NSNumber(value: 100),
+                ])
+                self._startPosition = -1
+            }
 
-        if onVideoLoad != nil {
-            Task {
+            if onVideoLoad != nil {
                 var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
 
                 if duration.isNaN || duration == 0 {
@@ -1398,15 +1401,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                        "textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.map(\.json),
                                        "target": self.reactTag as Any])
                 }
-
-                self._videoLoadStarted = false
             }
-        } else {
-            self._videoLoadStarted = false
-        }
 
-        self._playerObserver.attachPlayerEventListeners()
-        self.applyModifiers()
+            self._videoLoadStarted = false
+            self._playerObserver.attachPlayerEventListeners()
+            self.applyModifiers()
+        }
     }
 
     func handlePlaybackFailed() {
