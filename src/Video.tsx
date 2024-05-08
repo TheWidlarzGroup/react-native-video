@@ -166,10 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
-        title: resolvedSource.title,
-        subtitle: resolvedSource.subtitle,
-        description: resolvedSource.description,
-        customImageUri: resolvedSource.customImageUri,
+        metadata: resolvedSource.metadata,
       };
     }, [source]);
 
@@ -339,10 +336,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     // android only
-    const onVideoIdle = useCallback(() => {
-      onIdle?.();
-    }, [onIdle]);
-
     const _onTimedMetadata = useCallback(
       (e: NativeSyntheticEvent<OnTimedMetadataData>) => {
         onTimedMetadata?.(e.nativeEvent);
@@ -543,11 +536,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={
-            onLoad
+            onLoad || hasPoster
               ? (onVideoLoad as (e: NativeSyntheticEvent<object>) => void)
               : undefined
           }
-          onVideoLoadStart={onLoadStart ? onVideoLoadStart : undefined}
+          onVideoLoadStart={
+            onLoadStart || hasPoster ? onVideoLoadStart : undefined
+          }
           onVideoError={onError ? onVideoError : undefined}
           onVideoProgress={onProgress ? onVideoProgress : undefined}
           onVideoSeek={onSeek ? onVideoSeek : undefined}
@@ -573,7 +568,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoExternalPlaybackChange={
             onExternalPlaybackChange ? onVideoExternalPlaybackChange : undefined
           }
-          onVideoIdle={onIdle ? onVideoIdle : undefined}
+          onVideoIdle={onIdle}
           onAudioFocusChanged={
             onAudioFocusChanged ? _onAudioFocusChanged : undefined
           }

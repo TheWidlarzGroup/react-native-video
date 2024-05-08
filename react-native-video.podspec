@@ -12,8 +12,8 @@ Pod::Spec.new do |s|
   s.license        = package['license']
   s.author         = package['author']
 
-  s.homepage       = 'https://github.com/react-native-video/react-native-video'
-  s.source         = { :git => "https://github.com/react-native-video/react-native-video.git", :tag => "v#{s.version}" }
+  s.homepage       = 'https://github.com/TheWidlarzGroup/react-native-video'
+  s.source         = { :git => "https://github.com/TheWidlarzGroup/react-native-video.git", :tag => "v#{s.version}" }
   s.platforms      = { :ios => "13.0", :tvos => "13.0", :visionos => "1.0" }
 
   s.subspec "Video" do |ss|

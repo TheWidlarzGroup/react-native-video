@@ -20,12 +20,12 @@ The aim of this package is to have a thin and exhaustive control of player.
 
 ## V6.0.0 Information
 > ⚠️ **Version 6**: The following documentation refer to features only available through the v6.0.0 releases.
-> As major rework has been done in case of doubt, you can still use [version 5.2.x, see documentation](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md)
+> As major rework has been done in case of doubt, you can still use [version 5.2.x, see documentation](https://github.com/TheWidlarzGroup/react-native-video/blob/v5.2.0/README.md)
 
 Version 6.x requires **react-native >= 0.68.2**
 > ⚠️ from **6.0.0-beta.8** requires also **iOS >= 13.0** (default in react-native 0.73)
 
-For older versions of react-native, [please use version 5.x](https://github.com/react-native-video/react-native-video/tree/v5.2.0).
+For older versions of react-native, [please use version 5.x](https://github.com/TheWidlarzGroup/react-native-video/tree/v5.2.0).
 
 ## Usage
 

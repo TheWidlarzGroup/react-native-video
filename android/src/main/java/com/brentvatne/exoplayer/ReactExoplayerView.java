@@ -7,13 +7,20 @@ import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
+import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
@@ -25,6 +32,7 @@ import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -33,6 +41,7 @@ import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
@@ -92,6 +101,7 @@ import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
+import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
@@ -170,6 +180,10 @@ public class ReactExoplayerView extends FrameLayout implements
     private ExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
+    private MediaMetadata customMetadata;
+
+    private ServiceConnection playbackServiceConnection;
+    private PlaybackServiceBinder playbackServiceBinder;
 
     private int resumeWindow;
     private long resumePosition;
@@ -222,6 +236,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
+
+    private boolean showNotificationControls = false;
     // \ End props
 
     // React
@@ -338,6 +354,12 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostDestroy() {
         cleanUpResources();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        cleanupPlaybackService();
+        super.onDetachedFromWindow();
     }
 
     public void cleanUpResources() {
@@ -654,6 +676,10 @@ public class ReactExoplayerView extends FrameLayout implements
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
         changeAudioOutput(this.audioOutput);
+
+        if(showNotificationControls) {
+            setupPlaybackService();
+        }
     }
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
@@ -739,6 +765,69 @@ public class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
     }
 
+    private void setupPlaybackService() {
+        if (!showNotificationControls || player == null) {
+            return;
+        }
+
+        playbackServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                playbackServiceBinder = (PlaybackServiceBinder) service;
+
+                try {
+                    playbackServiceBinder.getService().registerPlayer(player);
+                } catch (Exception e) {
+                    DebugLog.e(TAG, "Cloud not register ExoPlayer");
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                try {
+                    playbackServiceBinder.getService().unregisterPlayer(player);
+                } catch (Exception ignored) {}
+
+                playbackServiceBinder = null;
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                DebugLog.e(TAG, "Cloud not register ExoPlayer");
+            }
+        };
+
+        Intent intent = new Intent(themedReactContext, VideoPlaybackService.class);
+        intent.setAction(MediaSessionService.SERVICE_INTERFACE);
+
+        themedReactContext.startService(intent);
+
+        int flags;
+        if (Build.VERSION.SDK_INT >= 29) {
+            flags = Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES;
+        } else {
+            flags = Context.BIND_AUTO_CREATE;
+        }
+
+        themedReactContext.bindService(intent, playbackServiceConnection, flags);
+    }
+
+    private void cleanupPlaybackService() {
+        try {
+            if(player != null && playbackServiceBinder != null) {
+                playbackServiceBinder.getService().unregisterPlayer(player);
+            }
+
+            playbackServiceBinder = null;
+
+            if(playbackServiceConnection != null) {
+                themedReactContext.unbindService(playbackServiceConnection);
+            }
+        } catch(Exception e) {
+            DebugLog.w(TAG, "Cloud not cleanup playback service");
+        }
+    }
+
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
         return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
     }
@@ -793,7 +882,12 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         config.setDisableDisconnectError(this.disableDisconnectError);
 
-        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
+        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
+                .setUri(uri);
+
+        if (customMetadata != null) {
+            mediaItemBuilder.setMediaMetadata(customMetadata);
+        }
 
         if (adTagUrl != null) {
             mediaItemBuilder.setAdsConfiguration(
@@ -844,7 +938,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                if (uri.toString().startsWith("file://") ||
+                if ("asset".equals(srcUri.getScheme())) {
+                    try {
+                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, srcUri);
+                        mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
+                    } catch (Exception e) {
+                        throw new IllegalStateException("cannot open input file" + srcUri);
+                    }
+                } else if ("file".equals(srcUri.getScheme()) ||
                         cacheDataSourceFactory == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
@@ -926,12 +1027,20 @@ public class ReactExoplayerView extends FrameLayout implements
             if (adsLoader != null) {
                 adsLoader.setPlayer(null);
             }
+
+            if(playbackServiceBinder != null) {
+                playbackServiceBinder.getService().unregisterPlayer(player);
+                themedReactContext.unbindService(playbackServiceConnection);
+            }
+
             updateResumePosition();
             player.release();
             player.removeListener(this);
             trackSelector = null;
+
             player = null;
         }
+
         if (adsLoader != null) {
             adsLoader.release();
         }
@@ -1533,7 +1642,21 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, MediaMetadata customMetadata) {
+
+        if (this.customMetadata != customMetadata && player != null) {
+            MediaItem currentMediaItem = player.getCurrentMediaItem();
+
+            if (currentMediaItem == null) {
+                return;
+            }
+
+            MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+
+            // This will cause video blink/reload but won't louse progress
+            player.setMediaItem(newMediaItem, false);
+        }
+
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && cropStartMs == this.cropStartMs && cropEndMs == this.cropEndMs;
             hasDrmFailed = false;
@@ -1546,6 +1669,7 @@ public class ReactExoplayerView extends FrameLayout implements
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
+            this.customMetadata = customMetadata;
 
             if (!isSourceEqual) {
                 reloadSource();
@@ -1564,6 +1688,7 @@ public class ReactExoplayerView extends FrameLayout implements
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;
+            customMetadata = null;
             clearResumePosition();
         }
     }
@@ -1945,6 +2070,16 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setContentStartTime(int contentStartTime) {
         this.contentStartTime = contentStartTime;
+    }
+
+    public void setShowNotificationControls(boolean showNotificationControls) {
+        this.showNotificationControls = showNotificationControls;
+
+        if (playbackServiceConnection == null && showNotificationControls) {
+            setupPlaybackService();
+        } else if(!showNotificationControls && playbackServiceConnection != null) {
+            cleanupPlaybackService();
+        }
     }
 
     public void setDisableBuffering(boolean disableBuffering) {
