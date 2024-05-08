@@ -1355,7 +1355,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self._startPosition = -1
             }
 
-            if onVideoLoad != nil {
+            if onVideoLoad != nil, self._videoLoadStarted {
                 var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
 
                 if duration.isNaN || duration == 0 {
@@ -1381,26 +1381,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
                 orientation = width > height ? "landscape" : width == height ? "square" : "portrait"
 
-                if self._videoLoadStarted {
-                    let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
-                    let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
-                    self.onVideoLoad?(["duration": NSNumber(value: duration),
-                                       "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
-                                       "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
-                                       "canPlayFastForward": NSNumber(value: _playerItem.canPlayFastForward),
-                                       "canPlaySlowForward": NSNumber(value: _playerItem.canPlaySlowForward),
-                                       "canPlaySlowReverse": NSNumber(value: _playerItem.canPlaySlowReverse),
-                                       "canStepBackward": NSNumber(value: _playerItem.canStepBackward),
-                                       "canStepForward": NSNumber(value: _playerItem.canStepForward),
-                                       "naturalSize": [
-                                           "width": width,
-                                           "height": height,
-                                           "orientation": orientation,
-                                       ],
-                                       "audioTracks": audioTracks,
-                                       "textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.map(\.json),
-                                       "target": self.reactTag as Any])
-                }
+                let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
+                let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
+                self.onVideoLoad?(["duration": NSNumber(value: duration),
+                                   "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
+                                   "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
+                                   "canPlayFastForward": NSNumber(value: _playerItem.canPlayFastForward),
+                                   "canPlaySlowForward": NSNumber(value: _playerItem.canPlaySlowForward),
+                                   "canPlaySlowReverse": NSNumber(value: _playerItem.canPlaySlowReverse),
+                                   "canStepBackward": NSNumber(value: _playerItem.canStepBackward),
+                                   "canStepForward": NSNumber(value: _playerItem.canStepForward),
+                                   "naturalSize": [
+                                       "width": width,
+                                       "height": height,
+                                       "orientation": orientation,
+                                   ],
+                                   "audioTracks": audioTracks,
+                                   "textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.map(\.json),
+                                   "target": self.reactTag as Any])
             }
 
             self._videoLoadStarted = false
