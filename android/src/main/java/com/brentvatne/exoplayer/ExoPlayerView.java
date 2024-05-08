@@ -1,13 +1,12 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.C;
-import androidx.media3.common.PlaybackException;
-import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
-import androidx.media3.common.Timeline;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
 import androidx.media3.common.text.Cue;
@@ -38,8 +37,8 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
     private ExoPlayer player;
-    private Context context;
-    private ViewGroup.LayoutParams layoutParams;
+    final private Context context;
+    final private ViewGroup.LayoutParams layoutParams;
     private final FrameLayout adOverlayFrameLayout;
 
     private boolean useTextureView = true;
@@ -113,7 +112,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
-        // ensure we reset subtile style before reapplying it
+        // ensure we reset subtitle style before reapplying it
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
@@ -211,16 +210,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
@@ -263,15 +252,24 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
     }
 
+    Runnable hideShutterViewRunnable = new Runnable() {
+        @Override
+        public void run() {
+            shutterView.setVisibility(INVISIBLE);
+        }
+    };
+
     public void invalidateAspectRatio() {
         // Resetting aspect ratio will force layout refresh on next video size changed
         layout.invalidateAspectRatio();
+
+        removeCallbacks(hideShutterViewRunnable);
     }
 
     private final class ComponentListener implements Player.Listener {
 
         @Override
-        public void onCues(List<Cue> cues) {
+        public void onCues(@NonNull List<Cue> cues) {
             subtitleLayout.setCues(cues);
         }
 
@@ -288,11 +286,16 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onRenderedFirstFrame() {
-            shutterView.setVisibility(INVISIBLE);
+            // The shutter view is use to hide dirty resizing issue when starting playback.
+            // In case video doesn't match your View aspect ratio, at playback startup you may have flickering during resize.
+            // we saw that onRenderedFirstFrame is called before first resizing
+            // Then hiding the shutterView directly may not hide the flickering.
+            // This small delay avoid the flickering
+            postDelayed(hideShutterViewRunnable, 15);
         }
 
         @Override
-        public void onTracksChanged(Tracks tracks) {
+        public void onTracksChanged(@NonNull Tracks tracks) {
             updateForCurrentTrackSelections();
         }
     }
