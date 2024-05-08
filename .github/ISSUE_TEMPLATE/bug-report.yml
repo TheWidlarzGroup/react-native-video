@@ -7,6 +7,8 @@ body:
   - type: markdown
     attributes:
       value: Thanks for taking the time to fill out this bug report!
+      Please do not report issue on 5.2.1 version, this version is not maintained anymore.
+      Only issues on version > V6 will be handled. Please also ensure your issue is reproduced with the last release!
 
   - type: textarea
     id: version
