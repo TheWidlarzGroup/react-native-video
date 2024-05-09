@@ -22,10 +22,7 @@ export type ReactVideoSourceProperties = {
   startPosition?: number;
   cropStart?: number;
   cropEnd?: number;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  customImageUri?: string;
+  metadata?: VideoMetadata;
 };
 
 export type ReactVideoSource = Readonly<
@@ -33,6 +30,14 @@ export type ReactVideoSource = Readonly<
     uri?: string | NodeRequire;
   }
 >;
+
+export type VideoMetadata = Readonly<{
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  artist?: string;
+  imageUri?: string;
+}>;
 
 export type DebugConfig = Readonly<{
   enable?: boolean;
@@ -72,6 +77,7 @@ export type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
+  cacheSizeMB?: number;
 };
 
 export enum SelectedTrackType {
@@ -220,6 +226,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
+  showNotificationControls?: boolean; // Android, iOS
   selectedAudioTrack?: SelectedTrack;
   selectedTextTrack?: SelectedTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android
@@ -227,7 +234,6 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   shutterColor?: string; // Android
   textTracks?: TextTracks;
   testID?: string;
-  trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
   volume?: number;

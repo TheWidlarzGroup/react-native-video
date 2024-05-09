@@ -17,16 +17,20 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
 
     private fun performOnPlayerView(reactTag: Int, callback: (ReactExoplayerView?) -> Unit) {
         UiThreadUtil.runOnUiThread {
-            val uiManager = UIManagerHelper.getUIManager(
-                reactApplicationContext,
-                if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) UIManagerType.FABRIC else UIManagerType.DEFAULT
-            )
+            try {
+                val uiManager = UIManagerHelper.getUIManager(
+                    reactApplicationContext,
+                    if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) UIManagerType.FABRIC else UIManagerType.DEFAULT
+                )
 
-            val view = uiManager?.resolveView(reactTag)
+                val view = uiManager?.resolveView(reactTag)
 
-            if (view is ReactExoplayerView) {
-                callback(view)
-            } else {
+                if (view is ReactExoplayerView) {
+                    callback(view)
+                } else {
+                    callback(null)
+                }
+            } catch (e: Exception) {
                 callback(null)
             }
         }

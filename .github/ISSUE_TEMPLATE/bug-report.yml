@@ -7,15 +7,14 @@ body:
   - type: markdown
     attributes:
       value: Thanks for taking the time to fill out this bug report!
+      Please do not report issue on 5.2.1 version, this version is not maintained anymore.
+      Only issues on version > V6 will be handled. Please also ensure your issue is reproduced with the last release!
 
-  - type: dropdown
+  - type: textarea
     id: version
     attributes:
       label: Version
-      description: What version are you using?
-      options:
-        - v6 (Beta)
-        - v5 (Stable)
+      description: What version are you using? Put the exact version from your package.json
     validations:
       required: true
 

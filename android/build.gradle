@@ -36,17 +36,30 @@ def supportsNamespace() {
     return major >= 8
 }
 
-def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA")?.toBoolean() ?: false
+def ExoplayerDependenciesList = [
+    "useExoplayerIMA",
+    "useExoplayerSmoothStreaming",
+    "useExoplayerDash",
+    "useExoplayerHls",
+    "useExoplayerRtsp",
+]
 
-println "useExoplayerIMA:" + useExoplayerIMA
+def ExoplayerDependencies = ExoplayerDependenciesList.collectEntries { property ->
+    [(property): safeExtGet(property)?.toBoolean() ?: false]
+}
+
+ExoplayerDependenciesList.each { propertyName ->
+    def propertyValue = ExoplayerDependencies[propertyName]
+    println "$propertyName: $propertyValue"
+}
 
 // This string is used to define build path.
 // As react native build output directory is react-native path of the module.
 // We need to force a new path on each configuration change.
 // If you add a new build parameter, please add the new value in this string
-def configStringPath = (
-        'useExoplayerIMA' + useExoplayerIMA \
-).md5()
+def configStringPath = ExoplayerDependencies.collect { property, value ->
+    property + value
+}.join('').md5()
 
 if (isNewArchitectureEnabled()) {
     apply plugin: "com.facebook.react"
@@ -83,7 +96,13 @@ android {
         targetSdkVersion safeExtGet('targetSdkVersion')
         versionCode 1
         versionName "1.0"
+
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+        buildConfigField "boolean", "USE_EXOPLAYER_IMA", ExoplayerDependencies["useExoplayerIMA"].toString()
+        buildConfigField "boolean", "USE_EXOPLAYER_SMOOTH_STREAMING", ExoplayerDependencies["useExoplayerSmoothStreaming"].toString()
+        buildConfigField "boolean", "USE_EXOPLAYER_DASH", ExoplayerDependencies["useExoplayerDash"].toString()
+        buildConfigField "boolean", "USE_EXOPLAYER_HLS", ExoplayerDependencies["useExoplayerHls"].toString()
+        buildConfigField "boolean", "USE_EXOPLAYER_RTSP", ExoplayerDependencies["useExoplayerRtsp"].toString()
 
         ndk {
             abiFilters(*reactNativeArchitectures())
@@ -103,9 +122,25 @@ android {
     sourceSets {
         main {
             java {
-                if (useExoplayerIMA) {
+                if (ExoplayerDependencies["useExoplayerIMA"]) {
                     exclude 'com/google/ads/interactivemedia/v3/api'
                     exclude 'androidx/media3/exoplayer/ima'
+                }
+
+                if (ExoplayerDependencies["useExoplayerSmoothStreaming"]) {
+                    exclude 'androidx/media3/exoplayer/smoothstreaming'
+                }
+
+                if (ExoplayerDependencies["useExoplayerDash"]) {
+                    exclude 'androidx/media3/exoplayer/dash'
+                }
+
+                if (ExoplayerDependencies["useExoplayerHls"]) {
+                    exclude 'androidx/media3/exoplayer/hls'
+                }
+
+                if (ExoplayerDependencies["useExoplayerRtsp"]) {
+                    exclude 'androidx/media3/exoplayer/rtsp'
                 }
             }
         }
@@ -158,14 +193,28 @@ dependencies {
     // For media playback using ExoPlayer
     implementation "androidx.media3:media3-exoplayer:$media3_version"
 
-    // For Smooth Streaming playback support with ExoPlayer
-    implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
-    // For DASH playback support with ExoPlayer
-    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
-    // For HLS playback support with ExoPlayer
-    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    if (ExoplayerDependencies["useExoplayerSmoothStreaming"]) {
+        // For Smooth Streaming playback support with ExoPlayer
+        implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
+    }
+
+    if (ExoplayerDependencies["useExoplayerDash"]) {
+        // For DASH playback support with ExoPlayer
+        implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    }
+
+    if (ExoplayerDependencies["useExoplayerHls"]) {
+      // For HLS playback support with ExoPlayer
+      implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    }
+
+    // For RTSP playback support with ExoPlayer
+    if (ExoplayerDependencies["useExoplayerRtsp"]) {
+        implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
+    }
+    
     // For ad insertion using the Interactive Media Ads SDK with ExoPlayer
-    if (useExoplayerIMA) {
+    if (ExoplayerDependencies["useExoplayerIMA"]) {
         implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
     }
 

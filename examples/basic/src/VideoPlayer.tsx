@@ -69,7 +69,9 @@ interface StateType {
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
+  useCache: boolean;
   poster?: string;
+  showNotificationControls: boolean;
 }
 
 class VideoPlayer extends Component {
@@ -97,19 +99,42 @@ class VideoPlayer extends Component {
     srcListId: 0,
     loop: false,
     showRNVControls: false,
+    useCache: false,
     poster: undefined,
+    showNotificationControls: false,
   };
 
   seekerWidth = 0;
 
+  // internal usage change to index if you want to select tracks by index instead of lang
+  textTracksSelectionBy = 'lang';
+
   srcAllPlatformList = [
     {
-      description: 'local file',
+      description: 'local file landscape',
       uri: require('./broadchurch.mp4'),
+    },
+    {
+      description: 'local file portrait',
+      uri: require('./portrait.mp4'),
+      metadata: {
+        title: 'Test Title',
+        subtitle: 'Test Subtitle',
+        artist: 'Test Artist',
+        description: 'Test Description',
+        imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+      }
     },
     {
       description: '(hls|live) red bull tv',
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
+      metadata: {
+        title: 'Custom Title',
+        subtitle: 'Custom Subtitle',
+        artist: 'Custom Artist',
+        description: 'Custom Description',
+        imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+      }
     },
     {
       description: 'invalid URL',
@@ -134,8 +159,15 @@ class VideoPlayer extends Component {
       uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     },
     {
-      description: 'sintel with sideLoaded subtitles',
-      uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', // this is sample video, my actual video file is MP4
+      description: 'sintel starts at 20sec',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+      startPosition: 50000,
+    },
+    {
+      description: 'BigBugBunny sideLoaded subtitles',
+      // sideloaded subtitles wont work for streaming like HLS on ios
+      // mp4
+      uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
       textTracks: [
         {
           title: 'test',
@@ -153,6 +185,10 @@ class VideoPlayer extends Component {
     {
       description: 'Another live sample',
       uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
+    {
+      description: 'asset file',
+      uri: 'asset:///broadchurch.mp4',
     },
     {
       description: '(dash) sintel subtitles',
@@ -190,6 +226,11 @@ class VideoPlayer extends Component {
         licenseServer:
           'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
       },
+    },
+    {
+      description: 'rtsp big bug bunny',
+      uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
+      type: 'rtsp',
     },
   ];
 
@@ -232,23 +273,23 @@ class VideoPlayer extends Component {
 
   updateSeeker = () => {
     // put this code in timeout as because it may be put just after a setState
-    setTimeout(()=> {
+    setTimeout(() => {
       const position = this.calculateSeekerPosition();
       this.setSeekerPosition(position);
-    }, 1)
-  }
+    }, 1);
+  };
 
   onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
     if (!this.state.seeking) {
-      this.updateSeeker()
+      this.updateSeeker();
     }
   };
 
   onSeek = (data: OnSeekData) => {
     this.setState({currentTime: data.currentTime});
-    this.updateSeeker()
-  }
+    this.updateSeeker();
+  };
 
   onVideoLoadStart = () => {
     console.log('onVideoLoadStart');
@@ -282,7 +323,10 @@ class VideoPlayer extends Component {
     if (selectedTrack?.language) {
       this.setState({
         textTracks: data.textTracks,
-        selectedTextTrack: {
+        selectedTextTrack: this.textTracksSelectionBy === 'index' ? {
+          type: 'index',
+          value: selectedTrack?.index,
+        }: {
           type: 'language',
           value: selectedTrack?.language,
         },
@@ -353,16 +397,18 @@ class VideoPlayer extends Component {
   };
 
   onEnd = () => {
-    this.channelUp();
+    if (!this.state.loop) {
+      this.channelUp();
+    }
   };
 
   onPlaybackRateChange = (data: OnPlaybackRateChangeData) => {
     console.log('onPlaybackRateChange', data);
-  }
+  };
 
   onPlaybackStateChanged = (data: OnPlaybackStateChangedData) => {
     console.log('onPlaybackStateChanged', data);
-  }
+  };
 
   toggleFullscreen() {
     this.setState({fullscreen: !this.state.fullscreen});
@@ -378,6 +424,12 @@ class VideoPlayer extends Component {
     } else {
       this.video?.presentFullscreenPlayer();
     }
+  }
+
+  toggleShowNotificationControls() {
+    this.setState({
+      showNotificationControls: !this.state.showNotificationControls,
+    });
   }
 
   goToChannel(channel: number) {
@@ -586,8 +638,8 @@ class VideoPlayer extends Component {
 
   renderTopControl() {
     return (
-      <>
-        <Text style={[styles.controlOption]}>
+      <View style={styles.topControlsContainer}>
+        <Text style={styles.controlOption}>
           {this.srcList[this.state.srcListId]?.description || 'local file'}
         </Text>
         <View>
@@ -595,12 +647,12 @@ class VideoPlayer extends Component {
             onPress={() => {
               this.toggleControls();
             }}>
-            <Text style={[styles.leftRightControlOption]}>
+            <Text style={styles.leftRightControlOption}>
               {this.state.showRNVControls ? 'Hide controls' : 'Show controls'}
             </Text>
           </TouchableOpacity>
         </View>
-      </>
+      </View>
     );
   }
 
@@ -651,6 +703,14 @@ class VideoPlayer extends Component {
                       }}
                       text="decoderInfo"
                     />
+                    <ToggleControl
+                      isSelected={this.state.useCache}
+                      onPress={() => {
+                        this.setState({useCache: !this.state.useCache});
+                      }}
+                      selectedText="enable cache"
+                      unselectedText="disable cache"
+                    />
                   </View>
                 ) : null}
                 <ToggleControl
@@ -690,6 +750,14 @@ class VideoPlayer extends Component {
                   }}
                   selectedText="poster"
                   unselectedText="no poster"
+                />
+                <ToggleControl
+                  isSelected={this.state.showNotificationControls}
+                  onPress={() => {
+                    this.toggleShowNotificationControls();
+                  }}
+                  selectedText="hide notification controls"
+                  unselectedText="show notification controls"
                 />
               </View>
               <View style={styles.generalControls}>
@@ -776,7 +844,7 @@ class VideoPlayer extends Component {
                       console.log('on value change ' + itemValue);
                       this.setState({
                         selectedTextTrack: {
-                          type: 'language',
+                          type: this.textTracksSelectionBy === 'index' ? 'index': 'language',
                           value: itemValue,
                         },
                       });
@@ -786,13 +854,21 @@ class VideoPlayer extends Component {
                       if (!track) {
                         return;
                       }
-                      return (
-                        <Picker.Item
-                          label={track.language}
-                          value={track.language}
-                          key={track.language}
-                        />
-                      );
+                      if (this.textTracksSelectionBy === 'index') {
+                        return (
+                          <Picker.Item
+                            label={`${track.index}`}
+                            value={track.index}
+                            key={track.index}
+                          />);
+                      } else {
+                        return (
+                          <Picker.Item
+                            label={track.language}
+                            value={track.language}
+                            key={track.language}
+                          />);
+                      }
                     })}
                   </Picker>
                 )}
@@ -812,6 +888,7 @@ class VideoPlayer extends Component {
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
+          showNotificationControls={this.state.showNotificationControls}
           ref={(ref: VideoRef) => {
             this.video = ref;
           }}
@@ -846,6 +923,13 @@ class VideoPlayer extends Component {
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
           playInBackground={false}
+          bufferConfig={{
+            minBufferMs: 15000,
+            maxBufferMs: 50000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+            cacheSizeMB: this.state.useCache ? 200 : 0,
+          }}
           preventsDisplaySleepDuringVideoPlayback={true}
           poster={this.state.poster}
           onPlaybackRateChange={this.onPlaybackRateChange}
@@ -1025,6 +1109,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
   },
-});
+  topControlsContainer: {
+    paddingTop: 30,
+  }
+ });
 
 export default VideoPlayer;

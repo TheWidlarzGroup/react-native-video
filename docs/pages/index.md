@@ -3,13 +3,29 @@
 ## About
 `react-native-video` is a React Native library that provides a Video component that renders media content such as videos and streams
 
-## Beta Information
-> ⚠️ **Version 6 Beta**: The following documentation may refer to features only available through the v6.0.0 alpha releases, [please see version 5.2.x](https://github.com/react-native-video/react-native-video/blob/v5.2.0/README.md) for the current documentation!
+It allows to stream video files (m3u, mpd, mp4, ...) inside your react native application.
+
+- Exoplayer for android
+- AVplayer for iOS, tvOS and visionOS
+- Windows UWP for windows
+- Trick mode support
+- Subtitles (embeded or side loaded)
+- DRM support
+- Client side Ads insertion (via google IMA)
+- Pip (ios)
+- Embedded playback controls
+- And much more
+
+The aim of this package is to have a thin and exhaustive control of player.
+
+## V6.0.0 Information
+> ⚠️ **Version 6**: The following documentation refer to features only available through the v6.0.0 releases.
+> As major rework has been done in case of doubt, you can still use [version 5.2.x, see documentation](https://github.com/TheWidlarzGroup/react-native-video/blob/v5.2.0/README.md)
 
 Version 6.x requires **react-native >= 0.68.2**
 > ⚠️ from **6.0.0-beta.8** requires also **iOS >= 13.0** (default in react-native 0.73)
 
-For older versions of react-native, [please use version 5.x](https://github.com/react-native-video/react-native-video/tree/v5.2.0).
+For older versions of react-native, [please use version 5.x](https://github.com/TheWidlarzGroup/react-native-video/tree/v5.2.0).
 
 ## Usage
 
@@ -51,28 +67,4 @@ var styles = StyleSheet.create({
     right: 0,
   },
 });
-```
-
-### Version 6.0.0 breaking changes
-
-Version 6.0.0 is introducing dozens of breaking changes, mostly through updated dependencies and significant refactoring. While the API remains compatible, the significant internal changes require full testing with your app to ensure all functionality remains operational. Please view the [Changelog](CHANGELOG.md) for specific breaking changes.  
-
-### Installing Version 6.0.0 Beta
-
-Whilst we finalise version 6.0.0 you can install the latest beta from npm
-
-Using npm:
-
-```bash
-
-npm install --save react-native-video@beta
-
-```
-
-using yarn:
-
-```bash
-
-yarn add react-native-video@beta
-
 ```

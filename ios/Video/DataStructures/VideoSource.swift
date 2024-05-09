@@ -8,11 +8,7 @@ struct VideoSource {
     let startPosition: Float64?
     let cropStart: Int64?
     let cropEnd: Int64?
-    // Custom Metadata
-    let title: String?
-    let subtitle: String?
-    let description: String?
-    let customImageUri: String?
+    let customMetadata: CustomMetadata?
 
     let json: NSDictionary?
 
@@ -28,10 +24,7 @@ struct VideoSource {
             self.startPosition = nil
             self.cropStart = nil
             self.cropEnd = nil
-            self.title = nil
-            self.subtitle = nil
-            self.description = nil
-            self.customImageUri = nil
+            self.customMetadata = nil
             return
         }
         self.json = json
@@ -54,9 +47,6 @@ struct VideoSource {
         self.startPosition = json["startPosition"] as? Float64
         self.cropStart = (json["cropStart"] as? Float64).flatMap { Int64(round($0)) }
         self.cropEnd = (json["cropEnd"] as? Float64).flatMap { Int64(round($0)) }
-        self.title = json["title"] as? String
-        self.subtitle = json["subtitle"] as? String
-        self.description = json["description"] as? String
-        self.customImageUri = json["customImageUri"] as? String
+        self.customMetadata = CustomMetadata(json["metadata"] as? NSDictionary)
     }
 }

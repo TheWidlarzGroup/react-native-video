@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: GitHub Discussions
-    url: https://github.com/react-native-video/react-native-video/discussions
+    url: https://github.com/TheWidlarzGroup/react-native-video/discussions
     about: Please ask and answer questions here.
   - name: Slack Channel
     url: https://join.slack.com/t/video-dev/shared_invite/zt-24kgmctuv-2z0O9J_v6q_rg~x1RujdOA

@@ -63,7 +63,7 @@ Adjust the buffer settings. This prop takes an object with one or more of the pr
 | maxHeapAllocationPercent          | number | The percentage of available heap that the video can use to buffer, between 0 and 1                                                                                                              |
 | minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1                                                                                |
 | minBufferMemoryReservePercent     | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1                                                                                   |
-
+| cacheSizeMB                       | number | Cache size in MB, enabling this to prevent new src requests and save bandwidth while repeating videos, or 0 to disable. Android only.                                                           |
 
 Example with default values:
 
@@ -74,8 +74,11 @@ bufferConfig={{
   bufferForPlaybackMs: 2500,
   bufferForPlaybackAfterRebufferMs: 5000,
   backBufferDurationMs: 120000,
+  cacheSizeMB: 0
 }}
 ```
+
+Please note that the Android cache is a global cache that is shared among all components; individual components can still opt out of caching behavior by setting cacheSizeMB to 0, but multiple components with a positive cacheSizeMB will be sharing the same one, and the cache size will always be the first value set; it will not change during the app's lifecycle.
 
 ### `chapters`
 
@@ -158,7 +161,7 @@ Determines if the player needs to throw an error when connection is lost or not
 - **false (default)** - Player will throw an error when connection is lost
 - **true** - Player will keep trying to buffer when network connect is lost
 
-### `DRM`
+### `drm`
 
 <PlatformsList types={['Android', 'iOS']} />
 
@@ -229,7 +232,7 @@ Enable video filter.
 - **false (default)** - Don't enable filter
 - **true** - Enable filter
 
-### `Focusable`
+### `focusable`
 
 <PlatformsList types={['Android']} />
 
@@ -299,6 +302,20 @@ Controls the iOS silent switch behavior
 - **"inherit" (default)** - Use the default AVPlayer behavior
 - **"ignore"** - Play audio even if the silent switch is set
 - **"obey"** - Don't play audio if the silent switch is set
+
+### `localSourceEncryptionKeyScheme`
+
+<PlatformsList types={['iOS']} />
+
+Set the url scheme for stream encryption key for local assets
+
+Type: String
+
+Example:
+
+```
+localSourceEncryptionKeyScheme="my-offline-key"
+```
 
 ### `maxBitRate`
 
@@ -442,34 +459,6 @@ Determine whether to repeat the video when the end is reached
 
 - **false (default)** - Don't repeat the video
 - **true** - Repeat the video
-
-### `onAudioTracks`
-
-<PlatformsList types={['Android']} />
-
-Callback function that is called when audio tracks change
-
-Payload:
-
-| Property | Type    | Description                                                                                                |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------- |
-| index    | number  | Internal track ID                                                                                          |
-| title    | string  | Descriptive name for the track                                                                             |
-| language | string  | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language |
-| bitrate  | number  | bitrate of track                                                                                           |
-| type     | string  | Mime type of track                                                                                         |
-| selected | boolean | true if track is playing                                                                                   |
-
-Example:
-
-```javascript
-{
-  audioTracks: [
-    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0, selected: true },
-    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
-  ],
-}
-```
 
 ### `reportBandwidth`
 
@@ -622,7 +611,7 @@ Pass directly the asset to play (deprecated)
 
 ```javascript
 const sintel = require('./sintel.mp4');
-source={ sintel };
+source = {sintel};
 ```
 
 Or by using an uri (starting from 6.0.0-beta.6)
@@ -631,7 +620,6 @@ Or by using an uri (starting from 6.0.0-beta.6)
 const sintel = require('./sintel.mp4');
 source={{ uri: sintel }}
 ```
-
 
 #### URI string
 
@@ -661,6 +649,18 @@ source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
 ```
 
 Note: Your app will need to request permission to read external storage if you're accessing a file outside your app.
+
+##### File from asset folder (asset://)
+
+<PlatformsList types={['Android']} />
+
+Allows to play a video file from the asset folder from the application
+
+Example:
+
+```javascript
+source={{ uri: 'asset:///sintel.mp4' }}
+```
 
 ##### iPod Library (ipod-library://)
 
@@ -718,33 +718,36 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 
 #### Overriding the metadata of a source
 
-<PlatformsList types={['tvOS']} />
+<PlatformsList types={['Android, iOS, tvOS']} />
 
-Provide an optional `title`, `subtitle`, `customImageUri` and/or `description` properties for the video.
-Useful when to adapt the tvOS playback experience.
+Provide an optional `title`, `subtitle`, `artist`, `imageUri` and/or `description` properties for the video.
+Useful when using notification controls on Android or iOS or to adapt the tvOS playback experience.
 
 Example:
 
 ```javascript
 source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    title: 'Custom Title',
-    subtitle: 'Custom Subtitle',
-    description: 'Custom Description',
-    customImageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+    metadata: {
+      title: 'Custom Title',
+      subtitle: 'Custom Subtitle',
+      artist: 'Custom Artist',
+      description: 'Custom Description',
+      imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+    }
   }}
 ```
 
 ### `subtitleStyle`
 
-| Property      | Description                                                             | Platforms |
-| ------------- | ----------------------------------------------------------------------- | --------- |
-| fontSize      | Adjust the font size of the subtitles. Default: font size of the device | Android   |
-| paddingTop    | Adjust the top padding of the subtitles. Default: 0                     | Android   |
-| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                  | Android   |
-| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                    | Android   |
-| paddingRight  | Adjust the right padding of the subtitles. Default: 0                   | Android   |
-| opacity | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+| Property      | Description                                                                                                                                                                                        | Platforms    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop    | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity       | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
 
 Example:
 
@@ -792,11 +795,57 @@ textTracks={[
 ]}
 ```
 
-### `trackId`
+### `showNotificationContorols`
+
+<PlatformsList types={['Android', 'iOS']}/>
+
+Controls whether to show media controls in the notification area. 
+For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
+
+You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
+
+To customize the notification controls you can use `metadata` property in the `source` prop.
+
+- **false (default)** - Don't show media controls in the notification area
+- **true** - Show media controls in the notification area
+
+**To test notification controls on iOS you need to run the app on a real device, as the simulator does not support it.**
+
+**For Android you have to add the following code in your `AndroidManifest.xml` file:**
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    ...
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    ...
+
+    <application>
+      ...
+      <service
+        android:name="com.brentvatne.exoplayer.VideoPlaybackService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback">
+          <intent-filter>
+            <action android:name="androidx.media3.session.MediaSessionService" />
+          </intent-filter>
+      </service>
+    </application>
+</manifest>
+```
+
+### `useSecureView`
 
 <PlatformsList types={['Android']} />
 
-Configure an identifier for the video stream to link the playback context to the events emitted.
+Force the output to a SurfaceView and enables the secure surface.
+
+This will override useTextureView flag.
+
+SurfaceView is is the only one that can be labeled as secure.
+
+- **true** - Use security
+- **false (default)** - Do not use security
 
 ### `useTextureView`
 
@@ -814,19 +863,6 @@ useTextureView can only be set at same time you're setting the source.
 - **true (default)** - Use a TextureView
 - **false** - Use a SurfaceView
 
-### `useSecureView`
-
-<PlatformsList types={['Android']} />
-
-Force the output to a SurfaceView and enables the secure surface.
-
-This will override useTextureView flag.
-
-SurfaceView is is the only one that can be labeled as secure.
-
-- **true** - Use security
-- **false (default)** - Do not use security
-
 ### `volume`
 
 <PlatformsList types={['All']} />
@@ -836,17 +872,3 @@ Adjust the volume.
 - **1.0 (default)** - Play at full volume
 - **0.0** - Mute the audio
 - **Other values** - Reduce volume
-
-### `localSourceEncryptionKeyScheme`
-
-<PlatformsList types={['iOS']} />
-
-Set the url scheme for stream encryption key for local assets
-
-Type: String
-
-Example:
-
-```
-localSourceEncryptionKeyScheme="my-offline-key"
-```

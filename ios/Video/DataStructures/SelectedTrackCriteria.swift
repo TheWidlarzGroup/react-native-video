@@ -1,6 +1,6 @@
 struct SelectedTrackCriteria {
     let type: String
-    let value: Any?
+    let value: String?
 
     let json: NSDictionary?
 
@@ -13,6 +13,6 @@ struct SelectedTrackCriteria {
         }
         self.json = json
         self.type = json["type"] as? String ?? ""
-        self.value = json["value"]
+        self.value = json["value"] as? String
     }
 }

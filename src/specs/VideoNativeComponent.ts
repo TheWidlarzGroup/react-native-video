@@ -19,6 +19,13 @@ type Headers = ReadonlyArray<
   }>
 >;
 
+type VideoMetadata = Readonly<{
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  imageUri?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -31,10 +38,7 @@ export type VideoSrc = Readonly<{
   startPosition?: Float;
   cropStart?: Float;
   cropEnd?: Float;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  customImageUri?: string;
+  metadata?: VideoMetadata;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -300,7 +304,7 @@ export interface VideoNativeProps extends ViewProps {
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
-
+  showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
   bufferConfig?: BufferConfig; // Android
   contentStartTime?: Int32; // Android
   currentPlaybackTime?: Double; // Android
@@ -310,7 +314,6 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;

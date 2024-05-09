@@ -7,10 +7,12 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 
+import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
@@ -38,6 +40,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_START_POSITION = "startPosition";
     private static final String PROP_SRC_CROP_START = "cropStart";
     private static final String PROP_SRC_CROP_END = "cropEnd";
+    private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
@@ -60,14 +63,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_AUDIO_OUTPUT = "audioOutput";
     private static final String PROP_VOLUME = "volume";
     private static final String PROP_BUFFER_CONFIG = "bufferConfig";
-    private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs";
-    private static final String PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs";
-    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
-    private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
-    private static final String PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT = "maxHeapAllocationPercent";
-    private static final String PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent";
-    private static final String PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent";
-    private static final String PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs";
     private static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
@@ -90,6 +85,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
+    private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
 
     private final ReactExoplayerConfig config;
@@ -174,6 +170,32 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         }
 
+        ReadableMap propMetadata = ReactBridgeUtils.safeGetMap(src, PROP_SRC_METADATA);
+        MediaMetadata customMetadata = null;
+        if (propMetadata != null) {
+            String title = ReactBridgeUtils.safeGetString(propMetadata, "title");
+            String subtitle = ReactBridgeUtils.safeGetString(propMetadata, "subtitle");
+            String description = ReactBridgeUtils.safeGetString(propMetadata, "description");
+            String artist = ReactBridgeUtils.safeGetString(propMetadata, "artist");
+            String imageUriString = ReactBridgeUtils.safeGetString(propMetadata, "imageUri");
+
+            Uri imageUri = null;
+
+            try {
+                imageUri = Uri.parse(imageUriString);
+            } catch (Exception e) {
+                DebugLog.e("ExoPlayer Warning", "Could not parse imageUri in metadata");
+            }
+
+            customMetadata = new MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setSubtitle(subtitle)
+                    .setDescription(description)
+                    .setArtist(artist)
+                    .setArtworkUri(imageUri)
+                    .build();
+        }
+
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
             return;
@@ -183,7 +205,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers);
+                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
             }
         } else {
             int identifier = context.getResources().getIdentifier(
@@ -406,28 +428,16 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setShutterColor(color == null ? Color.BLACK : color);
     }
 
+
     @ReactProp(name = PROP_BUFFER_CONFIG)
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {
-        int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
-        int maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
-        int bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
-        int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
-        int backBufferDurationMs = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS;
-        double maxHeapAllocationPercent = ReactExoplayerView.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
-        double minBackBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE;
-        double minBufferMemoryReservePercent = ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
+        BufferConfig config = BufferConfig.parse(bufferConfig);
+        videoView.setBufferConfig(config);
+    }
 
-        if (bufferConfig != null) {
-            minBufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_MIN_BUFFER_MS, minBufferMs);
-            maxBufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_MAX_BUFFER_MS, maxBufferMs);
-            bufferForPlaybackMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS, bufferForPlaybackMs);
-            bufferForPlaybackAfterRebufferMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS, bufferForPlaybackAfterRebufferMs);
-            maxHeapAllocationPercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT, maxHeapAllocationPercent);
-            minBackBufferMemoryReservePercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT, minBackBufferMemoryReservePercent);
-            minBufferMemoryReservePercent = ReactBridgeUtils.safeGetDouble(bufferConfig, PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT, minBufferMemoryReservePercent);
-            backBufferDurationMs = ReactBridgeUtils.safeGetInt(bufferConfig, PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS, backBufferDurationMs);
-            videoView.setBufferConfig(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, maxHeapAllocationPercent, minBackBufferMemoryReservePercent, minBufferMemoryReservePercent, backBufferDurationMs);
-        }
+    @ReactProp(name = PROP_SHOW_NOTIFICATION_CONTROLS)
+    public void setShowNotificationControls(final ReactExoplayerView videoView, final boolean showNotificationControls) {
+        videoView.setShowNotificationControls(showNotificationControls);
     }
 
     @ReactProp(name = PROP_DEBUG, defaultBoolean = false)
@@ -448,6 +458,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 || lowerCaseUri.startsWith("https://")
                 || lowerCaseUri.startsWith("content://")
                 || lowerCaseUri.startsWith("file://")
+                || lowerCaseUri.startsWith("rtsp://")
                 || lowerCaseUri.startsWith("asset://");
     }
 }

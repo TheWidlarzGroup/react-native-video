@@ -9,7 +9,13 @@ buildscript {
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.22"
 
-        RNVUseExoplayerIMA = System.getenv("RNV_SAMPLE_ENABLE_ADS") ?: true
+        useExoplayerIMA = System.getenv("RNV_SAMPLE_ENABLE_ADS") ?: true
+        useExoplayerRtsp = true
+
+        // use the following to disable ExoPlayer modules - this will reduce the size of your app
+        // useExoplayerSmoothStreaming = false
+        // useExoplayerDash = false
+        // useExoplayerHls = false
     }
     repositories {
         google()
