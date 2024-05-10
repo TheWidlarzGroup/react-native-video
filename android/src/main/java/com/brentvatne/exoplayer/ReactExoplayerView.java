@@ -365,7 +365,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
+        cleanupPlaybackService();
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity instanceof FragmentActivity && reactExoplayerFragment != null) {
             ((FragmentActivity) activity).getSupportFragmentManager()
@@ -373,6 +373,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     .remove(reactExoplayerFragment)
                     .commitAllowingStateLoss();
         }
+        super.onDetachedFromWindow();
     }
 
     // LifecycleEventListener implementation
@@ -402,12 +403,6 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostDestroy() {
         cleanUpResources();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        cleanupPlaybackService();
-        super.onDetachedFromWindow();
     }
 
     public void cleanUpResources() {
