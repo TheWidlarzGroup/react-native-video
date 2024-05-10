@@ -1647,14 +1647,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (this.customMetadata != customMetadata && player != null) {
             MediaItem currentMediaItem = player.getCurrentMediaItem();
 
-            if (currentMediaItem == null) {
-                return;
+            if (currentMediaItem != null) {
+
+                MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+
+                // This will cause video blink/reload but won't louse progress
+                player.setMediaItem(newMediaItem, false);
             }
-
-            MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-
-            // This will cause video blink/reload but won't louse progress
-            player.setMediaItem(newMediaItem, false);
         }
 
         if (uri != null) {
