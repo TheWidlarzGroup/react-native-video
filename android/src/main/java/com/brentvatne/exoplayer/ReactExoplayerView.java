@@ -106,6 +106,8 @@ import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SideLoadedTextTrack;
+import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
@@ -117,8 +119,6 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -220,7 +220,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private String videoTrackValue;
     private String textTrackType;
     private String textTrackValue;
-    private ReadableArray textTracks;
+    private SideLoadedTextTrackList textTracks;
     private boolean disableFocus;
     private boolean focusable = true;
     private boolean disableBuffering;
@@ -995,17 +995,12 @@ public class ReactExoplayerView extends FrameLayout implements
             return textSources;
         }
 
-        for (int i = 0; i < textTracks.size(); ++i) {
-            ReadableMap textTrack = textTracks.getMap(i);
-            String language = textTrack.getString("language");
-            String title = textTrack.hasKey("title")
-                    ? textTrack.getString("title") : language + " " + i;
-            Uri uri = Uri.parse(textTrack.getString("uri"));
-            MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
-                    language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
+        for (SideLoadedTextTrack track : textTracks.getTracks()) {
+            MediaSource textSource = buildTextSource(track.getTitle(),
+                    track.getUri(),
+                    track.getType(),
+                    track.getLanguage());
+            textSources.add(textSource);
         }
         return textSources;
     }
@@ -1718,7 +1713,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setTextTracks(ReadableArray textTracks) {
+    public void setTextTracks(SideLoadedTextTrackList textTracks) {
         this.textTracks = textTracks;
         reloadSource();
     }

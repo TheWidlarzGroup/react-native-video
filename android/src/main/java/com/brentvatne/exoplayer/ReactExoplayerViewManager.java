@@ -14,6 +14,7 @@ import androidx.media3.exoplayer.DefaultLoadControl;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
@@ -309,7 +310,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_TEXT_TRACKS)
     public void setPropTextTracks(final ReactExoplayerView videoView,
                                   @Nullable ReadableArray textTracks) {
-        videoView.setTextTracks(textTracks);
+        SideLoadedTextTrackList sideLoadedTextTracks = SideLoadedTextTrackList.Companion.parse(textTracks);
+        videoView.setTextTracks(sideLoadedTextTracks);
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
