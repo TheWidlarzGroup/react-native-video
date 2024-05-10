@@ -4,16 +4,13 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.C;
-import androidx.media3.common.PlaybackException;
-import androidx.media3.common.PlaybackParameters;
+import androidx.media3.common.Format;
 import androidx.media3.common.Player;
-import androidx.media3.common.Timeline;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
 import androidx.media3.common.text.Cue;
 import androidx.media3.common.util.Assertions;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.ui.SubtitleView;
 
 import android.util.AttributeSet;
@@ -27,6 +24,7 @@ import android.widget.FrameLayout;
 
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
@@ -247,19 +245,22 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         layout(getLeft(), getTop(), getRight(), getBottom());
     };
 
-    private void updateForCurrentTrackSelections() {
-        if (player == null) {
+    private void updateForCurrentTrackSelections(Tracks tracks) {
+        if (tracks == null) {
             return;
         }
-        TrackSelectionArray selections = player.getCurrentTrackSelections();
-        for (int i = 0; i < selections.length; i++) {
-            if (player.getRendererType(i) == C.TRACK_TYPE_VIDEO && selections.get(i) != null) {
-                // Video enabled so artwork must be hidden. If the shutter is closed, it will be opened in
-                // onRenderedFirstFrame().
+        ImmutableList<Tracks.Group> groups = tracks.getGroups();
+        for (Tracks.Group group: groups) {
+            if (group.getType() == C.TRACK_TYPE_VIDEO && group.length > 0) {
+                // get the first track of the group to identify aspect ratio
+                Format format = group.getTrackFormat(0);
+
+                // update aspect ratio !
+                layout.setAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
                 return;
             }
         }
-        // Video disabled so the shutter must be closed.
+        // no video tracks, in that case refresh shutterView visibility
         shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
     }
 
@@ -293,8 +294,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onTracksChanged(Tracks tracks) {
-            updateForCurrentTrackSelections();
+            updateForCurrentTrackSelections(tracks);
         }
     }
-
 }
