@@ -375,6 +375,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
 
+        // Perform on next run loop, otherwise onVideoLoadStart is nil
+        onVideoLoadStart?([
+            "src": [
+                "uri": _source?.uri ?? NSNull(),
+                "type": _source?.type ?? NSNull(),
+                "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
+            ],
+            "drm": _drm?.json ?? NSNull(),
+            "target": reactTag,
+        ])
+
         if let uri = source.uri, uri.starts(with: "ph://") {
             let photoAsset = await RCTVideoUtils.preparePHAsset(uri: uri)
             return await playerItemPrepareText(asset: photoAsset, assetOptions: nil, uri: source.uri ?? "")
@@ -467,16 +478,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _imaAdsManager.setUpAdsLoader()
             }
         #endif
-        // Perform on next run loop, otherwise onVideoLoadStart is nil
-        onVideoLoadStart?([
-            "src": [
-                "uri": _source?.uri ?? NSNull(),
-                "type": _source?.type ?? NSNull(),
-                "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
-            ],
-            "drm": _drm?.json ?? NSNull(),
-            "target": reactTag,
-        ])
         isSetSourceOngoing = false
         applyNextSource()
     }
