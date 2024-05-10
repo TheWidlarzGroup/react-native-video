@@ -69,9 +69,9 @@ export type Drm = Readonly<{
 }>;
 
 export enum BufferingStrategyType {
-  DEFAULT = 'default',
-  DISABLE_BUFFERING = 'disableBuffering',
-  DEPENDING_ON_MEMORY = 'dependingOnMemory',
+  DEFAULT = 'Default',
+  DISABLE_BUFFERING = 'DisableBuffering',
+  DEPENDING_ON_MEMORY = 'DependingOnMemory',
 }
 
 export type BufferConfig = {

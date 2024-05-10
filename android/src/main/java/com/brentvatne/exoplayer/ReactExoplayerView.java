@@ -32,7 +32,6 @@ import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -542,9 +541,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
-            if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.disableBuffering) {
+            if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DisableBuffering) {
                 return false;
-            } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.dependingOnMemory) {
+            } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DependingOnMemory) {
                 // The goal of this algorithm is to pause video loading (increasing the buffer)
                 // when available memory on device become low.
                 int loadedBytes = getAllocator().getTotalBytesAllocated();
@@ -569,7 +568,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     return false;
                 }
             }
-            // "default" case or normal case for "dependingOnMemory"
+            // "default" case or normal case for "DependingOnMemory"
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
         }
     }

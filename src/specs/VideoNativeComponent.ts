@@ -93,7 +93,7 @@ export type Seek = Readonly<{
   tolerance?: Float;
 }>;
 
-type BufferingStrategyType = WithDefault<string, 'default'>;
+type BufferingStrategyType = WithDefault<string, 'Default'>;
 
 type BufferConfig = Readonly<{
   minBufferMs?: Float;

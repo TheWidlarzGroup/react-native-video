@@ -15,17 +15,17 @@ class BufferingStrategy {
         /**
          * default exoplayer strategy
          */
-        default,
+        Default,
 
         /**
          * never load more than needed
          */
-        disableBuffering,
+        DisableBuffering,
 
         /**
          * use default strategy but pause loading when available memory is low
          */
-        dependingOnMemory,
+        DependingOnMemory
     }
 
     companion object {
@@ -35,12 +35,12 @@ class BufferingStrategy {
          * companion function to transform input string to enum
          */
         fun parse(src: String?): BufferingStrategyEnum {
-            if (src == null) return BufferingStrategyEnum.default
+            if (src == null) return BufferingStrategyEnum.Default
             return try {
                 BufferingStrategyEnum.valueOf(src)
             } catch (e: Exception) {
                 DebugLog.e(TAG, "cannot parse buffering strategy " + src)
-                BufferingStrategyEnum.default
+                BufferingStrategyEnum.Default
             }
         }
     }
