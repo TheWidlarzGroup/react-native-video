@@ -1598,6 +1598,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
+        updatePictureInPictureActions(!isPlaying);
         eventEmitter.playbackStateChanged(isPlaying);
     }
 
@@ -2024,7 +2025,6 @@ public class ReactExoplayerView extends FrameLayout implements
             } else {
                 pausePlayback();
             }
-            updatePictureInPictureActions(paused);
         }
     }
 
