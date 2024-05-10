@@ -14,7 +14,7 @@ class SideLoadedTextTrackList {
     companion object {
         fun parse(src: ReadableArray?): SideLoadedTextTrackList? {
             if (src == null) {
-                return null;
+                return null
             }
             var sideLoadedTextTrackList = SideLoadedTextTrackList()
             for (i in 0 until src.size()) {
