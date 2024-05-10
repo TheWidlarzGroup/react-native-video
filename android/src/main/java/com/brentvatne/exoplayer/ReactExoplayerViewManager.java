@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 
 public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerView> {
 
+    private static final String TAG = "ExoViewManager";
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
@@ -183,7 +184,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             try {
                 imageUri = Uri.parse(imageUriString);
             } catch (Exception e) {
-                DebugLog.e("ExoPlayer Warning", "Could not parse imageUri in metadata");
+                DebugLog.e(TAG, "Could not parse imageUri in metadata");
             }
 
             customMetadata = new MediaMetadata.Builder()
@@ -254,7 +255,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FILL);
                 break;
             default:
-                DebugLog.w("ExoPlayer Warning", "Unsupported resize mode: " + resizeMode + " - falling back to fit");
+                DebugLog.w(TAG, "Unsupported resize mode: " + resizeMode + " - falling back to fit");
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT);
                 break;
         }

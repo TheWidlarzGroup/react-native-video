@@ -588,13 +588,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         DrmSessionManager drmSessionManager = initializePlayerDrm(self);
                         if (drmSessionManager == null && self.drmUUID != null) {
                             // Failed to intialize DRM session manager - cannot continue
-                            DebugLog.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
+                            DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
                             eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                             return;
                         }
 
                         if (activity == null) {
-                            DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
+                            DebugLog.e(TAG, "Failed to initialize Player!");
                             eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
                             return;
                         }
@@ -606,8 +606,8 @@ public class ReactExoplayerView extends FrameLayout implements
                                 initializePlayerSource(self, drmSessionManager);
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
-                                DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
-                                DebugLog.e("ExoPlayer Exception", ex.toString());
+                                DebugLog.e(TAG, "Failed to initialize Player!");
+                                DebugLog.e(TAG, ex.toString());
                                 self.eventEmitter.error(ex.toString(), ex, "1001");
                             }
                         });
@@ -617,8 +617,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
-                DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
-                DebugLog.e("ExoPlayer Exception", ex.toString());
+                DebugLog.e(TAG, "Failed to initialize Player!");
+                DebugLog.e(TAG, ex.toString());
                 eventEmitter.error(ex.toString(), ex, "1001");
             }
         };
@@ -734,7 +734,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 wait();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                DebugLog.e("ExoPlayer Exception", ex.toString());
+                DebugLog.e(TAG, ex.toString());
             }
         }
 
