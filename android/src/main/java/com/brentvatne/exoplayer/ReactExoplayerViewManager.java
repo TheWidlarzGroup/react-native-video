@@ -10,9 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.RawResourceDataSource;
-import androidx.media3.exoplayer.DefaultLoadControl;
 
 import com.brentvatne.common.api.BufferConfig;
+import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
@@ -73,7 +73,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_CONTENT_START_TIME = "contentStartTime";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
-    private static final String PROP_DISABLE_BUFFERING = "disableBuffering";
+    private static final String PROP_BUFFERING_STRATEGY = "bufferingStrategy";
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
     private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
@@ -380,9 +380,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setContentStartTime(contentStartTime);
     }
 
-    @ReactProp(name = PROP_DISABLE_BUFFERING, defaultBoolean = false)
-    public void setDisableBuffering(final ReactExoplayerView videoView, final boolean disableBuffering) {
-        videoView.setDisableBuffering(disableBuffering);
+    @ReactProp(name = PROP_BUFFERING_STRATEGY)
+    public void setBufferingStrategy(final ReactExoplayerView videoView, final String bufferingStrategy) {
+        BufferingStrategy.BufferingStrategyEnum strategy = BufferingStrategy.Companion.parse(bufferingStrategy);
+        videoView.setBufferingStrategy(strategy);
     }
 
     @ReactProp(name = PROP_DISABLE_DISCONNECT_ERROR, defaultBoolean = false)

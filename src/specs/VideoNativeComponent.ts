@@ -93,6 +93,8 @@ export type Seek = Readonly<{
   tolerance?: Float;
 }>;
 
+type BufferingStrategyType = WithDefault<string, 'Default'>;
+
 type BufferConfig = Readonly<{
   minBufferMs?: Float;
   maxBufferMs?: Float;
@@ -317,6 +319,7 @@ export interface VideoNativeProps extends ViewProps {
   subtitleStyle?: SubtitleStyle; // android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
+  bufferingStrategy?: BufferingStrategyType; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;

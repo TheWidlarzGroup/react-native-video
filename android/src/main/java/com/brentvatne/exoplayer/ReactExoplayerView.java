@@ -32,7 +32,6 @@ import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -105,6 +104,7 @@ import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
+import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
@@ -223,7 +223,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private SideLoadedTextTrackList textTracks;
     private boolean disableFocus;
     private boolean focusable = true;
-    private boolean disableBuffering;
+    private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
     private long contentStartTime = -1L;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
@@ -541,30 +541,34 @@ public class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
-            if (ReactExoplayerView.this.disableBuffering) {
+            if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DisableBuffering) {
                 return false;
+            } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DependingOnMemory) {
+                // The goal of this algorithm is to pause video loading (increasing the buffer)
+                // when available memory on device become low.
+                int loadedBytes = getAllocator().getTotalBytesAllocated();
+                boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
+                if (isHeapReached) {
+                    return false;
+                }
+                long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+                long freeMemory = runtime.maxMemory() - usedMemory;
+                double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
+                        ? bufferConfig.getMinBufferMemoryReservePercent()
+                        : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
+                long reserveMemory = (long) minBufferMemoryReservePercent * runtime.maxMemory();
+                long bufferedMs = bufferedDurationUs / (long) 1000;
+                if (reserveMemory > freeMemory && bufferedMs > 2000) {
+                    // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
+                    return false;
+                }
+                if (runtime.freeMemory() == 0) {
+                    DebugLog.w(TAG, "Free memory reached 0, forcing garbage collection");
+                    runtime.gc();
+                    return false;
+                }
             }
-            int loadedBytes = getAllocator().getTotalBytesAllocated();
-            boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
-            if (isHeapReached) {
-                return false;
-            }
-            long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-            long freeMemory = runtime.maxMemory() - usedMemory;
-            double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                    ? bufferConfig.getMinBufferMemoryReservePercent()
-                    : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-            long reserveMemory = (long)minBufferMemoryReservePercent * runtime.maxMemory();
-            long bufferedMs = bufferedDurationUs / (long)1000;
-            if (reserveMemory > freeMemory && bufferedMs > 2000) {
-                // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
-                return false;
-            }
-            if (runtime.freeMemory() == 0) {
-                DebugLog.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
-                runtime.gc();
-                return false;
-            }
+            // "default" case or normal case for "DependingOnMemory"
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
         }
     }
@@ -2077,8 +2081,8 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setDisableBuffering(boolean disableBuffering) {
-        this.disableBuffering = disableBuffering;
+    public void setBufferingStrategy(BufferingStrategy.BufferingStrategyEnum _bufferingStrategy) {
+        bufferingStrategy = _bufferingStrategy;
     }
 
     public boolean getPreventsDisplaySleepDuringVideoPlayback() {
