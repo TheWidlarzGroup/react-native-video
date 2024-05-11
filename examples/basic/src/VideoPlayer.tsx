@@ -39,6 +39,7 @@ import Video, {
   OnSeekData,
   OnPlaybackStateChangedData,
   OnPlaybackRateChangeData,
+  BufferingStrategyType,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
@@ -934,6 +935,7 @@ class VideoPlayer extends Component {
           poster={this.state.poster}
           onPlaybackRateChange={this.onPlaybackRateChange}
           onPlaybackStateChanged={this.onPlaybackStateChanged}
+          bufferingStrategy={BufferingStrategyType.DEFAULT}
         />
       </TouchableOpacity>
     );
