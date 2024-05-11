@@ -307,6 +307,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Progress
 
     func sendProgressUpdate() {
+        #if !USE_GOOGLE_IMA
+            // If we dont use Ads and onVideoProgress is not defined we dont need to run this code
+            guard onVideoProgress != nil else { return }
+        #endif
+
         if let video = _player?.currentItem,
            video == nil || video.status != AVPlayerItem.Status.readyToPlay {
             return
@@ -1300,6 +1305,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // When timeMetadata is read the event onTimedMetadata is triggered
     func handleTimeMetadataChange(timedMetadata: [AVMetadataItem]) {
         guard onTimedMetadata != nil else { return }
+
         var metadata: [[String: String?]?] = []
         for item in timedMetadata {
             let value = item.value as? String
@@ -1331,32 +1337,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleReadyToPlay() {
         guard let _playerItem else { return }
-        var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
-
-        if duration.isNaN || duration == 0 {
-            // This is a safety check for live video.
-            // AVPlayer report a 0 duration
-            duration = RCTVideoUtils.calculateSeekableDuration(_player).floatValue
-            if duration.isNaN {
-                duration = 0
-            }
-        }
-
-        var width: Float = 0
-        var height: Float = 0
-        var orientation = "undefined"
 
         Task {
-            let tracks = await RCTVideoAssetsUtils.getTracks(asset: _playerItem.asset, withMediaType: .video)
-            if let videoTrack = tracks?.first {
-                width = Float(videoTrack.naturalSize.width)
-                height = Float(videoTrack.naturalSize.height)
-            } else if _playerItem.presentationSize.height != 0.0 {
-                width = Float(_playerItem.presentationSize.width)
-                height = Float(_playerItem.presentationSize.height)
-            }
-            orientation = width > height ? "landscape" : width == height ? "square" : "portrait"
-
             if self._pendingSeek {
                 self.setSeek([
                     "time": NSNumber(value: self._pendingSeekTime),
@@ -1373,7 +1355,32 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 self._startPosition = -1
             }
 
-            if self._videoLoadStarted {
+            if onVideoLoad != nil, self._videoLoadStarted {
+                var duration = Float(CMTimeGetSeconds(_playerItem.asset.duration))
+
+                if duration.isNaN || duration == 0 {
+                    // This is a safety check for live video.
+                    // AVPlayer report a 0 duration
+                    duration = RCTVideoUtils.calculateSeekableDuration(_player).floatValue
+                    if duration.isNaN {
+                        duration = 0
+                    }
+                }
+
+                var width: Float = 0
+                var height: Float = 0
+                var orientation = "undefined"
+
+                let tracks = await RCTVideoAssetsUtils.getTracks(asset: _playerItem.asset, withMediaType: .video)
+                if let videoTrack = tracks?.first {
+                    width = Float(videoTrack.naturalSize.width)
+                    height = Float(videoTrack.naturalSize.height)
+                } else if _playerItem.presentationSize.height != 0.0 {
+                    width = Float(_playerItem.presentationSize.width)
+                    height = Float(_playerItem.presentationSize.height)
+                }
+                orientation = width > height ? "landscape" : width == height ? "square" : "portrait"
+
                 let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
                 let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
                 self.onVideoLoad?(["duration": NSNumber(value: duration),
@@ -1463,7 +1470,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleVolumeChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
-        guard let _player else { return }
+        guard let _player, onVolumeChange != nil else { return }
 
         if player.rate == change.oldValue && change.oldValue != nil {
             return
@@ -1475,7 +1482,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
         #if !os(visionOS)
-            guard let _player else { return }
+            guard let _player, onVideoExternalPlaybackChange != nil else { return }
             onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
                                             "target": reactTag as Any])
         #endif
@@ -1514,6 +1521,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleDidFailToFinishPlaying(notification: NSNotification!) {
+        guard onVideoError != nil else { return }
+
         let error: NSError! = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? NSError
         onVideoError?(
             [
@@ -1563,6 +1572,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
         guard onVideoBandwidthUpdate != nil else { return }
+
         guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
             return
         }
@@ -1572,16 +1582,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleTracksChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<[AVPlayerItemTrack]>) {
-        Task {
-            let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
-            let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
+        if onTextTracks != nil {
+            Task {
+                let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
+                self.onTextTracks?(["textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.compactMap(\.json)])
+            }
+        }
 
-            self.onTextTracks?(["textTracks": self._textTracks?.compactMap { $0.json } ?? textTracks.compactMap(\.json)])
-            self.onAudioTracks?(["audioTracks": audioTracks])
+        if onAudioTracks != nil {
+            Task {
+                let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
+                self.onAudioTracks?(["audioTracks": audioTracks])
+            }
         }
     }
 
     func handleLegibleOutput(strings: [NSAttributedString]) {
+        guard onTextTrackDataChanged != nil else { return }
+
         if let subtitles = strings.first {
             self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }

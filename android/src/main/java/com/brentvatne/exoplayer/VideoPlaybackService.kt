@@ -72,9 +72,7 @@ class VideoPlaybackService : MediaSessionService() {
 
     // Callbacks
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
-        return null
-    }
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = null
 
     override fun onBind(intent: Intent?): IBinder {
         super.onBind(intent)
