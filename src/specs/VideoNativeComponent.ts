@@ -102,6 +102,7 @@ type BufferConfig = Readonly<{
   backBufferDurationMs?: Float; // Android
   minBackBufferMemoryReservePercent?: Float;
   minBufferMemoryReservePercent?: Float;
+  cacheSizeMB?: Float;
 }>;
 
 type SubtitleStyle = Readonly<{
