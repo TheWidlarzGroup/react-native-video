@@ -80,6 +80,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             #endif
         }
     }
+
     private var _isBuffering = false {
         didSet {
             onVideoBuffer?(["isBuffering": _isBuffering, "target": reactTag as Any])
@@ -1444,7 +1445,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
-    func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change: NSKeyValueObservedChange<Bool>) {
+    func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
         if _isBuffering {
             _isBuffering = false
         }
