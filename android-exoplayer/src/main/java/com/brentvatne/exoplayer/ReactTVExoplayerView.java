@@ -29,6 +29,7 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.Timeline;
+import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.endeavor.LimitedSeekRange;
@@ -41,7 +42,6 @@ import androidx.media3.exoplayer.drm.DrmSession;
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.source.TrackGroupArray;
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.session.ext.MediaSessionConnector;
@@ -66,6 +66,7 @@ import com.brentvatne.util.ImdbGenreMap;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.DorisPlayerOutput;
 import com.diceplatform.doris.ExoDoris;
+import com.diceplatform.doris.ExoDorisTrackSelector;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
@@ -78,6 +79,7 @@ import com.diceplatform.doris.entity.ImaDaiPropertiesBuilder;
 import com.diceplatform.doris.entity.Source;
 import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
+import com.diceplatform.doris.entity.Track;
 import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
@@ -91,6 +93,7 @@ import com.diceplatform.doris.ui.entity.VideoTile;
 import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.diceplatform.doris.util.DorisExceptionUtil;
 import com.diceplatform.doris.util.LocalizationService;
+import com.diceplatform.doris.util.TrackUtils;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
@@ -116,6 +119,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -168,7 +172,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ExoDorisTvPlayerView exoDorisPlayerView;
     private DceWatermarkWidget watermarkWidget;
     private ExoDoris player;
-    private DefaultTrackSelector trackSelector;
+    private ExoDorisTrackSelector trackSelector;
     private Source source;
     private LocalizationService localizationService;
     private boolean playerNeedsSource;
@@ -483,7 +487,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
-            
+
             long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
 
@@ -583,13 +587,21 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
-    private String getPreferredSubtitleLang() {
+    private List<String> getPreferredSubtitleLang() {
         TrackPreferenceStorage trackPreferenceStorage = TrackPreferenceStorage.getInstance(getContext());
         if (!trackPreferenceStorage.isEnabled()) {
-            return src.getSelectedSubtitleTrack();
+            return Collections.singletonList(src.getSelectedSubtitleTrack());
         }
-        return trackPreferenceStorage.isNoSubtitlePreferred() ?
-                null : trackPreferenceStorage.getPreferredSubtitleLanguage();
+        return Collections.singletonList(trackPreferenceStorage.isNoSubtitlePreferred() ?
+                null : trackPreferenceStorage.getPreferredSubtitleLanguage());
+    }
+
+    private List<String> getPreferredAudioLang() {
+        TrackPreferenceStorage trackPreferenceStorage = TrackPreferenceStorage.getInstance(getContext());
+        if (!trackPreferenceStorage.isEnabled()) {
+            return src.getPreferredAudioTracks();
+        }
+        return Collections.singletonList(trackPreferenceStorage.getPreferredAudioLanguage());
     }
 
     private void loadImaDaiStream() {
@@ -1012,9 +1024,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (loadVideoStarted) {
             loadVideoStarted = false;
 
+            // check track policy
+            Tracks tracks = player.getExoPlayer().getCurrentTracks();
+            TracksPolicy.TrackPolicy trackPolicy = getTrackPolicy(trackSelector, tracks, getPreferredAudioLang());
+
             // Preselect subtitle and audio.
-            selectTrack(C.TRACK_TYPE_TEXT, Collections.singletonList(getPreferredSubtitleLang()));
-            selectTrack(C.TRACK_TYPE_AUDIO, src.getPreferredAudioTracks());
+            selectTrack(trackPolicy, C.TRACK_TYPE_TEXT, getPreferredSubtitleLang());
+            selectTrack(trackPolicy, C.TRACK_TYPE_AUDIO, getPreferredAudioLang());
 
             ExoPlayer exoPlayer = player.getExoPlayer();
             Format videoFormat = exoPlayer.getVideoFormat();
@@ -1025,6 +1041,29 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             eventEmitter.load(exoPlayer.getDuration(), exoPlayer.getCurrentPosition(), width, height,
                     getAudioTrackInfo(), getTextTrackInfo());
         }
+    }
+
+    private TracksPolicy.TrackPolicy getTrackPolicy(ExoDorisTrackSelector trackSelector, Tracks tracksInfo, List<String> selectedAudios) {
+        if (trackSelector == null) {
+            return null;
+        }
+        String language = null;
+        if (selectedAudios != null && !selectedAudios.isEmpty() && !TextUtils.isEmpty(selectedAudios.get(0))) {
+            language = selectedAudios.get(0);
+        } else {
+            for (Tracks.Group groupInfo : tracksInfo.getGroups()) {
+                @C.TrackType int trackType = groupInfo.getType();
+                if (trackType == C.TRACK_TYPE_AUDIO && groupInfo.isSelected()) {
+                    language = groupInfo.getMediaTrackGroup().getFormat(0).language;
+                }
+            }
+        }
+        if (language == null || language.isEmpty()) {
+            return null;
+        }
+        return trackSelector
+                .getTrackPolicyHandler()
+                .getTrackPolicyForAudio(language);
     }
 
     private WritableArray getAudioTrackInfo() {
@@ -1380,11 +1419,23 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         this.repeat = repeat;
     }
 
-    private void selectTrack(int trackType, @Nullable List<String> preferredLanguages) {
+    private void selectTrack(TracksPolicy.TrackPolicy trackPolicy, int trackType, @Nullable List<String> preferredLanguages) {
         // If we have tracks policy then do not select any initial subtitle.
-        if (trackType == C.TRACK_TYPE_TEXT && src.getTracksPolicy() != null) {
-            return;
+        // if (trackType == C.TRACK_TYPE_TEXT && src.getTracksPolicy() != null) {
+        //     return;
+        // }
+        // Track policy active, ignore user preferred languages subtitle
+        if (trackType == C.TRACK_TYPE_TEXT && trackPolicy != null) {
+            List<Track> trackList = getTextTracks(player.getExoPlayer().getCurrentTracks());
+            Track track = TrackUtils.findMatchingTrack(trackList, trackType, trackPolicy.getSubtitle());
+            if (track != null) {
+                trackSelector.selectTrack(track);
+                // notify subtitle changed by track policy
+                onSubtitleSelected(track.getLanguage());
+                return;
+            }
         }
+
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
@@ -1444,6 +1495,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 .setOverrideForType(new TrackSelectionOverride(groups.get(trackIndex), 0))
                 .build();
         trackSelector.setParameters(selectionParameters);
+    }
+
+    private List<Track> getTextTracks(Tracks tracksInfo) {
+        Set<Track> trackSet = new LinkedHashSet<>();
+        for (Tracks.Group groupInfo : tracksInfo.getGroups()) {
+            @C.TrackType int trackType = groupInfo.getType();
+            if (trackType == C.TRACK_TYPE_TEXT) {
+                boolean isSelected = groupInfo.isSelected();
+                TrackGroup group = groupInfo.getMediaTrackGroup();
+                Format format = group.getFormat(0);
+                String name = TrackUtils.getTrackName(group, trackType);
+                String language = format.language;
+                trackSet.add(new Track(trackType, name, language, isSelected));
+            }
+        }
+        return new ArrayList<>(trackSet);
     }
 
     public void setPausedModifier(boolean paused) {
@@ -1855,6 +1922,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onAudioSelected(String language) {
+        TrackPreferenceStorage storage = TrackPreferenceStorage.getInstance(getContext());
+        storage.storePreferredAudioLanguage(language == null
+                ? TrackPreferenceStorage.NONE
+                : language);
         eventEmitter.audioTrackChanged(language);
     }
 
