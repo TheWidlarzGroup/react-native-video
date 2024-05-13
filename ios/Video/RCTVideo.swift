@@ -81,6 +81,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    private var _isBuffering = false {
+        didSet {
+            onVideoBuffer?(["isBuffering": _isBuffering, "target": reactTag as Any])
+        }
+    }
+
     /* IMA Ads */
     private var _adTagUrl: String?
     #if USE_GOOGLE_IMA
@@ -375,6 +381,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
 
+        // Perform on next run loop, otherwise onVideoLoadStart is nil
+        onVideoLoadStart?([
+            "src": [
+                "uri": _source?.uri ?? NSNull(),
+                "type": _source?.type ?? NSNull(),
+                "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
+            ],
+            "drm": _drm?.json ?? NSNull(),
+            "target": reactTag,
+        ])
+
         if let uri = source.uri, uri.starts(with: "ph://") {
             let photoAsset = await RCTVideoUtils.preparePHAsset(uri: uri)
             return await playerItemPrepareText(asset: photoAsset, assetOptions: nil, uri: source.uri ?? "")
@@ -467,16 +484,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _imaAdsManager.setUpAdsLoader()
             }
         #endif
-        // Perform on next run loop, otherwise onVideoLoadStart is nil
-        onVideoLoadStart?([
-            "src": [
-                "uri": _source?.uri ?? NSNull(),
-                "type": _source?.type ?? NSNull(),
-                "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
-            ],
-            "drm": _drm?.json ?? NSNull(),
-            "target": reactTag,
-        ])
         isSetSourceOngoing = false
         applyNextSource()
     }
@@ -1296,7 +1303,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyForDisplay(changeObject _: Any, change _: NSKeyValueObservedChange<Bool>) {
-        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
+        if _isBuffering {
+            _isBuffering = false
+        }
         onReadyForDisplay?([
             "target": reactTag,
         ])
@@ -1430,12 +1439,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        onVideoBuffer?(["isBuffering": true, "target": reactTag as Any])
+        if !_isBuffering {
+            _isBuffering = true
+        }
     }
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
+        if _isBuffering {
+            _isBuffering = false
+        }
     }
 
     func handleTimeControlStatusChange(player: AVPlayer, change: NSKeyValueObservedChange<AVPlayer.TimeControlStatus>) {
