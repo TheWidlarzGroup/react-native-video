@@ -80,6 +80,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             #endif
         }
     }
+    private var _isBuffering = false {
+        didSet {
+            onVideoBuffer?(["isBuffering": _isBuffering, "target": reactTag as Any])
+        }
+    }
 
     /* IMA Ads */
     private var _adTagUrl: String?
@@ -1297,7 +1302,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyForDisplay(changeObject _: Any, change _: NSKeyValueObservedChange<Bool>) {
-        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
+        if _isBuffering {
+            _isBuffering = false
+        }
         onReadyForDisplay?([
             "target": reactTag,
         ])
@@ -1431,16 +1438,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        onVideoBuffer?(["isBuffering": true, "target": reactTag as Any])
+        if !_isBuffering {
+            _isBuffering = true
+        }
     }
 
     // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change: NSKeyValueObservedChange<Bool>) {
-        if change.newValue == change.oldValue {
-            return
+        if _isBuffering {
+            _isBuffering = false
         }
-
-        onVideoBuffer?(["isBuffering": false, "target": reactTag as Any])
     }
 
     func handleTimeControlStatusChange(player: AVPlayer, change: NSKeyValueObservedChange<AVPlayer.TimeControlStatus>) {
