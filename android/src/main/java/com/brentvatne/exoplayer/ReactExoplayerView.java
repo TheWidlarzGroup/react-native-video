@@ -1358,7 +1358,7 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
-        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);;
+        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
         return videoTrack;
     }
 
@@ -1798,9 +1798,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if ("index".equals(type)) {
-            int iValue = Integer.parseInt(value);
-            if (iValue < groups.length) {
-                groupIndex = iValue;
+            try {
+                int iValue = Integer.parseInt(value);
+                if (iValue < groups.length) {
+                    groupIndex = iValue;
+                }
+            } catch (Exception e) {
+                DebugLog.e(TAG, "cannot parse index:" + value);
+                groupIndex = 0;
             }
         } else if ("resolution".equals(type)) {
             int height = Integer.parseInt(value);
@@ -1866,7 +1871,6 @@ public class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new ArrayList<>(group.length);
             ArrayList<Integer> allTracks = new ArrayList<>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
