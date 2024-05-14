@@ -39,12 +39,30 @@ import Video, {
   OnSeekData,
   OnPlaybackStateChangedData,
   OnPlaybackRateChangeData,
+  OnVideoTracksData,
+  VideoTrack,
+  SelectedVideoTrackType,
+  SelectedVideoTrack,
   BufferingStrategyType,
+  ReactVideoSource,
+  Drm,
+  TextTracks,
 } from 'react-native-video';
 import ToggleControl from './ToggleControl';
 import MultiValueControl, {
   MultiValueControlPropType,
 } from './MultiValueControl';
+
+
+type AdditionnalSourceInfo = {
+  textTracks: TextTracks
+  adTagUrl: string
+  description: string
+  drm: Drm
+  noView: boolean
+}
+
+type SampleVideoSource = ReactVideoSource | AdditionnalSourceInfo
 
 interface StateType {
   rate: number;
@@ -65,8 +83,10 @@ interface StateType {
   seeking: boolean;
   audioTracks: Array<AudioTrack>;
   textTracks: Array<TextTrack>;
+  videoTracks: Array<VideoTrack>;
   selectedAudioTrack: SelectedTrack | undefined;
   selectedTextTrack: SelectedTrack | undefined;
+  selectedVideoTrack: SelectedVideoTrack;
   srcListId: number;
   loop: boolean;
   showRNVControls: boolean;
@@ -95,8 +115,12 @@ class VideoPlayer extends Component {
     seeking: false,
     audioTracks: [],
     textTracks: [],
+    videoTracks: [],
     selectedAudioTrack: undefined,
     selectedTextTrack: undefined,
+    selectedVideoTrack: {
+      type: SelectedVideoTrackType.AUTO,
+    },
     srcListId: 0,
     loop: false,
     showRNVControls: false,
@@ -239,7 +263,7 @@ class VideoPlayer extends Component {
   samplePoster =
     'https://upload.wikimedia.org/wikipedia/commons/1/18/React_Native_Logo.png';
 
-  srcList = this.srcAllPlatformList.concat(
+  srcList: SampleVideoSource[] = this.srcAllPlatformList.concat(
     Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
   );
 
@@ -270,6 +294,7 @@ class VideoPlayer extends Component {
     this.setState({duration: data.duration, loading: false});
     this.onAudioTracks(data);
     this.onTextTracks(data);
+    this.onVideoTracks(data);
   };
 
   updateSeeker = () => {
@@ -315,6 +340,13 @@ class VideoPlayer extends Component {
       });
     }
   };
+
+  onVideoTracks = (data: OnVideoTracksData) => {
+    console.log('onVideoTracks', data.videoTracks)
+    this.setState({
+      videoTracks: data.videoTracks,
+    });
+  }
 
   onTextTracks = (data: OnTextTracksData) => {
     const selectedTrack = data.textTracks?.find((x: TextTrack) => {
@@ -445,6 +477,9 @@ class VideoPlayer extends Component {
       textTracks: [],
       selectedAudioTrack: undefined,
       selectedTextTrack: undefined,
+      selectedVideoTrack: {
+        type: SelectedVideoTrackType.AUTO
+      },
     });
   }
 
@@ -641,7 +676,7 @@ class VideoPlayer extends Component {
     return (
       <View style={styles.topControlsContainer}>
         <Text style={styles.controlOption}>
-          {this.srcList[this.state.srcListId]?.description || 'local file'}
+          {(this.srcList[this.state.srcListId] as AdditionnalSourceInfo)?.description || 'local file'}
         </Text>
         <View>
           <TouchableOpacity
@@ -666,6 +701,137 @@ class VideoPlayer extends Component {
   onResizeModeSelected = (value: MultiValueControlPropType) => {
     this.setState({resizeMode: value});
   };
+
+  renderAudioTracks = () => {
+    return <><Text style={styles.controlOption}>AudioTrack</Text>
+{this.state.audioTracks?.length <= 0 ? (
+      <Text style={styles.emptyPickerItem}>empty</Text>
+    ) : (
+      <Picker
+        style={styles.picker}
+        itemStyle={styles.pickerItem}
+        selectedValue={this.state.selectedAudioTrack?.value}
+        onValueChange={itemValue => {
+          console.log('on audio value change ' + itemValue);
+          this.setState({
+            selectedAudioTrack: {
+              type: 'language',
+              value: itemValue,
+            },
+          });
+        }}>
+        {this.state.audioTracks.map(track => {
+          if (!track) {
+            return;
+          }
+          return (
+            <Picker.Item
+              label={track.language}
+              value={track.language}
+              key={track.language}
+            />
+          );
+        })}
+      </Picker>
+    )}
+    </>
+  }
+
+  renderTextTracks = () => {
+    return <><Text style={styles.controlOption}>TextTrack</Text>
+    {this.state.textTracks?.length <= 0 ? (
+      <Text style={styles.emptyPickerItem}>empty</Text>
+    ) : (
+      <Picker
+        style={styles.picker}
+        itemStyle={styles.pickerItem}
+        selectedValue={this.state.selectedTextTrack?.value}
+        onValueChange={itemValue => {
+          console.log('on value change ' + itemValue);
+          this.setState({
+            selectedTextTrack: {
+              type: this.textTracksSelectionBy === 'index' ? 'index': 'language',
+              value: itemValue,
+            },
+          });
+        }}>
+        <Picker.Item label={'none'} value={'none'} key={'none'} />
+        {this.state.textTracks.map(track => {
+          if (!track) {
+            return;
+          }
+          if (this.textTracksSelectionBy === 'index') {
+            return (
+              <Picker.Item
+                label={`${track.index}`}
+                value={track.index}
+                key={track.index}
+              />);
+          } else {
+            return (
+              <Picker.Item
+                label={track.language}
+                value={track.language}
+                key={track.language}
+              />);
+          }
+        })}
+      </Picker>
+    )}
+    </>
+  }
+
+  renderVideoTracks = () => {
+    return <><Text style={styles.controlOption}>VideoTrack</Text>
+    {!this.state.videoTracks || this.state.videoTracks?.length <= 0 ? (
+      <Text style={styles.emptyPickerItem}>empty</Text>
+    ) : (
+      <Picker
+        style={styles.picker}
+        itemStyle={styles.pickerItem}
+        selectedValue={
+          this.state.selectedVideoTrack === undefined || this.state.selectedVideoTrack?.type === SelectedVideoTrackType.AUTO
+            ? 'auto'
+            : this.state.selectedVideoTrack?.value
+        }
+        onValueChange={itemValue => {
+          console.log('on value change ' + itemValue);
+          if (itemValue == undefined || itemValue === 'auto') {
+            this.setState({
+              selectedVideoTrack: {
+                  type: SelectedVideoTrackType.AUTO
+              },
+            });
+          } else {
+            this.setState({
+              selectedVideoTrack: {
+                type: SelectedVideoTrackType.INDEX,
+                value: itemValue,
+              },
+            });
+          }
+        }}>
+          <Picker.Item
+            label={`auto`}
+            value={`auto`}
+            key={`auto`}
+          />
+        {this.state.videoTracks.map(track => {
+          if (!track) {
+            return;
+          }
+          return (
+            <Picker.Item
+              label={`${track.width}x${track.height} ${Math.floor((track.bitrate || 0) / 8 / 1024)} Kbps`}
+              value={track.index}
+              key={track.index}
+            />);
+        })}
+      </Picker>
+    )}
+    </>
+
+  }
 
   renderOverlay() {
     return (
@@ -802,77 +968,9 @@ class VideoPlayer extends Component {
               </View>
               {this.renderSeekBar()}
               <View style={styles.generalControls}>
-                <Text style={styles.controlOption}>AudioTrack</Text>
-                {this.state.audioTracks?.length <= 0 ? (
-                  <Text style={styles.emptyPickerItem}>empty</Text>
-                ) : (
-                  <Picker
-                    style={styles.picker}
-                    itemStyle={styles.pickerItem}
-                    selectedValue={this.state.selectedAudioTrack?.value}
-                    onValueChange={itemValue => {
-                      console.log('on audio value change ' + itemValue);
-                      this.setState({
-                        selectedAudioTrack: {
-                          type: 'language',
-                          value: itemValue,
-                        },
-                      });
-                    }}>
-                    {this.state.audioTracks.map(track => {
-                      if (!track) {
-                        return;
-                      }
-                      return (
-                        <Picker.Item
-                          label={track.language}
-                          value={track.language}
-                          key={track.language}
-                        />
-                      );
-                    })}
-                  </Picker>
-                )}
-                <Text style={styles.controlOption}>TextTrack</Text>
-                {this.state.textTracks?.length <= 0 ? (
-                  <Text style={styles.emptyPickerItem}>empty</Text>
-                ) : (
-                  <Picker
-                    style={styles.picker}
-                    itemStyle={styles.pickerItem}
-                    selectedValue={this.state.selectedTextTrack?.value}
-                    onValueChange={itemValue => {
-                      console.log('on value change ' + itemValue);
-                      this.setState({
-                        selectedTextTrack: {
-                          type: this.textTracksSelectionBy === 'index' ? 'index': 'language',
-                          value: itemValue,
-                        },
-                      });
-                    }}>
-                    <Picker.Item label={'none'} value={'none'} key={'none'} />
-                    {this.state.textTracks.map(track => {
-                      if (!track) {
-                        return;
-                      }
-                      if (this.textTracksSelectionBy === 'index') {
-                        return (
-                          <Picker.Item
-                            label={`${track.index}`}
-                            value={track.index}
-                            key={track.index}
-                          />);
-                      } else {
-                        return (
-                          <Picker.Item
-                            label={track.language}
-                            value={track.language}
-                            key={track.language}
-                          />);
-                      }
-                    })}
-                  </Picker>
-                )}
+                {this.renderAudioTracks()}
+                {this.renderTextTracks()}
+                {this.renderVideoTracks()}
               </View>
             </View>
           </>
@@ -886,6 +984,9 @@ class VideoPlayer extends Component {
       ? styles.fullScreen
       : styles.halfScreen;
 
+    const currentSrc = this.srcList[this.state.srcListId]
+    const additionnal = currentSrc as AdditionnalSourceInfo
+
     return (
       <TouchableOpacity style={viewStyle}>
         <Video
@@ -893,10 +994,10 @@ class VideoPlayer extends Component {
           ref={(ref: VideoRef) => {
             this.video = ref;
           }}
-          source={this.srcList[this.state.srcListId]}
-          textTracks={this.srcList[this.state.srcListId]?.textTracks}
-          adTagUrl={this.srcList[this.state.srcListId]?.adTagUrl}
-          drm={this.srcList[this.state.srcListId]?.drm}
+          source={currentSrc as ReactVideoSource}
+          textTracks={additionnal?.textTracks}
+          adTagUrl={additionnal?.adTagUrl}
+          drm={additionnal?.drm}
           style={viewStyle}
           rate={this.state.rate}
           paused={this.state.paused}
@@ -908,6 +1009,7 @@ class VideoPlayer extends Component {
           onLoad={this.onLoad}
           onAudioTracks={this.onAudioTracks}
           onTextTracks={this.onTextTracks}
+          onVideoTracks={this.onVideoTracks}
           onTextTrackDataChanged={this.onTextTrackDataChanged}
           onProgress={this.onProgress}
           onEnd={this.onEnd}
@@ -923,6 +1025,7 @@ class VideoPlayer extends Component {
           repeat={this.state.loop}
           selectedTextTrack={this.state.selectedTextTrack}
           selectedAudioTrack={this.state.selectedAudioTrack}
+          selectedVideoTrack={this.state.selectedVideoTrack}
           playInBackground={false}
           bufferConfig={{
             minBufferMs: 15000,
@@ -944,7 +1047,7 @@ class VideoPlayer extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {this.srcList[this.state.srcListId]?.noView
+        {(this.srcList[this.state.srcListId] as AdditionnalSourceInfo)?.noView
           ? null
           : this.renderVideoView()}
         {this.renderOverlay()}
@@ -1093,6 +1196,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
+    color: 'white',
     flexDirection: 'row',
     justifyContent: 'center',
     width: 100,

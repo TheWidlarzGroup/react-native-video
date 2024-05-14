@@ -216,7 +216,8 @@ export type OnTextTrackDataChangedData = Readonly<{
 
 export type OnVideoTracksData = Readonly<{
   videoTracks: {
-    trackId: Int32;
+    index: Int32;
+    tracksId?: string;
     codecs?: string;
     width?: Float;
     height?: Float;

@@ -1359,6 +1359,7 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
         videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
+        videoTrack.setIndex(trackIndex);
         return videoTrack;
     }
 
