@@ -589,7 +589,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVideoEnd={onEnd}
           onVideoBuffer={onBuffer ? onVideoBuffer : undefined}
           onVideoPlaybackStateChanged={
-            onPlaybackRateChange ? onVideoPlaybackStateChanged : undefined
+            onPlaybackStateChanged ? onVideoPlaybackStateChanged : undefined
           }
           onVideoBandwidthUpdate={
             onBandwidthUpdate ? _onBandwidthUpdate : undefined
@@ -612,7 +612,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onAudioFocusChanged={
             onAudioFocusChanged ? _onAudioFocusChanged : undefined
           }
-          onReadyForDisplay={onReadyForDisplay ? _onReadyForDisplay : undefined}
+          onReadyForDisplay={
+            onReadyForDisplay || hasPoster ? _onReadyForDisplay : undefined
+          }
           onPlaybackRateChange={
             onPlaybackRateChange ? _onPlaybackRateChange : undefined
           }

@@ -34,7 +34,6 @@ import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.view.WindowCompat;
@@ -108,7 +107,10 @@ import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
+import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ResizeMode;
+import com.brentvatne.common.api.SideLoadedTextTrack;
+import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
@@ -121,8 +123,6 @@ import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.receiver.PictureInPictureReceiver;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.views.view.ReactViewGroup;
@@ -229,10 +229,10 @@ public class ReactExoplayerView extends FrameLayout implements
     private String videoTrackValue;
     private String textTrackType;
     private String textTrackValue;
-    private ReadableArray textTracks;
+    private SideLoadedTextTrackList textTracks;
     private boolean disableFocus;
     private boolean focusable = true;
-    private boolean disableBuffering;
+    private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
     private long contentStartTime = -1L;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
@@ -584,30 +584,34 @@ public class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
-            if (ReactExoplayerView.this.disableBuffering) {
+            if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DisableBuffering) {
                 return false;
+            } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DependingOnMemory) {
+                // The goal of this algorithm is to pause video loading (increasing the buffer)
+                // when available memory on device become low.
+                int loadedBytes = getAllocator().getTotalBytesAllocated();
+                boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
+                if (isHeapReached) {
+                    return false;
+                }
+                long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+                long freeMemory = runtime.maxMemory() - usedMemory;
+                double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
+                        ? bufferConfig.getMinBufferMemoryReservePercent()
+                        : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
+                long reserveMemory = (long) minBufferMemoryReservePercent * runtime.maxMemory();
+                long bufferedMs = bufferedDurationUs / (long) 1000;
+                if (reserveMemory > freeMemory && bufferedMs > 2000) {
+                    // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
+                    return false;
+                }
+                if (runtime.freeMemory() == 0) {
+                    DebugLog.w(TAG, "Free memory reached 0, forcing garbage collection");
+                    runtime.gc();
+                    return false;
+                }
             }
-            int loadedBytes = getAllocator().getTotalBytesAllocated();
-            boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
-            if (isHeapReached) {
-                return false;
-            }
-            long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-            long freeMemory = runtime.maxMemory() - usedMemory;
-            double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                    ? bufferConfig.getMinBufferMemoryReservePercent()
-                    : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-            long reserveMemory = (long)minBufferMemoryReservePercent * runtime.maxMemory();
-            long bufferedMs = bufferedDurationUs / (long)1000;
-            if (reserveMemory > freeMemory && bufferedMs > 2000) {
-                // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
-                return false;
-            }
-            if (runtime.freeMemory() == 0) {
-                DebugLog.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
-                runtime.gc();
-                return false;
-            }
+            // "default" case or normal case for "DependingOnMemory"
             return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
         }
     }
@@ -631,13 +635,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         DrmSessionManager drmSessionManager = initializePlayerDrm(self);
                         if (drmSessionManager == null && self.drmUUID != null) {
                             // Failed to intialize DRM session manager - cannot continue
-                            DebugLog.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
+                            DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
                             eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                             return;
                         }
 
                         if (activity == null) {
-                            DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
+                            DebugLog.e(TAG, "Failed to initialize Player!");
                             eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
                             return;
                         }
@@ -649,8 +653,8 @@ public class ReactExoplayerView extends FrameLayout implements
                                 initializePlayerSource(self, drmSessionManager);
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
-                                DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
-                                DebugLog.e("ExoPlayer Exception", ex.toString());
+                                DebugLog.e(TAG, "Failed to initialize Player!");
+                                DebugLog.e(TAG, ex.toString());
                                 self.eventEmitter.error(ex.toString(), ex, "1001");
                             }
                         });
@@ -660,8 +664,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
-                DebugLog.e("ExoPlayer Exception", "Failed to initialize Player!");
-                DebugLog.e("ExoPlayer Exception", ex.toString());
+                DebugLog.e(TAG, "Failed to initialize Player!");
+                DebugLog.e(TAG, ex.toString());
                 eventEmitter.error(ex.toString(), ex, "1001");
             }
         };
@@ -778,7 +782,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 wait();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                DebugLog.e("ExoPlayer Exception", ex.toString());
+                DebugLog.e(TAG, ex.toString());
             }
         }
 
@@ -1039,17 +1043,12 @@ public class ReactExoplayerView extends FrameLayout implements
             return textSources;
         }
 
-        for (int i = 0; i < textTracks.size(); ++i) {
-            ReadableMap textTrack = textTracks.getMap(i);
-            String language = textTrack.getString("language");
-            String title = textTrack.hasKey("title")
-                    ? textTrack.getString("title") : language + " " + i;
-            Uri uri = Uri.parse(textTrack.getString("uri"));
-            MediaSource textSource = buildTextSource(title, uri, textTrack.getString("type"),
-                    language);
-            if (textSource != null) {
-                textSources.add(textSource);
-            }
+        for (SideLoadedTextTrack track : textTracks.getTracks()) {
+            MediaSource textSource = buildTextSource(track.getTitle(),
+                    track.getUri(),
+                    track.getType(),
+                    track.getLanguage());
+            textSources.add(textSource);
         }
         return textSources;
     }
@@ -1404,7 +1403,7 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
-        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);;
+        videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
         return videoTrack;
     }
 
@@ -1693,14 +1692,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (this.customMetadata != customMetadata && player != null) {
             MediaItem currentMediaItem = player.getCurrentMediaItem();
 
-            if (currentMediaItem == null) {
-                return;
+            if (currentMediaItem != null) {
+
+                MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+
+                // This will cause video blink/reload but won't louse progress
+                player.setMediaItem(newMediaItem, false);
             }
-
-            MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-
-            // This will cause video blink/reload but won't louse progress
-            player.setMediaItem(newMediaItem, false);
         }
 
         if (uri != null) {
@@ -1764,7 +1762,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setTextTracks(ReadableArray textTracks) {
+    public void setTextTracks(SideLoadedTextTrackList textTracks) {
         this.textTracks = textTracks;
         reloadSource();
     }
@@ -1846,9 +1844,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if ("index".equals(type)) {
-            int iValue = Integer.parseInt(value);
-            if (iValue < groups.length) {
-                groupIndex = iValue;
+            try {
+                int iValue = Integer.parseInt(value);
+                if (iValue < groups.length) {
+                    groupIndex = iValue;
+                }
+            } catch (Exception e) {
+                DebugLog.e(TAG, "cannot parse index:" + value);
+                groupIndex = 0;
             }
         } else if ("resolution".equals(type)) {
             int height = Integer.parseInt(value);
@@ -1914,7 +1917,6 @@ public class ReactExoplayerView extends FrameLayout implements
         if (groupIndex == C.INDEX_UNSET && trackType == C.TRACK_TYPE_VIDEO && groups.length != 0) { // Video auto
             // Add all tracks as valid options for ABR to choose from
             TrackGroup group = groups.get(0);
-            tracks = new ArrayList<>(group.length);
             ArrayList<Integer> allTracks = new ArrayList<>(group.length);
             groupIndex = 0;
             for (int j = 0; j < group.length; j++) {
@@ -2184,8 +2186,8 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setDisableBuffering(boolean disableBuffering) {
-        this.disableBuffering = disableBuffering;
+    public void setBufferingStrategy(BufferingStrategy.BufferingStrategyEnum _bufferingStrategy) {
+        bufferingStrategy = _bufferingStrategy;
     }
 
     public boolean getPreventsDisplaySleepDuringVideoPlayback() {

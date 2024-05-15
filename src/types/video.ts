@@ -68,6 +68,12 @@ export type Drm = Readonly<{
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
 
+export enum BufferingStrategyType {
+  DEFAULT = 'Default',
+  DISABLE_BUFFERING = 'DisableBuffering',
+  DEPENDING_ON_MEMORY = 'DependingOnMemory',
+}
+
 export type BufferConfig = {
   minBufferMs?: number;
   maxBufferMs?: number;
@@ -195,6 +201,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   bufferConfig?: BufferConfig; // Android
+  bufferingStrategy?: BufferingStrategyType;
   chapters?: Chapters[]; // iOS
   contentStartTime?: number; // Android
   controls?: boolean;

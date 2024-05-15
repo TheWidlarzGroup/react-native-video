@@ -1,5 +1,33 @@
 
 
+# [6.0.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.0.0-rc.2...v6.0.0) (2024-05-14)
+
+
+### Bug Fixes
+
+* **android:** poster hidding ([#3768](https://github.com/TheWidlarzGroup/react-native-video/issues/3768)) ([98b4a75](https://github.com/TheWidlarzGroup/react-native-video/commit/98b4a75a90c6bc97cde267ea1c6a4a68d0bfdf45))
+* **android:** video tracks crash and clean ([#3767](https://github.com/TheWidlarzGroup/react-native-video/issues/3767)) ([219496f](https://github.com/TheWidlarzGroup/react-native-video/commit/219496ff3abf6d7362ae01fb66c0bf28dfb00510))
+
+# [6.0.0-rc.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.0.0-rc.1...v6.0.0-rc.2) (2024-05-13)
+
+
+### Bug Fixes
+
+* **avoid:** avoid early return in setSrc ([#3759](https://github.com/TheWidlarzGroup/react-native-video/issues/3759)) ([2e623ca](https://github.com/TheWidlarzGroup/react-native-video/commit/2e623ca0fb074e64a6125994effb8723f5c4ce59))
+* **ios:** call `onLoadStart` earlier ([#3750](https://github.com/TheWidlarzGroup/react-native-video/issues/3750)) ([b3f08f6](https://github.com/TheWidlarzGroup/react-native-video/commit/b3f08f6c990f4670311e6d918aea191e72673057))
+* **js:** fix onPlaybackStateChanged callback ([#3753](https://github.com/TheWidlarzGroup/react-native-video/issues/3753)) ([f87a793](https://github.com/TheWidlarzGroup/react-native-video/commit/f87a7938c6941c69915477fcf5f08c54a2635597))
+* **ts:** add missing type ([#3757](https://github.com/TheWidlarzGroup/react-native-video/issues/3757)) ([2d94844](https://github.com/TheWidlarzGroup/react-native-video/commit/2d9484499cfb58d86b0aa82872d494a03fe67bba))
+
+
+### Features
+
+* **android:** make buffering strategy dynamic ([#3756](https://github.com/TheWidlarzGroup/react-native-video/issues/3756)) ([e420418](https://github.com/TheWidlarzGroup/react-native-video/commit/e420418e8f74894c443bd232e99f9b860e1d0b93))
+
+
+### Reverts
+
+* Revert "fix(android): video flickering add playback start (#3746)" (#3748) ([d25629b](https://github.com/TheWidlarzGroup/react-native-video/commit/d25629bb62cb9a7772ec2704f678e0fdf4927d12)), closes [#3746](https://github.com/TheWidlarzGroup/react-native-video/issues/3746) [#3748](https://github.com/TheWidlarzGroup/react-native-video/issues/3748)
+
 # [6.0.0-rc.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.0.0-rc.0...v6.0.0-rc.1) (2024-05-08)
 
 

@@ -80,6 +80,16 @@ bufferConfig={{
 
 Please note that the Android cache is a global cache that is shared among all components; individual components can still opt out of caching behavior by setting cacheSizeMB to 0, but multiple components with a positive cacheSizeMB will be sharing the same one, and the cache size will always be the first value set; it will not change during the app's lifecycle.
 
+
+### `bufferingStrategy`
+<PlatformsList types={['Android']} />
+
+Configure buffering / data loading strategy.
+
+ - **Default (default)**: use exoplayer default loading strategy
+ - **DisableBuffering**: never try to buffer more than needed. Be carefull using this value will stop playback. To be used with care.
+ - **DependingOnMemory**: use exoplayer default strategy, but stop buffering and starts gc if available memory is low |
+
 ### `chapters`
 
 <PlatformsList types={['tvOS']} />
