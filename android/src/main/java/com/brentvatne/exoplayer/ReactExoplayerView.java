@@ -1366,7 +1366,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private ArrayList<VideoTrack> getVideoTrackInfo() {
         ArrayList<VideoTrack> videoTracks = new ArrayList<>();
         if (trackSelector == null) {
-            // Likely player is unmounting so no audio tracks are available anymore
+            // Likely player is unmounting so no video tracks are available anymore
             return videoTracks;
         }
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
