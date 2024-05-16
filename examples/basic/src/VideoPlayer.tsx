@@ -1039,6 +1039,7 @@ class VideoPlayer extends Component {
           onPlaybackRateChange={this.onPlaybackRateChange}
           onPlaybackStateChanged={this.onPlaybackStateChanged}
           bufferingStrategy={BufferingStrategyType.DEFAULT}
+          debug={{enable: true, thread: true}}
         />
       </TouchableOpacity>
     );

@@ -448,6 +448,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         } else {
             DebugLog.setConfig(Log.WARN, enableThreadDebug);
         }
+        videoView.setDebug(enableDebug);
     }
 
     private boolean startsWithValidScheme(String uriString) {
