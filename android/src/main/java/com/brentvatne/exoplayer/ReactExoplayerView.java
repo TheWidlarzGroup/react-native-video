@@ -1824,14 +1824,15 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if ("index".equals(type)) {
-            try {
-                int iValue = Integer.parseInt(value);
-                if (iValue < groups.length) {
-                    groupIndex = iValue;
-                }
-            } catch (Exception e) {
-                DebugLog.e(TAG, "cannot parse index:" + value);
+            int iValue = Integer.parseInt(value);
+
+            if (trackType == C.TRACK_TYPE_VIDEO && groups.length == 1) {
                 groupIndex = 0;
+                if (iValue < groups.get(groupIndex).length) {
+                    tracks.set(0, iValue);
+                }
+            } else if (iValue < groups.length) {
+                groupIndex = iValue;
             }
         } else if ("resolution".equals(type)) {
             int height = Integer.parseInt(value);
