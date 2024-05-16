@@ -712,6 +712,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
             DataSpec adTagDataSpec = new DataSpec(adTagUrl);
             mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
+        } else {
+            if (adTagUrl == null && adsLoader != null) {
+                adsLoader.release();
+                adsLoader = null;
+            }
         }
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
