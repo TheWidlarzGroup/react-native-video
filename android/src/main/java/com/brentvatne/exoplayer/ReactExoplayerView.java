@@ -97,6 +97,7 @@ import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
+import androidx.media3.exoplayer.util.EventLogger;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
@@ -184,6 +185,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private ServiceConnection playbackServiceConnection;
     private PlaybackServiceBinder playbackServiceBinder;
+
+    // logger to be enable by props
+    private EventLogger debugEventLogger = null;
+    private boolean enableDebug = false;
+    private static final String TAG_EVENT_LOGGER = "RNVExoplayer";
 
     private int resumeWindow;
     private long resumePosition;
@@ -508,6 +514,24 @@ public class ReactExoplayerView extends FrameLayout implements
         reLayout(playerControlView);
     }
 
+    public void setDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
+        refreshDebugState();
+    }
+
+    private void refreshDebugState() {
+        if (player == null) {
+            return;
+        }
+        if (enableDebug) {
+            debugEventLogger = new EventLogger(TAG_EVENT_LOGGER);
+            player.addAnalyticsListener(debugEventLogger);
+        } else if (debugEventLogger != null) {
+            player.removeAnalyticsListener(debugEventLogger);
+            debugEventLogger = null;
+        }
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
@@ -666,6 +690,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
                 .build();
+        refreshDebugState();
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
