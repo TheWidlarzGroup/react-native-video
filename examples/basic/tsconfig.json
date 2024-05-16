@@ -6,6 +6,6 @@
       "react": ["./node_modules/@types/react"]
     }
   },
-  "include": ["src", "**/*.js"],
+  "jsx": "react",
   "exclude": ["node_modules"]
 }
