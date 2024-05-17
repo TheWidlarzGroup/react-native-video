@@ -750,11 +750,11 @@ public class ReactExoplayerView extends FrameLayout implements
         boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
         if (haveResumePosition) {
             player.seekTo(resumeWindow, resumePosition);
-        }
-        if (startPositionMs >= 0) {
+            player.setMediaSource(mediaSource, false);
+        } else if (startPositionMs > 0) {
             player.setMediaSource(mediaSource, startPositionMs);
         } else {
-            player.setMediaSource(mediaSource, !haveResumePosition);
+            player.setMediaSource(mediaSource, true);
         }
         player.prepare();
         playerNeedsSource = false;
