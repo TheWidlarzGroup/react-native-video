@@ -188,7 +188,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipActive)
+            _imaAdsManager = RCTIMAAdsManager(video: self, pipActive: isPipActive)
         #endif
 
         _eventDispatcher = eventDispatcher
@@ -256,7 +256,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
+            _imaAdsManager = RCTIMAAdsManager(video: self, pipActive: isPipActive)
         #endif
     }
 
