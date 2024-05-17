@@ -132,7 +132,7 @@ class VideoPlayer extends Component {
   seekerWidth = 0;
 
   // internal usage change to index if you want to select tracks by index instead of lang
-  textTracksSelectionBy = 'lang';
+  textTracksSelectionBy = 'index';
 
   srcAllPlatformList = [
     {
@@ -328,12 +328,12 @@ class VideoPlayer extends Component {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    if (selectedTrack?.language) {
+    if (selectedTrack?.index) {
       this.setState({
         audioTracks: data.audioTracks,
         selectedAudioTrack: {
-          type: 'language',
-          value: selectedTrack?.language,
+          type: SelectedVideoTrackType.INDEX,
+          value: selectedTrack?.index,
         },
       });
     } else {
@@ -710,12 +710,18 @@ class VideoPlayer extends Component {
 
   onSelectedAudioTrackChange = (itemValue: string) => {
     console.log('on audio value change ' + itemValue);
-    this.setState({
-      selectedAudioTrack: {
-        type: 'language',
-        value: itemValue,
-      },
-    });
+    if (itemValue === 'none') {
+      this.setState({
+        selectedAudioTrack: SelectedVideoTrackType.DISABLED,
+      });
+    } else {
+      this.setState({
+        selectedAudioTrack: {
+          type: SelectedVideoTrackType.INDEX,
+          value: itemValue,
+        },
+      });
+    }
   };
 
   onSelectedTextTrackChange = (itemValue: string) => {
