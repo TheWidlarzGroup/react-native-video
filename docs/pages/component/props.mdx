@@ -51,7 +51,7 @@ A Boolean value that indicates whether the player should automatically delay pla
 
 <PlatformsList types={['Android']} />
 
-Adjust the control styles. This prop takes an object with one property listed below.
+Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
 
 | Property    | Type    | Description                                                                          |
 |-------------|---------|--------------------------------------------------------------------------------------|
@@ -65,6 +65,7 @@ controlsStyles={{
 }}
 ```
 
+
 ### `bufferConfig`
 
 <PlatformsList types={['Android']} />
@@ -72,7 +73,7 @@ controlsStyles={{
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
 | Property                          | Type   | Description                                                                                                                                                                                     |
-|-----------------------------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | minBufferMs                       | number | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.                                                                         |
 | maxBufferMs                       | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.                                                                                                  |
 | bufferForPlaybackMs               | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.                                                    |
@@ -115,7 +116,7 @@ Configure buffering / data loading strategy.
 To provide a custom chapter source for tvOS. This prop takes an array of objects with the properties listed below.
 
 | Property  | Type    | Description                                                                                                                                               |
-|-----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | title     | string  | The title of the chapter to create                                                                                                                        |
 | startTime | number  | The start time of the chapter in seconds                                                                                                                  |
 | endTime   | number  | The end time of the chapter in seconds                                                                                                                    |
@@ -156,7 +157,7 @@ Enable more verbosity in logs.
 > Do not use this open in production build
 
 | Property | Type    | Description                                   |
-|----------|---------|-----------------------------------------------|
+| -------- | ------- | --------------------------------------------- |
 | `enable` | boolean | when true, display logs with verbosity higher |
 | `thread` | boolean | enable thread display                         |
 
@@ -519,7 +520,7 @@ selectedAudioTrack={{
 ```
 
 | Type               | Value  | Description                                                                                 |
-|--------------------|--------|---------------------------------------------------------------------------------------------|
+| ------------------ | ------ | ------------------------------------------------------------------------------------------- |
 | "system" (default) | N/A    | Play the audio track that matches the system language. If none match, play the first track. |
 | "disabled"         | N/A    | Turn off audio                                                                              |
 | "title"            | string | Play the audio track with the title specified as the Value, e.g. "French"                   |
@@ -551,7 +552,7 @@ selectedTextTrack={{
 ```
 
 | Type               | Value  | Description                                                                   |
-|--------------------|--------|-------------------------------------------------------------------------------|
+| ------------------ | ------ | ----------------------------------------------------------------------------- |
 | "system" (default) | N/A    | Display captions only if the system preference for captions is enabled        |
 | "disabled"         | N/A    | Don't display a text track                                                    |
 | "title"            | string | Display the text track with the title specified as the Value, e.g. "French 1" |
@@ -585,7 +586,7 @@ selectedVideoTrack={{
 ```
 
 | Type             | Value  | Description                                                                  |
-|------------------|--------|------------------------------------------------------------------------------|
+| ---------------- | ------ | ---------------------------------------------------------------------------- |
 | "auto" (default) | N/A    | Let the player determine which track to play using ABR                       |
 | "disabled"       | N/A    | Turn off video                                                               |
 | "resolution"     | number | Play the video track with the height specified, e.g. 480 for the 480p stream |
@@ -757,7 +758,7 @@ source={{
 ### `subtitleStyle`
 
 | Property      | Description                                                                                                                                                                                        | Platforms    |
-|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
 | fontSize      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
 | paddingTop    | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
 | paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
@@ -780,7 +781,7 @@ Load one or more "sidecar" text tracks. This takes an array of objects represent
 > ⚠️ This feature does not work with HLS playlists (e.g m3u8) on iOS
 
 | Property | Description                                                                                                                                                                      |
-|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | title    | Descriptive name for the track                                                                                                                                                   |
 | language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                       |
 | type     | Mime type of the track _ TextTrackType.SRT - SubRip (.srt) _ TextTrackType.TTML - TTML (.ttml) \* TextTrackType.VTT - WebVTT (.vtt)iOS only supports VTT, Android supports all 3 |

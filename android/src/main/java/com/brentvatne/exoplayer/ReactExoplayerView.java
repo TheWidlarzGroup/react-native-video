@@ -247,7 +247,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
-    private boolean hideSeekBar = false;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -517,31 +516,33 @@ public class ReactExoplayerView extends FrameLayout implements
 
     }
 
-    @SuppressLint("SuspiciousIndentation")
     private void refreshProgressBarVisibility (){
         if(playerControlView == null) return;
-            exoProgress = playerControlView.findViewById(R.id.exo_progress);
-            exoDuration = playerControlView.findViewById(R.id.exo_duration);
-            exoPosition = playerControlView.findViewById(R.id.exo_position);
-            if(hideSeekBar){
-                LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT,
-                        LayoutParams.MATCH_PARENT,
-                        1.0f
-                );
-                exoProgress.setVisibility(GONE);
-                exoDuration.setVisibility(GONE);
-                exoPosition.setLayoutParams(param);
-            }else{
-                exoProgress.setVisibility(VISIBLE);
-                exoDuration.setVisibility(VISIBLE);
-                // Reset the layout parameters of exoPosition to their default state
-                LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
-                        LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT
-                );
-                exoPosition.setLayoutParams(defaultParam);
-            }
+        DefaultTimeBar exoProgress;
+        TextView exoDuration;
+        TextView exoPosition;
+        exoProgress = playerControlView.findViewById(R.id.exo_progress);
+        exoDuration = playerControlView.findViewById(R.id.exo_duration);
+        exoPosition = playerControlView.findViewById(R.id.exo_position);
+        if(controlsConfig.getHideSeekBar()){
+            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT,
+                    1.0f
+            );
+            exoProgress.setVisibility(GONE);
+            exoDuration.setVisibility(GONE);
+            exoPosition.setLayoutParams(param);
+        }else{
+            exoProgress.setVisibility(VISIBLE);
+            exoDuration.setVisibility(VISIBLE);
+            // Reset the layout parameters of exoPosition to their default state
+            LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
+                    LayoutParams.WRAP_CONTENT,
+                    LayoutParams.WRAP_CONTENT
+            );
+            exoPosition.setLayoutParams(defaultParam);
+        }
     }
 
     private void reLayoutControls() {
@@ -2313,7 +2314,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
-        this.hideSeekBar = controlsStyles.getHideSeekBar();
         refreshProgressBarVisibility();
     }
 }

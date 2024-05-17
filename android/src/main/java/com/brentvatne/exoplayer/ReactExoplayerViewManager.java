@@ -212,15 +212,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         } else {
             int identifier = context.getResources().getIdentifier(
-                    uriString,
-                    "drawable",
-                    context.getPackageName()
+                uriString,
+                "drawable",
+                context.getPackageName()
             );
             if (identifier == 0) {
                 identifier = context.getResources().getIdentifier(
-                        uriString,
-                        "raw",
-                        context.getPackageName()
+                uriString,
+                "raw",
+                context.getPackageName()
                 );
             }
             if (identifier > 0) {
@@ -275,28 +275,28 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
-    public void setSelectedVideoTrack(final ReactExoplayerView videoView,
-                                      @Nullable ReadableMap selectedVideoTrack) {
-        String typeString = null;
-        String value = null;
-        if (selectedVideoTrack != null) {
-            typeString = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_TYPE);
-            value = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_VALUE);
+        public void setSelectedVideoTrack(final ReactExoplayerView videoView,
+                                         @Nullable ReadableMap selectedVideoTrack) {
+            String typeString = null;
+            String value = null;
+            if (selectedVideoTrack != null) {
+                typeString = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_TYPE);
+                value = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_VALUE);
+            }
+            videoView.setSelectedVideoTrack(typeString, value);
         }
-        videoView.setSelectedVideoTrack(typeString, value);
-    }
 
-    @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
-    public void setSelectedAudioTrack(final ReactExoplayerView videoView,
-                                      @Nullable ReadableMap selectedAudioTrack) {
-        String typeString = null;
-        String value = null;
-        if (selectedAudioTrack != null) {
-            typeString = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_TYPE);
-            value = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_VALUE);
+        @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
+        public void setSelectedAudioTrack(final ReactExoplayerView videoView,
+                                         @Nullable ReadableMap selectedAudioTrack) {
+            String typeString = null;
+            String value = null;
+            if (selectedAudioTrack != null) {
+                typeString = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_TYPE);
+                value = ReactBridgeUtils.safeGetString(selectedAudioTrack, PROP_SELECTED_AUDIO_TRACK_VALUE);
+            }
+            videoView.setSelectedAudioTrack(typeString, value);
         }
-        videoView.setSelectedAudioTrack(typeString, value);
-    }
 
     @ReactProp(name = PROP_SELECTED_TEXT_TRACK)
     public void setSelectedTextTrack(final ReactExoplayerView videoView,
