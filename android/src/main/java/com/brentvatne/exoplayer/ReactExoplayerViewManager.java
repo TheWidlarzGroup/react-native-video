@@ -288,7 +288,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactExoplayerView videoView,
-                                      @Nullable ReadableMap selectedAudioTrack) {
+                                     @Nullable ReadableMap selectedAudioTrack) {
         String typeString = null;
         String value = null;
         if (selectedAudioTrack != null) {
