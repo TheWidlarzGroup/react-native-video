@@ -194,9 +194,15 @@ public class VideoEventEmitter {
                 WritableMap audioTrack = Arguments.createMap();
                 audioTrack.putInt("index", i);
                 audioTrack.putString("title", format.getTitle());
-                audioTrack.putString("type", format.getMimeType());
-                audioTrack.putString("language", format.getLanguage());
-                audioTrack.putInt("bitrate", format.getBitrate());
+                if (format.getMimeType() != null) {
+                    audioTrack.putString("type", format.getMimeType());
+                }
+                if (format.getLanguage() != null) {
+                    audioTrack.putString("language", format.getLanguage());
+                }
+                if (format.getBitrate() > 0) {
+                    audioTrack.putInt("bitrate", format.getBitrate());
+                }
                 audioTrack.putBoolean("selected", format.isSelected());
                 waAudioTracks.pushMap(audioTrack);
             }
