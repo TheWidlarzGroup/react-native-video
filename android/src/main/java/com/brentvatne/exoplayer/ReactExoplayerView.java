@@ -508,7 +508,6 @@ public class ReactExoplayerView extends FrameLayout implements
         view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
-
     }
 
     private void refreshProgressBarVisibility (){
