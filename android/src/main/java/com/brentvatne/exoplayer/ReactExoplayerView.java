@@ -29,6 +29,8 @@ import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -101,10 +103,12 @@ import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
+import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
+import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
@@ -119,6 +123,7 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -210,6 +215,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private Handler mainHandler;
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
+    private ControlsConfig controlsConfig = new ControlsConfig();
+
 
     // Props from React
     private Uri srcUri;
@@ -450,6 +457,7 @@ public class ReactExoplayerView extends FrameLayout implements
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisbility();
+        refreshProgressBarVisibility();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -507,30 +515,33 @@ public class ReactExoplayerView extends FrameLayout implements
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
 
-         if(view == playerControlView){
-            exoProgress = findViewById(R.id.exo_progress);
-            exoDuration = findViewById(R.id.exo_duration);
-            exoPosition = findViewById(R.id.exo_position);
+    }
+
+    @SuppressLint("SuspiciousIndentation")
+    private void refreshProgressBarVisibility (){
+        if(playerControlView == null) return;
+            exoProgress = playerControlView.findViewById(R.id.exo_progress);
+            exoDuration = playerControlView.findViewById(R.id.exo_duration);
+            exoPosition = playerControlView.findViewById(R.id.exo_position);
             if(hideSeekBar){
                 LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                                LayoutParams.MATCH_PARENT,
-                                LayoutParams.MATCH_PARENT,
-                                1.0f
-                        );
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.MATCH_PARENT,
+                        1.0f
+                );
                 exoProgress.setVisibility(GONE);
                 exoDuration.setVisibility(GONE);
                 exoPosition.setLayoutParams(param);
             }else{
-               exoProgress.setVisibility(VISIBLE);
+                exoProgress.setVisibility(VISIBLE);
                 exoDuration.setVisibility(VISIBLE);
                 // Reset the layout parameters of exoPosition to their default state
                 LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
-                               LayoutParams.WRAP_CONTENT,
-                                LayoutParams.WRAP_CONTENT
-                        );
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT
+                );
                 exoPosition.setLayoutParams(defaultParam);
-                    }
-                }
+            }
     }
 
     private void reLayoutControls() {
@@ -2300,7 +2311,9 @@ public class ReactExoplayerView extends FrameLayout implements
         eventEmitter.receiveAdErrorEvent(error.getMessage(), String.valueOf(error.getErrorCode()), String.valueOf(error.getErrorType()));
     }
 
-    public void setHideSeekBar(boolean hideSeekBar) {
-        this.hideSeekBar = hideSeekBar;
+    public void setControlsStyles(ControlsConfig controlsStyles) {
+        controlsConfig = controlsStyles;
+        this.hideSeekBar = controlsStyles.getHideSeekBar();
+        refreshProgressBarVisibility();
     }
 }

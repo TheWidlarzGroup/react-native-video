@@ -13,6 +13,7 @@ import androidx.media3.datasource.RawResourceDataSource;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
+import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
@@ -88,7 +89,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
-    private static final String HIDE_SEEKBAR = "hideSeekBar";
+    private static final String PROP_CONTROLS_STYLES = "controlsStyles";
 
     private final ReactExoplayerConfig config;
 
@@ -211,15 +212,15 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             }
         } else {
             int identifier = context.getResources().getIdentifier(
-                uriString,
-                "drawable",
-                context.getPackageName()
+                    uriString,
+                    "drawable",
+                    context.getPackageName()
             );
             if (identifier == 0) {
                 identifier = context.getResources().getIdentifier(
-                    uriString,
-                    "raw",
-                    context.getPackageName()
+                        uriString,
+                        "raw",
+                        context.getPackageName()
                 );
             }
             if (identifier > 0) {
@@ -275,7 +276,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
     public void setSelectedVideoTrack(final ReactExoplayerView videoView,
-                                     @Nullable ReadableMap selectedVideoTrack) {
+                                      @Nullable ReadableMap selectedVideoTrack) {
         String typeString = null;
         String value = null;
         if (selectedVideoTrack != null) {
@@ -287,7 +288,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
     public void setSelectedAudioTrack(final ReactExoplayerView videoView,
-                                     @Nullable ReadableMap selectedAudioTrack) {
+                                      @Nullable ReadableMap selectedAudioTrack) {
         String typeString = null;
         String value = null;
         if (selectedAudioTrack != null) {
@@ -451,10 +452,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         }
     }
 
-    @ReactProp(name = HIDE_SEEKBAR, defaultBoolean = false)
-        public void setHideSeekBar(final ReactExoplayerView videoView, final boolean hideSeekBar) {
-            videoView.setHideSeekBar(hideSeekBar);
-        }
+    @ReactProp(name = PROP_CONTROLS_STYLES)
+    public void setControlsStyles(final ReactExoplayerView videoView, @Nullable ReadableMap controlsStyles) {
+        ControlsConfig controlsConfig = ControlsConfig.parse(controlsStyles);
+        videoView.setControlsStyles(controlsConfig);
+    }
 
     private boolean startsWithValidScheme(String uriString) {
         String lowerCaseUri = uriString.toLowerCase();
