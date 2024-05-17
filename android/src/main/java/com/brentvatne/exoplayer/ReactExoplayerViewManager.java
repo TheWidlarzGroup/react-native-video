@@ -213,7 +213,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         } else {
             int identifier = context.getResources().getIdentifier(
                 uriString,
-                    "drawable",
+                "drawable",
                 context.getPackageName()
             );
             if (identifier == 0) {
