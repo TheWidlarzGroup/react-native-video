@@ -93,6 +93,14 @@ export type Seek = Readonly<{
   tolerance?: Float;
 }>;
 
+type BufferConfigLive = Readonly<{
+  maxPlaybackSpeed?: Float;
+  minPlaybackSpeed?: Float;
+  maxOffsetMs?: Int32;
+  minOffsetMs?: Int32;
+  targetOffsetMs?: Int32;
+}>;
+
 type BufferingStrategyType = WithDefault<string, 'Default'>;
 
 type BufferConfig = Readonly<{
@@ -105,6 +113,7 @@ type BufferConfig = Readonly<{
   minBackBufferMemoryReservePercent?: Float;
   minBufferMemoryReservePercent?: Float;
   cacheSizeMB?: Float;
+  live?: BufferConfigLive;
 }>;
 
 type SubtitleStyle = Readonly<{
