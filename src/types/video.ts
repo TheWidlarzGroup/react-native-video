@@ -194,7 +194,7 @@ export enum PosterResizeModeType {
 export type AudioOutput = 'speaker' | 'earpiece';
 
 export type ControlsStyles = {
-  hideSeekBar?: boolean
+  hideSeekBar?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {

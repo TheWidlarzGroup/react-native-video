@@ -274,7 +274,7 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
-  hideSeekBar?: boolean
+  hideSeekBar?: boolean;
 }>;
 
 export interface VideoNativeProps extends ViewProps {
