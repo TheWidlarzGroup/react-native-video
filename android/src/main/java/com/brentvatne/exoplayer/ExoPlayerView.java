@@ -279,7 +279,12 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
             boolean isInitialRatio = layout.getAspectRatio() == 0;
-            layout.setAspectRatio(videoSize.height == 0 ? 1 : (videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
+            if (videoSize.height == 0 || videoSize.width == 0) {
+                // When changing video track we receive an ghost state with height / width = 0
+                // No need to resize the view in that case
+                return;
+            }
+            layout.setAspectRatio((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
 
             // React native workaround for measuring and layout on initial load.
             if (isInitialRatio) {

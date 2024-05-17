@@ -97,6 +97,7 @@ import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
+import androidx.media3.exoplayer.util.EventLogger;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
@@ -184,6 +185,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private ServiceConnection playbackServiceConnection;
     private PlaybackServiceBinder playbackServiceBinder;
+
+    // logger to be enable by props
+    private EventLogger debugEventLogger = null;
+    private boolean enableDebug = false;
+    private static final String TAG_EVENT_LOGGER = "RNVExoplayer";
 
     private int resumeWindow;
     private long resumePosition;
@@ -508,6 +514,24 @@ public class ReactExoplayerView extends FrameLayout implements
         reLayout(playerControlView);
     }
 
+    public void setDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
+        refreshDebugState();
+    }
+
+    private void refreshDebugState() {
+        if (player == null) {
+            return;
+        }
+        if (enableDebug) {
+            debugEventLogger = new EventLogger(TAG_EVENT_LOGGER);
+            player.addAnalyticsListener(debugEventLogger);
+        } else if (debugEventLogger != null) {
+            player.removeAnalyticsListener(debugEventLogger);
+            debugEventLogger = null;
+        }
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
@@ -666,6 +690,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
                 .build();
+        refreshDebugState();
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
@@ -712,6 +737,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
             DataSpec adTagDataSpec = new DataSpec(adTagUrl);
             mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
+        } else {
+            if (adTagUrl == null && adsLoader != null) {
+                adsLoader.release();
+                adsLoader = null;
+            }
         }
         MediaSource mediaSource;
         if (mediaSourceList.size() == 0) {
@@ -745,11 +775,11 @@ public class ReactExoplayerView extends FrameLayout implements
         boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
         if (haveResumePosition) {
             player.seekTo(resumeWindow, resumePosition);
-        }
-        if (startPositionMs >= 0) {
+            player.setMediaSource(mediaSource, false);
+        } else if (startPositionMs > 0) {
             player.setMediaSource(mediaSource, startPositionMs);
         } else {
-            player.setMediaSource(mediaSource, !haveResumePosition);
+            player.setMediaSource(mediaSource, true);
         }
         player.prepare();
         playerNeedsSource = false;
@@ -1643,7 +1673,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, MediaMetadata customMetadata) {
 
-        if (this.customMetadata != customMetadata && player != null) {
+        if (!Util.areEqual(this.customMetadata, customMetadata) && player != null) {
             MediaItem currentMediaItem = player.getCurrentMediaItem();
 
             if (currentMediaItem != null) {
@@ -1677,8 +1707,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
-            player.stop();
-            player.clearMediaItems();
+            if (player != null) {
+                player.stop();
+                player.clearMediaItems();
+            }
             this.srcUri = null;
             this.startPositionMs = -1;
             this.cropStartMs = -1;
