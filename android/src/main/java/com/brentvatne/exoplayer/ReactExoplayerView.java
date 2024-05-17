@@ -1707,8 +1707,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
-            player.stop();
-            player.clearMediaItems();
+            if (player != null) {
+                player.stop();
+                player.clearMediaItems();
+            }
             this.srcUri = null;
             this.startPositionMs = -1;
             this.cropStartMs = -1;
