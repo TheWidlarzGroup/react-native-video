@@ -187,10 +187,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean playerNeedsSource;
     private MediaMetadata customMetadata;
 
-     private DefaultTimeBar exoProgress;
-     private TextView exoDuration;
-     private TextView exoPosition;
-
     private ServiceConnection playbackServiceConnection;
     private PlaybackServiceBinder playbackServiceBinder;
 
@@ -216,7 +212,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
     private ControlsConfig controlsConfig = new ControlsConfig();
-
 
     // Props from React
     private Uri srcUri;
