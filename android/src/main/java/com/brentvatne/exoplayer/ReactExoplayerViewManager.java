@@ -276,7 +276,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
     public void setSelectedVideoTrack(final ReactExoplayerView videoView,
-                                      @Nullable ReadableMap selectedVideoTrack) {
+                                     @Nullable ReadableMap selectedVideoTrack) {
         String typeString = null;
         String value = null;
         if (selectedVideoTrack != null) {
