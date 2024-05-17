@@ -218,7 +218,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             );
             if (identifier == 0) {
                 identifier = context.getResources().getIdentifier(
-                        uriString,
+                    uriString,
                         "raw",
                         context.getPackageName()
                 );
