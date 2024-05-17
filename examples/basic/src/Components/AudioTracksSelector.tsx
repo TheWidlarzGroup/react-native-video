@@ -39,9 +39,9 @@ const AudioTrackSelector = ({
           }
           return (
             <Picker.Item
-              label={track.language}
-              value={track.language}
-              key={track.language}
+              label={`${track.language} - ${track.title} - ${track.selected}`}
+              value={`${track.index}`}
+              key={`${track.index}`}
             />
           );
         })}
