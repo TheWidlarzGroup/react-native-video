@@ -214,7 +214,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             int identifier = context.getResources().getIdentifier(
                 uriString,
                     "drawable",
-                    context.getPackageName()
+                context.getPackageName()
             );
             if (identifier == 0) {
                 identifier = context.getResources().getIdentifier(
