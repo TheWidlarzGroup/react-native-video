@@ -458,12 +458,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setControlsStyles(controlsConfig);
     }
 
-    @ReactProp(name = PROP_CONTROLS_STYLES)
-    public void setControlsStyles(final ReactExoplayerView videoView, @Nullable ReadableMap controlsStyles) {
-        ControlsConfig controlsConfig = ControlsConfig.parse(controlsStyles);
-        videoView.setControlsStyles(controlsConfig);
-    }
-
     private boolean startsWithValidScheme(String uriString) {
         String lowerCaseUri = uriString.toLowerCase();
         return lowerCaseUri.startsWith("http://")
