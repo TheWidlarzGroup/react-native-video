@@ -1648,7 +1648,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, MediaMetadata customMetadata) {
 
-        if (this.customMetadata != customMetadata && player != null) {
+        if (!Util.areEqual(this.customMetadata, customMetadata) && player != null) {
             MediaItem currentMediaItem = player.getCurrentMediaItem();
 
             if (currentMediaItem != null) {
