@@ -182,6 +182,10 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean playerNeedsSource;
     private MediaMetadata customMetadata;
 
+     private DefaultTimeBar exoProgress;
+     private TextView exoDuration;
+     private TextView exoPosition;
+
     private ServiceConnection playbackServiceConnection;
     private PlaybackServiceBinder playbackServiceBinder;
 
@@ -236,6 +240,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
+    private boolean hideSeekBar = false;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -501,6 +506,31 @@ public class ReactExoplayerView extends FrameLayout implements
         view.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
+
+         if(view == playerControlView){
+            exoProgress = findViewById(R.id.exo_progress);
+            exoDuration = findViewById(R.id.exo_duration);
+            exoPosition = findViewById(R.id.exo_position);
+            if(hideSeekBar){
+                LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                                LayoutParams.MATCH_PARENT,
+                                LayoutParams.MATCH_PARENT,
+                                1.0f
+                        );
+                exoProgress.setVisibility(GONE);
+                exoDuration.setVisibility(GONE);
+                exoPosition.setLayoutParams(param);
+            }else{
+               exoProgress.setVisibility(VISIBLE);
+                exoDuration.setVisibility(VISIBLE);
+                // Reset the layout parameters of exoPosition to their default state
+                LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
+                               LayoutParams.WRAP_CONTENT,
+                                LayoutParams.WRAP_CONTENT
+                        );
+                exoPosition.setLayoutParams(defaultParam);
+                    }
+                }
     }
 
     private void reLayoutControls() {
@@ -2268,5 +2298,9 @@ public class ReactExoplayerView extends FrameLayout implements
     public void onAdError(AdErrorEvent adErrorEvent) {
         AdError error = adErrorEvent.getError();
         eventEmitter.receiveAdErrorEvent(error.getMessage(), String.valueOf(error.getErrorCode()), String.valueOf(error.getErrorType()));
+    }
+
+    public void setHideSeekBar(boolean hideSeekBar) {
+        this.hideSeekBar = hideSeekBar;
     }
 }

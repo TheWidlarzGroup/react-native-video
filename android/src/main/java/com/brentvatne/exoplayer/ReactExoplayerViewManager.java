@@ -88,6 +88,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
+    private static final String HIDE_SEEKBAR = "hideSeekBar";
 
     private final ReactExoplayerConfig config;
 
@@ -449,6 +450,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             DebugLog.setConfig(Log.WARN, enableThreadDebug);
         }
     }
+
+    @ReactProp(name = HIDE_SEEKBAR, defaultBoolean = false)
+        public void setHideSeekBar(final ReactExoplayerView videoView, final boolean hideSeekBar) {
+            videoView.setHideSeekBar(hideSeekBar);
+        }
 
     private boolean startsWithValidScheme(String uriString) {
         String lowerCaseUri = uriString.toLowerCase();

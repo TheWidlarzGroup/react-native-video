@@ -247,4 +247,5 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   allowsExternalPlayback?: boolean; // iOS
+  hideSeekBar?: boolean; // Android
 }

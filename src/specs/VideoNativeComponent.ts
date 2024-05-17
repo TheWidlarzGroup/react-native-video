@@ -320,6 +320,7 @@ export interface VideoNativeProps extends ViewProps {
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
+  hideSeekBar?: boolean; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;
