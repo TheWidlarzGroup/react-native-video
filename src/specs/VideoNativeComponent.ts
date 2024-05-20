@@ -273,6 +273,10 @@ export type OnAudioFocusChangedData = Readonly<{
   hasAudioFocus: boolean;
 }>;
 
+type ControlsStyles = Readonly<{
+  hideSeekBar?: boolean;
+}>;
+
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   drm?: Drm;
@@ -320,6 +324,7 @@ export interface VideoNativeProps extends ViewProps {
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
+  controlsStyles?: ControlsStyles; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;
