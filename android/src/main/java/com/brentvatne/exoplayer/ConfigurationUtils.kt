@@ -33,5 +33,4 @@ object ConfigurationUtils {
         }
         return liveConfiguration
     }
-
 }
