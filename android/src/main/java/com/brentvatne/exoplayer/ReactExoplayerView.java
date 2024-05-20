@@ -1978,6 +1978,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
         DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
                 .buildUpon()
+                .setExceedAudioConstraintsIfNecessary(true)
+                .setExceedRendererCapabilitiesIfNecessary(true)
+                .setExceedVideoConstraintsIfNecessary(true)
                 .setRendererDisabled(rendererIndex, false)
                 .clearOverridesOfType(selectionOverride.getType())
                 .addOverride(selectionOverride)
