@@ -47,6 +47,25 @@ A Boolean value that indicates whether the player should automatically delay pla
 - **false** - Immediately starts playback
 - **true (default)** - Delays playback in order to minimize stalling
 
+### `controlsStyles`
+
+<PlatformsList types={['Android']} />
+
+Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
+
+| Property    | Type    | Description                                                                          |
+|-------------|---------|--------------------------------------------------------------------------------------|
+| hideSeekBar | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts. |
+
+Example with default values:
+
+```javascript
+controlsStyles={{
+  hideSeekBar: false,
+}}
+```
+
+
 ### `bufferConfig`
 
 <PlatformsList types={['Android']} />
@@ -814,7 +833,7 @@ textTracks={[
 
 <PlatformsList types={['Android', 'iOS']}/>
 
-Controls whether to show media controls in the notification area. 
+Controls whether to show media controls in the notification area.
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
 
 You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.

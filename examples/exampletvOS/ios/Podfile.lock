@@ -316,9 +316,13 @@ PODS:
   - React-jsinspector (0.71.12-0)
   - React-logger (0.71.12-0):
     - glog
-  - react-native-video (6.0.0-beta.6):
+  - react-native-video (6.0.0):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - react-native-video/Video (= 6.0.0-beta.6)
+    - react-native-video/Video (= 6.0.0)
+  - react-native-video/Video (6.0.0):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - React-perflogger (0.71.12-0)
   - React-RCTActionSheet (0.71.12-0):
     - React-Core/RCTActionSheetHeaders (= 0.71.12-0)
@@ -588,7 +592,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 0c8c5e8b2171be52295f59097923babf84d1cf66
   React-jsinspector: f8e6919523047a9bd1270ade75b4eca0108963b4
   React-logger: 16c56636d4209cc204d06c5ba347cee21b960012
-  react-native-video: 98040e05dace82fbbe8709cf42fd4496b0aed744
+  react-native-video: fc60911540a69935cc7950829163f6f41259cb0d
   React-perflogger: 355109dc9d6f34e35bc35dabb32310f8ed2d29a2
   React-RCTActionSheet: 9d1be4d43972f2aae4b31d9e53ffb030115fa445
   React-RCTAnimation: aab7e1ecd325db67e1f2a947d85a52adf86594b7
@@ -605,6 +609,6 @@ SPEC CHECKSUMS:
   Yoga: 8b8c06e142662150974d1c70b4c5ffb08eb468db
   YogaKit: 1e22bf2228b3a5ac8cc88965153061ae92c494b5
 
-PODFILE CHECKSUM: 49dad183688257f9360c15d54e77f8de0f8048f7
+PODFILE CHECKSUM: 26d254806a611a4bc6b6c39cff790dd08f770ccf
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2
