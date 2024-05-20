@@ -77,6 +77,13 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(setVolume:reactTag:)
+    func setVolume(value: Float, reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setVolume(value)
+        })
+    }
+
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }
