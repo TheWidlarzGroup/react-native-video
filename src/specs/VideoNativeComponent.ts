@@ -372,6 +372,7 @@ export interface VideoManagerType {
     licenseUrl: string,
     reactTag: number,
   ) => Promise<void>;
+  setVolume: (volume: number, reactTag: number) => Promise<void>;
 }
 
 export interface VideoDecoderPropertiesType {

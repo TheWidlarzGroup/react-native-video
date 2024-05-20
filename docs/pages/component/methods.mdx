@@ -92,6 +92,14 @@ By default iOS seeks within 100 milliseconds of the target position. If you need
 
 tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
 
+### `setVolume`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setVolume(value): Promise<void>`
+
+This function will change the volume exactly like [volume](../props#volume) property. default value and range are the same then.
+
 ### Example Usage
 
 ```tsx
