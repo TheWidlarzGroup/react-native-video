@@ -74,6 +74,14 @@ export enum BufferingStrategyType {
   DEPENDING_ON_MEMORY = 'DependingOnMemory',
 }
 
+export type BufferConfigLive = {
+  maxPlaybackSpeed?: number;
+  minPlaybackSpeed?: number;
+  maxOffsetMs?: number;
+  minOffsetMs?: number;
+  targetOffsetMs?: number;
+};
+
 export type BufferConfig = {
   minBufferMs?: number;
   maxBufferMs?: number;
@@ -84,6 +92,7 @@ export type BufferConfig = {
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
   cacheSizeMB?: number;
+  live?: BufferConfigLive;
 };
 
 export enum SelectedTrackType {

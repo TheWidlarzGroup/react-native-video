@@ -930,6 +930,9 @@ class VideoPlayer extends Component {
             bufferForPlaybackMs: 2500,
             bufferForPlaybackAfterRebufferMs: 5000,
             cacheSizeMB: this.state.useCache ? 200 : 0,
+            live: {
+              targetOffsetMs: 500,
+            },
           }}
           preventsDisplaySleepDuringVideoPlayback={true}
           poster={this.state.poster}

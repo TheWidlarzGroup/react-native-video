@@ -965,6 +965,9 @@ public class ReactExoplayerView extends FrameLayout implements
             );
         }
 
+        MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(bufferConfig);
+        mediaItemBuilder.setLiveConfiguration(liveConfiguration.build());
+
         MediaSource.Factory mediaSourceFactory;
         DrmSessionManagerProvider drmProvider;
         List<StreamKey> streamKeys = new ArrayList();
