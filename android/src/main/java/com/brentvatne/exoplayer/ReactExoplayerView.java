@@ -776,7 +776,7 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         }
         MediaSource mediaSource;
-        if (mediaSourceList.size() == 0) {
+        if (mediaSourceList.isEmpty()) {
             if (mediaSourceWithAds != null) {
                 mediaSource = mediaSourceWithAds;
             } else {
@@ -915,12 +915,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 // When DRM fails using L1 we want to switch to L3
                 mediaDrm.setPropertyString("securityLevel", "L3");
             }
-            DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager.Builder()
+            return new DefaultDrmSessionManager.Builder()
                     .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
                     .setKeyRequestParameters(null)
                     .setMultiSession(false)
                     .build(drmCallback);
-            return drmSessionManager;
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
             throw ex;
@@ -966,7 +965,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         MediaSource.Factory mediaSourceFactory;
         DrmSessionManagerProvider drmProvider;
-        List<StreamKey> streamKeys = new ArrayList();
+        List<StreamKey> streamKeys = new ArrayList<>();
         if (drmSessionManager != null) {
             drmProvider = ((_mediaItem) -> drmSessionManager);
         } else {
@@ -1623,7 +1622,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPlayerError(@NonNull PlaybackException e) {
         String errorString = "ExoPlaybackException: " + PlaybackException.getErrorCodeName(e.errorCode);
-        String errorCode = "2" + String.valueOf(e.errorCode);
+        String errorCode = "2" + e.errorCode;
         switch(e.errorCode) {
             case PlaybackException.ERROR_CODE_DRM_DEVICE_REVOKED:
             case PlaybackException.ERROR_CODE_DRM_LICENSE_ACQUISITION_FAILED:
@@ -1691,7 +1690,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
                 metadataArray.add(timedMetadata);
             } else {
-                DebugLog.d(TAG, "unhandled metadata " + entry.toString());
+                DebugLog.d(TAG, "unhandled metadata " + entry);
             }
         }
         eventEmitter.timedMetadata(metadataArray);
