@@ -445,9 +445,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
         //Handling the pauseButton click event
         ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
-        pauseButton.setOnClickListener((View v) -> {
-            setPausedModifier(true);
-        });
+        pauseButton.setOnClickListener((View v) ->
+            setPausedModifier(true)
+        );
 
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
@@ -1154,16 +1154,16 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     // Lower the volume
                     if (!view.muted) {
-                        activity.runOnUiThread(() -> {
-                            view.player.setVolume(view.audioVolume * 0.8f);
-                        });
+                        activity.runOnUiThread(() ->
+                            view.player.setVolume(view.audioVolume * 0.8f)
+                        );
                     }
                 } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                     // Raise it back to normal
                     if (!view.muted) {
-                        activity.runOnUiThread(() -> {
-                            view.player.setVolume(view.audioVolume * 1);
-                        });
+                        activity.runOnUiThread(() ->
+                            view.player.setVolume(view.audioVolume * 1)
+                        );
                     }
                 }
             }
