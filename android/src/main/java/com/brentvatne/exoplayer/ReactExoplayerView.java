@@ -1945,7 +1945,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
             // Valiate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
-            ArrayList<Integer> supportedTrackList = new ArrayList<>();
             for (int g = 0; g < allTracks.size(); g++) {
                 Format format = group.getFormat(g);
                 if (isFormatSupported(format)) {
@@ -1961,7 +1960,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     Format format = group.getFormat(k);
                     if (isFormatSupported(format)) {
                         tracks.add(allTracks.get(k));
-                        supportedTrackList.add(allTracks.get(k));
                     }
                 }
             }
