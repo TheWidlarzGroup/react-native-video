@@ -940,7 +940,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         int type;
         if ("rtsp".equals(overrideExtension)) {
-            type = C.TYPE_RTSP;
+            type = CONTENT_TYPE_RTSP;
         } else {
             type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                     : uri.getLastPathSegment());
