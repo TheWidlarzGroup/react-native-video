@@ -48,7 +48,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
-    private static final String PROP_DRM_LICENSESERVER = "licenseServer";
+    private static final String PROP_DRM_LICENSE_SERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
@@ -127,7 +127,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
-            String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
+            String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSE_SERVER);
             ReadableArray drmHeadersArray = ReactBridgeUtils.safeGetArray(drm, PROP_DRM_HEADERS);
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
