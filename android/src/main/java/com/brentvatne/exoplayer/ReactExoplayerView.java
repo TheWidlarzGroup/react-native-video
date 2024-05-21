@@ -1685,8 +1685,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
                 TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
                 metadataArray.add(timedMetadata);
-            } else if (entry instanceof EventMessage) {
-                EventMessage eventMessage = (EventMessage) entry;
+            } else if (entry instanceof EventMessage eventMessage) {
                 TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
                 metadataArray.add(timedMetadata);
             } else {
