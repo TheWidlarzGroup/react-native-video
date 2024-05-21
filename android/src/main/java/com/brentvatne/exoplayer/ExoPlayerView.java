@@ -1,6 +1,8 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.C;
@@ -262,7 +264,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final class ComponentListener implements Player.Listener {
 
         @Override
-        public void onCues(List<Cue> cues) {
+        public void onCues(@NonNull List<Cue> cues) {
             subtitleLayout.setCues(cues);
         }
 
@@ -288,7 +290,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
 
         @Override
-        public void onTracksChanged(Tracks tracks) {
+        public void onTracksChanged(@NonNull Tracks tracks) {
             updateForCurrentTrackSelections(tracks);
         }
     }
