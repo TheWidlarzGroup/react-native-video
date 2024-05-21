@@ -1,6 +1,8 @@
 package com.brentvatne.exoplayer;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -211,20 +213,22 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
             }
         } else {
-            int identifier = context.getResources().getIdentifier(
+            Resources resources = context.getResources();
+            String packageName = context.getPackageName();
+            int identifier = resources.getIdentifier(
                 uriString,
                 "drawable",
-                context.getPackageName()
+                packageName
             );
             if (identifier == 0) {
-                identifier = context.getResources().getIdentifier(
+                identifier = resources.getIdentifier(
                     uriString,
                     "raw",
-                    context.getPackageName()
+                    packageName
                 );
             }
             if (identifier > 0) {
-                Uri srcUri = RawResourceDataSource.buildRawResourceUri(identifier);
+                Uri srcUri = new Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(Integer.toString(identifier)).build();
                 videoView.setRawSrc(srcUri, extension);
             } else {
                 videoView.clearSrc();
