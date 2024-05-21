@@ -124,7 +124,6 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -158,7 +157,6 @@ public class ReactExoplayerView extends FrameLayout implements
         AdErrorEvent.AdErrorListener {
 
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
-    public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
 
     private static final String TAG = "ReactExoplayerView";
