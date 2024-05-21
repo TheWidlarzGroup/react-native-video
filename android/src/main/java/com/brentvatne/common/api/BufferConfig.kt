@@ -1,6 +1,7 @@
 package com.brentvatne.common.api
 
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetDouble
+import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetFloat
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.facebook.react.bridge.ReadableMap
 
@@ -20,6 +21,35 @@ class BufferConfig {
     var minBackBufferMemoryReservePercent = BufferConfigPropUnsetDouble
     var minBufferMemoryReservePercent = BufferConfigPropUnsetDouble
 
+    var live: Live = Live()
+
+    class Live {
+        var maxPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
+        var minPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
+        var maxOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
+        var minOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
+        var targetOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
+
+        companion object {
+            private val PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED = "maxPlaybackSpeed"
+            private val PROP_BUFFER_CONFIG_LIVE_MIN_PLAYBACK_SPEED = "minPlaybackSpeed"
+            private val PROP_BUFFER_CONFIG_LIVE_MAX_OFFSET_MS = "maxOffsetMs"
+            private val PROP_BUFFER_CONFIG_LIVE_MIN_OFFSET_MS = "minOffsetMs"
+            private val PROP_BUFFER_CONFIG_LIVE_TARGET_OFFSET_MS = "targetOffsetMs"
+
+            @JvmStatic
+            fun parse(src: ReadableMap?): Live {
+                val live = Live()
+                live.maxPlaybackSpeed = safeGetFloat(src, PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED, BufferConfigPropUnsetDouble.toFloat())
+                live.minPlaybackSpeed = safeGetFloat(src, PROP_BUFFER_CONFIG_LIVE_MIN_PLAYBACK_SPEED, BufferConfigPropUnsetDouble.toFloat())
+                live.maxOffsetMs = safeGetInt(src, PROP_BUFFER_CONFIG_LIVE_MAX_OFFSET_MS, BufferConfigPropUnsetInt).toLong()
+                live.minOffsetMs = safeGetInt(src, PROP_BUFFER_CONFIG_LIVE_MIN_OFFSET_MS, BufferConfigPropUnsetInt).toLong()
+                live.targetOffsetMs = safeGetInt(src, PROP_BUFFER_CONFIG_LIVE_TARGET_OFFSET_MS, BufferConfigPropUnsetInt).toLong()
+                return live
+            }
+        }
+    }
+
     companion object {
         val BufferConfigPropUnsetInt = -1
         val BufferConfigPropUnsetDouble = -1.0
@@ -33,6 +63,7 @@ class BufferConfig {
         private val PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent"
         private val PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent"
         private val PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs"
+        private val PROP_BUFFER_CONFIG_LIVE = "live"
 
         @JvmStatic
         fun parse(src: ReadableMap?): BufferConfig {
@@ -59,6 +90,7 @@ class BufferConfig {
                         BufferConfigPropUnsetDouble
                     )
                 bufferConfig.backBufferDurationMs = safeGetInt(src, PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS, BufferConfigPropUnsetInt)
+                bufferConfig.live = Live.parse(src.getMap(PROP_BUFFER_CONFIG_LIVE))
             }
             return bufferConfig
         }

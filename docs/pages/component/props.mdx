@@ -47,6 +47,25 @@ A Boolean value that indicates whether the player should automatically delay pla
 - **false** - Immediately starts playback
 - **true (default)** - Delays playback in order to minimize stalling
 
+### `controlsStyles`
+
+<PlatformsList types={['Android']} />
+
+Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
+
+| Property    | Type    | Description                                                                          |
+|-------------|---------|--------------------------------------------------------------------------------------|
+| hideSeekBar | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts. |
+
+Example with default values:
+
+```javascript
+controlsStyles={{
+  hideSeekBar: false,
+}}
+```
+
+
 ### `bufferConfig`
 
 <PlatformsList types={['Android']} />
@@ -64,6 +83,20 @@ Adjust the buffer settings. This prop takes an object with one or more of the pr
 | minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1                                                                                |
 | minBufferMemoryReservePercent     | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1                                                                                   |
 | cacheSizeMB                       | number | Cache size in MB, enabling this to prevent new src requests and save bandwidth while repeating videos, or 0 to disable. Android only.                                                           |
+| live                              | object | Object containing another config set for live playback configuration, see next table                                                                                                            |
+
+
+Description of live object:
+
+| Property                          | Type   | Description                                                                                                                                                                                     |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| maxPlaybackSpeed                  | number | The maximum playback speed the player can use to catch up when trying to reach the target live offset.                                                                                          |
+| minPlaybackSpeed                  | number | The minimum playback speed the player can use to fall back when trying to reach the target live offset.                                                                                         |
+| maxOffsetMs                       | number | The maximum allowed live offset. Even when adjusting the offset to current network conditions, the player will not attempt to get above this offset during playback.                            |
+| minOffsetMs                       | number | The minimum allowed live offset. Even when adjusting the offset to current network conditions, the player will not attempt to get below this offset during playback.                            |
+| targetOffsetMs                    | number | The target live offset. The player will attempt to get close to this live offset during playback if possible.                                                                                   |
+
+For android, more informations about live configuration can be find [here](https://developer.android.com/media/media3/exoplayer/live-streaming?hl=en)
 
 Example with default values:
 
@@ -74,7 +107,10 @@ bufferConfig={{
   bufferForPlaybackMs: 2500,
   bufferForPlaybackAfterRebufferMs: 5000,
   backBufferDurationMs: 120000,
-  cacheSizeMB: 0
+  cacheSizeMB: 0,
+  live: {
+      targetOffsetMs: 500,
+  },
 }}
 ```
 
@@ -797,7 +833,7 @@ textTracks={[
 
 <PlatformsList types={['Android', 'iOS']}/>
 
-Controls whether to show media controls in the notification area. 
+Controls whether to show media controls in the notification area.
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
 
 You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
