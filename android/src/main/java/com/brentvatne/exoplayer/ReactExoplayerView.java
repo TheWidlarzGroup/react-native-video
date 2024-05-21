@@ -264,28 +264,26 @@ public class ReactExoplayerView extends FrameLayout implements
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case SHOW_PROGRESS:
-                    if (player != null) {
-                        if (playerControlView != null && isPlayingAd() && controls) {
-                            playerControlView.hide();
-                        }
-                        long pos = player.getCurrentPosition();
-                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        long duration = player.getDuration();
-
-                        if (lastPos != pos
-                                || lastBufferDuration != bufferedDuration
-                                || lastDuration != duration) {
-                            lastPos = pos;
-                            lastBufferDuration = bufferedDuration;
-                            lastDuration = duration;
-                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
-                        }
-                        msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+            if (msg.what == SHOW_PROGRESS) {
+                if (player != null) {
+                    if (playerControlView != null && isPlayingAd() && controls) {
+                        playerControlView.hide();
                     }
-                    break;
+                    long pos = player.getCurrentPosition();
+                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                    long duration = player.getDuration();
+
+                    if (lastPos != pos
+                            || lastBufferDuration != bufferedDuration
+                            || lastDuration != duration) {
+                        lastPos = pos;
+                        lastBufferDuration = bufferedDuration;
+                        lastDuration = duration;
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                    }
+                    msg = obtainMessage(SHOW_PROGRESS);
+                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                }
             }
         }
     };
