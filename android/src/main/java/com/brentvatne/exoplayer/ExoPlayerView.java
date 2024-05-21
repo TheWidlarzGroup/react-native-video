@@ -209,16 +209,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
