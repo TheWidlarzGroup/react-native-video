@@ -70,7 +70,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _enterPictureInPictureOnLeave = false {
         didSet {
             #if os(iOS)
-                if isPipActive() == true { return }
+                if isPictureInPictureActive() { return }
                 if _enterPictureInPictureOnLeave {
                     initPictureinPicture()
                     _playerViewController?.allowsPictureInPicturePlayback = true
@@ -161,7 +161,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onRestoreUserInterfaceForPictureInPictureStop?([:])
     }
 
-    func isPipActive() -> Bool {
+    func isPictureInPictureActive() -> Bool {
         return _pip?.isPictureInPictureActive ?? false
     }
 
@@ -188,7 +188,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipActive: isPipActive)
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
         #endif
 
         _eventDispatcher = eventDispatcher
@@ -256,7 +256,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipActive: isPipActive)
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
         #endif
     }
 
@@ -295,12 +295,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
-        let isPipActive = isPipActive()
-        if _playInBackground || isPipActive == true {
-            if isPipActive {
-                _player?.play()
-                _player?.rate = _rate
-            }
+        if _playInBackground { return }
+        if isPictureInPictureActive() {
+            _player?.play()
+            _player?.rate = _rate
         } else {
             // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
             _playerLayer?.player?.pause()
@@ -312,7 +310,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationWillEnterForeground(notification _: NSNotification!) {
-        let isPipActive = isPipActive()
         self.applyModifiers()
         if !_playInBackground {
             _playerLayer?.player = _player
@@ -322,9 +319,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func screenWillLock() {
-        let isPipActive = isPipActive()
-        let isBackgroundPip = isPipActive == true && UIApplication.shared.applicationState != .active
-        if _playInBackground || !isBackgroundPip { return }
+        let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
+        if _playInBackground || !isActiveBackgroundPip { return }
 
         _player?.pause()
         _player?.rate = 0.0
@@ -332,9 +328,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func screenDidUnlock() {
-        let isPipActive = isPipActive()
-        let isBackgroundPip = isPipActive == true && UIApplication.shared.applicationState != .active
-        if _paused || !isBackgroundPip { return }
+        let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
+        if _paused || !isActiveBackgroundPip { return }
 
         _player?.play()
         _player?.rate = _rate
