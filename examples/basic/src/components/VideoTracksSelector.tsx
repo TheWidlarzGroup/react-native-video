@@ -42,7 +42,7 @@ const VideoTrackSelector = ({
         ) : (
           <Picker.Item label={'none'} value={'none'} key={'none'} />
         )}
-        {videoTracks.map(track => {
+        {videoTracks?.map(track => {
           if (!track) {
             return;
           }
