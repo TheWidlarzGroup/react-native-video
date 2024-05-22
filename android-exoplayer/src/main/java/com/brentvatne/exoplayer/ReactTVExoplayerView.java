@@ -30,7 +30,6 @@ import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.Timeline;
 import androidx.media3.common.TrackGroup;
-import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.endeavor.LimitedSeekRange;
 import androidx.media3.common.text.CueGroup;
@@ -42,7 +41,6 @@ import androidx.media3.exoplayer.drm.DrmSession;
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.source.TrackGroupArray;
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.session.ext.MediaSessionConnector;
 
@@ -178,6 +176,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean playerNeedsSource;
     private long resumePosition; // unit: millisecond
     private boolean loadVideoStarted;
+    private boolean selectUserPreferredTrack;
     private boolean isInBackground = false;
     private boolean fromBackground = false;
     private boolean isPaused;
@@ -584,6 +583,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             playerNeedsSource = false;
             eventEmitter.loadStart();
             loadVideoStarted = true;
+            selectUserPreferredTrack = true;
         }
     }
 
@@ -1024,14 +1024,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (loadVideoStarted) {
             loadVideoStarted = false;
 
-            // check track policy
-            Tracks tracks = player.getExoPlayer().getCurrentTracks();
-            TracksPolicy.TrackPolicy trackPolicy = getTrackPolicy(trackSelector, tracks, getPreferredAudioLang());
-
-            // Preselect subtitle and audio.
-            selectTrack(trackPolicy, C.TRACK_TYPE_TEXT, getPreferredSubtitleLang());
-            selectTrack(trackPolicy, C.TRACK_TYPE_AUDIO, getPreferredAudioLang());
-
             ExoPlayer exoPlayer = player.getExoPlayer();
             Format videoFormat = exoPlayer.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
@@ -1420,88 +1412,31 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     private void selectTrack(TracksPolicy.TrackPolicy trackPolicy, int trackType, @Nullable List<String> preferredLanguages) {
-        // If we have tracks policy then do not select any initial subtitle.
-        // if (trackType == C.TRACK_TYPE_TEXT && src.getTracksPolicy() != null) {
-        //     return;
-        // }
-        // Track policy active, ignore user preferred languages subtitle
-        if (trackType == C.TRACK_TYPE_TEXT && trackPolicy != null) {
-            List<Track> trackList = getTextTracks(player.getExoPlayer().getCurrentTracks());
-            Track track = TrackUtils.findMatchingTrack(trackList, trackType, trackPolicy.getSubtitle());
-            if (track != null) {
-                trackSelector.selectTrack(track);
-                // notify subtitle changed by track policy
-                onSubtitleSelected(track.getLanguage());
-                return;
-            }
-        }
-
-        int rendererIndex = getTrackRendererIndex(trackType);
-        if (rendererIndex == C.INDEX_UNSET) {
-            return;
-        }
-
-        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-        if (info == null) {
-            return;
-        }
-
-        TrackGroupArray groups = info.getTrackGroups(rendererIndex);
-        int trackIndex = C.INDEX_UNSET;
-
-        // Turn subtitles off if the language is null/empty.
+        Track track = null;
+        List<Track> trackList = getTracks(player.getExoPlayer().getCurrentTracks());
         if (trackType == C.TRACK_TYPE_TEXT) {
-            if (preferredLanguages == null || preferredLanguages.isEmpty()
-                    || TextUtils.isEmpty(preferredLanguages.get(0))) {
-                Parameters disableParameters = trackSelector.getParameters()
-                        .buildUpon()
-                        .setRendererDisabled(rendererIndex, true)
-                        .build();
-                trackSelector.setParameters(disableParameters);
-                return;
-            }
-        }
-
-        if (preferredLanguages == null) {
-            return;
-        }
-
-        // Select the first match of preferred languages and available languages.
-        boolean matchFound = false;
-        for (String language : preferredLanguages) {
-            for (int i = 0; i < groups.length; ++i) {
-                Format format = groups.get(i).getFormat(0);
-                if (format.language != null && language != null
-                        && localizationService.isMatch(format.language, language)) {
-                    trackIndex = i;
-                    matchFound = true;
-                    break;
+            if (preferredLanguages == null || preferredLanguages.isEmpty() || preferredLanguages.get(0) == null) { // "OFF" or user not select preferred subtitle
+                if (trackPolicy != null) { // track policy is active, select track policy subtitle
+                    track = TrackUtils.findMatchingTrack(trackList, trackType, trackPolicy.getSubtitle());
                 }
+            } else { // select user preferred subtitle
+                track = TrackUtils.findMatchingTrack(trackList, trackType, preferredLanguages.get(0));
             }
-            if (matchFound) {
-                break;
+        } else if (trackType == C.TRACK_TYPE_AUDIO) {
+            if (preferredLanguages != null && !preferredLanguages.isEmpty() && preferredLanguages.get(0) != null) {
+                track = TrackUtils.findMatchingTrack(trackList, trackType, preferredLanguages.get(0));
             }
         }
-
-        // No match, return.
-        if (trackIndex == C.INDEX_UNSET) {
-            return;
+        if (track != null) {
+            trackSelector.selectTrack(track);
         }
-
-        // Select the matching track.
-        Parameters selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setRendererDisabled(rendererIndex, false)
-                .setOverrideForType(new TrackSelectionOverride(groups.get(trackIndex), 0))
-                .build();
-        trackSelector.setParameters(selectionParameters);
     }
 
-    private List<Track> getTextTracks(Tracks tracksInfo) {
+    private List<Track> getTracks(Tracks tracksInfo) {
         Set<Track> trackSet = new LinkedHashSet<>();
         for (Tracks.Group groupInfo : tracksInfo.getGroups()) {
             @C.TrackType int trackType = groupInfo.getType();
-            if (trackType == C.TRACK_TYPE_TEXT) {
+            if (trackType == C.TRACK_TYPE_TEXT || trackType == C.TRACK_TYPE_AUDIO) {
                 boolean isSelected = groupInfo.isSelected();
                 TrackGroup group = groupInfo.getMediaTrackGroup();
                 Format format = group.getFormat(0);
@@ -1951,6 +1886,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private final DorisPlayerOutput dorisListener = new DorisPlayerOutput() {
         @Override
         public void onPlayerEvent(DorisPlayerEvent playerEvent) {
+            if (exoDorisPlayerView != null) {
+                exoDorisPlayerView.onPlayerEvent(playerEvent);
+            }
             switch (playerEvent.details.state) {
                 case PLAYING:
                     eventEmitter.playbackRateChange(1f);
@@ -1967,6 +1905,18 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
 
             switch (playerEvent.event) {
+                case TRACK_INFO_CHANGED:
+                    if (selectUserPreferredTrack) {
+                        selectUserPreferredTrack = false;
+                        // check track policy
+                        Tracks tracks = player.getExoPlayer().getCurrentTracks();
+                        TracksPolicy.TrackPolicy trackPolicy = getTrackPolicy(trackSelector, tracks, getPreferredAudioLang());
+
+                        // Preselect subtitle and audio.
+                        selectTrack(trackPolicy, C.TRACK_TYPE_TEXT, getPreferredSubtitleLang());
+                        selectTrack(trackPolicy, C.TRACK_TYPE_AUDIO, getPreferredAudioLang());
+                    }
+                    break;
                 case TIMELINE_ADJUSTER_CHANGED:
                     if (exoDorisPlayerView != null) {
                         exoDorisPlayerView.setExtraTimelineAdjuster(playerEvent.details.timelineAdjuster);
