@@ -36,8 +36,8 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
     private ExoPlayer player;
-    private Context context;
-    private ViewGroup.LayoutParams layoutParams;
+    private final Context context;
+    private final ViewGroup.LayoutParams layoutParams;
     private final FrameLayout adOverlayFrameLayout;
 
     private boolean useTextureView = true;

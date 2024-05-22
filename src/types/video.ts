@@ -117,7 +117,7 @@ export enum SelectedVideoTrackType {
 
 export type SelectedVideoTrack = {
   type: SelectedVideoTrackType;
-  value?: number;
+  value?: string | number;
 };
 
 export type SubtitleStyle = {

@@ -222,13 +222,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
-      const value = selectedVideoTrack?.value
-        ? `${selectedVideoTrack.value}`
-        : undefined;
-
+      const type = typeof selectedVideoTrack.value;
+      if (type !== 'number' && type !== 'string') {
+        console.log('invalid type provided to selectedVideoTrack');
+        return;
+      }
       return {
         type: selectedVideoTrack?.type,
-        value,
+        value: `${selectedVideoTrack.value}`,
       };
     }, [selectedVideoTrack]);
 

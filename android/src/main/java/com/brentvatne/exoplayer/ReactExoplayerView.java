@@ -1428,13 +1428,14 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
         videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
+        videoTrack.setIndex(trackIndex);
         return videoTrack;
     }
 
     private ArrayList<VideoTrack> getVideoTrackInfo() {
         ArrayList<VideoTrack> videoTracks = new ArrayList<>();
         if (trackSelector == null) {
-            // Likely player is unmounting so no audio tracks are available anymore
+            // Likely player is unmounting so no video tracks are available anymore
             return videoTracks;
         }
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
@@ -1869,14 +1870,15 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if ("index".equals(type)) {
-            try {
-                int iValue = Integer.parseInt(value);
-                if (iValue < groups.length) {
-                    groupIndex = iValue;
-                }
-            } catch (Exception e) {
-                DebugLog.e(TAG, "cannot parse index:" + value);
+            int iValue = Integer.parseInt(value);
+
+            if (trackType == C.TRACK_TYPE_VIDEO && groups.length == 1) {
                 groupIndex = 0;
+                if (iValue < groups.get(groupIndex).length) {
+                    tracks.set(0, iValue);
+                }
+            } else if (iValue < groups.length) {
+                groupIndex = iValue;
             }
         } else if ("resolution".equals(type)) {
             int height = Integer.parseInt(value);
