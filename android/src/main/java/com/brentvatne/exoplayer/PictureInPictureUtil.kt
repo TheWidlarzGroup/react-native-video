@@ -20,7 +20,7 @@ object PictureInPictureUtil {
     @JvmStatic
     fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
         if (!isSupportPictureInPicture(context)) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && pictureInPictureParams != null) {
+        if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
             context.currentActivity?.enterPictureInPictureMode(pictureInPictureParams)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.currentActivity?.enterPictureInPictureMode()
@@ -29,7 +29,7 @@ object PictureInPictureUtil {
 
     @JvmStatic
     fun updatePictureInPictureActions(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (isSupportPictureInPictureAction()) {
             if (!isSupportPictureInPicture(context)) return
             context.currentActivity?.setPictureInPictureParams(pictureInPictureParams)
         }
@@ -48,6 +48,8 @@ object PictureInPictureUtil {
 
     private fun isSupportPictureInPicture(context: ThemedReactContext): Boolean =
         checkIsApiSupport() && checkIsSystemSupportPIP(context) && checkIsUserAllowPIP(context)
+
+    private fun isSupportPictureInPictureAction(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
     @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.N)
     private fun checkIsApiSupport(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N

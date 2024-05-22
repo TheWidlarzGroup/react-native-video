@@ -401,7 +401,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         Activity activity = themedReactContext.getCurrentActivity();
-        boolean isInMultiWindowMode = Util.SDK_INT >= 24 && activity != null && activity.isInMultiWindowMode();
+        boolean isInMultiWindowMode = Util.SDK_INT >= Build.VERSION_CODES.N && activity != null && activity.isInMultiWindowMode();
         if (playInBackground || isInPictureInPicture || isInMultiWindowMode) {
             return;
         }
