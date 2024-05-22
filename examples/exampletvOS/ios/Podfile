@@ -9,7 +9,7 @@ production = ENV["PRODUCTION"] == "1"
 
 target 'exampletvOS' do
 
-  platform :ios, min_ios_version_supported
+  platform :ios, '13.0'
 
   config = use_native_modules!
 
@@ -51,7 +51,8 @@ end
 
 target 'exampletvOS-tvOS' do
 
-  platform :tvos, min_ios_version_supported
+  platform :tvos, '13.0'
+
 
   config = use_native_modules!
 

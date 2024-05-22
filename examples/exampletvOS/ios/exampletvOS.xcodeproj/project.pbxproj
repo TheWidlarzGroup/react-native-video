@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,15 +11,15 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		269984920579226908D49904 /* libPods-exampletvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2855AB2CCC04BED0978AE /* libPods-exampletvOS.a */; };
+		2B9CB19ABD2F7593CC712EE0 /* libPods-exampletvOS-exampletvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B8541581572353AE641D25D /* libPods-exampletvOS-exampletvOSTests.a */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* exampletvOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* exampletvOSTests.m */; };
-		41BF5F3596F87FEE707DDD11 /* libPods-exampletvOS-exampletvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F21F13455730034D850CD1C /* libPods-exampletvOS-exampletvOSTests.a */; };
-		47EB63F3390701B2260096C6 /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A0216F1136BF7C90703C880F /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */; };
+		2F4A1A2DDB7DBCC788D49417 /* libPods-exampletvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 267B8C44BB0A52136D3696A6 /* libPods-exampletvOS.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		EE57DEA5314790D63C074D03 /* libPods-exampletvOS-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EA54FCF2086BA3B4678F8237 /* libPods-exampletvOS-tvOS.a */; };
+		D3343BEFCC605F69862C50EC /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2736B0345701FB5FDD68392 /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */; };
+		DC8DE8BB8CCCAFB04B6C9636 /* libPods-exampletvOS-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD32AD4A645A850C7DA3ABFA /* libPods-exampletvOS-tvOS.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,27 +44,27 @@
 		00E356EE1AD99517003FC87E /* exampletvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = exampletvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* exampletvOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = exampletvOSTests.m; sourceTree = "<group>"; };
-		015BA46D04C1496C29E63456 /* Pods-exampletvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS/Pods-exampletvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		0AB95528D4917A6897CDBEA6 /* Pods-exampletvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS/Pods-exampletvOS.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* exampletvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = exampletvOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = exampletvOS/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.mm; path = exampletvOS/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = exampletvOS/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = exampletvOS/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = exampletvOS/main.m; sourceTree = "<group>"; };
-		224D5D4AEB9A0A36B75746AA /* Pods-exampletvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS/Pods-exampletvOS.release.xcconfig"; sourceTree = "<group>"; };
-		2C329346E04FD437DBF160C6 /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-exampletvOSTests.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		1B8541581572353AE641D25D /* libPods-exampletvOS-exampletvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-exampletvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		267B8C44BB0A52136D3696A6 /* libPods-exampletvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E47B1E0B4A5D006451C7 /* exampletvOS-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "exampletvOS-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* exampletvOS-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "exampletvOS-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		36771B2C8C43AC6099096637 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-exampletvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		388308430DF4BE056B0CEF13 /* Pods-exampletvOS-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		3BDF8C4CCF278F944E8C6CBF /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		4F21F13455730034D850CD1C /* libPods-exampletvOS-exampletvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-exampletvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EF14C168915C44EEC550883 /* Pods-exampletvOS-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = exampletvOS/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8DC2855AB2CCC04BED0978AE /* libPods-exampletvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A0216F1136BF7C90703C880F /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CCE9A90FED9D09047497AB6D /* Pods-exampletvOS-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		E8891750AE2DFBD87A5BDB74 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		EA54FCF2086BA3B4678F8237 /* libPods-exampletvOS-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		906EB17F52B20B7C849584D4 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-exampletvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A028C97A652690D3951A90A2 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		A0DAFD18766DF238412CC790 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A1BFF3A7FDE8D0E0E8D29DA5 /* Pods-exampletvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS.debug.xcconfig"; path = "Target Support Files/Pods-exampletvOS/Pods-exampletvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		BD32AD4A645A850C7DA3ABFA /* libPods-exampletvOS-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2736B0345701FB5FDD68392 /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFF7EEC11318CF90C8E798DE /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-exampletvOSTests.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		D58C4912C7CCD936EF5AA8FA /* Pods-exampletvOS-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-exampletvOS-tvOS.release.xcconfig"; path = "Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
@@ -74,7 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41BF5F3596F87FEE707DDD11 /* libPods-exampletvOS-exampletvOSTests.a in Frameworks */,
+				2B9CB19ABD2F7593CC712EE0 /* libPods-exampletvOS-exampletvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				269984920579226908D49904 /* libPods-exampletvOS.a in Frameworks */,
+				2F4A1A2DDB7DBCC788D49417 /* libPods-exampletvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE57DEA5314790D63C074D03 /* libPods-exampletvOS-tvOS.a in Frameworks */,
+				DC8DE8BB8CCCAFB04B6C9636 /* libPods-exampletvOS-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,7 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47EB63F3390701B2260096C6 /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a in Frameworks */,
+				D3343BEFCC605F69862C50EC /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,10 +141,10 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				8DC2855AB2CCC04BED0978AE /* libPods-exampletvOS.a */,
-				4F21F13455730034D850CD1C /* libPods-exampletvOS-exampletvOSTests.a */,
-				EA54FCF2086BA3B4678F8237 /* libPods-exampletvOS-tvOS.a */,
-				A0216F1136BF7C90703C880F /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */,
+				267B8C44BB0A52136D3696A6 /* libPods-exampletvOS.a */,
+				1B8541581572353AE641D25D /* libPods-exampletvOS-exampletvOSTests.a */,
+				BD32AD4A645A850C7DA3ABFA /* libPods-exampletvOS-tvOS.a */,
+				C2736B0345701FB5FDD68392 /* libPods-exampletvOS-tvOS-exampletvOS-tvOSTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -185,14 +185,14 @@
 		9B1644CBAE2FABCCC6E29A69 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				015BA46D04C1496C29E63456 /* Pods-exampletvOS.debug.xcconfig */,
-				224D5D4AEB9A0A36B75746AA /* Pods-exampletvOS.release.xcconfig */,
-				36771B2C8C43AC6099096637 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */,
-				2C329346E04FD437DBF160C6 /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */,
-				CCE9A90FED9D09047497AB6D /* Pods-exampletvOS-tvOS.debug.xcconfig */,
-				388308430DF4BE056B0CEF13 /* Pods-exampletvOS-tvOS.release.xcconfig */,
-				E8891750AE2DFBD87A5BDB74 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */,
-				3BDF8C4CCF278F944E8C6CBF /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */,
+				A1BFF3A7FDE8D0E0E8D29DA5 /* Pods-exampletvOS.debug.xcconfig */,
+				0AB95528D4917A6897CDBEA6 /* Pods-exampletvOS.release.xcconfig */,
+				906EB17F52B20B7C849584D4 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */,
+				CFF7EEC11318CF90C8E798DE /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */,
+				3EF14C168915C44EEC550883 /* Pods-exampletvOS-tvOS.debug.xcconfig */,
+				D58C4912C7CCD936EF5AA8FA /* Pods-exampletvOS-tvOS.release.xcconfig */,
+				A0DAFD18766DF238412CC790 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */,
+				A028C97A652690D3951A90A2 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -204,12 +204,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "exampletvOSTests" */;
 			buildPhases = (
-				BC8CB606DF6125BE2BCE6F48 /* [CP] Check Pods Manifest.lock */,
+				BF68A211DE5FA356083775A9 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				D9B6B751E2AEDF3F7AB29F2D /* [CP] Copy Pods Resources */,
-				A7BC8AD5F38E060ECF380790 /* [CP] Embed Pods Frameworks */,
+				2AF7DD143288359334AF738B /* [CP] Embed Pods Frameworks */,
+				5BDFA4F7B1A367282C91D51D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -225,14 +225,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "exampletvOS" */;
 			buildPhases = (
-				5227897DA0E4608219DEAFFA /* [CP] Check Pods Manifest.lock */,
+				DF7C9EC0B0BEFF0A405B71C3 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				0D7507D506130F6246FD97BE /* [CP] Copy Pods Resources */,
-				2D0FE9B0618B7653931FB828 /* [CP] Embed Pods Frameworks */,
+				5F978FF933EC33D523CF1E66 /* [CP] Embed Pods Frameworks */,
+				7E7236B4667DD58A6B2A4E61 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -247,14 +247,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "exampletvOS-tvOS" */;
 			buildPhases = (
-				966D472419EA4A89F6874B5E /* [CP] Check Pods Manifest.lock */,
+				CCE0FD12C8E21423A8C2E1D7 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F122414F3F0027D42C /* Start Packager */,
 				2D02E4771E0B4A5D006451C7 /* Sources */,
 				2D02E4781E0B4A5D006451C7 /* Frameworks */,
 				2D02E4791E0B4A5D006451C7 /* Resources */,
 				2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */,
-				42686649B799B0EA1ADB4648 /* [CP] Copy Pods Resources */,
-				ED633C06123B38C012707698 /* [CP] Embed Pods Frameworks */,
+				02E55596BAC44B139AA8EC2F /* [CP] Embed Pods Frameworks */,
+				0B0402B6EAC3E6C0096BFE57 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -269,12 +269,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "exampletvOS-tvOSTests" */;
 			buildPhases = (
-				C021C441AB5F12C78313DC25 /* [CP] Check Pods Manifest.lock */,
+				CD8D004736C0482436C31F49 /* [CP] Check Pods Manifest.lock */,
 				2D02E48C1E0B4A5D006451C7 /* Sources */,
 				2D02E48D1E0B4A5D006451C7 /* Frameworks */,
 				2D02E48E1E0B4A5D006451C7 /* Resources */,
-				84F93B44286727BF8D357577 /* [CP] Copy Pods Resources */,
-				D8B17B456BDCF3F3A01CF942 /* [CP] Embed Pods Frameworks */,
+				81353144088214080C77D5E8 /* [CP] Embed Pods Frameworks */,
+				396546E895580186FD953097 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -384,55 +384,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		0D7507D506130F6246FD97BE /* [CP] Copy Pods Resources */ = {
+		02E55596BAC44B139AA8EC2F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Bundle React Native Code And Images";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
-		};
-		2D0FE9B0618B7653931FB828 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		42686649B799B0EA1ADB4648 /* [CP] Copy Pods Resources */ = {
+		0B0402B6EAC3E6C0096BFE57 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -449,68 +418,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5227897DA0E4608219DEAFFA /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-exampletvOS-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		84F93B44286727BF8D357577 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		966D472419EA4A89F6874B5E /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-exampletvOS-tvOS-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A7BC8AD5F38E060ECF380790 /* [CP] Embed Pods Frameworks */ = {
+		2AF7DD143288359334AF738B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -527,7 +435,106 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		BC8CB606DF6125BE2BCE6F48 /* [CP] Check Pods Manifest.lock */ = {
+		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle React Native Code And Images";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+		};
+		396546E895580186FD953097 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5BDFA4F7B1A367282C91D51D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5F978FF933EC33D523CF1E66 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7E7236B4667DD58A6B2A4E61 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS/Pods-exampletvOS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		81353144088214080C77D5E8 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BF68A211DE5FA356083775A9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -549,7 +556,29 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C021C441AB5F12C78313DC25 /* [CP] Check Pods Manifest.lock */ = {
+		CCE0FD12C8E21423A8C2E1D7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-exampletvOS-tvOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CD8D004736C0482436C31F49 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -571,55 +600,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D8B17B456BDCF3F3A01CF942 /* [CP] Embed Pods Frameworks */ = {
+		DF7C9EC0B0BEFF0A405B71C3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-exampletvOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests/Pods-exampletvOS-tvOS-exampletvOS-tvOSTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D9B6B751E2AEDF3F7AB29F2D /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-exampletvOSTests/Pods-exampletvOS-exampletvOSTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		ED633C06123B38C012707698 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-exampletvOS-tvOS/Pods-exampletvOS-tvOS-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
@@ -715,7 +715,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 36771B2C8C43AC6099096637 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */;
+			baseConfigurationReference = 906EB17F52B20B7C849584D4 /* Pods-exampletvOS-exampletvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -723,8 +723,12 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = exampletvOSTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -738,13 +742,17 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2C329346E04FD437DBF160C6 /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */;
+			baseConfigurationReference = CFF7EEC11318CF90C8E798DE /* Pods-exampletvOS-exampletvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = exampletvOSTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -758,7 +766,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 015BA46D04C1496C29E63456 /* Pods-exampletvOS.debug.xcconfig */;
+			baseConfigurationReference = A1BFF3A7FDE8D0E0E8D29DA5 /* Pods-exampletvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -769,7 +777,12 @@
 					"COCOAPODS=1",
 				);
 				INFOPLIST_FILE = exampletvOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -786,13 +799,18 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 224D5D4AEB9A0A36B75746AA /* Pods-exampletvOS.release.xcconfig */;
+			baseConfigurationReference = 0AB95528D4917A6897CDBEA6 /* Pods-exampletvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = exampletvOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -808,7 +826,7 @@
 		};
 		2D02E4971E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CCE9A90FED9D09047497AB6D /* Pods-exampletvOS-tvOS.debug.xcconfig */;
+			baseConfigurationReference = 3EF14C168915C44EEC550883 /* Pods-exampletvOS-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -821,7 +839,11 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "exampletvOS-tvOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -834,13 +856,13 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 12.4;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Debug;
 		};
 		2D02E4981E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 388308430DF4BE056B0CEF13 /* Pods-exampletvOS-tvOS.release.xcconfig */;
+			baseConfigurationReference = D58C4912C7CCD936EF5AA8FA /* Pods-exampletvOS-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -853,7 +875,11 @@
 				ENABLE_BITCODE = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "exampletvOS-tvOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -865,13 +891,13 @@
 				SDKROOT = appletvos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 12.4;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Release;
 		};
 		2D02E4991E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E8891750AE2DFBD87A5BDB74 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */;
+			baseConfigurationReference = A0DAFD18766DF238412CC790 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -882,7 +908,11 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "exampletvOS-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -892,13 +922,13 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/exampletvOS-tvOS.app/exampletvOS-tvOS";
-				TVOS_DEPLOYMENT_TARGET = 12.4;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Debug;
 		};
 		2D02E49A1E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3BDF8C4CCF278F944E8C6CBF /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */;
+			baseConfigurationReference = A028C97A652690D3951A90A2 /* Pods-exampletvOS-tvOS-exampletvOS-tvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -909,7 +939,11 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "exampletvOS-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -919,7 +953,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/exampletvOS-tvOS.app/exampletvOS-tvOS";
-				TVOS_DEPLOYMENT_TARGET = 12.4;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Release;
 		};
@@ -972,8 +1006,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
@@ -1028,8 +1065,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",

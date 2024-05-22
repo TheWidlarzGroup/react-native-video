@@ -64,6 +64,7 @@ export interface VideoRef {
     restore: boolean,
   ) => void;
   save: (options: object) => Promise<VideoSaveData>;
+  setVolume: (volume: number) => void;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -290,6 +291,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [setRestoreUserInterfaceForPIPStopCompletionHandler],
     );
 
+    const setVolume = useCallback((volume: number) => {
+      return VideoManager.setVolume(volume, getReactTag(nativeRef));
+    }, []);
+
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
         hasPoster && setShowPoster(true);
@@ -506,6 +511,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
+        setVolume,
       }),
       [
         seek,
@@ -515,6 +521,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         pause,
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
+        setVolume,
       ],
     );
 

@@ -86,4 +86,6 @@ RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
 
+RCT_EXTERN_METHOD(setVolume : (nonnull float*)volume reactTag : (nonnull NSNumber*)reactTag)
+
 @end
