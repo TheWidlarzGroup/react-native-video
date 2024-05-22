@@ -1498,7 +1498,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
         #if !os(visionOS)
             guard let _player else { return }
-            if UIApplication.shared.applicationState == .background {
+            if !_playInBackground && UIApplication.shared.applicationState == .background {
                 _playerLayer?.player = nil
                 _playerViewController?.player = nil
             }
