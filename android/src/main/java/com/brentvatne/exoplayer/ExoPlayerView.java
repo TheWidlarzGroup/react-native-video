@@ -1,6 +1,8 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.C;
@@ -36,8 +38,8 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final AspectRatioFrameLayout layout;
     private final ComponentListener componentListener;
     private ExoPlayer player;
-    private Context context;
-    private ViewGroup.LayoutParams layoutParams;
+    private final Context context;
+    private final ViewGroup.LayoutParams layoutParams;
     private final FrameLayout adOverlayFrameLayout;
 
     private boolean useTextureView = true;
@@ -209,16 +211,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
@@ -272,14 +264,19 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final class ComponentListener implements Player.Listener {
 
         @Override
-        public void onCues(List<Cue> cues) {
+        public void onCues(@NonNull List<Cue> cues) {
             subtitleLayout.setCues(cues);
         }
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
             boolean isInitialRatio = layout.getAspectRatio() == 0;
-            layout.setAspectRatio(videoSize.height == 0 ? 1 : (videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
+            if (videoSize.height == 0 || videoSize.width == 0) {
+                // When changing video track we receive an ghost state with height / width = 0
+                // No need to resize the view in that case
+                return;
+            }
+            layout.setAspectRatio((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
 
             // React native workaround for measuring and layout on initial load.
             if (isInitialRatio) {
@@ -293,7 +290,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
 
         @Override
-        public void onTracksChanged(Tracks tracks) {
+        public void onTracksChanged(@NonNull Tracks tracks) {
             updateForCurrentTrackSelections(tracks);
         }
     }

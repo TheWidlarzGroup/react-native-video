@@ -237,9 +237,9 @@ Example:
     { title: '#3 English Director Commentary', language: 'en', index: 2, type: 'text/vtt' }
   ],
   videoTracks: [
-    { bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
-    { bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
-    { bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
+    { index: 0, bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
+    { index: 1, bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
+    { index: 2, bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
   ]
 }
 ```
@@ -550,7 +550,8 @@ Payload:
 
 | Property | Type    | Description                           |
 | -------- | ------- | ------------------------------------- |
-| trackId  | number  | Internal track ID                     |
+| index    | number  | index of the track                    |
+| trackId  | string  | Internal track ID                     |
 | codecs   | string  | MimeType of codec used for this track |
 | width    | number  | Track width                           |
 | height   | number  | Track height                          |
@@ -563,7 +564,8 @@ Example:
 {
   videoTracks: [
     {
-      trackId: 0,
+      index: O,
+      trackId: "0",
       codecs: 'video/mp4',
       width: 1920,
       height: 1080,

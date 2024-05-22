@@ -117,7 +117,7 @@ This function corresponds to the completion handler in Apple's [restoreUserInter
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](./events#onseek) event will be called.
 
 #### Exact seek
 
@@ -128,6 +128,14 @@ By default iOS seeks within 100 milliseconds of the target position. If you need
 `seek(seconds, tolerance)`
 
 tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
+
+### `setVolume`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setVolume(value): Promise<void>`
+
+This function will change the volume exactly like [volume](./props#volume) property. default value and range are the same then.
 
 ### Example Usage
 
