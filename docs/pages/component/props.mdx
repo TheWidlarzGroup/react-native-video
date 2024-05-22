@@ -836,6 +836,8 @@ textTracks={[
 Controls whether to show media controls in the notification area.
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
 
+On android this will also allow for external controls, Google Assisten session and other benefits of MediaSession.
+
 You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
 
 To customize the notification controls you can use `metadata` property in the `source` prop.
