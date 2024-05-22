@@ -783,6 +783,13 @@ class VideoPlayer extends Component {
                   onPress={this.onResizeModeSelected}
                   selected={this.state.resizeMode}
                 />
+                <ToggleControl
+                  isSelected={this.state.muted}
+                  onPress={() => {
+                    this.setState({muted: !this.state.muted});
+                  }}
+                  text="muted"
+                />
                 {Platform.OS === 'ios' ? (
                   <ToggleControl
                     isSelected={this.state.paused}
