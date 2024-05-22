@@ -36,7 +36,7 @@ class VideoPlaybackCallback(private val seekIntervalMS: Long) : MediaSession.Cal
     ): ListenableFuture<SessionResult> {
         when (customCommand.customAction) {
             VideoPlaybackService.COMMAND_SEEK_FORWARD -> session.player.seekTo(session.player.contentPosition + seekIntervalMS)
-            VideoPlaybackService.COMMAND_SEEK_BACKWARD -> session.player.seekTo(session.player.contentPosition + seekIntervalMS)
+            VideoPlaybackService.COMMAND_SEEK_BACKWARD -> session.player.seekTo(session.player.contentPosition - seekIntervalMS)
         }
         return super.onCustomCommand(session, controller, customCommand, args)
     }

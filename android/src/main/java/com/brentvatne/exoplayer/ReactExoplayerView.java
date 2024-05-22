@@ -124,7 +124,6 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -158,7 +157,6 @@ public class ReactExoplayerView extends FrameLayout implements
         AdErrorEvent.AdErrorListener {
 
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
-    public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
 
     private static final String TAG = "ReactExoplayerView";
@@ -266,28 +264,26 @@ public class ReactExoplayerView extends FrameLayout implements
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case SHOW_PROGRESS:
-                    if (player != null) {
-                        if (playerControlView != null && isPlayingAd() && controls) {
-                            playerControlView.hide();
-                        }
-                        long pos = player.getCurrentPosition();
-                        long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                        long duration = player.getDuration();
-
-                        if (lastPos != pos
-                                || lastBufferDuration != bufferedDuration
-                                || lastDuration != duration) {
-                            lastPos = pos;
-                            lastBufferDuration = bufferedDuration;
-                            lastDuration = duration;
-                            eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
-                        }
-                        msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+            if (msg.what == SHOW_PROGRESS) {
+                if (player != null) {
+                    if (playerControlView != null && isPlayingAd() && controls) {
+                        playerControlView.hide();
                     }
-                    break;
+                    long pos = player.getCurrentPosition();
+                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+                    long duration = player.getDuration();
+
+                    if (lastPos != pos
+                            || lastBufferDuration != bufferedDuration
+                            || lastDuration != duration) {
+                        lastPos = pos;
+                        lastBufferDuration = bufferedDuration;
+                        lastDuration = duration;
+                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+                    }
+                    msg = obtainMessage(SHOW_PROGRESS);
+                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+                }
             }
         }
     };
@@ -449,9 +445,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
         //Handling the pauseButton click event
         ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
-        pauseButton.setOnClickListener((View v) -> {
-            setPausedModifier(true);
-        });
+        pauseButton.setOnClickListener((View v) ->
+            setPausedModifier(true)
+        );
 
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
@@ -780,7 +776,7 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         }
         MediaSource mediaSource;
-        if (mediaSourceList.size() == 0) {
+        if (mediaSourceList.isEmpty()) {
             if (mediaSourceWithAds != null) {
                 mediaSource = mediaSourceWithAds;
             } else {
@@ -919,12 +915,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 // When DRM fails using L1 we want to switch to L3
                 mediaDrm.setPropertyString("securityLevel", "L3");
             }
-            DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager.Builder()
+            return new DefaultDrmSessionManager.Builder()
                     .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
                     .setKeyRequestParameters(null)
                     .setMultiSession(false)
                     .build(drmCallback);
-            return drmSessionManager;
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
             throw ex;
@@ -945,7 +940,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         int type;
         if ("rtsp".equals(overrideExtension)) {
-            type = C.TYPE_RTSP;
+            type = CONTENT_TYPE_RTSP;
         } else {
             type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                     : uri.getLastPathSegment());
@@ -970,7 +965,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         MediaSource.Factory mediaSourceFactory;
         DrmSessionManagerProvider drmProvider;
-        List<StreamKey> streamKeys = new ArrayList();
+        List<StreamKey> streamKeys = new ArrayList<>();
         if (drmSessionManager != null) {
             drmProvider = ((_mediaItem) -> drmSessionManager);
         } else {
@@ -1158,16 +1153,16 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     // Lower the volume
                     if (!view.muted) {
-                        activity.runOnUiThread(() -> {
-                            view.player.setVolume(view.audioVolume * 0.8f);
-                        });
+                        activity.runOnUiThread(() ->
+                            view.player.setVolume(view.audioVolume * 0.8f)
+                        );
                     }
                 } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                     // Raise it back to normal
                     if (!view.muted) {
-                        activity.runOnUiThread(() -> {
-                            view.player.setVolume(view.audioVolume * 1);
-                        });
+                        activity.runOnUiThread(() ->
+                            view.player.setVolume(view.audioVolume * 1)
+                        );
                     }
                 }
             }
@@ -1628,7 +1623,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPlayerError(@NonNull PlaybackException e) {
         String errorString = "ExoPlaybackException: " + PlaybackException.getErrorCodeName(e.errorCode);
-        String errorCode = "2" + String.valueOf(e.errorCode);
+        String errorCode = "2" + e.errorCode;
         switch(e.errorCode) {
             case PlaybackException.ERROR_CODE_DRM_DEVICE_REVOKED:
             case PlaybackException.ERROR_CODE_DRM_LICENSE_ACQUISITION_FAILED:
@@ -1691,12 +1686,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
                 TimedMetadata timedMetadata = new TimedMetadata(frame.id, value);
                 metadataArray.add(timedMetadata);
-            } else if (entry instanceof EventMessage) {
-                EventMessage eventMessage = (EventMessage) entry;
+            } else if (entry instanceof EventMessage eventMessage) {
                 TimedMetadata timedMetadata = new TimedMetadata(eventMessage.schemeIdUri, eventMessage.value);
                 metadataArray.add(timedMetadata);
             } else {
-                DebugLog.d(TAG, "unhandled metadata " + entry.toString());
+                DebugLog.d(TAG, "unhandled metadata " + entry);
             }
         }
         eventEmitter.timedMetadata(metadataArray);
@@ -1952,7 +1946,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
             // Valiate list of all tracks and add only supported formats
             int supportedFormatLength = 0;
-            ArrayList<Integer> supportedTrackList = new ArrayList<>();
             for (int g = 0; g < allTracks.size(); g++) {
                 Format format = group.getFormat(g);
                 if (isFormatSupported(format)) {
@@ -1968,7 +1961,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     Format format = group.getFormat(k);
                     if (isFormatSupported(format)) {
                         tracks.add(allTracks.get(k));
-                        supportedTrackList.add(allTracks.get(k));
                     }
                 }
             }
@@ -2285,7 +2277,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, Exception e) {
+    public void onDrmSessionManagerError(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId, @NonNull Exception e) {
         DebugLog.d("DRM Info", "onDrmSessionManagerError");
         eventEmitter.error("onDrmSessionManagerError", e, "3002");
     }

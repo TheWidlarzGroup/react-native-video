@@ -234,8 +234,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [selectedVideoTrack]);
 
     const seek = useCallback(async (time: number, tolerance?: number) => {
-      if (isNaN(time)) {
-        throw new Error('Specified time is not a number');
+      if (isNaN(time) || time === null) {
+        throw new Error("Specified time is not a number: '" + time + "'");
       }
 
       if (!nativeRef.current) {
