@@ -27,7 +27,7 @@ object RNVSimpleCache {
     fun getCacheFactory(factory: HttpDataSource.Factory): DataSource.Factory {
         if (simpleCache == null) return factory
         return CacheDataSource.Factory()
-                .setCache(simpleCache!!)
-                .setUpstreamDataSourceFactory(factory)
+            .setCache(simpleCache!!)
+            .setUpstreamDataSourceFactory(factory)
     }
 }
