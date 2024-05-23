@@ -1619,7 +1619,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.onTextTrackDataChanged?(["subtitleTracks": subtitles.string])
         }
     }
-    
+
     @objc
     func getCurrentPlaybackTime(_ resolve: @escaping RCTPromiseResolveBlock) {
         let currentTime = RCTVideoUtils.getCurrentTime(playerItem: _playerItem)
