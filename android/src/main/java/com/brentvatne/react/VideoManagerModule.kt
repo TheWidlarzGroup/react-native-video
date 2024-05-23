@@ -65,7 +65,7 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     @ReactMethod
     fun getCurrentPosition(reactTag: Int, promise: Promise) {
         performOnPlayerView(reactTag) {
-           it?.getCurrentPosition(promise)
+            it?.getCurrentPosition(promise)
         }
     }
 
