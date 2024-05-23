@@ -9,7 +9,7 @@ class VideoTrack {
     var height = 0
     var bitrate = 0
     var codecs = ""
-    var id = -1
+    var index = -1
     var trackId = ""
     var isSelected = false
 }

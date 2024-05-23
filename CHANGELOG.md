@@ -1,4 +1,31 @@
+# [6.1.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.1.0...v6.1.1) (2024-05-22)
 
+### Bug Fixes
+* **iOS:** sometimes aspect ratio is invalid ([#3821](https://github.com/TheWidlarzGroup/react-native-video/issues/3821)) ([dac0985](https://github.com/TheWidlarzGroup/react-native-video/commit/dac09854303335d8e37b633c37bca399499d1999))
+
+### Features
+* **android:** change default user agent value ([#3813](https://github.com/TheWidlarzGroup/react-native-video/issues/3813)) ([089dc7e](https://github.com/TheWidlarzGroup/react-native-video/commit/089dc7e03251983ed3e1581519ffe4b3020ff5f8))
+
+
+# [6.1.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.0.0...v6.1.0) (2024-05-22)
+
+
+### Bug Fixes
+
+* **android:** avoid blinking on video track change ([#3782](https://github.com/TheWidlarzGroup/react-native-video/issues/3782)) ([7b1e129](https://github.com/TheWidlarzGroup/react-native-video/commit/7b1e1293f67c0e25e0763d08d830fcf192bb713c))
+* **android:** implement live configuration management ([#3792](https://github.com/TheWidlarzGroup/react-native-video/issues/3792)) ([e16730d](https://github.com/TheWidlarzGroup/react-native-video/commit/e16730de11d50b8a85cd09fa2b102fdbf777d8ad))
+* **android:** implement seek backward in notification service ([#3808](https://github.com/TheWidlarzGroup/react-native-video/issues/3808)) ([94b3da3](https://github.com/TheWidlarzGroup/react-native-video/commit/94b3da3477af3d82e4b16e6c93beb5c92ccee59b))
+* **android:** playback doesn't work with 0 startPositionMs ([#3784](https://github.com/TheWidlarzGroup/react-native-video/issues/3784)) ([66e0ba5](https://github.com/TheWidlarzGroup/react-native-video/commit/66e0ba579b84d745b4ca1b076d41d8eb880ef616))
+* **android:** random android crash ([#3777](https://github.com/TheWidlarzGroup/react-native-video/issues/3777)) ([d4c9be2](https://github.com/TheWidlarzGroup/react-native-video/commit/d4c9be2ba09dd410f0d878ce3f6a1cca987f6713))
+* **android:** remove remaining ad view when zapping ([#3786](https://github.com/TheWidlarzGroup/react-native-video/issues/3786)) ([324b461](https://github.com/TheWidlarzGroup/react-native-video/commit/324b46152703d813945778f55d87310d4e0b03cf))
+* **android:** source metadata compare function ([#3775](https://github.com/TheWidlarzGroup/react-native-video/issues/3775)) ([6455380](https://github.com/TheWidlarzGroup/react-native-video/commit/6455380f9e15099b975dce9beaf9b9af8298f998))
+* **tvos:** fix tvOS build and sample ([#3785](https://github.com/TheWidlarzGroup/react-native-video/issues/3785)) ([cd42dd7](https://github.com/TheWidlarzGroup/react-native-video/commit/cd42dd78c96e20da377c9b05c321218f1411ba97))
+
+
+### Features
+
+* add setVolume function to component's ref ([#3794](https://github.com/TheWidlarzGroup/react-native-video/issues/3794)) ([3cd7ab6](https://github.com/TheWidlarzGroup/react-native-video/commit/3cd7ab60b27e8820607bd83a5681bc7ba7e6c52e))
+* **android:** add possibility to hide seekBar ([#3789](https://github.com/TheWidlarzGroup/react-native-video/issues/3789)) ([95e6140](https://github.com/TheWidlarzGroup/react-native-video/commit/95e6140eead56efab83871e29b57d30f4f11a77a))
 
 # [6.0.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.0.0-rc.2...v6.0.0) (2024-05-14)
 

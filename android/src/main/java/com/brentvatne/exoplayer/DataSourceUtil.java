@@ -12,7 +12,6 @@ import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 
-import com.brentvatne.common.toolbox.DebugLog;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
@@ -39,7 +38,7 @@ public class DataSourceUtil {
 
     public static String getUserAgent(ReactContext context) {
         if (userAgent == null) {
-            userAgent = Util.getUserAgent(context, "ReactNativeVideo");
+            userAgent = Util.getUserAgent(context, context.getPackageName());
         }
         return userAgent;
     }

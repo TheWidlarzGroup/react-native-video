@@ -1,6 +1,8 @@
 package com.brentvatne.exoplayer;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -48,7 +50,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
-    private static final String PROP_DRM_LICENSESERVER = "licenseServer";
+    private static final String PROP_DRM_LICENSE_SERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
@@ -127,7 +129,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
             String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
-            String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSESERVER);
+            String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSE_SERVER);
             ReadableArray drmHeadersArray = ReactBridgeUtils.safeGetArray(drm, PROP_DRM_HEADERS);
             if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
                 UUID drmUUID = Util.getDrmUuid(drmType);
@@ -211,20 +213,22 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
             }
         } else {
-            int identifier = context.getResources().getIdentifier(
+            Resources resources = context.getResources();
+            String packageName = context.getPackageName();
+            int identifier = resources.getIdentifier(
                 uriString,
                 "drawable",
-                context.getPackageName()
+                packageName
             );
             if (identifier == 0) {
-                identifier = context.getResources().getIdentifier(
+                identifier = resources.getIdentifier(
                     uriString,
                     "raw",
-                    context.getPackageName()
+                    packageName
                 );
             }
             if (identifier > 0) {
-                Uri srcUri = RawResourceDataSource.buildRawResourceUri(identifier);
+                Uri srcUri = new Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(Integer.toString(identifier)).build();
                 videoView.setRawSrc(srcUri, extension);
             } else {
                 videoView.clearSrc();
