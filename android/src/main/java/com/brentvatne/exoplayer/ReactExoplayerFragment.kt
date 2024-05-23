@@ -20,7 +20,11 @@ class ReactExoplayerFragment(private val view: ReactExoplayerView) : Fragment() 
         mIsOnStopCalled = true
 
         // Handling when onStop is called while in multi-window mode
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity?.isInMultiWindowMode == true && activity?.isInPictureInPictureMode != true && !view.playInBackground) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+            activity?.isInMultiWindowMode == true &&
+            activity?.isInPictureInPictureMode != true &&
+            !view.playInBackground
+        ) {
             view.setPausedModifier(true)
         }
     }
