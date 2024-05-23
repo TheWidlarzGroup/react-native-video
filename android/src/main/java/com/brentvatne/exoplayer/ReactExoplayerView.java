@@ -685,6 +685,15 @@ public class ReactExoplayerView extends FrameLayout implements
         mainHandler.postDelayed(mainRunnable, 1);
     }
 
+    public void getCurrentPosition(Promise promise) {
+        if (player != null) {
+            long currentPosition = player.getCurrentPosition() / 1000;
+            promise.resolve((double) currentPosition);
+        } else {
+            promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
+        }
+    }
+
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
         self.trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);

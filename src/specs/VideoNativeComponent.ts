@@ -388,6 +388,7 @@ export interface VideoManagerType {
     reactTag: number,
   ) => Promise<void>;
   setVolume: (volume: number, reactTag: number) => Promise<void>;
+  getCurrentPosition: (reactTag: number) => Promise<number>;
 }
 
 export interface VideoDecoderPropertiesType {
