@@ -139,6 +139,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -842,7 +843,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 playbackServiceBinder = (PlaybackServiceBinder) service;
 
                 try {
-                    playbackServiceBinder.getService().registerPlayer(player);
+                    playbackServiceBinder.getService().registerPlayer(player,
+                            Objects.requireNonNull((Class<Activity>) (themedReactContext.getCurrentActivity()).getClass()));
                 } catch (Exception e) {
                     DebugLog.e(TAG, "Cloud not register ExoPlayer");
                 }

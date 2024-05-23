@@ -1,8 +1,10 @@
 package com.brentvatne.exoplayer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
@@ -23,6 +25,7 @@ class PlaybackServiceBinder(val service: VideoPlaybackService) : Binder()
 class VideoPlaybackService : MediaSessionService() {
     private var mediaSessionsList = mutableMapOf<ExoPlayer, MediaSession>()
     private var binder = PlaybackServiceBinder(this)
+    private var sourceActivity: Class<Activity>? = null
 
     // Controls
     private val commandSeekForward = SessionCommand(COMMAND_SEEK_FORWARD, Bundle.EMPTY)
@@ -44,10 +47,11 @@ class VideoPlaybackService : MediaSessionService() {
 
     // Player Registry
 
-    fun registerPlayer(player: ExoPlayer) {
+    fun registerPlayer(player: ExoPlayer, from: Class<Activity>) {
         if (mediaSessionsList.containsKey(player)) {
             return
         }
+        sourceActivity = from
 
         val mediaSession = MediaSession.Builder(this, player)
             .setId("RNVideoPlaybackService_" + player.hashCode())
@@ -63,6 +67,7 @@ class VideoPlaybackService : MediaSessionService() {
         hidePlayerNotification(player)
         val session = mediaSessionsList.remove(player)
         session?.release()
+        sourceActivity = null
 
         if (mediaSessionsList.isEmpty()) {
             cleanup()
@@ -110,9 +115,13 @@ class VideoPlaybackService : MediaSessionService() {
             return
         }
 
+        val returnToPlayer = Intent(this, sourceActivity).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
         val notificationCompact = NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
             .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
             .setStyle(MediaStyleNotificationHelper.MediaStyle(session))
+            .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
             .build()
 
         notificationManager.notify(session.player.hashCode(), notificationCompact)
