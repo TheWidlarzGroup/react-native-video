@@ -1708,7 +1708,7 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setSrc(Source source) {
         if (source.getUri() != null) {
             clearResumePosition();
-            boolean isSourceEqual = source == this.source;
+            boolean isSourceEqual = source.isEquals(this.source);
             hasDrmFailed = false;
             this.source = source;
             this.mediaDataSourceFactory =
