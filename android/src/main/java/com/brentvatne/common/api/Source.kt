@@ -45,14 +45,14 @@ class Source {
     val headers: MutableMap<String, String> = HashMap()
 
     /** return true if this and src are equals  */
-    fun isEqual(src: Source?): Boolean {
-        if (src == null) return false
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Source) return false
         return (
-            uri == src.uri &&
-                cropStartMs == src.cropStartMs &&
-                cropEndMs == src.cropEndMs &&
-                startPositionMs == src.startPositionMs &&
-                extension == src.extension
+            uri == other.uri &&
+                cropStartMs == other.cropStartMs &&
+                cropEndMs == other.cropEndMs &&
+                startPositionMs == other.startPositionMs &&
+                extension == other.extension
             )
     }
 
