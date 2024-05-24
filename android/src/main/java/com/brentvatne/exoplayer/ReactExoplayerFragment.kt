@@ -2,9 +2,10 @@ package com.brentvatne.exoplayer
 
 import android.os.Build
 import androidx.fragment.app.Fragment
+import java.util.UUID
 
 class ReactExoplayerFragment(private val view: ReactExoplayerView) : Fragment() {
-
+    val id = "${ReactExoplayerFragment::class.java.simpleName}_${UUID.randomUUID()}"
     private var mIsOnStopCalled = false
 
     override fun onStart() {

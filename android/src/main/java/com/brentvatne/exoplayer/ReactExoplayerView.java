@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
@@ -37,10 +38,12 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
@@ -130,7 +133,6 @@ import com.brentvatne.receiver.PictureInPictureReceiver;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.views.view.ReactViewGroup;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
@@ -225,6 +227,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
     private ControlsConfig controlsConfig = new ControlsConfig();
+    private String pictureInPictureFragmentTag = "";
+    private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
     // Props from React
     private Uri srcUri;
@@ -261,7 +265,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // React
     private final ThemedReactContext themedReactContext;
-    private final ReactExoplayerFragment reactExoplayerFragment;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
     private final PictureInPictureReceiver pictureInPictureReceiver;
@@ -311,7 +314,6 @@ public class ReactExoplayerView extends FrameLayout implements
         super(context);
         this.themedReactContext = context;
         this.eventEmitter = new VideoEventEmitter(context);
-        this.reactExoplayerFragment = new ReactExoplayerFragment(this);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
@@ -363,10 +365,12 @@ public class ReactExoplayerView extends FrameLayout implements
         super.onAttachedToWindow();
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity instanceof FragmentActivity) {
-            ((FragmentActivity) themedReactContext.getCurrentActivity())
+            ReactExoplayerFragment fragment = new ReactExoplayerFragment(this);
+            pictureInPictureFragmentTag = fragment.getId();
+            ((FragmentActivity) activity)
                     .getSupportFragmentManager()
                     .beginTransaction()
-                    .add(((ReactViewGroup) getParent()).getId(), reactExoplayerFragment)
+                    .add(fragment, fragment.getId())
                     .commitAllowingStateLoss();
         }
     }
@@ -374,14 +378,16 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onDetachedFromWindow() {
         cleanupPlaybackService();
+        super.onDetachedFromWindow();
         Activity activity = themedReactContext.getCurrentActivity();
-        if (activity instanceof FragmentActivity && reactExoplayerFragment != null) {
-            ((FragmentActivity) activity).getSupportFragmentManager()
-                    .beginTransaction()
-                    .remove(reactExoplayerFragment)
+        if (activity instanceof FragmentActivity) {
+            FragmentManager fragmentManager = ((FragmentActivity) activity).getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(pictureInPictureFragmentTag);
+            if (fragment == null) return;
+            fragmentManager.beginTransaction()
+                    .remove(fragment)
                     .commitAllowingStateLoss();
         }
-        super.onDetachedFromWindow();
     }
 
     // LifecycleEventListener implementation
@@ -2106,32 +2112,33 @@ public class ReactExoplayerView extends FrameLayout implements
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
         this.isInPictureInPicture = isInPictureInPicture;
         eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
+
+        Activity currentActivity = themedReactContext.getCurrentActivity();
+        if (currentActivity == null) return;
+
+        View decorView = currentActivity.getWindow().getDecorView();
+        ViewGroup rootView = (ViewGroup)decorView.findViewById(android.R.id.content);
+        LayoutParams layoutParams = new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+
         if (isInPictureInPicture) {
-            if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
-                fullScreenPlayerView.dismiss();
+            ((ViewGroup)exoPlayerView.getParent()).removeView(exoPlayerView);
+            for (int i = 0; i < rootView.getChildCount(); i++) {
+                if (rootView.getChildAt(i) != exoPlayerView) {
+                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
+                    rootView.getChildAt(i).setVisibility(View.GONE);
+                }
             }
-            if (pipFullScreenPlayerView == null) {
-                pipFullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, null, new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() { }
-                });
-            }
-            pipFullScreenPlayerView.show();
+            rootView.addView(exoPlayerView, layoutParams);
         } else {
-            if (pipFullScreenPlayerView != null && pipFullScreenPlayerView.isShowing())  {
-                pipFullScreenPlayerView.dismiss();
+            rootView.removeView(exoPlayerView);
+            for (int i = 0; i < rootView.getChildCount(); i++) {
+                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
             }
-            if (controls) {
-                fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() {
-                        setFullscreen(false);
-                    }
-                });
-                addPlayerControl();
-                if (isFullscreen) fullScreenPlayerView.show();
-                updateFullScreenButtonVisbility();
-            }
+            rootViewChildrenOriginalVisibility.clear();
+            addView(exoPlayerView, 0, layoutParams);
+            reLayout(exoPlayerView);
         }
     }
 
@@ -2150,7 +2157,9 @@ public class ReactExoplayerView extends FrameLayout implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
-            _pipParams = pictureInPictureParamsBuilder.build();
+            _pipParams = pictureInPictureParamsBuilder
+                    .setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player))
+                    .build();
         }
         PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
     }

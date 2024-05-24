@@ -8,9 +8,11 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Process
+import android.util.Rational
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
 import androidx.core.app.AppOpsManagerCompat
+import androidx.media3.exoplayer.ExoPlayer
 import com.brentvatne.receiver.PictureInPictureReceiver
 import com.facebook.react.uimanager.ThemedReactContext
 
@@ -46,6 +48,19 @@ object PictureInPictureUtil {
         return arrayListOf(RemoteAction(icon, title, title, intent))
     }
 
+    @JvmStatic
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun calcPictureInPictureAspectRatio(player: ExoPlayer): Rational {
+        var aspectRatio = Rational(player.videoSize.width, player.videoSize.height)
+        // Android PiP doesn't support aspect ratios lower than 0.4184 or higher than 2.39
+        if (aspectRatio.toFloat() > 2.39) {
+            aspectRatio = Rational(239, 100)
+        } else if (aspectRatio.toFloat() < 0.4184) {
+            aspectRatio = Rational(10000, 4184)
+        }
+        return aspectRatio
+    }
+
     private fun isSupportPictureInPicture(context: ThemedReactContext): Boolean =
         checkIsApiSupport() && checkIsSystemSupportPIP(context) && checkIsUserAllowPIP(context)
 
@@ -79,8 +94,6 @@ object PictureInPictureUtil {
                 Process.myUid(),
                 activity.packageName
             )
-            // In Android 10 Google Pixel, If allow,MODE_ALLOWED. If not allow, MODE_ERRORED
-            // Log.d(TAG, "isSupportPIP: OPSTR_PICTURE_IN_PICTURE=" + result); // MODE_ERRORED
             AppOpsManager.MODE_ALLOWED == result
         } else {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
