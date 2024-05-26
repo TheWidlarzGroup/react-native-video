@@ -17,7 +17,7 @@ class RCTVideoManager: RCTViewManager {
                 callback(nil)
                 return
             }
-            
+
             let view = self.bridge.uiManager.view(forReactTag: reactTag)
 
             guard let videoView = view as? RCTVideo else {
