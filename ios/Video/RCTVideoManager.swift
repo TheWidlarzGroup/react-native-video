@@ -17,14 +17,16 @@ class RCTVideoManager: RCTViewManager {
                 callback(nil)
                 return
             }
+            
+            let view = self.bridge.uiManager.view(forReactTag: reactTag)
 
-            guard let view = self.bridge.uiManager.view(forReactTag: reactTag) as? RCTVideo else {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: view))")
+            guard let videoView = view as? RCTVideo else {
+                DebugLog("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: view))")
                 callback(nil)
                 return
             }
 
-            callback(view)
+            callback(videoView)
         }
     }
 
