@@ -2138,7 +2138,19 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             rootViewChildrenOriginalVisibility.clear();
             addView(exoPlayerView, 0, layoutParams);
-            reLayout(exoPlayerView);
+            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    for (int i = 0; i < getChildCount(); i++) {
+                        View child = getChildAt(i);
+                        child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                                MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                        child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+                    }
+                    getViewTreeObserver().dispatchOnGlobalLayout();
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            });
         }
     }
 
