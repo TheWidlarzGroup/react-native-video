@@ -16,6 +16,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -106,6 +107,8 @@ import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.LegacyPlayerControlView;
+import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.PlayerView;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
@@ -172,8 +175,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
-    private LegacyPlayerControlView playerControlView;
-    private View playPauseControlContainer;
+    private PlayerControlView playerControlView;
+    // private View playPauseControlContainer;
     private Player.Listener eventListener;
 
     private ExoPlayerView exoPlayerView;
@@ -326,6 +329,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
+        exoPlayerView.setBackgroundColor(Color.BLACK);
 
         addView(exoPlayerView, 0, layoutParams);
 
@@ -404,7 +408,15 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     private void initializePlayerControl() {
         if (playerControlView == null) {
-            playerControlView = new LegacyPlayerControlView(getContext());
+            playerControlView = new PlayerControlView(getContext());
+            // playerControlView.setShowSubtitleButton(true);
+
+            exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
+                @Override
+                public void onFullscreenButtonClick(boolean isFullScreen) {
+                    DebugLog.w("FullsScreen", "onFullscreenButtonClick");
+                }
+            });
         }
 
         if (fullScreenPlayerView == null) {
@@ -418,7 +430,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
-        playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
+        //playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
         // Invoking onClick event for exoplayerView
         exoPlayerView.setOnClickListener((View v) -> {
@@ -428,7 +440,7 @@ public class ReactExoplayerView extends FrameLayout implements
         });
 
         //Handling the playButton click event
-        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        /*ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
         playButton.setOnClickListener((View v) -> {
             if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
                 player.seekTo(0);
@@ -441,15 +453,15 @@ public class ReactExoplayerView extends FrameLayout implements
         pauseButton.setOnClickListener((View v) ->
             setPausedModifier(true)
         );
-
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisbility();
         refreshProgressBarVisibility();
+*/
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
-        eventListener = new Player.Listener() {
+        /*eventListener = new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
                 View playButton = playerControlView.findViewById(R.id.exo_play);
@@ -460,19 +472,19 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (pauseButton != null && pauseButton.getVisibility() == GONE) {
                     pauseButton.setVisibility(INVISIBLE);
                 }
-                reLayout(playPauseControlContainer);
+                //reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
             }
 
             @Override
             public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-                reLayout(playPauseControlContainer);
+                //reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
             }
         };
-        player.addListener(eventListener);
+        player.addListener(eventListener);*/
     }
 
     /**
@@ -505,7 +517,7 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void refreshProgressBarVisibility (){
+/*    private void refreshProgressBarVisibility (){
         if(playerControlView == null) return;
         DefaultTimeBar exoProgress;
         TextView exoDuration;
@@ -513,6 +525,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoProgress = playerControlView.findViewById(R.id.exo_progress);
         exoDuration = playerControlView.findViewById(R.id.exo_duration);
         exoPosition = playerControlView.findViewById(R.id.exo_position);
+
         if(controlsConfig.getHideSeekBar()){
             LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT,
@@ -533,7 +546,7 @@ public class ReactExoplayerView extends FrameLayout implements
             exoPosition.setLayoutParams(defaultParam);
         }
     }
-
+ */
     private void reLayoutControls() {
         reLayout(exoPlayerView);
         reLayout(playerControlView);
@@ -738,10 +751,12 @@ public class ReactExoplayerView extends FrameLayout implements
                 drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
                         self.drmLicenseHeader);
             } catch (UnsupportedDrmException e) {
+                /*
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                         ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
+                */
                 return null;
             }
         }
@@ -2137,6 +2152,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void updateFullScreenButtonVisbility() {
         if (playerControlView != null) {
+            /*
             final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
             if (controls) {
                 //Handling the fullScreenButton click event
@@ -2147,7 +2163,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             } else {
                 fullScreenButton.setVisibility(GONE);
-            }
+            }*/
         }
     }
 
@@ -2290,7 +2306,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setShutterColor(Integer color) {
-        exoPlayerView.setShutterColor(color);
+        exoPlayerView.setShutterBackgroundColor(color);
     }
 
     @Override
@@ -2310,6 +2326,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
-        refreshProgressBarVisibility();
+        // refreshProgressBarVisibility();
     }
 }
