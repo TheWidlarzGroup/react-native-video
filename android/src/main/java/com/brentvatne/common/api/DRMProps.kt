@@ -19,10 +19,12 @@ class DRMProps {
      * Configured UUID for drm prop
      */
     var drmUUID: UUID? = null
+
     /**
      * DRM license server to be used
      */
     var drmLicenseServer: String? = null
+
     /**
      * DRM Http Header to access to license server
      */
@@ -37,7 +39,7 @@ class DRMProps {
         /** parse the source ReadableMap received from app */
         @JvmStatic
         fun parse(src: ReadableMap?): DRMProps? {
-            var drm : DRMProps? = null
+            var drm: DRMProps? = null
             if (src != null && src.hasKey(PROP_DRM_TYPE)) {
                 drm = DRMProps()
                 drm.drmType = safeGetString(src, PROP_DRM_TYPE)
