@@ -180,6 +180,7 @@ class VideoPlayer extends Component {
     {
       description: 'another bunny (can be saved)',
       uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+      headers: {referer: 'www.github.com', 'User-Agent': 'react.native.video'},
     },
     {
       description: 'sintel with subtitles',

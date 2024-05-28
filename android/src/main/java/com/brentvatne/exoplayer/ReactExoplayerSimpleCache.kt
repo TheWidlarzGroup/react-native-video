@@ -12,10 +12,9 @@ import java.io.File
 object RNVSimpleCache {
     // TODO: when to release? how to check if cache is released?
     private var simpleCache: SimpleCache? = null
-    var cacheDataSourceFactory: DataSource.Factory? = null
 
-    fun setSimpleCache(context: Context, cacheSize: Int, factory: HttpDataSource.Factory) {
-        if (cacheDataSourceFactory != null || cacheSize <= 0) return
+    fun setSimpleCache(context: Context, cacheSize: Int) {
+        if (simpleCache != null || cacheSize <= 0) return
         simpleCache = SimpleCache(
             File(context.cacheDir, "RNVCache"),
             LeastRecentlyUsedCacheEvictor(
@@ -23,9 +22,12 @@ object RNVSimpleCache {
             ),
             StandaloneDatabaseProvider(context)
         )
-        cacheDataSourceFactory =
-            CacheDataSource.Factory()
-                .setCache(simpleCache!!)
-                .setUpstreamDataSourceFactory(factory)
+    }
+
+    fun getCacheFactory(factory: HttpDataSource.Factory): DataSource.Factory {
+        if (simpleCache == null) return factory
+        return CacheDataSource.Factory()
+            .setCache(simpleCache!!)
+            .setUpstreamDataSourceFactory(factory)
     }
 }
