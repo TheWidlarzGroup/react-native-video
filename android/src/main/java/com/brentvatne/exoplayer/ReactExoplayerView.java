@@ -124,6 +124,7 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -695,6 +696,15 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         };
         mainHandler.postDelayed(mainRunnable, 1);
+    }
+
+    public void getCurrentPosition(Promise promise) {
+        if (player != null) {
+            double currentPosition = player.getCurrentPosition() / 1000;
+            promise.resolve(currentPosition);
+        } else {
+            promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
+        }
     }
 
     private void initializePlayerCore(ReactExoplayerView self) {

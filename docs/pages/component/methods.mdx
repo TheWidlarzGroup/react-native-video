@@ -100,6 +100,15 @@ tolerance is the max distance in milliseconds from the seconds position that's a
 
 This function will change the volume exactly like [volume](./props#volume) property. default value and range are the same then.
 
+### `getCurrentPosition`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`getCurrentPosition(): Promise<number>`
+
+This function retrieves and returns the precise current position of the video playback, measured in seconds.
+This function will throw an error if player is not initialized.
+
 ### Example Usage
 
 ```tsx

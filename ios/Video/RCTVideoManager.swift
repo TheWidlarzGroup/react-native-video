@@ -86,6 +86,13 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(getCurrentPosition:resolver:rejecter:)
+    func getCurrentPosition(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.getCurrentPlaybackTime(resolve, reject)
+        })
+    }
+
     override class func requiresMainQueueSetup() -> Bool {
         return true
     }
