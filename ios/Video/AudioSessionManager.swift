@@ -30,14 +30,20 @@ class AudioSessionManager {
         if needsPlayback {
             if earpiece {
                 RCTLogWarn(
-                    "You can't set \"audioOutput\"=\"earpiece\" and \"ignoreSilentSwitch\"=\"obey\" at the same time (in same or different components) - skipping props"
+                    """
+                    You can't set \"audioOutput\"=\"earpiece\" and \"ignoreSilentSwitch\"=\"obey\"
+                    at the same time (in same or different components) - skipping those props
+                    """
                 )
                 return .playback
             }
 
             if silentSwitchObey {
                 RCTLogWarn(
-                    "You can't use \"playInBackground or \"notificationControls with \"ignoreSilentSwitch\"=\"obey\" at the same time (in same or different components) - skipping \"ignoreSilentSwitch prop"
+                    """
+                    You can't use \"playInBackground or \"notificationControls with \"ignoreSilentSwitch\"=\"obey\"
+                    at the same time (in same or different components) - skipping \"ignoreSilentSwitch\" prop
+                    """
                 )
                 return .playback
             }
@@ -46,14 +52,20 @@ class AudioSessionManager {
         if silentSwitchObey {
             if earpiece {
                 RCTLogWarn(
-                    "You can't set \"audioOutput\"=\"earpiece\" and \"ignoreSilentSwitch\"=\"obey\" at the same time (in same or different components) - skipping props"
+                    """
+                    You can't set \"audioOutput\"=\"earpiece\" and \"ignoreSilentSwitch\"=\"obey\"
+                    at the same time (in same or different components) - skipping those props
+                    """
                 )
                 return .playback
             }
 
             if pip {
                 RCTLogWarn(
-                    "You use \"pictureInPicture\"=\"true\" and \"ignoreSilentSwitch\"=\"obey\" at the same time (in same or different components) - skipping props"
+                    """
+                    You use \"pictureInPicture\"=\"true\" and \"ignoreSilentSwitch\"=\"obey\"
+                    at the same time (in same or different components) - skipping those props
+                    """
                 )
                 return .playback
             }
