@@ -1716,10 +1716,11 @@ public class ReactExoplayerView extends FrameLayout implements
                             source.getHeaders());
 
             // refresh custom Metadata
-            customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
+            MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
 
             // Apply custom metadata is possible
-            if (player != null) {
+            if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
+                customMetadata = newCustomMetadata;
                 MediaItem currentMediaItem = player.getCurrentMediaItem();
                 if (currentMediaItem != null) {
                     MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
