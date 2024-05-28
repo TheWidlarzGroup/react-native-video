@@ -85,9 +85,9 @@ class RCTVideoManager: RCTViewManager {
     }
 
     @objc(getCurrentPosition:resolver:rejecter:)
-    func getCurrentPosition(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, _reject _: @escaping RCTPromiseRejectBlock) {
+    func getCurrentPosition(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
-            videoView?.getCurrentPlaybackTime(resolve)
+            videoView?.getCurrentPlaybackTime(resolve, reject)
         })
     }
 
