@@ -139,6 +139,7 @@ import java.lang.Math;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -214,7 +215,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean selectTrackWhenReady = false;
     private Handler mainHandler;
     private Runnable mainRunnable;
-    private DataSource.Factory cacheDataSourceFactory;
+    private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
 
     // Props from React
@@ -434,6 +435,17 @@ public class ReactExoplayerView extends FrameLayout implements
                 player.seekTo(0);
             }
             setPausedModifier(false);
+        });
+
+        //Handling the rewind and forward button click events
+        ImageButton exoRewind = playerControlView.findViewById(R.id.exo_rew);
+        ImageButton exoForward = playerControlView.findViewById(R.id.exo_ffwd);
+        exoRewind.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() - controlsConfig.getSeekIncrementMS());
+        });
+
+        exoForward.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() + controlsConfig.getSeekIncrementMS());
         });
 
         //Handling the pauseButton click event
@@ -696,8 +708,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (cacheDataSourceFactory != null) {
-            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        if (useCache) {
+            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
         if (adsLoader != null) {
@@ -841,7 +853,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 playbackServiceBinder = (PlaybackServiceBinder) service;
 
                 try {
-                    playbackServiceBinder.getService().registerPlayer(player);
+                    playbackServiceBinder.getService().registerPlayer(player,
+                            Objects.requireNonNull((Class<Activity>) (themedReactContext.getCurrentActivity()).getClass()));
                 } catch (Exception e) {
                     DebugLog.e(TAG, "Cloud not register ExoPlayer");
                 }
@@ -1013,13 +1026,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         throw new IllegalStateException("cannot open input file" + uri);
                     }
                 } else if ("file".equals(uri.getScheme()) ||
-                        cacheDataSourceFactory == null) {
+                        !useCache) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            cacheDataSourceFactory
+                            RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
                     );
 
                 }
@@ -2214,12 +2227,11 @@ public class ReactExoplayerView extends FrameLayout implements
         if (bufferConfig.getCacheSize() > 0) {
             RNVSimpleCache.INSTANCE.setSimpleCache(
                     this.getContext(),
-                    bufferConfig.getCacheSize(),
-                    buildHttpDataSourceFactory(false)
+                    bufferConfig.getCacheSize()
             );
-            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
+            useCache = true;
         } else {
-            cacheDataSourceFactory = null;
+            useCache = false;
         }
         releasePlayer();
         initializePlayer();
