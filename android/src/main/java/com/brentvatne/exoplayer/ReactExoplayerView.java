@@ -110,6 +110,7 @@ import androidx.media3.ui.LegacyPlayerControlView;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
+import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
@@ -243,9 +244,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
-    private UUID drmUUID = null;
-    private String drmLicenseUrl = null;
-    private String[] drmLicenseHeader = null;
+
+    private DRMProps drmProps;
     private boolean controls;
     private Uri adTagUrl;
 
@@ -659,7 +659,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     es.execute(() -> {
                         // DRM initialization must run on a different thread
                         DrmSessionManager drmSessionManager = initializePlayerDrm(self);
-                        if (drmSessionManager == null && self.drmUUID != null) {
+                        if (drmSessionManager == null && self.drmProps != null) {
                             // Failed to intialize DRM session manager - cannot continue
                             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
                             eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
@@ -767,10 +767,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
-        if (self.drmUUID != null) {
+        if (self.drmProps != null) {
             try {
-                drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                        self.drmLicenseHeader);
+                drmSessionManager = self.buildDrmSessionManager(self.drmProps.getDrmUUID(),
+                        self.drmProps.getDrmLicenseServer(),
+                        self.drmProps.getDrmLicenseHeader());
             } catch (UnsupportedDrmException e) {
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
@@ -2245,7 +2246,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        boolean finallyUseTextureView = useTextureView && this.drmUUID == null;
+        boolean finallyUseTextureView = useTextureView && drmProps == null;
         exoPlayerView.setUseTextureView(finallyUseTextureView);
     }
 
@@ -2272,16 +2273,11 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setDrmType(UUID drmType) {
-        this.drmUUID = drmType;
-    }
-
-    public void setDrmLicenseUrl(String licenseUrl){
-        this.drmLicenseUrl = licenseUrl;
-    }
-
-    public void setDrmLicenseHeader(String[] header){
-        this.drmLicenseHeader = header;
+    public void setDrm(DRMProps drmProps) {
+        this.drmProps = drmProps;
+        if (drmProps != null && drmProps.getDrmType() != null) {
+            this.drmProps.setDrmUUID(Util.getDrmUuid(drmProps.getDrmType()));
+        }
     }
 
     @Override

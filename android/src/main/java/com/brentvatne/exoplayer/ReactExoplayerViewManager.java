@@ -16,6 +16,7 @@ import androidx.media3.datasource.RawResourceDataSource;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
+import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.SubtitleStyle;
@@ -49,9 +50,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_AD_TAG_URL = "adTagUrl";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
-    private static final String PROP_DRM_TYPE = "type";
-    private static final String PROP_DRM_LICENSE_SERVER = "licenseServer";
-    private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -127,27 +125,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
-        if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
-            String drmType = ReactBridgeUtils.safeGetString(drm, PROP_DRM_TYPE);
-            String drmLicenseServer = ReactBridgeUtils.safeGetString(drm, PROP_DRM_LICENSE_SERVER);
-            ReadableArray drmHeadersArray = ReactBridgeUtils.safeGetArray(drm, PROP_DRM_HEADERS);
-            if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
-                UUID drmUUID = Util.getDrmUuid(drmType);
-                videoView.setDrmType(drmUUID);
-                videoView.setDrmLicenseUrl(drmLicenseServer);
-                if (drmHeadersArray != null) {
-                    ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-                    for (int i = 0; i < drmHeadersArray.size(); i++) {
-                        ReadableMap current = drmHeadersArray.getMap(i);
-                        String key = current.hasKey("key") ? current.getString("key") : null;
-                        String value = current.hasKey("value") ? current.getString("value") : null;
-                        drmKeyRequestPropertiesList.add(key);
-                        drmKeyRequestPropertiesList.add(value);
-                    }
-                    videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
-                }
-                videoView.setUseTextureView(false);
-            }
+        DRMProps drmProps = DRMProps.parse(drm);
+        if (drmProps != null) {
+            videoView.setDrm(drmProps);
+            videoView.setUseTextureView(false);
         }
     }
 
