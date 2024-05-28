@@ -124,6 +124,7 @@ import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -139,6 +140,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -214,7 +216,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean selectTrackWhenReady = false;
     private Handler mainHandler;
     private Runnable mainRunnable;
-    private DataSource.Factory cacheDataSourceFactory;
+    private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
 
     // Props from React
@@ -441,6 +443,17 @@ public class ReactExoplayerView extends FrameLayout implements
                 player.seekTo(0);
             }
             setPausedModifier(false);
+        });
+
+        //Handling the rewind and forward button click events
+        ImageButton exoRewind = playerControlView.findViewById(R.id.exo_rew);
+        ImageButton exoForward = playerControlView.findViewById(R.id.exo_ffwd);
+        exoRewind.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() - controlsConfig.getSeekIncrementMS());
+        });
+
+        exoForward.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() + controlsConfig.getSeekIncrementMS());
         });
 
         //Handling the pauseButton click event
@@ -685,6 +698,15 @@ public class ReactExoplayerView extends FrameLayout implements
         mainHandler.postDelayed(mainRunnable, 1);
     }
 
+    public void getCurrentPosition(Promise promise) {
+        if (player != null) {
+            double currentPosition = player.getCurrentPosition() / 1000;
+            promise.resolve(currentPosition);
+        } else {
+            promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
+        }
+    }
+
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
         self.trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);
@@ -708,8 +730,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (cacheDataSourceFactory != null) {
-            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        if (useCache) {
+            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
         if (adsLoader != null) {
@@ -842,7 +864,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 playbackServiceBinder = (PlaybackServiceBinder) service;
 
                 try {
-                    playbackServiceBinder.getService().registerPlayer(player);
+                    playbackServiceBinder.getService().registerPlayer(player,
+                            Objects.requireNonNull((Class<Activity>) (themedReactContext.getCurrentActivity()).getClass()));
                 } catch (Exception e) {
                     DebugLog.e(TAG, "Cloud not register ExoPlayer");
                 }
@@ -1014,13 +1037,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         throw new IllegalStateException("cannot open input file" + srcUri);
                     }
                 } else if ("file".equals(srcUri.getScheme()) ||
-                        cacheDataSourceFactory == null) {
+                        !useCache) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            cacheDataSourceFactory
+                            RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
                     );
 
                 }
@@ -2239,12 +2262,11 @@ public class ReactExoplayerView extends FrameLayout implements
         if (bufferConfig.getCacheSize() > 0) {
             RNVSimpleCache.INSTANCE.setSimpleCache(
                     this.getContext(),
-                    bufferConfig.getCacheSize(),
-                    buildHttpDataSourceFactory(false)
+                    bufferConfig.getCacheSize()
             );
-            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
+            useCache = true;
         } else {
-            cacheDataSourceFactory = null;
+            useCache = false;
         }
         releasePlayer();
         initializePlayer();

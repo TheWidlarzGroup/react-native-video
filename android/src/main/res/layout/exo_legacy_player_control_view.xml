@@ -4,14 +4,14 @@
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:layoutDirection="ltr"
-    android:background="#CC000000"
+    android:background="@color/midnight_black"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingTop="4dp"
+        android:paddingTop="@dimen/controller_wrapper_padding_top"
         android:orientation="horizontal">
 
         <ImageButton android:id="@+id/exo_prev"
@@ -42,42 +42,40 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/seekBar_wrapper_margin_top"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView android:id="@+id/exo_position"
-            android:layout_width="50dp"
+            android:layout_width="@dimen/position_duration_width"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="@dimen/position_duration_text_size"
             android:textStyle="bold"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
+            android:paddingHorizontal="@dimen/position_duration_horizontal_padding"
             android:includeFontPadding="false"
-            android:textColor="#FFBEBEBE"/>
+            android:textColor="@color/silver_gray"/>
 
         <androidx.media3.ui.DefaultTimeBar
             android:id="@+id/exo_progress"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="26dp"/>
+            android:layout_height="@dimen/seekBar_height"/>
 
         <TextView android:id="@+id/exo_duration"
-            android:layout_width="50dp"
+            android:layout_width="@dimen/position_duration_width"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="@dimen/position_duration_text_size"
             android:textStyle="bold"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
+            android:paddingHorizontal="@dimen/position_duration_horizontal_padding"
             android:includeFontPadding="false"
-            android:textColor="#FFBEBEBE"/>
+            android:textColor="@color/silver_gray"/>
 
         <ImageButton
             android:id="@+id/exo_fullscreen"
             style="@style/ExoMediaButton.FullScreen"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/full_screen_size"
+            android:layout_height="@dimen/full_screen_size"
+            android:layout_margin="@dimen/full_screen_margin"
             android:scaleType="fitCenter" />
     </LinearLayout>
 

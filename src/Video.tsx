@@ -65,6 +65,7 @@ export interface VideoRef {
   ) => void;
   save: (options: object) => Promise<VideoSaveData>;
   setVolume: (volume: number) => void;
+  getCurrentPosition: () => Promise<number>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -295,6 +296,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return VideoManager.setVolume(volume, getReactTag(nativeRef));
     }, []);
 
+    const getCurrentPosition = useCallback(() => {
+      return VideoManager.getCurrentPosition(getReactTag(nativeRef));
+    }, []);
+
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
         hasPoster && setShowPoster(true);
@@ -512,6 +517,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
+        getCurrentPosition,
       }),
       [
         seek,
@@ -522,6 +528,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         resume,
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
+        getCurrentPosition,
       ],
     );
 

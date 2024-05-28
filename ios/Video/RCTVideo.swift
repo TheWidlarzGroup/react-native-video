@@ -1622,6 +1622,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    @objc
+    func getCurrentPlaybackTime(_ resolve: @escaping RCTPromiseResolveBlock, _ reject: @escaping RCTPromiseRejectBlock) {
+        if let player = _playerItem {
+            let currentTime = RCTVideoUtils.getCurrentTime(playerItem: player)
+            resolve(currentTime)
+        } else {
+            reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.", nil)
+        }
+    }
+
     // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
     @objc
     func setOnClick(_: Any) {}
