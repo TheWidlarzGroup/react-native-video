@@ -244,7 +244,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
-
     private DRMProps drmProps;
     private boolean controls;
     private Uri adTagUrl;
