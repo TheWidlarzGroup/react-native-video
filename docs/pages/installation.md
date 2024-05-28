@@ -24,6 +24,8 @@ Then follow the instructions for your platform to link react-native-video into y
 ### Standard Method
 Run `pod install` in the `ios` directory of your project.
 
+⚠️ from version `6.0.0` the minimum iOS version required is `13.0`. For more information see [updating section](updating.md)
+
 ### Enable custom feature in podfile file
 
 Samples available in sample app see [sample pod file](https://github.com/TheWidlarzGroup/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34)
