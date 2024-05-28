@@ -26,7 +26,7 @@ class NowPlayingInfoCenterManager {
             } else {
                 UIApplication.shared.endReceivingRemoteControlEvents()
             }
-            
+
             AudioSessionManager.shared.updateAudioSessionCategory()
         }
     }

@@ -540,7 +540,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         }
                     }
                 }
-                
+
                 AudioSessionManager.shared.updateAudioSessionCategory()
             }
 
