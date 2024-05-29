@@ -82,14 +82,13 @@ RCT_EXTERN_METHOD(setLicenseResultError : (NSString*)error licenseUrl : (NSStrin
 
 RCT_EXTERN_METHOD(setPlayerPauseState : (nonnull NSNumber*)paused reactTag : (nonnull NSNumber*)reactTag)
 
-RCT_EXTERN_METHOD(presentFullscreenPlayer : (nonnull NSNumber*)reactTag)
-
-RCT_EXTERN_METHOD(dismissFullscreenPlayer : (nonnull NSNumber*)reactTag)
-
 RCT_EXTERN_METHOD(setVolume : (nonnull float*)volume reactTag : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(getCurrentPosition
                   : (nonnull NSNumber*)reactTag resolver
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setFullScreen : (BOOL)fullScreen reactTag : (nonnull NSNumber*)reactTag)
+
 @end

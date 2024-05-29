@@ -1290,14 +1290,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
     }
 
-    func dismissFullscreenPlayer() {
-        setFullscreen(false)
-    }
-
-    func presentFullscreenPlayer() {
-        setFullscreen(true)
-    }
-
     // MARK: - RCTPlayerObserverHandler
 
     func handleTimeUpdate(time _: CMTime) {

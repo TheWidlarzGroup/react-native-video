@@ -4,14 +4,6 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 This page shows the list of available methods
 
-### `dismissFullscreenPlayer`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-`dismissFullscreenPlayer(): Promise<void>`
-
-Take the player out of fullscreen mode.
-
 ### `pause`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -20,13 +12,13 @@ Take the player out of fullscreen mode.
 
 Pause the video.
 
-### `presentFullscreenPlayer`
+### `setFullScreen`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-`presentFullscreenPlayer(): Promise<void>`
+`setFullScreen(fullscreen): Promise<void>`
 
-Put the player in fullscreen mode.
+If you set it to `true`, the player enters fullscreen mode. If you set it to `false`, the player exits fullscreen mode.
 
 On iOS, this displays the video in a fullscreen view controller with controls.
 
