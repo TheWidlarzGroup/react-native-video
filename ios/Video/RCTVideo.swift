@@ -44,7 +44,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _muted = false
     private var _paused = false
     private var _repeat = false
-    private var _isPlaying: Bool?
+    private var _isPlaying = false
     private var _allowsExternalPlayback = true
     private var _textTracks: [TextTrack]?
     private var _selectedTextTrackCriteria: SelectedTrackCriteria?
@@ -264,7 +264,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationWillResignActive(notification _: NSNotification!) {
-        if _playInBackground || _playWhenInactive || _paused { return }
+        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
         _player?.pause()
         _player?.rate = 0.0
@@ -272,7 +273,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
-        if _playInBackground || _playWhenInactive || _paused { return }
+        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
         // Resume the player or any other tasks that should continue when the app becomes active.
         _player?.play()
@@ -281,20 +283,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
-        if !_playInBackground {
-            // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
-            _playerLayer?.player = nil
-            _playerViewController?.player = nil
-        }
+        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        if _playInBackground || isExternalPlaybackActive { return }
+        // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+        _playerLayer?.player = nil
+        _playerViewController?.player = nil
     }
 
     @objc
     func applicationWillEnterForeground(notification _: NSNotification!) {
         self.applyModifiers()
-        if !_playInBackground {
-            _playerLayer?.player = _player
-            _playerViewController?.player = _player
-        }
+        _playerLayer?.player = _player
+        _playerViewController?.player = _player
     }
 
     // MARK: - Audio events
@@ -1464,7 +1464,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
         let isPlaying = player.timeControlStatus == .playing
 
-        guard _isPlaying == nil || _isPlaying! != isPlaying else { return }
+        guard _isPlaying != isPlaying else { return }
         _isPlaying = isPlaying
         onVideoPlaybackStateChanged?(["isPlaying": isPlaying, "target": reactTag as Any])
     }
@@ -1499,7 +1499,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleExternalPlaybackActiveChange(player _: AVPlayer, change _: NSKeyValueObservedChange<Bool>) {
         #if !os(visionOS)
-            guard let _player, onVideoExternalPlaybackChange != nil else { return }
+            guard let _player else { return }
+            if !_playInBackground && UIApplication.shared.applicationState == .background {
+                _playerLayer?.player = nil
+                _playerViewController?.player = nil
+            }
+            guard onVideoExternalPlaybackChange != nil else { return }
             onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
                                             "target": reactTag as Any])
         #endif
