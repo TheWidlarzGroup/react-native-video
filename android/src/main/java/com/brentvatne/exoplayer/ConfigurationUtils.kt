@@ -1,8 +1,10 @@
 package com.brentvatne.exoplayer
 
 import androidx.media3.common.MediaItem.LiveConfiguration
+import androidx.media3.common.MediaMetadata
 import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferConfig.Live
+import com.brentvatne.common.api.Source
 
 /**
  * Helper functions to create exoplayer configuration
@@ -32,5 +34,23 @@ object ConfigurationUtils {
             liveConfiguration.setMinPlaybackSpeed(live.minPlaybackSpeed)
         }
         return liveConfiguration
+    }
+
+    /**
+     * Generate exoplayer MediaMetadata from source.Metadata
+     */
+    @JvmStatic
+    fun buildCustomMetadata(metadata: Source.Metadata?): MediaMetadata? {
+        var customMetadata: MediaMetadata? = null
+        if (metadata != null) {
+            customMetadata = MediaMetadata.Builder()
+                .setTitle(metadata.title)
+                .setSubtitle(metadata.subtitle)
+                .setDescription(metadata.description)
+                .setArtist(metadata.artist)
+                .setArtworkUri(metadata.imageUri)
+                .build()
+        }
+        return customMetadata
     }
 }
