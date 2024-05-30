@@ -2114,11 +2114,17 @@ public class ReactExoplayerView extends FrameLayout implements
         this.isInPictureInPicture = isInPictureInPicture;
         eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
 
+        if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
+            if (isInPictureInPicture) fullScreenPlayerView.hideWithoutPlayer();
+            return;
+        }
+
         Activity currentActivity = themedReactContext.getCurrentActivity();
         if (currentActivity == null) return;
 
         View decorView = currentActivity.getWindow().getDecorView();
-        ViewGroup rootView = (ViewGroup)decorView.findViewById(android.R.id.content);
+        ViewGroup rootView = decorView.findViewById(android.R.id.content);
+
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
