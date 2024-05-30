@@ -117,10 +117,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_DRM)
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         DRMProps drmProps = DRMProps.parse(drm);
-        if (drmProps != null) {
-            videoView.setDrm(drmProps);
-            videoView.setUseTextureView(false);
-        }
+        videoView.setDrm(drmProps);
+        videoView.setUseTextureView(false);
     }
 
     @ReactProp(name = PROP_SRC)
