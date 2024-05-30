@@ -114,7 +114,7 @@ class AudioSessionManager {
                     options.insert(.mixWithOthers)
                 }
 
-                if shouldEnabledDucking {
+                if shouldEnableDucking {
                     options.insert(.duckOthers)
                 }
             }
