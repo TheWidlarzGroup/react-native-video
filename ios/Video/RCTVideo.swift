@@ -459,8 +459,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player = AVPlayer()
             _player!.replaceCurrentItem(with: playerItem)
 
-            // We need to register player after we set current item and only for init
-            NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
+            if _showNotificationControls {
+                // We need to register player after we set current item and only for init
+                NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
+            }
         } else {
             _player?.replaceCurrentItem(with: playerItem)
 
