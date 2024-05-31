@@ -99,7 +99,6 @@ const Seeker = ({
 
   useEffect(() => {
     if (!isLoading && !seeking && !isUISeeking) {
-      console.log('update position from currentTime');
       const percent = currentTime / duration;
       const position = seekerWidth * percent;
       updateSeekerPosition(position);
