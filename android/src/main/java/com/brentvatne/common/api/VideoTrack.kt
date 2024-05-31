@@ -12,4 +12,5 @@ class VideoTrack {
     var index = -1
     var trackId = ""
     var isSelected = false
+    var rotation = 0
 }

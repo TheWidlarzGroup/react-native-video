@@ -1375,8 +1375,9 @@ public class ReactExoplayerView extends FrameLayout implements
                 setSelectedTextTrack(textTrackType, textTrackValue);
             }
             Format videoFormat = player.getVideoFormat();
-            int width = videoFormat != null ? videoFormat.width : 0;
-            int height = videoFormat != null ? videoFormat.height : 0;
+            boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
+            int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
+            int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
 
             // Properties that must be accessed on the main thread
@@ -1444,6 +1445,7 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setWidth(format.width == Format.NO_VALUE ? 0 : format.width);
         videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+        videoTrack.setRotation(format.rotationDegrees);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
         videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
         videoTrack.setIndex(trackIndex);
