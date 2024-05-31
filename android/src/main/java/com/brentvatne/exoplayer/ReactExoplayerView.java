@@ -709,7 +709,8 @@ public class ReactExoplayerView extends FrameLayout implements
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
-                        .setEnableDecoderFallback(true);
+                        .setEnableDecoderFallback(true)
+                        .forceEnableMediaCodecAsynchronousQueueing();
 
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
