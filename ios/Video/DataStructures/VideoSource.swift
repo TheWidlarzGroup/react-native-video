@@ -51,6 +51,6 @@ struct VideoSource {
         self.cropStart = (json["cropStart"] as? Float64).flatMap { Int64(round($0)) }
         self.cropEnd = (json["cropEnd"] as? Float64).flatMap { Int64(round($0)) }
         self.customMetadata = CustomMetadata(json["metadata"] as? NSDictionary)
-        self.drm = DRMParams(json["drm"] as? NSDictionary )
+        self.drm = DRMParams(json["drm"] as? NSDictionary)
     }
 }
