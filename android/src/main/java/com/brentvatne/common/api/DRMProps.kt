@@ -3,7 +3,6 @@ package com.brentvatne.common.api
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
-import java.util.UUID
 
 /**
  * Class representing DRM props for host.
@@ -29,7 +28,7 @@ class DRMProps {
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is DRMProps) return false
         val seemsEqual = (
-                drmType == other.drmType &&
+            drmType == other.drmType &&
                 drmLicenseServer == other.drmLicenseServer &&
                 drmLicenseHeader.size == other.drmLicenseHeader.size
             )

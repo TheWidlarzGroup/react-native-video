@@ -71,9 +71,7 @@ class Source {
     }
 
     /** return true if this and src are equals  */
-    fun isEquals(source: Source): Boolean {
-        return this == source
-    }
+    fun isEquals(source: Source): Boolean = this == source
 
     /** Metadata to display in notification */
     class Metadata {
@@ -189,7 +187,7 @@ class Source {
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.viewType = safeGetInt(src, PROP_SRC_VIEW_TYPE, ViewType.VIEW_TYPE_SURFACE)
-                source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM));
+                source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {
