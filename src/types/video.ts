@@ -3,6 +3,7 @@ import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
+import type ViewType from './ViewType';
 
 export type Headers = Record<string, string>;
 
@@ -23,6 +24,8 @@ export type ReactVideoSourceProperties = {
   cropStart?: number;
   cropEnd?: number;
   metadata?: VideoMetadata;
+  drm?: Drm;
+  viewType?: ViewType; // Android
 };
 
 export type ReactVideoSource = Readonly<
@@ -209,7 +212,7 @@ export type ControlsStyles = {
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
-  drm?: Drm;
+  drm?: Drm; // deprecated
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
   audioOutput?: AudioOutput; // Mobile
@@ -255,8 +258,8 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   shutterColor?: string; // Android
   textTracks?: TextTracks;
   testID?: string;
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
+  useTextureView?: boolean; // Android // deprecated
+  useSecureView?: boolean; // Android // deprecated
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;

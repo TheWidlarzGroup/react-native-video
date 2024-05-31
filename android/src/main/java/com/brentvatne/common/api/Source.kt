@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
 import android.text.TextUtils
+import com.brentvatne.common.api.DRMProps.Companion.parse
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.DebugLog.e
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
@@ -44,6 +45,17 @@ class Source {
     /** http header list */
     val headers: MutableMap<String, String> = HashMap()
 
+    /**
+     * DRM properties linked to the source
+     */
+    var drmProps: DRMProps? = null
+
+    /**
+     * Type of view to be used
+     */
+    @ViewType.ViewType
+    var viewType = ViewType.VIEW_TYPE_SURFACE
+
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is Source) return false
@@ -52,7 +64,9 @@ class Source {
                 cropStartMs == other.cropStartMs &&
                 cropEndMs == other.cropEndMs &&
                 startPositionMs == other.startPositionMs &&
-                extension == other.extension
+                extension == other.extension &&
+                viewType == other.viewType &&
+                drmProps == other.drmProps
             )
     }
 
@@ -116,6 +130,8 @@ class Source {
         private const val PROP_SRC_TYPE = "type"
         private const val PROP_SRC_METADATA = "metadata"
         private const val PROP_SRC_HEADERS = "requestHeaders"
+        private const val PROP_SRC_VIEW_TYPE = "viewType"
+        private const val PROP_SRC_DRM = "drm"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -172,6 +188,8 @@ class Source {
                 source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
+                source.viewType = safeGetInt(src, PROP_SRC_VIEW_TYPE, ViewType.VIEW_TYPE_SURFACE)
+                source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM));
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {

@@ -43,11 +43,12 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import {VideoManager} from './specs/VideoNativeComponent';
-import type {
-  OnLoadData,
-  OnTextTracksData,
-  OnReceiveAdEventData,
-  ReactVideoProps,
+import {
+  type OnLoadData,
+  type OnTextTracksData,
+  type OnReceiveAdEventData,
+  type ReactVideoProps,
+  ViewType,
 } from './types';
 
 export type VideoSaveData = {
@@ -82,6 +83,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
+      useTextureView,
+      useSecureView,
       onLoadStart,
       onLoad,
       onError,
@@ -156,6 +159,26 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         )
       );
 
+      const selectedDrm = source.drm || drm;
+      const _drm = !selectedDrm
+        ? undefined
+        : {
+            type: selectedDrm.type,
+            licenseServer: selectedDrm.licenseServer,
+            headers: generateHeaderForNative(selectedDrm.headers),
+            contentId: selectedDrm.contentId,
+            certificateUrl: selectedDrm.certificateUrl,
+            base64Certificate: selectedDrm.base64Certificate,
+            useExternalGetLicense: !!selectedDrm.getLicense,
+          };
+
+      const viewType = useSecureView
+        ? ViewType.SURFACE_SECURE
+        : useTextureView &&
+          (_drm === undefined || Object.keys(_drm).length === 0)
+        ? ViewType.TEXTURE
+        : ViewType.SURFACE;
+
       return {
         uri,
         isNetwork,
@@ -169,24 +192,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
+        viewType,
+        drm: _drm,
       };
-    }, [source]);
-
-    const _drm = useMemo(() => {
-      if (!drm) {
-        return;
-      }
-
-      return {
-        type: drm.type,
-        licenseServer: drm.licenseServer,
-        headers: generateHeaderForNative(drm.headers),
-        contentId: drm.contentId,
-        certificateUrl: drm.certificateUrl,
-        base64Certificate: drm.base64Certificate,
-        useExternalGetLicense: !!drm.getLicense,
-      };
-    }, [drm]);
+    }, [drm, source, useSecureView, useTextureView]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -538,7 +547,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           ref={nativeRef}
           {...rest}
           src={src}
-          drm={_drm}
           style={StyleSheet.absoluteFill}
           resizeMode={resizeMode}
           fullscreen={isFullscreen}

@@ -16,11 +16,6 @@ class DRMProps {
     var drmType: String? = null
 
     /**
-     * Configured UUID for drm prop
-     */
-    var drmUUID: UUID? = null
-
-    /**
      * DRM license server to be used
      */
     var drmLicenseServer: String? = null
@@ -29,6 +24,28 @@ class DRMProps {
      * DRM Http Header to access to license server
      */
     var drmLicenseHeader: Array<String> = emptyArray<String>()
+
+    /** return true if this and src are equals  */
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is DRMProps) return false
+        val seemsEqual = (
+                drmType == other.drmType &&
+                drmLicenseServer == other.drmLicenseServer &&
+                drmLicenseHeader.size == other.drmLicenseHeader.size
+            )
+        if (!seemsEqual) {
+            return false
+        }
+        var i = 0
+        while (i < drmLicenseHeader.size) {
+            if (drmLicenseHeader[i] != other.drmLicenseHeader[i]) {
+                return false
+            }
+            i++
+        }
+        return true
+    }
+
     companion object {
         private const val PROP_DRM_TYPE = "type"
         private const val PROP_DRM_LICENSE_SERVER = "licenseServer"

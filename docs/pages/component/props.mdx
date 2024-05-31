@@ -210,11 +210,8 @@ Determines if the player needs to throw an error when connection is lost or not
 
 ### `drm`
 
-<PlatformsList types={['Android', 'iOS']} />
-
-To setup DRM please follow [this guide](/component/drm)
-
-> ⚠️ DRM is not supported on visionOS yet
+> [!WARNING]
+> deprecated, use source.drm instead
 
 ### `filter`
 
@@ -728,6 +725,29 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+#### Using DRM content
+
+<PlatformsList types={['Android', 'iOS']} />
+
+To setup DRM please follow [this guide](/component/drm)
+
+Example:
+
+```javascript
+    {
+      description: 'WV: Secure SD & HD (cbcs,MP4,H264)',
+      uri: 'https://storage.googleapis.com/wvmedia/cbcs/h264/tears/tears_aes_cbcs.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
+    },
+```
+
+> ⚠️ DRM is not supported on visionOS yet
+
+
 #### Start playback at a specific point in time
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -772,6 +792,17 @@ source={{
     }
   }}
 ```
+#### viewType
+
+<PlatformsList types={['Android']} />
+
+Allow to explicitly specify view type.
+This flag replace `useSecureView` and `useTextureView` fields.
+There are 3 available values:
+- 'textureView': The video is rendered in a texture view. it allows mapping the view on a texture (usefull for 3D).
+DRM playback is not supported on textureView, if drm prop is provided, the suface will be transformed to a SurfaceView.
+- 'surfaceView' (default): The video is rendered in a surface. take less resources to be rendered.
+- 'secureView': The video is rendered in a surface which disallow taking screenshot of the video
 
 ### `subtitleStyle`
 
@@ -873,6 +904,9 @@ To customize the notification controls you can use `metadata` property in the `s
 
 ### `useSecureView`
 
+> [!WARNING]
+> deprecated, use source.viewType instead
+
 <PlatformsList types={['Android']} />
 
 Force the output to a SurfaceView and enables the secure surface.
@@ -885,6 +919,9 @@ SurfaceView is is the only one that can be labeled as secure.
 - **false (default)** - Do not use security
 
 ### `useTextureView`
+
+> [!WARNING]
+> deprecated, use source.viewType instead
 
 <PlatformsList types={['Android']} />
 

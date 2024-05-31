@@ -39,6 +39,8 @@ export type VideoSrc = Readonly<{
   cropStart?: Float;
   cropEnd?: Float;
   metadata?: VideoMetadata;
+  viewType?: Int32; // Android
+  drm?: Drm;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -290,7 +292,6 @@ type ControlsStyles = Readonly<{
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: Float;
@@ -332,8 +333,6 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
   onVideoLoad?: DirectEventHandler<OnLoadData>;

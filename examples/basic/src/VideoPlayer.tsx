@@ -57,7 +57,6 @@ type AdditionnalSourceInfo = {
   textTracks: TextTracks;
   adTagUrl: string;
   description: string;
-  drm: Drm;
   noView: boolean;
 };
 
@@ -769,7 +768,6 @@ class VideoPlayer extends Component {
           source={currentSrc as ReactVideoSource}
           textTracks={additionnal?.textTracks}
           adTagUrl={additionnal?.adTagUrl}
-          drm={additionnal?.drm}
           style={viewStyle}
           rate={this.state.rate}
           paused={this.state.paused}
