@@ -17,10 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-
-    /* DRM */
-    private var _drm: DRMParams?
-
     private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
@@ -388,7 +384,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": _drm?.json ?? NSNull(),
+            "drm": source.drm?.json ?? NSNull(),
             "target": reactTag,
         ])
 
@@ -425,10 +421,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if _drm != nil || _localSourceEncryptionKeyScheme != nil {
+        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
             _resouceLoaderDelegate = RCTResourceLoaderDelegate(
                 asset: asset,
-                drm: _drm,
+                drm: source.drm,
                 localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
                 onVideoError: onVideoError,
                 onGetLicense: onGetLicense,
@@ -544,11 +540,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
-    }
-
-    @objc
-    func setDrm(_ drm: NSDictionary) {
-        _drm = DRMParams(drm)
     }
 
     @objc
