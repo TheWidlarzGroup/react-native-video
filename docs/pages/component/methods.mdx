@@ -15,6 +15,14 @@ Take the player out of fullscreen mode.
 > [!WARNING]
 > deprecated, use setfullScreen method instead
 
+### `pause`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`pause(): Promise<void>`
+
+Pause the video.
+
 ### `presentFullscreenPlayer`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -41,14 +49,6 @@ If you set it to `true`, the player enters fullscreen mode. If you set it to `fa
 On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
-
-### `pause`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-`pause(): Promise<void>`
-
-Pause the video.
 
 ### `resume`
 
