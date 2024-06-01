@@ -285,6 +285,7 @@ export type OnAudioFocusChangedData = Readonly<{
 
 type ControlsStyles = Readonly<{
   hideSeekBar?: boolean;
+  seekIncrementMS?: number;
 }>;
 
 export interface VideoNativeProps extends ViewProps {
@@ -388,6 +389,7 @@ export interface VideoManagerType {
     reactTag: number,
   ) => Promise<void>;
   setVolume: (volume: number, reactTag: number) => Promise<void>;
+  getCurrentPosition: (reactTag: number) => Promise<number>;
   enterPictureInPicture: (reactTag: number) => Promise<void>;
   exitPictureInPicture: (reactTag: number) => Promise<void>;
 }

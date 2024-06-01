@@ -1,23 +1,20 @@
 package com.brentvatne.exoplayer;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.Util;
-import androidx.media3.datasource.RawResourceDataSource;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
+import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
@@ -29,7 +26,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
@@ -41,18 +37,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String TAG = "ExoViewManager";
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
-    private static final String PROP_SRC_URI = "uri";
-    private static final String PROP_SRC_START_POSITION = "startPosition";
-    private static final String PROP_SRC_CROP_START = "cropStart";
-    private static final String PROP_SRC_CROP_END = "cropEnd";
-    private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
-    private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_DRM = "drm";
     private static final String PROP_DRM_TYPE = "type";
     private static final String PROP_DRM_LICENSE_SERVER = "licenseServer";
     private static final String PROP_DRM_HEADERS = "headers";
-    private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -93,6 +82,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
     private static final String PROP_CONTROLS_STYLES = "controlsStyles";
+
 
     private final ReactExoplayerConfig config;
 
@@ -155,85 +145,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
-        String uriString = ReactBridgeUtils.safeGetString(src, PROP_SRC_URI, null);
-        int startPositionMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_START_POSITION, -1);
-        int cropStartMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_START, -1);
-        int cropEndMs = ReactBridgeUtils.safeGetInt(src, PROP_SRC_CROP_END, -1);
-        String extension = ReactBridgeUtils.safeGetString(src, PROP_SRC_TYPE, null);
-
-        Map<String, String> headers = new HashMap<>();
-        ReadableArray propSrcHeadersArray = ReactBridgeUtils.safeGetArray(src, PROP_SRC_HEADERS);
-        if (propSrcHeadersArray != null) {
-            if (propSrcHeadersArray.size() > 0) {
-                for (int i = 0; i < propSrcHeadersArray.size(); i++) {
-                    ReadableMap current = propSrcHeadersArray.getMap(i);
-                    String key = current.hasKey("key") ? current.getString("key") : null;
-                    String value = current.hasKey("value") ? current.getString("value") : null;
-                    if (key != null && value != null) {
-                        headers.put(key, value);
-                    }
-                }
-            }
-        }
-
-        ReadableMap propMetadata = ReactBridgeUtils.safeGetMap(src, PROP_SRC_METADATA);
-        MediaMetadata customMetadata = null;
-        if (propMetadata != null) {
-            String title = ReactBridgeUtils.safeGetString(propMetadata, "title");
-            String subtitle = ReactBridgeUtils.safeGetString(propMetadata, "subtitle");
-            String description = ReactBridgeUtils.safeGetString(propMetadata, "description");
-            String artist = ReactBridgeUtils.safeGetString(propMetadata, "artist");
-            String imageUriString = ReactBridgeUtils.safeGetString(propMetadata, "imageUri");
-
-            Uri imageUri = null;
-
-            try {
-                imageUri = Uri.parse(imageUriString);
-            } catch (Exception e) {
-                DebugLog.e(TAG, "Could not parse imageUri in metadata");
-            }
-
-            customMetadata = new MediaMetadata.Builder()
-                    .setTitle(title)
-                    .setSubtitle(subtitle)
-                    .setDescription(description)
-                    .setArtist(artist)
-                    .setArtworkUri(imageUri)
-                    .build();
-        }
-
-        if (TextUtils.isEmpty(uriString)) {
+        Source source = Source.parse(src, context);
+        if (source.getUri() == null) {
             videoView.clearSrc();
-            return;
-        }
-
-        if (startsWithValidScheme(uriString)) {
-            Uri srcUri = Uri.parse(uriString);
-
-            if (srcUri != null) {
-                videoView.setSrc(srcUri, startPositionMs, cropStartMs, cropEndMs, extension, headers, customMetadata);
-            }
         } else {
-            Resources resources = context.getResources();
-            String packageName = context.getPackageName();
-            int identifier = resources.getIdentifier(
-                uriString,
-                "drawable",
-                packageName
-            );
-            if (identifier == 0) {
-                identifier = resources.getIdentifier(
-                    uriString,
-                    "raw",
-                    packageName
-                );
-            }
-            if (identifier > 0) {
-                Uri srcUri = new Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(Integer.toString(identifier)).build();
-                videoView.setRawSrc(srcUri, extension);
-            } else {
-                videoView.clearSrc();
-            }
+            videoView.setSrc(source);
         }
     }
 
@@ -467,15 +383,5 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setControlsStyles(final ReactExoplayerView videoView, @Nullable ReadableMap controlsStyles) {
         ControlsConfig controlsConfig = ControlsConfig.parse(controlsStyles);
         videoView.setControlsStyles(controlsConfig);
-    }
-
-    private boolean startsWithValidScheme(String uriString) {
-        String lowerCaseUri = uriString.toLowerCase();
-        return lowerCaseUri.startsWith("http://")
-                || lowerCaseUri.startsWith("https://")
-                || lowerCaseUri.startsWith("content://")
-                || lowerCaseUri.startsWith("file://")
-                || lowerCaseUri.startsWith("rtsp://")
-                || lowerCaseUri.startsWith("asset://");
     }
 }

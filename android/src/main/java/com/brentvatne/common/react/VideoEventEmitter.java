@@ -227,6 +227,7 @@ public class VideoEventEmitter {
                 videoTrack.putString("trackId", vTrack.getTrackId());
                 videoTrack.putInt("index", vTrack.getIndex());
                 videoTrack.putBoolean("selected", vTrack.isSelected());
+                videoTrack.putInt("rotation", vTrack.getRotation());
                 waVideoTracks.pushMap(videoTrack);
             }
         }

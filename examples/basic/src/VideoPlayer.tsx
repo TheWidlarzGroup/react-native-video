@@ -7,10 +7,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  PanResponder,
   ToastAndroid,
   Platform,
-  PanResponderInstance,
   Alert,
 } from 'react-native';
 
@@ -53,6 +51,7 @@ import styles from './styles';
 import AudioTrackSelector from './components/AudioTracksSelector';
 import TextTrackSelector from './components/TextTracksSelector';
 import VideoTrackSelector from './components/VideoTracksSelector';
+import Seeker from './components/Seeker';
 
 type AdditionnalSourceInfo = {
   textTracks: TextTracks;
@@ -77,10 +76,6 @@ interface StateType {
   fullscreen: true;
   decoration: true;
   isLoading: boolean;
-  seekerFillWidth: number;
-  seekerPosition: number;
-  seekerOffset: number;
-  seeking: boolean;
   audioTracks: Array<AudioTrack>;
   textTracks: Array<TextTrack>;
   videoTracks: Array<VideoTrack>;
@@ -93,6 +88,7 @@ interface StateType {
   useCache: boolean;
   poster?: string;
   showNotificationControls: boolean;
+  isSeeking: boolean;
 }
 
 class VideoPlayer extends Component {
@@ -109,10 +105,6 @@ class VideoPlayer extends Component {
     fullscreen: true,
     decoration: true,
     isLoading: false,
-    seekerFillWidth: 0,
-    seekerPosition: 0,
-    seekerOffset: 0,
-    seeking: false,
     audioTracks: [],
     textTracks: [],
     videoTracks: [],
@@ -127,9 +119,8 @@ class VideoPlayer extends Component {
     useCache: false,
     poster: undefined,
     showNotificationControls: false,
+    isSeeking: false,
   };
-
-  seekerWidth = 0;
 
   // internal usage change to index if you want to select tracks by index instead of lang
   textTracksSelectionBy = 'index';
@@ -138,6 +129,12 @@ class VideoPlayer extends Component {
     {
       description: 'local file landscape',
       uri: require('./broadchurch.mp4'),
+    },
+    {
+      description: 'local file landscape cropped',
+      uri: require('./broadchurch.mp4'),
+      cropStart: 3000,
+      cropEnd: 10000,
     },
     {
       description: 'local file portrait',
@@ -180,6 +177,7 @@ class VideoPlayer extends Component {
     {
       description: 'another bunny (can be saved)',
       uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+      headers: {referer: 'www.github.com', 'User-Agent': 'react.native.video'},
     },
     {
       description: 'sintel with subtitles',
@@ -270,7 +268,6 @@ class VideoPlayer extends Component {
   );
 
   video?: VideoRef;
-  seekPanResponder?: PanResponderInstance;
 
   popupInfo = () => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
@@ -299,24 +296,13 @@ class VideoPlayer extends Component {
     this.onVideoTracks(data);
   };
 
-  updateSeeker = () => {
-    // put this code in timeout as because it may be put just after a setState
-    setTimeout(() => {
-      const position = this.calculateSeekerPosition();
-      this.setSeekerPosition(position);
-    }, 1);
-  };
-
   onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
-    if (!this.state.seeking) {
-      this.updateSeeker();
-    }
   };
 
   onSeek = (data: OnSeekData) => {
+    this.setState({isSeeking: false});
     this.setState({currentTime: data.currentTime});
-    this.updateSeeker();
   };
 
   onVideoLoadStart = () => {
@@ -406,13 +392,6 @@ class VideoPlayer extends Component {
     this.setState({paused: !event.hasAudioFocus});
   };
 
-  getCurrentTimePercentage = () => {
-    if (this.state.currentTime > 0 && this.state.duration !== 0) {
-      return this.state.currentTime / this.state.duration;
-    }
-    return 0;
-  };
-
   toast = (visible: boolean, message: string) => {
     if (visible) {
       if (Platform.OS === 'android') {
@@ -500,166 +479,20 @@ class VideoPlayer extends Component {
     );
   }
 
-  componentDidMount() {
-    this.initSeekPanResponder();
-  }
-
-  /**
-   * Render the seekbar and attach its handlers
-   */
-
-  /**
-   * Constrain the location of the seeker to the
-   * min/max value based on how big the
-   * seeker is.
-   *
-   * @param {float} val position of seeker handle in px
-   * @return {float} constrained position of seeker handle in px
-   */
-  constrainToSeekerMinMax(val = 0) {
-    if (val <= 0) {
-      return 0;
-    } else if (val >= this.seekerWidth) {
-      return this.seekerWidth;
-    }
-    return val;
-  }
-
-  /**
-   * Set the position of the seekbar's components
-   * (both fill and handle) according to the
-   * position supplied.
-   *
-   * @param {float} position position in px of seeker handle}
-   */
-  setSeekerPosition(position = 0) {
-    const state = this.state;
-    position = this.constrainToSeekerMinMax(position);
-
-    state.seekerFillWidth = position;
-    state.seekerPosition = position;
-
-    if (!state.seeking) {
-      state.seekerOffset = position;
-    }
-
-    this.setState(state);
-  }
-
-  /**
-   * Calculate the position that the seeker should be
-   * at along its track.
-   *
-   * @return {float} position of seeker handle in px based on currentTime
-   */
-  calculateSeekerPosition() {
-    const percent = this.state.currentTime / this.state.duration;
-    return this.seekerWidth * percent;
-  }
-
-  /**
-   * Return the time that the video should be at
-   * based on where the seeker handle is.
-   *
-   * @return {float} time in ms based on seekerPosition.
-   */
-  calculateTimeFromSeekerPosition() {
-    const percent = this.state.seekerPosition / this.seekerWidth;
-    return this.state.duration * percent;
-  }
-
-  /**
-   * Get our seekbar responder going
-   */
-  initSeekPanResponder() {
-    this.seekPanResponder = PanResponder.create({
-      // Ask to be the responder.
-      onStartShouldSetPanResponder: (_evt, _gestureState) => true,
-      onMoveShouldSetPanResponder: (_evt, _gestureState) => true,
-
-      /**
-       * When we start the pan tell the machine that we're
-       * seeking. This stops it from updating the seekbar
-       * position in the onProgress listener.
-       */
-      onPanResponderGrant: (evt, _gestureState) => {
-        const state = this.state;
-        // this.clearControlTimeout()
-        const position = evt.nativeEvent.locationX;
-        this.setSeekerPosition(position);
-        state.seeking = true;
-        this.setState(state);
-      },
-
-      /**
-       * When panning, update the seekbar position, duh.
-       */
-      onPanResponderMove: (evt, gestureState) => {
-        const position = this.state.seekerOffset + gestureState.dx;
-        this.setSeekerPosition(position);
-      },
-
-      /**
-       * On release we update the time and seek to it in the video.
-       * If you seek to the end of the video we fire the
-       * onEnd callback
-       */
-      onPanResponderRelease: (_evt, _gestureState) => {
-        const time = this.calculateTimeFromSeekerPosition();
-        const state = this.state;
-        if (time >= state.duration && !state.isLoading) {
-          state.paused = true;
-          this.onEnd();
-        } else {
-          this.video?.seek(time);
-          state.seeking = false;
-        }
-        this.setState(state);
-      },
-    });
+  videoSeek(position: number) {
+    this.setState({isSeeking: true});
+    this.video?.seek(position);
   }
 
   renderSeekBar() {
-    if (!this.seekPanResponder) {
-      return null;
-    }
-    const seekerStyle = [
-      styles.seekbarFill,
-      {
-        width: this.state.seekerFillWidth > 0 ? this.state.seekerFillWidth : 0,
-        backgroundColor: '#FFF',
-      },
-    ];
-
-    const seekerPositionStyle = [
-      styles.seekbarHandle,
-      {
-        left: this.state.seekerPosition > 0 ? this.state.seekerPosition : 0,
-      },
-    ];
-
-    const seekerPointerStyle = [
-      styles.seekbarCircle,
-      {backgroundColor: '#FFF'},
-    ];
-
     return (
-      <View
-        style={styles.seekbarContainer}
-        {...this.seekPanResponder.panHandlers}
-        {...styles.generalControls}>
-        <View
-          style={styles.seekbarTrack}
-          onLayout={event =>
-            (this.seekerWidth = event.nativeEvent.layout.width)
-          }
-          pointerEvents={'none'}>
-          <View style={seekerStyle} pointerEvents={'none'} />
-        </View>
-        <View style={seekerPositionStyle} pointerEvents={'none'}>
-          <View style={seekerPointerStyle} pointerEvents={'none'} />
-        </View>
-      </View>
+      <Seeker
+        currentTime={this.state.currentTime}
+        duration={this.state.duration}
+        isLoading={this.state.isLoading}
+        videoSeek={prop => this.videoSeek(prop)}
+        isUISeeking={this.state.isSeeking}
+      />
     );
   }
 

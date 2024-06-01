@@ -120,6 +120,7 @@ import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
+import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
@@ -132,6 +133,7 @@ import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.receiver.PictureInPictureReceiver;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -144,9 +146,9 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.lang.Math;
 import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -226,17 +228,13 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean selectTrackWhenReady = false;
     private Handler mainHandler;
     private Runnable mainRunnable;
-    private DataSource.Factory cacheDataSourceFactory;
+    private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
     private String pictureInPictureFragmentTag = "";
     private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
     // Props from React
-    private Uri srcUri;
-    private long startPositionMs = -1;
-    private long cropStartMs = -1;
-    private long cropEndMs = -1;
-    private String extension;
+    private Source source = new Source();
     private boolean repeat;
     private String audioTrackType;
     private String audioTrackValue;
@@ -253,7 +251,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
     protected boolean playInBackground = false;
-    private Map<String, String> requestHeaders;
     private boolean mReportBandwidth = false;
     private UUID drmUUID = null;
     private String drmLicenseUrl = null;
@@ -342,8 +339,6 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void createViews() {
-        clearResumePosition();
-        mediaDataSourceFactory = buildDataSourceFactory(true);
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
@@ -491,6 +486,17 @@ public class ReactExoplayerView extends FrameLayout implements
                 player.seekTo(0);
             }
             setPausedModifier(false);
+        });
+
+        //Handling the rewind and forward button click events
+        ImageButton exoRewind = playerControlView.findViewById(R.id.exo_rew);
+        ImageButton exoForward = playerControlView.findViewById(R.id.exo_ffwd);
+        exoRewind.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() - controlsConfig.getSeekIncrementMS());
+        });
+
+        exoForward.setOnClickListener((View v) -> {
+            seekTo(player.getCurrentPosition() + controlsConfig.getSeekIncrementMS());
         });
 
         //Handling the pauseButton click event
@@ -689,22 +695,15 @@ public class ReactExoplayerView extends FrameLayout implements
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
                 }
-                if (playerNeedsSource && srcUri != null) {
+                if (playerNeedsSource && source.getUri() != null) {
                     exoPlayerView.invalidateAspectRatio();
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {
                         // DRM initialization must run on a different thread
-                        DrmSessionManager drmSessionManager = initializePlayerDrm(self);
-                        if (drmSessionManager == null && self.drmUUID != null) {
-                            // Failed to intialize DRM session manager - cannot continue
-                            DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
-                            eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
-                            return;
-                        }
 
                         if (activity == null) {
-                            DebugLog.e(TAG, "Failed to initialize Player!");
+                            DebugLog.e(TAG, "Failed to initialize Player!, null activity");
                             eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
                             return;
                         }
@@ -713,26 +712,37 @@ public class ReactExoplayerView extends FrameLayout implements
                         activity.runOnUiThread(() -> {
                             try {
                                 // Source initialization must run on the main thread
-                                initializePlayerSource(self, drmSessionManager);
+                                initializePlayerSource();
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
                                 DebugLog.e(TAG, "Failed to initialize Player!");
                                 DebugLog.e(TAG, ex.toString());
+                                ex.printStackTrace();
                                 self.eventEmitter.error(ex.toString(), ex, "1001");
                             }
                         });
                     });
-                } else if (srcUri != null) {
-                    initializePlayerSource(self, null);
+                } else if (source.getUri() != null) {
+                    initializePlayerSource();
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
                 DebugLog.e(TAG, "Failed to initialize Player!");
                 DebugLog.e(TAG, ex.toString());
+                ex.printStackTrace();
                 eventEmitter.error(ex.toString(), ex, "1001");
             }
         };
         mainHandler.postDelayed(mainRunnable, 1);
+    }
+
+    public void getCurrentPosition(Promise promise) {
+        if (player != null) {
+            double currentPosition = player.getCurrentPosition() / 1000;
+            promise.resolve(currentPosition);
+        } else {
+            promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
+        }
     }
 
     private void initializePlayerCore(ReactExoplayerView self) {
@@ -749,7 +759,8 @@ public class ReactExoplayerView extends FrameLayout implements
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
-                        .setEnableDecoderFallback(true);
+                        .setEnableDecoderFallback(true)
+                        .forceEnableMediaCodecAsynchronousQueueing();
 
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
@@ -758,8 +769,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (cacheDataSourceFactory != null) {
-            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
+        if (useCache) {
+            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
         if (adsLoader != null) {
@@ -811,15 +822,26 @@ public class ReactExoplayerView extends FrameLayout implements
         return drmSessionManager;
     }
 
-    private void initializePlayerSource(ReactExoplayerView self, DrmSessionManager drmSessionManager) {
+    private void initializePlayerSource() {
+        if (source.getUri() == null) {
+            return;
+        }
+        DrmSessionManager drmSessionManager = initializePlayerDrm(this);
+        if (drmSessionManager == null && drmUUID != null) {
+            // Failed to intialize DRM session manager - cannot continue
+            DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
+            eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
+            return;
+        }
+
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
-        MediaSource videoSource = buildMediaSource(self.srcUri, self.extension, drmSessionManager, cropStartMs, cropEndMs);
+        MediaSource videoSource = buildMediaSource(source.getUri(), source.getExtension(), drmSessionManager, source.getCropStartMs(), source.getCropEndMs());
         MediaSource mediaSourceWithAds = null;
         if (adTagUrl != null && adsLoader != null) {
             DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
                     .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
             DataSpec adTagDataSpec = new DataSpec(adTagUrl);
-            mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(srcUri, adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
+            mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(source.getUri(), adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
         } else {
             if (adTagUrl == null && adsLoader != null) {
                 adsLoader.release();
@@ -859,8 +881,8 @@ public class ReactExoplayerView extends FrameLayout implements
         if (haveResumePosition) {
             player.seekTo(resumeWindow, resumePosition);
             player.setMediaSource(mediaSource, false);
-        } else if (startPositionMs > 0) {
-            player.setMediaSource(mediaSource, startPositionMs);
+        } else if (source.getStartPositionMs() > 0) {
+            player.setMediaSource(mediaSource, source.getStartPositionMs());
         } else {
             player.setMediaSource(mediaSource, true);
         }
@@ -893,7 +915,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 playbackServiceBinder = (PlaybackServiceBinder) service;
 
                 try {
-                    playbackServiceBinder.getService().registerPlayer(player);
+                    playbackServiceBinder.getService().registerPlayer(player,
+                            Objects.requireNonNull((Class<Activity>) (themedReactContext.getCurrentActivity()).getClass()));
                 } catch (Exception e) {
                     DebugLog.e(TAG, "Cloud not register ExoPlayer");
                 }
@@ -1057,21 +1080,21 @@ public class ReactExoplayerView extends FrameLayout implements
                 );
                 break;
             case CONTENT_TYPE_OTHER:
-                if ("asset".equals(srcUri.getScheme())) {
+                if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, srcUri);
+                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
-                        throw new IllegalStateException("cannot open input file" + srcUri);
+                        throw new IllegalStateException("cannot open input file" + uri);
                     }
-                } else if ("file".equals(srcUri.getScheme()) ||
-                        cacheDataSourceFactory == null) {
+                } else if ("file".equals(uri.getScheme()) ||
+                        !useCache) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            cacheDataSourceFactory
+                            RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
                     );
 
                 }
@@ -1222,7 +1245,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private boolean requestAudioFocus() {
-        if (disableFocus || srcUri == null || this.hasAudioFocus) {
+        if (disableFocus || source.getUri() == null || this.hasAudioFocus) {
             return true;
         }
         int result = audioManager.requestAudioFocus(audioFocusChangeListener,
@@ -1299,7 +1322,7 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
         return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
-                useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
+                useBandwidthMeter ? bandwidthMeter : null, source.getHeaders());
     }
 
     /**
@@ -1310,7 +1333,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return A new HttpDataSource factory.
      */
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
+        return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, source.getHeaders());
     }
 
     // AudioBecomingNoisyListener implementation
@@ -1404,8 +1427,9 @@ public class ReactExoplayerView extends FrameLayout implements
                 setSelectedTextTrack(textTrackType, textTrackValue);
             }
             Format videoFormat = player.getVideoFormat();
-            int width = videoFormat != null ? videoFormat.width : 0;
-            int height = videoFormat != null ? videoFormat.height : 0;
+            boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
+            int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
+            int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
 
             // Properties that must be accessed on the main thread
@@ -1473,6 +1497,7 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setWidth(format.width == Format.NO_VALUE ? 0 : format.width);
         videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+        videoTrack.setRotation(format.rotationDegrees);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
         videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
         videoTrack.setIndex(trackIndex);
@@ -1515,7 +1540,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private ArrayList<VideoTrack> getVideoTrackInfoFromManifest(int retryCount) {
         ExecutorService es = Executors.newSingleThreadExecutor();
         final DataSource dataSource = this.mediaDataSourceFactory.createDataSource();
-        final Uri sourceUri = this.srcUri;
+        final Uri sourceUri = source.getUri();
         final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
 
         Future<ArrayList<VideoTrack>> result = es.submit(new Callable() {
@@ -1759,34 +1784,29 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startPositionMs, final long cropStartMs, final long cropEndMs, final String extension, Map<String, String> headers, MediaMetadata customMetadata) {
-
-        if (!Util.areEqual(this.customMetadata, customMetadata) && player != null) {
-            MediaItem currentMediaItem = player.getCurrentMediaItem();
-
-            if (currentMediaItem != null) {
-
-                MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-
-                // This will cause video blink/reload but won't louse progress
-                player.setMediaItem(newMediaItem, false);
-            }
-        }
-
-        if (uri != null) {
-            boolean isSourceEqual = uri.equals(srcUri) && cropStartMs == this.cropStartMs && cropEndMs == this.cropEndMs;
+    public void setSrc(Source source) {
+        if (source.getUri() != null) {
+            clearResumePosition();
+            boolean isSourceEqual = source.isEquals(this.source);
             hasDrmFailed = false;
-            this.srcUri = uri;
-            this.startPositionMs = startPositionMs;
-            this.cropStartMs = cropStartMs;
-            this.cropEndMs = cropEndMs;
-            this.extension = extension;
-            this.requestHeaders = headers;
+            this.source = source;
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
-                            this.requestHeaders);
-            this.customMetadata = customMetadata;
+                            source.getHeaders());
 
+            // refresh custom Metadata
+            MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
+
+            // Apply custom metadata is possible
+            if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
+                customMetadata = newCustomMetadata;
+                MediaItem currentMediaItem = player.getCurrentMediaItem();
+                if (currentMediaItem != null) {
+                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+                    // This will cause video blink/reload but won't louse progress
+                    player.setMediaItem(newMediaItem, false);
+                }
+            }
             if (!isSourceEqual) {
                 reloadSource();
             }
@@ -1794,19 +1814,13 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void clearSrc() {
-        if (srcUri != null) {
+        if (source.getUri() != null) {
             if (player != null) {
                 player.stop();
                 player.clearMediaItems();
             }
-            this.srcUri = null;
-            this.startPositionMs = -1;
-            this.cropStartMs = -1;
-            this.cropEndMs = -1;
-            this.extension = null;
-            this.requestHeaders = null;
+            this.source = new Source();
             this.mediaDataSourceFactory = null;
-            customMetadata = null;
             clearResumePosition();
         }
     }
@@ -1823,22 +1837,9 @@ public class ReactExoplayerView extends FrameLayout implements
         adTagUrl = uri;
     }
 
-    public void setRawSrc(final Uri uri, final String extension) {
-        if (uri != null) {
-            boolean isSourceEqual = uri.equals(srcUri);
-            this.srcUri = uri;
-            this.extension = extension;
-            this.mediaDataSourceFactory = buildDataSourceFactory(true);
-
-            if (!isSourceEqual) {
-                reloadSource();
-            }
-        }
-    }
-
     public void setTextTracks(SideLoadedTextTrackList textTracks) {
         this.textTracks = textTracks;
-        reloadSource();
+        reloadSource(); // FIXME Shall be moved inside source
     }
 
     private void reloadSource() {
@@ -2369,12 +2370,11 @@ public class ReactExoplayerView extends FrameLayout implements
         if (bufferConfig.getCacheSize() > 0) {
             RNVSimpleCache.INSTANCE.setSimpleCache(
                     this.getContext(),
-                    bufferConfig.getCacheSize(),
-                    buildHttpDataSourceFactory(false)
+                    bufferConfig.getCacheSize()
             );
-            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
+            useCache = true;
         } else {
-            cacheDataSourceFactory = null;
+            useCache = false;
         }
         releasePlayer();
         initializePlayer();

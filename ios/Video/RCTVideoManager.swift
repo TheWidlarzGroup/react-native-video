@@ -18,13 +18,15 @@ class RCTVideoManager: RCTViewManager {
                 return
             }
 
-            guard let view = self.bridge.uiManager.view(forReactTag: reactTag) as? RCTVideo else {
-                RCTLogError("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: view))")
+            let view = self.bridge.uiManager.view(forReactTag: reactTag)
+
+            guard let videoView = view as? RCTVideo else {
+                DebugLog("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: view))")
                 callback(nil)
                 return
             }
 
-            callback(view)
+            callback(videoView)
         }
     }
 
@@ -84,6 +86,13 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(getCurrentPosition:resolver:rejecter:)
+    func getCurrentPosition(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.getCurrentPlaybackTime(resolve, reject)
+        })
+    }
+
     @objc(enterPictureInPicture:)
     func enterPictureInPicture(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
@@ -95,7 +104,6 @@ class RCTVideoManager: RCTViewManager {
     func exitPictureInPicture(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
             videoView?.exitPictureInPicture()
-        })
     }
 
     override class func requiresMainQueueSetup() -> Bool {

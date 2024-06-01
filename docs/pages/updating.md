@@ -4,6 +4,19 @@
 
 #### iOS
 
+##### Min iOS version
+From version 6.0.0, the minimum iOS version supported is 13.0. Projects that are using `react-native < 0.73` will need to set the minimum iOS version to 13.0 in the Podfile.
+
+You can do it by adding the following code to your Podfile:
+```diff
+- platform :ios, min_ios_version_supported
+
++ MIN_IOS_OVERRIDE = '13.0'
++ if Gem::Version.new(MIN_IOS_OVERRIDE) > Gem::Version.new(min_ios_version_supported)
++   min_ios_version_supported = MIN_IOS_OVERRIDE
++ end
+```
+
 ##### linking
 In your project Podfile add support for static dependency linking. This is required to support the new Promises subdependency in the iOS swift conversion.
 
