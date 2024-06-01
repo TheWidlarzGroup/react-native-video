@@ -58,6 +58,8 @@ export interface VideoRef {
   seek: (time: number, tolerance?: number) => void;
   resume: () => void;
   pause: () => void;
+  presentFullscreenPlayer: () => void;
+  dismissFullscreenPlayer: () => void;
   restoreUserInterfaceForPictureInPictureStopCompleted: (
     restore: boolean,
   ) => void;
@@ -116,6 +118,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
   ) => {
     const nativeRef = useRef<ComponentRef<VideoComponentType>>(null);
     const [showPoster, setShowPoster] = useState(!!poster);
+    const [isFullscreen, setIsFullscreen] = useState(fullscreen);
     const [
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
@@ -261,6 +264,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         },
       })();
     }, []);
+
+    const presentFullscreenPlayer = useCallback(() => {
+      setIsFullscreen(true);
+    }, [setIsFullscreen]);
+
+    const dismissFullscreenPlayer = useCallback(() => {
+      setIsFullscreen(false);
+    }, [setIsFullscreen]);
 
     const save = useCallback((options: object) => {
       // VideoManager.save can be null on android & windows
@@ -504,6 +515,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       ref,
       () => ({
         seek,
+        presentFullscreenPlayer,
+        dismissFullscreenPlayer,
         save,
         pause,
         resume,
@@ -514,6 +527,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }),
       [
         seek,
+        presentFullscreenPlayer,
+        dismissFullscreenPlayer,
         save,
         pause,
         resume,
@@ -533,7 +548,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           drm={_drm}
           style={StyleSheet.absoluteFill}
           resizeMode={resizeMode}
-          fullscreen={fullscreen}
+          fullscreen={isFullscreen}
           restoreUserInterfaceForPIPStopCompletionHandler={
             _restoreUserInterfaceForPIPStopCompletionHandler
           }

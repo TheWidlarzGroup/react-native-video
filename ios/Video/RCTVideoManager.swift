@@ -58,6 +58,20 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(dismissFullscreenPlayer:)
+    func dismissFullscreenPlayer(_ reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.dismissFullscreenPlayer()
+        })
+    }
+
+    @objc(presentFullscreenPlayer:)
+    func presentFullscreenPlayer(_ reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.presentFullscreenPlayer()
+        })
+    }
+
     @objc(setPlayerPauseState:reactTag:)
     func setPlayerPauseState(paused: NSNumber, reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
