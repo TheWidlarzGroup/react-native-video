@@ -104,6 +104,7 @@ class RCTVideoManager: RCTViewManager {
     func exitPictureInPicture(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
             videoView?.exitPictureInPicture()
+        })
     }
 
     override class func requiresMainQueueSetup() -> Bool {
