@@ -4,6 +4,17 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 This page shows the list of available methods
 
+### `dismissFullscreenPlayer`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`dismissFullscreenPlayer(): Promise<void>`
+
+Take the player out of fullscreen mode.
+
+> [!WARNING]
+> deprecated, use setfullScreen method instead
+
 ### `pause`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -11,6 +22,20 @@ This page shows the list of available methods
 `pause(): Promise<void>`
 
 Pause the video.
+
+### `presentFullscreenPlayer`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`presentFullscreenPlayer(): Promise<void>`
+
+Put the player in fullscreen mode.
+
+On iOS, this displays the video in a fullscreen view controller with controls.
+
+On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+> [!WARNING]
+> deprecated, use setfullScreen method instead
 
 ### `setFullScreen`
 
