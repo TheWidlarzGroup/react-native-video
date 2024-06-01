@@ -2187,11 +2187,15 @@ public class ReactExoplayerView extends FrameLayout implements
     private void updateFullScreenButtonVisibility() {
         if (playerControlView != null) {
             final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-            //Handling the fullScreenButton click event
-            if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
-                fullScreenButton.setVisibility(GONE);
+            if (controls) {
+                //Handling the fullScreenButton click event
+                if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
+                    fullScreenButton.setVisibility(GONE);
+                } else {
+                    fullScreenButton.setVisibility(VISIBLE);
+                }
             } else {
-                fullScreenButton.setVisibility(VISIBLE);
+                fullScreenButton.setVisibility(GONE);
             }
         }
     }
