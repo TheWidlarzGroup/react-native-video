@@ -136,7 +136,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     }
 
     public void updateSurfaceView(@ViewType.ViewType int viewType) {
-        DebugLog.w(TAG, "allocate surface type " + viewType);
         boolean viewNeedRefresh = false;
         if (viewType == ViewType.VIEW_TYPE_SURFACE || viewType == ViewType.VIEW_TYPE_SURFACE_SECURE) {
             if (!(surfaceView instanceof SurfaceView)) {
