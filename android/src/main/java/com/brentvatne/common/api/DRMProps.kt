@@ -28,8 +28,8 @@ class DRMProps {
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is DRMProps) return false
         return drmType == other.drmType &&
-                drmLicenseServer == other.drmLicenseServer &&
-                drmLicenseHeader.contentDeepEquals(other.drmLicenseHeader) // drmLicenseHeader is never null
+            drmLicenseServer == other.drmLicenseServer &&
+            drmLicenseHeader.contentDeepEquals(other.drmLicenseHeader) // drmLicenseHeader is never null
     }
 
     companion object {
