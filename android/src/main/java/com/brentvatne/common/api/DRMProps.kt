@@ -27,22 +27,9 @@ class DRMProps {
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is DRMProps) return false
-        val seemsEqual = (
-            drmType == other.drmType &&
+        return drmType == other.drmType &&
                 drmLicenseServer == other.drmLicenseServer &&
-                drmLicenseHeader.size == other.drmLicenseHeader.size
-            )
-        if (!seemsEqual) {
-            return false
-        }
-        var i = 0
-        while (i < drmLicenseHeader.size) {
-            if (drmLicenseHeader[i] != other.drmLicenseHeader[i]) {
-                return false
-            }
-            i++
-        }
-        return true
+                drmLicenseHeader.contentDeepEquals(other.drmLicenseHeader) // drmLicenseHeader is never null
     }
 
     companion object {
