@@ -35,7 +35,7 @@ body:
     id: system_version
     attributes:
       label: System Version
-      description: What version of the system are you using?
+      description: What version of the system is using device that you are experiencing the issue?
     validations:
       required: true
 
