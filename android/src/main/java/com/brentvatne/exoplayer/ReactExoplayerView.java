@@ -258,29 +258,36 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private void updateProgress() {
+        if (player != null) {
+            if (playerControlView != null && isPlayingAd() && controls) {
+                playerControlView.hide();
+            }
+            long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+            long duration = player.getDuration();
+            long pos = player.getCurrentPosition();
+            if (pos > duration) {
+                pos = duration;
+            }
+
+            if (lastPos != pos
+                    || lastBufferDuration != bufferedDuration
+                    || lastDuration != duration) {
+                lastPos = pos;
+                lastBufferDuration = bufferedDuration;
+                lastDuration = duration;
+                eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+            }
+        }
+    }
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_PROGRESS) {
-                if (player != null) {
-                    if (playerControlView != null && isPlayingAd() && controls) {
-                        playerControlView.hide();
-                    }
-                    long pos = player.getCurrentPosition();
-                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                    long duration = player.getDuration();
-
-                    if (lastPos != pos
-                            || lastBufferDuration != bufferedDuration
-                            || lastDuration != duration) {
-                        lastPos = pos;
-                        lastBufferDuration = bufferedDuration;
-                        lastDuration = duration;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
-                    }
-                    msg = obtainMessage(SHOW_PROGRESS);
-                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-                }
+                updateProgress();
+                msg = obtainMessage(SHOW_PROGRESS);
+                sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
             }
         }
     };
@@ -1337,6 +1344,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
                 case Player.STATE_ENDED:
                     text += "ended";
+                    updateProgress();
                     eventEmitter.end();
                     onStopPlayback();
                     setKeepScreenOn(false);
@@ -1614,6 +1622,7 @@ public class ReactExoplayerView extends FrameLayout implements
         // so we need to explicitly detect it.
         if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
                 && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
+            updateProgress();
             eventEmitter.end();
         }
     }
