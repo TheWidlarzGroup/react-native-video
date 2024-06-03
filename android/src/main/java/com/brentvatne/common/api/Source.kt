@@ -57,9 +57,7 @@ class Source {
     }
 
     /** return true if this and src are equals  */
-    fun isEquals(source: Source): Boolean {
-        return this == source
-    }
+    fun isEquals(source: Source): Boolean = this == source
 
     /** Metadata to display in notification */
     class Metadata {

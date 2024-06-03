@@ -336,7 +336,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let duration = CMTimeGetSeconds(playerDuration)
         var currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
 
-        if (currentTimeSecs > duration || fromEnd) {
+        if currentTimeSecs > duration || fromEnd {
             currentTimeSecs = duration
         }
 
