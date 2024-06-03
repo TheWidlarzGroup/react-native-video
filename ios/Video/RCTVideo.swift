@@ -312,7 +312,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // MARK: - Progress
 
-    func sendProgressUpdate(fromEnd: Bool = false) {
+    func sendProgressUpdate(didEnd: Bool = false) {
         #if !USE_GOOGLE_IMA
             // If we dont use Ads and onVideoProgress is not defined we dont need to run this code
             guard onVideoProgress != nil else { return }
@@ -336,7 +336,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let duration = CMTimeGetSeconds(playerDuration)
         var currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
 
-        if currentTimeSecs > duration || fromEnd {
+        if currentTimeSecs > duration || didEnd {
             currentTimeSecs = duration
         }
 
@@ -1570,7 +1570,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handlePlayerItemDidReachEnd(notification: NSNotification!) {
-        sendProgressUpdate(fromEnd: true)
+        sendProgressUpdate(didEnd: true)
         onVideoEnd?(["target": reactTag as Any])
         #if USE_GOOGLE_IMA
             if notification.object as? AVPlayerItem == _player?.currentItem {
