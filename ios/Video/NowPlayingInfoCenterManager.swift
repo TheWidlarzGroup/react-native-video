@@ -61,11 +61,11 @@ class NowPlayingInfoCenterManager {
             return
         }
 
-        if let observer = observers[players.hashValue] {
+        if let observer = observers[player.hashValue] {
             observer.invalidate()
         }
 
-        observers.removeValue(forKey: players.hashValue)
+        observers.removeValue(forKey: player.hashValue)
         players.remove(player)
 
         if currentPlayer == player {
