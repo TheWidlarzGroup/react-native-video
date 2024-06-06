@@ -980,6 +980,8 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
                 .setUri(uri);
 
+        // refresh custom Metadata
+        customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
@@ -1750,19 +1752,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
-            // refresh custom Metadata
-            MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
-
-            // Apply custom metadata is possible
-            if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
-                customMetadata = newCustomMetadata;
-                MediaItem currentMediaItem = player.getCurrentMediaItem();
-                if (currentMediaItem != null) {
-                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-                    // This will cause video blink/reload but won't louse progress
-                    player.setMediaItem(newMediaItem, false);
-                }
-            }
             if (!isSourceEqual) {
                 reloadSource();
             }
