@@ -197,6 +197,8 @@ class NewPlayerView: UIView, JSInputProtocol {
         jsPlayerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0).isActive = true
         
         self.jsPlayerView = jsPlayerView
+      
+        self.jsProps.startAt = Dynamic(nil)
     }
     
     //moved to source
