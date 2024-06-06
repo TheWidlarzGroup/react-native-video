@@ -6,3 +6,6 @@ include ':react-native-video'
 project (':react-native-video').projectDir = new File(rootProject.projectDir, '../../../android')
 
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
+useExpoModules()
