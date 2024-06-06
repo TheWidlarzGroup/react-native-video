@@ -106,6 +106,12 @@ class NewPlayerView: UIView, JSInputProtocol {
         }
     }
     
+    @objc var hideAdUiElements: Bool = false {
+        didSet {
+            jsProps.hideAdUiElements.value = hideAdUiElements
+        }
+    }
+    
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
     @objc var selectedAudioTrack: NSDictionary?

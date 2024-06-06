@@ -65,6 +65,8 @@ import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.DorisPlayerOutput;
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisTrackSelector;
+import com.diceplatform.doris.common.ad.AdGlobalSettings;
+import com.diceplatform.doris.common.ad.ui.AdLabels;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
 import com.diceplatform.doris.entity.DorisAdEvent;
@@ -200,6 +202,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean isLive = false;
     private boolean hasEpg;
     private boolean hasStats;
+    private boolean hideAdUiElements;
     private float jsProgressUpdateInterval = 250.0f;
     // \ End props
 
@@ -486,6 +489,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
+            AdLabels adLabels = translations == null ? null : new AdLabels(
+                    translations.getLearnMoreLabel(),
+                    translations.getAdsCountdownAdLabel(),
+                    translations.getAdsCountdownOfLabel(),
+                    translations.getSkipCountdownLabel(),
+                    translations.getSkipLabel()
+            );
+            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, adLabels);
 
             long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
@@ -497,6 +508,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     dvrSeekForwardInterval != 0L ? dvrSeekForwardInterval : exoDorisPlayerView.getFastForwardIncrementMs(),
                     dvrSeekBackwardInterval != 0L ? dvrSeekBackwardInterval : exoDorisPlayerView.getRewindIncrementMs(),
                     adViewProvider,
+                    adGlobalSettings,
                     src.getTracksPolicy());
 
             player.setDorisListener(dorisListener);
@@ -1573,6 +1585,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void setStats(boolean hasStats) {
         this.hasStats = hasStats;
+    }
+
+    public void setHideAdUiElements(boolean hideAdUiElements) {
+        this.hideAdUiElements = hideAdUiElements;
     }
 
     public void setAreControlsAllowed(boolean allowed) {

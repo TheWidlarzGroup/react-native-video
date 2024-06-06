@@ -30,6 +30,7 @@ RCT_EXPORT_VIEW_PROPERTY(relatedVideos, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(metadata, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(overlayConfig, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(nowPlaying, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(hideAdUiElements, BOOL);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);
