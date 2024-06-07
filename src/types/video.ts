@@ -23,6 +23,7 @@ export type ReactVideoSourceProperties = {
   cropStart?: number;
   cropEnd?: number;
   metadata?: VideoMetadata;
+  textTracksAllowChunklessPreparation?: boolean;
 };
 
 export type ReactVideoSource = Readonly<
