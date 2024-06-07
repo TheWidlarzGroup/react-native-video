@@ -867,25 +867,6 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayerControl();
         setControls(controls);
         applyModifiers();
-        refreshMetadata();
-    }
-
-    /**
-     * refresh custom Metadata from notification bar
-     */
-    private void refreshMetadata() {
-        // refresh custom Metadata
-        MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
-        // Apply custom metadata is possible
-        if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
-            customMetadata = newCustomMetadata;
-            MediaItem currentMediaItem = player.getCurrentMediaItem();
-            if (currentMediaItem != null && customMetadata != null) {
-                MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-                // This will cause video blink/reload but won't louse progress
-                player.setMediaItem(newMediaItem, false);
-            }
-        }
     }
 
     private void setupPlaybackService() {
