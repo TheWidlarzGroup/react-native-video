@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/brentvatne/react-native-video.git", :tag => "#{s.version}" }
   s.swift_version = "5.0"
 
-  s.ios.deployment_target = "12.0"
-  s.tvos.deployment_target = "12.0"
+  s.ios.deployment_target = "14.0"
+  s.tvos.deployment_target = "14.0"
   # s.static_framework = true
   s.source_files = "ios/**/*"
   

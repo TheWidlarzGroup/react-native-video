@@ -84,6 +84,7 @@ import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
+import com.diceplatform.doris.ui.ExoDorisPlayerTvControlView;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
 import com.diceplatform.doris.ui.ExoDorisTvPlayerView;
@@ -102,6 +103,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.i18nmanager.I18nUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.google.gson.Gson;
@@ -340,6 +342,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
         mediaSessionConnector = new MediaSessionConnector(mediaSession);
         localizationService = new LocalizationService(Locale.getDefault());
+
+        boolean isRTL = I18nUtil.getInstance().isRTL(getContext());
+        ExoDorisPlayerTvControlView controller = exoDorisPlayerView.findViewById(R.id.exo_controller);
+        controller.setLayoutDirection(isRTL ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+        View playList = controller.findViewById(R.id.playlistView);
+        playList.setLayoutDirection(isRTL ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
     }
 
 
@@ -568,7 +576,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             Map<String, Object> muxData = src.getMuxData();
             if (muxData != null) {
                 String correlationId = (String) muxData.get("correlationId");
-                sourceBuilder.setMuxProperties(muxData, correlationId, exoDorisPlayerView.getVideoSurfaceView());
+                sourceBuilder.setMuxProperties(muxData, correlationId, null, exoDorisPlayerView.getVideoSurfaceView());
             }
 
             LimitedSeekRange limitedSeekRange = isLive ? src.getLimitedSeekRange() : null;
