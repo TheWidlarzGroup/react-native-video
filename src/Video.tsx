@@ -175,17 +175,30 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       const hasValidDrmProp =
         _drm === undefined || Object.keys(_drm).length === 0;
 
-      const viewType =
+      const shallForceViewType =
         hasValidDrmProp &&
-        (source.viewType === ViewType.TEXTURE || useTextureView)
-          ? ViewType.SURFACE // check if we should force the type to Surface due to DRM
-          : source.viewType
-          ? source.viewType // else use ViewType from source
-          : useSecureView // else infer view type from useSecureView and useTextureView
-          ? ViewType.SURFACE_SECURE
-          : useTextureView
-          ? ViewType.TEXTURE
-          : ViewType.SURFACE;
+        (source.viewType === ViewType.TEXTURE || useTextureView);
+
+      if (shallForceViewType) {
+        console.warn(
+          'cannot use DRM on texture view. please set useTextureView={false}',
+        );
+      }
+      if (useSecureView && useTextureView) {
+        console.warn(
+          'cannot use SecureView on texture view. please set useTextureView={false}',
+        );
+      }
+
+      const viewType = shallForceViewType
+        ? ViewType.SURFACE // check if we should force the type to Surface due to DRM
+        : source.viewType
+        ? source.viewType // else use ViewType from source
+        : useSecureView // else infer view type from useSecureView and useTextureView
+        ? ViewType.SURFACE_SECURE
+        : useTextureView
+        ? ViewType.TEXTURE
+        : ViewType.SURFACE;
 
       return {
         uri,
