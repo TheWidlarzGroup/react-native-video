@@ -15,6 +15,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
 import java.util.Locale
+import java.util.Objects
 
 /**
  * Class representing Source props for host.
@@ -49,6 +50,8 @@ class Source {
      * see:
      */
     var textTracksAllowChuncklessPreparation: Boolean = false
+
+    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
