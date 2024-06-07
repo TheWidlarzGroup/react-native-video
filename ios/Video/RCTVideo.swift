@@ -308,7 +308,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // MARK: - Progress
 
-    func sendProgressUpdate() {
+    func sendProgressUpdate(didEnd: Bool = false) {
         #if !USE_GOOGLE_IMA
             // If we dont use Ads and onVideoProgress is not defined we dont need to run this code
             guard onVideoProgress != nil else { return }
@@ -330,11 +330,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
         let currentPlaybackTime = _player?.currentItem?.currentDate()
         let duration = CMTimeGetSeconds(playerDuration)
-        let currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
+        var currentTimeSecs = CMTimeGetSeconds(currentTime ?? .zero)
 
-        NotificationCenter.default.post(name: NSNotification.Name("RCTVideo_progress"), object: nil, userInfo: [
-            "progress": NSNumber(value: currentTimeSecs / duration),
-        ])
+        if currentTimeSecs > duration || didEnd {
+            currentTimeSecs = duration
+        }
 
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
@@ -344,10 +344,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             #endif
             onVideoProgress?([
-                "currentTime": NSNumber(value: Float(currentTimeSecs)),
+                "currentTime": currentTimeSecs,
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
-                "atValue": NSNumber(value: currentTime?.value ?? .zero),
-                "currentPlaybackTime": NSNumber(value: NSNumber(value: Double(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value),
+                "atValue": currentTime?.value ?? .zero,
+                "currentPlaybackTime": NSNumber(value: Double(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value,
                 "target": reactTag,
                 "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player),
             ])
@@ -1232,10 +1232,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Lifecycle
 
     override func removeFromSuperview() {
+        self._player?.replaceCurrentItem(with: nil)
         if let player = _player {
             player.pause()
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
+        _playerItem = nil
+        _source = nil
+        _chapters = nil
+        _drm = nil
+        _textTracks = nil
+        _selectedTextTrackCriteria = nil
+        _selectedAudioTrackCriteria = nil
+        _presentingViewController = nil
 
         _player = nil
         _resouceLoaderDelegate = nil
@@ -1243,6 +1252,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         #if USE_GOOGLE_IMA
             _imaAdsManager.releaseAds()
+            _imaAdsManager = nil
         #endif
 
         self.removePlayerLayer()
@@ -1561,6 +1571,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handlePlayerItemDidReachEnd(notification: NSNotification!) {
+        sendProgressUpdate(didEnd: true)
         onVideoEnd?(["target": reactTag as Any])
         #if USE_GOOGLE_IMA
             if notification.object as? AVPlayerItem == _player?.currentItem {
