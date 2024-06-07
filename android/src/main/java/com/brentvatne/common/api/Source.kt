@@ -9,6 +9,7 @@ import android.text.TextUtils
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.DebugLog.e
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
+import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetBool
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
@@ -44,6 +45,11 @@ class Source {
 
     /** http header list */
     val headers: MutableMap<String, String> = HashMap()
+
+    /** enable chunckless preparation for HLS
+     * see:
+     */
+    var textTracksAllowChuncklessPreparation: Boolean = false
 
     override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
@@ -117,6 +123,7 @@ class Source {
         private const val PROP_SRC_TYPE = "type"
         private const val PROP_SRC_METADATA = "metadata"
         private const val PROP_SRC_HEADERS = "requestHeaders"
+        private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNCKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -173,6 +180,7 @@ class Source {
                 source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
+                source.textTracksAllowChuncklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNCKLESS_PREPARATION, true)
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {

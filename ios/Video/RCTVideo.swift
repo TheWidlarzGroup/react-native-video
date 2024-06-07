@@ -525,7 +525,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
 
                     let playerItem = try await self.preparePlayerItem()
-                    try await setupPlayer(playerItem: playerItem)
+                    try await self.setupPlayer(playerItem: playerItem)
                 } catch {
                     DebugLog("An error occurred: \(error.localizedDescription)")
 
@@ -763,7 +763,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
-            self.setPaused(_paused)
+            self.setPaused(self._paused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
                                "seekTime": seekTime,
                                "target": self.reactTag])
@@ -1241,10 +1241,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Lifecycle
 
     override func removeFromSuperview() {
+        self._player?.replaceCurrentItem(with: nil)
         if let player = _player {
             player.pause()
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
+        _playerItem = nil
+        _source = nil
+        _chapters = nil
+        _drm = nil
+        _textTracks = nil
+        _selectedTextTrackCriteria = nil
+        _selectedAudioTrackCriteria = nil
+        _presentingViewController = nil
 
         _player = nil
         _resouceLoaderDelegate = nil
@@ -1252,6 +1261,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         #if USE_GOOGLE_IMA
             _imaAdsManager.releaseAds()
+            _imaAdsManager = nil
         #endif
 
         self.removePlayerLayer()
