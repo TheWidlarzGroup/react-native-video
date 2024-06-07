@@ -10,11 +10,13 @@ import com.brentvatne.common.api.DRMProps.Companion.parse
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.DebugLog.e
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
+import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetBool
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
 import java.util.Locale
+import java.util.Objects
 
 /**
  * Class representing Source props for host.
@@ -55,6 +57,13 @@ class Source {
      */
     @ViewType.ViewType
     var viewType = ViewType.VIEW_TYPE_SURFACE
+
+    /** enable chunckless preparation for HLS
+     * see:
+     */
+    var textTracksAllowChuncklessPreparation: Boolean = false
+
+    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
@@ -130,6 +139,7 @@ class Source {
         private const val PROP_SRC_HEADERS = "requestHeaders"
         private const val PROP_SRC_VIEW_TYPE = "viewType"
         private const val PROP_SRC_DRM = "drm"
+        private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNCKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -188,6 +198,7 @@ class Source {
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.viewType = safeGetInt(src, PROP_SRC_VIEW_TYPE, ViewType.VIEW_TYPE_SURFACE)
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
+                source.textTracksAllowChuncklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNCKLESS_PREPARATION, true)
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {

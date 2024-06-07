@@ -26,6 +26,7 @@ export type ReactVideoSourceProperties = {
   metadata?: VideoMetadata;
   drm?: Drm;
   viewType?: ViewType; // Android
+  textTracksAllowChunklessPreparation?: boolean;
 };
 
 export type ReactVideoSource = Readonly<

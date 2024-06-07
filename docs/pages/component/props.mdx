@@ -773,7 +773,7 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 
 #### Overriding the metadata of a source
 
-<PlatformsList types={['Android, iOS, tvOS']} />
+<PlatformsList types={['Android', 'iOS', 'tvOS']} />
 
 Provide an optional `title`, `subtitle`, `artist`, `imageUri` and/or `description` properties for the video.
 Useful when using notification controls on Android or iOS or to adapt the tvOS playback experience.
@@ -803,6 +803,21 @@ There are 3 available values:
 DRM playback is not supported on textureView, if drm prop is provided, the suface will be transformed to a SurfaceView.
 - 'surfaceView' (default): The video is rendered in a surface. take less resources to be rendered.
 - 'secureView': The video is rendered in a surface which disallow taking screenshot of the video
+
+#### `textTracksAllowChunklessPreparation`
+<PlatformsList types={['Android']} />
+
+AllowChunklessPreparation for hls media source.
+see: [disabling-chunkless](https://developer.android.com/media/media3/exoplayer/hls?#disabling-chunkless) in android documentation.
+
+Default value: true.
+
+```javascript
+source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    textTracksAllowChunklessPreparation: false,
+  }}
+```
 
 ### `subtitleStyle`
 

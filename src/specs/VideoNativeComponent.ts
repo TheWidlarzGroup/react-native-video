@@ -41,6 +41,7 @@ export type VideoSrc = Readonly<{
   metadata?: VideoMetadata;
   viewType?: Int32; // Android
   drm?: Drm;
+  textTracksAllowChunklessPreparation?: boolean; // android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
