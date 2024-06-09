@@ -797,7 +797,11 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         /// init DRM
         DrmSessionManager drmSessionManager = initializePlayerDrm();
-
+        if (drmSessionManager == null && source.getDrmProps() != null && source.getDrmProps().getDrmType() != null) {
+            // Failed to initialize DRM session manager - cannot continue
+            DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
+            return;
+        }
         // init source to manage ads and external text tracks
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(source.getUri(), source.getExtension(), drmSessionManager, source.getCropStartMs(), source.getCropEndMs());
