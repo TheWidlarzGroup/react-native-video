@@ -198,7 +198,6 @@ class VideoPlaybackService : MediaSessionService() {
                 .setContentText(session.player.mediaMetadata.description)
                 .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
                 .setLargeIcon(session.player.mediaMetadata.artworkUri?.let { session.bitmapLoader.loadBitmap(it).get() })
-                .setProgress(session.player.duration.toInt(), 1000, false)
                 .setOngoing(true)
                 .build()
         }
