@@ -332,7 +332,7 @@ public class ReactExoplayerView extends FrameLayout implements
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
-        exoPlayerView = new ExoPlayerView(getContext(), source.getViewType());
+        exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
         addView(exoPlayerView, 0, layoutParams);
 

@@ -48,7 +48,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
     private boolean hideShutterView = false;
 
-    public ExoPlayerView(Context context, @ViewType.ViewType int viewType) {
+    public ExoPlayerView(Context context) {
         super(context, null, 0);
 
         this.context = context;
@@ -75,7 +75,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
-        updateSurfaceView(viewType);
+        updateSurfaceView(ViewType.VIEW_TYPE_SURFACE);
 
         adOverlayFrameLayout = new FrameLayout(context);
 
