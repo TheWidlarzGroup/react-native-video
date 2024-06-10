@@ -1,6 +1,6 @@
 # Debugging
 
-This page describe usefull tips for debugging and investigating issue in the package or in your application.
+This page describe useful tips for debugging and investigating issue in the package or in your application.
 
 ## Using the sample app
 This repository contains multiple a sample implementation in example folder.
