@@ -3,6 +3,7 @@ package com.brentvatne.common.api
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
+import java.util.UUID
 
 /**
  * Class representing DRM props for host.
@@ -13,6 +14,11 @@ class DRMProps {
      * string version of configured UUID for drm prop
      */
     var drmType: String? = null
+
+    /**
+     * Configured UUID for drm prop
+     */
+    var drmUUID: UUID? = null
 
     /**
      * DRM license server to be used

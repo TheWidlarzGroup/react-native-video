@@ -67,6 +67,7 @@ export interface VideoRef {
   save: (options: object) => Promise<VideoSaveData>;
   setVolume: (volume: number) => void;
   getCurrentPosition: () => Promise<number>;
+  setFullScreen: (fullScreen: boolean) => void;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -330,6 +331,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return VideoManager.getCurrentPosition(getReactTag(nativeRef));
     }, []);
 
+    const setFullScreen = useCallback((fullScreen: boolean) => {
+      return VideoManager.setFullScreen(fullScreen, getReactTag(nativeRef));
+    }, []);
+
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
         hasPoster && setShowPoster(true);
@@ -548,6 +553,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
         getCurrentPosition,
+        setFullScreen,
       }),
       [
         seek,
@@ -559,6 +565,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
         getCurrentPosition,
+        setFullScreen,
       ],
     );
 

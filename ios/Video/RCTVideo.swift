@@ -995,6 +995,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _presentingViewController?.dismiss(animated: true, completion: { [weak self] in
                 self?.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
             })
+            setControls(_controls)
         }
     }
 

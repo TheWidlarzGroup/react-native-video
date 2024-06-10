@@ -435,11 +435,7 @@ class VideoPlayer extends Component {
 
   toggleDecoration() {
     this.setState({decoration: !this.state.decoration});
-    if (this.state.decoration) {
-      this.video?.dismissFullscreenPlayer();
-    } else {
-      this.video?.presentFullscreenPlayer();
-    }
+    this.video?.setFullScreen(!this.state.decoration);
   }
 
   toggleShowNotificationControls() {
