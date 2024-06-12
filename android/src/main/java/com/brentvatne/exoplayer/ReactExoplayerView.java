@@ -221,6 +221,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
+    private boolean wasSeeking = false;
 
     // Props from React
     private Source source = new Source();
@@ -1627,6 +1628,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            wasSeeking = true;
             eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), newPosition.positionMs % 1000); // time are in seconds /°\
             if (isUsingContentResolution) {
                 // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
@@ -1678,7 +1680,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
-        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying);
+        if (isPlaying) {
+            wasSeeking = false;
+        }
+
+        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, wasSeeking);
     }
 
     @Override
