@@ -1104,7 +1104,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setShowNotificationControls(_ showNotificationControls: Bool) {
         _showNotificationControls = showNotificationControls
-        
+
         guard let player = _player else {
             return
         }
