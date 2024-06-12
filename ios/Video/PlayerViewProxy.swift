@@ -98,6 +98,7 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.annotations = translationsValue.annotations
             dorisTranslationsViewModel.playingLive = translationsValue.playingLive
             dorisTranslationsViewModel.nowPlaying = translationsValue.nowPlaying
+            dorisTranslationsViewModel.subtitles = translationsValue.captions
             jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
         }
         return jsTranslations
@@ -254,7 +255,8 @@ class PlayerViewProxy {
                 selectedSubtitleTrack: sourceValue.selectedSubtitleTrack,
                 selectedPlaybackQuality: nil,
                 nowPlaying: jsNowPlaying,
-                preferredAudioTracks: sourceValue.preferredAudioTracks) //tvos new
+                preferredAudioTracks: sourceValue.preferredAudioTracks,
+                watchContext: nil) //tvos new
         }
 
         let jsTranslations = PlayerViewProxy.convertRNVideoTranslationsToRNDV(translations: jsProps.translations.value)
