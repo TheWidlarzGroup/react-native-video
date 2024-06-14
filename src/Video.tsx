@@ -195,7 +195,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
       const type = typeof selectedTextTrack.value;
       if (type !== 'number' && type !== 'string' && type !== 'undefined') {
-        console.log('invalid type provided to selectedTextTrack.value');
+        console.log('invalid type provided to selectedTextTrack.value: ', type);
         return;
       }
       return {
@@ -210,7 +210,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
       const type = typeof selectedAudioTrack.value;
       if (type !== 'number' && type !== 'string' && type !== 'undefined') {
-        console.log('invalid type provided to selectedAudioTrack.value');
+        console.log('invalid type provided to selectedAudioTrack.value: ', type);
         return;
       }
 
