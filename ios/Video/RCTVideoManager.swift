@@ -21,7 +21,7 @@ class RCTVideoManager: RCTViewManager {
             let view = self.bridge.uiManager.view(forReactTag: reactTag)
 
             guard let videoView = view as? RCTVideo else {
-                DebugLog("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: view))")
+                DebugLog("Invalid view returned from registry, expecting RCTVideo, got: \(String(describing: self.view))")
                 callback(nil)
                 return
             }
@@ -90,6 +90,13 @@ class RCTVideoManager: RCTViewManager {
     func getCurrentPosition(reactTag: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
             videoView?.getCurrentPlaybackTime(resolve, reject)
+        })
+    }
+
+    @objc(setFullScreen:reactTag:)
+    func setFullScreen(fullScreen: Bool, reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setFullscreen(fullScreen)
         })
     }
 
