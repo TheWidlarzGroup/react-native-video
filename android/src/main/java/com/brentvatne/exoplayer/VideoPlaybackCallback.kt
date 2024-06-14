@@ -5,9 +5,12 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
+import com.brentvatne.exoplayer.VideoPlaybackService.Companion.COMMAND
+import com.brentvatne.exoplayer.VideoPlaybackService.Companion.commandFromString
+import com.brentvatne.exoplayer.VideoPlaybackService.Companion.handleCommand
 import com.google.common.util.concurrent.ListenableFuture
 
-class VideoPlaybackCallback(private val seekIntervalMS: Long) : MediaSession.Callback {
+class VideoPlaybackCallback : MediaSession.Callback {
     override fun onConnect(session: MediaSession, controller: MediaSession.ControllerInfo): MediaSession.ConnectionResult {
         try {
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
@@ -18,8 +21,8 @@ class VideoPlaybackCallback(private val seekIntervalMS: Long) : MediaSession.Cal
                         .build()
                 ).setAvailableSessionCommands(
                     MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
-                        .add(SessionCommand(VideoPlaybackService.COMMAND_SEEK_FORWARD, Bundle.EMPTY))
-                        .add(SessionCommand(VideoPlaybackService.COMMAND_SEEK_BACKWARD, Bundle.EMPTY))
+                        .add(SessionCommand(COMMAND.SEEK_FORWARD.stringValue, Bundle.EMPTY))
+                        .add(SessionCommand(COMMAND.SEEK_BACKWARD.stringValue, Bundle.EMPTY))
                         .build()
                 )
                 .build()
@@ -34,10 +37,7 @@ class VideoPlaybackCallback(private val seekIntervalMS: Long) : MediaSession.Cal
         customCommand: SessionCommand,
         args: Bundle
     ): ListenableFuture<SessionResult> {
-        when (customCommand.customAction) {
-            VideoPlaybackService.COMMAND_SEEK_FORWARD -> session.player.seekTo(session.player.contentPosition + seekIntervalMS)
-            VideoPlaybackService.COMMAND_SEEK_BACKWARD -> session.player.seekTo(session.player.contentPosition - seekIntervalMS)
-        }
+        handleCommand(commandFromString(customCommand.customAction), session)
         return super.onCustomCommand(session, controller, customCommand, args)
     }
 }

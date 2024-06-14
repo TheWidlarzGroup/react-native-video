@@ -12,6 +12,9 @@ This page shows the list of available methods
 
 Take the player out of fullscreen mode.
 
+> [!WARNING]
+> deprecated, use setFullScreen method instead
+
 ### `pause`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -31,6 +34,9 @@ Put the player in fullscreen mode.
 On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+
+> [!WARNING]
+> deprecated, use setFullScreen method instead
 
 ### `resume`
 
@@ -108,6 +114,18 @@ This function will change the volume exactly like [volume](./props#volume) prope
 
 This function retrieves and returns the precise current position of the video playback, measured in seconds.
 This function will throw an error if player is not initialized.
+
+### `setFullScreen`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setFullScreen(fullscreen): Promise<void>`
+
+If you set it to `true`, the player enters fullscreen mode. If you set it to `false`, the player exits fullscreen mode.
+
+On iOS, this displays the video in a fullscreen view controller with controls.
+
+On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
 ### Example Usage
 
