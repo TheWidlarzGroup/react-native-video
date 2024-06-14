@@ -193,9 +193,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
-      const type = typeof selectedTextTrack.value;
-      if (type !== 'number' && type !== 'string' && type !== 'undefined') {
-        console.log('invalid type provided to selectedTextTrack.value: ', type);
+      const typeOfValueProp = typeof selectedTextTrack.value;
+      if (typeOfValueProp !== 'number' && typeOfValueProp !== 'string' && typeOfValueProp !== 'undefined') {
+        console.log('invalid type provided to selectedTextTrack.value: ', typeOfValueProp);
         return;
       }
       return {
@@ -208,9 +208,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
-      const type = typeof selectedAudioTrack.value;
-      if (type !== 'number' && type !== 'string' && type !== 'undefined') {
-        console.log('invalid type provided to selectedAudioTrack.value: ', type);
+      const typeOfValueProp = typeof selectedAudioTrack.value;
+      if (typeOfValueProp !== 'number' && typeOfValueProp !== 'string' && typeOfValueProp !== 'undefined') {
+        console.log('invalid type provided to selectedAudioTrack.value: ', typeOfValueProp);
         return;
       }
 
