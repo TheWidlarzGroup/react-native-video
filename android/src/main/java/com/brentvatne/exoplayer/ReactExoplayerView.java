@@ -6,7 +6,6 @@ import static androidx.media3.common.C.CONTENT_TYPE_OTHER;
 import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
-
 import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
 
 import android.annotation.SuppressLint;
@@ -16,20 +15,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -105,12 +105,12 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.DefaultTimeBar;
-import androidx.media3.ui.LegacyPlayerControlView;
+import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.PlayerView;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
-import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
@@ -122,26 +122,22 @@ import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.BuildConfig;
-import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
-import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
+import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.common.collect.ImmutableList;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.lang.Math;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -175,10 +171,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
-    private LegacyPlayerControlView playerControlView;
-    private View playPauseControlContainer;
-    private Player.Listener eventListener;
-
+    private PlayerControlView playerControlView;
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
     private ImaAdsLoader adsLoader;
@@ -196,7 +189,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private EventLogger debugEventLogger = null;
     private boolean enableDebug = false;
     private static final String TAG_EVENT_LOGGER = "RNVExoplayer";
-
+    private ViewGroup.LayoutParams exoProgressLayoutParam;
+    private ColorStateList exoPositionText;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -217,7 +211,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean selectTrackWhenReady = false;
     private Handler mainHandler;
     private Runnable mainRunnable;
-    private boolean useCache = false;
+    private DataSource.Factory cacheDataSourceFactory;
     private ControlsConfig controlsConfig = new ControlsConfig();
 
     // Props from React
@@ -239,7 +233,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean mReportBandwidth = false;
-    private DRMProps drmProps;
+    private UUID drmUUID = null;
+    private String drmLicenseUrl = null;
+    private String[] drmLicenseHeader = null;
     private boolean controls;
     private Uri adTagUrl;
 
@@ -257,40 +253,32 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
-    private boolean viewHasDropped = false;
-    private void updateProgress() {
-        if (player != null) {
-            if (playerControlView != null && isPlayingAd() && controls) {
-                playerControlView.hide();
-            }
-            long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-            long duration = player.getDuration();
-            long pos = player.getCurrentPosition();
-            if (pos > duration) {
-                pos = duration;
-            }
-
-            if (lastPos != pos
-                    || lastBufferDuration != bufferedDuration
-                    || lastDuration != duration) {
-                lastPos = pos;
-                lastBufferDuration = bufferedDuration;
-                lastDuration = duration;
-                eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
-            }
-        }
-    }
-
-    private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == SHOW_PROGRESS) {
-                updateProgress();
-                msg = obtainMessage(SHOW_PROGRESS);
-                sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-            }
-        }
-    };
+//    private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            if (msg.what == SHOW_PROGRESS) {
+//                if (player != null) {
+//                    if (playerControlView != null && isPlayingAd() && controls) {
+//                        playerControlView.hide();
+//                    }
+//                    long pos = player.getCurrentPosition();
+//                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+//                    long duration = player.getDuration();
+//
+//                    if (lastPos != pos
+//                            || lastBufferDuration != bufferedDuration
+//                            || lastDuration != duration) {
+//                        lastPos = pos;
+//                        lastBufferDuration = bufferedDuration;
+//                        lastDuration = duration;
+//                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+//                    }
+//                    msg = obtainMessage(SHOW_PROGRESS);
+//                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+//                }
+//            }
+//        }
+//    };
 
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
@@ -335,6 +323,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
+        exoPlayerView.setBackgroundColor(Color.BLACK);
 
         addView(exoPlayerView, 0, layoutParams);
 
@@ -375,8 +364,6 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
-        releasePlayer();
-        viewHasDropped = true;
     }
 
     //BandwidthMeter.EventListener implementation
@@ -395,27 +382,22 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    // Internal methods
-
-    /**
-     * Toggling the visibility of the player control view
-     */
-    private void togglePlayerControlVisibility() {
-        if (player == null) return;
-        reLayoutControls();
-        if (playerControlView.isVisible()) {
-            playerControlView.hide();
-        } else {
-            playerControlView.show();
-        }
-    }
-
     /**
      * Initializing Player control
      */
+    @SuppressLint("ClickableViewAccessibility")
     private void initializePlayerControl() {
         if (playerControlView == null) {
-            playerControlView = new LegacyPlayerControlView(getContext());
+            playerControlView = new PlayerControlView(getContext());
+//             playerControlView.setShowSubtitleButton(true);
+
+            exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
+                @Override
+                public void onFullscreenButtonClick(boolean isFullScreen) {
+                    DebugLog.w("FullsScreen", "onFullscreenButtonClick");
+                    setFullscreen(isFullScreen);
+                }
+            });
         }
 
         if (fullScreenPlayerView == null) {
@@ -429,89 +411,14 @@ public class ReactExoplayerView extends FrameLayout implements
 
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
-        playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
-        // Invoking onClick event for exoplayerView
-        exoPlayerView.setOnClickListener((View v) -> {
-            if (!isPlayingAd()) {
-                togglePlayerControlVisibility();
+        exoPlayerView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return !controls && !isFullscreen && !isPlayingAd();
             }
         });
-
-        //Handling the playButton click event
-        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
-        playButton.setOnClickListener((View v) -> {
-            if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
-                player.seekTo(0);
-            }
-            setPausedModifier(false);
-        });
-
-        //Handling the rewind and forward button click events
-        ImageButton exoRewind = playerControlView.findViewById(R.id.exo_rew);
-        ImageButton exoForward = playerControlView.findViewById(R.id.exo_ffwd);
-        exoRewind.setOnClickListener((View v) -> {
-            seekTo(player.getCurrentPosition() - controlsConfig.getSeekIncrementMS());
-        });
-
-        exoForward.setOnClickListener((View v) -> {
-            seekTo(player.getCurrentPosition() + controlsConfig.getSeekIncrementMS());
-        });
-
-        //Handling the pauseButton click event
-        ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
-        pauseButton.setOnClickListener((View v) ->
-            setPausedModifier(true)
-        );
-
-        //Handling the fullScreenButton click event
-        final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-        fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
-        updateFullScreenButtonVisibility();
         refreshProgressBarVisibility();
-
-        // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
-        eventListener = new Player.Listener() {
-            @Override
-            public void onPlaybackStateChanged(int playbackState) {
-                View playButton = playerControlView.findViewById(R.id.exo_play);
-                View pauseButton = playerControlView.findViewById(R.id.exo_pause);
-                if (playButton != null && playButton.getVisibility() == GONE) {
-                    playButton.setVisibility(INVISIBLE);
-                }
-                if (pauseButton != null && pauseButton.getVisibility() == GONE) {
-                    pauseButton.setVisibility(INVISIBLE);
-                }
-                reLayout(playPauseControlContainer);
-                //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
-                player.removeListener(eventListener);
-            }
-
-            @Override
-            public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-                reLayout(playPauseControlContainer);
-                //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
-                player.removeListener(eventListener);
-            }
-        };
-        player.addListener(eventListener);
-    }
-
-    /**
-     * Adding Player control to the frame layout
-     */
-    private void addPlayerControl() {
-        if (playerControlView == null) return;
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-        playerControlView.setLayoutParams(layoutParams);
-        int indexOfPC = indexOfChild(playerControlView);
-        if (indexOfPC != -1) {
-            removeViewAt(indexOfPC);
-        }
-        addView(playerControlView, 1, layoutParams);
-        reLayout(playerControlView);
     }
 
     /**
@@ -527,32 +434,22 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+
+    @SuppressLint("ResourceAsColor")
     private void refreshProgressBarVisibility (){
         if(playerControlView == null) return;
         DefaultTimeBar exoProgress;
         TextView exoDuration;
-        TextView exoPosition;
-        exoProgress = playerControlView.findViewById(R.id.exo_progress);
-        exoDuration = playerControlView.findViewById(R.id.exo_duration);
-        exoPosition = playerControlView.findViewById(R.id.exo_position);
+        exoProgress = findViewById(androidx.media3.ui.R.id.exo_progress);
+        exoDuration = findViewById(androidx.media3.ui.R.id.exo_duration);
         if(controlsConfig.getHideSeekBar()){
-            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT,
-                    1.0f
-            );
-            exoProgress.setVisibility(GONE);
-            exoDuration.setVisibility(GONE);
-            exoPosition.setLayoutParams(param);
+            exoProgressLayoutParam = exoProgress.getLayoutParams();
+            exoPositionText = exoDuration.getTextColors();
+            exoProgress.setLayoutParams(new LayoutParams(0,0));
+            exoDuration.setTextColor(android.R.color.transparent);
         }else{
-            exoProgress.setVisibility(VISIBLE);
-            exoDuration.setVisibility(VISIBLE);
-            // Reset the layout parameters of exoPosition to their default state
-            LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-            );
-            exoPosition.setLayoutParams(defaultParam);
+            exoProgress.setLayoutParams(exoProgressLayoutParam);
+            exoDuration.setTextColor(exoPositionText);
         }
     }
 
@@ -649,9 +546,6 @@ public class ReactExoplayerView extends FrameLayout implements
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
         mainRunnable = () -> {
-            if (viewHasDropped) {
-                return;
-            }
             try {
                 if (player == null) {
                     // Initialize core configuration and listeners
@@ -663,9 +557,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {
                         // DRM initialization must run on a different thread
-                        if (viewHasDropped) {
-                            return;
-                        }
+
                         if (activity == null) {
                             DebugLog.e(TAG, "Failed to initialize Player!, null activity");
                             eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
@@ -674,15 +566,12 @@ public class ReactExoplayerView extends FrameLayout implements
 
                         // Initialize handler to run on the main thread
                         activity.runOnUiThread(() -> {
-                            if (viewHasDropped) {
-                                return;
-                            }
                             try {
                                 // Source initialization must run on the main thread
                                 initializePlayerSource();
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
-                                DebugLog.e(TAG, "Failed to initialize Player! 1");
+                                DebugLog.e(TAG, "Failed to initialize Player!");
                                 DebugLog.e(TAG, ex.toString());
                                 ex.printStackTrace();
                                 self.eventEmitter.error(ex.toString(), ex, "1001");
@@ -694,7 +583,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
-                DebugLog.e(TAG, "Failed to initialize Player! 2");
+                DebugLog.e(TAG, "Failed to initialize Player!");
                 DebugLog.e(TAG, ex.toString());
                 ex.printStackTrace();
                 eventEmitter.error(ex.toString(), ex, "1001");
@@ -736,8 +625,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setAdErrorListener(this)
                 .build();
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (useCache) {
-            mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
+        if (cacheDataSourceFactory != null) {
+            mediaSourceFactory.setDataSourceFactory(cacheDataSourceFactory);
         }
 
         if (adsLoader != null) {
@@ -749,6 +638,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setBandwidthMeter(bandwidthMeter)
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
+                .setSeekForwardIncrementMs(controlsConfig.getSeekIncrementMS())
+                .setSeekBackIncrementMs(controlsConfig.getSeekIncrementMS())
                 .build();
         refreshDebugState();
         player.addListener(self);
@@ -773,16 +664,17 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
-        if (self.drmProps != null) {
+        if (self.drmUUID != null) {
             try {
-                drmSessionManager = self.buildDrmSessionManager(self.drmProps.getDrmUUID(),
-                        self.drmProps.getDrmLicenseServer(),
-                        self.drmProps.getDrmLicenseHeader());
+                drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                        self.drmLicenseHeader);
             } catch (UnsupportedDrmException e) {
+                /*
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                         ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
+                */
                 return null;
             }
         }
@@ -794,7 +686,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         DrmSessionManager drmSessionManager = initializePlayerDrm(this);
-        if (drmSessionManager == null && drmProps != null && drmProps.getDrmUUID() != null) {
+        if (drmSessionManager == null && drmUUID != null) {
             // Failed to intialize DRM session manager - cannot continue
             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
             eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
@@ -866,8 +758,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void finishPlayerInitialization() {
         // Initializing the playerControlView
-        initializePlayerControl();
         setControls(controls);
+        initializePlayerControl();
         applyModifiers();
     }
 
@@ -882,8 +774,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 playbackServiceBinder = (PlaybackServiceBinder) service;
 
                 try {
-                    playbackServiceBinder.getService().registerPlayer(player,
-                            Objects.requireNonNull((Class<Activity>) (themedReactContext.getCurrentActivity()).getClass()));
+                    playbackServiceBinder.getService().registerPlayer(player);
                 } catch (Exception e) {
                     DebugLog.e(TAG, "Cloud not register ExoPlayer");
                 }
@@ -991,8 +882,6 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
                 .setUri(uri);
 
-        // refresh custom Metadata
-        customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
@@ -1046,7 +935,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setAllowChunklessPreparation(source.getTextTracksAllowChuncklessPreparation());
+                );
                 break;
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
@@ -1057,13 +946,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         throw new IllegalStateException("cannot open input file" + uri);
                     }
                 } else if ("file".equals(uri.getScheme()) ||
-                        !useCache) {
+                        cacheDataSourceFactory == null) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
                 } else {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
+                            cacheDataSourceFactory
                     );
 
                 }
@@ -1151,7 +1040,7 @@ public class ReactExoplayerView extends FrameLayout implements
             adsLoader.release();
         }
         adsLoader = null;
-        progressHandler.removeMessages(SHOW_PROGRESS);
+//        progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
 
@@ -1197,14 +1086,14 @@ public class ReactExoplayerView extends FrameLayout implements
                     // Lower the volume
                     if (!view.muted) {
                         activity.runOnUiThread(() ->
-                            view.player.setVolume(view.audioVolume * 0.8f)
+                                view.player.setVolume(view.audioVolume * 0.8f)
                         );
                     }
                 } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                     // Raise it back to normal
                     if (!view.muted) {
                         activity.runOnUiThread(() ->
-                            view.player.setVolume(view.audioVolume * 1)
+                                view.player.setVolume(view.audioVolume * 1)
                         );
                     }
                 }
@@ -1327,7 +1216,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 case Player.STATE_IDLE:
                     text += "idle";
                     eventEmitter.idle();
-                    clearProgressMessageHandler();
+//                    clearProgressMessageHandler();
                     if (!player.getPlayWhenReady()) {
                         setKeepScreenOn(false);
                     }
@@ -1335,15 +1224,15 @@ public class ReactExoplayerView extends FrameLayout implements
                 case Player.STATE_BUFFERING:
                     text += "buffering";
                     onBuffering(true);
-                    clearProgressMessageHandler();
+//                    clearProgressMessageHandler();
                     setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                     break;
                 case Player.STATE_READY:
                     text += "ready";
                     eventEmitter.ready();
                     onBuffering(false);
-                    clearProgressMessageHandler(); // ensure there is no other message
-                    startProgressHandler();
+//                    clearProgressMessageHandler(); // ensure there is no other message
+//                    startProgressHandler();
                     videoLoaded();
                     if (selectTrackWhenReady && isUsingContentResolution) {
                         selectTrackWhenReady = false;
@@ -1351,13 +1240,12 @@ public class ReactExoplayerView extends FrameLayout implements
                     }
                     // Setting the visibility for the playerControlView
                     if (playerControlView != null) {
-                        playerControlView.show();
+                        exoPlayerView.setUseController(true);
                     }
                     setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                     break;
                 case Player.STATE_ENDED:
                     text += "ended";
-                    updateProgress();
                     eventEmitter.end();
                     onStopPlayback();
                     setKeepScreenOn(false);
@@ -1370,18 +1258,18 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private void startProgressHandler() {
-        progressHandler.sendEmptyMessage(SHOW_PROGRESS);
-    }
+//    private void startProgressHandler() {
+//        progressHandler.sendEmptyMessage(SHOW_PROGRESS);
+//    }
 
     /**
      *  The progress message handler will duplicate recursions of the onProgressMessage handler
      *  on change of player state from any state to STATE_READY with playWhenReady is true (when
      *  the video is not paused). This clears all existing messages.
      */
-    private void clearProgressMessageHandler() {
-        progressHandler.removeMessages(SHOW_PROGRESS);
-    }
+//    private void clearProgressMessageHandler() {
+//        progressHandler.removeMessages(SHOW_PROGRESS);
+//    }
 
     private void videoLoaded() {
         if (!player.isPlayingAd() && loadVideoStarted) {
@@ -1396,9 +1284,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 setSelectedTextTrack(textTrackType, textTrackValue);
             }
             Format videoFormat = player.getVideoFormat();
-            boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
-            int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
-            int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
+            int width = videoFormat != null ? videoFormat.width : 0;
+            int height = videoFormat != null ? videoFormat.height : 0;
             String trackId = videoFormat != null ? videoFormat.id : "-1";
 
             // Properties that must be accessed on the main thread
@@ -1466,7 +1353,6 @@ public class ReactExoplayerView extends FrameLayout implements
         videoTrack.setWidth(format.width == Format.NO_VALUE ? 0 : format.width);
         videoTrack.setHeight(format.height == Format.NO_VALUE ? 0 : format.height);
         videoTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-        videoTrack.setRotation(format.rotationDegrees);
         if (format.codecs != null) videoTrack.setCodecs(format.codecs);
         videoTrack.setTrackId(format.id == null ? String.valueOf(trackIndex) : format.id);
         videoTrack.setIndex(trackIndex);
@@ -1635,7 +1521,6 @@ public class ReactExoplayerView extends FrameLayout implements
         // so we need to explicitly detect it.
         if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
                 && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
-            updateProgress();
             eventEmitter.end();
         }
     }
@@ -1763,6 +1648,18 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
+            // refresh custom Metadata
+            customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
+
+            // Apply custom metadata is possible
+            if (player != null) {
+                MediaItem currentMediaItem = player.getCurrentMediaItem();
+                if (currentMediaItem != null) {
+                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+                    // This will cause video blink/reload but won't louse progress
+                    player.setMediaItem(newMediaItem, false);
+                }
+            }
             if (!isSourceEqual) {
                 reloadSource();
             }
@@ -2171,20 +2068,13 @@ public class ReactExoplayerView extends FrameLayout implements
         return preventsDisplaySleepDuringVideoPlayback;
     }
 
-    private void updateFullScreenButtonVisibility() {
-        if (playerControlView != null) {
-            final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-            //Handling the fullScreenButton click event
-            if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
-                fullScreenButton.setVisibility(GONE);
-            } else {
-                fullScreenButton.setVisibility(VISIBLE);
-            }
-        }
-    }
-
     public void setDisableDisconnectError(boolean disableDisconnectError) {
         this.disableDisconnectError = disableDisconnectError;
+    }
+
+    public void handleFullScreenMode(boolean fullscreen){
+        ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
+        exoFullScreen.performClick();
     }
 
     public void setFullscreen(boolean fullscreen) {
@@ -2200,10 +2090,12 @@ public class ReactExoplayerView extends FrameLayout implements
 
         Window window = activity.getWindow();
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
-        if (isFullscreen) {
+        if (fullscreen) {
             eventEmitter.fullscreenWillPresent();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
+                reLayoutControls();
+                exoPlayerView.setUseController(true);
             }
             UiThreadUtil.runOnUiThread(() -> {
                 WindowCompat.setDecorFitsSystemWindows(window, false);
@@ -2224,12 +2116,10 @@ public class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.fullscreenDidDismiss();
             });
         }
-        // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
-        updateFullScreenButtonVisibility();
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        boolean finallyUseTextureView = useTextureView && drmProps == null;
+        boolean finallyUseTextureView = useTextureView && this.drmUUID == null;
         exoPlayerView.setUseTextureView(finallyUseTextureView);
     }
 
@@ -2246,21 +2136,27 @@ public class ReactExoplayerView extends FrameLayout implements
         if (bufferConfig.getCacheSize() > 0) {
             RNVSimpleCache.INSTANCE.setSimpleCache(
                     this.getContext(),
-                    bufferConfig.getCacheSize()
+                    bufferConfig.getCacheSize(),
+                    buildHttpDataSourceFactory(false)
             );
-            useCache = true;
+            cacheDataSourceFactory = RNVSimpleCache.INSTANCE.getCacheDataSourceFactory();
         } else {
-            useCache = false;
+            cacheDataSourceFactory = null;
         }
         releasePlayer();
         initializePlayer();
     }
 
-    public void setDrm(DRMProps drmProps) {
-        this.drmProps = drmProps;
-        if (drmProps != null && drmProps.getDrmType() != null) {
-            this.drmProps.setDrmUUID(Util.getDrmUuid(drmProps.getDrmType()));
-        }
+    public void setDrmType(UUID drmType) {
+        this.drmUUID = drmType;
+    }
+
+    public void setDrmLicenseUrl(String licenseUrl){
+        this.drmLicenseUrl = licenseUrl;
+    }
+
+    public void setDrmLicenseHeader(String[] header){
+        this.drmLicenseHeader = header;
     }
 
     @Override
@@ -2301,15 +2197,7 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (controls) {
-            addPlayerControl();
-            updateFullScreenButtonVisibility();
-        } else {
-            int indexOfPC = indexOfChild(playerControlView);
-            if (indexOfPC != -1) {
-                removeViewAt(indexOfPC);
-            }
-        }
+        exoPlayerView.setUseController(controls);
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
@@ -2317,7 +2205,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setShutterColor(Integer color) {
-        exoPlayerView.setShutterColor(color);
+        exoPlayerView.setShutterBackgroundColor(color);
     }
 
     @Override

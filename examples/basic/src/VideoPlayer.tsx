@@ -137,6 +137,12 @@ class VideoPlayer extends Component {
       cropEnd: 10000,
     },
     {
+      description: 'local file landscape cropped',
+      uri: require('./broadchurch.mp4'),
+      cropStart: 3000,
+      cropEnd: 10000,
+    },
+    {
       description: 'local file portrait',
       uri: require('./portrait.mp4'),
       metadata: {
