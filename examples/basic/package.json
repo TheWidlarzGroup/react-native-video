@@ -6,7 +6,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "windows": "react-native run-windows",
-    "start": "react-native start",
+    "start": "expo start",
     "test": "jest",
     "lint": "eslint .",
     "pod-install": "cd ios && pod install && cd ..",
