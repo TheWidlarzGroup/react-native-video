@@ -170,6 +170,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
+        textTracksAllowChunklessPreparation:
+          resolvedSource.textTracksAllowChunklessPreparation,
       };
     }, [source]);
 
