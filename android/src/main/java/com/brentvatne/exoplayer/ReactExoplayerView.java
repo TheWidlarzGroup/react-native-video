@@ -383,6 +383,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    // Internal methods
+
+    /**
+     * Toggling the visibility of the player control view
+     */
+    private void togglePlayerControlVisibility() {
+        if (player == null) return;
+        reLayoutControls();
+        if (playerControlView.isVisible()) {
+            exoPlayerView.setUseController(false);
+        } else {
+            exoPlayerView.setUseController(false);
+        }
+    }
+
     /**
      * Initializing Player control
      */
@@ -391,21 +406,11 @@ public class ReactExoplayerView extends FrameLayout implements
         if (playerControlView == null) {
             playerControlView = new PlayerControlView(getContext());
 //             playerControlView.setShowSubtitleButton(true);
-
             exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
                 @Override
                 public void onFullscreenButtonClick(boolean isFullScreen) {
                     DebugLog.w("FullsScreen", "onFullscreenButtonClick");
                     setFullscreen(isFullScreen);
-                }
-            });
-        }
-
-        if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    setFullscreen(false);
                 }
             });
         }
@@ -435,6 +440,12 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+    public void updateFullScreenProp() {
+        ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
+        if(exoFullScreen == null) return;
+        exoFullScreen.performClick();
+    }
+
 
     @SuppressLint("ResourceAsColor")
     private void refreshProgressBarVisibility (){
@@ -443,6 +454,7 @@ public class ReactExoplayerView extends FrameLayout implements
         TextView exoDuration;
         exoProgress = findViewById(androidx.media3.ui.R.id.exo_progress);
         exoDuration = findViewById(androidx.media3.ui.R.id.exo_duration);
+        if(exoProgressLayoutParam == null || exoPositionText == null) return;
         if(controlsConfig.getHideSeekBar()){
             exoProgressLayoutParam = exoProgress.getLayoutParams();
             exoPositionText = exoDuration.getTextColors();
@@ -759,8 +771,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void finishPlayerInitialization() {
         // Initializing the playerControlView
-        setControls(controls);
         initializePlayerControl();
+        setControls(controls);
         applyModifiers();
     }
 
@@ -2091,6 +2103,14 @@ public class ReactExoplayerView extends FrameLayout implements
 
         Window window = activity.getWindow();
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
+        if (fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
         if (fullscreen) {
             eventEmitter.fullscreenWillPresent();
             if (fullScreenPlayerView != null) {
