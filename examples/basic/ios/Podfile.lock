@@ -11,6 +11,13 @@ PODS:
     - ExpoModulesCore
   - ExpoFont (12.0.7):
     - ExpoModulesCore
+  - ExpoImage (1.12.12):
+    - ExpoModulesCore
+    - libavif/libdav1d
+    - SDWebImage (~> 5.19.1)
+    - SDWebImageAVIFCoder (~> 0.11.0)
+    - SDWebImageSVGCoder (~> 1.7.0)
+    - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
   - ExpoModulesCore (1.12.15):
@@ -42,6 +49,23 @@ PODS:
   - hermes-engine (0.74.2):
     - hermes-engine/Pre-built (= 0.74.2)
   - hermes-engine/Pre-built (0.74.2)
+  - libavif/core (0.11.1)
+  - libavif/libdav1d (0.11.1):
+    - libavif/core
+    - libdav1d (>= 0.6.0)
+  - libdav1d (1.2.0)
+  - libwebp (1.3.2):
+    - libwebp/demux (= 1.3.2)
+    - libwebp/mux (= 1.3.2)
+    - libwebp/sharpyuv (= 1.3.2)
+    - libwebp/webp (= 1.3.2)
+  - libwebp/demux (1.3.2):
+    - libwebp/webp
+  - libwebp/mux (1.3.2):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.3.2)
+  - libwebp/webp (1.3.2):
+    - libwebp/sharpyuv
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -1244,6 +1268,17 @@ PODS:
     - React-utils (= 0.74.2)
   - RNCPicker (2.7.5):
     - React-Core
+  - SDWebImage (5.19.2):
+    - SDWebImage/Core (= 5.19.2)
+  - SDWebImage/Core (5.19.2)
+  - SDWebImageAVIFCoder (0.11.0):
+    - libavif/core (>= 0.11.0)
+    - SDWebImage (~> 5.10)
+  - SDWebImageSVGCoder (1.7.0):
+    - SDWebImage/Core (~> 5.6)
+  - SDWebImageWebPCoder (0.14.6):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.17)
   - SocketRocket (0.7.0)
   - Yoga (0.0.0)
 
@@ -1255,6 +1290,7 @@ DEPENDENCIES:
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
+  - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -1316,6 +1352,13 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - libavif
+    - libdav1d
+    - libwebp
+    - SDWebImage
+    - SDWebImageAVIFCoder
+    - SDWebImageSVGCoder
+    - SDWebImageWebPCoder
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1333,6 +1376,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
     :path: "../node_modules/expo-font/ios"
+  ExpoImage:
+    :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoModulesCore:
@@ -1455,12 +1500,16 @@ SPEC CHECKSUMS:
   ExpoAsset: 39e60dc31b16e204a9949caf3edb6dcda322e667
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: 43b69559cef3d773db57c7ae7edd3cb0aa0dc610
+  ExpoImage: 2ccccff1219ebc765e344f3338f2430af2df4824
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
   ExpoModulesCore: 2731dc119f8c1400636a994df4efbc19522defbd
   FBLazyVector: 4bc164e5b5e6cfc288d2b5ff28643ea15fa1a589
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: 01d3e052018c2a13937aca1860fbedbccd4a41b7
+  libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
+  libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
+  libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   RCT-Folly: 045d6ecaa59d826c5736dfba0b2f4083ff8d79df
   RCTDeprecation: b03c35057846b685b3ccadc9bfe43e349989cdb2
   RCTRequired: 194626909cfa8d39ca6663138c417bc6c431648c
@@ -1510,6 +1559,10 @@ SPEC CHECKSUMS:
   React-utils: 5a40a1bb87d8c2d42a6bbbb7ead6d95785ca6042
   ReactCommon: e5866ad8f7487779853fa3fe33f1c075207c3262
   RNCPicker: 3e2c37a8328f368ce14da050cdc8231deb5fc9f9
+  SDWebImage: dfe95b2466a9823cf9f0c6d01217c06550d7b29a
+  SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
+  SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
+  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 45564236f670899c9739b1581a12b00ead5d391f
 
