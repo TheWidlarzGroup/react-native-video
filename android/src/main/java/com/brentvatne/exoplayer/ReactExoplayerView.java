@@ -214,6 +214,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private Handler mainHandler;
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
+    private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
 
     // Props from React
@@ -971,7 +972,7 @@ public class ReactExoplayerView extends FrameLayout implements
                         throw new IllegalStateException("cannot open input file" + uri);
                     }
                 } else if ("file".equals(uri.getScheme()) ||
-                        cacheDataSourceFactory == null) {
+                        !useCache) {
                     mediaSourceFactory = new ProgressiveMediaSource.Factory(
                             mediaDataSourceFactory
                     );
