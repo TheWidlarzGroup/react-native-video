@@ -50,6 +50,8 @@ class Source {
      */
     var textTracksAllowChuncklessPreparation: Boolean = false
 
+    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
+
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is Source) return false

@@ -118,7 +118,6 @@ public class FullScreenPlayerView extends Dialog {
             exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
                 @Override
                 public void onFullscreenButtonClick(boolean isFullScreen) {
-                    DebugLog.w("Fullscreen", "onFullscreenButtonClick");
                     reactExoplayerView.setFullscreen(isFullScreen);
                 }
             });
