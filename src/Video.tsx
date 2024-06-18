@@ -22,6 +22,7 @@ import NativeVideoComponent, {
   type OnAudioTracksData,
   type OnBandwidthUpdateData,
   type OnBufferData,
+  type OnControlsVisibilityChange,
   type OnExternalPlaybackChangeData,
   type OnGetLicenseData,
   type OnLoadStartData,
@@ -91,6 +92,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onEnd,
       onBuffer,
       onBandwidthUpdate,
+      onControlsVisibilityChange,
       onExternalPlaybackChange,
       onFullscreenPlayerWillPresent,
       onFullscreenPlayerDidPresent,
@@ -391,13 +393,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onVideoTracks],
     );
 
-    const _onPlaybackRateChange = useCallback(
-      (e: NativeSyntheticEvent<Readonly<{playbackRate: number}>>) => {
-        onPlaybackRateChange?.(e.nativeEvent);
-      },
-      [onPlaybackRateChange],
-    );
-
     const _onVolumeChange = useCallback(
       (e: NativeSyntheticEvent<Readonly<{volume: number}>>) => {
         onVolumeChange?.(e.nativeEvent);
@@ -458,6 +453,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       },
       [onAspectRatio],
     );
+
+    const _onPlaybackRateChange = useCallback(
+      (e: NativeSyntheticEvent<Readonly<{playbackRate: number}>>) => {
+        onPlaybackRateChange?.(e.nativeEvent);
+      },
+      [onPlaybackRateChange],
+    );
+
+    const _onControlsVisibilityChange = useCallback(
+      (e: NativeSyntheticEvent<OnControlsVisibilityChange>) => {
+        onControlsVisibilityChange?.(e.nativeEvent);
+      },
+      [onControlsVisibilityChange],
+    )
 
     const useExternalGetLicense = drm?.getLicense instanceof Function;
 
@@ -616,6 +625,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
               : undefined
           }
+          onControlsVisibilityChange={onControlsVisibilityChange ? _onControlsVisibilityChange : undefined}
         />
         {hasPoster && showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />
