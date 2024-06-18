@@ -185,6 +185,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
+    private TelephonyManager telephonyManager;
+    private PhoneStateListener phoneStateListener;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
     private MediaMetadata customMetadata;
@@ -375,6 +377,9 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
+        if (telephonyManager != null && phoneStateListener != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
         releasePlayer();
         viewHasDropped = true;
     }
@@ -754,6 +759,9 @@ public class ReactExoplayerView extends FrameLayout implements
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
+        telephonyManager = (TelephonyManager) themedReactContext.getSystemService(Context.TELEPHONY_SERVICE);
+        phoneStateListener = new PhoneStateListener(player);
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         if (adsLoader != null) {
             adsLoader.setPlayer(player);
         }
