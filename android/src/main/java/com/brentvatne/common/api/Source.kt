@@ -15,6 +15,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
 import java.util.Locale
+import java.util.Objects
 
 /**
  * Class representing Source props for host.
