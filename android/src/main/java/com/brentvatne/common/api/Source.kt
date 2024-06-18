@@ -123,7 +123,7 @@ class Source {
         private const val PROP_SRC_TYPE = "type"
         private const val PROP_SRC_METADATA = "metadata"
         private const val PROP_SRC_HEADERS = "requestHeaders"
-        private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunclessPreparation"
+        private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
