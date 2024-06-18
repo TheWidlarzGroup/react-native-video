@@ -4,10 +4,10 @@ import android.telephony.TelephonyManager;
 
 import androidx.media3.exoplayer.ExoPlayer;
 
-public class PhoneStateListener extends PhoneStateListener {
+public class ExoPlayerPhoneStateListener extends PhoneStateListener {
     private final ExoPlayer exoPlayer;
 
-    public PhoneStateListener(ExoPlayer exoPlayer) {
+    public ExoPlayerPhoneStateListener(ExoPlayer exoPlayer) {
         this.exoPlayer = exoPlayer;
     }
 

@@ -762,7 +762,7 @@ public class ReactExoplayerView extends FrameLayout implements
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
         telephonyManager = (TelephonyManager) themedReactContext.getSystemService(Context.TELEPHONY_SERVICE);
-        phoneStateListener = new PhoneStateListener(player);
+        phoneStateListener = new ExoPlayerPhoneStateListener(player);
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         if (adsLoader != null) {
             adsLoader.setPlayer(player);
