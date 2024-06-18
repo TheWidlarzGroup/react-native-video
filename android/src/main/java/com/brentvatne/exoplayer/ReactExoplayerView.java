@@ -110,6 +110,7 @@ import androidx.media3.ui.LegacyPlayerControlView;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
+import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
@@ -238,9 +239,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean mReportBandwidth = false;
-    private UUID drmUUID = null;
-    private String drmLicenseUrl = null;
-    private String[] drmLicenseHeader = null;
+    private DRMProps drmProps;
     private boolean controls;
     private Uri adTagUrl;
 
@@ -468,7 +467,7 @@ public class ReactExoplayerView extends FrameLayout implements
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
-        updateFullScreenButtonVisbility();
+        updateFullScreenButtonVisibility();
         refreshProgressBarVisibility();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
@@ -774,10 +773,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
-        if (self.drmUUID != null) {
+        if (self.drmProps != null) {
             try {
-                drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                        self.drmLicenseHeader);
+                drmSessionManager = self.buildDrmSessionManager(self.drmProps.getDrmUUID(),
+                        self.drmProps.getDrmLicenseServer(),
+                        self.drmProps.getDrmLicenseHeader());
             } catch (UnsupportedDrmException e) {
                 int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                         : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
@@ -794,7 +794,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         DrmSessionManager drmSessionManager = initializePlayerDrm(this);
-        if (drmSessionManager == null && drmUUID != null) {
+        if (drmSessionManager == null && drmProps != null && drmProps.getDrmUUID() != null) {
             // Failed to intialize DRM session manager - cannot continue
             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
             eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
@@ -991,6 +991,8 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
                 .setUri(uri);
 
+        // refresh custom Metadata
+        customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
@@ -1044,7 +1046,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                );
+                ).setAllowChunklessPreparation(source.getTextTracksAllowChuncklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
@@ -1761,19 +1763,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
-            // refresh custom Metadata
-            MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
-
-            // Apply custom metadata is possible
-            if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
-                customMetadata = newCustomMetadata;
-                MediaItem currentMediaItem = player.getCurrentMediaItem();
-                if (currentMediaItem != null) {
-                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-                    // This will cause video blink/reload but won't louse progress
-                    player.setMediaItem(newMediaItem, false);
-                }
-            }
             if (!isSourceEqual) {
                 reloadSource();
             }
@@ -2182,18 +2171,14 @@ public class ReactExoplayerView extends FrameLayout implements
         return preventsDisplaySleepDuringVideoPlayback;
     }
 
-    private void updateFullScreenButtonVisbility() {
+    private void updateFullScreenButtonVisibility() {
         if (playerControlView != null) {
             final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-            if (controls) {
-                //Handling the fullScreenButton click event
-                if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
-                    fullScreenButton.setVisibility(GONE);
-                } else {
-                    fullScreenButton.setVisibility(VISIBLE);
-                }
-            } else {
+            //Handling the fullScreenButton click event
+            if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
                 fullScreenButton.setVisibility(GONE);
+            } else {
+                fullScreenButton.setVisibility(VISIBLE);
             }
         }
     }
@@ -2217,7 +2202,7 @@ public class ReactExoplayerView extends FrameLayout implements
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
         if (isFullscreen) {
             eventEmitter.fullscreenWillPresent();
-            if (controls && fullScreenPlayerView != null) {
+            if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
             }
             UiThreadUtil.runOnUiThread(() -> {
@@ -2228,9 +2213,10 @@ public class ReactExoplayerView extends FrameLayout implements
             });
         } else {
             eventEmitter.fullscreenWillDismiss();
-            if (controls && fullScreenPlayerView != null) {
+            if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayoutControls();
+                setControls(controls);
             }
             UiThreadUtil.runOnUiThread(() -> {
                 WindowCompat.setDecorFitsSystemWindows(window, true);
@@ -2239,11 +2225,11 @@ public class ReactExoplayerView extends FrameLayout implements
             });
         }
         // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
-        updateFullScreenButtonVisbility();
+        updateFullScreenButtonVisibility();
     }
 
     public void setUseTextureView(boolean useTextureView) {
-        boolean finallyUseTextureView = useTextureView && this.drmUUID == null;
+        boolean finallyUseTextureView = useTextureView && drmProps == null;
         exoPlayerView.setUseTextureView(finallyUseTextureView);
     }
 
@@ -2270,16 +2256,11 @@ public class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setDrmType(UUID drmType) {
-        this.drmUUID = drmType;
-    }
-
-    public void setDrmLicenseUrl(String licenseUrl){
-        this.drmLicenseUrl = licenseUrl;
-    }
-
-    public void setDrmLicenseHeader(String[] header){
-        this.drmLicenseHeader = header;
+    public void setDrm(DRMProps drmProps) {
+        this.drmProps = drmProps;
+        if (drmProps != null && drmProps.getDrmType() != null) {
+            this.drmProps.setDrmUUID(Util.getDrmUuid(drmProps.getDrmType()));
+        }
     }
 
     @Override
@@ -2322,7 +2303,7 @@ public class ReactExoplayerView extends FrameLayout implements
         this.controls = controls;
         if (controls) {
             addPlayerControl();
-            updateFullScreenButtonVisbility();
+            updateFullScreenButtonVisibility();
         } else {
             int indexOfPC = indexOfChild(playerControlView);
             if (indexOfPC != -1) {

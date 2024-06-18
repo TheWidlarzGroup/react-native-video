@@ -39,6 +39,7 @@ export type VideoSrc = Readonly<{
   cropStart?: Float;
   cropEnd?: Float;
   metadata?: VideoMetadata;
+  textTracksAllowChunklessPreparation?: boolean; // android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -390,6 +391,7 @@ export interface VideoManagerType {
   ) => Promise<void>;
   setVolume: (volume: number, reactTag: number) => Promise<void>;
   getCurrentPosition: (reactTag: number) => Promise<number>;
+  setFullScreen: (fullScreen: boolean, reactTag: number) => Promise<void>;
 }
 
 export interface VideoDecoderPropertiesType {
