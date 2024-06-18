@@ -188,7 +188,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
     private TelephonyManager telephonyManager;
-    private PhoneStateListener phoneStateListener;
+    private ExoPlayerPhoneStateListener phoneStateListener;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
     private MediaMetadata customMetadata;
