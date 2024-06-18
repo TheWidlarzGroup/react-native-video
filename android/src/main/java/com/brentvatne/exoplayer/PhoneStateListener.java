@@ -7,7 +7,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 public class PhoneStateListener extends PhoneStateListener {
     private final ExoPlayer exoPlayer;
 
-    public MyPhoneStateListener(ExoPlayer exoPlayer) {
+    public PhoneStateListener(ExoPlayer exoPlayer) {
         this.exoPlayer = exoPlayer;
     }
 
