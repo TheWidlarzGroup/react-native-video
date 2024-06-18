@@ -935,7 +935,7 @@ PODS:
   - React-Mapbuffer (0.74.1):
     - glog
     - React-debug
-  - react-native-video (6.1.2):
+  - react-native-video (6.2.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -949,7 +949,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.1.2)
+    - react-native-video/Video (= 6.2.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -980,6 +980,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - react-native-video/Video (6.1.2):
+  - react-native-video/Video (6.2.0):
     - DoubleConversion
     - glog
     - hermes-engine
