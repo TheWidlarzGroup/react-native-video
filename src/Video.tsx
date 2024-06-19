@@ -626,8 +626,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               : undefined
           }
           onControlsVisibilityChange={
-            onControlsVisibilityChange 
-              ? _onControlsVisibilityChange 
+            onControlsVisibilityChange
+              ? _onControlsVisibilityChange
               : undefined
           }
         />
