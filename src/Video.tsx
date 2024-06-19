@@ -466,7 +466,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         onControlsVisibilityChange?.(e.nativeEvent);
       },
       [onControlsVisibilityChange],
-    )
+    );
 
     const useExternalGetLicense = drm?.getLicense instanceof Function;
 
@@ -625,7 +625,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
               : undefined
           }
-          onControlsVisibilityChange={onControlsVisibilityChange ? _onControlsVisibilityChange : undefined}
+          onControlsVisibilityChange={
+            onControlsVisibilityChange 
+            ? _onControlsVisibilityChange 
+            : undefined
+          }
         />
         {hasPoster && showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />
