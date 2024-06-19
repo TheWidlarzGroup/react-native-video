@@ -244,7 +244,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         typeOfValueProp !== 'string' &&
         typeOfValueProp !== 'undefined'
       ) {
-        console.log(
+        console.warn(
           'invalid type provided to selectedVideoTrack.value: ',
           typeOfValueProp,
         );
