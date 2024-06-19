@@ -18,6 +18,8 @@ body:
 
   - type: dropdown
     id: platforms
+    validations:
+      required: true
     attributes:
       label: What platforms are you having the problem on?
       multiple: true
@@ -28,6 +30,25 @@ body:
         - visionOS
         - Android TV
         - Apple tvOS
+
+  - type: input
+    id: system_version
+    attributes:
+      label: System Version
+      description: What version of the system is using device that you are experiencing the issue?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    validations:
+      required: true
+    attributes:
+      label: On what device are you experiencing the issue?
+      multiple: true
+      options:
+        - Real device
+        - Simulator
   
   - type: dropdown
     id: architecture

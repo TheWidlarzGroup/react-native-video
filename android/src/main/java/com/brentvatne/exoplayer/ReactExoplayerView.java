@@ -273,29 +273,37 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private boolean viewHasDropped = false;
+    private void updateProgress() {
+        if (player != null) {
+            if (playerControlView != null && isPlayingAd() && controls) {
+                playerControlView.hide();
+            }
+            long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+            long duration = player.getDuration();
+            long pos = player.getCurrentPosition();
+            if (pos > duration) {
+                pos = duration;
+            }
+
+            if (lastPos != pos
+                    || lastBufferDuration != bufferedDuration
+                    || lastDuration != duration) {
+                lastPos = pos;
+                lastBufferDuration = bufferedDuration;
+                lastDuration = duration;
+                eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
+            }
+        }
+    }
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_PROGRESS) {
-                if (player != null) {
-                    if (playerControlView != null && isPlayingAd() && controls) {
-                        playerControlView.hide();
-                    }
-                    long pos = player.getCurrentPosition();
-                    long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
-                    long duration = player.getDuration();
-
-                    if (lastPos != pos
-                            || lastBufferDuration != bufferedDuration
-                            || lastDuration != duration) {
-                        lastPos = pos;
-                        lastBufferDuration = bufferedDuration;
-                        lastDuration = duration;
-                        eventEmitter.progressChanged(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
-                    }
-                    msg = obtainMessage(SHOW_PROGRESS);
-                    sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-                }
+                updateProgress();
+                msg = obtainMessage(SHOW_PROGRESS);
+                sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
             }
         }
     };
@@ -418,6 +426,8 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
+        releasePlayer();
+        viewHasDropped = true;
     }
 
     //BandwidthMeter.EventListener implementation
@@ -690,6 +700,9 @@ public class ReactExoplayerView extends FrameLayout implements
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
         mainRunnable = () -> {
+            if (viewHasDropped) {
+                return;
+            }
             try {
                 if (player == null) {
                     // Initialize core configuration and listeners
@@ -701,7 +714,9 @@ public class ReactExoplayerView extends FrameLayout implements
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {
                         // DRM initialization must run on a different thread
-
+                        if (viewHasDropped) {
+                            return;
+                        }
                         if (activity == null) {
                             DebugLog.e(TAG, "Failed to initialize Player!, null activity");
                             eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
@@ -710,12 +725,15 @@ public class ReactExoplayerView extends FrameLayout implements
 
                         // Initialize handler to run on the main thread
                         activity.runOnUiThread(() -> {
+                            if (viewHasDropped) {
+                                return;
+                            }
                             try {
                                 // Source initialization must run on the main thread
                                 initializePlayerSource();
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
-                                DebugLog.e(TAG, "Failed to initialize Player!");
+                                DebugLog.e(TAG, "Failed to initialize Player! 1");
                                 DebugLog.e(TAG, ex.toString());
                                 ex.printStackTrace();
                                 self.eventEmitter.error(ex.toString(), ex, "1001");
@@ -727,7 +745,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
-                DebugLog.e(TAG, "Failed to initialize Player!");
+                DebugLog.e(TAG, "Failed to initialize Player! 2");
                 DebugLog.e(TAG, ex.toString());
                 ex.printStackTrace();
                 eventEmitter.error(ex.toString(), ex, "1001");
@@ -1024,6 +1042,8 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
                 .setUri(uri);
 
+        // refresh custom Metadata
+        customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
@@ -1077,7 +1097,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                );
+                ).setAllowChunklessPreparation(source.getTextTracksAllowChuncklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
@@ -1389,6 +1409,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
                 case Player.STATE_ENDED:
                     text += "ended";
+                    updateProgress();
                     eventEmitter.end();
                     onStopPlayback();
                     setKeepScreenOn(false);
@@ -1666,6 +1687,7 @@ public class ReactExoplayerView extends FrameLayout implements
         // so we need to explicitly detect it.
         if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
                 && player.getRepeatMode() == Player.REPEAT_MODE_ONE) {
+            updateProgress();
             eventEmitter.end();
         }
     }
@@ -1794,19 +1816,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
-            // refresh custom Metadata
-            MediaMetadata newCustomMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
-
-            // Apply custom metadata is possible
-            if (player != null && !Util.areEqual(newCustomMetadata, customMetadata)) {
-                customMetadata = newCustomMetadata;
-                MediaItem currentMediaItem = player.getCurrentMediaItem();
-                if (currentMediaItem != null) {
-                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
-                    // This will cause video blink/reload but won't louse progress
-                    player.setMediaItem(newMediaItem, false);
-                }
-            }
             if (!isSourceEqual) {
                 reloadSource();
             }
