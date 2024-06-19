@@ -193,9 +193,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
-      const type = typeof selectedTextTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedTextTrack');
+      const typeOfValueProp = typeof selectedTextTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedTextTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
@@ -208,9 +215,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
-      const type = typeof selectedAudioTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedAudioTrack');
+      const typeOfValueProp = typeof selectedAudioTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedAudioTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
 
@@ -224,9 +238,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
-      const type = typeof selectedVideoTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedVideoTrack');
+      const typeOfValueProp = typeof selectedVideoTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedVideoTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
