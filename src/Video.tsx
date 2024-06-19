@@ -627,8 +627,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
           onControlsVisibilityChange={
             onControlsVisibilityChange 
-            ? _onControlsVisibilityChange 
-            : undefined
+              ? _onControlsVisibilityChange 
+              : undefined
           }
         />
         {hasPoster && showPoster ? (
