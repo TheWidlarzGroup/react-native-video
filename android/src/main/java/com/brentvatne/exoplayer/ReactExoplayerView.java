@@ -367,11 +367,6 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         cleanupPlaybackService();
         super.onDetachedFromWindow();
