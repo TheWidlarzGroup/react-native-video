@@ -824,6 +824,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
         exoDorisPlayerView.setTag(R.id.bottomComponentTag, null);
+        View bottomOverlayView = exoDorisPlayerView.findViewWithTag(R.id.bottom_overlay_component);
+        if (bottomOverlayView instanceof ReactRootView) {
+            ((ReactRootView) bottomOverlayView).unmountReactApplication();
+        }
     }
 
     private boolean requestAudioFocus() {
@@ -1668,6 +1672,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoDorisPlayerView.removeView(reactRootFrameLayout);
         });
         ReactRootView reactRootView = new ReactRootView(getContext());
+        reactRootView.setTag(R.id.bottom_overlay_component);
         reactRootView.setLayoutParams(new FrameLayout.LayoutParams(1, 1));
         reactRootView.startReactApplication(((ReactApplication) getContext().getApplicationContext())
                 .getReactNativeHost().getReactInstanceManager(), component, null);
