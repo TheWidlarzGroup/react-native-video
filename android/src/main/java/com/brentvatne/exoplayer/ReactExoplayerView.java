@@ -351,6 +351,8 @@ public class ReactExoplayerView extends FrameLayout implements
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
+        addFragment();
+
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -367,31 +369,12 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Activity activity = themedReactContext.getCurrentActivity();
-        if (activity instanceof FragmentActivity) {
-            ReactExoplayerFragment fragment = new ReactExoplayerFragment(this);
-            pictureInPictureFragmentTag = fragment.getId();
-            ((FragmentActivity) activity)
-                    .getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(fragment, fragment.getId())
-                    .commitAllowingStateLoss();
-        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         cleanupPlaybackService();
         super.onDetachedFromWindow();
-        Activity activity = themedReactContext.getCurrentActivity();
-        if (activity instanceof FragmentActivity) {
-            FragmentManager fragmentManager = ((FragmentActivity) activity).getSupportFragmentManager();
-            Fragment fragment = fragmentManager.findFragmentByTag(pictureInPictureFragmentTag);
-            if (fragment == null) return;
-            fragmentManager.beginTransaction()
-                    .remove(fragment)
-                    .commitAllowingStateLoss();
-        }
     }
 
     // LifecycleEventListener implementation
@@ -427,7 +410,33 @@ public class ReactExoplayerView extends FrameLayout implements
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
         releasePlayer();
+        removeFragment();
         viewHasDropped = true;
+    }
+
+    private void addFragment() {
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity && !viewHasDropped) {
+            ReactExoplayerFragment fragment = new ReactExoplayerFragment(this);
+            pictureInPictureFragmentTag = fragment.getId();
+            ((FragmentActivity) activity)
+                    .getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(fragment, fragment.getId())
+                    .commitNowAllowingStateLoss();
+        }
+    }
+
+    private void removeFragment() {
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity) {
+            FragmentManager fragmentManager = ((FragmentActivity) activity).getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(pictureInPictureFragmentTag);
+            if (fragment == null) return;
+            fragmentManager.beginTransaction()
+                    .remove(fragment)
+                    .commitNowAllowingStateLoss();
+        }
     }
 
     //BandwidthMeter.EventListener implementation
@@ -2140,7 +2149,10 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT);
 
         if (isInPictureInPicture) {
-            ((ViewGroup)exoPlayerView.getParent()).removeView(exoPlayerView);
+            ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
+            if (parent != null) {
+                parent.removeView(exoPlayerView);
+            }
             for (int i = 0; i < rootView.getChildCount(); i++) {
                 if (rootView.getChildAt(i) != exoPlayerView) {
                     rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
