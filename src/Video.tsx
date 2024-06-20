@@ -393,6 +393,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onVideoTracks],
     );
 
+    const _onPlaybackRateChange = useCallback(
+      (e: NativeSyntheticEvent<Readonly<{playbackRate: number}>>) => {
+        onPlaybackRateChange?.(e.nativeEvent);
+      },
+      [onPlaybackRateChange],
+    );
+
     const _onVolumeChange = useCallback(
       (e: NativeSyntheticEvent<Readonly<{volume: number}>>) => {
         onVolumeChange?.(e.nativeEvent);
@@ -452,13 +459,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         onAspectRatio?.(e.nativeEvent);
       },
       [onAspectRatio],
-    );
-
-    const _onPlaybackRateChange = useCallback(
-      (e: NativeSyntheticEvent<Readonly<{playbackRate: number}>>) => {
-        onPlaybackRateChange?.(e.nativeEvent);
-      },
-      [onPlaybackRateChange],
     );
 
     const _onControlsVisibilityChange = useCallback(
@@ -626,9 +626,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               : undefined
           }
           onControlsVisibilityChange={
-            onControlsVisibilityChange
-              ? _onControlsVisibilityChange
-              : undefined
+            onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
           }
         />
         {hasPoster && showPoster ? (
