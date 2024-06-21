@@ -12,3 +12,6 @@ gradle.ext.androidxMediaModulePrefix = 'media-'
 apply from: file("../../../../media3/core_settings.gradle")
 
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
+useExpoModules()

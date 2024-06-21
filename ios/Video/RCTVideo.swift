@@ -250,6 +250,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     deinit {
+        #if USE_GOOGLE_IMA
+            _imaAdsManager.releaseAds()
+            _imaAdsManager = nil
+        #endif
+
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
         _playerObserver.clearPlayer()
@@ -1266,11 +1271,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
-
-        #if USE_GOOGLE_IMA
-            _imaAdsManager.releaseAds()
-            _imaAdsManager = nil
-        #endif
 
         self.removePlayerLayer()
 
