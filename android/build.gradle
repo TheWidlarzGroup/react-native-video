@@ -177,6 +177,7 @@ repositories {
 }
 
 def media3_version = safeExtGet('media3Version')
+def media3_buildFromSource = true
 def kotlin_version = safeExtGet('kotlinVersion')
 def androidxCore_version = safeExtGet('androidxCoreVersion')
 def androidxActivity_version = safeExtGet('androidxActivityVersion')
@@ -191,46 +192,87 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$androidxActivity_version"
 
     // For media playback using ExoPlayer
-    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    if (media3_buildFromSource) {
+        implementation(project(":media-lib-exoplayer"))
+    } else {
+        implementation "androidx.media3:media3-exoplayer:$media3_version"
+    }
 
     if (ExoplayerDependencies["useExoplayerSmoothStreaming"]) {
         // For Smooth Streaming playback support with ExoPlayer
-        implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
+        if (media3_buildFromSource) {
+            implementation(project(":media-lib-exoplayer-smoothstreaming"))
+        } else {
+            implementation "androidx.media3:media3-exoplayer-smoothstreaming:$media3_version"
+        }
     }
 
     if (ExoplayerDependencies["useExoplayerDash"]) {
         // For DASH playback support with ExoPlayer
-        implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+        if (media3_buildFromSource) {
+            implementation(project(":media-lib-exoplayer-dash"))
+        } else {
+            implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+        }
     }
 
     if (ExoplayerDependencies["useExoplayerHls"]) {
-      // For HLS playback support with ExoPlayer
-      implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+        // For HLS playback support with ExoPlayer
+        if (media3_buildFromSource) {
+            implementation(project(":media-lib-exoplayer-hls"))
+        } else {
+            implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+        }
     }
 
     // For RTSP playback support with ExoPlayer
     if (ExoplayerDependencies["useExoplayerRtsp"]) {
-        implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
+        if (media3_buildFromSource) {
+            implementation(project(":media-lib-exoplayer-rtsp"))
+        } else {
+            implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
+        }
     }
-    
+
     // For ad insertion using the Interactive Media Ads SDK with ExoPlayer
     if (ExoplayerDependencies["useExoplayerIMA"]) {
-        implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
+        if (media3_buildFromSource) {
+            implementation(project(":media-lib-exoplayer-ima"))
+        } else {
+            implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
+        }
     }
 
-    // For loading data using the OkHttp network stack
-    implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+    if (media3_buildFromSource) {
+        // For loading data using the OkHttp network stack
+        implementation(project(":media-lib-datasource-okhttp"))
 
-    // For building media playback UIs
-    implementation "androidx.media3:media3-ui:$media3_version"
+        // For building media playback UIs
+        implementation(project(":media-lib-ui"))
 
-    // For exposing and controlling media sessions
-    implementation "androidx.media3:media3-session:$media3_version"
+        // For exposing and controlling media sessions
+        implementation(project(":media-lib-session"))
 
-    // Common functionality for loading data
-    implementation "androidx.media3:media3-datasource:$media3_version"
-    // Common functionality used across multiple media libraries
-    implementation "androidx.media3:media3-common:$media3_version"
+        // Common functionality for loading data
+        implementation(project(":media-lib-datasource"))
+
+        // Common functionality used across multiple media libraries
+        implementation(project(":media-lib-common"))
+    } else {
+        // For loading data using the OkHttp network stack
+        implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+
+        // For building media playback UIs
+        implementation "androidx.media3:media3-ui:$media3_version"
+
+        // For exposing and controlling media sessions
+        implementation "androidx.media3:media3-session:$media3_version"
+
+        // Common functionality for loading data
+        implementation "androidx.media3:media3-datasource:$media3_version"
+        // Common functionality used across multiple media libraries
+        implementation "androidx.media3:media3-common:$media3_version"
+    }
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

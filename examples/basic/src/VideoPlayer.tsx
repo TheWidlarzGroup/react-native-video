@@ -128,7 +128,11 @@ class VideoPlayer extends Component {
   srcAllPlatformList = [
     {
       description: 'local file landscape',
-      uri: require('./broadchurch.mp4'),
+      uri: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_with_multiple_tiled_thumbnails.mpd',
+      // uri: 'https://cdn.theoplayer.com/video/big_buck_bunny/big_buck_bunny.m3u8',
+      //uri: 'https://demo.unified-streaming.com/k8s/features/stable/no-handler-origin/tears-of-steel/tears-of-steel-tiled-thumbnails-static.mpd',
+      // uri: 'https://demo.unified-streaming.com/k8s/features/stable/no-handler-origin/tears-of-steel/tears-of-steel-tiled-thumbnails.cmfv',
+      type: 'mpd',
     },
     {
       description: 'local file landscape cropped',
