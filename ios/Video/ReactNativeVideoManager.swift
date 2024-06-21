@@ -11,9 +11,7 @@ public class ReactNativeVideoManager: RNVPlugin {
     // create a private initializer
     private init() {}
 
-    public static let shared: ReactNativeVideoManager = {
-        return ReactNativeVideoManager()
-    }()
+    public static let shared: ReactNativeVideoManager = .init()
 
     var instanceList: [RCTVideo] = Array()
     var pluginList: [RNVPlugin] = Array()
