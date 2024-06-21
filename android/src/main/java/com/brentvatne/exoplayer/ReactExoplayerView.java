@@ -1046,7 +1046,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setAllowChunklessPreparation(source.getTextTracksAllowChuncklessPreparation());
+                ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
@@ -1172,12 +1172,16 @@ public class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public void onAudioFocusChange(int focusChange) {
+            Activity activity = themedReactContext.getCurrentActivity();
+
             switch (focusChange) {
                 case AudioManager.AUDIOFOCUS_LOSS:
                     view.hasAudioFocus = false;
                     view.eventEmitter.audioFocusChanged(false);
                     // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
-                    view.pausePlayback();
+                    if (activity != null) {
+                        activity.runOnUiThread(view::pausePlayback);
+                    }
                     view.audioManager.abandonAudioFocus(this);
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -1191,7 +1195,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
             }
 
-            Activity activity = themedReactContext.getCurrentActivity();
             if (view.player != null && activity != null) {
                 if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     // Lower the volume
