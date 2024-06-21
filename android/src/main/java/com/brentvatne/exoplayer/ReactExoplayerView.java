@@ -1267,7 +1267,7 @@ public class ReactExoplayerView extends FrameLayout implements
                         setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
                     }
                     // Setting the visibility for the playerControlView
-                    if (playerControlView != null) {
+                    if (playerControlView != null && controls) {
                         exoPlayerView.setUseController(true);
                     }
                     setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
