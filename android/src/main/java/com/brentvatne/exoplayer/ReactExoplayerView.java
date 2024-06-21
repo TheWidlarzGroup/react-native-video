@@ -2260,7 +2260,6 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setShowSubtitleButton(Boolean showSubtitleButton) {
-        if(exoPlayerView == null) return;
         exoPlayerView.setShowSubtitleButton(showSubtitleButton);
     }
 }
