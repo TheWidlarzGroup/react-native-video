@@ -2258,4 +2258,9 @@ public class ReactExoplayerView extends FrameLayout implements
         controlsConfig = controlsStyles;
         refreshProgressBarVisibility();
     }
+
+    public void setShowSubtitleButton(Boolean showSubtitleButton) {
+        if(exoPlayerView == null) return;
+        exoPlayerView.setShowSubtitleButton(showSubtitleButton);
+    }
 }
