@@ -1,23 +1,22 @@
-//
-//  RNVAnalyticsPlugin.swift
-//  react-native-video
-//
+package com.brentvatne.react
 
-import Foundation
-
-public protocol RNVAnalyticsPlugin {
+/**
+ * Plugin interface definition
+ */
+interface RNVPlugin {
     /**
      * Function called when a new player is created
      * @param id: a random string identifying the player
      * @param player: the instantiated player reference
      */
-    func onInstanceCreated(id: String, player: Any)
+    fun onInstanceCreated(id: String, player: Any)
+
     /**
      * Function called when a player should be destroyed
-     * when this callback is called, the analytics plugin shall free all
+     * when this callback is called, the plugin shall free all
      * resources and release all reference to Player object
      * @param id: a random string identifying the player
      * @param player: the player to release
      */
-    func onInstanceRemoved(id: String, player: Any)
+    fun onInstanceRemoved(id: String, player: Any)
 }

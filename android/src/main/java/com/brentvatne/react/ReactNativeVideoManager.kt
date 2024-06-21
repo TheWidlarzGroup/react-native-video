@@ -5,9 +5,9 @@ import com.brentvatne.exoplayer.ReactExoplayerViewManager
 
 /**
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
- * It handles the list of <Video view instanced and registration of analytics plugins
+ * It handles the list of <Video view instanced and registration of plugins
  */
-class ReactNativeVideoManager : RNVAnalyticsPlugin {
+class ReactNativeVideoManager : RNVPlugin {
     companion object {
         private const val TAG = "ReactNativeVideoManager"
 
@@ -24,7 +24,7 @@ class ReactNativeVideoManager : RNVAnalyticsPlugin {
     }
 
     private var instanceList: ArrayList<ReactExoplayerViewManager> = ArrayList()
-    private var analyticsPluginList: ArrayList<RNVAnalyticsPlugin> = ArrayList()
+    private var pluginList: ArrayList<RNVPlugin> = ArrayList()
 
     /**
      * register a new ReactExoplayerViewManager in the managed list
@@ -46,26 +46,26 @@ class ReactNativeVideoManager : RNVAnalyticsPlugin {
         }
 
     /**
-     * register a new analytics plugin in the managed list
+     * register a new plugin in the managed list
      */
-    fun registerAnalyticsPlugin(plugin: RNVAnalyticsPlugin) {
-        analyticsPluginList.add(plugin)
+    fun registerPlugin(plugin: RNVPlugin) {
+        pluginList.add(plugin)
         return
     }
 
     /**
-     * unregister a analytics plugin from the managed list
+     * unregister a plugin from the managed list
      */
-    fun unregisterAnalyticsPlugin(plugin: RNVAnalyticsPlugin) {
-        analyticsPluginList.remove(plugin)
+    fun unregisterPlugin(plugin: RNVPlugin) {
+        pluginList.remove(plugin)
         return
     }
 
     override fun onInstanceCreated(id: String, player: Any) {
-        analyticsPluginList.forEach { it.onInstanceCreated(id, player) }
+        pluginList.forEach { it.onInstanceCreated(id, player) }
     }
 
     override fun onInstanceRemoved(id: String, player: Any) {
-        analyticsPluginList.forEach { it.onInstanceRemoved(id, player) }
+        pluginList.forEach { it.onInstanceRemoved(id, player) }
     }
 }

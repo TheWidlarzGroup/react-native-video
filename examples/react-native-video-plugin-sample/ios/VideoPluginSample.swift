@@ -3,7 +3,7 @@ import AVFoundation
 import AVKit
 
 @objc(VideoPluginSample)
-class VideoPluginSample: NSObject, RNVAnalyticsPlugin {
+class VideoPluginSample: NSObject, RNVPlugin {
     private var _playerRateChangeObserver: NSKeyValueObservation?
     private var _playerCurrentItemChangeObserver: NSKeyValueObservation?
     private var _playerItemStatusObserver: NSKeyValueObservation?
@@ -13,7 +13,7 @@ class VideoPluginSample: NSObject, RNVAnalyticsPlugin {
      */
     override init() {
         super.init()
-        ReactNativeVideoManager.shared.registerAnalyticsPlugin(plugin: self)
+        ReactNativeVideoManager.shared.registerPlugin(plugin: self)
     }
     
     

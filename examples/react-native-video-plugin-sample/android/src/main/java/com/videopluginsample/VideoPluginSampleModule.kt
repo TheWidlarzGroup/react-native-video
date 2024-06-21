@@ -5,14 +5,14 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
 import com.brentvatne.common.toolbox.DebugLog
-import com.brentvatne.react.RNVAnalyticsPlugin
+import com.brentvatne.react.RNVPlugin
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 
 class VideoPluginSampleModule(reactContext: ReactApplicationContext) :
-  ReactContextBaseJavaModule(reactContext), RNVAnalyticsPlugin, Player.Listener {
+  ReactContextBaseJavaModule(reactContext), RNVPlugin, Player.Listener {
 
   private val debugEventLogger = EventLogger("RNVPluginSample")
 

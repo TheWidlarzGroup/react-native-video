@@ -5,20 +5,18 @@
 
 import Foundation
 
-public class ReactNativeVideoManager: RNVAnalyticsPlugin {
+public class ReactNativeVideoManager: RNVPlugin {
     private let expectedMaxVideoCount = 10
 
     // create a private initializer
     private init() {}
 
     public static let shared: ReactNativeVideoManager = {
-        let instance = ReactNativeVideoManager()
-        // setup code
-        return instance
+        return ReactNativeVideoManager()
     }()
 
     var instanceList: [RCTVideo] = Array()
-    var analyticsPluginList: [RNVAnalyticsPlugin] = Array()
+    var pluginList: [RNVPlugin] = Array()
 
     /**
       * register a new ReactExoplayerViewManager in the managed list
@@ -40,18 +38,18 @@ public class ReactNativeVideoManager: RNVAnalyticsPlugin {
     }
 
     /**
-     * register a new analytics plugin in the managed list
+     * register a new plugin in the managed list
      */
-    public func registerAnalyticsPlugin(plugin: RNVAnalyticsPlugin) {
-        analyticsPluginList.append(plugin)
+    public func registerPlugin(plugin: RNVPlugin) {
+        pluginList.append(plugin)
         return
     }
 
     public func onInstanceCreated(id: String, player: Any) {
-        analyticsPluginList.forEach { it in it.onInstanceCreated(id: id, player: player) }
+        pluginList.forEach { it in it.onInstanceCreated(id: id, player: player) }
     }
 
     public func onInstanceRemoved(id: String, player: Any) {
-        analyticsPluginList.forEach { it in it.onInstanceRemoved(id: id, player: player) }
+        pluginList.forEach { it in it.onInstanceRemoved(id: id, player: player) }
     }
 }

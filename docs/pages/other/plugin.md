@@ -1,6 +1,6 @@
-# Analytics plugin (experimental)
+# Plugin (experimental)
 
-Since Version 6.3.0, it is possible to create plugins for analytics management (and maybe much more).
+Since Version 6.3.0, it is possible to create plugins for analytics management and maybe much more.
 A sample plugin is available in the repository in: example/react-native-video-plugin-sample. (important FIXME, put sample link)
 
 ## Concept
@@ -25,7 +25,7 @@ First you need to create a new react native package:
 npx create-react-native-library@latest react-native-video-custom-analytics
 ````
 
-Both android and iOS implementation expose an interface `RNVAnalyticsPlugin`.
+Both android and iOS implementation expose an interface `RNVPlugin`.
 Your `react-native-video-custom-analytics` shall implement this interface and register itself as a plugin for react native video.
 
 ## Android
@@ -34,11 +34,11 @@ You need two mandatory action to be able to receive player handle
 
 ### 1/ Create the plugin
 
-First you should instanciate a class which extends `RNVAnalyticsPlugin`.
+First you should instanciate a class which extends `RNVPlugin`.
 
-The proposed integration implement `RNVAnalyticsPlugin` directly inside the Module file (`VideoPluginSampleModule`).
+The proposed integration implement `RNVPlugin` directly inside the Module file (`VideoPluginSampleModule`).
 
-The `RNVAnalyticsPlugin` interface only defines 2 functions, see description here under.
+The `RNVPlugin` interface only defines 2 functions, see description here under.
 
 ```kotlin
     /**
@@ -49,7 +49,7 @@ The `RNVAnalyticsPlugin` interface only defines 2 functions, see description her
     fun onInstanceCreated(id: String, player: Any)
     /**
      * Function called when a player should be destroyed
-     * when this callback is called, the analytics plugin shall free all
+     * when this callback is called, the plugin shall free all
      * resources and release all reference to Player object
      * @param id: a random string identifying the player
      * @param player: the player to release
@@ -62,7 +62,7 @@ The `RNVAnalyticsPlugin` interface only defines 2 functions, see description her
 To register this allocated class in the main react native video package you should call following function:
 
 ```kotlin
-ReactNativeVideoManager.getInstance().registerAnalyticsPlugin(plugin)
+ReactNativeVideoManager.getInstance().registerPlugin(plugin)
 ```
 The proposed integration register the instanciated class in `createNativeModules` entry point.
 
@@ -80,11 +80,11 @@ Your new module shall be able to access to react-native-video package, then we m
 
 ### 2/ Create the plugin
 
-First you should instanciate a class which extends `RNVAnalyticsPlugin`.
+First you should instanciate a class which extends `RNVPlugin`.
 
-The proposed integration implement `RNVAnalyticsPlugin` directly inside the entry point of the module file (`VideoPluginSample`).
+The proposed integration implement `RNVPlugin` directly inside the entry point of the module file (`VideoPluginSample`).
 
-The `RNVAnalyticsPlugin` interface only defines 2 functions, see description here under.
+The `RNVPlugin` interface only defines 2 functions, see description here under.
 
 ```swift
     /**
@@ -94,7 +94,7 @@ The `RNVAnalyticsPlugin` interface only defines 2 functions, see description her
     func onInstanceCreated(player: Any)
     /**
      * Function called when a player should be destroyed
-     * when this callback is called, the analytics plugin shall free all
+     * when this callback is called, the plugin shall free all
      * resources and release all reference to Player object
      * @param player: the player to release
      */
@@ -106,7 +106,7 @@ The `RNVAnalyticsPlugin` interface only defines 2 functions, see description her
 To register this allocated class in the main react native video package you should register it by calling this function:
 
 ```swift
-ReactNativeVideoManager.shared.registerAnalyticsPlugin(plugin: plugin)
+ReactNativeVideoManager.shared.registerPlugin(plugin: plugin)
 ```
 
 The proposed integration register the instanciated class in file `VideoPluginSample` in the init function:
@@ -118,7 +118,7 @@ import react_native_video
 
 override init() {
     super.init()
-    ReactNativeVideoManager.shared.registerAnalyticsPlugin(plugin: self)
+    ReactNativeVideoManager.shared.registerPlugin(plugin: self)
 }
 ```
 

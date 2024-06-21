@@ -3,5 +3,5 @@
   "misc": "Misc",
   "debug": "Debugging",
   "new-arch": "New Architecture",
-  "analytics": "Analytics plugin"
+  "plugin": "Plugin (experimental)"
 }

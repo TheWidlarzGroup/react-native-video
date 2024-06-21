@@ -9,7 +9,7 @@ import com.facebook.react.uimanager.ViewManager
 class VideoPluginSamplePackage : ReactPackage {
   override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
     val plugin = VideoPluginSampleModule(reactContext)
-    ReactNativeVideoManager.getInstance().registerAnalyticsPlugin(plugin)
+    ReactNativeVideoManager.getInstance().registerPlugin(plugin)
     return listOf(plugin)
   }
 
