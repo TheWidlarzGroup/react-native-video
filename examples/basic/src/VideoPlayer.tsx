@@ -128,7 +128,7 @@ class VideoPlayer extends Component {
   srcAllPlatformList = [
     {
       description: 'local file landscape',
-      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
+      uri: require('./broadchurch.mp4'),
     },
     {
       description: 'local file landscape cropped',
