@@ -1,6 +1,6 @@
 # Plugin (experimental)
 
-Since Version 6.3.0, it is possible to create plugins for analytics management and maybe much more.
+Since Version 6.4.0, it is possible to create plugins for analytics management and maybe much more.
 A sample plugin is available in the repository in: example/react-native-video-plugin-sample. (important FIXME, put sample link)
 
 ## Concept
