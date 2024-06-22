@@ -409,7 +409,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new PlayerControlView(getContext());
-//             playerControlView.setShowSubtitleButton(true);
             exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
                 @Override
                 public void onFullscreenButtonClick(boolean isFullScreen) {
@@ -1310,6 +1309,9 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             if (textTrackType != null) {
                 setSelectedTextTrack(textTrackType, textTrackValue);
+                exoPlayerView.setShowSubtitleButton(controlsConfig.getShowSubtitleButton());
+            }else{
+                exoPlayerView.setShowSubtitleButton(false);
             }
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
@@ -2257,9 +2259,5 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshProgressBarVisibility();
-    }
-
-    public void setShowSubtitleButton(Boolean showSubtitleButton) {
-        exoPlayerView.setShowSubtitleButton(showSubtitleButton);
     }
 }

@@ -83,7 +83,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
-      showSubtitleButton,
       onLoadStart,
       onLoad,
       onError,
@@ -558,9 +557,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
-          showSubtitleButton={
-            showSubtitleButton === undefined ? true : showSubtitleButton
-          }
           onVideoLoad={
             onLoad || hasPoster
               ? (onVideoLoad as (e: NativeSyntheticEvent<object>) => void)

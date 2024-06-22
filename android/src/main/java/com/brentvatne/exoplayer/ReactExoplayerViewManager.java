@@ -80,7 +80,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
     private static final String PROP_CONTROLS_STYLES = "controlsStyles";
-    private static final String PROP_SHOW_SUBTITLE_BUTTON = "showSubtitleButton";
 
 
     private final ReactExoplayerConfig config;
@@ -358,10 +357,5 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setControlsStyles(final ReactExoplayerView videoView, @Nullable ReadableMap controlsStyles) {
         ControlsConfig controlsConfig = ControlsConfig.parse(controlsStyles);
         videoView.setControlsStyles(controlsConfig);
-    }
-
-    @ReactProp(name = PROP_SHOW_SUBTITLE_BUTTON)
-    public void setShowSubtitle(final ReactExoplayerView videoView, @Nullable Boolean showSubtitleButton) {
-        videoView.setShowSubtitleButton(showSubtitleButton);
     }
 }
