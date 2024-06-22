@@ -420,6 +420,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new LegacyPlayerControlView(getContext());
+            playerControlView.addVisibilityListener(new LegacyPlayerControlView.VisibilityListener() {
+                @Override
+                public void onVisibilityChange(int visibility) {
+                    eventEmitter.controlsVisibilityChanged(visibility == View.VISIBLE);
+                }
+            });
         }
 
         if (fullScreenPlayerView == null) {

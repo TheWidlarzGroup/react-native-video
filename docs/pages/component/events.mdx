@@ -121,6 +121,26 @@ Example:
 }
 ```
 
+### `onControlsVisibilityChange`
+
+<PlatformsList types={['Android']} />
+
+Callback function that is called when the controls are hidden or shown. Not possible on iOS.
+
+Payload:
+
+| Property    | Type    | Description                                    |
+| ----------- | ------- | ---------------------------------------------- |
+| isVisible | boolean | Boolean indicating whether controls are visible |
+
+Example:
+
+```javascript
+{
+  isVisible: true;
+}
+```
+
 ### `onEnd`
 
 <PlatformsList types={['All']} />
