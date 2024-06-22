@@ -226,6 +226,12 @@ class NowPlayingInfoCenterManager {
             })
         }
 
+        if CMTIME_IS_INDEFINITE(currentItem.asset.duration) {
+            nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
+        } else {
+            nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+        }
+
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
@@ -245,6 +251,11 @@ class NowPlayingInfoCenterManager {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds.rounded()
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
 
+            if CMTIME_IS_INDEFINITE(currentItem.asset.duration) {
+                nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
+            } else {
+                nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+            }
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         }
     }
