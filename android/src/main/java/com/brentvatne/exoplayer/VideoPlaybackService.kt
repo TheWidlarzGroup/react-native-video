@@ -69,8 +69,6 @@ class VideoPlaybackService : MediaSessionService() {
         hidePlayerNotification(player)
         val session = mediaSessionsList.remove(player)
         session?.release()
-        sourceActivity = null
-
         if (mediaSessionsList.isEmpty()) {
             cleanup()
             stopSelf()

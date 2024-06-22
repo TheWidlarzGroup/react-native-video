@@ -289,6 +289,10 @@ type ControlsStyles = Readonly<{
   seekIncrementMS?: number;
 }>;
 
+export type OnControlsVisibilityChange = Readonly<{
+  isVisible: boolean;
+}>;
+
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   drm?: Drm;
@@ -337,6 +341,7 @@ export interface VideoNativeProps extends ViewProps {
   useSecureView?: boolean; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
+  onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;
