@@ -22,6 +22,7 @@ import NativeVideoComponent, {
   type OnAudioTracksData,
   type OnBandwidthUpdateData,
   type OnBufferData,
+  type OnControlsVisibilityChange,
   type OnExternalPlaybackChangeData,
   type OnGetLicenseData,
   type OnLoadStartData,
@@ -91,6 +92,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onEnd,
       onBuffer,
       onBandwidthUpdate,
+      onControlsVisibilityChange,
       onExternalPlaybackChange,
       onFullscreenPlayerWillPresent,
       onFullscreenPlayerDidPresent,
@@ -482,6 +484,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAspectRatio],
     );
 
+    const _onControlsVisibilityChange = useCallback(
+      (e: NativeSyntheticEvent<OnControlsVisibilityChange>) => {
+        onControlsVisibilityChange?.(e.nativeEvent);
+      },
+      [onControlsVisibilityChange],
+    );
+
     const useExternalGetLicense = drm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
@@ -638,6 +647,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             onReceiveAdEvent
               ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
               : undefined
+          }
+          onControlsVisibilityChange={
+            onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
           }
         />
         {hasPoster && showPoster ? (
