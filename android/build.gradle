@@ -45,7 +45,7 @@ def ExoplayerDependenciesList = [
 ]
 
 def ExoplayerDependencies = ExoplayerDependenciesList.collectEntries { property ->
-    [(property): safeExtGet(property)?.toBoolean() ?: false]
+    [(property): safeExtGet('RNVideo_' + property)?.toBoolean() ?: false]
 }
 
 ExoplayerDependenciesList.each { propertyName ->

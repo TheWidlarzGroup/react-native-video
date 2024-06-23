@@ -4,13 +4,20 @@ import {withNotificationControls} from './withNotificationControls';
 import {withAndroidExtensions} from './withAndroidExtensions';
 import {withAds} from './withAds';
 import {withBackgroundAudio} from './withBackgroundAudio';
+import {withPermissions} from '@expo/config-plugins/build/android/Permissions';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../package.json');
 
 const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
+  const androidPermissions = [];
+
   if (props.enableNotificationControls) {
     config = withNotificationControls(config, props.enableNotificationControls);
+    androidPermissions.push('android.permission.FOREGROUND_SERVICE');
+    androidPermissions.push(
+      'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+    );
   }
 
   if (props.androidExtensions != null) {
@@ -24,6 +31,8 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
   if (props.enableBackgroundAudio) {
     config = withBackgroundAudio(config, props.enableBackgroundAudio);
   }
+
+  config = withPermissions(config, androidPermissions);
 
   return config;
 };

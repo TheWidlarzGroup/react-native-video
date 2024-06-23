@@ -1,20 +1,10 @@
-import {
-  AndroidConfig,
-  withAndroidManifest,
-  withPlugins,
-  type ConfigPlugin,
-} from '@expo/config-plugins';
+import {withAndroidManifest, type ConfigPlugin} from '@expo/config-plugins';
 
 export const withNotificationControls: ConfigPlugin<boolean> = (
   c,
   enableNotificationControls,
 ) => {
-  const permissions = [
-    'android.permission.FOREGROUND_SERVICE',
-    'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
-  ];
-
-  const configWithService = withAndroidManifest(c, (config) => {
+  return withAndroidManifest(c, (config) => {
     const manifest = config.modResults.manifest;
 
     if (!enableNotificationControls) {
@@ -59,9 +49,4 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
 
     return config;
   });
-
-  // Add the permissions to the AndroidManifest.xml
-  return withPlugins(configWithService, [
-    [AndroidConfig.Permissions.withPermissions, permissions],
-  ]);
 };
