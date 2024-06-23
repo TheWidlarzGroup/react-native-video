@@ -1,4 +1,4 @@
-import withRNVideo from 'react-native-video/expo-plugins/withRNVideo';
+import {withRNVideo} from 'react-native-video';
 
 const config = {
   name: 'VideoPlayer',
