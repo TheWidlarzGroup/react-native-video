@@ -17,6 +17,7 @@ import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.api.ViewType;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
@@ -296,10 +297,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setFullscreen(fullscreen);
     }
 
-    @ReactProp(name = PROP_VIEW_TYPE, defaultInt = 1)
-    public void setViewType(final ReactExoplayerView videoView, final int useSecureView) {
-        videoView.setViewType(useSecureView);
+    @ReactProp(name = PROP_VIEW_TYPE, defaultInt = ViewType.VIEW_TYPE_SURFACE)
+    public void setViewType(final ReactExoplayerView videoView, final int viewType) {
+        videoView.setViewType(viewType);
     }
+
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
     public void setHideShutterView(final ReactExoplayerView videoView, final boolean hideShutterView) {
         videoView.setHideShutterView(hideShutterView);
