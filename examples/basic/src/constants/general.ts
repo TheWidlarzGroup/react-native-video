@@ -1,4 +1,5 @@
 import {
+  BufferConfig,
   DRMType,
   ISO639_1,
   ResizeMode,
@@ -187,3 +188,13 @@ export const defaultValue: StateType = {
   showNotificationControls: false,
   isSeeking: false,
 };
+
+export const bufferConfig: BufferConfig = {
+  minBufferMs: 15000,
+  maxBufferMs: 50000,
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000,
+  live: {
+    targetOffsetMs: 500,
+  },
+}

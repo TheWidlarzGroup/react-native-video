@@ -28,7 +28,7 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
-import {defaultValue, srcList, textTracksSelectionBy} from './constants';
+import {bufferConfig, defaultValue, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast} from './components';
 
 type Props = NonNullable<unknown>;
@@ -237,16 +237,7 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={state.selectedAudioTrack}
             selectedVideoTrack={state.selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{
-              minBufferMs: 15000,
-              maxBufferMs: 50000,
-              bufferForPlaybackMs: 2500,
-              bufferForPlaybackAfterRebufferMs: 5000,
-              cacheSizeMB: state.useCache ? 200 : 0,
-              live: {
-                targetOffsetMs: 500,
-              },
-            }}
+            bufferConfig={{...bufferConfig, cacheSizeMB: state.useCache ? 200 : 0}}
             preventsDisplaySleepDuringVideoPlayback={true}
             poster={state.poster}
             onPlaybackRateChange={onPlaybackRateChange}
