@@ -16,6 +16,12 @@ export type ConfigProps = {
    */
   enableADSExtension?: boolean;
   /**
+   * Whether to enable cache extension for ios in the app.
+   * @default false
+   * @see https://thewidlarzgroup.github.io/react-native-video/other/caching
+   */
+  enableCacheExtension?: boolean;
+  /**
    * Android extensions for ExoPlayer - you can choose which extensions to include in order to reduce the size of the app.
    * @default { useExoplayerRtsp: false, useExoplayerSmoothStreaming: true, useExoplayerDash: true, useExoplayerHls: true }
    */

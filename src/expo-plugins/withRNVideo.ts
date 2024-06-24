@@ -5,6 +5,7 @@ import {withAndroidExtensions} from './withAndroidExtensions';
 import {withAds} from './withAds';
 import {withBackgroundAudio} from './withBackgroundAudio';
 import {withPermissions} from '@expo/config-plugins/build/android/Permissions';
+import {withCaching} from './withCaching';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../package.json');
@@ -26,6 +27,10 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
 
   if (props.enableADSExtension) {
     config = withAds(config, props.enableADSExtension);
+  }
+
+  if (props.enableCacheExtension) {
+    config = withCaching(config, props.enableCacheExtension);
   }
 
   if (props.enableBackgroundAudio) {
