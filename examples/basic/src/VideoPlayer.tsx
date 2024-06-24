@@ -29,8 +29,7 @@ import Video, {
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
 import {defaultValue, srcList, textTracksSelectionBy} from './constants';
-import {Overlay} from './components';
-import {toast} from './utils';
+import {Overlay, toast} from './components';
 
 type Props = NonNullable<unknown>;
 

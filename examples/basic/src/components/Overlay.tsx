@@ -25,7 +25,7 @@ import {VideoTrackSelector} from './VideoTracksSelector.tsx';
 import {TopControl} from './TopControl.tsx';
 import {StateType} from '../types';
 import {Seeker} from './Seeker.tsx';
-import {toast} from '../utils';
+import {toast} from '../components';
 
 type Props = {
   channelDown: () => void;
