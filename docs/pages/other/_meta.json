@@ -2,5 +2,6 @@
   "caching": "Caching",
   "misc": "Misc",
   "debug": "Debugging",
-  "new-arch": "New Architecture"
+  "new-arch": "New Architecture",
+  "plugin": "Plugin (experimental)"
 }

@@ -145,6 +145,7 @@ dependencies {
     }
 
     implementation project(':react-native-video')
+    implementation project(':react-native-video-plugin-sample')
 
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
