@@ -10,7 +10,7 @@ project (':react-native-video').projectDir = new File(rootProject.projectDir, '.
 
 // uncomment these lines to be able to build from media3 source code
 gradle.ext.androidxMediaModulePrefix = 'media-'
-apply from: file("../../../../media3/core_settings.gradle")
+apply from: file("../node_modules/media/core_settings.gradle")
 
 includeBuild('../node_modules/@react-native/gradle-plugin')
 
