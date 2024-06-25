@@ -14,6 +14,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.brentvatne.react.ReactVideoPackage
+import com.videopluginsample.VideoPluginSamplePackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -24,6 +25,7 @@ class MainApplication : Application(), ReactApplication {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
               add(ReactVideoPackage())
+              add(VideoPluginSamplePackage())
             }
 
         override fun getJSMainModuleName(): String = "src/index"
