@@ -20,6 +20,7 @@ import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
+import com.brentvatne.react.ReactNativeVideoManager;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -97,12 +98,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @NonNull
     @Override
     protected ReactExoplayerView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
+        ReactNativeVideoManager.Companion.getInstance().registerView(this);
         return new ReactExoplayerView(themedReactContext, config);
     }
 
     @Override
     public void onDropViewInstance(ReactExoplayerView view) {
         view.cleanUpResources();
+        ReactNativeVideoManager.Companion.getInstance().unregisterView(this);
     }
 
     @Override
