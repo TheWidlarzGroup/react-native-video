@@ -56,6 +56,41 @@ With these tool you should be able to analyze what is going on with network. You
 
 Then try to compare exchanges with previous tests you made.
 
+## Debug media3: build from media3 source
+
+If you need to use a specific exoplayer version or patch default behavior, you may want to build from media3 source code.
+
+Building from media3 source is possible. You need to add 2 or 3 things in your app:
+
+### Configure player path
+
+You need to add following lines in settings.gradle to configure your media3 source path:
+
+```gradle
+gradle.ext.androidxMediaModulePrefix = 'media-'
+apply from: file("../../../../media3/core_settings.gradle")
+````
+
+Of course, you should replace with media3 source path. Be carefull, you need to use the same version (or version with compatible api) that the package support.
+
+### Enable building from source
+In your build.gradle file, add following setting:
+
+```gradle
+buildscript {
+    ext {
+        ...
+        buildFromMedia3Source = true
+        ...
+    }
+}
+```
+
+### Desugaring
+to be able to link you may also need to enable coreLibraryDesugaringEnabled in your app.
+
+See: https://developer.android.com/studio/write/java8-support?hl=fr#library-desugaring for more informations.
+
 ## It's still not working
 
 You can try to open a ticket now !

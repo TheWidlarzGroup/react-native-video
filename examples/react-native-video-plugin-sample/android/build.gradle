@@ -100,7 +100,15 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation "androidx.media3:media3-exoplayer:$media3_version"
+
+  def media3_buildFromSource = safeExtGet('buildFromMedia3Source')?.toBoolean() ?: false
+  if (media3_buildFromSource) {
+    implementation(project(":media-lib-exoplayer"))
+    implementation(project(":media-lib-exoplayer-dash"))
+  } else {
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+  }
   implementation project(':react-native-video')
 }
 
