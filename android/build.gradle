@@ -43,6 +43,7 @@ def ExoplayerDependenciesList = [
     "useExoplayerHls",
     "useExoplayerRtsp",
 ]
+def media3_buildFromSource = safeExtGet('buildFromMedia3Source').toBoolean() ?: false
 
 def ExoplayerDependencies = ExoplayerDependenciesList.collectEntries { property ->
     [(property): safeExtGet(property)?.toBoolean() ?: false]
@@ -52,14 +53,17 @@ ExoplayerDependenciesList.each { propertyName ->
     def propertyValue = ExoplayerDependencies[propertyName]
     println "$propertyName: $propertyValue"
 }
+println "buildFromSource: $media3_buildFromSource"
 
 // This string is used to define build path.
 // As react native build output directory is react-native path of the module.
 // We need to force a new path on each configuration change.
 // If you add a new build parameter, please add the new value in this string
-def configStringPath = ExoplayerDependencies.collect { property, value ->
-    property + value
-}.join('').md5()
+def configStringPath = ExoplayerDependencies
+        .collect { property, value -> property + value}
+        .join('')
+        .concat("buildFromSource:$media3_buildFromSource")
+        .md5()
 
 if (isNewArchitectureEnabled()) {
     apply plugin: "com.facebook.react"
@@ -177,7 +181,6 @@ repositories {
 }
 
 def media3_version = safeExtGet('media3Version')
-def media3_buildFromSource = true
 def kotlin_version = safeExtGet('kotlinVersion')
 def androidxCore_version = safeExtGet('androidxCoreVersion')
 def androidxActivity_version = safeExtGet('androidxActivityVersion')
@@ -243,7 +246,7 @@ dependencies {
         }
     }
 
-    if (media3_buildFromSource) {
+   if (media3_buildFromSource) {
         // For loading data using the OkHttp network stack
         implementation(project(":media-lib-datasource-okhttp"))
 
@@ -270,9 +273,9 @@ dependencies {
 
         // Common functionality for loading data
         implementation "androidx.media3:media3-datasource:$media3_version"
+
         // Common functionality used across multiple media libraries
         implementation "androidx.media3:media3-common:$media3_version"
     }
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

@@ -10,6 +10,8 @@ import {
   ToastAndroid,
   Platform,
   Alert,
+  NativeModules,
+  NativeEventEmitter,
 } from 'react-native';
 
 import Video, {
@@ -90,6 +92,8 @@ interface StateType {
   showNotificationControls: boolean;
   isSeeking: boolean;
 }
+
+let eventEmitter
 
 class VideoPlayer extends Component {
   state: StateType = {
@@ -493,6 +497,7 @@ class VideoPlayer extends Component {
         isLoading={this.state.isLoading}
         videoSeek={prop => this.videoSeek(prop)}
         isUISeeking={this.state.isSeeking}
+        thumbnailData={this.state.thumbnailData}
       />
     );
   }
@@ -585,6 +590,17 @@ class VideoPlayer extends Component {
       });
     }
   };
+
+  componentDidMount() {
+    eventEmitter = new NativeEventEmitter(NativeModules.VideoPluginSample);
+
+    eventEmitter.addListener("ImageDataAvailable", (res) => {
+      console.log('ImageDataAvailable ', res);
+      this.setState({
+        thumbnailData: res,
+      })
+    });
+  }
 
   renderOverlay() {
     return (
