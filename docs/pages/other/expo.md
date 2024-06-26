@@ -1,30 +1,32 @@
 # Expo
 
 ## Expo plugin
-From version `6.3.1`, we have added support for expo plugin. You can configure `react-native-video` properties in `app.config.js` file.
+From version `6.3.1`, we have added support for expo plugin. You can configure `react-native-video` properties in `app.json` (or `app.config.json` or `app.config.js`) file.
 It's useful when you are using `expo` managed workflow (expo prebuild) as it will automatically configure `react-native-video` properties in native part of the expo project.
 
 ```javascript
-// Use this import path - import from other place then lib folder will not work
-import withVideo from 'react-native-video/lib/expo-plugins/withRNVideo';
-
-const config = {
-  // your app config
+// app.json
+{
+  {
+  "name": "my app",
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        // ...
+        "enableNotificationControls": true,
+        "androidExtensions": {
+          "useExoplayerRtsp": false,
+          "useExoplayerSmoothStreaming": false,
+          "useExoplayerHls": false,
+          "useExoplayerDash": false,
+        }
+        // ...
+      }
+    ]
+  ]
 }
-
-module.exports = withRNVideo(config, {
-  // You can setup your react-native-video properties here
-  enableNotificationControls: true,
-  enableBackgroundAudio: true,
-  enableCacheExtension: true,
-  enableADSExtension: true,
-  androidExtensions: {
-    useExoplayerRtsp: true,
-    useExoplayerSmoothStreaming: true,
-    useExoplayerDash: true,
-    useExoplayerHls: true,
-  },
-});
+}
 ```
 
 ## Expo Plugin Properties
