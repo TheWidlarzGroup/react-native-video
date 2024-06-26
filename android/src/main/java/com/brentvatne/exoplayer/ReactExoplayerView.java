@@ -920,6 +920,8 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
                 .setUri(uri);
 
+        // refresh custom Metadata
+        customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
@@ -1258,7 +1260,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 case Player.STATE_IDLE:
                     text += "idle";
                     eventEmitter.idle();
-//                    clearProgressMessageHandler();
+                    clearProgressMessageHandler();
                     if (!player.getPlayWhenReady()) {
                         setKeepScreenOn(false);
                     }
@@ -1288,6 +1290,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
                 case Player.STATE_ENDED:
                     text += "ended";
+                    updateProgress();
                     eventEmitter.end();
                     onStopPlayback();
                     setKeepScreenOn(false);
@@ -1697,7 +1700,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
-            // refresh custom Metadata
             customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
 
             // Apply custom metadata is possible
