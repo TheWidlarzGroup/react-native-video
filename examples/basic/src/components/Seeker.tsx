@@ -154,10 +154,11 @@ const Seeker = ({
    const tileWidth = imageWidth / tileWidthCount
    const tileHeight = imageHeight / tileHeightCount
 
-  const tileindex = Math.floor((tileCount * percent * 100) / tileCount)
-
-  const top = -(Math.floor(tileindex / tileWidthCount) * tileHeight)
-  const left = -(tileindex % tileWidthCount * tileWidth)
+   const tileindex = Math.floor((tileCount * percent))
+  const topId = Math.floor(tileindex / tileWidthCount)
+  const leftId = tileindex % tileWidthCount
+  const top = -(topId * tileHeight)
+  const left = -(leftId * tileWidth)
 
   // set the tile close to the poiunter
   const tileOffset = seekerPosition - tileWidth / 2

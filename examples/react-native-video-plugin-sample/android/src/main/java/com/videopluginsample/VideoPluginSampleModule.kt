@@ -81,7 +81,7 @@ class VideoPluginSampleModule(reactContext: ReactApplicationContext) :
                   // FIXME tile_1.jpg should be generate
                   var newUrl = representation.baseUrls.get(0).url + format.id + "/" + "tile_1.jpg"
                   /*
-                  d(TAG, "ici url:" + newUrl +
+                  d(TAG, "url:" + newUrl +
                           " Image.width " + format.width +
                           " Image.height " + format.height +
                           " tile.horiz " + format.tileCountHorizontal +
