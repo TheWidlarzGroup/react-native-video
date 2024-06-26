@@ -46,6 +46,7 @@ target 'videoplayer' do
   )
 
   pod 'react-native-video', path: '../../..'
+  pod 'react-native-video-plugin-sample', path: '../../react-native-video-plugin-sample'
 
   target 'videoplayerTests' do
     inherit! :complete

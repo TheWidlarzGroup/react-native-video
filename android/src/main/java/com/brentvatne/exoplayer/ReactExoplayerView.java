@@ -123,6 +123,8 @@ import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.BuildConfig;
+import com.brentvatne.react.R;
+import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -255,6 +257,20 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
     private boolean viewHasDropped = false;
+
+    private String instanceId = String.valueOf(UUID.randomUUID());
+
+    private void updateProgress() {
+        if (player != null) {
+            if (playerControlView != null && isPlayingAd() && controls) {
+                playerControlView.hide();
+            }
+            long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
+            long duration = player.getDuration();
+            long pos = player.getCurrentPosition();
+            if (pos > duration) {
+                pos = duration;
+            }
 
 //    private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
 //        @Override
@@ -666,6 +682,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setSeekForwardIncrementMs(controlsConfig.getSeekIncrementMS())
                 .setSeekBackIncrementMs(controlsConfig.getSeekIncrementMS())
                 .build();
+        ReactNativeVideoManager.Companion.getInstance().onInstanceCreated(instanceId, player);
         refreshDebugState();
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
@@ -1060,6 +1077,7 @@ public class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
 
+            ReactNativeVideoManager.Companion.getInstance().onInstanceRemoved(instanceId, player);
             player = null;
         }
 
