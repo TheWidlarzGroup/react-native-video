@@ -4,7 +4,7 @@
 From version `6.3.1`, we have added support for expo plugin. You can configure `react-native-video` properties in `app.json` (or `app.config.json` or `app.config.js`) file.
 It's useful when you are using `expo` managed workflow (expo prebuild) as it will automatically configure `react-native-video` properties in native part of the expo project.
 
-```javascript
+```json
 // app.json
 {
   {
