@@ -1,6 +1,14 @@
 package com.brentvatne.exoplayer;
 
 import android.content.Context;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.media3.common.AdViewProvider;
@@ -14,26 +22,19 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.SubtitleView;
 
-import android.graphics.Color;
-import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.SurfaceView;
-import android.view.TextureView;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.toolbox.DebugLog;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
 public final class ExoPlayerView extends PlayerView implements AdViewProvider {
-
-    //private View surfaceView;
+    private final View shutterView;
     private final ComponentListener componentListener;
     private ExoPlayer player;
     private final Context context;
     private final ViewGroup.LayoutParams layoutParams;
+    private final AspectRatioFrameLayout layout;
 
     private boolean useTextureView = true;
     private boolean useSecureView = false;
@@ -52,12 +53,19 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
         this.context = context;
 
+        shutterView = findViewById(androidx.media3.ui.R.id.exo_shutter);
+
         layoutParams = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
 
         componentListener = new ComponentListener();
-        setBackgroundColor(Color.BLACK);
+        FrameLayout.LayoutParams aspectRatioParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        aspectRatioParams.gravity = Gravity.CENTER;
+        layout = new AspectRatioFrameLayout(context);
+        layout.setLayoutParams(aspectRatioParams);
 
         updateSurfaceView();
         requestLayout();
@@ -100,20 +108,30 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
         if (!useTextureView || useSecureView) {
             view = new SurfaceView(context);
             if (useSecureView) {
-                ((SurfaceView)view).setSecure(true);
+                ((SurfaceView) view).setSecure(true);
             }
         } else {
-            setUseTextureView(true);
             view = new TextureView(context);
             // Support opacity properly:
             ((TextureView) view).setOpaque(false);
         }
         view.setLayoutParams(layoutParams);
+        if (layout.getChildAt(0) != null) {
+            layout.removeViewAt(0);
+        }
         addView(view, 0, layoutParams);
     }
 
     private void updateShutterViewVisibility() {
-        //((PlayerView)this).setHideShutterView(hideShutterView);
+        if(shutterView != null) {
+            shutterView.setVisibility(this.hideShutterView ? INVISIBLE : VISIBLE);
+        }
+    }
+
+    public void closeShutterView() {
+        if(shutterView != null) {
+            shutterView.setVisibility(INVISIBLE);
+        }
     }
 
     @Override
@@ -202,7 +220,12 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
         @Override
         public void onCues(@NonNull List<Cue> cues) {
-            getSubtitleView().setCues(cues);
+            SubtitleView subtitleView = getSubtitleView();
+            if (subtitleView != null) {
+                subtitleView.setCues(cues);
+            } else {
+                DebugLog.w("SubtitleHandler", "Subtitle view is null, cannot set cues");
+            }
         }
 
         @Override
@@ -229,7 +252,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
         @Override
         public void onTracksChanged(@NonNull Tracks tracks) {
-            //updateForCurrentTrackSelections(tracks);
+            updateForCurrentTrackSelections(tracks);
         }
     }
 }

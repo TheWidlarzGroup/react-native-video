@@ -72,7 +72,9 @@ public class FullScreenPlayerView extends Dialog {
     @Override
     public void onBackPressed() {
         ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
-        exoFullScreen.performClick();
+        if(exoFullScreen != null){
+            exoFullScreen.performClick();
+        }
         onBackPressedCallback.handleOnBackPressed();
         super.onBackPressed();
     }
