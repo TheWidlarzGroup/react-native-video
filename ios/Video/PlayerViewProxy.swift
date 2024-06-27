@@ -55,7 +55,8 @@ class PlayerViewProxy {
                 experimentName: config.muxData.experimentName,
                 videoSeries: nil,
                 videoCdn: nil,
-                videoDuration: nil)
+                videoDuration: nil,
+                correlationId: config.muxData.correlationId)
             jsConfig = JSConfig(muxData: jsMuxData, beacon: nil, convivaData: nil)
         }
         return jsConfig

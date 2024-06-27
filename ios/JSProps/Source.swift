@@ -110,6 +110,7 @@ extension Source.Config {
         let subPropertyId: String
         let videoIsLive: Bool
         let experimentName: String?
+        let correlationId: String?
     }
 }
 
