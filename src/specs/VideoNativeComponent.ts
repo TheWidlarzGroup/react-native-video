@@ -291,6 +291,10 @@ type ControlsStyles = Readonly<{
   seekIncrementMS?: number;
 }>;
 
+export type OnControlsVisibilityChange = Readonly<{
+  isVisible: boolean;
+}>;
+
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   adTagUrl?: string;
@@ -334,8 +338,10 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
+  viewType?: Int32; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
+  onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;

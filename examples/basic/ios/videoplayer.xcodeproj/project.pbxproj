@@ -8,13 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* videoplayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* videoplayerTests.m */; };
-		11C6209C7B72C624AC36CAD1 /* Pods_videoplayer_videoplayerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 594390EE3512A597F6D2CFC8 /* Pods_videoplayer_videoplayerTests.framework */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		208BB513171FFCC3277F9E0F /* Pods_videoplayer_videoplayerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C7FBD972AC23420C9CAEF6 /* Pods_videoplayer_videoplayerTests.framework */; };
+		20E2D2234B216472515590E5 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B7A50CD29E62AE55CDBAC5 /* ExpoModulesProvider.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		A64041D5CF85945B698F6FD0 /* Pods_videoplayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4610D42AC113C0F184AAF5BC /* Pods_videoplayer.framework */; };
+		8564D8A0ECE6B35EF7A78EDB /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AF6DF30451E50AB13568EFC /* ExpoModulesProvider.swift */; };
+		C57DB7DC75FFA5378D941129 /* Pods_videoplayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10FD7EDE51B5059CB0982AD2 /* Pods_videoplayer.framework */; };
 		DA6F026ACB11B4361D7006B9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 06EB80F4634394ABC14C45DC /* PrivacyInfo.xcprivacy */; };
+		EC73F7EE64DE3B7F743B618D /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,20 +34,22 @@
 		00E356EE1AD99517003FC87E /* videoplayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = videoplayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* videoplayerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = videoplayerTests.m; sourceTree = "<group>"; };
+		058979377AFD7ECE5B23DBEB /* Pods-videoplayer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer.release.xcconfig"; path = "Target Support Files/Pods-videoplayer/Pods-videoplayer.release.xcconfig"; sourceTree = "<group>"; };
 		06EB80F4634394ABC14C45DC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = videoplayer/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		10FD7EDE51B5059CB0982AD2 /* Pods_videoplayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_videoplayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* videoplayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = videoplayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = videoplayer/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = videoplayer/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = videoplayer/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = videoplayer/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = videoplayer/main.m; sourceTree = "<group>"; };
-		327740C386721461467B91B2 /* Pods-videoplayer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer.release.xcconfig"; path = "Target Support Files/Pods-videoplayer/Pods-videoplayer.release.xcconfig"; sourceTree = "<group>"; };
-		4610D42AC113C0F184AAF5BC /* Pods_videoplayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_videoplayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5112808AA45F803BD0D3F411 /* Pods-videoplayer-videoplayerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer-videoplayerTests.release.xcconfig"; path = "Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests.release.xcconfig"; sourceTree = "<group>"; };
-		594390EE3512A597F6D2CFC8 /* Pods_videoplayer_videoplayerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_videoplayer_videoplayerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		6E6DE29C8B861F4D5A4BBDEB /* Pods-videoplayer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer.debug.xcconfig"; path = "Target Support Files/Pods-videoplayer/Pods-videoplayer.debug.xcconfig"; sourceTree = "<group>"; };
+		2F5C4E6DD1564FCB6C9B7B94 /* Pods-videoplayer-videoplayerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer-videoplayerTests.debug.xcconfig"; path = "Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		7AF6DF30451E50AB13568EFC /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-videoplayer-videoplayerTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = videoplayer/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		CBE734469FBE698BF938A7EF /* Pods-videoplayer-videoplayerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer-videoplayerTests.debug.xcconfig"; path = "Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		9C018F4E223E0E71BA85ABC9 /* Pods-videoplayer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer.debug.xcconfig"; path = "Target Support Files/Pods-videoplayer/Pods-videoplayer.debug.xcconfig"; sourceTree = "<group>"; };
+		A5C7FBD972AC23420C9CAEF6 /* Pods_videoplayer_videoplayerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_videoplayer_videoplayerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9B7A50CD29E62AE55CDBAC5 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-videoplayer/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		CF1F0C5E1D8D8D557C4C7043 /* Pods-videoplayer-videoplayerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-videoplayer-videoplayerTests.release.xcconfig"; path = "Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -53,7 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11C6209C7B72C624AC36CAD1 /* Pods_videoplayer_videoplayerTests.framework in Frameworks */,
+				208BB513171FFCC3277F9E0F /* Pods_videoplayer_videoplayerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,7 +66,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A64041D5CF85945B698F6FD0 /* Pods_videoplayer.framework in Frameworks */,
+				EC73F7EE64DE3B7F743B618D /* BuildFile in Frameworks */,
+				C57DB7DC75FFA5378D941129 /* Pods_videoplayer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,10 +109,18 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				4610D42AC113C0F184AAF5BC /* Pods_videoplayer.framework */,
-				594390EE3512A597F6D2CFC8 /* Pods_videoplayer_videoplayerTests.framework */,
+				10FD7EDE51B5059CB0982AD2 /* Pods_videoplayer.framework */,
+				A5C7FBD972AC23420C9CAEF6 /* Pods_videoplayer_videoplayerTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		698327F1B1080810C68A43E9 /* videoplayerTests */ = {
+			isa = PBXGroup;
+			children = (
+				7AF6DF30451E50AB13568EFC /* ExpoModulesProvider.swift */,
+			);
+			name = videoplayerTests;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -125,6 +139,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				9DA543C66D941807E2528698 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -140,15 +155,32 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		9DA543C66D941807E2528698 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				DD84E791BDA24DE7607DAD2D /* videoplayer */,
+				698327F1B1080810C68A43E9 /* videoplayerTests */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				6E6DE29C8B861F4D5A4BBDEB /* Pods-videoplayer.debug.xcconfig */,
-				327740C386721461467B91B2 /* Pods-videoplayer.release.xcconfig */,
-				CBE734469FBE698BF938A7EF /* Pods-videoplayer-videoplayerTests.debug.xcconfig */,
-				5112808AA45F803BD0D3F411 /* Pods-videoplayer-videoplayerTests.release.xcconfig */,
+				9C018F4E223E0E71BA85ABC9 /* Pods-videoplayer.debug.xcconfig */,
+				058979377AFD7ECE5B23DBEB /* Pods-videoplayer.release.xcconfig */,
+				2F5C4E6DD1564FCB6C9B7B94 /* Pods-videoplayer-videoplayerTests.debug.xcconfig */,
+				CF1F0C5E1D8D8D557C4C7043 /* Pods-videoplayer-videoplayerTests.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		DD84E791BDA24DE7607DAD2D /* videoplayer */ = {
+			isa = PBXGroup;
+			children = (
+				B9B7A50CD29E62AE55CDBAC5 /* ExpoModulesProvider.swift */,
+			);
+			name = videoplayer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -158,12 +190,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "videoplayerTests" */;
 			buildPhases = (
-				C0C880E0881EE98C1792E57D /* [CP] Check Pods Manifest.lock */,
+				05848CC282AE20BB2B2AA52D /* [CP] Check Pods Manifest.lock */,
+				E0436766C647BDEAF9FD5ED3 /* [Expo] Configure project */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				E3461B2529EDAA05BCA42787 /* [CP] Embed Pods Frameworks */,
-				0765D094F5C79DBE6CC6386B /* [CP] Copy Pods Resources */,
+				0F69B47FEB727B4EBBAC0C93 /* [CP] Embed Pods Frameworks */,
+				8DEA7E188641F8CD9B4543DD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -179,14 +212,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "videoplayer" */;
 			buildPhases = (
-				66FA7E36D064B737784DDFB7 /* [CP] Check Pods Manifest.lock */,
+				4BC7B73D9362CA23BDA1E909 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
+				43E82399B51FE7A2CADEE958 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				189A4605ED0B2F88CF1DCFA8 /* [CP] Embed Pods Frameworks */,
-				F467D0E16E9AD72917847B43 /* [CP] Copy Pods Resources */,
+				5580EE7ED1DD133A3CB36FB0 /* [CP] Embed Pods Frameworks */,
+				4617BBDCD64674510B35868A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -268,65 +302,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli')\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n";
 		};
-		0765D094F5C79DBE6CC6386B /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		189A4605ED0B2F88CF1DCFA8 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		66FA7E36D064B737784DDFB7 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-videoplayer-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C0C880E0881EE98C1792E57D /* [CP] Check Pods Manifest.lock */ = {
+		05848CC282AE20BB2B2AA52D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -348,7 +326,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E3461B2529EDAA05BCA42787 /* [CP] Embed Pods Frameworks */ = {
+		0F69B47FEB727B4EBBAC0C93 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -365,7 +343,26 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F467D0E16E9AD72917847B43 /* [CP] Copy Pods Resources */ = {
+		43E82399B51FE7A2CADEE958 /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-videoplayer/expo-configure-project.sh\"\n";
+		};
+		4617BBDCD64674510B35868A /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -381,6 +378,81 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		4BC7B73D9362CA23BDA1E909 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-videoplayer-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5580EE7ED1DD133A3CB36FB0 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer/Pods-videoplayer-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8DEA7E188641F8CD9B4543DD /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-videoplayer-videoplayerTests/Pods-videoplayer-videoplayerTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E0436766C647BDEAF9FD5ED3 /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-videoplayer-videoplayerTests/expo-configure-project.sh\"\n";
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -398,7 +470,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > \"${SRCROOT}/../node_modules/react-native/scripts/.packager.env\"\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open \"$SRCROOT/../node_modules/react-native/scripts/launchPackager.command\" || echo \"Can't start packager automatically\"\n  fi\nfi\n";
+			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\nexport RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > `$NODE_BINARY --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/.packager.env'\"`\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open `$NODE_BINARY --print \"require('path').dirname(require.resolve('expo/package.json')) + '/scripts/launchPackager.command'\"` || echo \"Can't start packager automatically\"\n  fi\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -409,6 +481,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* videoplayerTests.m in Sources */,
+				8564D8A0ECE6B35EF7A78EDB /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,6 +491,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				20E2D2234B216472515590E5 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,7 +508,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CBE734469FBE698BF938A7EF /* Pods-videoplayer-videoplayerTests.debug.xcconfig */;
+			baseConfigurationReference = 2F5C4E6DD1564FCB6C9B7B94 /* Pods-videoplayer-videoplayerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -442,7 +516,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = videoplayerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -453,6 +527,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/videoplayer.app/videoplayer";
@@ -461,12 +536,12 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5112808AA45F803BD0D3F411 /* Pods-videoplayer-videoplayerTests.release.xcconfig */;
+			baseConfigurationReference = CF1F0C5E1D8D8D557C4C7043 /* Pods-videoplayer-videoplayerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = videoplayerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -477,6 +552,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/videoplayer.app/videoplayer";
@@ -485,7 +561,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6E6DE29C8B861F4D5A4BBDEB /* Pods-videoplayer.debug.xcconfig */;
+			baseConfigurationReference = 9C018F4E223E0E71BA85ABC9 /* Pods-videoplayer.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -502,6 +578,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = videoplayer;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -512,7 +589,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 327740C386721461467B91B2 /* Pods-videoplayer.release.xcconfig */;
+			baseConfigurationReference = 058979377AFD7ECE5B23DBEB /* Pods-videoplayer.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -528,6 +605,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = videoplayer;
 				SWIFT_VERSION = 5.0;
@@ -625,7 +703,7 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -739,7 +817,7 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
 				LD_RUNPATH_SEARCH_PATHS = (

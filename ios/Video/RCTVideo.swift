@@ -77,6 +77,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    private let instanceId = UUID().uuidString
+
     private var _isBuffering = false {
         didSet {
             onVideoBuffer?(["isBuffering": _isBuffering, "target": reactTag as Any])
@@ -180,6 +182,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
             _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
         #endif
@@ -243,6 +246,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     deinit {
+        #if USE_GOOGLE_IMA
+            _imaAdsManager.releaseAds()
+            _imaAdsManager = nil
+        #endif
+
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
         _playerObserver.clearPlayer()
@@ -254,6 +262,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #if os(iOS)
             _pip = nil
         #endif
+        ReactNativeVideoManager.shared.unregisterView(newInstance: self)
     }
 
     // MARK: - App lifecycle handlers
@@ -453,6 +462,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _player == nil {
             _player = AVPlayer()
+            ReactNativeVideoManager.shared.onInstanceCreated(id: instanceId, player: _player)
+
             _player!.replaceCurrentItem(with: playerItem)
 
             if _showNotificationControls {
@@ -1095,6 +1106,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setShowNotificationControls(_ showNotificationControls: Bool) {
+        _showNotificationControls = showNotificationControls
+
         guard let player = _player else {
             return
         }
@@ -1104,8 +1117,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         } else {
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
-
-        _showNotificationControls = showNotificationControls
     }
 
     @objc
@@ -1247,14 +1258,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _selectedAudioTrackCriteria = nil
         _presentingViewController = nil
 
+        ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player)
         _player = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
-
-        #if USE_GOOGLE_IMA
-            _imaAdsManager.releaseAds()
-            _imaAdsManager = nil
-        #endif
 
         self.removePlayerLayer()
 

@@ -1,5 +1,25 @@
 
 
+# [6.3.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.2.0...v6.3.0) (2024-06-22)
+
+
+### Bug Fixes
+
+* **android:** allow chunk less preparation ([#3913](https://github.com/TheWidlarzGroup/react-native-video/issues/3913)) ([264b57a](https://github.com/TheWidlarzGroup/react-native-video/commit/264b57aa2ed01b52c09b2992d5ca61e33871315b))
+* **android:** avoid crash multiplayer with notification ([#3931](https://github.com/TheWidlarzGroup/react-native-video/issues/3931)) ([104ee70](https://github.com/TheWidlarzGroup/react-native-video/commit/104ee703bac0f7d5fb162d17c30f65f8071d07a6))
+* **android:** show controls in notification on older androids ([#3886](https://github.com/TheWidlarzGroup/react-native-video/issues/3886)) ([098a754](https://github.com/TheWidlarzGroup/react-native-video/commit/098a754110a2c58fc18062769f4dd83775d20de4))
+* **android:** use UI thread to pause when lost audio focus ([#3916](https://github.com/TheWidlarzGroup/react-native-video/issues/3916)) ([856b1dd](https://github.com/TheWidlarzGroup/react-native-video/commit/856b1dd58ba9bb1832397ee0fc86f778f737798f))
+* **ios:** crash on ads after leaving the app ([#3911](https://github.com/TheWidlarzGroup/react-native-video/issues/3911)) ([3d6bc94](https://github.com/TheWidlarzGroup/react-native-video/commit/3d6bc9409c2111760620a821466b0ea0f1970681))
+* **ios:** missing notification controls when enabled from start ([#3898](https://github.com/TheWidlarzGroup/react-native-video/issues/3898)) ([2d793db](https://github.com/TheWidlarzGroup/react-native-video/commit/2d793dbde16cc140d1e7b873c40ff4dec285e253))
+* **JS:** safety check on resolve uri ([#3915](https://github.com/TheWidlarzGroup/react-native-video/issues/3915)) ([84bb910](https://github.com/TheWidlarzGroup/react-native-video/commit/84bb910d10e3e3d70f9e92b57c17de829d73218a))
+* **typescript:** type checks on selectedTextTrack, selectedAudioTrack, selectedVideoTrack ([#3910](https://github.com/TheWidlarzGroup/react-native-video/issues/3910)) ([dc2a2ab](https://github.com/TheWidlarzGroup/react-native-video/commit/dc2a2ab863dc53fb2da1c2cea99e59e6d8387803))
+
+
+### Features
+
+* **android:** add `onControlsVisiblityChange` ([#3925](https://github.com/TheWidlarzGroup/react-native-video/issues/3925)) ([c2ce372](https://github.com/TheWidlarzGroup/react-native-video/commit/c2ce372bcf21e21b97878e7efe77780168d09a79))
+* **ios:** add live key to now playing dict to decorate when livestream playing ([#3922](https://github.com/TheWidlarzGroup/react-native-video/issues/3922)) ([91751ab](https://github.com/TheWidlarzGroup/react-native-video/commit/91751abc870109e0a2667dfffbd2baa2e4cf997b))
+
 # [6.2.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.1.2...v6.2.0) (2024-06-07)
 
 

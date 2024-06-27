@@ -123,6 +123,7 @@ import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
+import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -257,6 +258,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     private boolean viewHasDropped = false;
+
+    private String instanceId = String.valueOf(UUID.randomUUID());
+
     private void updateProgress() {
         if (player != null) {
             if (playerControlView != null && isPlayingAd() && controls) {
@@ -412,6 +416,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new LegacyPlayerControlView(getContext());
+            playerControlView.addVisibilityListener(new LegacyPlayerControlView.VisibilityListener() {
+                @Override
+                public void onVisibilityChange(int visibility) {
+                    eventEmitter.controlsVisibilityChanged(visibility == View.VISIBLE);
+                }
+            });
         }
 
         if (fullScreenPlayerView == null) {
@@ -575,6 +585,10 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setViewType(int viewType) {
+        exoPlayerView.updateSurfaceView(viewType);
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
@@ -650,7 +664,6 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             try {
                 if (player == null) {
-                    exoPlayerView.updateSurfaceView(source.getViewType());
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
                 }
@@ -747,6 +760,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
                 .build();
+        ReactNativeVideoManager.Companion.getInstance().onInstanceCreated(instanceId, player);
         refreshDebugState();
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
@@ -1048,7 +1062,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 mediaSourceFactory = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setAllowChunklessPreparation(source.getTextTracksAllowChuncklessPreparation());
+                ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
@@ -1146,6 +1160,7 @@ public class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
 
+            ReactNativeVideoManager.Companion.getInstance().onInstanceRemoved(instanceId, player);
             player = null;
         }
 
@@ -1174,12 +1189,16 @@ public class ReactExoplayerView extends FrameLayout implements
 
         @Override
         public void onAudioFocusChange(int focusChange) {
+            Activity activity = themedReactContext.getCurrentActivity();
+
             switch (focusChange) {
                 case AudioManager.AUDIOFOCUS_LOSS:
                     view.hasAudioFocus = false;
                     view.eventEmitter.audioFocusChanged(false);
                     // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
-                    view.pausePlayback();
+                    if (activity != null) {
+                        activity.runOnUiThread(view::pausePlayback);
+                    }
                     view.audioManager.abandonAudioFocus(this);
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -1193,7 +1212,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     break;
             }
 
-            Activity activity = themedReactContext.getCurrentActivity();
             if (view.player != null && activity != null) {
                 if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     // Lower the volume

@@ -22,6 +22,7 @@ import NativeVideoComponent, {
   type OnAudioTracksData,
   type OnBandwidthUpdateData,
   type OnBufferData,
+  type OnControlsVisibilityChange,
   type OnExternalPlaybackChangeData,
   type OnGetLicenseData,
   type OnLoadStartData,
@@ -86,6 +87,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedTextTrack,
       useTextureView,
       useSecureView,
+      viewType,
       onLoadStart,
       onLoad,
       onError,
@@ -94,6 +96,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onEnd,
       onBuffer,
       onBandwidthUpdate,
+      onControlsVisibilityChange,
       onExternalPlaybackChange,
       onFullscreenPlayerWillPresent,
       onFullscreenPlayerDidPresent,
@@ -173,34 +176,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             useExternalGetLicense: !!selectedDrm.getLicense,
           };
 
-      const hasValidDrmProp =
-        _drm === undefined || Object.keys(_drm).length === 0;
-
-      const shallForceViewType =
-        hasValidDrmProp &&
-        (source.viewType === ViewType.TEXTURE || useTextureView);
-
-      if (shallForceViewType) {
-        console.warn(
-          'cannot use DRM on texture view. please set useTextureView={false}',
-        );
-      }
-      if (useSecureView && useTextureView) {
-        console.warn(
-          'cannot use SecureView on texture view. please set useTextureView={false}',
-        );
-      }
-
-      const viewType = shallForceViewType
-        ? ViewType.SURFACE // check if we should force the type to Surface due to DRM
-        : source.viewType
-        ? source.viewType // else use ViewType from source
-        : useSecureView // else infer view type from useSecureView and useTextureView
-        ? ViewType.SURFACE_SECURE
-        : useTextureView
-        ? ViewType.TEXTURE
-        : ViewType.SURFACE;
-
       return {
         uri,
         isNetwork,
@@ -214,8 +189,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
-        viewType,
         drm: _drm,
+        textTracksAllowChunklessPreparation:
+          resolvedSource.textTracksAllowChunklessPreparation,
       };
     }, [drm, source, useSecureView, useTextureView]);
 
@@ -223,9 +199,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
-      const type = typeof selectedTextTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedTextTrack');
+      const typeOfValueProp = typeof selectedTextTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedTextTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
@@ -238,9 +221,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
-      const type = typeof selectedAudioTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedAudioTrack');
+      const typeOfValueProp = typeof selectedAudioTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedAudioTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
 
@@ -254,9 +244,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
-      const type = typeof selectedVideoTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedVideoTrack');
+      const typeOfValueProp = typeof selectedVideoTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedVideoTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
@@ -489,6 +486,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAspectRatio],
     );
 
+    const _onControlsVisibilityChange = useCallback(
+      (e: NativeSyntheticEvent<OnControlsVisibilityChange>) => {
+        onControlsVisibilityChange?.(e.nativeEvent);
+      },
+      [onControlsVisibilityChange],
+    );
+
     const useExternalGetLicense = drm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
@@ -569,6 +573,37 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       ],
     );
 
+    const _viewType = useMemo(() => {
+      const hasValidDrmProp =
+        drm !== undefined && Object.keys(drm).length !== 0;
+
+      const shallForceViewType =
+        hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
+
+      if (shallForceViewType) {
+        console.warn(
+          'cannot use DRM on texture view. please set useTextureView={false}',
+        );
+      }
+      if (useSecureView && useTextureView) {
+        console.warn(
+          'cannot use SecureView on texture view. please set useTextureView={false}',
+        );
+      }
+
+      return shallForceViewType
+        ? useSecureView
+          ? ViewType.SURFACE_SECURE
+          : ViewType.SURFACE // check if we should force the type to Surface due to DRM
+        : viewType
+        ? viewType // else use ViewType from source
+        : useSecureView // else infer view type from useSecureView and useTextureView
+        ? ViewType.SURFACE_SECURE
+        : useTextureView
+        ? ViewType.TEXTURE
+        : ViewType.SURFACE;
+    }, [drm, useSecureView, useTextureView, viewType]);
+
     return (
       <View style={style}>
         <NativeVideoComponent
@@ -645,6 +680,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
               : undefined
           }
+          onControlsVisibilityChange={
+            onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
+          }
+          viewType={_viewType}
         />
         {hasPoster && showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />

@@ -34,7 +34,6 @@ import java.util.List;
 
 @SuppressLint("ViewConstructor")
 public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
-
     private final static String TAG = "ExoPlayerView";
     private View surfaceView;
     private final View shutterView;
@@ -46,6 +45,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final ViewGroup.LayoutParams layoutParams;
     private final FrameLayout adOverlayFrameLayout;
 
+    private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
@@ -75,7 +75,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
-        updateSurfaceView(ViewType.VIEW_TYPE_SURFACE);
+        updateSurfaceView(viewType);
 
         adOverlayFrameLayout = new FrameLayout(context);
 
@@ -129,6 +129,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     }
 
     public void updateSurfaceView(@ViewType.ViewType int viewType) {
+        this.viewType = viewType;
         boolean viewNeedRefresh = false;
         if (viewType == ViewType.VIEW_TYPE_SURFACE || viewType == ViewType.VIEW_TYPE_SURFACE_SECURE) {
             if (!(surfaceView instanceof SurfaceView)) {

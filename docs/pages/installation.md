@@ -94,7 +94,7 @@ buildscript {
 }
 ```
 
-See [sample app](https://github.com/TheWidlarzGroup/react-native-videoo/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5)
+See [sample app](https://github.com/TheWidlarzGroup/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5)
 
 </details>
 <details>
