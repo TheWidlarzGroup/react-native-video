@@ -970,7 +970,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return new DefaultDrmSessionManager.Builder()
                     .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
                     .setKeyRequestParameters(null)
-                    .setMultiSession(false)
+                    .setMultiSession(true)
                     .build(drmCallback);
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
