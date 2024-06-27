@@ -791,9 +791,7 @@ public class ReactExoplayerView extends FrameLayout implements
             if (uuid != null) {
                 try {
                     DebugLog.w(TAG, "drm buildDrmSessionManager");
-                    drmSessionManager = buildDrmSessionManager(uuid,
-                            drmProps.getDrmLicenseServer(),
-                            drmProps.getDrmLicenseHeader());
+                    drmSessionManager = buildDrmSessionManager(uuid, drmProps);
                 } catch (UnsupportedDrmException e) {
                     int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
                             : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
@@ -951,21 +949,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps) throws UnsupportedDrmException {
+        return buildDrmSessionManager(uuid, drmProps, 0);
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray, int retryCount) throws UnsupportedDrmException {
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps, int retryCount) throws UnsupportedDrmException {
         if (Util.SDK_INT < 18) {
             return null;
         }
         try {
-            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
+            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmProps.getDrmLicenseServer(),
                     buildHttpDataSourceFactory(false));
-            if (keyRequestPropertiesArray != null) {
-                for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
-                    drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
-                }
+
+            String[] keyRequestPropertiesArray = drmProps.getDrmLicenseHeader();
+            for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
+                drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
             }
             FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
             if (hasDrmFailed) {
@@ -975,7 +973,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return new DefaultDrmSessionManager.Builder()
                     .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
                     .setKeyRequestParameters(null)
-                    .setMultiSession(false)
+                    .setMultiSession(drmProps.getMultiDrm())
                     .build(drmCallback);
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
@@ -983,7 +981,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } catch (Exception ex) {
             if (retryCount < 3) {
                 // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
-                return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, ++retryCount);
+                return buildDrmSessionManager(uuid, drmProps, ++retryCount);
             }
             // Handle the unknow exception and emit to JS
             eventEmitter.error(ex.toString(), ex, "3006");
