@@ -505,6 +505,10 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setViewType(int viewType) {
+        exoPlayerView.updateSurfaceView(viewType);
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
@@ -2177,14 +2181,14 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void setUseTextureView(boolean useTextureView) {
-        boolean finallyUseTextureView = useTextureView && drmProps == null;
-        exoPlayerView.setUseTextureView(finallyUseTextureView);
-    }
-
-    public void useSecureView(boolean useSecureView) {
-        exoPlayerView.useSecureView(useSecureView);
-    }
+//    public void setUseTextureView(boolean useTextureView) {
+//        boolean finallyUseTextureView = useTextureView && drmProps == null;
+//        exoPlayerView.setUseTextureView(finallyUseTextureView);
+//    }
+//
+//    public void useSecureView(boolean useSecureView) {
+//        exoPlayerView.useSecureView(useSecureView);
+//    }
 
     public void setHideShutterView(boolean hideShutterView) {
         exoPlayerView.setHideShutterView(hideShutterView);

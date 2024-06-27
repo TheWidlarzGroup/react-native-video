@@ -23,12 +23,15 @@ import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.SubtitleView;
 
 import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.api.ViewType;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
 public final class ExoPlayerView extends PlayerView implements AdViewProvider {
+    private final static String TAG = "ExoPlayerView";
+    private View surfaceView;
     private final View shutterView;
     private final ComponentListener componentListener;
     private ExoPlayer player;
@@ -36,8 +39,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
     private final ViewGroup.LayoutParams layoutParams;
     private final AspectRatioFrameLayout layout;
 
-    private boolean useTextureView = true;
-    private boolean useSecureView = false;
+    private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
@@ -67,7 +69,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
         layout = new AspectRatioFrameLayout(context);
         layout.setLayoutParams(aspectRatioParams);
 
-        updateSurfaceView();
+        updateSurfaceView(viewType);
         requestLayout();
     }
 
@@ -103,24 +105,34 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
     }
 
-    private void updateSurfaceView() {
-        View view;
-        if (!useTextureView || useSecureView) {
-            view = new SurfaceView(context);
-            if (useSecureView) {
-                ((SurfaceView) view).setSecure(true);
+    public void updateSurfaceView(@ViewType.ViewType int viewType) {
+        this.viewType = viewType;
+        boolean viewNeedRefresh = false;
+        if (viewType == ViewType.VIEW_TYPE_SURFACE || viewType == ViewType.VIEW_TYPE_SURFACE_SECURE) {
+            if (!(surfaceView instanceof SurfaceView)) {
+                surfaceView = new SurfaceView(context);
+                viewNeedRefresh = true;
             }
-        } else {
-            view = new TextureView(context);
-            // Support opacity properly:
-            ((TextureView) view).setOpaque(false);
+            ((SurfaceView) surfaceView).setSecure(viewType == ViewType.VIEW_TYPE_SURFACE_SECURE);
+        } else if (viewType == ViewType.VIEW_TYPE_TEXTURE) {
+            if (!(surfaceView instanceof TextureView)) {
+                surfaceView = new TextureView(context);
+                viewNeedRefresh = true;
+                // Support opacity properly:
+                ((TextureView) surfaceView).setOpaque(false);
+            } else {
+                DebugLog.wtf(TAG, "wtf is this texture " + viewType);
+            }
         }
-        view.setLayoutParams(layoutParams);
-        if (layout.getChildAt(0) != null) {
-            layout.removeViewAt(0);
+            if (viewNeedRefresh) {
+                surfaceView.setLayoutParams(layoutParams);
+
+                if (layout.getChildAt(0) != null) {
+                    layout.removeViewAt(0);
+                }
+                addView(surfaceView, 0, layoutParams);
+            }
         }
-        addView(view, 0, layoutParams);
-    }
 
     private void updateShutterViewVisibility() {
         if(shutterView != null) {
@@ -164,20 +176,6 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
             player.addListener(componentListener);
         }
         requestLayout();
-    }
-
-    public void setUseTextureView(boolean useTextureView) {
-        if (useTextureView != this.useTextureView) {
-            this.useTextureView = useTextureView;
-            updateSurfaceView();
-        }
-    }
-
-    public void useSecureView(boolean useSecureView) {
-        if (useSecureView != this.useSecureView) {
-            this.useSecureView = useSecureView;
-            updateSurfaceView();
-        }
     }
 
     public void setHideShutterView(boolean hideShutterView) {
