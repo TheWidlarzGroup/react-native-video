@@ -39,7 +39,6 @@ export type VideoSrc = Readonly<{
   cropStart?: Float;
   cropEnd?: Float;
   metadata?: VideoMetadata;
-  viewType?: Int32; // Android
   drm?: Drm;
   textTracksAllowChunklessPreparation?: boolean; // android
 }>;

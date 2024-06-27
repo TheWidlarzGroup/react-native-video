@@ -792,17 +792,6 @@ source={{
     }
   }}
 ```
-#### viewType
-
-<PlatformsList types={['Android']} />
-
-Allow to explicitly specify view type.
-This flag replace `useSecureView` and `useTextureView` fields.
-There are 3 available values:
-- 'textureView': The video is rendered in a texture view. it allows mapping the view on a texture (useful for 3D).
-DRM playback is not supported on textureView, if drm prop is provided, the suface will be transformed to a SurfaceView.
-- 'surfaceView' (default): The video is rendered in a surface. take less resources to be rendered.
-- 'secureView': The video is rendered in a surface which disallow taking screenshot of the video
 
 #### `textTracksAllowChunklessPreparation`
 <PlatformsList types={['Android']} />

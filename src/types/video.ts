@@ -25,7 +25,6 @@ export type ReactVideoSourceProperties = {
   cropEnd?: number;
   metadata?: VideoMetadata;
   drm?: Drm;
-  viewType?: ViewType; // Android
   textTracksAllowChunklessPreparation?: boolean;
 };
 
