@@ -32,7 +32,7 @@ class DRMProps {
     var drmLicenseHeader: Array<String> = emptyArray<String>()
 
     /**
-     *
+     * Flag to enable key rotation support
      */
     var multiDrm: Boolean = false
 
