@@ -17,6 +17,7 @@ import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.api.ViewType;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
@@ -69,8 +70,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
     private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
-    private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
-    private static final String PROP_SECURE_VIEW = "useSecureView";
+    private static final String PROP_VIEW_TYPE = "viewType";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
@@ -121,7 +121,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
         DRMProps drmProps = DRMProps.parse(drm);
         videoView.setDrm(drmProps);
-        videoView.setUseTextureView(false);
     }
 
     @ReactProp(name = PROP_SRC)
@@ -301,14 +300,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setFullscreen(fullscreen);
     }
 
-    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
-    public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
-        videoView.setUseTextureView(useTextureView);
-    }
-
-    @ReactProp(name = PROP_SECURE_VIEW, defaultBoolean = true)
-    public void useSecureView(final ReactExoplayerView videoView, final boolean useSecureView) {
-        videoView.useSecureView(useSecureView);
+    @ReactProp(name = PROP_VIEW_TYPE, defaultInt = ViewType.VIEW_TYPE_SURFACE)
+    public void setViewType(final ReactExoplayerView videoView, final int viewType) {
+        videoView.setViewType(viewType);
     }
 
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
