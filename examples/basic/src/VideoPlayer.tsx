@@ -28,7 +28,12 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
-import {bufferConfig, defaultValue, srcList, textTracksSelectionBy} from './constants';
+import {
+  bufferConfig,
+  defaultValue,
+  srcList,
+  textTracksSelectionBy,
+} from './constants';
 import {Overlay, toast} from './components';
 
 type Props = NonNullable<unknown>;
@@ -98,10 +103,10 @@ const VideoPlayer: FC<Props> = ({}) => {
   };
 
   const onLoad = (data: OnLoadData) => {
-    setState({...state, duration: data.duration});
     onAudioTracks(data);
     onTextTracks(data);
     onVideoTracks(data);
+    setState({...state, duration: data.duration});
   };
 
   const onProgress = (data: OnProgressData) => {
@@ -109,8 +114,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   };
 
   const onSeek = (data: OnSeekData) => {
-    setState({...state, isSeeking: false});
-    setState({...state, currentTime: data.currentTime});
+    setState({...state, currentTime: data.currentTime, isSeeking: false});
   };
 
   const onVideoLoadStart = () => {
@@ -237,7 +241,10 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={state.selectedAudioTrack}
             selectedVideoTrack={state.selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{...bufferConfig, cacheSizeMB: state.useCache ? 200 : 0}}
+            bufferConfig={{
+              ...bufferConfig,
+              cacheSizeMB: state.useCache ? 200 : 0,
+            }}
             preventsDisplaySleepDuringVideoPlayback={true}
             poster={state.poster}
             onPlaybackRateChange={onPlaybackRateChange}
