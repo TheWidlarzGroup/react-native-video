@@ -30,5 +30,9 @@ public class HlsMediaSource {
         public MediaSource createMediaSource(MediaItem mediaItem) {
             return null;
         }
+
+        public Factory setAllowChunklessPreparation(boolean allowChunklessPreparation) {
+            return this;
+        }
     }
 }
