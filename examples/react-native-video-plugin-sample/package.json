@@ -1,0 +1,9 @@
+{
+  "name": "react-native-video-plugin-sample",
+  "version": "0.0.0",
+  "description": "sample subpackage for react native video plugin",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme"
+}

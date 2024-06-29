@@ -333,8 +333,7 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
+  viewType?: Int32; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
   onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;

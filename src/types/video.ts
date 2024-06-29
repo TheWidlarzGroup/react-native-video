@@ -3,6 +3,7 @@ import type {ReactVideoEvents} from './events';
 import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
+import type ViewType from './ViewType';
 
 export type Headers = Record<string, string>;
 
@@ -256,8 +257,9 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   shutterColor?: string; // Android
   textTracks?: TextTracks;
   testID?: string;
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
+  viewType?: ViewType;
+  useTextureView?: boolean; // Android // deprecated
+  useSecureView?: boolean; // Android // deprecated
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;

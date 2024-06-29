@@ -123,6 +123,7 @@ import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
+import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -258,6 +259,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     private boolean viewHasDropped = false;
+
+    private String instanceId = String.valueOf(UUID.randomUUID());
+
     private void updateProgress() {
         if (player != null) {
             if (playerControlView != null && isPlayingAd() && controls) {
@@ -585,6 +589,10 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void setViewType(int viewType) {
+        exoPlayerView.updateSurfaceView(viewType);
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private final int availableHeapInBytes;
         private final Runtime runtime;
@@ -756,6 +764,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
                 .build();
+        ReactNativeVideoManager.Companion.getInstance().onInstanceCreated(instanceId, player);
         refreshDebugState();
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
@@ -1150,6 +1159,7 @@ public class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
 
+            ReactNativeVideoManager.Companion.getInstance().onInstanceRemoved(instanceId, player);
             player = null;
         }
 
@@ -2235,15 +2245,6 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
         updateFullScreenButtonVisibility();
-    }
-
-    public void setUseTextureView(boolean useTextureView) {
-        boolean finallyUseTextureView = useTextureView && drmProps == null;
-        exoPlayerView.setUseTextureView(finallyUseTextureView);
-    }
-
-    public void useSecureView(boolean useSecureView) {
-        exoPlayerView.useSecureView(useSecureView);
     }
 
     public void setHideShutterView(boolean hideShutterView) {

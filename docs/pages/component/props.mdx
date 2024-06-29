@@ -888,6 +888,9 @@ To customize the notification controls you can use `metadata` property in the `s
 
 ### `useSecureView`
 
+> [!WARNING]
+> deprecated, use viewType instead
+
 <PlatformsList types={['Android']} />
 
 Force the output to a SurfaceView and enables the secure surface.
@@ -899,7 +902,12 @@ SurfaceView is is the only one that can be labeled as secure.
 - **true** - Use security
 - **false (default)** - Do not use security
 
+
+
 ### `useTextureView`
+
+> [!WARNING]
+> deprecated, use viewType instead
 
 <PlatformsList types={['Android']} />
 
@@ -914,6 +922,18 @@ useTextureView can only be set at same time you're setting the source.
 
 - **true (default)** - Use a TextureView
 - **false** - Use a SurfaceView
+
+### `viewType`
+
+<PlatformsList types={['Android']} />
+
+Allow to explicitly specify view type.
+This flag replace `useSecureView` and `useTextureView` fields.
+There are 3 available values:
+- 'textureView': The video is rendered in a texture view. it allows mapping the view on a texture (useful for 3D).
+DRM playback is not supported on textureView, if drm prop is provided, the suface will be transformed to a SurfaceView.
+- 'surfaceView' (default): The video is rendered in a surface. take less resources to be rendered.
+- 'secureView': The video is rendered in a surface which disallow taking screenshot of the video
 
 ### `volume`
 
