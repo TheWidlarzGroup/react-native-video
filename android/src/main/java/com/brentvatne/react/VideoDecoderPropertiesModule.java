@@ -26,7 +26,7 @@ public class VideoDecoderPropertiesModule extends ReactContextBaseJavaModule {
     @NonNull
     @Override
     public String getName() {
-        return "VideoDecoderProperties";
+        return "RNVDecoderPropertiesModule";
     }
 
     @SuppressLint("ObsoleteSdkInt")

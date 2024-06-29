@@ -748,13 +748,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setSeek(_ info: NSDictionary!) {
-        let seekTime: NSNumber! = info["time"] as! NSNumber
-        let seekTolerance: NSNumber! = info["tolerance"] as! NSNumber
+    func setSeek(_ time: NSNumber, _ tolerance: NSNumber) {
         let item: AVPlayerItem? = _player?.currentItem
         guard item != nil, let player = _player, let item, item.status == AVPlayerItem.Status.readyToPlay else {
             _pendingSeek = true
-            _pendingSeekTime = seekTime.floatValue
+            _pendingSeekTime = time.floatValue
             return
         }
 
@@ -762,15 +760,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             player: player,
             playerItem: item,
             paused: _paused,
-            seekTime: seekTime.floatValue,
-            seekTolerance: seekTolerance.floatValue
+            seekTime: time.floatValue,
+            seekTolerance: tolerance.floatValue
         ) { [weak self] (_: Bool) in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
             self.setPaused(self._paused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
-                               "seekTime": seekTime,
+                               "seekTime": time,
                                "target": self.reactTag])
         }
 
@@ -1286,7 +1284,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Export
 
     @objc
-    func save(options: NSDictionary!, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    func save(_ options: NSDictionary!, _ resolve: @escaping RCTPromiseResolveBlock, _ reject: @escaping RCTPromiseRejectBlock) {
         RCTVideoSave.save(
             options: options,
             resolve: resolve,
@@ -1301,14 +1299,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
         _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
-    }
-
-    func dismissFullscreenPlayer() {
-        setFullscreen(false)
-    }
-
-    func presentFullscreenPlayer() {
-        setFullscreen(true)
     }
 
     // MARK: - RCTPlayerObserverHandler
@@ -1364,18 +1354,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         Task {
             if self._pendingSeek {
-                self.setSeek([
-                    "time": NSNumber(value: self._pendingSeekTime),
-                    "tolerance": NSNumber(value: 100),
-                ])
+                self.setSeek(NSNumber(value: self._pendingSeekTime), NSNumber(value: 100))
                 self._pendingSeek = false
             }
 
             if self._startPosition >= 0 {
-                self.setSeek([
-                    "time": NSNumber(value: self._startPosition),
-                    "tolerance": NSNumber(value: 100),
-                ])
+                self.setSeek(NSNumber(value: self._startPosition), NSNumber(value: 100))
                 self._startPosition = -1
             }
 
