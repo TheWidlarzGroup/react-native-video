@@ -1,17 +1,15 @@
-package com.brentvatne.react;
+package com.brentvatne.react
 
-import android.media.MediaCodecList;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.UnsupportedSchemeException;
-import android.os.Build;
-
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-
-import java.util.UUID;
+import android.media.MediaCodecList
+import android.media.MediaDrm
+import android.media.MediaFormat
+import android.media.UnsupportedSchemeException
+import android.os.Build
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import java.util.UUID
 
 class VideoDecoderPropertiesModule(reactContext: ReactApplicationContext?) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String = REACT_CLASS
@@ -23,8 +21,6 @@ class VideoDecoderPropertiesModule(reactContext: ReactApplicationContext?) : Rea
             p.resolve(widevineLevel)
             return
         }
-        val WIDEVINE_UUID = UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L)
-        val SECURITY_LEVEL_PROPERTY = "securityLevel"
         try {
             val mediaDrm = MediaDrm(WIDEVINE_UUID)
             val securityProperty = mediaDrm.getPropertyString(SECURITY_LEVEL_PROPERTY)
@@ -69,6 +65,8 @@ class VideoDecoderPropertiesModule(reactContext: ReactApplicationContext?) : Rea
     fun isHEVCSupported(p: Promise) = isCodecSupported("video/hevc", 1920, 1080, p)
 
     companion object {
-        private const val REACT_CLASS = "VideoDecoderProperties"
+        private val WIDEVINE_UUID = UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L)
+        private const val SECURITY_LEVEL_PROPERTY = "securityLevel"
+        private const val REACT_CLASS = "VideoManager"
     }
 }
