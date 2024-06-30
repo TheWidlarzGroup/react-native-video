@@ -45,8 +45,7 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
-import type {VideoSaveData} from './specs/NativeVideoManager';
-import {CmcdMode, ViewType} from './types';
+import {ViewType, type VideoSaveData, CmcdMode} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
