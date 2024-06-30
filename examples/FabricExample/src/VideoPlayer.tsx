@@ -1,557 +1,831 @@
 'use strict';
-import React, {Component, createRef} from 'react';
+
+import React, {Component} from 'react';
 
 import {
-  Alert,
-  GestureResponderEvent,
-  Platform,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  ToastAndroid,
+  Platform,
+  Alert,
 } from 'react-native';
 
-import Video, {FilterType, VideoRef, ResizeMode, IgnoreSilentSwitchType, MixWithOthersType} from 'react-native-video';
+import Video, {
+  AudioTrack,
+  OnAudioTracksData,
+  OnLoadData,
+  OnProgressData,
+  OnTextTracksData,
+  OnVideoAspectRatioData,
+  TextTrack,
+  VideoDecoderProperties,
+  OnBufferData,
+  OnAudioFocusChangedData,
+  OnVideoErrorData,
+  VideoRef,
+  ResizeMode,
+  SelectedTrack,
+  DRMType,
+  OnTextTrackDataChangedData,
+  TextTrackType,
+  ISO639_1,
+  OnSeekData,
+  OnPlaybackStateChangedData,
+  OnPlaybackRateChangeData,
+  OnVideoTracksData,
+  VideoTrack,
+  SelectedVideoTrackType,
+  SelectedVideoTrack,
+  BufferingStrategyType,
+  ReactVideoSource,
+  Drm,
+  TextTracks,
+} from 'react-native-video';
+import ToggleControl from './ToggleControl';
+import MultiValueControl, {
+  MultiValueControlPropType,
+} from './MultiValueControl';
+import styles from './styles';
+import AudioTrackSelector from './components/AudioTracksSelector';
+import TextTrackSelector from './components/TextTracksSelector';
+import VideoTrackSelector from './components/VideoTracksSelector';
+import Seeker from './components/Seeker';
 
-const filterTypes = [
-  FilterType.NONE,
-  FilterType.INVERT,
-  FilterType.MONOCHROME,
-  FilterType.POSTERIZE,
-  FilterType.FALSE,
-  FilterType.MAXIMUMCOMPONENT,
-  FilterType.MINIMUMCOMPONENT,
-  FilterType.CHROME,
-  FilterType.FADE,
-  FilterType.INSTANT,
-  FilterType.MONO,
-  FilterType.NOIR,
-  FilterType.PROCESS,
-  FilterType.TONAL,
-  FilterType.TRANSFER,
-  FilterType.SEPIA,
-];
+type AdditionnalSourceInfo = {
+  textTracks: TextTracks;
+  adTagUrl: string;
+  description: string;
+  drm: Drm;
+  noView: boolean;
+};
 
-type SkinType = 'custom' | 'native' | 'embed'
+type SampleVideoSource = ReactVideoSource | AdditionnalSourceInfo;
 
-type State = {
-  rate: number,
-  volume: number,
-  muted: boolean,
-  resizeMode: ResizeMode,
-  duration: number,
-  currentTime: number,
-  controls: boolean,
-  paused: boolean,
-  skin: SkinType,
-  ignoreSilentSwitch: IgnoreSilentSwitchType,
-  mixWithOthers: MixWithOthersType,
-  isBuffering: boolean,
-  filter: FilterType,
-  filterEnabled: boolean,
+interface StateType {
+  rate: number;
+  volume: number;
+  muted: boolean;
+  resizeMode: ResizeMode;
+  duration: number;
+  currentTime: number;
+  videoWidth: number;
+  videoHeight: number;
+  paused: boolean;
+  fullscreen: true;
+  decoration: true;
+  isLoading: boolean;
+  audioTracks: Array<AudioTrack>;
+  textTracks: Array<TextTrack>;
+  videoTracks: Array<VideoTrack>;
+  selectedAudioTrack: SelectedTrack | undefined;
+  selectedTextTrack: SelectedTrack | undefined;
+  selectedVideoTrack: SelectedVideoTrack;
+  srcListId: number;
+  loop: boolean;
+  showRNVControls: boolean;
+  useCache: boolean;
+  poster?: string;
+  showNotificationControls: boolean;
+  isSeeking: boolean;
 }
 
-class VideoPlayer extends Component<{}, State> {
-  controlRef: React.RefObject<TouchableOpacity>;
-  videoRef: React.RefObject<VideoRef>;
-  constructor(props: any) {
-    super(props);
-    this.onLoad = this.onLoad.bind(this);
-    this.onProgress = this.onProgress.bind(this);
-    this.onBuffer = this.onBuffer.bind(this);
-    this.onTouchControl = this.onTouchControl.bind(this);
-    this.controlRef = createRef();
-    this.videoRef = createRef();
-  }
-  state: State = {
+class VideoPlayer extends Component {
+  state: StateType = {
     rate: 1,
     volume: 1,
     muted: false,
     resizeMode: ResizeMode.CONTAIN,
     duration: 0.0,
     currentTime: 0.0,
-    controls: false,
-    paused: true,
-    skin: 'custom',
-    ignoreSilentSwitch: IgnoreSilentSwitchType.IGNORE,
-    mixWithOthers: MixWithOthersType.DUCK,
-    isBuffering: false,
-    filter: FilterType.NONE,
-    filterEnabled: true,
+    videoWidth: 0,
+    videoHeight: 0,
+    paused: false,
+    fullscreen: true,
+    decoration: true,
+    isLoading: false,
+    audioTracks: [],
+    textTracks: [],
+    videoTracks: [],
+    selectedAudioTrack: undefined,
+    selectedTextTrack: undefined,
+    selectedVideoTrack: {
+      type: SelectedVideoTrackType.AUTO,
+    },
+    srcListId: 0,
+    loop: false,
+    showRNVControls: false,
+    useCache: false,
+    poster: undefined,
+    showNotificationControls: false,
+    isSeeking: false,
   };
 
-  onLoad(data: any) {
-    console.log('On load fired!');
-    console.log(data.duration);
-    this.setState({duration: data.duration});
-  }
+  // internal usage change to index if you want to select tracks by index instead of lang
+  textTracksSelectionBy = 'index';
 
-  onProgress(data: any) {
+  srcAllPlatformList = [
+    {
+      description: 'local file landscape',
+      uri: require('./broadchurch.mp4'),
+    },
+    {
+      description: 'local file landscape cropped',
+      uri: require('./broadchurch.mp4'),
+      cropStart: 3000,
+      cropEnd: 10000,
+    },
+    {
+      description: 'local file portrait',
+      uri: require('./portrait.mp4'),
+      metadata: {
+        title: 'Test Title',
+        subtitle: 'Test Subtitle',
+        artist: 'Test Artist',
+        description: 'Test Description',
+        imageUri:
+          'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
+      },
+    },
+    {
+      description: '(hls|live) red bull tv',
+      textTracksAllowChunklessPreparation: false,
+      uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
+      metadata: {
+        title: 'Custom Title',
+        subtitle: 'Custom Subtitle',
+        artist: 'Custom Artist',
+        description: 'Custom Description',
+        imageUri:
+          'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
+      },
+    },
+    {
+      description: 'invalid URL',
+      uri: 'mmt://www.youtube.com',
+      type: 'mpd',
+    },
+    {description: '(no url) Stopped playback', uri: undefined},
+    {
+      description: '(no view) no View',
+      noView: true,
+    },
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
+    {
+      description: 'another bunny (can be saved)',
+      uri: 'https://rawgit.com/mediaelement/mediaelement-files/master/big_buck_bunny.mp4',
+      headers: {referer: 'www.github.com', 'User-Agent': 'react.native.video'},
+    },
+    {
+      description: 'sintel with subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    },
+    {
+      description: 'sintel starts at 20sec',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+      startPosition: 50000,
+    },
+    {
+      description: 'BigBugBunny sideLoaded subtitles',
+      // sideloaded subtitles wont work for streaming like HLS on ios
+      // mp4
+      uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+      textTracks: [
+        {
+          title: 'test',
+          language: 'en' as ISO639_1,
+          type: TextTrackType.VTT,
+          uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+        },
+      ],
+    },
+  ];
+
+  srcIosList = [];
+
+  srcAndroidList = [
+    {
+      description: 'Another live sample',
+      uri: 'https://live.forstreet.cl/live/livestream.m3u8',
+    },
+    {
+      description: 'asset file',
+      uri: 'asset:///broadchurch.mp4',
+    },
+    {
+      description: '(dash) sintel subtitles',
+      uri: 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd',
+    },
+    {
+      description: '(mp4) big buck bunny',
+      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+    },
+    {
+      description: '(mp4|subtitles) demo with sintel Subtitles',
+      uri: 'http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0',
+      type: 'mpd',
+    },
+    {
+      description: '(mp4) big buck bunny With Ads',
+      adTagUrl:
+        'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
+      uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+    },
+    {
+      description: 'WV: Secure SD & HD (cbcs,MP4,H264)',
+      uri: 'https://storage.googleapis.com/wvmedia/cbcs/h264/tears/tears_aes_cbcs.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
+    },
+    {
+      description: 'Secure UHD (cenc)',
+      uri: 'https://storage.googleapis.com/wvmedia/cenc/h264/tears/tears_uhd.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
+    },
+    {
+      description: 'rtsp big bug bunny',
+      uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
+      type: 'rtsp',
+    },
+  ];
+
+  // poster which can be displayed
+  samplePoster =
+    'https://upload.wikimedia.org/wikipedia/commons/1/18/React_Native_Logo.png';
+
+  srcList: SampleVideoSource[] = this.srcAllPlatformList.concat(
+    Platform.OS === 'android' ? this.srcAndroidList : this.srcIosList,
+  );
+
+  video?: VideoRef;
+
+  popupInfo = () => {
+    VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
+      VideoDecoderProperties.isHEVCSupported().then((hevc: string) => {
+        VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
+          (avc: string) => {
+            this.toast(
+              true,
+              'Widevine level: ' +
+                widevineLevel +
+                '\n hevc: ' +
+                hevc +
+                '\n avc: ' +
+                avc,
+            );
+          },
+        );
+      });
+    });
+  };
+
+  onLoad = (data: OnLoadData) => {
+    this.setState({duration: data.duration, loading: false});
+    this.onAudioTracks(data);
+    this.onTextTracks(data);
+    this.onVideoTracks(data);
+  };
+
+  onProgress = (data: OnProgressData) => {
     this.setState({currentTime: data.currentTime});
-  }
+  };
 
-  onBuffer({isBuffering}: {isBuffering: boolean}) {
-    this.setState({isBuffering});
-  }
+  onSeek = (data: OnSeekData) => {
+    this.setState({isSeeking: false});
+    this.setState({currentTime: data.currentTime});
+  };
 
-  onTouchControl(e: GestureResponderEvent) {
-    if (!this.controlRef.current || !this.videoRef.current) return;
-    const videoCommands = this.videoRef.current;
-    const touchX = e.nativeEvent.pageX;
-    const duration = this.state.duration;
+  onVideoLoadStart = () => {
+    console.log('onVideoLoadStart');
+    this.setState({isLoading: true});
+  };
 
-    this.controlRef.current.measureInWindow((x, y, width, height) => {
-      const relativeX = touchX - x;
-      const nextTime = (relativeX / width) * duration;
-      videoCommands.seek(nextTime);
+  onAudioTracks = (data: OnAudioTracksData) => {
+    const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
+      return x.selected;
     });
-  }
-
-  getCurrentTimePercentage() {
-    if (this.state.currentTime > 0 && this.state.duration !== 0) {
-      return this.state.currentTime / this.state.duration;
+    if (selectedTrack?.index) {
+      this.setState({
+        audioTracks: data.audioTracks,
+        selectedAudioTrack: {
+          type: SelectedVideoTrackType.INDEX,
+          value: selectedTrack?.index,
+        },
+      });
     } else {
-      return 0;
+      this.setState({
+        audioTracks: data.audioTracks,
+      });
     }
+  };
+
+  onVideoTracks = (data: OnVideoTracksData) => {
+    console.log('onVideoTracks', data.videoTracks);
+    this.setState({
+      videoTracks: data.videoTracks,
+    });
+  };
+
+  onTextTracks = (data: OnTextTracksData) => {
+    const selectedTrack = data.textTracks?.find((x: TextTrack) => {
+      return x?.selected;
+    });
+
+    if (selectedTrack?.language) {
+      this.setState({
+        textTracks: data.textTracks,
+        selectedTextTrack:
+          this.textTracksSelectionBy === 'index'
+            ? {
+                type: 'index',
+                value: selectedTrack?.index,
+              }
+            : {
+                type: 'language',
+                value: selectedTrack?.language,
+              },
+      });
+    } else {
+      this.setState({
+        textTracks: data.textTracks,
+      });
+    }
+  };
+
+  onTextTrackDataChanged = (data: OnTextTrackDataChangedData) => {
+    console.log(`Subtitles: ${JSON.stringify(data, null, 2)}`);
+  };
+
+  onAspectRatio = (data: OnVideoAspectRatioData) => {
+    console.log('onAspectRadio called ' + JSON.stringify(data));
+    this.setState({
+      videoWidth: data.width,
+      videoHeight: data.height,
+    });
+  };
+
+  onVideoBuffer = (param: OnBufferData) => {
+    console.log('onVideoBuffer');
+    this.setState({isLoading: param.isBuffering});
+  };
+
+  onReadyForDisplay = () => {
+    console.log('onReadyForDisplay');
+    this.setState({isLoading: false});
+  };
+
+  onAudioBecomingNoisy = () => {
+    this.setState({paused: true});
+  };
+
+  onAudioFocusChanged = (event: OnAudioFocusChangedData) => {
+    this.setState({paused: !event.hasAudioFocus});
+  };
+
+  toast = (visible: boolean, message: string) => {
+    if (visible) {
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravityAndOffset(
+          message,
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+      } else {
+        Alert.alert(message, message);
+      }
+    }
+  };
+
+  onError = (err: OnVideoErrorData) => {
+    console.log(JSON.stringify(err));
+    this.toast(true, 'error: ' + JSON.stringify(err));
+  };
+
+  onEnd = () => {
+    if (!this.state.loop) {
+      this.channelUp();
+    }
+  };
+
+  onPlaybackRateChange = (data: OnPlaybackRateChangeData) => {
+    console.log('onPlaybackRateChange', data);
+  };
+
+  onPlaybackStateChanged = (data: OnPlaybackStateChangedData) => {
+    console.log('onPlaybackStateChanged', data);
+  };
+
+  toggleFullscreen() {
+    this.setState({fullscreen: !this.state.fullscreen});
+  }
+  toggleControls() {
+    this.setState({showRNVControls: !this.state.showRNVControls});
   }
 
-  setFilter(step: number) {
-    let index = filterTypes.indexOf(this.state.filter) + step;
+  toggleDecoration() {
+    this.setState({decoration: !this.state.decoration});
+    this.video?.setFullScreen(!this.state.decoration);
+  }
 
-    if (index === filterTypes.length) {
-      index = 0;
-    } else if (index === -1) {
-      index = filterTypes.length - 1;
-    }
-
+  toggleShowNotificationControls() {
     this.setState({
-      filter: filterTypes[index],
+      showNotificationControls: !this.state.showNotificationControls,
     });
   }
 
-  renderSkinControl(skin: 'custom' | 'native' | 'embed') {
-    const isSelected = this.state.skin == skin;
-    const selectControls = skin == 'native' || skin == 'embed';
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({
-            controls: selectControls,
-            skin: skin,
-          });
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {skin}
-        </Text>
-      </TouchableOpacity>
+  goToChannel(channel: number) {
+    this.setState({
+      srcListId: channel,
+      duration: 0.0,
+      currentTime: 0.0,
+      videoWidth: 0,
+      videoHeight: 0,
+      isLoading: false,
+      audioTracks: [],
+      textTracks: [],
+      selectedAudioTrack: undefined,
+      selectedTextTrack: undefined,
+      selectedVideoTrack: {
+        type: SelectedVideoTrackType.AUTO,
+      },
+    });
+  }
+
+  channelUp() {
+    console.log('channel up');
+    this.goToChannel((this.state.srcListId + 1) % this.srcList.length);
+  }
+
+  channelDown() {
+    console.log('channel down');
+    this.goToChannel(
+      (this.state.srcListId + this.srcList.length - 1) % this.srcList.length,
     );
   }
 
-  renderRateControl(rate: number) {
-    const isSelected = this.state.rate == rate;
+  videoSeek(position: number) {
+    this.setState({isSeeking: true});
+    this.video?.seek(position);
+  }
 
+  renderSeekBar() {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({rate: rate});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {rate}x
-        </Text>
-      </TouchableOpacity>
+      <Seeker
+        currentTime={this.state.currentTime}
+        duration={this.state.duration}
+        isLoading={this.state.isLoading}
+        videoSeek={prop => this.videoSeek(prop)}
+        isUISeeking={this.state.isSeeking}
+      />
     );
   }
 
-  renderResizeModeControl(resizeMode: ResizeMode) {
-    const isSelected = this.state.resizeMode == resizeMode;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({resizeMode: resizeMode});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {resizeMode}
-        </Text>
-      </TouchableOpacity>
-    );
+  IndicatorLoadingView() {
+    if (this.state.isLoading) {
+      return (
+        <ActivityIndicator
+          color="#3235fd"
+          size="large"
+          style={styles.IndicatorStyle}
+        />
+      );
+    } else {
+      return <View />;
+    }
   }
 
-  renderVolumeControl(volume: number) {
-    const isSelected = this.state.volume == volume;
-
+  renderTopControl() {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({volume: volume});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {volume * 100}%
+      <View style={styles.topControlsContainer}>
+        <Text style={styles.controlOption}>
+          {(this.srcList[this.state.srcListId] as AdditionnalSourceInfo)
+            ?.description || 'local file'}
         </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderIgnoreSilentSwitchControl(ignoreSilentSwitch: IgnoreSilentSwitchType) {
-    const isSelected = this.state.ignoreSilentSwitch == ignoreSilentSwitch;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({ignoreSilentSwitch: ignoreSilentSwitch});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {ignoreSilentSwitch}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderMixWithOthersControl(mixWithOthers: MixWithOthersType) {
-    const isSelected = this.state.mixWithOthers == mixWithOthers;
-
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({mixWithOthers: mixWithOthers});
-        }}>
-        <Text
-          style={[
-            styles.controlOption,
-            {fontWeight: isSelected ? 'bold' : 'normal'},
-          ]}>
-          {mixWithOthers}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  renderCustomSkin() {
-    const flexCompleted = this.getCurrentTimePercentage() * 100;
-    const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
-
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.fullScreen}
-          onPress={() => {
-            this.setState({paused: !this.state.paused});
-          }}>
-          <Video
-            ref={this.videoRef}
-            source={require('./broadchurch.mp4')}
-            style={styles.fullScreen}
-            rate={this.state.rate}
-            paused={this.state.paused}
-            volume={this.state.volume}
-            muted={this.state.muted}
-            ignoreSilentSwitch={this.state.ignoreSilentSwitch}
-            mixWithOthers={this.state.mixWithOthers}
-            resizeMode={this.state.resizeMode}
-            onLoad={this.onLoad}
-            onBuffer={this.onBuffer}
-            onProgress={this.onProgress}
-            onEnd={() => {
-              Alert.alert('Done!');
-            }}
-            onError={e => {
-              console.log(e);
-            }}
-            repeat={true}
-            filter={this.state.filter}
-            filterEnabled={this.state.filterEnabled}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.controls}>
-          <View style={styles.generalControls}>
-            <View style={styles.skinControl}>
-              {this.renderSkinControl('custom')}
-              {this.renderSkinControl('native')}
-              {this.renderSkinControl('embed')}
-            </View>
-            {this.state.filterEnabled ? (
-              <View style={styles.skinControl}>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(-1);
-                  }}>
-                  <Text style={styles.controlOption}>Previous Filter</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setFilter(1);
-                  }}>
-                  <Text style={styles.controlOption}>Next Filter</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.generalControls}>
-            <View style={styles.rateControl}>
-              {this.renderRateControl(0.5)}
-              {this.renderRateControl(1.0)}
-              {this.renderRateControl(2.0)}
-            </View>
-
-            <View style={styles.volumeControl}>
-              {this.renderVolumeControl(0.5)}
-              {this.renderVolumeControl(1)}
-              {this.renderVolumeControl(1.5)}
-            </View>
-
-            <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl(ResizeMode.COVER)}
-              {this.renderResizeModeControl(ResizeMode.CONTAIN)}
-              {this.renderResizeModeControl(ResizeMode.STRETCH)}
-            </View>
-          </View>
-          <View style={styles.generalControls}>
-            {Platform.OS === 'ios' ? (
-              <>
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.IGNORE)}
-                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.OBEY)}
-                </View>
-                <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl(MixWithOthersType.MIX)}
-                  {this.renderMixWithOthersControl(MixWithOthersType.DUCK)}
-                </View>
-              </>
-            ) : null}
-          </View>
-          <TouchableOpacity ref={this.controlRef} onPress={this.onTouchControl}>
-            <View style={styles.trackingControls}>
-              <View style={styles.progress}>
-                <View
-                  style={[styles.innerProgressCompleted, {flex: flexCompleted}]}
-                />
-                <View
-                  style={[styles.innerProgressRemaining, {flex: flexRemaining}]}
-                />
-              </View>
-            </View>
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              this.toggleControls();
+            }}>
+            <Text style={styles.leftRightControlOption}>
+              {this.state.showRNVControls ? 'Hide controls' : 'Show controls'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  renderNativeSkin() {
-    const videoStyle =
-      this.state.skin == 'embed'
-        ? styles.nativeVideoControls
-        : styles.fullScreen;
+  onRateSelected = (value: MultiValueControlPropType) => {
+    this.setState({rate: value});
+  };
+  onVolumeSelected = (value: MultiValueControlPropType) => {
+    this.setState({volume: value});
+  };
+  onResizeModeSelected = (value: MultiValueControlPropType) => {
+    this.setState({resizeMode: value});
+  };
+
+  onSelectedAudioTrackChange = (itemValue: string) => {
+    console.log('on audio value change ' + itemValue);
+    if (itemValue === 'none') {
+      this.setState({
+        selectedAudioTrack: SelectedVideoTrackType.DISABLED,
+      });
+    } else {
+      this.setState({
+        selectedAudioTrack: {
+          type: SelectedVideoTrackType.INDEX,
+          value: itemValue,
+        },
+      });
+    }
+  };
+
+  onSelectedTextTrackChange = (itemValue: string) => {
+    console.log('on value change ' + itemValue);
+    this.setState({
+      selectedTextTrack: {
+        type: this.textTracksSelectionBy === 'index' ? 'index' : 'language',
+        value: itemValue,
+      },
+    });
+  };
+
+  onSelectedVideoTrackChange = (itemValue: string) => {
+    console.log('on value change ' + itemValue);
+    if (itemValue === undefined || itemValue === 'auto') {
+      this.setState({
+        selectedVideoTrack: {
+          type: SelectedVideoTrackType.AUTO,
+        },
+      });
+    } else {
+      this.setState({
+        selectedVideoTrack: {
+          type: SelectedVideoTrackType.INDEX,
+          value: itemValue,
+        },
+      });
+    }
+  };
+
+  renderOverlay() {
     return (
-      <View style={styles.container}>
-        <View style={styles.fullScreen}>
-          <Video
-            ref={this.videoRef}
-            source={require('./broadchurch.mp4')}
-            style={videoStyle}
-            rate={this.state.rate}
-            paused={this.state.paused}
-            volume={this.state.volume}
-            muted={this.state.muted}
-            ignoreSilentSwitch={this.state.ignoreSilentSwitch}
-            mixWithOthers={this.state.mixWithOthers}
-            resizeMode={this.state.resizeMode}
-            onLoad={this.onLoad}
-            onBuffer={this.onBuffer}
-            onProgress={this.onProgress}
-            onEnd={() => {
-              Alert.alert('Done!');
-            }}
-            onError={e => {
-              console.log(e);
-            }}
-            repeat={true}
-            controls={this.state.controls}
-            filter={this.state.filter}
-            filterEnabled={this.state.filterEnabled}
-          />
+      <>
+        {this.IndicatorLoadingView()}
+        <View style={styles.topControls}>
+          <View style={styles.resizeModeControl}>
+            {this.renderTopControl()}
+          </View>
         </View>
-        <View style={styles.controls}>
-          <View style={styles.generalControls}>
-            <View style={styles.skinControl}>
-              {this.renderSkinControl('custom')}
-              {this.renderSkinControl('native')}
-              {this.renderSkinControl('embed')}
+        {!this.state.showRNVControls ? (
+          <>
+            <View style={styles.leftControls}>
+              <ToggleControl
+                onPress={() => {
+                  this.channelDown();
+                }}
+                text="ChDown"
+              />
             </View>
-            {this.state.filterEnabled ? (
-              <View style={styles.skinControl}>
-                <TouchableOpacity
+            <View style={styles.rightControls}>
+              <ToggleControl
+                onPress={() => {
+                  this.channelUp();
+                }}
+                text="ChUp"
+              />
+            </View>
+            <View style={styles.bottomControls}>
+              <View style={styles.generalControls}>
+                {Platform.OS === 'android' ? (
+                  <View style={styles.generalControls}>
+                    <ToggleControl
+                      onPress={() => {
+                        this.popupInfo();
+                      }}
+                      text="decoderInfo"
+                    />
+                    <ToggleControl
+                      isSelected={this.state.useCache}
+                      onPress={() => {
+                        this.setState({useCache: !this.state.useCache});
+                      }}
+                      selectedText="enable cache"
+                      unselectedText="disable cache"
+                    />
+                  </View>
+                ) : null}
+                <ToggleControl
+                  isSelected={this.state.paused}
                   onPress={() => {
-                    this.setFilter(-1);
-                  }}>
-                  <Text style={styles.controlOption}>Previous Filter</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                    this.setState({paused: !this.state.paused});
+                  }}
+                  selectedText="pause"
+                  unselectedText="playing"
+                />
+                <ToggleControl
+                  isSelected={this.state.loop}
                   onPress={() => {
-                    this.setFilter(1);
-                  }}>
-                  <Text style={styles.controlOption}>Next Filter</Text>
-                </TouchableOpacity>
+                    this.setState({loop: !this.state.loop});
+                  }}
+                  selectedText="loop enable"
+                  unselectedText="loop disable"
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleFullscreen();
+                  }}
+                  text="fullscreen"
+                />
+                <ToggleControl
+                  onPress={() => {
+                    this.toggleDecoration();
+                  }}
+                  text="decoration"
+                />
+                <ToggleControl
+                  isSelected={!!this.state.poster}
+                  onPress={() => {
+                    this.setState({
+                      poster: this.state.poster ? undefined : this.samplePoster,
+                    });
+                  }}
+                  selectedText="poster"
+                  unselectedText="no poster"
+                />
+                <ToggleControl
+                  isSelected={this.state.showNotificationControls}
+                  onPress={() => {
+                    this.toggleShowNotificationControls();
+                  }}
+                  selectedText="hide notification controls"
+                  unselectedText="show notification controls"
+                />
               </View>
-            ) : null}
-          </View>
-          <View style={styles.generalControls}>
-            <View style={styles.rateControl}>
-              {this.renderRateControl(0.5)}
-              {this.renderRateControl(1.0)}
-              {this.renderRateControl(2.0)}
+              <View style={styles.generalControls}>
+                {/* shall be replaced by slider */}
+                <MultiValueControl
+                  values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
+                  onPress={this.onRateSelected}
+                  selected={this.state.rate}
+                />
+                {/* shall be replaced by slider */}
+                <MultiValueControl
+                  values={[0.5, 1, 1.5]}
+                  onPress={this.onVolumeSelected}
+                  selected={this.state.volume}
+                />
+                <MultiValueControl
+                  values={[
+                    ResizeMode.COVER,
+                    ResizeMode.CONTAIN,
+                    ResizeMode.STRETCH,
+                  ]}
+                  onPress={this.onResizeModeSelected}
+                  selected={this.state.resizeMode}
+                />
+                <ToggleControl
+                  isSelected={this.state.muted}
+                  onPress={() => {
+                    this.setState({muted: !this.state.muted});
+                  }}
+                  text="muted"
+                />
+                {Platform.OS === 'ios' ? (
+                  <ToggleControl
+                    isSelected={this.state.paused}
+                    onPress={() => {
+                      this.video
+                        ?.save({})
+                        ?.then(response => {
+                          console.log('Downloaded URI', response);
+                        })
+                        .catch(error => {
+                          console.log('error during save ', error);
+                        });
+                    }}
+                    text="save"
+                  />
+                ) : null}
+              </View>
+              {this.renderSeekBar()}
+              <View style={styles.generalControls}>
+                <AudioTrackSelector
+                  audioTracks={this.state.audioTracks}
+                  selectedAudioTrack={this.state.selectedAudioTrack}
+                  onValueChange={this.onSelectedAudioTrackChange}
+                />
+                <TextTrackSelector
+                  textTracks={this.state.textTracks}
+                  selectedTextTrack={this.state.selectedTextTrack}
+                  onValueChange={this.onSelectedTextTrackChange}
+                  textTracksSelectionBy={this.textTracksSelectionBy}
+                />
+                <VideoTrackSelector
+                  videoTracks={this.state.videoTracks}
+                  selectedVideoTrack={this.state.selectedVideoTrack}
+                  onValueChange={this.onSelectedVideoTrackChange}
+                />
+              </View>
             </View>
+          </>
+        ) : null}
+      </>
+    );
+  }
 
-            <View style={styles.volumeControl}>
-              {this.renderVolumeControl(0.5)}
-              {this.renderVolumeControl(1)}
-              {this.renderVolumeControl(1.5)}
-            </View>
+  renderVideoView() {
+    const viewStyle = this.state.fullscreen
+      ? styles.fullScreen
+      : styles.halfScreen;
 
-            <View style={styles.resizeModeControl}>
-              {this.renderResizeModeControl(ResizeMode.COVER)}
-              {this.renderResizeModeControl(ResizeMode.CONTAIN)}
-              {this.renderResizeModeControl(ResizeMode.STRETCH)}
-            </View>
-          </View>
-          <View style={styles.generalControls}>
-            {Platform.OS === 'ios' ? (
-              <>
-                <View style={styles.ignoreSilentSwitchControl}>
-                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.IGNORE)}
-                  {this.renderIgnoreSilentSwitchControl(IgnoreSilentSwitchType.OBEY)}
-                </View>
-                <View style={styles.mixWithOthersControl}>
-                  {this.renderMixWithOthersControl(MixWithOthersType.MIX)}
-                  {this.renderMixWithOthersControl(MixWithOthersType.DUCK)}
-                </View>
-              </>
-            ) : null}
-          </View>
-        </View>
-      </View>
+    const currentSrc = this.srcList[this.state.srcListId];
+    const additionnal = currentSrc as AdditionnalSourceInfo;
+
+    return (
+      <TouchableOpacity style={viewStyle}>
+        <Video
+          showNotificationControls={this.state.showNotificationControls}
+          ref={(ref: VideoRef) => {
+            this.video = ref;
+          }}
+          source={currentSrc as ReactVideoSource}
+          textTracks={additionnal?.textTracks}
+          adTagUrl={additionnal?.adTagUrl}
+          drm={additionnal?.drm}
+          style={viewStyle}
+          rate={this.state.rate}
+          paused={this.state.paused}
+          volume={this.state.volume}
+          muted={this.state.muted}
+          fullscreen={this.state.fullscreen}
+          controls={this.state.showRNVControls}
+          resizeMode={this.state.resizeMode}
+          onLoad={this.onLoad}
+          onAudioTracks={this.onAudioTracks}
+          onTextTracks={this.onTextTracks}
+          onVideoTracks={this.onVideoTracks}
+          onTextTrackDataChanged={this.onTextTrackDataChanged}
+          onProgress={this.onProgress}
+          onEnd={this.onEnd}
+          progressUpdateInterval={1000}
+          onError={this.onError}
+          onAudioBecomingNoisy={this.onAudioBecomingNoisy}
+          onAudioFocusChanged={this.onAudioFocusChanged}
+          onLoadStart={this.onVideoLoadStart}
+          onAspectRatio={this.onAspectRatio}
+          onReadyForDisplay={this.onReadyForDisplay}
+          onBuffer={this.onVideoBuffer}
+          onSeek={this.onSeek}
+          repeat={this.state.loop}
+          selectedTextTrack={this.state.selectedTextTrack}
+          selectedAudioTrack={this.state.selectedAudioTrack}
+          selectedVideoTrack={this.state.selectedVideoTrack}
+          playInBackground={false}
+          bufferConfig={{
+            minBufferMs: 15000,
+            maxBufferMs: 50000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+            cacheSizeMB: this.state.useCache ? 200 : 0,
+            live: {
+              targetOffsetMs: 500,
+            },
+          }}
+          preventsDisplaySleepDuringVideoPlayback={true}
+          poster={this.state.poster}
+          onPlaybackRateChange={this.onPlaybackRateChange}
+          onPlaybackStateChanged={this.onPlaybackStateChanged}
+          bufferingStrategy={BufferingStrategyType.DEFAULT}
+          debug={{enable: true, thread: true}}
+        />
+      </TouchableOpacity>
     );
   }
 
   render() {
-    return this.state.controls
-      ? this.renderNativeSkin()
-      : this.renderCustomSkin();
+    return (
+      <View style={styles.container}>
+        {(this.srcList[this.state.srcListId] as AdditionnalSourceInfo)?.noView
+          ? null
+          : this.renderVideoView()}
+        {this.renderOverlay()}
+      </View>
+    );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
-  },
-  fullScreen: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-  controls: {
-    backgroundColor: 'transparent',
-    borderRadius: 5,
-    position: 'absolute',
-    bottom: 44,
-    left: 4,
-    right: 4,
-  },
-  progress: {
-    flex: 1,
-    flexDirection: 'row',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  innerProgressCompleted: {
-    height: 20,
-    backgroundColor: '#cccccc',
-  },
-  innerProgressRemaining: {
-    height: 20,
-    backgroundColor: '#2C2C2C',
-  },
-  generalControls: {
-    flex: 1,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    paddingBottom: 10,
-  },
-  skinControl: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  rateControl: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  volumeControl: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  resizeModeControl: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ignoreSilentSwitchControl: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mixWithOthersControl: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  controlOption: {
-    alignSelf: 'center',
-    fontSize: 11,
-    color: 'white',
-    paddingLeft: 2,
-    paddingRight: 2,
-    lineHeight: 12,
-  },
-  nativeVideoControls: {
-    top: 184,
-    height: 300,
-  },
-  trackingControls: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 export default VideoPlayer;
