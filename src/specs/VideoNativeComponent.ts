@@ -370,30 +370,32 @@ export interface VideoNativeProps extends ViewProps {
 }
 
 type NativeVideoComponentType = HostComponent<VideoNativeProps>;
-type NativeVideoComponentRefType = React.ElementRef<NativeVideoComponentType>;
 
 export interface NativeVideoCommands {
   seek: (
-    viewRef: NativeVideoComponentRefType,
+    viewRef: React.ElementRef<NativeVideoComponentType>,
     time: Float,
     tolerance?: Float,
   ) => void;
   setPlayerPauseState: (
-    viewRef: NativeVideoComponentRefType,
+    viewRef: React.ElementRef<NativeVideoComponentType>,
     paused: boolean,
   ) => void;
-  setVolume: (viewRef: NativeVideoComponentRefType, volume: Float) => void;
+  setVolume: (
+    viewRef: React.ElementRef<NativeVideoComponentType>,
+    volume: Float,
+  ) => void;
   setFullScreen: (
-    viewRef: NativeVideoComponentRefType,
+    viewRef: React.ElementRef<NativeVideoComponentType>,
     fullScreen: boolean,
   ) => void;
   setLicenseResult: (
-    viewRef: NativeVideoComponentRefType,
+    viewRef: React.ElementRef<NativeVideoComponentType>,
     result: string,
     licenseUrl: string,
   ) => void;
   setLicenseResultError: (
-    viewRef: NativeVideoComponentRefType,
+    viewRef: React.ElementRef<NativeVideoComponentType>,
     error: string,
     licenseUrl: string,
   ) => void;

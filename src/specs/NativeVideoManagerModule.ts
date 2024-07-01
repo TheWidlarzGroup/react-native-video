@@ -9,11 +9,9 @@ export type VideoSaveData = {
   uri: string;
 };
 
-export interface NativeVideoManagerModuleSpec extends TurboModule {
+interface Spec extends TurboModule {
   save: (reactTag: Int32, option: UnsafeObject) => Promise<VideoSaveData>;
   getCurrentPosition: (reactTag: Int32) => Promise<Int32>;
 }
 
-export default TurboModuleRegistry.getEnforcing<NativeVideoManagerModuleSpec>(
-  'VideoManager',
-);
+export default TurboModuleRegistry.getEnforcing<Spec>('VideoManager');

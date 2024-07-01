@@ -2,7 +2,7 @@ import type {TurboModule} from 'react-native';
 import {TurboModuleRegistry} from 'react-native';
 import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
 
-export interface NativeVideoDecoderPropertiesSpec extends TurboModule {
+interface Spec extends TurboModule {
   getWidevineLevel: () => Promise<Int32>;
   isCodecSupported: (
     mimeType: string,
@@ -12,6 +12,6 @@ export interface NativeVideoDecoderPropertiesSpec extends TurboModule {
   isHEVCSupported: () => Promise<'unsupported' | 'hardware' | 'software'>;
 }
 
-export default TurboModuleRegistry.getEnforcing<NativeVideoDecoderPropertiesSpec>(
+export default TurboModuleRegistry.getEnforcing<Spec>(
   'RNVDecoderPropertiesModule',
 );
