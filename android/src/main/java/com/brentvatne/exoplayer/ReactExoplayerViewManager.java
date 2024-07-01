@@ -82,7 +82,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String CMD_SET_PLAYER_PAUSE_STATE = "setPlayerPauseState";
     private static final String CMD_SEEK = "seek";
     private static final String CMD_SET_VOLUME = "setVolume";
-    private static final String CMD_SET_FULLSCREEN = "setFullscreen";
+    private static final String CMD_SET_FULLSCREEN = "setFullScreen";
 
     private final ReactExoplayerConfig config;
 
