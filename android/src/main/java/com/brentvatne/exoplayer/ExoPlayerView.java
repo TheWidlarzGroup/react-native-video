@@ -26,12 +26,14 @@ import android.widget.FrameLayout;
 
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
+import com.brentvatne.common.api.ViewType;
+import com.brentvatne.common.toolbox.DebugLog;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
 public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
-
+    private final static String TAG = "ExoPlayerView";
     private View surfaceView;
     private final View shutterView;
     private final SubtitleView subtitleLayout;
@@ -42,8 +44,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private final ViewGroup.LayoutParams layoutParams;
     private final FrameLayout adOverlayFrameLayout;
 
-    private boolean useTextureView = true;
-    private boolean useSecureView = false;
+    private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
@@ -81,7 +82,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
-        updateSurfaceView();
+        updateSurfaceView(viewType);
 
         adOverlayFrameLayout = new FrameLayout(context);
 
@@ -134,28 +135,36 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         shutterView.setBackgroundColor(color);
     }
 
-    private void updateSurfaceView() {
-        View view;
-        if (!useTextureView || useSecureView) {
-            view = new SurfaceView(context);
-            if (useSecureView) {
-                ((SurfaceView)view).setSecure(true);
+    public void updateSurfaceView(@ViewType.ViewType int viewType) {
+        this.viewType = viewType;
+        boolean viewNeedRefresh = false;
+        if (viewType == ViewType.VIEW_TYPE_SURFACE || viewType == ViewType.VIEW_TYPE_SURFACE_SECURE) {
+            if (!(surfaceView instanceof SurfaceView)) {
+                surfaceView = new SurfaceView(context);
+                viewNeedRefresh = true;
             }
-        } else {
-            view = new TextureView(context);
+            ((SurfaceView)surfaceView).setSecure(viewType == ViewType.VIEW_TYPE_SURFACE_SECURE);
+        } else if (viewType == ViewType.VIEW_TYPE_TEXTURE) {
+            if (!(surfaceView instanceof TextureView)) {
+                surfaceView = new TextureView(context);
+                viewNeedRefresh = true;
+            }
             // Support opacity properly:
-            ((TextureView) view).setOpaque(false);
+            ((TextureView) surfaceView).setOpaque(false);
+        } else {
+            DebugLog.wtf(TAG, "wtf is this texture " + viewType);
         }
-        view.setLayoutParams(layoutParams);
+        if (viewNeedRefresh) {
+            surfaceView.setLayoutParams(layoutParams);
 
-        surfaceView = view;
-        if (layout.getChildAt(0) != null) {
-            layout.removeViewAt(0);
-        }
-        layout.addView(surfaceView, 0, layoutParams);
+            if (layout.getChildAt(0) != null) {
+                layout.removeViewAt(0);
+            }
+            layout.addView(surfaceView, 0, layoutParams);
 
-        if (this.player != null) {
-            setVideoView();
+            if (this.player != null) {
+                setVideoView();
+            }
         }
     }
 
@@ -208,20 +217,6 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         if (layout.getResizeMode() != resizeMode) {
             layout.setResizeMode(resizeMode);
             post(measureAndLayout);
-        }
-    }
-
-    public void setUseTextureView(boolean useTextureView) {
-        if (useTextureView != this.useTextureView) {
-            this.useTextureView = useTextureView;
-            updateSurfaceView();
-        }
-    }
-
-    public void useSecureView(boolean useSecureView) {
-        if (useSecureView != this.useSecureView) {
-            this.useSecureView = useSecureView;
-            updateSurfaceView();
         }
     }
 

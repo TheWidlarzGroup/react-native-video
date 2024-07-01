@@ -11,7 +11,7 @@ export interface TextTrackSelectorType {
   textTracksSelectionBy: string;
 }
 
-const TextTrackSelector = ({
+export const TextTrackSelector = ({
   textTracks,
   selectedTextTrack,
   onValueChange,
@@ -60,5 +60,3 @@ const TextTrackSelector = ({
     </>
   );
 };
-
-export default TextTrackSelector;

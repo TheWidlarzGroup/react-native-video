@@ -10,7 +10,7 @@ export interface AudioTrackSelectorType {
   onValueChange: (arg0: string) => void;
 }
 
-const AudioTrackSelector = ({
+export const AudioTrackSelector = ({
   audioTracks,
   selectedAudioTrack,
   onValueChange,
@@ -49,5 +49,3 @@ const AudioTrackSelector = ({
     </>
   );
 };
-
-export default AudioTrackSelector;
