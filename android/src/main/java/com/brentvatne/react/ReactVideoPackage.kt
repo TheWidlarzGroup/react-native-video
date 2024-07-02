@@ -9,7 +9,9 @@ import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
-class ReactVideoPackage @JvmOverloads constructor(private var config: ReactExoplayerConfig? = null) : ReactPackage {
+class ReactVideoPackage(private var config: ReactExoplayerConfig?) : ReactPackage {
+
+    constructor() : this(null)
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> =
         listOf(
