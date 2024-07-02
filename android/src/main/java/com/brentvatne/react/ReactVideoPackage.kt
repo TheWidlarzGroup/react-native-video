@@ -21,9 +21,7 @@ class ReactVideoPackage(private val config: ReactExoplayerConfig? = null) : Reac
     fun createJSModules(): List<Class<out JavaScriptModule>> = emptyList()
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-        if (config == null) {
-            config = DefaultReactExoplayerConfig(reactContext)
-        }
-        return listOf(ReactExoplayerViewManager(config!!))
+        val effectiveConfig = config ?: DefaultReactExoplayerConfig(reactContext)
+        return listOf(ReactExoplayerViewManager(effectiveConfig))
     }
 }
