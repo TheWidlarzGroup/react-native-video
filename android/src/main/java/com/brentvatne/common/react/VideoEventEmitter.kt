@@ -10,6 +10,7 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.Event
+import com.facebook.react.uimanager.events.EventDispatcher
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -79,41 +80,43 @@ class VideoEventEmitter {
     lateinit var onTextTracks: (textTracks: ArrayList<Track>?) -> Unit
     lateinit var onVideoTracks: (videoTracks: ArrayList<VideoTrack>?) -> Unit
     lateinit var onTextTrackDataChanged: (textTrackData: String) -> Unit
-    lateinit var onReceiveAdEvent: (event: String, adData: Map<String?, String?>?) -> Unit
+    lateinit var onReceiveAdEvent: (adEvent: String, adData: Map<String?, String?>?) -> Unit
 
     fun addEventEmitters(reactContext: ThemedReactContext, view: ReactExoplayerView) {
         val dispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)
         val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
 
         if (dispatcher != null) {
+            val event = EventBuilder(surfaceId, view.id, dispatcher)
+
             onVideoLoadStart = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_LOAD_START))
+                event.dispatch(EventTypes.EVENT_LOAD_START)
             }
             onVideoLoad = { duration, currentPosition, videoWidth, videoHeight, audioTracks, textTracks, videoTracks, trackId ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_LOAD) {
-                    it.putDouble("duration", duration / 1000.0)
-                    it.putDouble("playableDuration", currentPosition / 1000.0)
+                event.dispatch(EventTypes.EVENT_LOAD) {
+                    putDouble("duration", duration / 1000.0)
+                    putDouble("playableDuration", currentPosition / 1000.0)
 
                     val naturalSize: WritableMap = aspectRatioToNaturalSize(videoWidth, videoHeight)
-                    it.putMap("seekableDuration", naturalSize)
-                    it.putString("trackId", trackId)
-                    it.putArray("videoTracks", videoTracksToArray(videoTracks))
-                    it.putArray("audioTracks", audioTracksToArray(audioTracks))
-                    it.putArray("textTracks", textTracksToArray(textTracks))
+                    putMap("seekableDuration", naturalSize)
+                    putString("trackId", trackId)
+                    putArray("videoTracks", videoTracksToArray(videoTracks))
+                    putArray("audioTracks", audioTracksToArray(audioTracks))
+                    putArray("textTracks", textTracksToArray(textTracks))
 
                     // TODO: Actually check if you can.
-                    it.putBoolean("canPlayFastForward", true)
-                    it.putBoolean("canPlaySlowForward", true)
-                    it.putBoolean("canPlaySlowReverse", true)
-                    it.putBoolean("canPlayReverse", true)
-                    it.putBoolean("canPlayFastForward", true)
-                    it.putBoolean("canStepBackward", true)
-                    it.putBoolean("canStepForward", true)
-                })
+                    putBoolean("canPlayFastForward", true)
+                    putBoolean("canPlaySlowForward", true)
+                    putBoolean("canPlaySlowReverse", true)
+                    putBoolean("canPlayReverse", true)
+                    putBoolean("canPlayFastForward", true)
+                    putBoolean("canStepBackward", true)
+                    putBoolean("canStepForward", true)
+                }
             }
             onVideoError = { errorString, exception, errorCode ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_ERROR) {
-                    it.putMap("error", Arguments.createMap().apply {
+                event.dispatch(EventTypes.EVENT_ERROR) {
+                    putMap("error", Arguments.createMap().apply {
                         // Prepare stack trace
                         val sw = StringWriter()
                         val pw = PrintWriter(sw)
@@ -125,72 +128,72 @@ class VideoEventEmitter {
                         putString("errorCode", errorCode)
                         putString("errorStackTrace", stackTrace)
                     })
-                })
+                }
             }
             onVideoProgress = { currentPosition, bufferedDuration, seekableDuration, currentPlaybackTime ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_PROGRESS) {
-                    it.putDouble("currentTime", currentPosition / 1000.0)
-                    it.putDouble("playableDuration", bufferedDuration / 1000.0)
-                    it.putDouble("seekableDuration", seekableDuration / 1000.0)
-                    it.putDouble("currentPlaybackTime", currentPlaybackTime)
-                })
+                event.dispatch(EventTypes.EVENT_PROGRESS) {
+                    putDouble("currentTime", currentPosition / 1000.0)
+                    putDouble("playableDuration", bufferedDuration / 1000.0)
+                    putDouble("seekableDuration", seekableDuration / 1000.0)
+                    putDouble("currentPlaybackTime", currentPlaybackTime)
+                }
             }
             onVideoBandwidthUpdate = { bitRateEstimate, height, width, trackId ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_BANDWIDTH) {
-                    it.putDouble("bitrate", bitRateEstimate.toDouble())
-                    it.putInt("width", width)
-                    it.putInt("height", height)
-                    it.putString("trackId", trackId)
-                })
+                event.dispatch(EventTypes.EVENT_BANDWIDTH) {
+                    putDouble("bitrate", bitRateEstimate.toDouble())
+                    putInt("width", width)
+                    putInt("height", height)
+                    putString("trackId", trackId)
+                }
             }
             onVideoPlaybackStateChanged = { isPlaying ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_PLAYBACK_STATE_CHANGED) {
-                    it.putBoolean("isPlaying", isPlaying)
-                })
+                event.dispatch(EventTypes.EVENT_PLAYBACK_STATE_CHANGED) {
+                    putBoolean("isPlaying", isPlaying)
+                }
             }
             onVideoSeek = { currentPosition, seekTime ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_SEEK) {
-                    it.putDouble("currentTime", currentPosition / 1000.0)
-                    it.putDouble("seekTime", seekTime / 1000.0)
-                })
+                event.dispatch(EventTypes.EVENT_SEEK) {
+                    putDouble("currentTime", currentPosition / 1000.0)
+                    putDouble("seekTime", seekTime / 1000.0)
+                }
             }
             onVideoEnd = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_END))
+                event.dispatch(EventTypes.EVENT_END)
             }
             onVideoFullscreenPlayerWillPresent = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_FULLSCREEN_WILL_PRESENT))
+                event.dispatch(EventTypes.EVENT_FULLSCREEN_WILL_PRESENT)
             }
             onVideoFullscreenPlayerDidPresent = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_FULLSCREEN_DID_PRESENT))
+                event.dispatch(EventTypes.EVENT_FULLSCREEN_DID_PRESENT)
             }
             onVideoFullscreenPlayerWillDismiss = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_FULLSCREEN_WILL_DISMISS))
+                event.dispatch(EventTypes.EVENT_FULLSCREEN_WILL_DISMISS)
             }
             onVideoFullscreenPlayerDidDismiss = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_FULLSCREEN_DID_DISMISS))
+                event.dispatch(EventTypes.EVENT_FULLSCREEN_DID_DISMISS)
             }
             onReadyForDisplay = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_READY))
+                event.dispatch(EventTypes.EVENT_READY)
             }
             onVideoBuffer = { isBuffering ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_BUFFER) {
-                    it.putBoolean("isBuffering", isBuffering)
-                })
+                event.dispatch(EventTypes.EVENT_BUFFER) {
+                    putBoolean("isBuffering", isBuffering)
+                }
             }
             onControlsVisibilityChange = { isVisible ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_CONTROLS_VISIBILITY_CHANGE) {
-                    it.putBoolean("isVisible", isVisible)
-                })
+                event.dispatch(EventTypes.EVENT_CONTROLS_VISIBILITY_CHANGE) {
+                    putBoolean("isVisible", isVisible)
+                }
             }
             onVideoIdle = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_IDLE))
+                event.dispatch(EventTypes.EVENT_IDLE)
             }
             onTimedMetadata = fn@ { metadataArrayList ->
                 if (metadataArrayList.size == 0) {
                     return@fn
                 }
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_TIMED_METADATA) {
-                    it.putArray("metadata", Arguments.createArray().apply {
+                event.dispatch(EventTypes.EVENT_TIMED_METADATA) {
+                    putArray("metadata", Arguments.createArray().apply {
                         metadataArrayList.forEachIndexed { i, metadata ->
                             pushMap(Arguments.createMap().apply {
                                 putString("identifier", metadata.identifier)
@@ -198,66 +201,67 @@ class VideoEventEmitter {
                             })
                         }
                     })
-                })
+                }
             }
             onVideoAudioBecomingNoisy = {
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_AUDIO_BECOMING_NOISY))
+                event.dispatch(EventTypes.EVENT_AUDIO_BECOMING_NOISY)
             }
             onAudioFocusChanged = { hasFocus ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_AUDIO_FOCUS_CHANGE) {
-                    it.putBoolean("hasAudioFocus", hasFocus)
-                })
+                event.dispatch(EventTypes.EVENT_AUDIO_FOCUS_CHANGE) {
+                    putBoolean("hasAudioFocus", hasFocus)
+                }
             }
             onPlaybackRateChange = { rate ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_PLAYBACK_RATE_CHANGE) {
-                    it.putDouble("playbackRate", rate.toDouble())
-                })
+                event.dispatch(EventTypes.EVENT_PLAYBACK_RATE_CHANGE) {
+                    putDouble("playbackRate", rate.toDouble())
+                }
             }
             onVolumeChange = { volume ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_VOLUME_CHANGE) {
-                    it.putDouble("volume", volume.toDouble())
-                })
+                event.dispatch(EventTypes.EVENT_VOLUME_CHANGE) {
+                    putDouble("volume", volume.toDouble())
+                }
             }
             onAudioTracks = { audioTracks ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_AUDIO_TRACKS) {
-                    it.putArray("audioTracks", audioTracksToArray(audioTracks))
-                })
+                event.dispatch(EventTypes.EVENT_AUDIO_TRACKS) {
+                    putArray("audioTracks", audioTracksToArray(audioTracks))
+                }
             }
             onTextTracks = { textTracks ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_TEXT_TRACKS) {
-                    it.putArray("textTracks", textTracksToArray(textTracks))
-                })
+                event.dispatch(EventTypes.EVENT_TEXT_TRACKS) {
+                    putArray("textTracks", textTracksToArray(textTracks))
+                }
             }
             onVideoTracks = { videoTracks ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_VIDEO_TRACKS) {
-                    it.putArray("videoTracks", videoTracksToArray(videoTracks))
-                })
+                event.dispatch(EventTypes.EVENT_VIDEO_TRACKS) {
+                    putArray("videoTracks", videoTracksToArray(videoTracks))
+                }
             }
             onTextTrackDataChanged = { textTrackData ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_TEXT_TRACK_DATA_CHANGED) {
-                    it.putString("subtitleTracks", textTrackData)
-                })
+                event.dispatch(EventTypes.EVENT_TEXT_TRACK_DATA_CHANGED) {
+                    putString("subtitleTracks", textTrackData)
+                }
             }
-            onReceiveAdEvent = { event, adData ->
-                dispatcher.dispatchEvent(createEventClass(surfaceId, view.id, EventTypes.EVENT_ON_RECEIVE_AD_EVENT) { it ->
-                    it.putString("event", event)
-                    it.putMap("data", Arguments.createMap().apply {
+            onReceiveAdEvent = { adEvent, adData ->
+                event.dispatch(EventTypes.EVENT_ON_RECEIVE_AD_EVENT) {
+                    putString("event", adEvent)
+                    putMap("data", Arguments.createMap().apply {
                         adData?.let { data ->
                             for ((key, value) in data) {
                                 putString(key!!, value)
                             }
                         }
                     })
-                })
+                }
             }
         }
     }
 
-    private fun createEventClass(surfaceId: Int, viewTag: Int, event: EventTypes, setParams: ((WritableMap) -> Unit)? = null): Event<*> {
-        return object : Event<Event<*>>(surfaceId, viewTag) {
-            override fun getEventName() = event.eventName
-            override fun getEventData(): WritableMap = Arguments.createMap().apply(setParams ?: {})
-        }
+    private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
+        fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
+            dispatcher.dispatchEvent(object : Event<Event<*>>(surfaceId, viewId) {
+                override fun getEventName() = event.name
+                override fun getEventData() = Arguments.createMap().apply(paramsSetter ?: {})
+            })
     }
 
     private fun audioTracksToArray(audioTracks: java.util.ArrayList<Track>?): WritableArray {
