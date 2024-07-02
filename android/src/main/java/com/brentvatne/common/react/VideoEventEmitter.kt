@@ -14,8 +14,7 @@ import com.facebook.react.uimanager.events.EventDispatcher
 import java.io.PrintWriter
 import java.io.StringWriter
 
-
-enum class EventTypes (val eventName: String) {
+enum class EventTypes(val eventName: String) {
     EVENT_LOAD_START("onVideoLoadStart"),
     EVENT_LOAD("onVideoLoad"),
     EVENT_ERROR("onVideoError"),
@@ -46,7 +45,8 @@ enum class EventTypes (val eventName: String) {
     EVENT_ON_RECEIVE_AD_EVENT("onReceiveAdEvent");
 
     companion object {
-        fun toMap() = mutableMapOf<String, Any>().apply {
+        fun toMap() =
+            mutableMapOf<String, Any>().apply {
                 EventTypes.entries.forEach { eventType ->
                     put(eventType.eventName, mapOf("registrationName" to eventType.eventName))
                 }
@@ -56,7 +56,16 @@ enum class EventTypes (val eventName: String) {
 
 class VideoEventEmitter {
     lateinit var onVideoLoadStart: () -> Unit
-    lateinit var onVideoLoad: (duration: Long, currentPosition: Long, videoWidth: Int, videoHeight: Int, audioTracks: ArrayList<Track>, textTracks: ArrayList<Track>, videoTracks: ArrayList<VideoTrack>, trackId: String) -> Unit
+    lateinit var onVideoLoad: (
+        duration: Long,
+        currentPosition: Long,
+        videoWidth: Int,
+        videoHeight: Int,
+        audioTracks: ArrayList<Track>,
+        textTracks: ArrayList<Track>,
+        videoTracks: ArrayList<VideoTrack>,
+        trackId: String
+    ) -> Unit
     lateinit var onVideoError: (errorString: String, exception: Exception, errorCode: String) -> Unit
     lateinit var onVideoProgress: (currentPosition: Long, bufferedDuration: Long, seekableDuration: Long, currentPlaybackTime: Double) -> Unit
     lateinit var onVideoBandwidthUpdate: (bitRateEstimate: Long, height: Int, width: Int, trackId: String) -> Unit
@@ -116,18 +125,21 @@ class VideoEventEmitter {
             }
             onVideoError = { errorString, exception, errorCode ->
                 event.dispatch(EventTypes.EVENT_ERROR) {
-                    putMap("error", Arguments.createMap().apply {
-                        // Prepare stack trace
-                        val sw = StringWriter()
-                        val pw = PrintWriter(sw)
-                        exception.printStackTrace(pw)
-                        val stackTrace = sw.toString()
+                    putMap(
+                        "error",
+                        Arguments.createMap().apply {
+                            // Prepare stack trace
+                            val sw = StringWriter()
+                            val pw = PrintWriter(sw)
+                            exception.printStackTrace(pw)
+                            val stackTrace = sw.toString()
 
-                        putString("errorString", errorString)
-                        putString("errorException", exception.toString())
-                        putString("errorCode", errorCode)
-                        putString("errorStackTrace", stackTrace)
-                    })
+                            putString("errorString", errorString)
+                            putString("errorException", exception.toString())
+                            putString("errorCode", errorCode)
+                            putString("errorStackTrace", stackTrace)
+                        }
+                    )
                 }
             }
             onVideoProgress = { currentPosition, bufferedDuration, seekableDuration, currentPlaybackTime ->
@@ -188,19 +200,24 @@ class VideoEventEmitter {
             onVideoIdle = {
                 event.dispatch(EventTypes.EVENT_IDLE)
             }
-            onTimedMetadata = fn@ { metadataArrayList ->
+            onTimedMetadata = fn@{ metadataArrayList ->
                 if (metadataArrayList.size == 0) {
                     return@fn
                 }
                 event.dispatch(EventTypes.EVENT_TIMED_METADATA) {
-                    putArray("metadata", Arguments.createArray().apply {
-                        metadataArrayList.forEachIndexed { i, metadata ->
-                            pushMap(Arguments.createMap().apply {
-                                putString("identifier", metadata.identifier)
-                                putString("value", metadata.value)
-                            })
+                    putArray(
+                        "metadata",
+                        Arguments.createArray().apply {
+                            metadataArrayList.forEachIndexed { i, metadata ->
+                                pushMap(
+                                    Arguments.createMap().apply {
+                                        putString("identifier", metadata.identifier)
+                                        putString("value", metadata.value)
+                                    }
+                                )
+                            }
                         }
-                    })
+                    )
                 }
             }
             onVideoAudioBecomingNoisy = {
@@ -244,13 +261,16 @@ class VideoEventEmitter {
             onReceiveAdEvent = { adEvent, adData ->
                 event.dispatch(EventTypes.EVENT_ON_RECEIVE_AD_EVENT) {
                     putString("event", adEvent)
-                    putMap("data", Arguments.createMap().apply {
-                        adData?.let { data ->
-                            for ((key, value) in data) {
-                                putString(key!!, value)
+                    putMap(
+                        "data",
+                        Arguments.createMap().apply {
+                            adData?.let { data ->
+                                for ((key, value) in data) {
+                                    putString(key!!, value)
+                                }
                             }
                         }
-                    })
+                    )
                 }
             }
         }
@@ -264,54 +284,57 @@ class VideoEventEmitter {
             })
     }
 
-    private fun audioTracksToArray(audioTracks: java.util.ArrayList<Track>?): WritableArray {
-        return Arguments.createArray().apply {
+    private fun audioTracksToArray(audioTracks: java.util.ArrayList<Track>?): WritableArray =
+        Arguments.createArray().apply {
             audioTracks?.forEachIndexed { i, format ->
-                pushMap(Arguments.createMap().apply {
-                    putInt("index", i)
-                    putString("title", format.title)
-                    format.mimeType?.let { putString("type", it) }
-                    format.language?.let { putString("language", it) }
-                    if (format.bitrate > 0) putInt("bitrate", format.bitrate)
-                    putBoolean("selected", format.isSelected)
-                })
+                pushMap(
+                    Arguments.createMap().apply {
+                        putInt("index", i)
+                        putString("title", format.title)
+                        format.mimeType?.let { putString("type", it) }
+                        format.language?.let { putString("language", it) }
+                        if (format.bitrate > 0) putInt("bitrate", format.bitrate)
+                        putBoolean("selected", format.isSelected)
+                    }
+                )
             }
         }
-    }
 
-    private fun videoTracksToArray(videoTracks: java.util.ArrayList<VideoTrack>?): WritableArray {
-        return Arguments.createArray().apply {
+    private fun videoTracksToArray(videoTracks: java.util.ArrayList<VideoTrack>?): WritableArray =
+        Arguments.createArray().apply {
             videoTracks?.forEachIndexed { i, vTrack ->
-                pushMap(Arguments.createMap().apply {
-                    putInt("width", vTrack.width)
-                    putInt("height", vTrack.height)
-                    putInt("bitrate", vTrack.bitrate)
-                    putString("codecs", vTrack.codecs)
-                    putString("trackId", vTrack.trackId)
-                    putInt("index", vTrack.index)
-                    putBoolean("selected", vTrack.isSelected)
-                    putInt("rotation", vTrack.rotation)
-                })
+                pushMap(
+                    Arguments.createMap().apply {
+                        putInt("width", vTrack.width)
+                        putInt("height", vTrack.height)
+                        putInt("bitrate", vTrack.bitrate)
+                        putString("codecs", vTrack.codecs)
+                        putString("trackId", vTrack.trackId)
+                        putInt("index", vTrack.index)
+                        putBoolean("selected", vTrack.isSelected)
+                        putInt("rotation", vTrack.rotation)
+                    }
+                )
             }
         }
-    }
 
-    private fun textTracksToArray(textTracks: ArrayList<Track>?): WritableArray {
-        return Arguments.createArray().apply {
+    private fun textTracksToArray(textTracks: ArrayList<Track>?): WritableArray =
+        Arguments.createArray().apply {
             textTracks?.forEachIndexed { i, format ->
-                pushMap(Arguments.createMap().apply {
-                    putInt("index", i)
-                    putString("title", format.title)
-                    putString("type", format.mimeType)
-                    putString("language", format.language)
-                    putBoolean("selected", format.isSelected)
-                })
+                pushMap(
+                    Arguments.createMap().apply {
+                        putInt("index", i)
+                        putString("title", format.title)
+                        putString("type", format.mimeType)
+                        putString("language", format.language)
+                        putBoolean("selected", format.isSelected)
+                    }
+                )
             }
         }
-    }
 
-    private fun aspectRatioToNaturalSize(videoWidth: Int, videoHeight: Int): WritableMap {
-        return Arguments.createMap().apply {
+    private fun aspectRatioToNaturalSize(videoWidth: Int, videoHeight: Int): WritableMap =
+        Arguments.createMap().apply {
             putInt("width", videoWidth)
             putInt("height", videoHeight)
             val orientation = if (videoWidth > videoHeight) {
@@ -323,5 +346,4 @@ class VideoEventEmitter {
             }
             putString("orientation", orientation)
         }
-    }
 }
