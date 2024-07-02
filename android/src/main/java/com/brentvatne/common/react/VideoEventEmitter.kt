@@ -279,7 +279,7 @@ class VideoEventEmitter {
     private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
         fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
             dispatcher.dispatchEvent(object : Event<Event<*>>(surfaceId, viewId) {
-                override fun getEventName() = event.name
+                override fun getEventName() = event.eventName
                 override fun getEventData() = Arguments.createMap().apply(paramsSetter ?: {})
             })
     }
