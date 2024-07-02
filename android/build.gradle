@@ -121,6 +121,8 @@ android {
         exclude "**/libreact_render*.so"
     }
 
+    buildDir 'buildOutput_' + configStringPath
+
     sourceSets {
         main {
             java {
@@ -234,7 +236,7 @@ dependencies {
             implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
         }
     }
-
+    
     // For ad insertion using the Interactive Media Ads SDK with ExoPlayer
     if (ExoplayerDependencies["useExoplayerIMA"]) {
         if (media3_buildFromSource) {
