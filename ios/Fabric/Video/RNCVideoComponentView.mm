@@ -203,22 +203,22 @@ using namespace facebook::react;
 //    RCTRNCVideoHandleCommand(self, commandName, args);
 //}
 
-- (void)seek:(float)time tolerance:(float)tolerance {
-    NSMutableDictionary *info = @{
-        @"time": @(time),
-        @"tolerance": @(tolerance),
-    };
-
-    [_view seek:info];
-}
-
-- (void)setLicenseResult:(NSString *)result {
-    [_view setLicenseResult:result];
-}
-
-- (void)setLicenseResultError:(NSString *)error {
-    [_view setLicenseResultError:error];
-}
+//- (void)seek:(float)time tolerance:(float)tolerance {
+//    NSMutableDictionary *info = @{
+//        @"time": @(time),
+//        @"tolerance": @(tolerance),
+//    };
+//
+//    [_view seek:info];
+//}
+//
+//- (void)setLicenseResult:(NSString *)result {
+//    [_view setLicenseResult:result];
+//}
+//
+//- (void)setLicenseResultError:(NSString *)error {
+//    [_view setLicenseResultError:error];
+//}
 
 # pragma mark - event
 
