@@ -381,7 +381,7 @@ export interface NativeVideoCommands {
     viewRef: React.ElementRef<NativeVideoComponentType>,
     paused: boolean,
   ) => void;
-  setVolume: (
+  setVolumeCMD: (
     viewRef: React.ElementRef<NativeVideoComponentType>,
     volume: Float,
   ) => void;
@@ -405,7 +405,7 @@ export const Commands = codegenNativeCommands<NativeVideoCommands>({
   supportedCommands: [
     'seek',
     'setPlayerPauseState',
-    'setVolume',
+    'setVolumeCMD',
     'setFullScreen',
     'setLicenseResult',
     'setLicenseResultError',

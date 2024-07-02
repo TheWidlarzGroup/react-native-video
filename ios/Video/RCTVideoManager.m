@@ -72,7 +72,7 @@ RCT_EXTERN_METHOD(seek : (nonnull NSNumber*)reactTag time : (nonnull NSNumber*)t
 RCT_EXTERN_METHOD(setLicenseResult : (nonnull NSNumber*)reactTag lisence : (NSString*)license licenseUrl : (NSString*)licenseUrl)
 RCT_EXTERN_METHOD(setLicenseResultError : (nonnull NSNumber*)reactTag error : (NSString*)error licenseUrl : (NSString*)licenseUrl)
 RCT_EXTERN_METHOD(setPlayerPauseState : (nonnull NSNumber*)reactTag paused : (nonnull BOOL)paused)
-RCT_EXTERN_METHOD(setVolume : (nonnull NSNumber*)reactTag volume : (nonnull float*)volume)
+RCT_EXTERN_METHOD(setVolumeCMD : (nonnull NSNumber*)reactTag volume : (nonnull float*)volume)
 RCT_EXTERN_METHOD(setFullScreen : (nonnull NSNumber*)reactTag fullscreen : (nonnull BOOL)fullScreen)
 
 RCT_EXTERN_METHOD(save

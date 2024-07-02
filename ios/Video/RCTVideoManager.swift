@@ -58,8 +58,8 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
-    @objc(setVolume:volume:)
-    func setVolume(_ reactTag: NSNumber, volume: Float) {
+    @objc(setVolumeCMD:volume:)
+    func setVolumeCMD(_ reactTag: NSNumber, volume: Float) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
             videoView?.setVolume(volume)
         })
