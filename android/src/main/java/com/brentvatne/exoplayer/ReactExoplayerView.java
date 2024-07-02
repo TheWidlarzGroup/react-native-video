@@ -307,7 +307,7 @@ public class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
-        this.eventEmitter = new VideoEventEmitter(context);
+        this.eventEmitter = new VideoEventEmitter();
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
@@ -321,12 +321,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private boolean isPlayingAd() {
         return player != null && player.isPlayingAd();
-    }
-
-    @Override
-    public void setId(int id) {
-        super.setId(id);
-        eventEmitter.setViewId(id);
     }
 
     private void createViews() {
