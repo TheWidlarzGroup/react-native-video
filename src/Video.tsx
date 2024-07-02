@@ -306,7 +306,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const setVolume = useCallback((volume: number) => {
-      return nativeRef.current && Commands.setVolumeCMD(nativeRef.current, volume);
+      return (
+        nativeRef.current && Commands.setVolumeCMD(nativeRef.current, volume)
+      );
     }, []);
 
     const setFullScreen = useCallback((fullScreen: boolean) => {
