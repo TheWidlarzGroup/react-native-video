@@ -18,7 +18,7 @@ class NowPlayingInfoCenterManager {
     private var skipBackwardTarget: Any?
     private var playbackPositionTarget: Any?
     private var seekTarget: Any?
-    
+
     private let remoteCommandCenter = MPRemoteCommandCenter.shared()
 
     private var receivingRemoveControlEvents = false {
@@ -197,9 +197,9 @@ class NowPlayingInfoCenterManager {
         let metadata = currentItem.asset.commonMetadata + currentItem.externalMetadata
 
         let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.stringValue ?? ""
-        
+
         let artistItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first?.stringValue ?? ""
-        
+
         // I have some issue with this - setting artworkItem when it not set dont return nil but also is crashing application
         // this is very hacky workaround for it
         let imgData = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.dataValue
@@ -213,7 +213,7 @@ class NowPlayingInfoCenterManager {
             MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
             MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds.rounded(),
             MPNowPlayingInfoPropertyPlaybackRate: player.rate,
-            MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration)
+            MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
         ]
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
@@ -230,7 +230,7 @@ class NowPlayingInfoCenterManager {
                 MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
                 MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds.rounded(),
                 MPNowPlayingInfoPropertyPlaybackRate: player.rate,
-                MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration)
+                MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
             ]
 
             nowPlayingInfo.merge(newNowPlayingInfo) { _, v in v }
