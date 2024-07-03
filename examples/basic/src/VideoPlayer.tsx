@@ -150,6 +150,7 @@ class VideoPlayer extends Component {
     },
     {
       description: '(hls|live) red bull tv',
+      textTracksAllowChunklessPreparation: false,
       uri: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8',
       metadata: {
         title: 'Custom Title',
@@ -436,11 +437,7 @@ class VideoPlayer extends Component {
 
   toggleDecoration() {
     this.setState({decoration: !this.state.decoration});
-    if (this.state.decoration) {
-      this.video?.dismissFullscreenPlayer();
-    } else {
-      this.video?.presentFullscreenPlayer();
-    }
+    this.video?.setFullScreen(!this.state.decoration);
   }
 
   toggleShowNotificationControls() {

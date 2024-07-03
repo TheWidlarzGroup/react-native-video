@@ -93,6 +93,13 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(setFullScreen:reactTag:)
+    func setFullScreen(fullScreen: Bool, reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setFullscreen(fullScreen)
+        })
+    }
+
     @objc(enterPictureInPicture:)
     func enterPictureInPicture(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in

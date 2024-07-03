@@ -22,6 +22,7 @@ import NativeVideoComponent, {
   type OnAudioTracksData,
   type OnBandwidthUpdateData,
   type OnBufferData,
+  type OnControlsVisibilityChange,
   type OnExternalPlaybackChangeData,
   type OnGetLicenseData,
   type OnLoadStartData,
@@ -66,6 +67,7 @@ export interface VideoRef {
   save: (options: object) => Promise<VideoSaveData>;
   setVolume: (volume: number) => void;
   getCurrentPosition: () => Promise<number>;
+  setFullScreen: (fullScreen: boolean) => void;
   enterPictureInPicture: () => void;
   exitPictureInPicture: () => void;
 }
@@ -92,6 +94,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onEnd,
       onBuffer,
       onBandwidthUpdate,
+      onControlsVisibilityChange,
       onExternalPlaybackChange,
       onFullscreenPlayerWillPresent,
       onFullscreenPlayerDidPresent,
@@ -171,6 +174,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
+        textTracksAllowChunklessPreparation:
+          resolvedSource.textTracksAllowChunklessPreparation,
       };
     }, [source]);
 
@@ -194,9 +199,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedTextTrack) {
         return;
       }
-      const type = typeof selectedTextTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedTextTrack');
+      const typeOfValueProp = typeof selectedTextTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedTextTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
@@ -209,9 +221,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedAudioTrack) {
         return;
       }
-      const type = typeof selectedAudioTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedAudioTrack');
+      const typeOfValueProp = typeof selectedAudioTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedAudioTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
 
@@ -225,9 +244,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!selectedVideoTrack) {
         return;
       }
-      const type = typeof selectedVideoTrack.value;
-      if (type !== 'number' && type !== 'string') {
-        console.log('invalid type provided to selectedVideoTrack');
+      const typeOfValueProp = typeof selectedVideoTrack.value;
+      if (
+        typeOfValueProp !== 'number' &&
+        typeOfValueProp !== 'string' &&
+        typeOfValueProp !== 'undefined'
+      ) {
+        console.warn(
+          'invalid type provided to selectedVideoTrack.value: ',
+          typeOfValueProp,
+        );
         return;
       }
       return {
@@ -334,6 +360,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const getCurrentPosition = useCallback(() => {
       return VideoManager.getCurrentPosition(getReactTag(nativeRef));
+    }, []);
+
+    const setFullScreen = useCallback((fullScreen: boolean) => {
+      return VideoManager.setFullScreen(fullScreen, getReactTag(nativeRef));
     }, []);
 
     const onVideoLoadStart = useCallback(
@@ -490,6 +520,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAspectRatio],
     );
 
+    const _onControlsVisibilityChange = useCallback(
+      (e: NativeSyntheticEvent<OnControlsVisibilityChange>) => {
+        onControlsVisibilityChange?.(e.nativeEvent);
+      },
+      [onControlsVisibilityChange],
+    );
+
     const useExternalGetLicense = drm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
@@ -554,6 +591,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
         getCurrentPosition,
+        setFullScreen,
         enterPictureInPicture,
         exitPictureInPicture,
       }),
@@ -567,6 +605,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         restoreUserInterfaceForPictureInPictureStopCompleted,
         setVolume,
         getCurrentPosition,
+        setFullScreen,
         enterPictureInPicture,
         exitPictureInPicture,
       ],
@@ -648,6 +687,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             onReceiveAdEvent
               ? (_onReceiveAdEvent as (e: NativeSyntheticEvent<object>) => void)
               : undefined
+          }
+          onControlsVisibilityChange={
+            onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
           }
         />
         {hasPoster && showPoster ? (

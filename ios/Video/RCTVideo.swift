@@ -261,6 +261,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     deinit {
+        #if USE_GOOGLE_IMA
+            _imaAdsManager.releaseAds()
+            _imaAdsManager = nil
+        #endif
+
         NotificationCenter.default.removeObserver(self)
         self.removePlayerLayer()
         _playerObserver.clearPlayer()
@@ -1040,6 +1045,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _presentingViewController?.dismiss(animated: true, completion: { [weak self] in
                 self?.videoPlayerViewControllerDidDismiss(playerViewController: _playerViewController)
             })
+            setControls(_controls)
         }
     }
 
@@ -1142,6 +1148,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setShowNotificationControls(_ showNotificationControls: Bool) {
+        _showNotificationControls = showNotificationControls
+
         guard let player = _player else {
             return
         }
@@ -1151,8 +1159,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         } else {
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
-
-        _showNotificationControls = showNotificationControls
     }
 
     @objc
@@ -1297,11 +1303,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _player = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
-
-        #if USE_GOOGLE_IMA
-            _imaAdsManager.releaseAds()
-            _imaAdsManager = nil
-        #endif
 
         self.removePlayerLayer()
 

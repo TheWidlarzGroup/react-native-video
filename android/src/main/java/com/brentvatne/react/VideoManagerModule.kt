@@ -71,6 +71,13 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     }
 
     @ReactMethod
+    fun setFullScreen(fullScreen: Boolean, reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.setFullscreen(fullScreen)
+        }
+    }
+
+    @ReactMethod
     fun enterPictureInPicture(reactTag: Int) {
         performOnPlayerView(reactTag) {
             it?.enterPictureInPictureMode()

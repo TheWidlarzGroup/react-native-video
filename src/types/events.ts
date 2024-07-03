@@ -4,6 +4,7 @@ import type {
   OnAudioTracksData,
   OnBandwidthUpdateData,
   OnBufferData,
+  OnControlsVisibilityChange,
   OnExternalPlaybackChangeData,
   OnLoadStartData,
   OnPictureInPictureStatusChangedData,
@@ -237,6 +238,7 @@ export interface ReactVideoEvents {
   onIdle?: () => void; // Android
   onBandwidthUpdate?: (e: OnBandwidthUpdateData) => void; //Android
   onBuffer?: (e: OnBufferData) => void; //Android, iOS
+  onControlsVisibilityChange?: (e: OnControlsVisibilityChange) => void; // Android, iOS
   onEnd?: () => void; //All
   onError?: (e: OnVideoErrorData) => void; //Android, iOS
   onExternalPlaybackChange?: (e: OnExternalPlaybackChangeData) => void; //iOS

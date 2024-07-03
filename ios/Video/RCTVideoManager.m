@@ -93,6 +93,8 @@ RCT_EXTERN_METHOD(getCurrentPosition
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setFullScreen : (BOOL)fullScreen reactTag : (nonnull NSNumber*)reactTag)
+
 RCT_EXTERN_METHOD(enterPictureInPicture : (nonnull NSNumber*)reactTag)
 
 RCT_EXTERN_METHOD(exitPictureInPicture : (nonnull NSNumber*)reactTag)
