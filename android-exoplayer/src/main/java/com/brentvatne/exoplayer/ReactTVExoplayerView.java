@@ -504,7 +504,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     translations.getSkipCountdownLabel(),
                     translations.getSkipLabel()
             );
-            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, adLabels);
+            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, true, adLabels);
 
             long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
@@ -533,6 +533,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoPlayer.addAnalyticsListener(this);
             Player realPlayer = player.createForwardPlayer();
             exoDorisPlayerView.setPlayer(realPlayer);
+            exoDorisPlayerView.setAdPlayPauseEnabled(adType == AdType.YO_SSAI || adType == AdType.AMT_SSAI);
             audioBecomingNoisyReceiver.setListener(this);
             setPlayWhenReady(!isPaused);
             playerNeedsSource = true;
@@ -1606,6 +1607,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setAreControlsAllowed(boolean allowed) {
         areControlsAllowed = allowed;
         setControls(allowed);
+        exoDorisPlayerView.setAreControlsAllowed(allowed);
     }
 
     public void setControls(final boolean visible) {
@@ -1971,6 +1973,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         @Override
         public void onAdEvent(DorisAdEvent adEvent) {
             Log.d(TAG, "onAdEvent: " + adEvent);
+            if (exoDorisPlayerView != null) {
+                exoDorisPlayerView.onAdEvent(adEvent);
+            }
             switch (adEvent.event) {
                 case AD_BREAK_STARTED:
                     if (areControlsAllowed) {
