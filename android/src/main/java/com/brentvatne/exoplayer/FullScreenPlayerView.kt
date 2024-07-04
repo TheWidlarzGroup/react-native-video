@@ -69,10 +69,7 @@ class FullScreenPlayerView(
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(
-                androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit,
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description)
-            )
+            updateFullscreenButton(playerControlView, true)
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
@@ -84,10 +81,7 @@ class FullScreenPlayerView(
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(
-                androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter,
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description)
-            )
+            updateFullscreenButton(playerControlView, false)
             containerView.removeView(it)
             parent?.addView(it, generateDefaultLayoutParams())
         }
@@ -95,11 +89,17 @@ class FullScreenPlayerView(
         parent = null
     }
 
-    private fun updateFullscreenButton(iconResourceId: Int, contentDescription: String) {
-        playerControlView?.let {
-            val imageButton: ImageButton = it.findViewById(com.brentvatne.react.R.id.exo_fullscreen)
-            imageButton.setImageResource(iconResourceId)
-            imageButton.contentDescription = contentDescription
+    private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
+        val imageButton = playerControlView.findViewById<ImageButton?>(com.brentvatne.react.R.id.exo_fullscreen)
+        imageButton?.let {
+            val imgResource = if (isFullscreen) androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit else androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
+            val desc = if (isFullscreen) {
+                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description)
+            } else {
+                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description)
+            }
+            imageButton.setImageResource(imgResource)
+            imageButton.contentDescription = desc
         }
     }
 
