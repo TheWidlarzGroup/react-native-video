@@ -78,6 +78,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       style,
       resizeMode,
       posterProps,
+      renderPoster,
       fullscreen,
       drm,
       textTracks,
@@ -122,14 +123,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<ComponentRef<VideoComponentType>>(null);
-    const [showPoster, setShowPoster] = useState(!!posterProps?.source);
+    const [showPoster, setShowPoster] = useState(
+      !!renderPoster || !!posterProps?.source,
+    );
     const [isFullscreen, setIsFullscreen] = useState(fullscreen);
     const [
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
-    const hasPoster = !!posterProps?.source;
+    const hasPoster = !!renderPoster || !!posterProps?.source;
 
     const posterStyle = useMemo<StyleProp<ImageStyle>>(
       () => [
@@ -604,6 +607,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         : ViewType.SURFACE;
     }, [drm, useSecureView, useTextureView, viewType]);
 
+    const _renderPoster = useCallback(() => {
+      if (renderPoster) {
+        return <View style={StyleSheet.absoluteFill}>{renderPoster()}</View>;
+      }
+
+      return <Image {...posterProps} style={posterStyle} />;
+    }, [posterProps, posterStyle, renderPoster]);
+
     return (
       <View style={style}>
         <NativeVideoComponent
@@ -689,9 +700,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
           viewType={_viewType}
         />
-        {hasPoster && showPoster ? (
-          <Image {...posterProps} style={posterStyle} />
-        ) : null}
+        {hasPoster && showPoster ? _renderPoster() : null}
       </View>
     );
   },

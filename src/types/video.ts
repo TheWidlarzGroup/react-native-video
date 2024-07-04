@@ -11,6 +11,7 @@ import type {
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
+import type {ReactNode} from 'react';
 
 export type Headers = Record<string, string>;
 
@@ -250,6 +251,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
+  renderPoster?: () => ReactNode;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
