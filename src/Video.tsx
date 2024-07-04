@@ -78,6 +78,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       style,
       resizeMode,
       posterProps,
+      posterResizeMode,
       renderPoster,
       fullscreen,
       drm,
@@ -136,7 +137,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const posterStyle = useMemo<StyleProp<ImageStyle>>(
       () => [
-        StyleSheet.absoluteFillObject,
+        {
+          ...StyleSheet.absoluteFillObject,
+          resizeMode:
+            posterResizeMode && posterResizeMode !== 'none'
+              ? posterResizeMode
+              : 'contain',
+        },
         ...(posterProps?.style && Array.isArray(posterProps.style)
           ? posterProps.style
           : [posterProps?.style]),

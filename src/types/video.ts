@@ -8,10 +8,10 @@ import type {
   ImageRequireSource,
   ImageURISource,
 } from 'react-native';
+import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
-import type {ReactNode} from 'react';
 
 export type Headers = Record<string, string>;
 
@@ -208,6 +208,15 @@ export enum MixWithOthersType {
   DUCK = 'duck',
 }
 
+export enum PosterResizeModeType {
+  CONTAIN = 'contain',
+  CENTER = 'center',
+  COVER = 'cover',
+  NONE = 'none',
+  REPEAT = 'repeat',
+  STRETCH = 'stretch',
+}
+
 export type AudioOutput = 'speaker' | 'earpiece';
 
 export type ControlsStyles = {
@@ -247,6 +256,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   posterProps?: ReactVideoPoster;
+  posterResizeMode?: EnumValues<PosterResizeModeType>; // deprecated
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
