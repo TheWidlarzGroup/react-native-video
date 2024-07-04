@@ -246,7 +246,7 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: state.useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            posterProps={{
+            poster={{
               source: {
                 uri: state.poster,
               },

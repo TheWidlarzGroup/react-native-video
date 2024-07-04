@@ -15,6 +15,7 @@ import {
   type StyleProp,
   type ImageStyle,
   type NativeSyntheticEvent,
+  type ImageResizeMode,
 } from 'react-native';
 
 import NativeVideoComponent, {
@@ -77,7 +78,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       source,
       style,
       resizeMode,
-      posterProps,
+      poster,
       posterResizeMode,
       renderPoster,
       fullscreen,
@@ -124,32 +125,27 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<ComponentRef<VideoComponentType>>(null);
-    const [showPoster, setShowPoster] = useState(
-      !!renderPoster || !!posterProps?.source,
-    );
+
+    const isPosterDeprecated = typeof poster === 'string';
+
+    const hasPoster = useMemo(() => {
+      if (renderPoster) {
+        return true;
+      }
+
+      if (isPosterDeprecated) {
+        return !!poster;
+      }
+
+      return !!poster?.source;
+    }, [isPosterDeprecated, poster, renderPoster]);
+
+    const [showPoster, setShowPoster] = useState(hasPoster);
     const [isFullscreen, setIsFullscreen] = useState(fullscreen);
     const [
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
-
-    const hasPoster = !!renderPoster || !!posterProps?.source;
-
-    const posterStyle = useMemo<StyleProp<ImageStyle>>(
-      () => [
-        {
-          ...StyleSheet.absoluteFillObject,
-          resizeMode:
-            posterResizeMode && posterResizeMode !== 'none'
-              ? posterResizeMode
-              : 'contain',
-        },
-        ...(posterProps?.style && Array.isArray(posterProps.style)
-          ? posterProps.style
-          : [posterProps?.style]),
-      ],
-      [posterProps?.style],
-    );
 
     const src = useMemo<VideoSrc | undefined>(() => {
       if (!source) {
@@ -614,13 +610,44 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         : ViewType.SURFACE;
     }, [drm, useSecureView, useTextureView, viewType]);
 
+    const posterStyle = useMemo<StyleProp<ImageStyle>>(() => {
+      let _posterResizeMode: ImageResizeMode = 'contain';
+
+      if (!isPosterDeprecated && poster?.resizeMode) {
+        _posterResizeMode = poster.resizeMode;
+      } else if (posterResizeMode && posterResizeMode !== 'none') {
+        _posterResizeMode = posterResizeMode;
+      }
+
+      const baseStyle: StyleProp<ImageStyle> = {
+        ...StyleSheet.absoluteFillObject,
+        resizeMode: _posterResizeMode,
+      };
+
+      if (!isPosterDeprecated && poster?.style) {
+        const styles = Array.isArray(poster.style)
+          ? poster.style
+          : [poster.style];
+
+        return [baseStyle, ...styles];
+      }
+
+      return baseStyle;
+    }, [poster, posterResizeMode, isPosterDeprecated]);
+
     const _renderPoster = useCallback(() => {
       if (renderPoster) {
         return <View style={StyleSheet.absoluteFill}>{renderPoster()}</View>;
       }
 
-      return <Image {...posterProps} style={posterStyle} />;
-    }, [posterProps, posterStyle, renderPoster]);
+      return (
+        <Image
+          {...(isPosterDeprecated ? {} : poster)}
+          source={isPosterDeprecated ? {uri: poster} : poster?.source}
+          style={posterStyle}
+        />
+      );
+    }, [isPosterDeprecated, poster, posterStyle, renderPoster]);
 
     return (
       <View style={style}>

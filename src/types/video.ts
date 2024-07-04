@@ -255,7 +255,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
-  posterProps?: ReactVideoPoster;
+  poster?: string | ReactVideoPoster; // string is deprecated
   posterResizeMode?: EnumValues<PosterResizeModeType>; // deprecated
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
