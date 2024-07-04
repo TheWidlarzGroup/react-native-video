@@ -1,6 +1,13 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
+import type {
+  ImageProps,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+  ImageRequireSource,
+  ImageURISource,
+} from 'react-native';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
@@ -32,6 +39,13 @@ export type ReactVideoSource = Readonly<
     uri?: string | NodeRequire;
   }
 >;
+
+export type ReactVideoPosterSource = ImageURISource | ImageRequireSource;
+
+export type ReactVideoPoster = Omit<ImageProps, 'source'> & {
+  // prevents giving source in the array
+  source?: ReactVideoPosterSource;
+};
 
 export type VideoMetadata = Readonly<{
   title?: string;
@@ -193,15 +207,6 @@ export enum MixWithOthersType {
   DUCK = 'duck',
 }
 
-export enum PosterResizeModeType {
-  CONTAIN = 'contain',
-  CENTER = 'center',
-  COVER = 'cover',
-  NONE = 'none',
-  REPEAT = 'repeat',
-  STRETCH = 'stretch',
-}
-
 export type AudioOutput = 'speaker' | 'earpiece';
 
 export type ControlsStyles = {
@@ -240,8 +245,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
-  poster?: string;
-  posterResizeMode?: EnumValues<PosterResizeModeType>;
+  posterProps?: ReactVideoPoster;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;

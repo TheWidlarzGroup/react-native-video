@@ -77,8 +77,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       source,
       style,
       resizeMode,
-      posterResizeMode,
-      poster,
+      posterProps,
       fullscreen,
       drm,
       textTracks,
@@ -123,24 +122,23 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<ComponentRef<VideoComponentType>>(null);
-    const [showPoster, setShowPoster] = useState(!!poster);
+    const [showPoster, setShowPoster] = useState(!!posterProps?.source);
     const [isFullscreen, setIsFullscreen] = useState(fullscreen);
     const [
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
-    const hasPoster = !!poster;
+    const hasPoster = !!posterProps?.source;
 
     const posterStyle = useMemo<StyleProp<ImageStyle>>(
-      () => ({
-        ...StyleSheet.absoluteFillObject,
-        resizeMode:
-          posterResizeMode && posterResizeMode !== 'none'
-            ? posterResizeMode
-            : 'contain',
-      }),
-      [posterResizeMode],
+      () => [
+        StyleSheet.absoluteFillObject,
+        ...(posterProps?.style && Array.isArray(posterProps.style)
+          ? posterProps.style
+          : [posterProps?.style]),
+      ],
+      [posterProps?.style],
     );
 
     const src = useMemo<VideoSrc | undefined>(() => {
@@ -613,7 +611,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           {...rest}
           src={src}
           drm={_drm}
-          style={StyleSheet.absoluteFill}
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            ...(showPoster ? {display: 'none'} : {}),
+          }}
           resizeMode={resizeMode}
           fullscreen={isFullscreen}
           restoreUserInterfaceForPIPStopCompletionHandler={
@@ -689,7 +690,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           viewType={_viewType}
         />
         {hasPoster && showPoster ? (
-          <Image style={posterStyle} source={{uri: poster}} />
+          <Image {...posterProps} style={posterStyle} />
         ) : null}
       </View>
     );

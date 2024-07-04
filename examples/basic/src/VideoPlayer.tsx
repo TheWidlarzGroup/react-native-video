@@ -246,7 +246,12 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: state.useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            poster={state.poster}
+            posterProps={{
+              source: {
+                uri: state.poster,
+              },
+              resizeMode: 'contain',
+            }}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
