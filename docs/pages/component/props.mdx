@@ -431,23 +431,39 @@ Determine whether the media should continue playing when notifications or the Co
 - **false (default)** - Don't continue playing the media
 - **true** - Continue playing the media
 
-### `posterProps`
+### `poster`
 
 <PlatformsList types={['All']} />
 
 An image to display while the video is loading
 
 Value: Props for the `Image` component. The poster is visible when the source attribute is provided.
+> [!WARNING]
+> Value: string with a URL for the poster is deprecated, use `poster` as object instead
 
 ```javascript
 <Video>
-  posterProps={{
+  poster={{
     source: { uri: "https://baconmockup.com/300/200/" },
     resizeMode: "cover",
     // ...
   }}
 </Video>
 ````
+
+### `posterResizeMode`
+> [!WARNING]
+> deprecated, use `poster` with `resizeMode` key instead
+<PlatformsList types={['All']} />
+
+Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
+
+- **"contain" (default)** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+- **"center"** - Center the image in the view along both dimensions. If the image is larger than the view, scale it down uniformly so that it is contained in the view.
+- **"cover"** - Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
+- **"none"** - Don't apply resize
+- **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
+- **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
 ### `renderPoster`
 
