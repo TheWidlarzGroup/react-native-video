@@ -213,7 +213,8 @@ export type ControlsStyles = {
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
-  drm?: Drm; // deprecated
+  /** @deprecated */
+  drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
   audioOutput?: AudioOutput; // Mobile
@@ -260,8 +261,10 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   textTracks?: TextTracks;
   testID?: string;
   viewType?: ViewType;
-  useTextureView?: boolean; // Android // deprecated
-  useSecureView?: boolean; // Android // deprecated
+  /** @deprecated */
+  useTextureView?: boolean; // Android
+  /** @deprecated */
+  useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
