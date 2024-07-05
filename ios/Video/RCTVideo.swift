@@ -1253,7 +1253,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerItem = nil
         _source = nil
         _chapters = nil
-        _drm = nil
         _textTracks = nil
         _selectedTextTrackCriteria = nil
         _selectedAudioTrackCriteria = nil
