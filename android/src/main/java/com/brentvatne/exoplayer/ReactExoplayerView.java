@@ -1628,7 +1628,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (isPaused && isSeeking && !buffering) {
-            eventEmitter.seek(player.getCurrentPosition(), seekPosition);
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
             isSeeking = false;
         }
 
@@ -1692,7 +1692,7 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
         if (isPlaying && isSeeking) {
-            eventEmitter.seek(player.getCurrentPosition(), seekPosition);
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
         }
 
         eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
