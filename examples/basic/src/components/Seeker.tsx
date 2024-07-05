@@ -10,7 +10,7 @@ interface SeekerProps {
   videoSeek: (arg0: number) => void;
 }
 
-const Seeker = ({
+export const Seeker = ({
   currentTime,
   duration,
   isLoading,
@@ -150,5 +150,3 @@ const Seeker = ({
     </View>
   );
 };
-
-export default Seeker;
