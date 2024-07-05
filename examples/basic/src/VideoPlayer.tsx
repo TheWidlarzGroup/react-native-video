@@ -1,6 +1,6 @@
 'use strict';
 
-import React, {FC, useCallback, useMemo, useRef, useState} from 'react';
+import React, {FC, useCallback, useRef, useState} from 'react';
 
 import {TouchableOpacity, View} from 'react-native';
 
@@ -28,32 +28,12 @@ import Video, {
   ResizeMode,
   VideoTrack,
   SelectedTrack,
-  VideoDecoderProperties,
   SelectedVideoTrack,
 } from 'react-native-video';
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
-import {
-  bufferConfig,
-  isAndroid,
-  isIos,
-  samplePoster,
-  srcList,
-  textTracksSelectionBy,
-} from './constants';
-import {
-  AudioTrackSelector,
-  Indicator,
-  Seeker,
-  TextTrackSelector,
-  toast,
-  TopControl,
-  VideoTrackSelector,
-} from './components';
-import ToggleControl from './ToggleControl.tsx';
-import MultiValueControl, {
-  MultiValueControlPropType,
-} from './MultiValueControl.tsx';
+import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
+import {Overlay, toast} from './components';
 
 type Props = NonNullable<unknown>;
 
@@ -231,277 +211,6 @@ const VideoPlayer: FC<Props> = ({}) => {
     goToChannel((srcListId + srcList.length - 1) % srcList.length);
   }, [srcListId]);
 
-  const popupInfo = useCallback(() => {
-    VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
-      VideoDecoderProperties.isHEVCSupported().then((hevc: string) => {
-        VideoDecoderProperties.isCodecSupported('video/avc', 1920, 1080).then(
-          (avc: string) => {
-            toast(
-              true,
-              'Widevine level: ' +
-                widevineLevel +
-                '\n hevc: ' +
-                hevc +
-                '\n avc: ' +
-                avc,
-            );
-          },
-        );
-      });
-    });
-  }, []);
-
-  const toggleFullscreen = useCallback(() => {
-    setFullscreen(!fullscreen);
-  }, [fullscreen]);
-
-  const toggleControls = useCallback(() => {
-    setControls(!controls);
-  }, [controls]);
-
-  const toggleDecoration = useCallback(() => {
-    setDecoration(!decoration);
-    videoRef.current?.setFullScreen(!decoration);
-  }, [decoration]);
-
-  const toggleShowNotificationControls = useCallback(() => {
-    setShowNotificationControls(!showNotificationControls);
-  }, [showNotificationControls]);
-
-  const onSelectedAudioTrackChange = (itemValue: string) => {
-    console.log('on audio value change ' + itemValue);
-    if (itemValue === 'none') {
-      setSelectedAudioTrack({
-        type: SelectedTrackType.DISABLED,
-      });
-    } else {
-      setSelectedAudioTrack({
-        type: SelectedTrackType.INDEX,
-        value: itemValue,
-      });
-    }
-  };
-
-  const onSelectedTextTrackChange = (itemValue: string) => {
-    console.log('on value change ' + itemValue);
-    const type =
-      textTracksSelectionBy === 'index'
-        ? SelectedTrackType.INDEX
-        : SelectedTrackType.LANGUAGE;
-    setSelectedTextTrack({type, value: itemValue});
-  };
-
-  const onSelectedVideoTrackChange = (itemValue: string) => {
-    console.log('on value change ' + itemValue);
-    if (itemValue === undefined || itemValue === 'auto') {
-      setSelectedVideoTrack({
-        type: SelectedVideoTrackType.AUTO,
-      });
-    } else {
-      setSelectedVideoTrack({
-        type: SelectedVideoTrackType.INDEX,
-        value: itemValue,
-      });
-    }
-  };
-
-  const videoSeek = (position: number) => {
-    setIsSeeking(true);
-    videoRef.current?.seek(position);
-  };
-
-  const onRateSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setRate(value);
-    }
-  };
-  const onVolumeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setVolume(value);
-    }
-  };
-  const onResizeModeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'object') {
-      setResizeMode(value);
-    }
-  };
-
-  const renderOverlay = useMemo(() => {
-    return (
-      <>
-        <Indicator isLoading={isLoading} />
-        <View style={styles.topControls}>
-          <View style={styles.resizeModeControl}>
-            <TopControl
-              srcListId={srcListId}
-              showRNVControls={controls}
-              toggleControls={toggleControls}
-            />
-          </View>
-        </View>
-        {!controls ? (
-          <>
-            <View style={styles.leftControls}>
-              <ToggleControl onPress={channelDown} text="ChDown" />
-            </View>
-            <View style={styles.rightControls}>
-              <ToggleControl onPress={channelUp} text="ChUp" />
-            </View>
-            <View style={styles.bottomControls}>
-              <View style={styles.generalControls}>
-                {isAndroid ? (
-                  <View style={styles.generalControls}>
-                    <ToggleControl onPress={popupInfo} text="decoderInfo" />
-                    <ToggleControl
-                      isSelected={useCache}
-                      onPress={() => {
-                        setUseCache(!useCache);
-                      }}
-                      selectedText="enable cache"
-                      unselectedText="disable cache"
-                    />
-                  </View>
-                ) : null}
-                <ToggleControl
-                  isSelected={paused}
-                  onPress={() => {
-                    setPaused(!paused);
-                  }}
-                  selectedText="pause"
-                  unselectedText="playing"
-                />
-                <ToggleControl
-                  isSelected={repeat}
-                  onPress={() => {
-                    setRepeat(!repeat);
-                  }}
-                  selectedText="loop enable"
-                  unselectedText="loop disable"
-                />
-                <ToggleControl onPress={toggleFullscreen} text="fullscreen" />
-                <ToggleControl onPress={toggleDecoration} text="decoration" />
-                <ToggleControl
-                  isSelected={!!poster}
-                  onPress={() => {
-                    setPoster(poster ? undefined : samplePoster);
-                  }}
-                  selectedText="poster"
-                  unselectedText="no poster"
-                />
-                <ToggleControl
-                  isSelected={showNotificationControls}
-                  onPress={toggleShowNotificationControls}
-                  selectedText="hide notification controls"
-                  unselectedText="show notification controls"
-                />
-              </View>
-              <View style={styles.generalControls}>
-                {/* shall be replaced by slider */}
-                <MultiValueControl
-                  values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
-                  onPress={onRateSelected}
-                  selected={rate}
-                />
-                {/* shall be replaced by slider */}
-                <MultiValueControl
-                  values={[0.5, 1, 1.5]}
-                  onPress={onVolumeSelected}
-                  selected={volume}
-                />
-                <MultiValueControl
-                  values={[
-                    ResizeMode.COVER,
-                    ResizeMode.CONTAIN,
-                    ResizeMode.STRETCH,
-                  ]}
-                  onPress={onResizeModeSelected}
-                  selected={resizeMode}
-                />
-                <ToggleControl
-                  isSelected={muted}
-                  onPress={() => {
-                    setMuted(!muted);
-                  }}
-                  text="muted"
-                />
-                {isIos ? (
-                  <ToggleControl
-                    isSelected={paused}
-                    onPress={() => {
-                      videoRef.current
-                        ?.save({})
-                        ?.then((response: unknown) => {
-                          console.log('Downloaded URI', response);
-                        })
-                        .catch((error: unknown) => {
-                          console.log('error during save ', error);
-                        });
-                    }}
-                    text="save"
-                  />
-                ) : null}
-              </View>
-              <Seeker
-                currentTime={currentTime}
-                duration={duration}
-                isLoading={isLoading}
-                videoSeek={prop => videoSeek(prop)}
-                isUISeeking={isSeeking}
-              />
-              <View style={styles.generalControls}>
-                <AudioTrackSelector
-                  audioTracks={audioTracks}
-                  selectedAudioTrack={selectedAudioTrack}
-                  onValueChange={onSelectedAudioTrackChange}
-                />
-                <TextTrackSelector
-                  textTracks={textTracks}
-                  selectedTextTrack={selectedTextTrack}
-                  onValueChange={onSelectedTextTrackChange}
-                  textTracksSelectionBy={textTracksSelectionBy}
-                />
-                <VideoTrackSelector
-                  videoTracks={videoTracks}
-                  selectedVideoTrack={selectedVideoTrack}
-                  onValueChange={onSelectedVideoTrackChange}
-                />
-              </View>
-            </View>
-          </>
-        ) : null}
-      </>
-    );
-  }, [
-    audioTracks,
-    channelDown,
-    channelUp,
-    controls,
-    currentTime,
-    duration,
-    isLoading,
-    isSeeking,
-    muted,
-    paused,
-    popupInfo,
-    poster,
-    rate,
-    repeat,
-    resizeMode,
-    selectedAudioTrack,
-    selectedTextTrack,
-    selectedVideoTrack,
-    showNotificationControls,
-    srcListId,
-    textTracks,
-    toggleControls,
-    toggleDecoration,
-    toggleFullscreen,
-    toggleShowNotificationControls,
-    useCache,
-    videoTracks,
-    volume,
-  ]);
-
   return (
     <View style={styles.container}>
       {(srcList[srcListId] as AdditionalSourceInfo)?.noView ? null : (
@@ -555,7 +264,50 @@ const VideoPlayer: FC<Props> = ({}) => {
           />
         </TouchableOpacity>
       )}
-      {renderOverlay}
+      <Overlay
+        channelDown={channelDown}
+        channelUp={channelUp}
+        ref={videoRef}
+        videoTracks={videoTracks}
+        selectedVideoTrack={selectedVideoTrack}
+        setSelectedTextTrack={setSelectedTextTrack}
+        audioTracks={audioTracks}
+        controls={controls}
+        resizeMode={resizeMode}
+        textTracks={textTracks}
+        selectedTextTrack={selectedTextTrack}
+        selectedAudioTrack={selectedAudioTrack}
+        setSelectedAudioTrack={setSelectedAudioTrack}
+        setSelectedVideoTrack={setSelectedVideoTrack}
+        currentTime={currentTime}
+        setMuted={setMuted}
+        muted={muted}
+        fullscreen={fullscreen}
+        duration={duration}
+        decoration={decoration}
+        paused={paused}
+        volume={volume}
+        setControls={setControls}
+        poster={poster}
+        setDecoration={setDecoration}
+        rate={rate}
+        setFullscreen={setFullscreen}
+        setPaused={setPaused}
+        isLoading={isLoading}
+        isSeeking={isSeeking}
+        setIsSeeking={setIsSeeking}
+        repeat={repeat}
+        setRepeat={setRepeat}
+        setPoster={setPoster}
+        setRate={setRate}
+        setResizeMode={setResizeMode}
+        setShowNotificationControls={setShowNotificationControls}
+        showNotificationControls={showNotificationControls}
+        setUseCache={setUseCache}
+        setVolume={setVolume}
+        useCache={useCache}
+        srcListId={srcListId}
+      />
     </View>
   );
 };
