@@ -11,7 +11,7 @@ import React
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
         private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
         private var _pipController: AVPictureInPictureController?
-        private var _isActive = false
+        public private(set) var _isActive = false
 
         init(
             _ onPictureInPictureEnter: (() -> Void)? = nil,
