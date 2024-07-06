@@ -398,19 +398,6 @@ public class ReactExoplayerView extends FrameLayout implements
     // Internal methods
 
     /**
-     * Toggling the visibility of the player control view
-     */
-    private void togglePlayerControlVisibility() {
-        if (player == null) return;
-        reLayoutControls();
-        if (playerControlView.isVisible()) {
-            exoPlayerView.setUseController(false);
-        } else {
-            exoPlayerView.setUseController(false);
-        }
-    }
-
-    /**
      * Initializing Player control
      */
     @SuppressLint("ClickableViewAccessibility")
@@ -2149,7 +2136,7 @@ public class ReactExoplayerView extends FrameLayout implements
             });
         }
         if (fullscreen) {
-            eventEmitter.fullscreenWillPresent();
+            eventEmitter.onVideoFullscreenPlayerDidPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
                 reLayoutControls();
