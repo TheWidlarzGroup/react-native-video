@@ -10,7 +10,6 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
 import androidx.media3.ui.LegacyPlayerControlView
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
@@ -28,7 +27,6 @@ class FullScreenPlayerView(
     private val containerView = FrameLayout(context)
     private val mKeepScreenOnHandler = Handler(Looper.getMainLooper())
     private val mKeepScreenOnUpdater = KeepScreenOnUpdater(this)
-    private val onBackPressedDispatcher = OnBackPressedDispatcher()
 
     private class KeepScreenOnUpdater(fullScreenPlayerView: FullScreenPlayerView) : Runnable {
         private val mFullscreenPlayer = WeakReference(fullScreenPlayerView)
@@ -61,6 +59,10 @@ class FullScreenPlayerView(
 
     init {
         setContentView(containerView, generateDefaultLayoutParams())
+    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        onBackPressedCallback.handleOnBackPressed()
     }
 
     override fun onStart() {
@@ -116,13 +118,6 @@ class FullScreenPlayerView(
         if (reactExoplayerView.preventsDisplaySleepDuringVideoPlayback) {
             mKeepScreenOnHandler.post(mKeepScreenOnUpdater)
         }
-        onBackPressedDispatcher.addCallback(onBackPressedCallback)
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        onBackPressedCallback.handleOnBackPressed()
-        onBackPressedCallback.remove()
     }
 
     private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams {
