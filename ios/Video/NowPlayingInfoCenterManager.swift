@@ -19,6 +19,8 @@ class NowPlayingInfoCenterManager {
     private var playbackPositionTarget: Any?
     private var seekTarget: Any?
 
+    private let remoteCommandCenter = MPRemoteCommandCenter.shared()
+
     private var receivingRemoveControlEvents = false {
         didSet {
             if receivingRemoveControlEvents {
@@ -86,8 +88,7 @@ class NowPlayingInfoCenterManager {
             currentPlayer?.removeTimeObserver(playbackObserver)
         }
 
-        let commandCenter = MPRemoteCommandCenter.shared()
-        invalidateTargets(commandCenter)
+        invalidateCommandTargets()
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         receivingRemoveControlEvents = false
@@ -103,7 +104,7 @@ class NowPlayingInfoCenterManager {
         }
 
         currentPlayer = player
-        registerTargets()
+        registerCommandTargets()
 
         updateMetadata()
 
@@ -117,12 +118,10 @@ class NowPlayingInfoCenterManager {
         )
     }
 
-    private func registerTargets() {
-        let commandCenter = MPRemoteCommandCenter.shared()
+    private func registerCommandTargets() {
+        invalidateCommandTargets()
 
-        invalidateTargets(commandCenter)
-
-        playTarget = commandCenter.playCommand.addTarget { [weak self] _ in
+        playTarget = remoteCommandCenter.playCommand.addTarget { [weak self] _ in
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
@@ -134,7 +133,7 @@ class NowPlayingInfoCenterManager {
             return .success
         }
 
-        pauseTarget = commandCenter.pauseCommand.addTarget { [weak self] _ in
+        pauseTarget = remoteCommandCenter.pauseCommand.addTarget { [weak self] _ in
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
@@ -146,7 +145,7 @@ class NowPlayingInfoCenterManager {
             return .success
         }
 
-        skipBackwardTarget = commandCenter.skipBackwardCommand.addTarget { [weak self] _ in
+        skipBackwardTarget = remoteCommandCenter.skipBackwardCommand.addTarget { [weak self] _ in
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
@@ -155,7 +154,7 @@ class NowPlayingInfoCenterManager {
             return .success
         }
 
-        skipForwardTarget = commandCenter.skipForwardCommand.addTarget { [weak self] _ in
+        skipForwardTarget = remoteCommandCenter.skipForwardCommand.addTarget { [weak self] _ in
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
@@ -165,7 +164,7 @@ class NowPlayingInfoCenterManager {
             return .success
         }
 
-        playbackPositionTarget = commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+        playbackPositionTarget = remoteCommandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
             guard let self, let player = self.currentPlayer else {
                 return .commandFailed
             }
@@ -179,63 +178,43 @@ class NowPlayingInfoCenterManager {
         }
     }
 
-    private func invalidateTargets(_ commandCenter: MPRemoteCommandCenter) {
-        commandCenter.playCommand.removeTarget(playTarget)
-        commandCenter.pauseCommand.removeTarget(pauseTarget)
-        commandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
-        commandCenter.skipBackwardCommand.removeTarget(skipBackwardTarget)
-        commandCenter.changePlaybackPositionCommand.removeTarget(playbackPositionTarget)
+    private func invalidateCommandTargets() {
+        remoteCommandCenter.playCommand.removeTarget(playTarget)
+        remoteCommandCenter.pauseCommand.removeTarget(pauseTarget)
+        remoteCommandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
+        remoteCommandCenter.skipBackwardCommand.removeTarget(skipBackwardTarget)
+        remoteCommandCenter.changePlaybackPositionCommand.removeTarget(playbackPositionTarget)
     }
 
     public func updateMetadata() {
         guard let player = currentPlayer, let currentItem = player.currentItem else {
-            let commandCenter = MPRemoteCommandCenter.shared()
-            invalidateTargets(commandCenter)
-
+            invalidateCommandTargets()
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
             return
         }
 
         // commonMetadata is metadata from asset, externalMetadata is custom metadata set by user
         let metadata = currentItem.asset.commonMetadata + currentItem.externalMetadata
-        var nowPlayingInfo: [String: Any] = [:]
 
-        if let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.value {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = titleItem
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyTitle] = ""
-        }
+        let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.stringValue ?? ""
 
-        if let artistItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first?.value {
-            nowPlayingInfo[MPMediaItemPropertyArtist] = artistItem
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyArtist] = ""
-        }
+        let artistItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtist).first?.stringValue ?? ""
 
         // I have some issue with this - setting artworkItem when it not set dont return nil but also is crashing application
         // this is very hacky workaround for it
-        if let artworkItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.value as? Data {
-            if let image = UIImage(data: artworkItem) {
-                nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { _ in
-                    return image
-                })
-            }
-        } else {
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: UIImage().size, requestHandler: { _ in
-                UIImage()
-            })
-        }
+        let imgData = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierArtwork).first?.dataValue
+        let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
+        let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
 
-        if CMTIME_IS_INDEFINITE(currentItem.asset.duration) {
-            nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
-        } else {
-            nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-        }
-
-        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
+        let nowPlayingInfo: [String: Any] = [
+            MPMediaItemPropertyTitle: titleItem,
+            MPMediaItemPropertyArtist: artistItem,
+            MPMediaItemPropertyArtwork: artworkItem,
+            MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds.rounded(),
+            MPNowPlayingInfoPropertyPlaybackRate: player.rate,
+            MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
+        ]
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
@@ -247,15 +226,15 @@ class NowPlayingInfoCenterManager {
 
         // We dont want to update playback if we did not set metadata yet
         if var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
-            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds.rounded()
-            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+            let newNowPlayingInfo: [String: Any] = [
+                MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
+                MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds.rounded(),
+                MPNowPlayingInfoPropertyPlaybackRate: player.rate,
+                MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
+            ]
 
-            if CMTIME_IS_INDEFINITE(currentItem.asset.duration) {
-                nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
-            } else {
-                nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-            }
+            nowPlayingInfo.merge(newNowPlayingInfo) { _, v in v }
+
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         }
     }
