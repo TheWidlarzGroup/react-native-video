@@ -6,15 +6,15 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AVKit/AVKit.h>
 #import "RCTVideo.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
+#import <AVKit/AVKit.h>
 
 @interface RCTVideoPlayerViewController : AVPlayerViewController
-@property (nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
+@property(nonatomic, weak) id<RCTVideoPlayerViewControllerDelegate> rctDelegate;
 
 // Optional paramters
-@property (nonatomic, weak) NSString* preferredOrientation;
-@property (nonatomic) BOOL autorotate;
+@property(nonatomic, weak) NSString* preferredOrientation;
+@property(nonatomic) BOOL autorotate;
 
 @end

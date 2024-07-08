@@ -1,18 +1,18 @@
-#import <AVFoundation/AVFoundation.h>
 #import "AVKit/AVKit.h"
-//#import "UIView+FindUIViewController.h"
+#import <AVFoundation/AVFoundation.h>
+// #import "UIView+FindUIViewController.h"
 #import "RCTVideoPlayerViewController.h"
 #import "RCTVideoPlayerViewControllerDelegate.h"
-#import <React/RCTComponent.h>
 #import <React/RCTBridgeModule.h>
+#import <React/RCTComponent.h>
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-#import <react-native-video/RCTVideoCache.h>
-#import <DVAssetLoaderDelegate/DVURLAsset.h>
 #import <DVAssetLoaderDelegate/DVAssetLoaderDelegate.h>
+#import <DVAssetLoaderDelegate/DVURLAsset.h>
+#import <react-native-video/RCTVideoCache.h>
 #endif
 
-# pragma mark - video event delegate
+#pragma mark - video event delegate
 
 @protocol RCTVideoEventDelegate
 // TODO follow up all events in RCTVideo.swift
@@ -42,17 +42,18 @@
 @end
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate, AVPictureInPictureControllerDelegate>
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate,
+                              AVPictureInPictureControllerDelegate>
 #elif TARGET_OS_TV
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVAssetResourceLoaderDelegate>
 #else
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVPictureInPictureControllerDelegate, AVAssetResourceLoaderDelegate>
 #endif
 
-@property (nonatomic, weak) id <RCTVideoEventDelegate> _Nullable eventDelegate;
+@property(nonatomic, weak) id<RCTVideoEventDelegate> _Nullable eventDelegate;
 
 // TODO follow up all errors in RCTVideoErrorHandling.swift
-//typedef NS_ENUM(NSInteger, RCTVideoError) {
+// typedef NS_ENUM(NSInteger, RCTVideoError) {
 //    RCTVideoErrorFromJSPart,
 //    RCTVideoErrorLicenseRequestNotOk,
 //    RCTVideoErrorNoDataFromLicenseRequest,
@@ -68,7 +69,7 @@
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
 
-# pragma mark - props
+#pragma mark - props
 // TODO follow up all setter functions in RCTVideo.swift
 //- (void)setSrc:(NSDictionary *)source;
 //- (void)setDrm:(NSDictionary *)drm;
@@ -102,8 +103,7 @@
 //- (void)setRestoreUserInterfaceForPIPStopCompletionHandler:(BOOL)restore;
 //- (void)setLocalSourceEncryptionKeyScheme:(NSString *)keyScheme;
 
-
-# pragma mark - extern methods
+#pragma mark - extern methods
 // TODO follow up all ref methods in RCTVideo.swift
 //- (void)save:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //- (void)setLicenseResult:(NSString * )license;
