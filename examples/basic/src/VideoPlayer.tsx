@@ -33,7 +33,7 @@ import Video, {
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
 import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
-import {Overlay, toast} from './components';
+import {Overlay, toast, VideoLoader} from './components';
 
 type Props = NonNullable<unknown>;
 
@@ -66,7 +66,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   const [repeat, setRepeat] = useState(false);
   const [controls, setControls] = useState(false);
   const [useCache, setUseCache] = useState(false);
-  const [poster, setPoster] = useState<string | undefined>(undefined);
+  const [showPoster, setShowPoster] = useState<boolean>(false);
   const [showNotificationControls, setShowNotificationControls] =
     useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -256,12 +256,7 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            poster={{
-              source: {
-                uri: poster,
-              },
-              resizeMode: 'contain',
-            }}
+            renderLoader={showPoster ? VideoLoader : undefined}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
@@ -293,7 +288,7 @@ const VideoPlayer: FC<Props> = ({}) => {
         paused={paused}
         volume={volume}
         setControls={setControls}
-        poster={poster}
+        showPoster={showPoster}
         setDecoration={setDecoration}
         rate={rate}
         setFullscreen={setFullscreen}
@@ -303,7 +298,7 @@ const VideoPlayer: FC<Props> = ({}) => {
         setIsSeeking={setIsSeeking}
         repeat={repeat}
         setRepeat={setRepeat}
-        setPoster={setPoster}
+        setShowPoster={setShowPoster}
         setRate={setRate}
         setResizeMode={setResizeMode}
         setShowNotificationControls={setShowNotificationControls}

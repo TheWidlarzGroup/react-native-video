@@ -434,12 +434,12 @@ Determine whether the media should continue playing when notifications or the Co
 ### `poster`
 
 <PlatformsList types={['All']} />
+> [!WARNING]
+> Value: string with a URL for the poster is deprecated, use `poster` as object instead
 
 An image to display while the video is loading
 
 Value: Props for the `Image` component. The poster is visible when the source attribute is provided.
-> [!WARNING]
-> Value: string with a URL for the poster is deprecated, use `poster` as object instead
 
 ```javascript
 <Video>
@@ -465,17 +465,17 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 - **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
 - **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
-### `renderPoster`
+### `renderLoader`
 
 <PlatformsList types={['All']} />
 
-Allows you to create custom components to display while the video is loading. If both `renderPoster` and `posterProps` are provided, `posterProps` will be ignored.
+Allows you to create custom components to display while the video is loading. If both `renderLoader` and `poster` are provided, `poster` will be ignored.
 
 ```javascript
 <Video>
-  renderPoster={() => (
+  renderLoader={() => (
     <View>
-      <Text>Custom Poster</Text>
+      <Text>Custom Loader</Text>
     </View>
   )}
 </Video>

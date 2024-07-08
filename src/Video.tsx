@@ -6,6 +6,8 @@ import React, {
   forwardRef,
   useImperativeHandle,
   type ComponentRef,
+  type MemoExoticComponent,
+  type FC,
 } from 'react';
 import {
   View,
@@ -16,6 +18,7 @@ import {
   type ImageStyle,
   type NativeSyntheticEvent,
   type ImageResizeMode,
+  type ViewStyle,
 } from 'react-native';
 
 import NativeVideoComponent, {
@@ -80,7 +83,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       resizeMode,
       poster,
       posterResizeMode,
-      renderPoster,
+      renderLoader,
       fullscreen,
       drm,
       textTracks,
@@ -129,7 +132,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const isPosterDeprecated = typeof poster === 'string';
 
     const hasPoster = useMemo(() => {
-      if (renderPoster) {
+      if (renderLoader) {
         return true;
       }
 
@@ -138,7 +141,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       return !!poster?.source;
-    }, [isPosterDeprecated, poster, renderPoster]);
+    }, [isPosterDeprecated, poster, renderLoader]);
 
     const [showPoster, setShowPoster] = useState(hasPoster);
     const [isFullscreen, setIsFullscreen] = useState(fullscreen);
@@ -610,7 +613,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         : ViewType.SURFACE;
     }, [drm, useSecureView, useTextureView, viewType]);
 
-    const posterStyle = useMemo<StyleProp<ImageStyle>>(() => {
+    const _renderPoster = useCallback(() => {
+      // poster resize mode
       let _posterResizeMode: ImageResizeMode = 'contain';
 
       if (!isPosterDeprecated && poster?.resizeMode) {
@@ -619,25 +623,65 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         _posterResizeMode = posterResizeMode;
       }
 
+      // poster style
       const baseStyle: StyleProp<ImageStyle> = {
         ...StyleSheet.absoluteFillObject,
         resizeMode: _posterResizeMode,
       };
 
+      let posterStyle: StyleProp<ImageStyle> = baseStyle;
+
       if (!isPosterDeprecated && poster?.style) {
         const styles = Array.isArray(poster.style)
           ? poster.style
           : [poster.style];
-
-        return [baseStyle, ...styles];
+        posterStyle = [baseStyle, ...styles];
       }
 
-      return baseStyle;
-    }, [poster, posterResizeMode, isPosterDeprecated]);
+      // render poster
+      if (renderLoader && poster) {
+        console.warn(
+          'You provided both `renderLoader` and `poster` props. Poster is ignored.',
+        );
+      }
 
-    const _renderPoster = useCallback(() => {
-      if (renderPoster) {
-        return <View style={StyleSheet.absoluteFill}>{renderPoster()}</View>;
+      if (renderLoader) {
+        const Loader = renderLoader as unknown as MemoExoticComponent<FC>;
+
+        const compType =
+          Loader?.$$typeof?.toString() === 'Symbol(react.memo)'
+            ? 'memoComp'
+            : 'comp';
+
+        const isFunctionComp = typeof renderLoader === 'function';
+
+        // check if valid jsx
+        if (
+          React.isValidElement(
+            {
+              memoComp: Loader,
+              comp: isFunctionComp ? renderLoader(null) : renderLoader,
+            }[compType],
+          )
+        ) {
+          console.warn(
+            'Invalid renderLoader component. Please provide a valid JSX component',
+          );
+          return;
+        }
+
+        return {
+          memoComp: (
+            <View style={StyleSheet.absoluteFill}>
+              <Loader />
+            </View>
+          ),
+          comp: (
+            <View style={StyleSheet.absoluteFill}>
+              {isFunctionComp ? renderLoader(null) : renderLoader}
+            </View>
+          ),
+        }[compType];
       }
 
       return (
@@ -647,7 +691,15 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           style={posterStyle}
         />
       );
-    }, [isPosterDeprecated, poster, posterStyle, renderPoster]);
+    }, [isPosterDeprecated, poster, posterResizeMode, renderLoader]);
+
+    const _style: StyleProp<ViewStyle> = useMemo(
+      () => ({
+        ...StyleSheet.absoluteFillObject,
+        ...(showPoster ? {display: 'none'} : {}),
+      }),
+      [showPoster],
+    );
 
     return (
       <View style={style}>
@@ -656,10 +708,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           {...rest}
           src={src}
           drm={_drm}
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            ...(showPoster ? {display: 'none'} : {}),
-          }}
+          style={_style}
           resizeMode={resizeMode}
           fullscreen={isFullscreen}
           restoreUserInterfaceForPIPStopCompletionHandler={

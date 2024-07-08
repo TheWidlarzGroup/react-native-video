@@ -8,7 +8,7 @@ import type {
   ImageRequireSource,
   ImageURISource,
 } from 'react-native';
-import type {ReactNode} from 'react';
+import type {FC, ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
@@ -256,12 +256,16 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
   poster?: string | ReactVideoPoster; // string is deprecated
-  posterResizeMode?: EnumValues<PosterResizeModeType>; // deprecated
+  /** @deprecated use **resizeMode** key in **poster** props instead */
+  posterResizeMode?: EnumValues<PosterResizeModeType>;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
-  renderPoster?: () => ReactNode;
+  renderLoader?:
+    | React.MemoExoticComponent<FC<null>>
+    | ReactNode
+    | (() => ReactNode);
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;

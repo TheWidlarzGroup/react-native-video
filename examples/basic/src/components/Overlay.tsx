@@ -1,14 +1,8 @@
 import React, {forwardRef, memo, useCallback} from 'react';
-import {Indicator} from './Indicator.tsx';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
 import ToggleControl from '../ToggleControl.tsx';
-import {
-  isAndroid,
-  isIos,
-  samplePoster,
-  textTracksSelectionBy,
-} from '../constants';
+import {isAndroid, isIos, textTracksSelectionBy} from '../constants';
 import MultiValueControl, {
   MultiValueControlPropType,
 } from '../MultiValueControl.tsx';
@@ -65,8 +59,8 @@ type Props = {
   setPaused: (value: boolean) => void;
   repeat: boolean;
   setRepeat: (value: boolean) => void;
-  poster: string | undefined;
-  setPoster: (value: string | undefined) => void;
+  showPoster: boolean;
+  setShowPoster: (value: boolean) => void;
   muted: boolean;
   setMuted: (value: boolean) => void;
   currentTime: number;
@@ -107,8 +101,8 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     setPaused,
     setRepeat,
     repeat,
-    setPoster,
-    poster,
+    setShowPoster,
+    showPoster,
     setMuted,
     muted,
     duration,
@@ -227,13 +221,12 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const toggleRepeat = () => setRepeat(!repeat);
 
-  const togglePoster = () => setPoster(poster ? undefined : samplePoster);
+  const togglePoster = () => setShowPoster(!showPoster);
 
   const toggleMuted = () => setMuted(!muted);
 
   return (
     <>
-      <Indicator isLoading={isLoading} />
       <View style={styles.topControls}>
         <View style={styles.resizeModeControl}>
           <TopControl
@@ -279,7 +272,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
               <ToggleControl onPress={toggleFullscreen} text="fullscreen" />
               <ToggleControl onPress={toggleDecoration} text="decoration" />
               <ToggleControl
-                isSelected={!!poster}
+                isSelected={!!showPoster}
                 onPress={togglePoster}
                 selectedText="poster"
                 unselectedText="no poster"
