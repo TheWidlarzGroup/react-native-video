@@ -465,22 +465,6 @@ Determines how to resize the poster image when the frame doesn't match the raw v
 - **"repeat"** - Repeat the image to cover the frame of the view. The image will keep its size and aspect ratio. (iOS only)
 - **"stretch"** - Scale width and height independently, This may change the aspect ratio of the src.
 
-### `renderLoader`
-
-<PlatformsList types={['All']} />
-
-Allows you to create custom components to display while the video is loading. If both `renderLoader` and `poster` are provided, `poster` will be ignored.
-
-```javascript
-<Video>
-  renderLoader={() => (
-    <View>
-      <Text>Custom Loader</Text>
-    </View>
-  )}
-</Video>
-````
-
 ### `preferredForwardBufferDuration`
 
 <PlatformsList types={['iOS', 'visionOS']} />
@@ -514,6 +498,22 @@ Speed at which the media should play.
 - **0.0** - Pauses the video (iOS only)
 - **1.0** - Play at normal speed (default)
 - **Other values** - Slow down or speed up playback
+
+### `renderLoader`
+
+<PlatformsList types={['All']} />
+
+Allows you to create custom components to display while the video is loading. If both `renderLoader` and `poster` are provided, `poster` will be ignored.
+
+```javascript
+<Video>
+  renderLoader={() => (
+    <View>
+      <Text>Custom Loader</Text>
+    </View>
+  )}
+</Video>
+````
 
 ### `repeat`
 
