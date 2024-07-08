@@ -157,7 +157,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func handlePictureInPictureExit() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
 
-        if _playInBackground {
+        // To continue audio playback in backgroud we need to set
+        // player in _playerLayer & _playerViewController to nil
+        let appState = UIApplication.shared.applicationState
+        if _playInBackground && appState == .background {
             _playerLayer?.player = nil
             _playerViewController?.player = nil
             _player?.play()
