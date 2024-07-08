@@ -42,7 +42,7 @@
 @end
 
 #if __has_include(<react-native-video/RCTVideoCache.h>)
-@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate>
+@interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, DVAssetLoaderDelegatesDelegate, AVAssetResourceLoaderDelegate, AVPictureInPictureControllerDelegate>
 #elif TARGET_OS_TV
 @interface RCTVideo : UIView <RCTVideoPlayerViewControllerDelegate, AVAssetResourceLoaderDelegate>
 #else
