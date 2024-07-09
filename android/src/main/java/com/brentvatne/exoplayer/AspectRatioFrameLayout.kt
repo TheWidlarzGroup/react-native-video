@@ -1,31 +1,14 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.brentvatne.exoplayer;
+package com.brentvatne.exoplayer
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.FrameLayout;
-
-import com.brentvatne.common.api.ResizeMode;
+import android.content.Context
+import android.widget.FrameLayout
+import com.brentvatne.common.api.ResizeMode
+import kotlin.math.abs
 
 /**
  * A {@link FrameLayout} that resizes itself to match a specified aspect ratio.
  */
-public final class AspectRatioFrameLayout extends FrameLayout {
-
+class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
     /**
      * The {@link FrameLayout} will not resize itself if the fractional difference between its natural
      * aspect ratio and the requested aspect ratio falls below this threshold.
@@ -35,28 +18,21 @@ public final class AspectRatioFrameLayout extends FrameLayout {
      * the number of view layers that need to be composited by the underlying system, which can help
      * to reduce power consumption.
      */
-    private static final float MAX_ASPECT_RATIO_DEFORMATION_FRACTION = 0.01f;
-
-    private float videoAspectRatio;
-    private @ResizeMode.Mode int resizeMode = ResizeMode.RESIZE_MODE_FIT;
-
-    public AspectRatioFrameLayout(Context context) {
-        this(context, null);
+    companion object {
+        private const val MAX_ASPECT_RATIO_DEFORMATION_FRACTION = 0.01f
     }
-
-    public AspectRatioFrameLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+    private var videoAspectRatio: Float = 0f
+    private var resizeMode: Int = ResizeMode.RESIZE_MODE_FIT
 
     /**
      * Set the aspect ratio that this view should satisfy.
      *
      * @param widthHeightRatio The width to height ratio.
      */
-    public void setAspectRatio(float widthHeightRatio) {
-        if (this.videoAspectRatio != widthHeightRatio) {
-            this.videoAspectRatio = widthHeightRatio;
-            requestLayout();
+    fun setAspectRatio(widthHeightRatio: Float) {
+        if (videoAspectRatio != widthHeightRatio) {
+            videoAspectRatio = widthHeightRatio
+            requestLayout()
         }
     }
 
@@ -65,12 +41,9 @@ public final class AspectRatioFrameLayout extends FrameLayout {
      *
      * @return widthHeightRatio The width to height ratio.
      */
-    public float getAspectRatio() {
-        return videoAspectRatio;
-    }
-
-    public void invalidateAspectRatio() {
-        videoAspectRatio = 0;
+    fun getAspectRatio(): Float = videoAspectRatio
+    fun invalidateAspectRatio() {
+        videoAspectRatio = 0f
     }
 
     /**
@@ -78,10 +51,10 @@ public final class AspectRatioFrameLayout extends FrameLayout {
      *
      * @param resizeMode The resize mode.
      */
-    public void setResizeMode(@ResizeMode.Mode int resizeMode) {
+    fun setResizeMode(@ResizeMode.Mode resizeMode: Int) {
         if (this.resizeMode != resizeMode) {
-            this.resizeMode = resizeMode;
-            requestLayout();
+            this.resizeMode = resizeMode
+            requestLayout()
         }
     }
 
@@ -90,60 +63,58 @@ public final class AspectRatioFrameLayout extends FrameLayout {
      *
      * @return resizeMode The resize mode.
      */
-    public @ResizeMode.Mode int getResizeMode() {
-        return resizeMode;
-    }
+    fun getResizeMode(): Int = resizeMode
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (videoAspectRatio == 0) {
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        if (videoAspectRatio == 0f) {
             // Aspect ratio not set.
-            return;
+            return
         }
 
-        int measuredWidth = getMeasuredWidth();
-        int measuredHeight = getMeasuredHeight();
-        int width = measuredWidth;
-        int height = measuredHeight;
+        val measuredWidth: Int = measuredWidth
+        val measuredHeight: Int = measuredHeight
+        var width: Int = measuredWidth
+        var height: Int = measuredHeight
 
-        float viewAspectRatio = (float) measuredWidth / measuredHeight;
-        float aspectDeformation = videoAspectRatio / viewAspectRatio - 1;
-        if (Math.abs(aspectDeformation) <= MAX_ASPECT_RATIO_DEFORMATION_FRACTION) {
+        val viewAspectRatio: Float = measuredWidth.toFloat() / measuredHeight
+        val aspectDeformation: Float = videoAspectRatio / viewAspectRatio - 1
+        if (abs(aspectDeformation) <= MAX_ASPECT_RATIO_DEFORMATION_FRACTION) {
             // We're within the allowed tolerance.
-            return;
+            return
         }
 
-        switch (resizeMode) {
-            case ResizeMode.RESIZE_MODE_FIXED_WIDTH:
-                height = (int) (measuredWidth / videoAspectRatio);
-                break;
-            case ResizeMode.RESIZE_MODE_FIXED_HEIGHT:
-                width = (int) (measuredHeight * videoAspectRatio);
-                break;
-            case ResizeMode.RESIZE_MODE_FILL:
+        when (resizeMode) {
+            ResizeMode.RESIZE_MODE_FIXED_WIDTH -> height = (measuredWidth / videoAspectRatio).toInt()
+
+            ResizeMode.RESIZE_MODE_FIXED_HEIGHT -> width = ((measuredHeight * videoAspectRatio).toInt())
+
+            ResizeMode.RESIZE_MODE_FILL -> {
                 // Do nothing width and height is the same as the view
-                break;
-            case ResizeMode.RESIZE_MODE_CENTER_CROP:
-                width = (int) (measuredHeight * videoAspectRatio);
+            }
+
+            ResizeMode.RESIZE_MODE_CENTER_CROP -> {
+                width = (measuredHeight * videoAspectRatio).toInt()
 
                 // Scale video if it doesn't fill the measuredWidth
                 if (width < measuredWidth) {
-                    float scaleFactor = (float) measuredWidth / width;
-                    width = (int) (width * scaleFactor);
-                    height = (int) (measuredHeight * scaleFactor);
+                    val scaleFactor: Int = measuredWidth / width
+                    width *= scaleFactor
+                    height = measuredHeight * scaleFactor
                 }
-                break;
-            default:
-                if (aspectDeformation > 0) {
-                    height = (int) (measuredWidth / videoAspectRatio);
-                } else {
-                    width = (int) (measuredHeight * videoAspectRatio);
-                }
-                break;
-        }
-        super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-    }
+            }
 
+            else -> {
+                if (aspectDeformation > 0) {
+                    height = (measuredWidth / videoAspectRatio).toInt()
+                } else {
+                    width = (measuredHeight * videoAspectRatio).toInt()
+                }
+            }
+        }
+        super.onMeasure(
+            MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        )
+    }
 }
