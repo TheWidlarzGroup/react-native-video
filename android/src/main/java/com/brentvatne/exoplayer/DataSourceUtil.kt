@@ -16,7 +16,7 @@ import com.facebook.react.modules.network.OkHttpClientProvider
 import okhttp3.Call
 import okhttp3.JavaNetCookieJar
 
-class DataSourceUtil  {
+class DataSourceUtil {
     companion object {
         private var defaultDataSourceFactory: DataSource.Factory? = null
         private var defaultHttpDataSourceFactory: HttpDataSource.Factory? = null
