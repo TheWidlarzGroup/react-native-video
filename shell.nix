@@ -3,6 +3,7 @@
     packages = with pkgs; [
       nodejs-18_x
       nodePackages.yarn
+      bun
       eslint_d
       prettierd
       jdk11

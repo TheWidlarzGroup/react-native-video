@@ -709,6 +709,8 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 > ⚠️ on iOS, you file name must not contain spaces eg. `my video.mp4` will not work, use `my-video.mp4` instead
 
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'Windows UWP']} />
+
 Example:
 
 Pass directly the asset to play (deprecated)
@@ -820,7 +822,7 @@ Example:
 
 #### Start playback at a specific point in time
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 Provide an optional `startPosition` for video. Value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
 (If it is negative or undefined or null, it is ignored)
