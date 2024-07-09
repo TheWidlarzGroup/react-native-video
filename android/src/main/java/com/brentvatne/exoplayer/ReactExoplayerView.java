@@ -7,7 +7,6 @@ import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
-import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -1061,7 +1060,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.Companion.buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file" + uri);
@@ -1303,7 +1302,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
+        return DataSourceUtil.Companion.getDefaultDataSourceFactory(this.themedReactContext,
                 useBandwidthMeter ? bandwidthMeter : null, source.getHeaders());
     }
 
@@ -1315,7 +1314,7 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return A new HttpDataSource factory.
      */
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, source.getHeaders());
+        return DataSourceUtil.Companion.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, source.getHeaders());
     }
 
     // AudioBecomingNoisyListener implementation
@@ -1774,7 +1773,7 @@ public class ReactExoplayerView extends FrameLayout implements
             hasDrmFailed = false;
             this.source = source;
             this.mediaDataSourceFactory =
-                    DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
+                    DataSourceUtil.Companion.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
             if (!isSourceEqual) {
