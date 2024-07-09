@@ -17,5 +17,5 @@ export interface VideoRef {
   setVolume: (volume: number) => void;
   getCurrentPosition: () => Promise<number>;
   setFullScreen: (fullScreen: boolean) => void;
-  nativeHtmlRef?: RefObject<HTMLVideoElement>; // web only
+  nativeHtmlVideoRef?: RefObject<HTMLVideoElement>; // web only
 }

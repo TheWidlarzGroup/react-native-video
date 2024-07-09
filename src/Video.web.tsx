@@ -100,7 +100,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setFullScreen: unsupported,
         save: unsupported,
         restoreUserInterfaceForPictureInPictureStopCompleted: unsupported,
-        nativeHtmlRef: nativeRef,
+        nativeHtmlVideoRef: nativeRef,
       }),
       [
         seek,
