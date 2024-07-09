@@ -1,38 +1,26 @@
-package com.brentvatne.exoplayer;
+package com.brentvatne.exoplayer
 
-import android.content.Context;
+import android.content.Context
+import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 
-import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
-import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
-import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
+class DefaultReactExoplayerConfig(context: Context) : ReactExoplayerConfig {
 
-public class DefaultReactExoplayerConfig implements ReactExoplayerConfig {
-
-    private final DefaultBandwidthMeter bandwidthMeter;
-    private boolean disableDisconnectError = false;
-
-    public DefaultReactExoplayerConfig(Context context) {
-        this.bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
-    }
-
-    public LoadErrorHandlingPolicy buildLoadErrorHandlingPolicy(int minLoadRetryCount) {
-        if (this.disableDisconnectError) {
-            // Use custom error handling policy to prevent throwing an error when losing network connection
-            return new ReactExoplayerLoadErrorHandlingPolicy(minLoadRetryCount);
+    private var bandWidthMeter: DefaultBandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
+    private var disableDisconnectError: Boolean = false
+    override fun buildLoadErrorHandlingPolicy(minLoadRetryCount: Int): LoadErrorHandlingPolicy =
+        if (disableDisconnectError) {
+            ReactExoplayerLoadErrorHandlingPolicy(minLoadRetryCount)
+        } else {
+            DefaultLoadErrorHandlingPolicy(minLoadRetryCount)
         }
-        return new DefaultLoadErrorHandlingPolicy(minLoadRetryCount);
+
+    override fun setDisableDisconnectError(disableDisconnectError: Boolean) {
+        this.disableDisconnectError = disableDisconnectError
     }
 
-    public void setDisableDisconnectError(boolean disableDisconnectError) {
-        this.disableDisconnectError = disableDisconnectError;
-    }
+    override fun getDisableDisconnectError(): Boolean = disableDisconnectError
 
-    public boolean getDisableDisconnectError() {
-        return this.disableDisconnectError;
-    }
-
-    @Override
-    public DefaultBandwidthMeter getBandwidthMeter() {
-        return bandwidthMeter;
-    }
+    override fun getBandwidthMeter(): DefaultBandwidthMeter = bandWidthMeter
 }
