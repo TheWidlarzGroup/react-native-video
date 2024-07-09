@@ -42,7 +42,7 @@ class DataSourceUtil  {
 
         fun getDefaultHttpDataSourceFactory(
             context: ReactContext,
-            bandwidthMeter: DefaultBandwidthMeter,
+            bandwidthMeter: DefaultBandwidthMeter?,
             requestHeaders: Map<String, String>?
         ): HttpDataSource.Factory {
             if (defaultHttpDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
