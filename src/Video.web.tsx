@@ -230,17 +230,19 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVolumeChange?.({volume: nativeRef.current.volume});
         }}
         onEnded={onEnd}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          objectFit: 'contain',
-          width: '100%',
-          height: '100%',
-        }}
+        style={videoStyle}
       />
     );
   },
 );
+
+const videoStyle = {
+  position: 'absolute',
+  inset: 0,
+  objectFit: 'contain',
+  width: '100%',
+  height: '100%',
+} satisfies React.CSSProperties;
 
 const useMediaSession = (
   metadata: VideoMetadata | undefined,
