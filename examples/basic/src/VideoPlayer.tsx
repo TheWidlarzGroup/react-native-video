@@ -25,6 +25,7 @@ import Video, {
   BufferingStrategyType,
   ReactVideoSource,
   SelectedTrackType,
+  TextTracks,
   ResizeMode,
   VideoTrack,
   SelectedTrack,
@@ -34,6 +35,13 @@ import styles from './styles';
 import {AdditionalSourceInfo} from './types';
 import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast} from './components';
+
+type AdditionnalSourceInfo = {
+  textTracks: TextTracks;
+  adTagUrl: string;
+  description: string;
+  noView: boolean;
+};
 
 type Props = NonNullable<unknown>;
 
