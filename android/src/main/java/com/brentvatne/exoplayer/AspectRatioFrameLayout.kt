@@ -21,49 +21,26 @@ class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
     companion object {
         private const val MAX_ASPECT_RATIO_DEFORMATION_FRACTION = 0.01f
     }
-    private var videoAspectRatio: Float = 0f
-    private var resizeMode: Int = ResizeMode.RESIZE_MODE_FIT
 
-    /**
-     * Set the aspect ratio that this view should satisfy.
-     *
-     * @param widthHeightRatio The width to height ratio.
-     */
-    fun setAspectRatio(widthHeightRatio: Float) {
-        if (videoAspectRatio != widthHeightRatio) {
-            videoAspectRatio = widthHeightRatio
-            requestLayout()
+    var videoAspectRatio: Float = 0f
+        set(value) {
+            if (value != videoAspectRatio) {
+                field = value
+                requestLayout()
+            }
         }
-    }
 
-    /**
-     * Get the aspect ratio that this view should satisfy.
-     *
-     * @return widthHeightRatio The width to height ratio.
-     */
-    fun getAspectRatio(): Float = videoAspectRatio
+    var resizeMode: Int = ResizeMode.RESIZE_MODE_FIT
+        set(value) {
+            if (value != resizeMode) {
+                field = value
+                requestLayout()
+            }
+        }
+
     fun invalidateAspectRatio() {
         videoAspectRatio = 0f
     }
-
-    /**
-     * Sets the resize mode which can be of value {@link ResizeMode.Mode}
-     *
-     * @param resizeMode The resize mode.
-     */
-    fun setResizeMode(@ResizeMode.Mode resizeMode: Int) {
-        if (this.resizeMode != resizeMode) {
-            this.resizeMode = resizeMode
-            requestLayout()
-        }
-    }
-
-    /**
-     * Gets the resize mode which can be of value {@link ResizeMode.Mode}
-     *
-     * @return resizeMode The resize mode.
-     */
-    fun getResizeMode(): Int = resizeMode
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
