@@ -24,7 +24,7 @@ class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
 
     var videoAspectRatio: Float = 0f
         set(value) {
-            if (value != videoAspectRatio) {
+            if (value != field) {
                 field = value
                 requestLayout()
             }
@@ -32,7 +32,7 @@ class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
 
     var resizeMode: Int = ResizeMode.RESIZE_MODE_FIT
         set(value) {
-            if (value != resizeMode) {
+            if (value != field) {
                 field = value
                 requestLayout()
             }
