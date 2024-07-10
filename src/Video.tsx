@@ -6,8 +6,6 @@ import React, {
   forwardRef,
   useImperativeHandle,
   type ComponentRef,
-  type MemoExoticComponent,
-  type FC,
 } from 'react';
 import {
   View,
@@ -641,47 +639,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       // render poster
       if (renderLoader && poster) {
         console.warn(
-          'You provided both `renderLoader` and `poster` props. Poster is ignored.',
+          'You provided both `renderLoader` and `poster` props. `Poster` props is ignored.',
         );
       }
 
       if (renderLoader) {
-        const Loader = renderLoader as unknown as MemoExoticComponent<FC>;
-
-        const compType =
-          Loader?.$$typeof?.toString() === 'Symbol(react.memo)'
-            ? 'memoComp'
-            : 'comp';
-
-        const isFunctionComp = typeof renderLoader === 'function';
-
         // check if valid jsx
-        if (
-          React.isValidElement(
-            {
-              memoComp: Loader,
-              comp: isFunctionComp ? renderLoader(null) : renderLoader,
-            }[compType],
-          )
-        ) {
+        if (React.isValidElement(renderLoader)) {
           console.warn(
             'Invalid renderLoader component. Please provide a valid JSX component',
           );
           return;
         }
 
-        return {
-          memoComp: (
-            <View style={StyleSheet.absoluteFill}>
-              <Loader />
-            </View>
-          ),
-          comp: (
-            <View style={StyleSheet.absoluteFill}>
-              {isFunctionComp ? renderLoader(null) : renderLoader}
-            </View>
-          ),
-        }[compType];
+        return <View style={StyleSheet.absoluteFill}>{renderLoader}</View>;
       }
 
       return (

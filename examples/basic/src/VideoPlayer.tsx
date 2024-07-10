@@ -256,7 +256,7 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            renderLoader={showPoster ? VideoLoader : undefined}
+            renderLoader={showPoster ? <VideoLoader /> : undefined}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}

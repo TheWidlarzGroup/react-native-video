@@ -8,7 +8,7 @@ import type {
   ImageRequireSource,
   ImageURISource,
 } from 'react-native';
-import type {FC, ReactNode} from 'react';
+import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
@@ -262,10 +262,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
-  renderLoader?:
-    | React.MemoExoticComponent<FC<null>>
-    | ReactNode
-    | (() => ReactNode);
+  renderLoader?: ReactNode;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
