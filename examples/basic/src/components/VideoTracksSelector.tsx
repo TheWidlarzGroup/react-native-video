@@ -1,9 +1,9 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
 import {
-  SelectedVideoTrack,
   SelectedVideoTrackType,
-  VideoTrack,
+  type SelectedVideoTrack,
+  type VideoTrack,
 } from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
