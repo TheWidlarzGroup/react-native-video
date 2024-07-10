@@ -20,6 +20,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       controls,
       showNotificationControls = false,
       poster,
+      fullscreen,
+      fullscreenAutorotate,
+      fullscreenOrientation,
       onBuffer,
       onLoad,
       onProgress,
@@ -83,6 +86,74 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       throw new Error('This is unsupported on the web');
     }, []);
 
+    // Stock this in a ref to not invalidate memoization when those changes.
+    const fsPrefs = useRef({
+      fullscreenAutorotate,
+      fullscreenOrientation,
+    });
+    fsPrefs.current = {
+      fullscreenOrientation,
+      fullscreenAutorotate,
+    };
+    const setFullScreen = useCallback(
+      (
+        newVal: boolean,
+        orientation?: ReactVideoProps['fullscreenOrientation'],
+        autorotate?: boolean,
+      ) => {
+        orientation ??= fsPrefs.current.fullscreenOrientation;
+        autorotate ??= fsPrefs.current.fullscreenAutorotate;
+
+        const run = async () => {
+          try {
+            if (newVal) {
+              await nativeRef.current?.requestFullscreen({
+                navigationUI: 'hide',
+              });
+              if (orientation === 'all' || !orientation || autorotate) {
+                screen.orientation.unlock();
+              } else {
+                await screen.orientation.lock(orientation);
+              }
+            } else {
+              if (document.fullscreenElement) {
+                await document.exitFullscreen();
+              }
+              screen.orientation.unlock();
+            }
+          } catch (e) {
+            // Changing fullscreen status without a button click is not allowed so it throws.
+            // Some browsers also used to throw when locking screen orientation was not supported.
+            console.error('Could not toggle fullscreen/screen lock status', e);
+          }
+        };
+        run();
+      },
+      [],
+    );
+
+    useEffect(() => {
+      setFullScreen(
+        fullscreen || false,
+        fullscreenOrientation,
+        fullscreenAutorotate,
+      );
+    }, [
+      setFullScreen,
+      fullscreen,
+      fullscreenAutorotate,
+      fullscreenOrientation,
+    ]);
+
+    const presentFullscreenPlayer = useCallback(
+      () => setFullScreen(true),
+      [setFullScreen],
+    );
+    const dismissFullscreenPlayer = useCallback(
+      () => setFullScreen(false),
+      [setFullScreen],
+    );
+
     useImperativeHandle(
       ref,
       () => ({
@@ -91,11 +162,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         resume,
         setVolume,
         getCurrentPosition,
-        // making the video fullscreen does not work with some subtitles polyfils
-        // so I decided to not include it.
-        presentFullscreenPlayer: unsupported,
-        dismissFullscreenPlayer: unsupported,
-        setFullScreen: unsupported,
+        presentFullscreenPlayer,
+        dismissFullscreenPlayer,
+        setFullScreen,
         save: unsupported,
         restoreUserInterfaceForPictureInPictureStopCompleted: unsupported,
         nativeHtmlVideoRef: nativeRef,
@@ -108,6 +177,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         nativeRef,
+        presentFullscreenPlayer,
+        dismissFullscreenPlayer,
+        setFullScreen,
       ],
     );
 
