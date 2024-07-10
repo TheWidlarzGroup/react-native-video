@@ -14,6 +14,7 @@ import MultiValueControl, {
 } from '../MultiValueControl.tsx';
 import {
   AudioTrack,
+  EnumValues,
   ResizeMode,
   SelectedTrack,
   SelectedTrackType,
@@ -55,8 +56,8 @@ type Props = {
   setRate: (value: number) => void;
   volume: number;
   setVolume: (value: number) => void;
-  resizeMode: ResizeMode;
-  setResizeMode: (value: ResizeMode) => void;
+  resizeMode: EnumValues<ResizeMode>;
+  setResizeMode: (value: EnumValues<ResizeMode>) => void;
   isLoading: boolean;
   srcListId: number;
   useCache: boolean;
@@ -216,8 +217,17 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
   };
 
   const onResizeModeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'object') {
-      setResizeMode(value);
+    if (typeof value === 'string') {
+      switch (value) {
+        case ResizeMode.CONTAIN:
+          setResizeMode(ResizeMode.CONTAIN);
+          break;
+        case ResizeMode.COVER:
+          setResizeMode(ResizeMode.COVER);
+          break;
+        default:
+          setResizeMode(ResizeMode.STRETCH);
+      }
     }
   };
 
