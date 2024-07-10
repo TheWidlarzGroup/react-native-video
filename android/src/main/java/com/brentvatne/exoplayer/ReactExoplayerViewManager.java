@@ -37,7 +37,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
-    private static final String PROP_DRM = "drm";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -77,7 +76,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DEBUG = "debug";
     private static final String PROP_CONTROLS_STYLES = "controlsStyles";
 
-
     private final ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -112,12 +110,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void addEventEmitters(@NonNull ThemedReactContext reactContext, @NonNull ReactExoplayerView view) {
         super.addEventEmitters(reactContext, view);
         view.eventEmitter.addEventEmitters(reactContext, view);
-    }
-
-    @ReactProp(name = PROP_DRM)
-    public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
-        DRMProps drmProps = DRMProps.parse(drm);
-        videoView.setDrm(drmProps);
     }
 
     @ReactProp(name = PROP_SRC)

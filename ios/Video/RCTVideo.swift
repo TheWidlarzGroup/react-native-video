@@ -17,10 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-
-    /* DRM */
-    private var _drm: DRMParams?
-
     private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
@@ -156,6 +152,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handlePictureInPictureExit() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
+
+        // To continue audio playback in backgroud we need to set
+        // player in _playerLayer & _playerViewController to nil
+        let appState = UIApplication.shared.applicationState
+        if _playInBackground && appState == .background {
+            _playerLayer?.player = nil
+            _playerViewController?.player = nil
+            _player?.play()
+        }
     }
 
     func handleRestoreUserInterfaceForPictureInPictureStop() {
@@ -293,7 +298,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if _playInBackground || isExternalPlaybackActive { return }
+        if !_playInBackground || isExternalPlaybackActive || _pip?._pipController?.isPictureInPictureActive == true { return }
         // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
         _playerLayer?.player = nil
         _playerViewController?.player = nil
@@ -397,7 +402,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": _drm?.json ?? NSNull(),
+            "drm": source.drm?.json ?? NSNull(),
             "target": reactTag,
         ])
 
@@ -434,10 +439,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if _drm != nil || _localSourceEncryptionKeyScheme != nil {
+        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
             _resouceLoaderDelegate = RCTResourceLoaderDelegate(
                 asset: asset,
-                drm: _drm,
+                drm: source.drm,
                 localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
                 onVideoError: onVideoError,
                 onGetLicense: onGetLicense,
@@ -557,11 +562,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
-    }
-
-    @objc
-    func setDrm(_ drm: NSDictionary) {
-        _drm = DRMParams(drm)
     }
 
     @objc
@@ -1260,7 +1260,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerItem = nil
         _source = nil
         _chapters = nil
-        _drm = nil
         _textTracks = nil
         _selectedTextTrackCriteria = nil
         _selectedAudioTrackCriteria = nil

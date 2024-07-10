@@ -24,6 +24,7 @@ export type ReactVideoSourceProperties = {
   cropStart?: number;
   cropEnd?: number;
   metadata?: VideoMetadata;
+  drm?: Drm;
   textTracksAllowChunklessPreparation?: boolean;
 };
 
@@ -60,6 +61,7 @@ export type Drm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
+  multiDrm: boolean; // android
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
@@ -211,6 +213,7 @@ export type ControlsStyles = {
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
+  /** @deprecated */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
@@ -258,8 +261,10 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   textTracks?: TextTracks;
   testID?: string;
   viewType?: ViewType;
-  useTextureView?: boolean; // Android // deprecated
-  useSecureView?: boolean; // Android // deprecated
+  /** @deprecated */
+  useTextureView?: boolean; // Android
+  /** @deprecated */
+  useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
