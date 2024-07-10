@@ -29,16 +29,13 @@ object DataSourceUtil {
     }
 
     @JvmStatic
-    fun getDefaultDataSourceFactory(
-        context: ReactContext,
-        bandwidthMeter: DefaultBandwidthMeter?,
-        requestHeaders: Map<String, String>?
-    ): DataSource.Factory {
+    fun getDefaultDataSourceFactory(context: ReactContext, bandwidthMeter: DefaultBandwidthMeter?, requestHeaders: Map<String, String>?): DataSource.Factory {
         if (defaultDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
             defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders)
         }
         return defaultDataSourceFactory as DataSource.Factory
     }
+
     @JvmStatic
     fun getDefaultHttpDataSourceFactory(
         context: ReactContext,
@@ -80,6 +77,7 @@ object DataSourceUtil {
 
         return okHttpDataSourceFactory
     }
+
     @JvmStatic
     fun buildAssetDataSourceFactory(context: ReactContext?, srcUri: Uri?): DataSource.Factory {
         val dataSpec = DataSpec(srcUri!!)
