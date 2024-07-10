@@ -34,8 +34,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<HTMLVideoElement>(null);
-    const errorHandler = useRef<typeof onError>(onError);
-    errorHandler.current = onError;
 
     const seek = useCallback(
       async (time: number, _tolerance?: number) => {
