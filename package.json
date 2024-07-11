@@ -59,6 +59,7 @@
         "src",
         "lib",
         "react-native-video.podspec",
+        "app.plugin.js",
         "!android/build",
         "!android/buildOutput_*",
         "!android/local.properties",
