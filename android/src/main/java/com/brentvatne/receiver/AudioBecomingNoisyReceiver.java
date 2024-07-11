@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat;
 public class AudioBecomingNoisyReceiver extends BroadcastReceiver {
 
     private final Context context;
-    private BecomingNoisyListener listener = BecomingNoisyListener.NO_OP;
+    private BecomingNoisyListener listener = BecomingNoisyListener.Companion.getNO_OP();
 
     public AudioBecomingNoisyReceiver(Context context) {
         this.context = context.getApplicationContext();
@@ -31,7 +31,7 @@ public class AudioBecomingNoisyReceiver extends BroadcastReceiver {
     }
 
     public void removeListener() {
-        this.listener = BecomingNoisyListener.NO_OP;
+        this.listener = BecomingNoisyListener.Companion.getNO_OP();
         try {
             context.unregisterReceiver(this);
         } catch (Exception ignore) {
