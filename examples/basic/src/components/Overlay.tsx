@@ -218,16 +218,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const onResizeModeSelected = (value: MultiValueControlPropType) => {
     if (typeof value === 'string') {
-      switch (value) {
-        case ResizeMode.CONTAIN:
-          setResizeMode(ResizeMode.CONTAIN);
-          break;
-        case ResizeMode.COVER:
-          setResizeMode(ResizeMode.COVER);
-          break;
-        default:
-          setResizeMode(ResizeMode.STRETCH);
-      }
+      setResizeMode(value as EnumValues<ResizeMode>);
     }
   };
 
