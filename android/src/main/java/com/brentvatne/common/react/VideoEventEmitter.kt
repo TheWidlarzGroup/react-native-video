@@ -47,7 +47,7 @@ enum class EventTypes(val eventName: String) {
     companion object {
         fun toMap() =
             mutableMapOf<String, Any>().apply {
-                EventTypes.entries.forEach { eventType ->
+                EventTypes.values().toList().forEach { eventType ->
                     put("top${eventType.eventName.removePrefix("on")}", mapOf("registrationName" to eventType.eventName))
                 }
             }
