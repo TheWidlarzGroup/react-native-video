@@ -7,7 +7,6 @@ import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
-import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -1060,7 +1059,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file" + uri);
