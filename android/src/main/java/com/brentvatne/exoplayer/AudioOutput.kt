@@ -1,38 +1,28 @@
-package com.brentvatne.exoplayer;
+package com.brentvatne.exoplayer
 
-import android.annotation.SuppressLint;
-
-import androidx.annotation.NonNull;
-import androidx.media3.common.C;
+import android.annotation.SuppressLint
+import androidx.media3.common.C
 
 @SuppressLint("InlinedApi")
-public enum AudioOutput {
-    SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
+enum class AudioOutput(private val mName: String, @C.StreamType val streamType: Int) {
+
+    SPEAKER("speaker", C.STREAM_TYPE_MUSIC ),
     EARPIECE("earpiece", C.STREAM_TYPE_VOICE_CALL);
 
-    private final @C.StreamType int streamType;
-    private final String mName;
-
-    AudioOutput(final String name, @C.StreamType int stream) {
-        mName = name;
-        streamType = stream;
-    }
-
-    public static AudioOutput get(String name) {
-        for (AudioOutput d : values()) {
-            if (d.mName.equalsIgnoreCase(name))
-                return d;
+    companion object {
+        @JvmStatic
+        fun get(name: String) : AudioOutput {
+            for (d in entries){
+                if (d.mName.equals(name, ignoreCase = true)){
+                    return d
+                }
+            }
+            return SPEAKER
         }
-        return SPEAKER;
     }
 
-    public int getStreamType() {
-        return streamType;
+    override fun toString(): String {
+        return "${javaClass.simpleName}($mName, $streamType)"
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" + this.mName + ", " + streamType + ")";
-    }
 }
