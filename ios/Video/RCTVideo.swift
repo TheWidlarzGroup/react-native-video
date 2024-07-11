@@ -172,7 +172,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func isPipActive() -> Bool {
-        #if os(ios)
+        #if os(iOS)
             return _pip?._pipController?.isPictureInPictureActive == true
         #else
             return false
