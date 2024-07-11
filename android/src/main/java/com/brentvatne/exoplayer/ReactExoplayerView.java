@@ -7,7 +7,6 @@ import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 
-import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -221,6 +220,13 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
+
+    /*
+    * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
+    * Then we set if to false when playback is back in onIsPlayingChanged -> true
+    */
+    private boolean isSeeking = false;
+    private long seekPosition = -1;
 
     // Props from React
     private Source source = new Source();
@@ -1060,7 +1066,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file" + uri);
@@ -1619,6 +1625,11 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        if (isPaused && isSeeking && !buffering) {
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            isSeeking = false;
+        }
+
         isBuffering = buffering;
         eventEmitter.onVideoBuffer.invoke(buffering);
     }
@@ -1626,7 +1637,8 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), newPosition.positionMs % 1000); // time are in seconds /°\
+            isSeeking = true;
+            seekPosition = newPosition.positionMs;
             if (isUsingContentResolution) {
                 // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
                 setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
@@ -1677,7 +1689,15 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
-        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying);
+        if (isPlaying && isSeeking) {
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+        }
+
+        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
+        
+        if (isPlaying) {
+            isSeeking = false;
+        }
     }
 
     @Override
