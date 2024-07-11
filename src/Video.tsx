@@ -612,6 +612,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [drm, useSecureView, useTextureView, viewType]);
 
     const _renderPoster = useCallback(() => {
+      if (!hasPoster || !showPoster) {
+        return null;
+      }
+
       // poster resize mode
       let _posterResizeMode: ImageResizeMode = 'contain';
 
@@ -637,21 +641,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       // render poster
-      if (renderLoader && poster) {
+      if (renderLoader && (poster || posterResizeMode)) {
         console.warn(
-          'You provided both `renderLoader` and `poster` props. `Poster` props is ignored.',
+          'You provided both `renderLoader` and `poster` or `posterResizeMode` props. `renderLoader` will be used.',
         );
       }
 
+      // render loader
       if (renderLoader) {
-        // check if valid jsx
-        if (React.isValidElement(renderLoader)) {
-          console.warn(
-            'Invalid renderLoader component. Please provide a valid JSX component',
-          );
-          return;
-        }
-
         return <View style={StyleSheet.absoluteFill}>{renderLoader}</View>;
       }
 
@@ -662,7 +659,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           style={posterStyle}
         />
       );
-    }, [isPosterDeprecated, poster, posterResizeMode, renderLoader]);
+    }, [
+      hasPoster,
+      isPosterDeprecated,
+      poster,
+      posterResizeMode,
+      renderLoader,
+      showPoster,
+    ]);
 
     const _style: StyleProp<ViewStyle> = useMemo(
       () => ({
@@ -754,7 +758,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           }
           viewType={_viewType}
         />
-        {hasPoster && showPoster ? _renderPoster() : null}
+        {_renderPoster()}
       </View>
     );
   },
