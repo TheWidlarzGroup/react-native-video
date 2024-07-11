@@ -21,13 +21,13 @@ class AudioBecomingNoisyReceiver(private val context: Context) : BroadcastReceiv
         }
     }
 
-    fun setListener(listener: BecomingNoisyListener)  {
+    fun setListener(listener: BecomingNoisyListener) {
         this.listener = listener
         val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         ContextCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
-    fun removeListener()  {
+    fun removeListener() {
         this.listener = BecomingNoisyListener.NO_OP
         try {
             context.unregisterReceiver(this)
