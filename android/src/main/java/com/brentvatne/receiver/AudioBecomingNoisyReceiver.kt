@@ -1,40 +1,37 @@
-package com.brentvatne.receiver;
+package com.brentvatne.receiver
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.AudioManager;
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
+import androidx.core.content.ContextCompat
 
-import androidx.core.content.ContextCompat;
+class AudioBecomingNoisyReceiver(private val context: Context) : BroadcastReceiver() {
+    private var listener: BecomingNoisyListener = BecomingNoisyListener.NO_OP
 
-public class AudioBecomingNoisyReceiver extends BroadcastReceiver {
-
-    private final Context context;
-    private BecomingNoisyListener listener = BecomingNoisyListener.NO_OP;
-
-    public AudioBecomingNoisyReceiver(Context context) {
-        this.context = context.getApplicationContext();
+    init {
+        context.applicationContext
     }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-            listener.onAudioBecomingNoisy();
+    override fun onReceive(context: Context?, intent: Intent?) {
+        if (intent != null) {
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == intent.action) {
+                listener.onAudioBecomingNoisy()
+            }
         }
     }
 
-    public void setListener(BecomingNoisyListener listener) {
-        this.listener = listener;
-        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        ContextCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+    fun setListener(listener: BecomingNoisyListener)  {
+        this.listener = listener
+        val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        ContextCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
-    public void removeListener() {
-        this.listener = BecomingNoisyListener.NO_OP;
+    fun removeListener()  {
+        this.listener = BecomingNoisyListener.NO_OP
         try {
-            context.unregisterReceiver(this);
-        } catch (Exception ignore) {
+            context.unregisterReceiver(this)
+        } catch (ignore: Exception) {
             // ignore if already unregistered
         }
     }
