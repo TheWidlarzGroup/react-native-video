@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type {HostComponent, ViewProps} from 'react-native';
-import {NativeModules, requireNativeComponent} from 'react-native';
+import {NativeModules} from 'react-native';
 import type {
   DirectEventHandler,
   Double,
@@ -8,6 +8,7 @@ import type {
   Int32,
   WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
+import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // -------- There are types for native component (future codegen) --------
 // if you are looking for types for react component, see src/types/video.ts
@@ -289,7 +290,7 @@ export type OnAudioFocusChangedData = Readonly<{
 
 type ControlsStyles = Readonly<{
   hideSeekBar?: boolean;
-  seekIncrementMS?: number;
+  seekIncrementMS?: Int32;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
@@ -414,6 +415,6 @@ export const VideoManager = NativeModules.VideoManager as VideoManagerType;
 export const VideoDecoderProperties =
   NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
 
-export default requireNativeComponent<VideoNativeProps>(
-  'RCTVideo',
+export default codegenNativeComponent<VideoNativeProps>(
+  'RNCVideo',
 ) as VideoComponentType;
