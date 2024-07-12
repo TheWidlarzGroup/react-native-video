@@ -1696,7 +1696,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func exitPictureInPicture() {
-        guard isPictureInPictureActive() ?? false else { return }
+        guard isPictureInPictureActive() else { return }
 
         _pip?.exitPictureInPicture()
         #if os(iOS)
