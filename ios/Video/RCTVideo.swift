@@ -316,7 +316,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if _playInBackground || isExternalPlaybackActive { return }
+        if !_playInBackground || isExternalPlaybackActive { return }
         if isPictureInPictureActive() {
             _player?.play()
             _player?.rate = _rate
