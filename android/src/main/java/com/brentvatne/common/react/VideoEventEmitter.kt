@@ -107,7 +107,7 @@ class VideoEventEmitter {
                     putDouble("playableDuration", currentPosition / 1000.0)
 
                     val naturalSize: WritableMap = aspectRatioToNaturalSize(videoWidth, videoHeight)
-                    putMap("seekableDuration", naturalSize)
+                    putMap("naturalSize", naturalSize)
                     putString("trackId", trackId)
                     putArray("videoTracks", videoTracksToArray(videoTracks))
                     putArray("audioTracks", audioTracksToArray(audioTracks))
