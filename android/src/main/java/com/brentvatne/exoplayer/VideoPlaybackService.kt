@@ -58,7 +58,7 @@ class VideoPlaybackService : MediaSessionService() {
         val mediaSession = MediaSession.Builder(this, player)
             .setId("RNVideoPlaybackService_" + player.hashCode())
             .setCallback(VideoPlaybackCallback())
-            .setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
+            .setCustomLayout(immutableListOf(seekForwardBtn, seekBackwardBtn))
             .build()
 
         mediaSessionsList[player] = mediaSession
