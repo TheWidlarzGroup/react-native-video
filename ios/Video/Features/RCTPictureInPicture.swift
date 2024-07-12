@@ -11,6 +11,9 @@ import React
         private var _onPictureInPictureExit: (() -> Void)?
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
         private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
+        private var _isPictureInPictureActive: Bool {
+            return _pipController?.isPictureInPictureActive ?? false
+        }
 
         init(
             _ onPictureInPictureEnter: (() -> Void)? = nil,
@@ -68,14 +71,14 @@ import React
 
         func enterPictureInPicture() {
             guard let _pipController else { return }
-            if !isPictureInPictureActive {
+            if !_isPictureInPictureActive {
                 _pipController.startPictureInPicture()
             }
         }
 
         func exitPictureInPicture() {
             guard let _pipController else { return }
-            if isPictureInPictureActive {
+            if _isPictureInPictureActive {
                 let state = UIApplication.shared.applicationState
                 if state == .background || state == .inactive {
                     deinitPipController()
