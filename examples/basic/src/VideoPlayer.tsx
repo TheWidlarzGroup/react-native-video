@@ -30,6 +30,7 @@ import Video, {
   VideoTrack,
   SelectedTrack,
   SelectedVideoTrack,
+  EnumValues,
 } from 'react-native-video';
 import styles from './styles';
 import {AdditionalSourceInfo} from './types';
@@ -49,7 +50,9 @@ const VideoPlayer: FC<Props> = ({}) => {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
-  const [resizeMode, setResizeMode] = useState(ResizeMode.CONTAIN);
+  const [resizeMode, setResizeMode] = useState<EnumValues<ResizeMode>>(
+    ResizeMode.CONTAIN,
+  );
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [_, setVideoSize] = useState({videoWidth: 0, videoHeight: 0});
