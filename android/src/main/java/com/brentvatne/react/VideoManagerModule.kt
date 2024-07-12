@@ -63,7 +63,6 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
         }
     }
 
-
     @ReactMethod
     fun enterPictureInPictureCmd(reactTag: Int) {
         performOnPlayerView(reactTag) {
