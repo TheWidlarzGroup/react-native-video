@@ -14,7 +14,7 @@ export interface VideoTrackSelectorType {
   onValueChange: (arg0: string) => void;
 }
 
-const VideoTrackSelector = ({
+export const VideoTrackSelector = ({
   videoTracks,
   selectedVideoTrack,
   onValueChange,
@@ -60,5 +60,3 @@ const VideoTrackSelector = ({
     </>
   );
 };
-
-export default VideoTrackSelector;

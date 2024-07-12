@@ -39,6 +39,7 @@ export type VideoSrc = Readonly<{
   cropStart?: Float;
   cropEnd?: Float;
   metadata?: VideoMetadata;
+  drm?: Drm;
   textTracksAllowChunklessPreparation?: boolean; // android
 }>;
 
@@ -57,6 +58,7 @@ type Drm = Readonly<{
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
   useExternalGetLicense?: boolean; // ios
+  multiDrm?: boolean; // android
 }>;
 
 type TextTracks = ReadonlyArray<
@@ -187,6 +189,7 @@ export type OnSeekData = Readonly<{
 
 export type OnPlaybackStateChangedData = Readonly<{
   isPlaying: boolean;
+  isSeeking: boolean;
 }>;
 
 export type OnTimedMetadataData = Readonly<{
@@ -295,7 +298,6 @@ export type OnControlsVisibilityChange = Readonly<{
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  drm?: Drm;
   adTagUrl?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: Float;
@@ -337,8 +339,7 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
+  viewType?: Int32; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
   onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;

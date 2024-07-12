@@ -44,11 +44,12 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import {VideoManager} from './specs/VideoNativeComponent';
-import type {
-  OnLoadData,
-  OnTextTracksData,
-  OnReceiveAdEventData,
-  ReactVideoProps,
+import {
+  type OnLoadData,
+  type OnTextTracksData,
+  type OnReceiveAdEventData,
+  type ReactVideoProps,
+  ViewType,
 } from './types';
 
 export type VideoSaveData = {
@@ -86,6 +87,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
+      useTextureView,
+      useSecureView,
+      viewType,
       onLoadStart,
       onLoad,
       onError,
@@ -161,6 +165,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         )
       );
 
+      const selectedDrm = source.drm || drm;
+      const _drm = !selectedDrm
+        ? undefined
+        : {
+            type: selectedDrm.type,
+            licenseServer: selectedDrm.licenseServer,
+            headers: generateHeaderForNative(selectedDrm.headers),
+            contentId: selectedDrm.contentId,
+            certificateUrl: selectedDrm.certificateUrl,
+            base64Certificate: selectedDrm.base64Certificate,
+            useExternalGetLicense: !!selectedDrm.getLicense,
+            multiDrm: selectedDrm.multiDrm,
+          };
+
       return {
         uri,
         isNetwork,
@@ -174,26 +192,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
+        drm: _drm,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [source]);
-
-    const _drm = useMemo(() => {
-      if (!drm) {
-        return;
-      }
-
-      return {
-        type: drm.type,
-        licenseServer: drm.licenseServer,
-        headers: generateHeaderForNative(drm.headers),
-        contentId: drm.contentId,
-        certificateUrl: drm.certificateUrl,
-        base64Certificate: drm.base64Certificate,
-        useExternalGetLicense: !!drm.getLicense,
-      };
-    }, [drm]);
+    }, [drm, source]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -611,13 +614,43 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       ],
     );
 
+    const _viewType = useMemo(() => {
+      const hasValidDrmProp =
+        drm !== undefined && Object.keys(drm).length !== 0;
+
+      const shallForceViewType =
+        hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
+
+      if (shallForceViewType) {
+        console.warn(
+          'cannot use DRM on texture view. please set useTextureView={false}',
+        );
+      }
+      if (useSecureView && useTextureView) {
+        console.warn(
+          'cannot use SecureView on texture view. please set useTextureView={false}',
+        );
+      }
+
+      return shallForceViewType
+        ? useSecureView
+          ? ViewType.SURFACE_SECURE
+          : ViewType.SURFACE // check if we should force the type to Surface due to DRM
+        : viewType
+        ? viewType // else use ViewType from source
+        : useSecureView // else infer view type from useSecureView and useTextureView
+        ? ViewType.SURFACE_SECURE
+        : useTextureView
+        ? ViewType.TEXTURE
+        : ViewType.SURFACE;
+    }, [drm, useSecureView, useTextureView, viewType]);
+
     return (
       <View style={style}>
         <NativeVideoComponent
           ref={nativeRef}
           {...rest}
           src={src}
-          drm={_drm}
           style={StyleSheet.absoluteFill}
           resizeMode={resizeMode}
           fullscreen={isFullscreen}
@@ -691,6 +724,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onControlsVisibilityChange={
             onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
           }
+          viewType={_viewType}
         />
         {hasPoster && showPoster ? (
           <Image style={posterStyle} source={{uri: poster}} />

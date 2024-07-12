@@ -17,10 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-
-    /* DRM */
-    private var _drm: DRMParams?
-
     private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
@@ -81,6 +77,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             #endif
         }
     }
+
+    private let instanceId = UUID().uuidString
 
     private var _isBuffering = false {
         didSet {
@@ -155,6 +153,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handlePictureInPictureExit() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
+
+        // To continue audio playback in backgroud we need to set
+        // player in _playerLayer & _playerViewController to nil
+        let appState = UIApplication.shared.applicationState
+        if _playInBackground && appState == .background {
+            _playerLayer?.player = nil
+            _playerViewController?.player = nil
+            _player?.play()
+        }
     }
 
     func handleRestoreUserInterfaceForPictureInPictureStop() {
@@ -162,7 +169,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func isPictureInPictureActive() -> Bool {
-        return _pip?.isPictureInPictureActive ?? false
+        #if os(iOS)
+            return _pip?._pipController?.isPictureInPictureActive == true
+        #else
+            return false
+        #endif
     }
 
     func initPictureinPicture() {
@@ -177,7 +188,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 })
             }
 
-            if _playerLayer != nil && !_controls && !(_pip?.isInitialized ?? false) {
+            if _playerLayer != nil && !_controls && _pip?._pipController == nil {
                 _pip?.setupPipController(_playerLayer)
             }
         #else
@@ -187,6 +198,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     init(eventDispatcher: RCTEventDispatcher!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
             _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
         #endif
@@ -277,6 +289,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #if os(iOS)
             _pip = nil
         #endif
+        ReactNativeVideoManager.shared.unregisterView(newInstance: self)
     }
 
     // MARK: - App lifecycle handlers
@@ -309,8 +322,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.rate = _rate
         } else {
             // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
-            _playerLayer?.player?.pause()
-            _playerLayer?.player?.rate = 0.0
             _playerLayer?.player = nil
             _playerViewController?.player = nil
         }
@@ -432,7 +443,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": _drm?.json ?? NSNull(),
+            "drm": source.drm?.json ?? NSNull(),
             "target": reactTag,
         ])
 
@@ -469,10 +480,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if _drm != nil || _localSourceEncryptionKeyScheme != nil {
+        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
             _resouceLoaderDelegate = RCTResourceLoaderDelegate(
                 asset: asset,
-                drm: _drm,
+                drm: source.drm,
                 localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
                 onVideoError: onVideoError,
                 onGetLicense: onGetLicense,
@@ -501,6 +512,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if _player == nil {
             _player = AVPlayer()
+            ReactNativeVideoManager.shared.onInstanceCreated(id: instanceId, player: _player)
+
             _player!.replaceCurrentItem(with: playerItem)
 
             if _showNotificationControls {
@@ -590,11 +603,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
-    }
-
-    @objc
-    func setDrm(_ drm: NSDictionary) {
-        _drm = DRMParams(drm)
     }
 
     @objc
@@ -788,8 +796,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let seekTime: NSNumber! = info["time"] as! NSNumber
         let seekTolerance: NSNumber! = info["tolerance"] as! NSNumber
         let item: AVPlayerItem? = _player?.currentItem
+
+        _pendingSeek = true
+
         guard item != nil, let player = _player, let item, item.status == AVPlayerItem.Status.readyToPlay else {
-            _pendingSeek = true
             _pendingSeekTime = seekTime.floatValue
             return
         }
@@ -998,7 +1008,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setFullscreen(_ fullscreen: Bool) {
-        if fullscreen && !_fullscreenPlayerPresented && _player != nil {
+        var alreadyFullscreenPresented = _presentingViewController?.presentedViewController != nil
+        if fullscreen && !_fullscreenPlayerPresented && _player != nil && !alreadyFullscreenPresented {
             // Ensure player view controller is not null
             // Controls will be displayed even if it is disabled in configuration
             if _playerViewController == nil {
@@ -1294,12 +1305,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerItem = nil
         _source = nil
         _chapters = nil
-        _drm = nil
         _textTracks = nil
         _selectedTextTrackCriteria = nil
         _selectedAudioTrackCriteria = nil
         _presentingViewController = nil
 
+        ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player)
         _player = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
@@ -1518,7 +1529,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         guard _isPlaying != isPlaying else { return }
         _isPlaying = isPlaying
-        onVideoPlaybackStateChanged?(["isPlaying": isPlaying, "target": reactTag as Any])
+        onVideoPlaybackStateChanged?(["isPlaying": isPlaying, "isSeeking": self._pendingSeek == true, "target": reactTag as Any])
     }
 
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
@@ -1692,7 +1703,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func enterPictureInPicture() {
-        if (_pip?.isInitialized ?? false) == false {
+        if _pip?._pipController == nil {
             initPictureinPicture()
             _playerViewController?.allowsPictureInPicturePlayback = true
         }
@@ -1701,7 +1712,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func exitPictureInPicture() {
-        guard _pip?.isPictureInPictureActive ?? false else { return }
+        guard isPictureInPictureActive() ?? false else { return }
 
         _pip?.exitPictureInPicture()
         #if os(iOS)

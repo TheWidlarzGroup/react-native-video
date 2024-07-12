@@ -17,19 +17,18 @@ import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
-import com.brentvatne.common.react.VideoEventEmitter;
+import com.brentvatne.common.api.ViewType;
+import com.brentvatne.common.react.EventTypes;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
+import com.brentvatne.react.ReactNativeVideoManager;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -39,8 +38,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String REACT_CLASS = "RCTVideo";
     private static final String PROP_SRC = "src";
     private static final String PROP_AD_TAG_URL = "adTagUrl";
-    private static final String PROP_DRM = "drm";
-    private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
@@ -69,8 +66,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError";
     private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
-    private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
-    private static final String PROP_SECURE_VIEW = "useSecureView";
+    private static final String PROP_VIEW_TYPE = "viewType";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
@@ -81,7 +77,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls";
     private static final String PROP_DEBUG = "debug";
     private static final String PROP_CONTROLS_STYLES = "controlsStyles";
-
 
     private final ReactExoplayerConfig config;
 
@@ -98,28 +93,25 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @NonNull
     @Override
     protected ReactExoplayerView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
+        ReactNativeVideoManager.Companion.getInstance().registerView(this);
         return new ReactExoplayerView(themedReactContext, config);
     }
 
     @Override
     public void onDropViewInstance(ReactExoplayerView view) {
         view.cleanUpResources();
+        ReactNativeVideoManager.Companion.getInstance().unregisterView(this);
     }
 
     @Override
     public @Nullable Map<String, Object> getExportedCustomDirectEventTypeConstants() {
-        MapBuilder.Builder<String, Object> builder = MapBuilder.builder();
-        for (String event : VideoEventEmitter.Events) {
-            builder.put(event, MapBuilder.of("registrationName", event));
-        }
-        return builder.build();
+        return EventTypes.Companion.toMap();
     }
 
-    @ReactProp(name = PROP_DRM)
-    public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
-        DRMProps drmProps = DRMProps.parse(drm);
-        videoView.setDrm(drmProps);
-        videoView.setUseTextureView(false);
+    @Override
+    public void addEventEmitters(@NonNull ThemedReactContext reactContext, @NonNull ReactExoplayerView view) {
+        super.addEventEmitters(reactContext, view);
+        view.eventEmitter.addEventEmitters(reactContext, view);
     }
 
     @ReactProp(name = PROP_SRC)
@@ -304,14 +296,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setFullscreen(fullscreen);
     }
 
-    @ReactProp(name = PROP_USE_TEXTURE_VIEW, defaultBoolean = true)
-    public void setUseTextureView(final ReactExoplayerView videoView, final boolean useTextureView) {
-        videoView.setUseTextureView(useTextureView);
-    }
-
-    @ReactProp(name = PROP_SECURE_VIEW, defaultBoolean = true)
-    public void useSecureView(final ReactExoplayerView videoView, final boolean useSecureView) {
-        videoView.useSecureView(useSecureView);
+    @ReactProp(name = PROP_VIEW_TYPE, defaultInt = ViewType.VIEW_TYPE_SURFACE)
+    public void setViewType(final ReactExoplayerView videoView, final int viewType) {
+        videoView.setViewType(viewType);
     }
 
     @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
