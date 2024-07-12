@@ -2160,7 +2160,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
         this.isInPictureInPicture = isInPictureInPicture;
-        eventEmitter.onPictureInPictureStatusChanged(isInPictureInPicture);
+        eventEmitter.onPictureInPictureStatusChanged.invoke(isInPictureInPicture);
 
         if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
             if (isInPictureInPicture) fullScreenPlayerView.hideWithoutPlayer();
