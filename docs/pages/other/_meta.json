@@ -3,6 +3,6 @@
   "misc": "Misc",
   "debug": "Debugging",
   "new-arch": "New Architecture",
-  "expo": "Expo"
+  "expo": "Expo",
   "plugin": "Plugin (experimental)"
 }

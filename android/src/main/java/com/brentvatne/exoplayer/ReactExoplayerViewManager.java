@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.media3.common.util.Util;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
@@ -204,7 +203,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_TEXT_TRACKS)
-    public void setPropTextTracks(final ReactExoplayerView videoView,
+    public void setTextTracks(final ReactExoplayerView videoView,
                                   @Nullable ReadableArray textTracks) {
         SideLoadedTextTrackList sideLoadedTextTracks = SideLoadedTextTrackList.Companion.parse(textTracks);
         videoView.setTextTracks(sideLoadedTextTracks);
@@ -251,12 +250,12 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
-    public void setMaxBitRate(final ReactExoplayerView videoView, final int maxBitRate) {
-        videoView.setMaxBitRateModifier(maxBitRate);
+    public void setMaxBitRate(final ReactExoplayerView videoView, final float maxBitRate) {
+        videoView.setMaxBitRateModifier((int)maxBitRate);
     }
 
     @ReactProp(name = PROP_MIN_LOAD_RETRY_COUNT)
-    public void minLoadRetryCount(final ReactExoplayerView videoView, final int minLoadRetryCount) {
+    public void setMinLoadRetryCount(final ReactExoplayerView videoView, final int minLoadRetryCount) {
         videoView.setMinLoadRetryCountModifier(minLoadRetryCount);
     }
 
@@ -316,11 +315,10 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setSubtitleStyle(SubtitleStyle.parse(src));
     }
 
-    @ReactProp(name = PROP_SHUTTER_COLOR, customType = "Color")
-    public void setShutterColor(final ReactExoplayerView videoView, final Integer color) {
-        videoView.setShutterColor(color == null ? Color.BLACK : color);
+    @ReactProp(name = PROP_SHUTTER_COLOR, defaultInt = 0)
+    public void setShutterColor(final ReactExoplayerView videoView, final int color) {
+        videoView.setShutterColor(color == 0 ? Color.BLACK : color);
     }
-
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
     public void setBufferConfig(final ReactExoplayerView videoView, @Nullable ReadableMap bufferConfig) {

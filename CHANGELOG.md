@@ -1,5 +1,12 @@
 
 
+## [6.4.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.0...v6.4.1) (2024-07-12)
+
+
+### Bug Fixes
+
+* expo plugin export ([#3992](https://github.com/TheWidlarzGroup/react-native-video/issues/3992)) ([de8ade0](https://github.com/TheWidlarzGroup/react-native-video/commit/de8ade06202cfdb3dd7fec635b6e8c6cdfd04e47))
+
 * fix(ios): remove pip check for other platforms (#3991) (40a72825)
 * feat: add `isSeeking` to `onPlaybackStateChanged` (#3899) (111a5d21)
 * chore(android): migrate DataSourceUtil to Kotlin (#3984) (b25e43ee)
