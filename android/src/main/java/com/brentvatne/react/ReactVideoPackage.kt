@@ -13,7 +13,7 @@ class ReactVideoPackage(private val config: ReactExoplayerConfig? = null) : Reac
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> =
         listOf(
-            VideoDecoderPropertiesModule(reactContext),
+            VideoDecoderInfoModule(reactContext),
             VideoManagerModule(reactContext)
         )
 
