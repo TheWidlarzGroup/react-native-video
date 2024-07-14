@@ -1,12 +1,22 @@
 import AVFoundation
 import AVKit
 import Foundation
+import MediaPlayer
+import AVFoundation
+
 #if USE_GOOGLE_IMA
     import GoogleInteractiveMediaAds
 #endif
 import React
 
 // MARK: - RCTVideo
+extension UIImage {
+    func resized(to size: CGSize) -> UIImage {
+        return UIGraphicsImageRenderer(size: size).image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+}
 
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
     private var _player: AVPlayer?
@@ -515,62 +525,123 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setSrc(_ source: NSDictionary!) {
-        if self.isSetSourceOngoing || self.nextSource != nil {
-            DebugLog("setSrc buffer request")
+   func setSrc(_ source: NSDictionary!) {
+    if self.isSetSourceOngoing || self.nextSource != nil {
+        DebugLog("setSrc buffer request")
+        self._player?.replaceCurrentItem(with: nil)
+        nextSource = source
+        return
+    }
+    self.isSetSourceOngoing = true
+    
+    let initializeSource = {
+        self._source = VideoSource(source)
+        if self._source?.uri == nil || self._source?.uri == "" {
             self._player?.replaceCurrentItem(with: nil)
-            nextSource = source
+            self.isSetSourceOngoing = false
+            self.applyNextSource()
+            
+            if let player = self._player {
+                NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+            }
+            
+            DebugLog("setSrc Stopping playback")
             return
         }
-        self.isSetSourceOngoing = true
-
-        let initializeSource = {
-            self._source = VideoSource(source)
-            if self._source?.uri == nil || self._source?.uri == "" {
-                self._player?.replaceCurrentItem(with: nil)
-                self.isSetSourceOngoing = false
-                self.applyNextSource()
-
-                if let player = self._player {
-                    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+        self.removePlayerLayer()
+        self._playerObserver.player = nil
+        self._resouceLoaderDelegate = nil
+        self._playerObserver.playerItem = nil
+        
+        // perform on next run loop, otherwise other passed react-props may not be set
+        RCTVideoUtils.delay { [weak self] in
+            do {
+                guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                
+                let playerItem = try await self.preparePlayerItem()
+                try await self.setupPlayer(playerItem: playerItem)
+                
+                // Update MPNowPlayingInfoCenter
+                var mapping: [AVMetadataIdentifier: Any] = [:]
+                
+                if let title = self._source?.customMetadata?.title {
+                    mapping[.commonIdentifierTitle] = title
                 }
-
-                DebugLog("setSrc Stopping playback")
-                return
-            }
-            self.removePlayerLayer()
-            self._playerObserver.player = nil
-            self._resouceLoaderDelegate = nil
-            self._playerObserver.playerItem = nil
-
-            // perform on next run loop, otherwise other passed react-props may not be set
-            RCTVideoUtils.delay { [weak self] in
-                do {
-                    guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
-
-                    let playerItem = try await self.preparePlayerItem()
-                    try await self.setupPlayer(playerItem: playerItem)
-                } catch {
-                    DebugLog("An error occurred: \(error.localizedDescription)")
-
-                    if let self {
-                        self.onVideoError?(["error": error.localizedDescription])
-                        self.isSetSourceOngoing = false
-                        self.applyNextSource()
-
-                        if let player = self._player {
-                            NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+                
+                if let artist = self._source?.customMetadata?.artist {
+                    mapping[.commonIdentifierArtist] = artist
+                }
+                
+                if let subtitle = self._source?.customMetadata?.subtitle {
+                    mapping[.iTunesMetadataTrackSubTitle] = subtitle
+                }
+                
+                if let description = self._source?.customMetadata?.description {
+                    mapping[.commonIdentifierDescription] = description
+                }
+                
+                if let imageUri = self._source?.customMetadata?.imageUri {
+                    if let url = URL(string: imageUri) {
+                        do {
+                            let data = try Data(contentsOf: url)
+                            if let artwork = UIImage(data: data) {
+                                let albumArtwork = MPMediaItemArtwork(boundsSize: artwork.size) { size in
+                                    return artwork.resized(to: size)
+                                }
+                                mapping[.commonIdentifierArtwork] = albumArtwork
+                            }
+                        } catch {
+                            print("Error loading artwork image: \(error)")
                         }
                     }
                 }
+                
+                if #available(iOS 12.2, *), !mapping.isEmpty {
+                    MPNowPlayingInfoCenter.default().nowPlayingInfo = mapping.reduce(into: [String: Any]()) { (result, pair) in
+                        result[pair.key.rawValue] = pair.value
+                    }
+                }
+                
+                // Set up remote control events
+                let commandCenter = MPRemoteCommandCenter.shared()
+                commandCenter.playCommand.isEnabled = true
+                commandCenter.pauseCommand.isEnabled = true
+                
+                commandCenter.playCommand.addTarget { [unowned self] event in
+                    self._player?.play()
+                    self._paused = false
+                    return .success
+                }
+                
+                commandCenter.pauseCommand.addTarget { [unowned self] event in
+                    self._player?.pause()
+                    self._paused = true
+                    return .success
+                }
+                
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+                
+            } catch {
+                DebugLog("An error occurred: \(error.localizedDescription)")
+                
+                if let self {
+                    self.onVideoError?(["error": error.localizedDescription])
+                    self.isSetSourceOngoing = false
+                    self.applyNextSource()
+                    
+                    if let player = self._player {
+                        NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+                    }
+                }
             }
-
-            self._videoLoadStarted = true
-            self.applyNextSource()
         }
-
-        DispatchQueue.global(qos: .default).async(execute: initializeSource)
+        
+        self._videoLoadStarted = true
+        self.applyNextSource()
     }
+    
+    DispatchQueue.global(qos: .default).async(execute: initializeSource)
+}
 
     @objc
     func setLocalSourceEncryptionKeyScheme(_ keyScheme: String) {
