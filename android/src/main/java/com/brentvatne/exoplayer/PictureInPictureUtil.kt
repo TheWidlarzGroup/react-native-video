@@ -13,27 +13,41 @@ import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
 import androidx.core.app.AppOpsManagerCompat
 import androidx.media3.exoplayer.ExoPlayer
+import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.receiver.PictureInPictureReceiver
 import com.facebook.react.uimanager.ThemedReactContext
 
 object PictureInPictureUtil {
     private const val FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000
+    private const val TAG = "PictureInPictureUtil"
 
     @JvmStatic
     fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
         if (!isSupportPictureInPicture(context)) return
         if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
-            context.currentActivity?.enterPictureInPictureMode(pictureInPictureParams)
+            try {
+                context.currentActivity?.enterPictureInPictureMode(pictureInPictureParams)
+            } catch (e: IllegalStateException) {
+                DebugLog.e(TAG, e.toString())
+            }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            context.currentActivity?.enterPictureInPictureMode()
+            try {
+                @Suppress("DEPRECATION")
+                context.currentActivity?.enterPictureInPictureMode()
+            } catch (e: IllegalStateException) {
+                DebugLog.e(TAG, e.toString())
+            }
         }
     }
 
     @JvmStatic
     fun updatePictureInPictureActions(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams) {
-        if (isSupportPictureInPictureAction()) {
-            if (!isSupportPictureInPicture(context)) return
+        if (!isSupportPictureInPictureAction()) return
+        if (!isSupportPictureInPicture(context)) return
+        try {
             context.currentActivity?.setPictureInPictureParams(pictureInPictureParams)
+        } catch (e: IllegalStateException) {
+            DebugLog.e(TAG, e.toString())
         }
     }
 
