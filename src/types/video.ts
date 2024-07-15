@@ -61,7 +61,7 @@ export type Drm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
-  multiDrm: boolean; // android
+  multiDrm?: boolean; // android
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,

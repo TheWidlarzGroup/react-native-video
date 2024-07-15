@@ -104,10 +104,10 @@ class VideoEventEmitter {
             onVideoLoad = { duration, currentPosition, videoWidth, videoHeight, audioTracks, textTracks, videoTracks, trackId ->
                 event.dispatch(EventTypes.EVENT_LOAD) {
                     putDouble("duration", duration / 1000.0)
-                    putDouble("playableDuration", currentPosition / 1000.0)
+                    putDouble("currentTime", currentPosition / 1000.0)
 
                     val naturalSize: WritableMap = aspectRatioToNaturalSize(videoWidth, videoHeight)
-                    putMap("seekableDuration", naturalSize)
+                    putMap("naturalSize", naturalSize)
                     putString("trackId", trackId)
                     putArray("videoTracks", videoTracksToArray(videoTracks))
                     putArray("audioTracks", audioTracksToArray(audioTracks))

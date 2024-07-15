@@ -199,22 +199,16 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     typeof ref !== 'function' && ref?.current?.seek(position);
   };
 
-  const onRateSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setRate(value);
-    }
+  const onRateSelected = (value: number) => {
+    setRate(value);
   };
 
-  const onVolumeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setVolume(value);
-    }
+  const onVolumeSelected = (value: number) => {
+    setVolume(value);
   };
 
-  const onResizeModeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'string') {
-      setResizeMode(value as EnumValues<ResizeMode>);
-    }
+  const onResizeModeSelected = (value: EnumValues<ResizeMode>) => {
+    setResizeMode(value);
   };
 
   const toggleCache = () => setUseCache(prev => !prev);
