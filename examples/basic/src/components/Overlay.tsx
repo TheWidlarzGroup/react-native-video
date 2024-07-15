@@ -1,4 +1,10 @@
-import React, {forwardRef, memo, useCallback} from 'react';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import {Indicator} from './Indicator.tsx';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
@@ -9,19 +15,21 @@ import {
   samplePoster,
   textTracksSelectionBy,
 } from '../constants';
-import MultiValueControl from '../MultiValueControl.tsx';
+import MultiValueControl, {
+  type MultiValueControlPropType,
+} from '../MultiValueControl.tsx';
 import {
-  AudioTrack,
-  EnumValues,
   ResizeMode,
-  SelectedTrack,
-  SelectedTrackType,
-  SelectedVideoTrack,
-  SelectedVideoTrackType,
-  TextTrack,
-  VideoDecoderProperties,
   VideoRef,
-  VideoTrack,
+  SelectedTrackType,
+  SelectedVideoTrackType,
+  VideoDecoderProperties,
+  type EnumValues,
+  type TextTrack,
+  type SelectedVideoTrack,
+  type SelectedTrack,
+  type VideoTrack,
+  type AudioTrack,
 } from 'react-native-video';
 import {
   toast,
@@ -35,39 +43,36 @@ import {
 type Props = {
   channelDown: () => void;
   channelUp: () => void;
-  fullscreen: boolean;
-  setFullscreen: (value: boolean) => void;
+  setFullscreen: Dispatch<SetStateAction<boolean>>;
   controls: boolean;
-  setControls: (value: boolean) => void;
-  decoration: boolean;
-  setDecoration: (value: boolean) => void;
+  setControls: Dispatch<SetStateAction<boolean>>;
   showNotificationControls: boolean;
-  setShowNotificationControls: (value: boolean) => void;
+  setShowNotificationControls: Dispatch<SetStateAction<boolean>>;
   selectedAudioTrack: SelectedTrack | undefined;
-  setSelectedAudioTrack: (value: SelectedTrack | undefined) => void;
+  setSelectedAudioTrack: Dispatch<SetStateAction<SelectedTrack | undefined>>;
   selectedTextTrack: SelectedTrack | undefined;
   setSelectedTextTrack: (value: SelectedTrack | undefined) => void;
   selectedVideoTrack: SelectedVideoTrack;
   setSelectedVideoTrack: (value: SelectedVideoTrack) => void;
-  setIsSeeking: (value: boolean) => void;
+  setIsSeeking: Dispatch<SetStateAction<boolean>>;
   rate: number;
-  setRate: (value: number) => void;
+  setRate: Dispatch<SetStateAction<number>>;
   volume: number;
   setVolume: (value: number) => void;
   resizeMode: EnumValues<ResizeMode>;
-  setResizeMode: (value: EnumValues<ResizeMode>) => void;
+  setResizeMode: Dispatch<SetStateAction<EnumValues<ResizeMode>>>;
   isLoading: boolean;
   srcListId: number;
   useCache: boolean;
-  setUseCache: (value: boolean) => void;
+  setUseCache: Dispatch<SetStateAction<boolean>>;
   paused: boolean;
-  setPaused: (value: boolean) => void;
+  setPaused: Dispatch<SetStateAction<boolean>>;
   repeat: boolean;
-  setRepeat: (value: boolean) => void;
+  setRepeat: Dispatch<SetStateAction<boolean>>;
   poster: string | undefined;
-  setPoster: (value: string | undefined) => void;
+  setPoster: Dispatch<SetStateAction<string | undefined>>;
   muted: boolean;
-  setMuted: (value: boolean) => void;
+  setMuted: Dispatch<SetStateAction<boolean>>;
   currentTime: number;
   duration: number;
   isSeeking: boolean;
@@ -81,11 +86,8 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     channelUp,
     channelDown,
     setFullscreen,
-    fullscreen,
     setControls,
     controls,
-    setDecoration,
-    decoration,
     setShowNotificationControls,
     showNotificationControls,
     setSelectedAudioTrack,
@@ -141,21 +143,18 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
   }, []);
 
   const toggleFullscreen = () => {
-    setFullscreen(!fullscreen);
+    setFullscreen(prev => !prev);
   };
   const toggleControls = () => {
-    setControls(!controls);
+    setControls(prev => !prev);
   };
 
-  const toggleDecoration = () => {
-    setDecoration(!decoration);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ref.current?.setFullScreen(!decoration);
+  const openDecoration = () => {
+    typeof ref !== 'function' && ref?.current?.setFullScreen(true);
   };
 
   const toggleShowNotificationControls = () => {
-    setShowNotificationControls(!showNotificationControls);
+    setShowNotificationControls(prev => !prev);
   };
 
   const onSelectedAudioTrackChange = (itemValue: string) => {
@@ -197,9 +196,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const videoSeek = (position: number) => {
     setIsSeeking(true);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ref.current?.seek(position);
+    typeof ref !== 'function' && ref?.current?.seek(position);
   };
 
   const onRateSelected = (value: number) => {
@@ -214,15 +211,16 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     setResizeMode(value);
   };
 
-  const toggleCache = () => setUseCache(!useCache);
+  const toggleCache = () => setUseCache(prev => !prev);
 
-  const togglePause = () => setPaused(!paused);
+  const togglePause = () => setPaused(prev => !prev);
 
-  const toggleRepeat = () => setRepeat(!repeat);
+  const toggleRepeat = () => setRepeat(prev => !prev);
 
-  const togglePoster = () => setPoster(poster ? undefined : samplePoster);
+  const togglePoster = () =>
+    setPoster(prev => (prev ? undefined : samplePoster));
 
-  const toggleMuted = () => setMuted(!muted);
+  const toggleMuted = () => setMuted(prev => !prev);
 
   return (
     <>
@@ -270,7 +268,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
                 unselectedText="loop disable"
               />
               <ToggleControl onPress={toggleFullscreen} text="fullscreen" />
-              <ToggleControl onPress={toggleDecoration} text="decoration" />
+              <ToggleControl onPress={openDecoration} text="decoration" />
               <ToggleControl
                 isSelected={!!poster}
                 onPress={togglePoster}
@@ -315,16 +313,15 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
                 <ToggleControl
                   isSelected={paused}
                   onPress={() => {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-expect-error
-                    ref.current
-                      ?.save({})
-                      ?.then((response: unknown) => {
-                        console.log('Downloaded URI', response);
-                      })
-                      .catch((error: unknown) => {
-                        console.log('error during save ', error);
-                      });
+                    typeof ref !== 'function' &&
+                      ref?.current
+                        ?.save({})
+                        ?.then((response: unknown) => {
+                          console.log('Downloaded URI', response);
+                        })
+                        .catch((error: unknown) => {
+                          console.log('error during save ', error);
+                        });
                   }}
                   text="save"
                 />

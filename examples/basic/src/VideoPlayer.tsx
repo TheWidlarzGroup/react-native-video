@@ -1,39 +1,39 @@
 'use strict';
 
-import React, {FC, useCallback, useRef, useState} from 'react';
+import React, {type FC, useCallback, useRef, useState} from 'react';
 
-import {TouchableOpacity, View} from 'react-native';
+import {Platform, TouchableOpacity, View} from 'react-native';
 
 import Video, {
-  AudioTrack,
-  OnAudioTracksData,
-  OnLoadData,
-  OnProgressData,
-  OnTextTracksData,
-  OnVideoAspectRatioData,
-  TextTrack,
-  OnBufferData,
-  OnAudioFocusChangedData,
-  OnVideoErrorData,
   VideoRef,
-  OnTextTrackDataChangedData,
-  OnSeekData,
-  OnPlaybackStateChangedData,
-  OnPlaybackRateChangeData,
-  OnVideoTracksData,
   SelectedVideoTrackType,
   BufferingStrategyType,
-  ReactVideoSource,
   SelectedTrackType,
-  TextTracks,
   ResizeMode,
-  VideoTrack,
-  SelectedTrack,
-  SelectedVideoTrack,
-  EnumValues,
+  type AudioTrack,
+  type OnAudioTracksData,
+  type OnLoadData,
+  type OnProgressData,
+  type OnTextTracksData,
+  type OnVideoAspectRatioData,
+  type TextTrack,
+  type OnBufferData,
+  type OnAudioFocusChangedData,
+  type OnVideoErrorData,
+  type OnTextTrackDataChangedData,
+  type OnSeekData,
+  type OnPlaybackStateChangedData,
+  type OnPlaybackRateChangeData,
+  type OnVideoTracksData,
+  type ReactVideoSource,
+  type TextTracks,
+  type VideoTrack,
+  type SelectedTrack,
+  type SelectedVideoTrack,
+  type EnumValues,
 } from 'react-native-video';
 import styles from './styles';
-import {AdditionalSourceInfo} from './types';
+import {type AdditionalSourceInfo} from './types';
 import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast} from './components';
 
@@ -58,7 +58,6 @@ const VideoPlayer: FC<Props> = ({}) => {
   const [_, setVideoSize] = useState({videoWidth: 0, videoHeight: 0});
   const [paused, setPaused] = useState(false);
   const [fullscreen, setFullscreen] = useState(true);
-  const [decoration, setDecoration] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
   const [textTracks, setTextTracks] = useState<TextTrack[]>([]);
@@ -86,6 +85,31 @@ const VideoPlayer: FC<Props> = ({}) => {
   const viewStyle = fullscreen ? styles.fullScreen : styles.halfScreen;
   const currentSrc = srcList[srcListId];
   const additional = currentSrc as AdditionalSourceInfo;
+
+  const goToChannel = useCallback((channel: number) => {
+    setSrcListId(channel);
+    setDuration(0);
+    setCurrentTime(0);
+    setVideoSize({videoWidth: 0, videoHeight: 0});
+    setIsLoading(false);
+    setAudioTracks([]);
+    setTextTracks([]);
+    setSelectedAudioTrack(undefined);
+    setSelectedTextTrack(undefined);
+    setSelectedVideoTrack({
+      type: SelectedVideoTrackType.AUTO,
+    });
+  }, []);
+
+  const channelUp = useCallback(() => {
+    console.log('channel up');
+    goToChannel((srcListId + 1) % srcList.length);
+  }, [goToChannel, srcListId]);
+
+  const channelDown = useCallback(() => {
+    console.log('channel down');
+    goToChannel((srcListId + srcList.length - 1) % srcList.length);
+  }, [goToChannel, srcListId]);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
@@ -197,30 +221,10 @@ const VideoPlayer: FC<Props> = ({}) => {
     console.log('onPlaybackStateChanged', data);
   };
 
-  const goToChannel = (channel: number) => {
-    setSrcListId(channel);
-    setDuration(0);
-    setCurrentTime(0);
-    setVideoSize({videoWidth: 0, videoHeight: 0});
-    setIsLoading(false);
-    setAudioTracks([]);
-    setTextTracks([]);
-    setSelectedAudioTrack(undefined);
-    setSelectedTextTrack(undefined);
-    setSelectedVideoTrack({
-      type: SelectedVideoTrackType.AUTO,
-    });
+  const onFullScreenExit = () => {
+    // iOS pauses video on exit from full screen
+    Platform.OS === 'ios' && setPaused(true);
   };
-
-  const channelUp = useCallback(() => {
-    console.log('channel up');
-    goToChannel((srcListId + 1) % srcList.length);
-  }, [srcListId]);
-
-  const channelDown = useCallback(() => {
-    console.log('channel down');
-    goToChannel((srcListId + srcList.length - 1) % srcList.length);
-  }, [srcListId]);
 
   return (
     <View style={styles.container}>
@@ -241,6 +245,7 @@ const VideoPlayer: FC<Props> = ({}) => {
             fullscreen={fullscreen}
             controls={controls}
             resizeMode={resizeMode}
+            onFullscreenPlayerWillDismiss={onFullScreenExit}
             onLoad={onLoad}
             onAudioTracks={onAudioTracks}
             onTextTracks={onTextTracks}
@@ -293,14 +298,11 @@ const VideoPlayer: FC<Props> = ({}) => {
         currentTime={currentTime}
         setMuted={setMuted}
         muted={muted}
-        fullscreen={fullscreen}
         duration={duration}
-        decoration={decoration}
         paused={paused}
         volume={volume}
         setControls={setControls}
         poster={poster}
-        setDecoration={setDecoration}
         rate={rate}
         setFullscreen={setFullscreen}
         setPaused={setPaused}
