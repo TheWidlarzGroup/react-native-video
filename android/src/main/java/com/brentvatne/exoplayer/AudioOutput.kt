@@ -12,7 +12,7 @@ enum class AudioOutput(private val outputName: String, @C.StreamType val streamT
     companion object {
         @JvmStatic
         fun get(name: String): AudioOutput {
-            for (entry in entries) {
+            for (entry in values()) {
                 if (entry.outputName.equals(name, ignoreCase = true)) {
                     return entry
                 }
