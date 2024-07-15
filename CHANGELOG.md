@@ -1,5 +1,25 @@
 
 
+## [6.4.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.1...v6.4.2) (2024-07-15)
+
+
+### Bug Fixes
+
+* **android:** exit fullscreen mode after finishing video playback ([#3978](https://github.com/TheWidlarzGroup/react-native-video/issues/3978)) ([4b8d09e](https://github.com/TheWidlarzGroup/react-native-video/commit/4b8d09e61f79a319ba5816dd342b5c0fd02d6e07))
+* **android:** fix android notification controller order ([#4002](https://github.com/TheWidlarzGroup/react-native-video/issues/4002)) ([05623c9](https://github.com/TheWidlarzGroup/react-native-video/commit/05623c9f5447f67acb535487de8918210b5ffec7))
+* **android:** fix onVideoLoad event field key ([#4001](https://github.com/TheWidlarzGroup/react-native-video/issues/4001)) ([f82268b](https://github.com/TheWidlarzGroup/react-native-video/commit/f82268be1bc33e5c61dbb031d7937197da0b67e5))
+* **android:** handle aspect ratio for rotated videos ([#4000](https://github.com/TheWidlarzGroup/react-native-video/issues/4000)) ([0a55ace](https://github.com/TheWidlarzGroup/react-native-video/commit/0a55ace0ca92f56394235f7c651d3a160e6a3c90))
+* **android:** resolve compatibility issue ([5cd5e5e](https://github.com/TheWidlarzGroup/react-native-video/commit/5cd5e5efe70b49d76fb27e3220a1df12b32901a6))
+* **example/basic:** select resizeMode ([#3989](https://github.com/TheWidlarzGroup/react-native-video/issues/3989)) ([39cf477](https://github.com/TheWidlarzGroup/react-native-video/commit/39cf477ceb37c6ecc38cbdd9077a556c81fd9c3d))
+* **ts:** make multiDrm prop optional type ([#3999](https://github.com/TheWidlarzGroup/react-native-video/issues/3999)) ([79c3076](https://github.com/TheWidlarzGroup/react-native-video/commit/79c30767fcf67e75e70ceb64a17736b5e3de63c6))
+
+## [6.4.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.0...v6.4.1) (2024-07-12)
+
+
+### Bug Fixes
+
+* expo plugin export ([#3992](https://github.com/TheWidlarzGroup/react-native-video/issues/3992)) ([de8ade0](https://github.com/TheWidlarzGroup/react-native-video/commit/de8ade06202cfdb3dd7fec635b6e8c6cdfd04e47))
+
 * fix(ios): remove pip check for other platforms (#3991) (40a72825)
 * feat: add `isSeeking` to `onPlaybackStateChanged` (#3899) (111a5d21)
 * chore(android): migrate DataSourceUtil to Kotlin (#3984) (b25e43ee)

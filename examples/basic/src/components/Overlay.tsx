@@ -9,11 +9,10 @@ import {
   samplePoster,
   textTracksSelectionBy,
 } from '../constants';
-import MultiValueControl, {
-  MultiValueControlPropType,
-} from '../MultiValueControl.tsx';
+import MultiValueControl from '../MultiValueControl.tsx';
 import {
   AudioTrack,
+  EnumValues,
   ResizeMode,
   SelectedTrack,
   SelectedTrackType,
@@ -55,8 +54,8 @@ type Props = {
   setRate: (value: number) => void;
   volume: number;
   setVolume: (value: number) => void;
-  resizeMode: ResizeMode;
-  setResizeMode: (value: ResizeMode) => void;
+  resizeMode: EnumValues<ResizeMode>;
+  setResizeMode: (value: EnumValues<ResizeMode>) => void;
   isLoading: boolean;
   srcListId: number;
   useCache: boolean;
@@ -203,22 +202,16 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     ref.current?.seek(position);
   };
 
-  const onRateSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setRate(value);
-    }
+  const onRateSelected = (value: number) => {
+    setRate(value);
   };
 
-  const onVolumeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setVolume(value);
-    }
+  const onVolumeSelected = (value: number) => {
+    setVolume(value);
   };
 
-  const onResizeModeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'object') {
-      setResizeMode(value);
-    }
+  const onResizeModeSelected = (value: EnumValues<ResizeMode>) => {
+    setResizeMode(value);
   };
 
   const toggleCache = () => setUseCache(!useCache);

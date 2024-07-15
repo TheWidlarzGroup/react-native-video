@@ -11,7 +11,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import java.util.UUID
 
-class VideoDecoderPropertiesModule(reactContext: ReactApplicationContext?) : ReactContextBaseJavaModule(reactContext) {
+class VideoDecoderInfoModule(reactContext: ReactApplicationContext?) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String = REACT_CLASS
 
     @ReactMethod
@@ -37,36 +37,36 @@ class VideoDecoderPropertiesModule(reactContext: ReactApplicationContext?) : Rea
     }
 
     @ReactMethod
-    fun isCodecSupported(mimeType: String?, width: Int, height: Int, p: Promise) {
+    fun isCodecSupported(mimeType: String?, width: Double, height: Double, p: Promise?) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            p.resolve("unsupported")
+            p?.resolve("unsupported")
             return
         }
         val mRegularCodecs = MediaCodecList(MediaCodecList.REGULAR_CODECS)
-        val format = MediaFormat.createVideoFormat(mimeType!!, width, height)
+        val format = MediaFormat.createVideoFormat(mimeType!!, width.toInt(), height.toInt())
         val codecName = mRegularCodecs.findDecoderForFormat(format)
         if (codecName == null) {
-            p.resolve("unsupported")
+            p?.resolve("unsupported")
             return
         }
 
         // Fallback for android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            p.resolve("software")
+            p?.resolve("software")
             return
         }
         val isHardwareAccelerated = mRegularCodecs.codecInfos.any {
             it.name.equals(codecName, ignoreCase = true) && it.isHardwareAccelerated
         }
-        p.resolve(if (isHardwareAccelerated) "software" else "hardware")
+        p?.resolve(if (isHardwareAccelerated) "software" else "hardware")
     }
 
     @ReactMethod
-    fun isHEVCSupported(p: Promise) = isCodecSupported("video/hevc", 1920, 1080, p)
+    fun isHEVCSupported(p: Promise) = isCodecSupported("video/hevc", 1920.0, 1080.0, p)
 
     companion object {
         private val WIDEVINE_UUID = UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L)
         private const val SECURITY_LEVEL_PROPERTY = "securityLevel"
-        private const val REACT_CLASS = "VideoDecoderProperties"
+        private const val REACT_CLASS = "VideoDecoderInfoModule"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.4.0",
+    "version": "6.4.2",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index",
@@ -59,6 +59,7 @@
         "src",
         "lib",
         "react-native-video.podspec",
+        "app.plugin.js",
         "!android/build",
         "!android/buildOutput_*",
         "!android/local.properties",
