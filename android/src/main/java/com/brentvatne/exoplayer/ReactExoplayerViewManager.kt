@@ -133,7 +133,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
 
     @ReactProp(name = PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK, defaultBoolean = false)
     fun setPreventsDisplaySleepDuringVideoPlayback(videoView: ReactExoplayerView, preventsSleep: Boolean) {
-        videoView.setPreventsDisplaySleepDuringVideoPlayback(preventsSleep)
+        videoView.preventsDisplaySleepDuringVideoPlayback = preventsSleep
     }
 
     @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
