@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import type {VideoDecoderPropertiesType} from './specs/VideoNativeComponent';
+import type {VideoDecoderInfoModuleType} from './specs/NativeVideoDecoderInfoModule';
 
 const canPlay = (codec: string): boolean => {
   // most chrome based browser (and safari I think) supports matroska but reports they do not.
@@ -31,4 +31,4 @@ export const VideoDecoderProperties = {
       ? 'software'
       : 'unsupported';
   },
-} satisfies VideoDecoderPropertiesType;
+} satisfies VideoDecoderInfoModuleType;

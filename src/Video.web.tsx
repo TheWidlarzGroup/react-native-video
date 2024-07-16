@@ -38,6 +38,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
   ) => {
     const nativeRef = useRef<HTMLVideoElement>(null);
 
+    const isSeeking = useRef(false);
     const seek = useCallback(
       async (time: number, _tolerance?: number) => {
         if (isNaN(time)) {
@@ -210,7 +211,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         // Set play state to the player's value (if autoplay is denied)
         // This is useful if our UI is in a play state but autoplay got denied so
         // the video is actaully in a paused state.
-        playbackStateRef.current?.({isPlaying: !nativeRef.current.paused});
+        playbackStateRef.current?.({
+          isPlaying: !nativeRef.current.paused,
+          isSeeking: isSeeking.current,
+        });
       }, 500);
     }, []);
 
@@ -291,8 +295,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             seek(source.startPosition / 1000);
           }
         }}
-        onPlay={() => onPlaybackStateChanged?.({isPlaying: true})}
-        onPause={() => onPlaybackStateChanged?.({isPlaying: false})}
+        onPlay={() =>
+          onPlaybackStateChanged?.({
+            isPlaying: true,
+            isSeeking: isSeeking.current,
+          })
+        }
+        onPause={() =>
+          onPlaybackStateChanged?.({
+            isPlaying: false,
+            isSeeking: isSeeking.current,
+          })
+        }
+        onSeeking={() => (isSeeking.current = true)}
+        onSeeked={() => (isSeeking.current = false)}
         onVolumeChange={() => {
           if (!nativeRef.current) {
             return;
