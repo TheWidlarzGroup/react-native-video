@@ -22,8 +22,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.annotations.ReactProp
 
-class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) :
-    ViewGroupManager<ReactExoplayerView>() {
+class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : ViewGroupManager<ReactExoplayerView>() {
 
     companion object {
         private const val TAG = "ExoViewManager"
@@ -71,9 +70,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) :
         private const val PROP_CONTROLS_STYLES = "controlsStyles"
     }
 
-    override fun getName(): String {
-        return REACT_CLASS
-    }
+    override fun getName(): String = REACT_CLASS
 
     override fun createViewInstance(themedReactContext: ThemedReactContext): ReactExoplayerView {
         ReactNativeVideoManager.getInstance().registerView(this)
@@ -85,9 +82,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) :
         ReactNativeVideoManager.getInstance().unregisterView(this)
     }
 
-    override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> {
-        return EventTypes.toMap()
-    }
+    override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> = EventTypes.toMap()
 
     override fun addEventEmitters(reactContext: ThemedReactContext, view: ReactExoplayerView) {
         super.addEventEmitters(reactContext, view)
@@ -119,8 +114,11 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) :
     fun setResizeMode(videoView: ReactExoplayerView, resizeMode: String) {
         when (resizeMode) {
             "none", "contain" -> videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT)
+
             "cover" -> videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_CENTER_CROP)
+
             "stretch" -> videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FILL)
+
             else -> {
                 DebugLog.w(TAG, "Unsupported resize mode: $resizeMode - falling back to fit")
                 videoView.setResizeModeModifier(ResizeMode.RESIZE_MODE_FIT)
