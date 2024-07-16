@@ -137,6 +137,13 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
+### `nativeHtmlVideoRef`
+
+<PlatformsList types={['web']} />
+
+A ref to the underlying html video element. This can be used if you need to integrate a 3d party, web only video library (like hls.js, shaka, video.js...).
+
+
 ### Example Usage
 
 ```tsx
