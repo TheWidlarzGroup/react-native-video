@@ -18,7 +18,7 @@ buildscript {
 task checkKotlinVersion {
     doLast {
         def kotlinVersion = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
-        def requiredKotlinVersion = '1.9.0'
+        def requiredKotlinVersion = project.properties['RNVideo_requiredKotlinVersion']
 
         // Function to compare version strings
         def isVersionAtLeast = { version, requiredVersion ->
