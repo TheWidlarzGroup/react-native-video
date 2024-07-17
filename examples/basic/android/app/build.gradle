@@ -83,8 +83,10 @@ android {
     namespace "com.videoplayer"
 
     compileOptions {
-        // These options are necessary to be able to build fro source
-        coreLibraryDesugaringEnabled true
+        // These options are necessary to be able to build from source
+        // coreLibraryDesugaringEnabled is mandatory to be able to build exoplayer from source
+        // uncomment this line if you want to build from source
+        // coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
