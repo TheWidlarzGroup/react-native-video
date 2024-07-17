@@ -91,13 +91,12 @@ class FullScreenPlayerView(
         parent = null
     }
 
-    private fun getFullscreenIconResource(isFullscreen: Boolean): Int {
-        return if (isFullscreen) {
+    private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
+        if (isFullscreen) {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit
         } else {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
         }
-    }
 
     private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
         val imageButton = playerControlView.findViewById<ImageButton?>(com.brentvatne.react.R.id.exo_fullscreen)
