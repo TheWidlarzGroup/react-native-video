@@ -26,7 +26,6 @@ import Video, {
   type OnPlaybackRateChangeData,
   type OnVideoTracksData,
   type ReactVideoSource,
-  type TextTracks,
   type VideoTrack,
   type SelectedTrack,
   type SelectedVideoTrack,
@@ -36,13 +35,6 @@ import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
 import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast} from './components';
-
-type AdditionnalSourceInfo = {
-  textTracks: TextTracks;
-  adTagUrl: string;
-  description: string;
-  noView: boolean;
-};
 
 type Props = NonNullable<unknown>;
 
