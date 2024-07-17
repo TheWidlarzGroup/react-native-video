@@ -2,7 +2,7 @@ import React, {FC, memo} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import styles from '../styles.tsx';
 import {srcList} from '../constants';
-import {AdditionalSourceInfo} from '../types';
+import {type AdditionalSourceInfo} from '../types';
 
 type Props = {
   srcListId: number;

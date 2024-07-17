@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.3.0",
+    "version": "6.4.2",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index",
@@ -16,6 +16,7 @@
         "@types/react": "~18.0.0"
     },
     "devDependencies": {
+        "@expo/config-plugins": "^8.0.5",
         "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
         "@react-native/eslint-config": "^0.72.2",
         "@release-it/conventional-changelog": "^7.0.2",
@@ -58,6 +59,7 @@
         "src",
         "lib",
         "react-native-video.podspec",
+        "app.plugin.js",
         "!android/build",
         "!android/buildOutput_*",
         "!android/local.properties",

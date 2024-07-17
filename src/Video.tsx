@@ -5,58 +5,52 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
-  type ComponentRef,
 } from 'react';
-import {
-  View,
-  StyleSheet,
-  Image,
-  Platform,
-  type StyleProp,
-  type ImageStyle,
-  type NativeSyntheticEvent,
-  type ImageResizeMode,
-  type ViewStyle,
+import type {ElementRef} from 'react';
+import {View, StyleSheet, Image, Platform, processColor} from 'react-native';
+import type {
+  StyleProp,
+  ImageStyle,
+  NativeSyntheticEvent,
+  ViewStyle,
+  ImageResizeMode,
 } from 'react-native';
 
-import NativeVideoComponent, {
-  type OnAudioFocusChangedData,
-  type OnAudioTracksData,
-  type OnBandwidthUpdateData,
-  type OnBufferData,
-  type OnControlsVisibilityChange,
-  type OnExternalPlaybackChangeData,
-  type OnGetLicenseData,
-  type OnLoadStartData,
-  type OnPictureInPictureStatusChangedData,
-  type OnPlaybackStateChangedData,
-  type OnProgressData,
-  type OnSeekData,
-  type OnTextTrackDataChangedData,
-  type OnTimedMetadataData,
-  type OnVideoAspectRatioData,
-  type OnVideoErrorData,
-  type OnVideoTracksData,
-  type VideoComponentType,
-  type VideoSrc,
+import NativeVideoComponent from './specs/VideoNativeComponent';
+import type {
+  OnAudioFocusChangedData,
+  OnAudioTracksData,
+  OnBandwidthUpdateData,
+  OnBufferData,
+  OnControlsVisibilityChange,
+  OnExternalPlaybackChangeData,
+  OnGetLicenseData,
+  OnLoadStartData,
+  OnPictureInPictureStatusChangedData,
+  OnPlaybackStateChangedData,
+  OnProgressData,
+  OnSeekData,
+  OnTextTrackDataChangedData,
+  OnTimedMetadataData,
+  OnVideoAspectRatioData,
+  OnVideoErrorData,
+  OnVideoTracksData,
+  VideoSrc,
 } from './specs/VideoNativeComponent';
 import {
   generateHeaderForNative,
   getReactTag,
   resolveAssetSourceForVideo,
 } from './utils';
-import {VideoManager} from './specs/VideoNativeComponent';
-import {
-  type OnLoadData,
-  type OnTextTracksData,
-  type OnReceiveAdEventData,
-  type ReactVideoProps,
-  ViewType,
+import NativeVideoManager from './specs/NativeVideoManager';
+import type {VideoSaveData} from './specs/NativeVideoManager';
+import {ViewType} from './types';
+import type {
+  OnLoadData,
+  OnTextTracksData,
+  OnReceiveAdEventData,
+  ReactVideoProps,
 } from './types';
-
-export type VideoSaveData = {
-  uri: string;
-};
 
 export interface VideoRef {
   seek: (time: number, tolerance?: number) => void;
@@ -67,10 +61,10 @@ export interface VideoRef {
   restoreUserInterfaceForPictureInPictureStopCompleted: (
     restore: boolean,
   ) => void;
-  save: (options: object) => Promise<VideoSaveData>;
   setVolume: (volume: number) => void;
-  getCurrentPosition: () => Promise<number>;
   setFullScreen: (fullScreen: boolean) => void;
+  save: (options: object) => Promise<VideoSaveData> | void;
+  getCurrentPosition: () => Promise<number>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -82,7 +76,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       poster,
       posterResizeMode,
       renderLoader,
-      fullscreen,
       drm,
       textTracks,
       selectedVideoTrack,
@@ -91,6 +84,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       useTextureView,
       useSecureView,
       viewType,
+      shutterColor,
       onLoadStart,
       onLoad,
       onError,
@@ -125,7 +119,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     },
     ref,
   ) => {
-    const nativeRef = useRef<ComponentRef<VideoComponentType>>(null);
+    const nativeRef = useRef<ElementRef<typeof NativeVideoComponent>>(null);
 
     const isPosterDeprecated = typeof poster === 'string';
 
@@ -142,7 +136,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [isPosterDeprecated, poster, renderLoader]);
 
     const [showPoster, setShowPoster] = useState(hasPoster);
-    const [isFullscreen, setIsFullscreen] = useState(fullscreen);
+
     const [
       _restoreUserInterfaceForPIPStopCompletionHandler,
       setRestoreUserInterfaceForPIPStopCompletionHandler,
@@ -168,6 +162,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         )
       );
 
+      const selectedDrm = source.drm || drm;
+      const _drm = !selectedDrm
+        ? undefined
+        : {
+            type: selectedDrm.type,
+            licenseServer: selectedDrm.licenseServer,
+            headers: generateHeaderForNative(selectedDrm.headers),
+            contentId: selectedDrm.contentId,
+            certificateUrl: selectedDrm.certificateUrl,
+            base64Certificate: selectedDrm.base64Certificate,
+            useExternalGetLicense: !!selectedDrm.getLicense,
+            multiDrm: selectedDrm.multiDrm,
+          };
+
       return {
         uri,
         isNetwork,
@@ -181,26 +189,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
+        drm: _drm,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [source]);
-
-    const _drm = useMemo(() => {
-      if (!drm) {
-        return;
-      }
-
-      return {
-        type: drm.type,
-        licenseServer: drm.licenseServer,
-        headers: generateHeaderForNative(drm.headers),
-        contentId: drm.contentId,
-        certificateUrl: drm.certificateUrl,
-        base64Certificate: drm.base64Certificate,
-        useExternalGetLicense: !!drm.getLicense,
-      };
-    }, [drm]);
+    }, [drm, source]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -280,12 +273,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       const callSeekFunction = () => {
-        VideoManager.seek(
-          {
-            time,
-            tolerance: tolerance || 0,
-          },
+        NativeVideoManager.seekCmd(
           getReactTag(nativeRef),
+          time,
+          tolerance || 0,
         );
       };
 
@@ -293,31 +284,59 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         ios: callSeekFunction,
         android: callSeekFunction,
         default: () => {
-          // TODO: Implement VideoManager.seek for windows
+          // TODO: Implement VideoManager.seekCmd for windows
           nativeRef.current?.setNativeProps({seek: time});
         },
       })();
     }, []);
 
-    const presentFullscreenPlayer = useCallback(() => {
-      setIsFullscreen(true);
-    }, [setIsFullscreen]);
-
-    const dismissFullscreenPlayer = useCallback(() => {
-      setIsFullscreen(false);
-    }, [setIsFullscreen]);
-
-    const save = useCallback((options: object) => {
-      // VideoManager.save can be null on android & windows
-      return VideoManager.save?.(options, getReactTag(nativeRef));
-    }, []);
-
     const pause = useCallback(() => {
-      return VideoManager.setPlayerPauseState(true, getReactTag(nativeRef));
+      return NativeVideoManager.setPlayerPauseStateCmd(
+        getReactTag(nativeRef),
+        true,
+      );
     }, []);
 
     const resume = useCallback(() => {
-      return VideoManager.setPlayerPauseState(false, getReactTag(nativeRef));
+      return NativeVideoManager.setPlayerPauseStateCmd(
+        getReactTag(nativeRef),
+        false,
+      );
+    }, []);
+
+    const setVolume = useCallback((volume: number) => {
+      return NativeVideoManager.setVolumeCmd(getReactTag(nativeRef), volume);
+    }, []);
+
+    const setFullScreen = useCallback((fullScreen: boolean) => {
+      return NativeVideoManager.setFullScreenCmd(
+        getReactTag(nativeRef),
+        fullScreen,
+      );
+    }, []);
+
+    const presentFullscreenPlayer = useCallback(
+      () => setFullScreen(true),
+      [setFullScreen],
+    );
+
+    const dismissFullscreenPlayer = useCallback(
+      () => setFullScreen(false),
+      [setFullScreen],
+    );
+
+    const save = useCallback((options: object) => {
+      // VideoManager.save can be null on android & windows
+      if (Platform.OS !== 'ios') {
+        return;
+      }
+      // @todo Must implement it in a different way.
+      return NativeVideoManager.save?.(getReactTag(nativeRef), options);
+    }, []);
+
+    const getCurrentPosition = useCallback(() => {
+      // @todo Must implement it in a different way.
+      return NativeVideoManager.getCurrentPosition(getReactTag(nativeRef));
     }, []);
 
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(
@@ -326,18 +345,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       },
       [setRestoreUserInterfaceForPIPStopCompletionHandler],
     );
-
-    const setVolume = useCallback((volume: number) => {
-      return VideoManager.setVolume(volume, getReactTag(nativeRef));
-    }, []);
-
-    const getCurrentPosition = useCallback(() => {
-      return VideoManager.getCurrentPosition(getReactTag(nativeRef));
-    }, []);
-
-    const setFullScreen = useCallback((fullScreen: boolean) => {
-      return VideoManager.setFullScreen(fullScreen, getReactTag(nativeRef));
-    }, []);
 
     const onVideoLoadStart = useCallback(
       (e: NativeSyntheticEvent<OnLoadStartData>) => {
@@ -384,6 +391,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       },
       [onPlaybackStateChanged],
     );
+
+    const _shutterColor = useMemo(() => {
+      const color = processColor(shutterColor);
+      return typeof color === 'number' ? color : undefined;
+    }, [shutterColor]);
 
     // android only
     const _onTimedMetadata = useCallback(
@@ -500,56 +512,41 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const useExternalGetLicense = drm?.getLicense instanceof Function;
+    const usingExternalGetLicense = drm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
-      (event: NativeSyntheticEvent<OnGetLicenseData>) => {
-        if (useExternalGetLicense) {
-          const data = event.nativeEvent;
-          if (data && data.spcBase64) {
-            const getLicenseOverride = drm.getLicense(
+      async (event: NativeSyntheticEvent<OnGetLicenseData>) => {
+        if (!usingExternalGetLicense) {
+          return;
+        }
+        const data = event.nativeEvent;
+        let result;
+        if (data?.spcBase64) {
+          try {
+            // Handles both scenarios, getLicenseOverride being a promise and not.
+            const license = await drm.getLicense(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
               data.loadedLicenseUrl,
             );
-            const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
-            getLicensePromise
-              .then((result) => {
-                if (result !== undefined) {
-                  nativeRef.current &&
-                    VideoManager.setLicenseResult(
-                      result,
-                      data.loadedLicenseUrl,
-                      getReactTag(nativeRef),
-                    );
-                } else {
-                  nativeRef.current &&
-                    VideoManager.setLicenseResultError(
-                      'Empty license result',
-                      data.loadedLicenseUrl,
-                      getReactTag(nativeRef),
-                    );
-                }
-              })
-              .catch(() => {
-                nativeRef.current &&
-                  VideoManager.setLicenseResultError(
-                    'fetch error',
-                    data.loadedLicenseUrl,
-                    getReactTag(nativeRef),
-                  );
-              });
-          } else {
-            VideoManager.setLicenseResultError(
-              'No spc received',
-              data.loadedLicenseUrl,
-              getReactTag(nativeRef),
-            );
+            result =
+              typeof license === 'string' ? license : 'Empty license result';
+          } catch {
+            result = 'fetch error';
           }
+        } else {
+          result = 'No spc received';
+        }
+        if (nativeRef.current) {
+          NativeVideoManager.setLicenseResultErrorCmd(
+            getReactTag(nativeRef),
+            result,
+            data.loadedLicenseUrl,
+          );
         }
       },
-      [drm, useExternalGetLicense],
+      [drm, usingExternalGetLicense],
     );
 
     useImperativeHandle(
@@ -682,10 +679,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           ref={nativeRef}
           {...rest}
           src={src}
-          drm={_drm}
           style={_style}
           resizeMode={resizeMode}
-          fullscreen={isFullscreen}
           restoreUserInterfaceForPIPStopCompletionHandler={
             _restoreUserInterfaceForPIPStopCompletionHandler
           }
@@ -693,7 +688,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
-          onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
+          shutterColor={_shutterColor}
+          onGetLicense={usingExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={
             onLoad || hasPoster
               ? (onVideoLoad as (e: NativeSyntheticEvent<object>) => void)

@@ -6,11 +6,11 @@ import React
 
 #if os(iOS)
     class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
+        public private(set) var _pipController: AVPictureInPictureController?
         private var _onPictureInPictureEnter: (() -> Void)?
         private var _onPictureInPictureExit: (() -> Void)?
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
         private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
-        private var _pipController: AVPictureInPictureController?
         private var _isActive = false
 
         init(
