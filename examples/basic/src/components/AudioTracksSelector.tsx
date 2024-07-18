@@ -1,6 +1,6 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
-import {AudioTrack, SelectedTrack} from 'react-native-video';
+import type {AudioTrack, SelectedTrack} from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
 
@@ -10,7 +10,7 @@ export interface AudioTrackSelectorType {
   onValueChange: (arg0: string) => void;
 }
 
-const AudioTrackSelector = ({
+export const AudioTrackSelector = ({
   audioTracks,
   selectedAudioTrack,
   onValueChange,
@@ -49,5 +49,3 @@ const AudioTrackSelector = ({
     </>
   );
 };
-
-export default AudioTrackSelector;

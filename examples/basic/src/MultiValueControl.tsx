@@ -1,5 +1,4 @@
-import React, {FunctionComponent} from 'react';
-
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,8 +7,6 @@ import {
   View,
 } from 'react-native';
 import {ResizeMode} from 'react-native-video';
-
-export type MultiValueControlPropType = number | string | ResizeMode;
 
 /*
  * MultiValueControl displays a list clickable text view
@@ -21,12 +18,14 @@ interface MultiValueControlType<T> {
   // The selected value in values
   selected?: T;
   // callback to press onPress
-  onPress: (arg: MultiValueControlPropType) => void;
+  onPress: (arg: T) => void;
 }
 
-const MultiValueControl: FunctionComponent<
-  MultiValueControlType<MultiValueControlPropType>
-> = ({values, selected, onPress}) => {
+const MultiValueControl = <T extends number | string | ResizeMode>({
+  values,
+  selected,
+  onPress,
+}: MultiValueControlType<T>) => {
   const selectedStyle: TextStyle = StyleSheet.flatten([
     styles.option,
     {fontWeight: 'bold'},
@@ -39,7 +38,7 @@ const MultiValueControl: FunctionComponent<
 
   return (
     <View style={styles.container}>
-      {values.map((value: MultiValueControlPropType) => {
+      {values.map(value => {
         const _style = value === selected ? selectedStyle : unselectedStyle;
         return (
           <TouchableOpacity

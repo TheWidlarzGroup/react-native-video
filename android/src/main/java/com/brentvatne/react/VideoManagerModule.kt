@@ -1,12 +1,10 @@
 package com.brentvatne.react
 
-import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.common.UIManagerType
@@ -37,28 +35,30 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     }
 
     @ReactMethod
-    fun setPlayerPauseState(paused: Boolean?, reactTag: Int) {
+    fun setPlayerPauseStateCmd(reactTag: Int, paused: Boolean?) {
         performOnPlayerView(reactTag) {
             it?.setPausedModifier(paused!!)
         }
     }
 
     @ReactMethod
-    fun seek(info: ReadableMap, reactTag: Int) {
-        if (!info.hasKey("time")) {
-            return
-        }
-
-        val time = ReactBridgeUtils.safeGetInt(info, "time")
+    fun seekCmd(reactTag: Int, time: Float, tolerance: Float) {
         performOnPlayerView(reactTag) {
             it?.seekTo((time * 1000f).roundToInt().toLong())
         }
     }
 
     @ReactMethod
-    fun setVolume(volume: Float, reactTag: Int) {
+    fun setVolumeCmd(reactTag: Int, volume: Float) {
         performOnPlayerView(reactTag) {
             it?.setVolumeModifier(volume)
+        }
+    }
+
+    @ReactMethod
+    fun setFullScreenCmd(reactTag: Int, fullScreen: Boolean) {
+        performOnPlayerView(reactTag) {
+            it?.setFullscreen(fullScreen)
         }
     }
 
@@ -66,13 +66,6 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     fun getCurrentPosition(reactTag: Int, promise: Promise) {
         performOnPlayerView(reactTag) {
             it?.getCurrentPosition(promise)
-        }
-    }
-
-    @ReactMethod
-    fun setFullScreen(fullScreen: Boolean, reactTag: Int) {
-        performOnPlayerView(reactTag) {
-            it?.setFullscreen(fullScreen)
         }
     }
 

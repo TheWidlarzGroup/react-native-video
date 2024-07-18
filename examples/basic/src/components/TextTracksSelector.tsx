@@ -1,6 +1,6 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
-import {TextTrack, SelectedTrack} from 'react-native-video';
+import type {TextTrack, SelectedTrack} from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
 
@@ -11,7 +11,7 @@ export interface TextTrackSelectorType {
   textTracksSelectionBy: string;
 }
 
-const TextTrackSelector = ({
+export const TextTrackSelector = ({
   textTracks,
   selectedTextTrack,
   onValueChange,
@@ -60,5 +60,3 @@ const TextTrackSelector = ({
     </>
   );
 };
-
-export default TextTrackSelector;
