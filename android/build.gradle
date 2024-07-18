@@ -30,10 +30,10 @@ buildscript {
     }
 
     ext {
-        if (!isVersionAtLeast(kotlinVersion, requiredKotlinVersion)) {
-            throw new GradleException("Kotlin version mismatch: Project is using Kotlin version $kotlinVersion, but it must be at least $requiredKotlinVersion. Please update the Kotlin version.")
+        if (!isVersionAtLeast(kotlin_version, requiredKotlinVersion)) {
+            throw new GradleException("Kotlin version mismatch: Project is using Kotlin version $kotlin_version, but it must be at least $requiredKotlinVersion. Please update the Kotlin version.")
         } else {
-            println("Kotlin version is correct: $kotlinVersion")
+            println("Kotlin version is correct: $kotlin_version")
         }
     }
 }
