@@ -238,12 +238,11 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
                 // There are weird cases when video height and width did not change with rotation so we need change aspect ration to fix it
                 switch (format.rotationDegrees) {
                     // update aspect ratio !
-                    case 90, 270 -> {
+                    case 90:
+                    case 270:
                         layout.setVideoAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
-                    }
-                    default -> {
+                    default:
                         layout.setVideoAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
-                    }
                 }
                 return;
             }
