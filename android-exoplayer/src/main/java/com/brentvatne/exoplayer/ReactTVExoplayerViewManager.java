@@ -133,6 +133,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_EPG = "hasEpg";
     private static final String PROP_STATS = "hasStats";
     private static final String PROP_HIDE_AD_UI_ELEMENTS = "hideAdUiElements";
+    private static final String PROP_IS_WHY_THIS_AD_ENABLED = "isWhyThisAdIconEnabled";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_CONTROLS_OPACITY = "controlsOpacity";
     private static final String PROP_PROGRESS_BAR_MARGIN_BOTTOM = "progressBarMarginBottom";
@@ -497,6 +498,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_HIDE_AD_UI_ELEMENTS, defaultBoolean = false)
     public void setHideAdUiElements(final ReactTVExoplayerView videoView, final boolean hideAdUiElements) {
         videoView.setHideAdUiElements(hideAdUiElements);
+    }
+
+    @ReactProp(name = PROP_IS_WHY_THIS_AD_ENABLED)
+    public void setIsWhyThisAdIconEnabled(final ReactTVExoplayerView videoView, final boolean isWhyThisAdIconEnabled) {
+        videoView.setIsWhyThisAdIconEnabled(isWhyThisAdIconEnabled);
     }
 
     @ReactProp(name = PROP_CONTROLS)

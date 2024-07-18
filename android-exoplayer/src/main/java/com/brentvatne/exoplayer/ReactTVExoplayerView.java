@@ -205,6 +205,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean hasEpg;
     private boolean hasStats;
     private boolean hideAdUiElements;
+    private boolean isWhyThisAdIconEnabled;
     private float jsProgressUpdateInterval = 250.0f;
     // \ End props
 
@@ -504,7 +505,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     translations.getSkipCountdownLabel(),
                     translations.getSkipLabel()
             );
-            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, true, adLabels);
+            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, isWhyThisAdIconEnabled, adLabels);
 
             long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
@@ -516,6 +517,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     dvrSeekForwardInterval != 0L ? dvrSeekForwardInterval : exoDorisPlayerView.getFastForwardIncrementMs(),
                     dvrSeekBackwardInterval != 0L ? dvrSeekBackwardInterval : exoDorisPlayerView.getRewindIncrementMs(),
                     adViewProvider,
+                    exoDorisPlayerView,
                     adGlobalSettings,
                     src.getTracksPolicy());
 
@@ -1604,10 +1606,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         this.hideAdUiElements = hideAdUiElements;
     }
 
+    public void setIsWhyThisAdIconEnabled(boolean isWhyThisAdIconEnabled) {
+        this.isWhyThisAdIconEnabled = isWhyThisAdIconEnabled;
+    }
+
     public void setAreControlsAllowed(boolean allowed) {
         areControlsAllowed = allowed;
         setControls(allowed);
-        exoDorisPlayerView.setAreControlsAllowed(allowed);
     }
 
     public void setControls(final boolean visible) {
@@ -1663,7 +1668,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setBottomOverlayComponent(String key, String component, int width, int height) {
         if (component == null || component.isEmpty()) return;
         if (TextUtils.equals((String) exoDorisPlayerView.getTag(R.id.bottomComponentTag), key)) return;
-        // add frameLayout to ExoPlayerView, ReactRootView load data first, move to ExoPlayerControllerView. 
+        // add frameLayout to ExoPlayerView, ReactRootView load data first, move to ExoPlayerControllerView.
         ReactRootFrameLayout frameLayout = new ReactRootFrameLayout(getContext());
         frameLayout.setOnSizeChangedListener((reactRootFrameLayout, childView) -> {
             reactRootFrameLayout.removeView(childView);

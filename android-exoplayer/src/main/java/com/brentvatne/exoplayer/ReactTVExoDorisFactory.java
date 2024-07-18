@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
+import com.diceplatform.doris.common.ad.AdChoicesTvListener;
 import com.diceplatform.doris.common.ad.AdGlobalSettings;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
 import com.diceplatform.doris.entity.TracksPolicy;
@@ -31,6 +32,7 @@ public final class ReactTVExoDorisFactory {
             long forwardIncrementMs,
             long rewindIncrementMs,
             @Nullable AdViewProvider adViewProvider,
+            @Nullable AdChoicesTvListener adChoicesTvListener,
             AdGlobalSettings adGlobalSettings,
             TracksPolicy tracksPolicy) {
         return createPlayer(
@@ -44,6 +46,7 @@ public final class ReactTVExoDorisFactory {
                 null,
                 null,
                 adViewProvider,
+                adChoicesTvListener,
                 adGlobalSettings,
                 tracksPolicy);
     }
@@ -59,12 +62,14 @@ public final class ReactTVExoDorisFactory {
             @Nullable List<Plugin> plugins,
             @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider,
+            @Nullable AdChoicesTvListener adChoicesTvListener,
             AdGlobalSettings adGlobalSettings,
             @Nullable TracksPolicy tracksPolicy) {
         final ExoDorisBuilder builder;
         if (adType == AdType.YO_SSAI) {
             builder = new ExoDorisYoSsaiBuilder(context)
                 .setAdViewProvider(checkNotNull(adViewProvider))
+                .setAdChoicesTvListener(adChoicesTvListener)
                 .setAdGlobalSettings(adGlobalSettings);
         } else if (adType == AdType.IMA_DAI) {
             builder = new ExoDorisImaDaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
