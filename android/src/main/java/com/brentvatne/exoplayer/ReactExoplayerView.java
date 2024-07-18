@@ -190,7 +190,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
-    private FullScreenPlayerView pipFullScreenPlayerView;
     private ImaAdsLoader adsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
