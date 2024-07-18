@@ -5,6 +5,7 @@ apply plugin: 'kotlin-android'
 
 buildscript {
     def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
+    def requiredKotlinVersion = project.properties['RNVideo_kotlinVersion']
 
     def isVersionAtLeast = { version, requiredVersion ->
         def (v1, v2) = [version, requiredVersion].collect { it.tokenize('.')*.toInteger() }
@@ -29,8 +30,6 @@ buildscript {
     }
 
     ext {
-        def kotlinVersion = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
-        def requiredKotlinVersion = project.properties['RNVideo_kotlinVersion']
         if (!isVersionAtLeast(kotlinVersion, requiredKotlinVersion)) {
             throw new GradleException("Kotlin version mismatch: Project is using Kotlin version $kotlinVersion, but it must be at least $requiredKotlinVersion. Please update the Kotlin version.")
         } else {
