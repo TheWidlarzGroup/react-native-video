@@ -7,7 +7,6 @@ import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
-import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.Event
@@ -49,8 +48,7 @@ enum class EventTypes(val eventName: String) {
         fun toMap() =
             mutableMapOf<String, Any>().apply {
                 EventTypes.values().toList().forEach { eventType ->
-                    put(eventType.eventName, MapBuilder.of("registrationName", eventType.eventName))
-                    put("top${eventType.eventName.removePrefix("on")}", MapBuilder.of("registrationName", eventType.eventName))
+                    put(eventType.eventName, hashMapOf("registrationName" to eventType.eventName))
                 }
             }
     }
@@ -282,7 +280,7 @@ class VideoEventEmitter {
     private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
         fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
             dispatcher.dispatchEvent(object : Event<Event<*>>(surfaceId, viewId) {
-                override fun getEventName() = "top${event.eventName.removePrefix("on")}"
+                override fun getEventName() = event.eventName
                 override fun getEventData() = Arguments.createMap().apply(paramsSetter ?: {})
             })
     }
