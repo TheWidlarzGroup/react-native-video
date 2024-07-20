@@ -1,7 +1,45 @@
 import com.android.Version
+import groovy.json.JsonSlurper
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+
+def getReactNativeVersion() {
+    def packageJsonFile = file("$rootDir/../package.json")
+    if (packageJsonFile.exists()) {
+        def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
+        return packageJson.dependencies["react-native"] ?: packageJson.devDependencies["react-native"]
+    }
+    return null
+}
+
+def reactNativeVersion = getReactNativeVersion()
+
+def isReactNativeVersionBetween = { version, minVersion, maxVersionExclusive ->
+    def versionParts = { v -> v.replaceAll(/[^0-9.]/, '').tokenize('.')*.toInteger() }
+    def (v, minV, maxV) = [version, minVersion, maxVersionExclusive].collect { versionParts(it) }
+
+    def isAtLeastMin = { v1, v2 ->
+        for (int i = 0; i < Math.max(v1.size(), v2.size()); i++) {
+            int val1 = i < v1.size() ? v1[i] : 0
+            int val2 = i < v2.size() ? v2[i] : 0
+            if (val1 < val2) return false
+            if (val1 > val2) return true
+        }
+        return true
+    }
+
+    def isBelowMax = { v1, v2 ->
+        for (int i = 0; i < Math.max(v1.size(), v2.size()); i++) {
+            int val1 = i < v1.size() ? v1[i] : 0
+            int val2 = i < v2.size() ? v2[i] : 0
+            if (val1 > val2) return false
+            if (val1 < val2) return true
+        }
+        return false
+    }
+    return isAtLeastMin(v, minV) && isBelowMax(v, maxV)
+}
 
 buildscript {
     def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
@@ -210,6 +248,8 @@ def media3_version = safeExtGet('media3Version')
 def kotlin_version = safeExtGet('kotlinVersion')
 def androidxCore_version = safeExtGet('androidxCoreVersion')
 def androidxActivity_version = safeExtGet('androidxActivityVersion')
+def minReactNativeVersion = safeExtGet("minReactNativeVersion")
+def maxReactNativeVersionExclusive = safeExtGet("maxReactNativeVersionExclusive")
 
 dependencies {
     // For < 0.71, this will be from the local maven repo
@@ -303,5 +343,8 @@ dependencies {
         // Common functionality used across multiple media libraries
         implementation "androidx.media3:media3-common:$media3_version"
     }
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    if (isReactNativeVersionBetween(reactNativeVersion, minReactNativeVersion, maxReactNativeVersionExclusive)) {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    }
 }
