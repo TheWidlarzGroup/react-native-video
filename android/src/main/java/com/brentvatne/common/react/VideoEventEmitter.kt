@@ -48,7 +48,7 @@ enum class EventTypes(val eventName: String) {
         fun toMap() =
             mutableMapOf<String, Any>().apply {
                 EventTypes.values().toList().forEach { eventType ->
-                    put(eventType.eventName, hashMapOf("registrationName" to eventType.eventName))
+                    put("top${eventType.eventName.removePrefix("on")}", hashMapOf("registrationName" to eventType.eventName))
                 }
             }
     }
@@ -280,7 +280,7 @@ class VideoEventEmitter {
     private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
         fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
             dispatcher.dispatchEvent(object : Event<Event<*>>(surfaceId, viewId) {
-                override fun getEventName() = event.eventName
+                override fun getEventName() = "top${event.eventName.removePrefix("on")}"
                 override fun getEventData() = Arguments.createMap().apply(paramsSetter ?: {})
             })
     }
