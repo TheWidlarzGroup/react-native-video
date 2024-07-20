@@ -1,5 +1,6 @@
 package com.brentvatne.exoplayer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -22,6 +23,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.SubtitleView;
 
+import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.ViewType;
 import com.brentvatne.common.toolbox.DebugLog;
@@ -43,15 +45,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
-        this(context, null);
-    }
-
-    public ExoPlayerView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public ExoPlayerView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        super(context, null, 0);
 
         this.context = context;
 
@@ -178,6 +172,18 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
         requestLayout();
     }
 
+    /**
+     * Sets the resize mode which can be of value {@link ResizeMode.Mode}
+     *
+     * @param resizeMode The resize mode.
+     */
+    public void setResizeMode(@ResizeMode.Mode int resizeMode) {
+        if (layout != null && layout.getResizeMode() != resizeMode) {
+            layout.setResizeMode(resizeMode);
+            post(measureAndLayout);
+        }
+    }
+
     public void setHideShutterView(boolean hideShutterView) {
         this.hideShutterView = hideShutterView;
         updateShutterViewVisibility();
@@ -200,8 +206,15 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
                 // get the first track of the group to identify aspect ratio
                 Format format = group.getTrackFormat(0);
 
-                // update aspect ratio !
-                // layout.setAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
+                // There are weird cases when video height and width did not change with rotation so we need change aspect ration to fix it
+                switch (format.rotationDegrees) {
+                    // update aspect ratio !
+                    case 90:
+                    case 270:
+                        layout.setAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
+                    default:
+                        layout.setAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
+                }
                 return;
             }
         }
@@ -228,7 +241,6 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
-            /*
             boolean isInitialRatio = layout.getAspectRatio() == 0;
             if (videoSize.height == 0 || videoSize.width == 0) {
                 // When changing video track we receive an ghost state with height / width = 0
@@ -240,7 +252,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
             // React native workaround for measuring and layout on initial load.
             if (isInitialRatio) {
                 post(measureAndLayout);
-            }*/
+            }
         }
 
         @Override

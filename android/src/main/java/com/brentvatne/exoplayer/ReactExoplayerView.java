@@ -203,6 +203,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private long resumePosition;
     private boolean loadVideoStarted;
     private boolean isFullscreen;
+    private boolean originalFitsSystemWindows;
     private boolean isInBackground;
     private boolean isPaused;
     private boolean isBuffering;
@@ -217,11 +218,18 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
     private boolean selectTrackWhenReady = false;
-    private Handler mainHandler;
+    private final Handler mainHandler;
     private Runnable mainRunnable;
     private DataSource.Factory cacheDataSourceFactory;
     private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
+
+    /*
+    * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
+    * Then we set if to false when playback is back in onIsPlayingChanged -> true
+    */
+    private boolean isSeeking = false;
+    private long seekPosition = -1;
 
     // Props from React
     private Source source = new Source();
@@ -242,7 +250,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
     private boolean mReportBandwidth = false;
-    private DRMProps drmProps;
     private boolean controls;
     private Uri adTagUrl;
 
@@ -311,7 +318,7 @@ public class ReactExoplayerView extends FrameLayout implements
         this.eventEmitter = new VideoEventEmitter();
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
-
+        mainHandler = new Handler();
         createViews();
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -339,8 +346,6 @@ public class ReactExoplayerView extends FrameLayout implements
         addView(exoPlayerView, 0, layoutParams);
 
         exoPlayerView.setFocusable(this.focusable);
-
-        mainHandler = new Handler();
     }
 
     // LifecycleEventListener implementation
@@ -686,19 +691,22 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
+    private DrmSessionManager initializePlayerDrm() {
         DrmSessionManager drmSessionManager = null;
-        if (self.drmProps != null) {
-            try {
-                drmSessionManager = self.buildDrmSessionManager(self.drmProps.getDrmUUID(),
-                        self.drmProps.getDrmLicenseServer(),
-                        self.drmProps.getDrmLicenseHeader());
-            } catch (UnsupportedDrmException e) {
-                int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                        : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                        ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
-                return null;
+        DRMProps drmProps = source.getDrmProps();
+        // need to realign UUID in DRM Props from source
+        if (drmProps != null && drmProps.getDrmType() != null) {
+            UUID uuid = Util.getDrmUuid(drmProps.getDrmType());
+            if (uuid != null) {
+                try {
+                    DebugLog.w(TAG, "drm buildDrmSessionManager");
+                    drmSessionManager = buildDrmSessionManager(uuid, drmProps);
+                } catch (UnsupportedDrmException e) {
+                    int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                            : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                            ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                    eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
+                        }
             }
         }
         return drmSessionManager;
@@ -708,14 +716,14 @@ public class ReactExoplayerView extends FrameLayout implements
         if (source.getUri() == null) {
             return;
         }
-        DrmSessionManager drmSessionManager = initializePlayerDrm(this);
-        if (drmSessionManager == null && drmProps != null && drmProps.getDrmUUID() != null) {
-            // Failed to intialize DRM session manager - cannot continue
+        /// init DRM
+        DrmSessionManager drmSessionManager = initializePlayerDrm();
+        if (drmSessionManager == null && source.getDrmProps() != null && source.getDrmProps().getDrmType() != null) {
+            // Failed to initialize DRM session manager - cannot continue
             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
-            eventEmitter.onVideoError.invoke("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
             return;
         }
-
+        // init source to manage ads and external text tracks
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(source.getUri(), source.getExtension(), drmSessionManager, source.getCropStartMs(), source.getCropEndMs());
         MediaSource mediaSourceWithAds = null;
@@ -850,21 +858,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps) throws UnsupportedDrmException {
+        return buildDrmSessionManager(uuid, drmProps, 0);
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray, int retryCount) throws UnsupportedDrmException {
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps, int retryCount) throws UnsupportedDrmException {
         if (Util.SDK_INT < 18) {
             return null;
         }
         try {
-            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
+            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmProps.getDrmLicenseServer(),
                     buildHttpDataSourceFactory(false));
-            if (keyRequestPropertiesArray != null) {
-                for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
-                    drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
-                }
+
+            String[] keyRequestPropertiesArray = drmProps.getDrmLicenseHeader();
+            for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
+                drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
             }
             FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
             if (hasDrmFailed) {
@@ -874,7 +882,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return new DefaultDrmSessionManager.Builder()
                     .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
                     .setKeyRequestParameters(null)
-                    .setMultiSession(false)
+                    .setMultiSession(drmProps.getMultiDrm())
                     .build(drmCallback);
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
@@ -882,7 +890,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } catch (Exception ex) {
             if (retryCount < 3) {
                 // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
-                return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, ++retryCount);
+                return buildDrmSessionManager(uuid, drmProps, ++retryCount);
             }
             // Handle the unknow exception and emit to JS
             eventEmitter.onVideoError.invoke(ex.toString(), ex, "3006");
@@ -966,7 +974,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file" + uri);
@@ -1183,9 +1191,6 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void onStopPlayback() {
-        if (isFullscreen) {
-            setFullscreen(false);
-        }
         audioManager.abandonAudioFocus(audioFocusChangeListener);
     }
 
@@ -1529,6 +1534,11 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        if (isPaused && isSeeking && !buffering) {
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            isSeeking = false;
+        }
+
         isBuffering = buffering;
         eventEmitter.onVideoBuffer.invoke(buffering);
     }
@@ -1536,7 +1546,8 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), newPosition.positionMs % 1000); // time are in seconds /°\
+            isSeeking = true;
+            seekPosition = newPosition.positionMs;
             if (isUsingContentResolution) {
                 // We need to update the selected track to make sure that it still matches user selection if track list has changed in this period
                 setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
@@ -1587,7 +1598,15 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
-        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying);
+        if (isPlaying && isSeeking) {
+            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+        }
+
+        eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
+
+        if (isPlaying) {
+            isSeeking = false;
+        }
     }
 
     @Override
@@ -1738,7 +1757,9 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
-        exoPlayerView.setResizeMode(resizeMode);
+        if (exoPlayerView != null) {
+            exoPlayerView.setResizeMode(resizeMode);
+        }
     }
 
     private void applyModifiers() {
@@ -2143,6 +2164,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 exoPlayerView.setUseController(true);
             }
             UiThreadUtil.runOnUiThread(() -> {
+                originalFitsSystemWindows = window.getDecorView().getFitsSystemWindows();
                 WindowCompat.setDecorFitsSystemWindows(window, false);
                 controller.hide(WindowInsetsCompat.Type.systemBars());
                 controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -2156,7 +2178,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 setControls(controls);
             }
             UiThreadUtil.runOnUiThread(() -> {
-                WindowCompat.setDecorFitsSystemWindows(window, true);
+                WindowCompat.setDecorFitsSystemWindows(window, originalFitsSystemWindows);
                 controller.show(WindowInsetsCompat.Type.systemBars());
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
             });
@@ -2189,13 +2211,6 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         releasePlayer();
         initializePlayer();
-    }
-
-    public void setDrm(DRMProps drmProps) {
-        this.drmProps = drmProps;
-        if (drmProps != null && drmProps.getDrmType() != null) {
-            this.drmProps.setDrmUUID(Util.getDrmUuid(drmProps.getDrmType()));
-        }
     }
 
     @Override

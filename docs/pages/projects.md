@@ -8,4 +8,4 @@ If you have a project which can be useful for other users, feel free to open a P
  - [react-native-corner-video](https://github.com/Lg0gs/react-native-corner-video): A floating video player
 
 ## Other tools
- - [react-native-music-control](https://github.com/tanguyantoine/react-native-music-control): A toolbox to control player over media session
+ - [react-native-track-player](https://github.com/doublesymmetry/react-native-track-player): A toolbox to control player over media session

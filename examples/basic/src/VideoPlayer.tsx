@@ -1,77 +1,134 @@
 'use strict';
 
-import React, {FC, useRef, useState} from 'react';
+import React, {type FC, useCallback, useRef, useState} from 'react';
 
-import {TouchableOpacity, View} from 'react-native';
+import {Platform, TouchableOpacity, View} from 'react-native';
 
 import Video, {
-  AudioTrack,
-  OnAudioTracksData,
-  OnLoadData,
-  OnProgressData,
-  OnTextTracksData,
-  OnVideoAspectRatioData,
-  TextTrack,
-  OnBufferData,
-  OnAudioFocusChangedData,
-  OnVideoErrorData,
   VideoRef,
-  OnTextTrackDataChangedData,
-  OnSeekData,
-  OnPlaybackStateChangedData,
-  OnPlaybackRateChangeData,
-  OnVideoTracksData,
   SelectedVideoTrackType,
   BufferingStrategyType,
-  ReactVideoSource,
   SelectedTrackType,
+  ResizeMode,
+  type AudioTrack,
+  type OnAudioTracksData,
+  type OnLoadData,
+  type OnProgressData,
+  type OnTextTracksData,
+  type OnVideoAspectRatioData,
+  type TextTrack,
+  type OnBufferData,
+  type OnAudioFocusChangedData,
+  type OnVideoErrorData,
+  type OnTextTrackDataChangedData,
+  type OnSeekData,
+  type OnPlaybackStateChangedData,
+  type OnPlaybackRateChangeData,
+  type OnVideoTracksData,
+  type ReactVideoSource,
+  type TextTracks,
+  type VideoTrack,
+  type SelectedTrack,
+  type SelectedVideoTrack,
+  type EnumValues,
 } from 'react-native-video';
 import styles from './styles';
-import {AdditionalSourceInfo} from './types';
-import {
-  bufferConfig,
-  defaultValue,
-  srcList,
-  textTracksSelectionBy,
-} from './constants';
+import {type AdditionalSourceInfo} from './types';
+import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast} from './components';
+
+type AdditionnalSourceInfo = {
+  textTracks: TextTracks;
+  adTagUrl: string;
+  description: string;
+  noView: boolean;
+};
 
 type Props = NonNullable<unknown>;
 
 const VideoPlayer: FC<Props> = ({}) => {
-  const [state, setState] = useState(defaultValue);
+  const [rate, setRate] = useState(1);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
+  const [resizeMode, setResizeMode] = useState<EnumValues<ResizeMode>>(
+    ResizeMode.CONTAIN,
+  );
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [_, setVideoSize] = useState({videoWidth: 0, videoHeight: 0});
+  const [paused, setPaused] = useState(false);
+  const [fullscreen, setFullscreen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
+  const [textTracks, setTextTracks] = useState<TextTrack[]>([]);
+  const [videoTracks, setVideoTracks] = useState<VideoTrack[]>([]);
+  const [selectedAudioTrack, setSelectedAudioTrack] = useState<
+    SelectedTrack | undefined
+  >(undefined);
+  const [selectedTextTrack, setSelectedTextTrack] = useState<
+    SelectedTrack | undefined
+  >(undefined);
+  const [selectedVideoTrack, setSelectedVideoTrack] =
+    useState<SelectedVideoTrack>({
+      type: SelectedVideoTrackType.AUTO,
+    });
+  const [srcListId, setSrcListId] = useState(0);
+  const [repeat, setRepeat] = useState(false);
+  const [controls, setControls] = useState(false);
+  const [useCache, setUseCache] = useState(false);
+  const [poster, setPoster] = useState<string | undefined>(undefined);
+  const [showNotificationControls, setShowNotificationControls] =
+    useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+
   const videoRef = useRef<VideoRef>(null);
-  const viewStyle = state.fullscreen ? styles.fullScreen : styles.halfScreen;
-  const currentSrc = srcList[state.srcListId];
+  const viewStyle = fullscreen ? styles.fullScreen : styles.halfScreen;
+  const currentSrc = srcList[srcListId];
   const additional = currentSrc as AdditionalSourceInfo;
+
+  const goToChannel = useCallback((channel: number) => {
+    setSrcListId(channel);
+    setDuration(0);
+    setCurrentTime(0);
+    setVideoSize({videoWidth: 0, videoHeight: 0});
+    setIsLoading(false);
+    setAudioTracks([]);
+    setTextTracks([]);
+    setSelectedAudioTrack(undefined);
+    setSelectedTextTrack(undefined);
+    setSelectedVideoTrack({
+      type: SelectedVideoTrackType.AUTO,
+    });
+  }, []);
+
+  const channelUp = useCallback(() => {
+    console.log('channel up');
+    goToChannel((srcListId + 1) % srcList.length);
+  }, [goToChannel, srcListId]);
+
+  const channelDown = useCallback(() => {
+    console.log('channel down');
+    goToChannel((srcListId + srcList.length - 1) % srcList.length);
+  }, [goToChannel, srcListId]);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
     if (selectedTrack?.index) {
-      setState({
-        ...state,
-        audioTracks: data.audioTracks,
-        selectedAudioTrack: {
-          type: SelectedTrackType.INDEX,
-          value: selectedTrack?.index,
-        },
+      setAudioTracks(data.audioTracks);
+      setSelectedAudioTrack({
+        type: SelectedTrackType.INDEX,
+        value: selectedTrack.index,
       });
     } else {
-      setState({
-        ...state,
-        audioTracks: data.audioTracks,
-      });
+      setAudioTracks(data.audioTracks);
     }
   };
 
   const onVideoTracks = (data: OnVideoTracksData) => {
     console.log('onVideoTracks', data.videoTracks);
-    setState({
-      ...state,
-      videoTracks: data.videoTracks,
-    });
+    setVideoTracks(data.videoTracks);
   };
 
   const onTextTracks = (data: OnTextTracksData) => {
@@ -80,46 +137,42 @@ const VideoPlayer: FC<Props> = ({}) => {
     });
 
     if (selectedTrack?.language) {
-      setState({
-        ...state,
-        textTracks: data.textTracks,
-        selectedTextTrack:
-          textTracksSelectionBy === 'index'
-            ? {
-                type: SelectedTrackType.INDEX,
-                value: selectedTrack?.index,
-              }
-            : {
-                type: SelectedTrackType.LANGUAGE,
-                value: selectedTrack?.language,
-              },
-      });
+      setTextTracks(data.textTracks);
+      if (textTracksSelectionBy === 'index') {
+        setSelectedTextTrack({
+          type: SelectedTrackType.INDEX,
+          value: selectedTrack?.index,
+        });
+      } else {
+        setSelectedTextTrack({
+          type: SelectedTrackType.LANGUAGE,
+          value: selectedTrack?.language,
+        });
+      }
     } else {
-      setState({
-        ...state,
-        textTracks: data.textTracks,
-      });
+      setTextTracks(data.textTracks);
     }
   };
 
   const onLoad = (data: OnLoadData) => {
+    setDuration(data.duration);
     onAudioTracks(data);
     onTextTracks(data);
     onVideoTracks(data);
-    setState({...state, duration: data.duration});
   };
 
   const onProgress = (data: OnProgressData) => {
-    setState({...state, currentTime: data.currentTime});
+    setCurrentTime(data.currentTime);
   };
 
   const onSeek = (data: OnSeekData) => {
-    setState({...state, currentTime: data.currentTime, isSeeking: false});
+    setCurrentTime(data.currentTime);
+    setIsSeeking(false);
   };
 
   const onVideoLoadStart = () => {
     console.log('onVideoLoadStart');
-    setState({...state, isLoading: true});
+    setIsLoading(true);
   };
 
   const onTextTrackDataChanged = (data: OnTextTrackDataChangedData) => {
@@ -128,29 +181,25 @@ const VideoPlayer: FC<Props> = ({}) => {
 
   const onAspectRatio = (data: OnVideoAspectRatioData) => {
     console.log('onAspectRadio called ' + JSON.stringify(data));
-    setState({
-      ...state,
-      videoWidth: data.width,
-      videoHeight: data.height,
-    });
+    setVideoSize({videoWidth: data.width, videoHeight: data.height});
   };
 
   const onVideoBuffer = (param: OnBufferData) => {
     console.log('onVideoBuffer');
-    setState({...state, isLoading: param.isBuffering});
+    setIsLoading(param.isBuffering);
   };
 
   const onReadyForDisplay = () => {
     console.log('onReadyForDisplay');
-    setState({...state, isLoading: false});
+    setIsLoading(false);
   };
 
   const onAudioBecomingNoisy = () => {
-    setState({...state, paused: true});
+    setPaused(true);
   };
 
   const onAudioFocusChanged = (event: OnAudioFocusChangedData) => {
-    setState({...state, paused: !event.hasAudioFocus});
+    setPaused(!event.hasAudioFocus);
   };
 
   const onError = (err: OnVideoErrorData) => {
@@ -159,7 +208,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   };
 
   const onEnd = () => {
-    if (!state.loop) {
+    if (!repeat) {
       channelUp();
     }
   };
@@ -172,54 +221,31 @@ const VideoPlayer: FC<Props> = ({}) => {
     console.log('onPlaybackStateChanged', data);
   };
 
-  const goToChannel = (channel: number) => {
-    setState({
-      ...state,
-      srcListId: channel,
-      duration: 0.0,
-      currentTime: 0.0,
-      videoWidth: 0,
-      videoHeight: 0,
-      isLoading: false,
-      audioTracks: [],
-      textTracks: [],
-      selectedAudioTrack: undefined,
-      selectedTextTrack: undefined,
-      selectedVideoTrack: {
-        type: SelectedVideoTrackType.AUTO,
-      },
-    });
-  };
-
-  const channelUp = () => {
-    console.log('channel up');
-    goToChannel((state.srcListId + 1) % srcList.length);
-  };
-
-  const channelDown = () => {
-    console.log('channel down');
-    goToChannel((state.srcListId + srcList.length - 1) % srcList.length);
+  const onFullScreenExit = () => {
+    // iOS pauses video on exit from full screen
+    Platform.OS === 'ios' && setPaused(true);
   };
 
   return (
     <View style={styles.container}>
-      {(srcList[state.srcListId] as AdditionalSourceInfo)?.noView ? null : (
+      {(srcList[srcListId] as AdditionalSourceInfo)?.noView ? null : (
         <TouchableOpacity style={viewStyle}>
           <Video
-            showNotificationControls={state.showNotificationControls}
+            showNotificationControls={showNotificationControls}
             ref={videoRef}
             source={currentSrc as ReactVideoSource}
             textTracks={additional?.textTracks}
             adTagUrl={additional?.adTagUrl}
             drm={additional?.drm}
             style={viewStyle}
-            rate={state.rate}
-            paused={state.paused}
-            volume={state.volume}
-            muted={state.muted}
-            fullscreen={state.fullscreen}
-            controls={state.showRNVControls}
-            resizeMode={state.resizeMode}
+            rate={rate}
+            paused={paused}
+            volume={volume}
+            muted={muted}
+            fullscreen={fullscreen}
+            controls={controls}
+            resizeMode={resizeMode}
+            onFullscreenPlayerWillDismiss={onFullScreenExit}
             onLoad={onLoad}
             onAudioTracks={onAudioTracks}
             onTextTracks={onTextTracks}
@@ -236,17 +262,17 @@ const VideoPlayer: FC<Props> = ({}) => {
             onReadyForDisplay={onReadyForDisplay}
             onBuffer={onVideoBuffer}
             onSeek={onSeek}
-            repeat={state.loop}
-            selectedTextTrack={state.selectedTextTrack}
-            selectedAudioTrack={state.selectedAudioTrack}
-            selectedVideoTrack={state.selectedVideoTrack}
+            repeat={repeat}
+            selectedTextTrack={selectedTextTrack}
+            selectedAudioTrack={selectedAudioTrack}
+            selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
             bufferConfig={{
               ...bufferConfig,
-              cacheSizeMB: state.useCache ? 200 : 0,
+              cacheSizeMB: useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            poster={state.poster}
+            poster={poster}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
@@ -257,9 +283,43 @@ const VideoPlayer: FC<Props> = ({}) => {
       <Overlay
         channelDown={channelDown}
         channelUp={channelUp}
-        setState={setState}
-        state={state}
         ref={videoRef}
+        videoTracks={videoTracks}
+        selectedVideoTrack={selectedVideoTrack}
+        setSelectedTextTrack={setSelectedTextTrack}
+        audioTracks={audioTracks}
+        controls={controls}
+        resizeMode={resizeMode}
+        textTracks={textTracks}
+        selectedTextTrack={selectedTextTrack}
+        selectedAudioTrack={selectedAudioTrack}
+        setSelectedAudioTrack={setSelectedAudioTrack}
+        setSelectedVideoTrack={setSelectedVideoTrack}
+        currentTime={currentTime}
+        setMuted={setMuted}
+        muted={muted}
+        duration={duration}
+        paused={paused}
+        volume={volume}
+        setControls={setControls}
+        poster={poster}
+        rate={rate}
+        setFullscreen={setFullscreen}
+        setPaused={setPaused}
+        isLoading={isLoading}
+        isSeeking={isSeeking}
+        setIsSeeking={setIsSeeking}
+        repeat={repeat}
+        setRepeat={setRepeat}
+        setPoster={setPoster}
+        setRate={setRate}
+        setResizeMode={setResizeMode}
+        setShowNotificationControls={setShowNotificationControls}
+        showNotificationControls={showNotificationControls}
+        setUseCache={setUseCache}
+        setVolume={setVolume}
+        useCache={useCache}
+        srcListId={srcListId}
       />
     </View>
   );

@@ -1,4 +1,10 @@
-import React, {forwardRef, memo, useCallback} from 'react';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import {Indicator} from './Indicator.tsx';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
@@ -10,16 +16,21 @@ import {
   textTracksSelectionBy,
 } from '../constants';
 import MultiValueControl, {
-  MultiValueControlPropType,
+  type MultiValueControlPropType,
 } from '../MultiValueControl.tsx';
 import {
   ResizeMode,
+  VideoRef,
   SelectedTrackType,
   SelectedVideoTrackType,
   VideoDecoderProperties,
-  VideoRef,
+  type EnumValues,
+  type TextTrack,
+  type SelectedVideoTrack,
+  type SelectedTrack,
+  type VideoTrack,
+  type AudioTrack,
 } from 'react-native-video';
-import {StateType} from '../types';
 import {
   toast,
   Seeker,
@@ -32,12 +43,85 @@ import {
 type Props = {
   channelDown: () => void;
   channelUp: () => void;
-  setState: (value: StateType) => void;
-  state: StateType;
+  setFullscreen: Dispatch<SetStateAction<boolean>>;
+  controls: boolean;
+  setControls: Dispatch<SetStateAction<boolean>>;
+  showNotificationControls: boolean;
+  setShowNotificationControls: Dispatch<SetStateAction<boolean>>;
+  selectedAudioTrack: SelectedTrack | undefined;
+  setSelectedAudioTrack: Dispatch<SetStateAction<SelectedTrack | undefined>>;
+  selectedTextTrack: SelectedTrack | undefined;
+  setSelectedTextTrack: (value: SelectedTrack | undefined) => void;
+  selectedVideoTrack: SelectedVideoTrack;
+  setSelectedVideoTrack: (value: SelectedVideoTrack) => void;
+  setIsSeeking: Dispatch<SetStateAction<boolean>>;
+  rate: number;
+  setRate: Dispatch<SetStateAction<number>>;
+  volume: number;
+  setVolume: (value: number) => void;
+  resizeMode: EnumValues<ResizeMode>;
+  setResizeMode: Dispatch<SetStateAction<EnumValues<ResizeMode>>>;
+  isLoading: boolean;
+  srcListId: number;
+  useCache: boolean;
+  setUseCache: Dispatch<SetStateAction<boolean>>;
+  paused: boolean;
+  setPaused: Dispatch<SetStateAction<boolean>>;
+  repeat: boolean;
+  setRepeat: Dispatch<SetStateAction<boolean>>;
+  poster: string | undefined;
+  setPoster: Dispatch<SetStateAction<string | undefined>>;
+  muted: boolean;
+  setMuted: Dispatch<SetStateAction<boolean>>;
+  currentTime: number;
+  duration: number;
+  isSeeking: boolean;
+  audioTracks: AudioTrack[];
+  textTracks: TextTrack[];
+  videoTracks: VideoTrack[];
 };
 
 const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
-  const {state, setState, channelUp, channelDown} = props;
+  const {
+    channelUp,
+    channelDown,
+    setFullscreen,
+    setControls,
+    controls,
+    setShowNotificationControls,
+    showNotificationControls,
+    setSelectedAudioTrack,
+    setSelectedTextTrack,
+    setSelectedVideoTrack,
+    setIsSeeking,
+    rate,
+    setRate,
+    volume,
+    setVolume,
+    resizeMode,
+    setResizeMode,
+    isLoading,
+    srcListId,
+    setUseCache,
+    useCache,
+    paused,
+    setPaused,
+    setRepeat,
+    repeat,
+    setPoster,
+    poster,
+    setMuted,
+    muted,
+    duration,
+    isSeeking,
+    currentTime,
+    textTracks,
+    videoTracks,
+    audioTracks,
+    selectedAudioTrack,
+    selectedVideoTrack,
+    selectedTextTrack,
+  } = props;
   const popupInfo = useCallback(() => {
     VideoDecoderProperties.getWidevineLevel().then((widevineLevel: number) => {
       VideoDecoderProperties.isHEVCSupported().then((hevc: string) => {
@@ -59,116 +143,98 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
   }, []);
 
   const toggleFullscreen = () => {
-    setState({...state, fullscreen: !state.fullscreen});
+    setFullscreen(prev => !prev);
   };
   const toggleControls = () => {
-    setState({...state, showRNVControls: !state.showRNVControls});
+    setControls(prev => !prev);
   };
 
-  const toggleDecoration = () => {
-    setState({...state, decoration: !state.decoration});
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ref.current?.setFullScreen(!state.decoration);
+  const openDecoration = () => {
+    typeof ref !== 'function' && ref?.current?.setFullScreen(true);
   };
 
   const toggleShowNotificationControls = () => {
-    setState({
-      ...state,
-      showNotificationControls: !state.showNotificationControls,
-    });
+    setShowNotificationControls(prev => !prev);
   };
 
   const onSelectedAudioTrackChange = (itemValue: string) => {
     console.log('on audio value change ' + itemValue);
     if (itemValue === 'none') {
-      setState({
-        ...state,
-        selectedAudioTrack: {
-          type: SelectedTrackType.DISABLED,
-        },
+      setSelectedAudioTrack({
+        type: SelectedTrackType.DISABLED,
       });
     } else {
-      setState({
-        ...state,
-        selectedAudioTrack: {
-          type: SelectedTrackType.INDEX,
-          value: itemValue,
-        },
+      setSelectedAudioTrack({
+        type: SelectedTrackType.INDEX,
+        value: itemValue,
       });
     }
   };
 
   const onSelectedTextTrackChange = (itemValue: string) => {
     console.log('on value change ' + itemValue);
-    setState({
-      ...state,
-      selectedTextTrack: {
-        type:
-          textTracksSelectionBy === 'index'
-            ? SelectedTrackType.INDEX
-            : SelectedTrackType.LANGUAGE,
-        value: itemValue,
-      },
-    });
+    const type =
+      textTracksSelectionBy === 'index'
+        ? SelectedTrackType.INDEX
+        : SelectedTrackType.LANGUAGE;
+    setSelectedTextTrack({type, value: itemValue});
   };
 
   const onSelectedVideoTrackChange = (itemValue: string) => {
     console.log('on value change ' + itemValue);
     if (itemValue === undefined || itemValue === 'auto') {
-      setState({
-        ...state,
-        selectedVideoTrack: {
-          type: SelectedVideoTrackType.AUTO,
-        },
+      setSelectedVideoTrack({
+        type: SelectedVideoTrackType.AUTO,
       });
     } else {
-      setState({
-        ...state,
-        selectedVideoTrack: {
-          type: SelectedVideoTrackType.INDEX,
-          value: itemValue,
-        },
+      setSelectedVideoTrack({
+        type: SelectedVideoTrackType.INDEX,
+        value: itemValue,
       });
     }
   };
 
   const videoSeek = (position: number) => {
-    setState({...state, isSeeking: true});
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ref.current?.seek(position);
+    setIsSeeking(true);
+    typeof ref !== 'function' && ref?.current?.seek(position);
   };
 
-  const onRateSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setState({...state, rate: value});
-    }
+  const onRateSelected = (value: number) => {
+    setRate(value);
   };
-  const onVolumeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'number') {
-      setState({...state, volume: value});
-    }
+
+  const onVolumeSelected = (value: number) => {
+    setVolume(value);
   };
-  const onResizeModeSelected = (value: MultiValueControlPropType) => {
-    if (typeof value === 'object') {
-      setState({...state, resizeMode: value});
-    }
+
+  const onResizeModeSelected = (value: EnumValues<ResizeMode>) => {
+    setResizeMode(value);
   };
+
+  const toggleCache = () => setUseCache(prev => !prev);
+
+  const togglePause = () => setPaused(prev => !prev);
+
+  const toggleRepeat = () => setRepeat(prev => !prev);
+
+  const togglePoster = () =>
+    setPoster(prev => (prev ? undefined : samplePoster));
+
+  const toggleMuted = () => setMuted(prev => !prev);
 
   return (
     <>
-      <Indicator isLoading={state.isLoading} />
+      <Indicator isLoading={isLoading} />
       <View style={styles.topControls}>
         <View style={styles.resizeModeControl}>
           <TopControl
-            srcListId={state.srcListId}
-            showRNVControls={state.showRNVControls}
+            srcListId={srcListId}
+            showRNVControls={controls}
             toggleControls={toggleControls}
           />
         </View>
       </View>
-      {!state.showRNVControls ? (
+      {!controls ? (
         <>
           <View style={styles.leftControls}>
             <ToggleControl onPress={channelDown} text="ChDown" />
@@ -182,46 +248,35 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
                 <View style={styles.generalControls}>
                   <ToggleControl onPress={popupInfo} text="decoderInfo" />
                   <ToggleControl
-                    isSelected={state.useCache}
-                    onPress={() => {
-                      setState({...state, useCache: !state.useCache});
-                    }}
+                    isSelected={useCache}
+                    onPress={toggleCache}
                     selectedText="enable cache"
                     unselectedText="disable cache"
                   />
                 </View>
               ) : null}
               <ToggleControl
-                isSelected={state.paused}
-                onPress={() => {
-                  setState({...state, paused: !state.paused});
-                }}
+                isSelected={paused}
+                onPress={togglePause}
                 selectedText="pause"
                 unselectedText="playing"
               />
               <ToggleControl
-                isSelected={state.loop}
-                onPress={() => {
-                  setState({...state, loop: !state.loop});
-                }}
+                isSelected={repeat}
+                onPress={toggleRepeat}
                 selectedText="loop enable"
                 unselectedText="loop disable"
               />
               <ToggleControl onPress={toggleFullscreen} text="fullscreen" />
-              <ToggleControl onPress={toggleDecoration} text="decoration" />
+              <ToggleControl onPress={openDecoration} text="decoration" />
               <ToggleControl
-                isSelected={!!state.poster}
-                onPress={() => {
-                  setState({
-                    ...state,
-                    poster: state.poster ? undefined : samplePoster,
-                  });
-                }}
+                isSelected={!!poster}
+                onPress={togglePoster}
                 selectedText="poster"
                 unselectedText="no poster"
               />
               <ToggleControl
-                isSelected={state.showNotificationControls}
+                isSelected={showNotificationControls}
                 onPress={toggleShowNotificationControls}
                 selectedText="hide notification controls"
                 unselectedText="show notification controls"
@@ -232,13 +287,13 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
               <MultiValueControl
                 values={[0, 0.25, 0.5, 1.0, 1.5, 2.0]}
                 onPress={onRateSelected}
-                selected={state.rate}
+                selected={rate}
               />
               {/* shall be replaced by slider */}
               <MultiValueControl
                 values={[0.5, 1, 1.5]}
                 onPress={onVolumeSelected}
-                selected={state.volume}
+                selected={volume}
               />
               <MultiValueControl
                 values={[
@@ -247,56 +302,53 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
                   ResizeMode.STRETCH,
                 ]}
                 onPress={onResizeModeSelected}
-                selected={state.resizeMode}
+                selected={resizeMode}
               />
               <ToggleControl
-                isSelected={state.muted}
-                onPress={() => {
-                  setState({...state, muted: !state.muted});
-                }}
+                isSelected={muted}
+                onPress={toggleMuted}
                 text="muted"
               />
               {isIos ? (
                 <ToggleControl
-                  isSelected={state.paused}
+                  isSelected={paused}
                   onPress={() => {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-expect-error
-                    ref.current
-                      ?.save({})
-                      ?.then((response: unknown) => {
-                        console.log('Downloaded URI', response);
-                      })
-                      .catch((error: unknown) => {
-                        console.log('error during save ', error);
-                      });
+                    typeof ref !== 'function' &&
+                      ref?.current
+                        ?.save({})
+                        ?.then((response: unknown) => {
+                          console.log('Downloaded URI', response);
+                        })
+                        .catch((error: unknown) => {
+                          console.log('error during save ', error);
+                        });
                   }}
                   text="save"
                 />
               ) : null}
             </View>
             <Seeker
-              currentTime={state.currentTime}
-              duration={state.duration}
-              isLoading={state.isLoading}
+              currentTime={currentTime}
+              duration={duration}
+              isLoading={isLoading}
               videoSeek={prop => videoSeek(prop)}
-              isUISeeking={state.isSeeking}
+              isUISeeking={isSeeking}
             />
             <View style={styles.generalControls}>
               <AudioTrackSelector
-                audioTracks={state.audioTracks}
-                selectedAudioTrack={state.selectedAudioTrack}
+                audioTracks={audioTracks}
+                selectedAudioTrack={selectedAudioTrack}
                 onValueChange={onSelectedAudioTrackChange}
               />
               <TextTrackSelector
-                textTracks={state.textTracks}
-                selectedTextTrack={state.selectedTextTrack}
+                textTracks={textTracks}
+                selectedTextTrack={selectedTextTrack}
                 onValueChange={onSelectedTextTrackChange}
                 textTracksSelectionBy={textTracksSelectionBy}
               />
               <VideoTrackSelector
-                videoTracks={state.videoTracks}
-                selectedVideoTrack={state.selectedVideoTrack}
+                videoTracks={videoTracks}
+                selectedVideoTrack={selectedVideoTrack}
                 onValueChange={onSelectedVideoTrackChange}
               />
             </View>
