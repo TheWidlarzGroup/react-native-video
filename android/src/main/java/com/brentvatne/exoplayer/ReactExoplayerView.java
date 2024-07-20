@@ -6,7 +6,6 @@ import static androidx.media3.common.C.CONTENT_TYPE_OTHER;
 import static androidx.media3.common.C.CONTENT_TYPE_RTSP;
 import static androidx.media3.common.C.CONTENT_TYPE_SS;
 import static androidx.media3.common.C.TIME_END_OF_SOURCE;
-import static com.brentvatne.exoplayer.DataSourceUtil.buildAssetDataSourceFactory;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -268,12 +267,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
     private boolean viewHasDropped = false;
 
-    private String instanceId = String.valueOf(UUID.randomUUID());
+    private final String instanceId = String.valueOf(UUID.randomUUID());
 
     private void updateProgress() {
         if (player != null) {
             if (playerControlView != null && isPlayingAd() && controls) {
-                playerControlView.hide();
+                exoPlayerView.setUseController(false);
             }
             long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
             long duration = player.getDuration();
@@ -290,6 +289,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 lastDuration = duration;
                 eventEmitter.onVideoProgress.invoke(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
             }
+            exoPlayerView.closeShutterView();
         }
     }
 

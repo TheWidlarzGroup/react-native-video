@@ -1,8 +1,6 @@
 package com.brentvatne.exoplayer;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceView;
@@ -81,7 +79,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
-        // ensure we reset subtile style before reapplying it
+        // ensure we reset subtitle style before reapplying it
         SubtitleView subtitleLayout = getSubtitleView();
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
@@ -211,9 +209,9 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
                     // update aspect ratio !
                     case 90:
                     case 270:
-                        layout.setAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
+                        layout.setVideoAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
                     default:
-                        layout.setAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
+                        layout.setVideoAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
                 }
                 return;
             }
@@ -241,13 +239,13 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
-            boolean isInitialRatio = layout.getAspectRatio() == 0;
+            boolean isInitialRatio = layout.getVideoAspectRatio() == 0;
             if (videoSize.height == 0 || videoSize.width == 0) {
                 // When changing video track we receive an ghost state with height / width = 0
                 // No need to resize the view in that case
                 return;
             }
-            layout.setAspectRatio((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
+            layout.setVideoAspectRatio((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
 
             // React native workaround for measuring and layout on initial load.
             if (isInitialRatio) {

@@ -9,17 +9,19 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
-import androidx.media3.ui.LegacyPlayerControlView
+import androidx.media3.ui.PlayerControlView
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
+
 
 @SuppressLint("PrivateResource")
 class FullScreenPlayerView(
     context: Context,
     private val exoPlayerView: ExoPlayerView,
     private val reactExoplayerView: ReactExoplayerView,
-    private val playerControlView: LegacyPlayerControlView?,
+    private val playerControlView: PlayerControlView?,
     private val onBackPressedCallback: OnBackPressedCallback
 ) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 
@@ -62,6 +64,9 @@ class FullScreenPlayerView(
     }
     override fun onBackPressed() {
         super.onBackPressed()
+        playerControlView?.let {
+            updateFullscreenButton(playerControlView, false)
+        }
         onBackPressedCallback.handleOnBackPressed()
     }
 
@@ -99,8 +104,8 @@ class FullScreenPlayerView(
         }
     }
 
-    private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
-        val imageButton = playerControlView.findViewById<ImageButton?>(com.brentvatne.react.R.id.exo_fullscreen)
+    private fun updateFullscreenButton(playerControlView: PlayerControlView, isFullscreen: Boolean) {
+        val imageButton = playerControlView.findViewById<ImageButton?>(androidx.media3.ui.R.id.exo_fullscreen)
         imageButton?.let {
             val imgResource = getFullscreenIconResource(isFullscreen)
             val desc = if (isFullscreen) {
