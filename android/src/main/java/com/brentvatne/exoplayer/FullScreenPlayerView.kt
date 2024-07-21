@@ -88,12 +88,11 @@ class FullScreenPlayerView(
         }
     }
 
-    private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams {
-        return FrameLayout.LayoutParams(
+    private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams =
+        FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         ).apply {
             setMargins(0, 0, 0, 0)
         }
-    }
 }
