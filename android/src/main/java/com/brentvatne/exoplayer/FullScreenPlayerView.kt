@@ -1,6 +1,5 @@
 package com.brentvatne.exoplayer
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.os.Handler
@@ -8,13 +7,12 @@ import android.os.Looper
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.ui.PlayerControlView
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
-@SuppressLint("PrivateResource")
 class FullScreenPlayerView(
     context: Context,
     private val exoPlayerView: ExoPlayerView,
@@ -24,9 +22,9 @@ class FullScreenPlayerView(
 ) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 
     private var parent: ViewGroup? = null
-    private val containerView = FrameLayout(context)
-    private val mKeepScreenOnHandler = Handler(Looper.getMainLooper())
-    private val mKeepScreenOnUpdater = KeepScreenOnUpdater(this)
+    private val containerView: FrameLayout = FrameLayout(context)
+    private val mKeepScreenOnHandler: Handler = Handler(Looper.getMainLooper())
+    private val mKeepScreenOnUpdater: Runnable = KeepScreenOnUpdater(this)
 
     private class KeepScreenOnUpdater(fullScreenPlayerView: FullScreenPlayerView) : Runnable {
         private val mFullscreenPlayer = WeakReference(fullScreenPlayerView)
@@ -34,20 +32,20 @@ class FullScreenPlayerView(
         override fun run() {
             try {
                 val fullscreenVideoPlayer = mFullscreenPlayer.get()
-                if (fullscreenVideoPlayer != null) {
-                    val window = fullscreenVideoPlayer.window
+                fullscreenVideoPlayer?.let {
+                    val window = it.window
                     if (window != null) {
-                        val isPlaying = fullscreenVideoPlayer.exoPlayerView.isPlaying
+                        val isPlaying = it.exoPlayerView.isPlaying
                         if (isPlaying) {
                             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         } else {
                             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         }
                     }
-                    fullscreenVideoPlayer.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
+                    it.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
                 }
             } catch (ex: Exception) {
-                DebugLog.e("ExoPlayer Exception", "Failed to flag FLAG_KEEP_SCREEN_ON on fullscreen.")
+                DebugLog.e("ExoPlayer Exception", "Failed to flag FLAG_KEEP_SCREEN_ON on fullscreeen.")
                 DebugLog.e("ExoPlayer Exception", ex.toString())
             }
         }
@@ -60,24 +58,18 @@ class FullScreenPlayerView(
     init {
         setContentView(containerView, generateDefaultLayoutParams())
     }
+
     override fun onBackPressed() {
-        super.onBackPressed()
-        playerControlView?.let {
-            updateFullscreenButton(playerControlView, false)
-        }
+        findViewById<ImageView>(androidx.media3.ui.R.id.exo_fullscreen)?.performClick()
         onBackPressedCallback.handleOnBackPressed()
+        super.onBackPressed()
     }
 
     override fun onStart() {
         super.onStart()
-        parent = exoPlayerView.parent as ViewGroup?
+        parent = exoPlayerView.parent as FrameLayout
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
-        playerControlView?.let {
-            updateFullscreenButton(playerControlView, true)
-            parent?.removeView(it)
-            containerView.addView(it, generateDefaultLayoutParams())
-        }
     }
 
     override fun onStop() {
@@ -85,34 +77,8 @@ class FullScreenPlayerView(
         mKeepScreenOnHandler.removeCallbacks(mKeepScreenOnUpdater)
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
-        playerControlView?.let {
-            updateFullscreenButton(playerControlView, false)
-            containerView.removeView(it)
-            parent?.addView(it, generateDefaultLayoutParams())
-        }
         parent?.requestLayout()
         parent = null
-    }
-
-    private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
-        if (isFullscreen) {
-            androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit
-        } else {
-            androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
-        }
-
-    private fun updateFullscreenButton(playerControlView: PlayerControlView, isFullscreen: Boolean) {
-        val imageButton = playerControlView.findViewById<ImageButton?>(androidx.media3.ui.R.id.exo_fullscreen)
-        imageButton?.let {
-            val imgResource = getFullscreenIconResource(isFullscreen)
-            val desc = if (isFullscreen) {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description)
-            } else {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description)
-            }
-            imageButton.setImageResource(imgResource)
-            imageButton.contentDescription = desc
-        }
     }
 
     override fun onAttachedToWindow() {
@@ -123,11 +89,11 @@ class FullScreenPlayerView(
     }
 
     private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams {
-        val layoutParams = FrameLayout.LayoutParams(
+        return FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
-        )
-        layoutParams.setMargins(0, 0, 0, 0)
-        return layoutParams
+        ).apply {
+            setMargins(0, 0, 0, 0)
+        }
     }
 }
