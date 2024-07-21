@@ -9,12 +9,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.ui.PlayerControlView
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
-
 
 @SuppressLint("PrivateResource")
 class FullScreenPlayerView(
@@ -96,13 +94,12 @@ class FullScreenPlayerView(
         parent = null
     }
 
-    private fun getFullscreenIconResource(isFullscreen: Boolean): Int {
-        return if (isFullscreen) {
+    private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
+        if (isFullscreen) {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit
         } else {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
         }
-    }
 
     private fun updateFullscreenButton(playerControlView: PlayerControlView, isFullscreen: Boolean) {
         val imageButton = playerControlView.findViewById<ImageButton?>(androidx.media3.ui.R.id.exo_fullscreen)
