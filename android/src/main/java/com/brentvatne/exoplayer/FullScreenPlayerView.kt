@@ -9,7 +9,6 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
-import androidx.media3.ui.PlayerControlView
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
@@ -17,12 +16,11 @@ class FullScreenPlayerView(
     context: Context,
     private val exoPlayerView: ExoPlayerView,
     private val reactExoplayerView: ReactExoplayerView,
-    private val playerControlView: PlayerControlView?,
     private val onBackPressedCallback: OnBackPressedCallback
 ) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 
     private var parent: ViewGroup? = null
-    private val containerView: FrameLayout = FrameLayout(context)
+    private val containerView = FrameLayout(context)
     private val mKeepScreenOnHandler: Handler = Handler(Looper.getMainLooper())
     private val mKeepScreenOnUpdater: Runnable = KeepScreenOnUpdater(this)
 
@@ -67,7 +65,7 @@ class FullScreenPlayerView(
 
     override fun onStart() {
         super.onStart()
-        parent = exoPlayerView.parent as FrameLayout
+        parent = exoPlayerView.parent as ViewGroup?
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
     }

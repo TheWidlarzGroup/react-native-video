@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-public final class ExoPlayerView extends PlayerView implements AdViewProvider {
+public final class ExoPlayerView extends PlayerView {
     private final static String TAG = "ExoPlayerView";
     private View surfaceView;
     private final View shutterView;
