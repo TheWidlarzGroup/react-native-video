@@ -22,6 +22,7 @@ class JSProps {
     var isFavourite: Dynamic<Bool> = Dynamic(false)
     var nowPlaying: Dynamic<JSNowPlaying?> = Dynamic(nil)
     var hideAdUiElements: Dynamic<Bool> = Dynamic(false)
+    var isWhyThisAdIconEnabled: Dynamic<Bool> = Dynamic(false)
 }
 
 class Dynamic<T> {

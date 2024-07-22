@@ -112,6 +112,12 @@ class NewPlayerView: UIView, JSInputProtocol {
         }
     }
     
+    @objc var isWhyThisAdIconEnabled: Bool = false {
+        didSet {
+            jsProps.isWhyThisAdIconEnabled.value = isWhyThisAdIconEnabled
+        }
+    }
+    
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
     @objc var selectedAudioTrack: NSDictionary?
