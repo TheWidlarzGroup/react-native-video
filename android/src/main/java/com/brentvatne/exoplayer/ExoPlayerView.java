@@ -113,7 +113,7 @@ public final class ExoPlayerView extends PlayerView implements AdViewProvider {
                 // Support opacity properly:
                 ((TextureView) surfaceView).setOpaque(false);
             } else {
-                DebugLog.wtf(TAG, "wtf is this texture " + viewType);
+                DebugLog.wtf(TAG, "Unexpected texture view type: " + viewType);
             }
         }
             if (viewNeedRefresh) {
