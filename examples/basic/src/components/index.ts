@@ -1,3 +1,4 @@
+export * from './VideoLoader';
 export * from './Indicator';
 export * from './Seeker';
 export * from './AudioTracksSelector';

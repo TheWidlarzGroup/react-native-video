@@ -5,19 +5,11 @@ import React, {
   type Dispatch,
   type SetStateAction,
 } from 'react';
-import {Indicator} from './Indicator.tsx';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
 import ToggleControl from '../ToggleControl.tsx';
-import {
-  isAndroid,
-  isIos,
-  samplePoster,
-  textTracksSelectionBy,
-} from '../constants';
-import MultiValueControl, {
-  type MultiValueControlPropType,
-} from '../MultiValueControl.tsx';
+import {isAndroid, isIos, textTracksSelectionBy} from '../constants';
+import MultiValueControl from '../MultiValueControl.tsx';
 import {
   ResizeMode,
   VideoRef,
@@ -69,8 +61,8 @@ type Props = {
   setPaused: Dispatch<SetStateAction<boolean>>;
   repeat: boolean;
   setRepeat: Dispatch<SetStateAction<boolean>>;
-  poster: string | undefined;
-  setPoster: Dispatch<SetStateAction<string | undefined>>;
+  showPoster: boolean;
+  setShowPoster: Dispatch<SetStateAction<boolean>>;
   muted: boolean;
   setMuted: Dispatch<SetStateAction<boolean>>;
   currentTime: number;
@@ -108,8 +100,8 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     setPaused,
     setRepeat,
     repeat,
-    setPoster,
-    poster,
+    setShowPoster,
+    showPoster,
     setMuted,
     muted,
     duration,
@@ -217,14 +209,12 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const toggleRepeat = () => setRepeat(prev => !prev);
 
-  const togglePoster = () =>
-    setPoster(prev => (prev ? undefined : samplePoster));
+  const togglePoster = () => setShowPoster(prev => !prev);
 
   const toggleMuted = () => setMuted(prev => !prev);
 
   return (
     <>
-      <Indicator isLoading={isLoading} />
       <View style={styles.topControls}>
         <View style={styles.resizeModeControl}>
           <TopControl
@@ -270,7 +260,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
               <ToggleControl onPress={toggleFullscreen} text="fullscreen" />
               <ToggleControl onPress={openDecoration} text="decoration" />
               <ToggleControl
-                isSelected={!!poster}
+                isSelected={showPoster}
                 onPress={togglePoster}
                 selectedText="poster"
                 unselectedText="no poster"
