@@ -298,28 +298,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func applicationWillResignActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
         if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
-
         _player?.pause()
-        _player?.rate = 0.0
     }
-
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
         if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
-        // Resume the player or any other tasks that should continue when the app becomes active.
         _player?.play()
         _player?.rate = _rate
     }
 
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if !_playInBackground || isExternalPlaybackActive || isPipActive() { return }
-        // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
-        _playerLayer?.player = nil
-        _playerViewController?.player = nil
+        if _paused {return}
     }
 
     @objc
@@ -327,6 +319,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.applyModifiers()
         _playerLayer?.player = _player
         _playerViewController?.player = _player
+        
+        // Apply the stored rate
+        if _playInBackground {
+            _player?.play()
+            _player?.rate = _rate
+        }
     }
 
     // MARK: - Audio events
@@ -605,12 +603,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     commandCenter.playCommand.addTarget { [weak self] _ in
                         self?._player?.play()
                         self?._paused = false
+                        self?.applyModifiers()
                         return .success
                     }
                     
                     commandCenter.pauseCommand.addTarget { [weak self] _ in
                         self?._player?.pause()
                         self?._paused = true
+                        self?.applyModifiers()
                         return .success
                     }
                     
