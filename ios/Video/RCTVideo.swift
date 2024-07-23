@@ -24,7 +24,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _source: VideoSource?
     private var _playerLayer: AVPlayerLayer?
     private var _chapters: [Chapter]?
-
+    private var _seekStartTime: Float = 0.0
+    private var _seekEndTime: Float = Float.infinity
+    
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
     private var _localSourceEncryptionKeyScheme: String?
@@ -371,6 +373,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         if currentTimeSecs >= 0 {
+            
+            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTimeSecs
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+            
             #if USE_GOOGLE_IMA
                 if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
                     _imaAdsManager.requestAds()
@@ -534,6 +542,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         let initializeSource = {
             self._source = VideoSource(source)
+                   if let startPosition = self._source?.startPosition {
+                       self._seekStartTime = Float(startPosition) / 1000
+                   } else {
+                       self._seekStartTime = 0
+                   }
+                   if let cropEnd = self._source?.cropEnd {
+                       self._seekEndTime = Float(cropEnd) / 1000
+                   } else {
+                       self._seekEndTime = Float.infinity
+                   }
+
             if self._source?.uri == nil || self._source?.uri == "" {
                 self._player?.replaceCurrentItem(with: nil)
                 self.isSetSourceOngoing = false
@@ -599,6 +618,27 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     let commandCenter = MPRemoteCommandCenter.shared()
                     commandCenter.playCommand.isEnabled = true
                     commandCenter.pauseCommand.isEnabled = true
+                    commandCenter.changePlaybackPositionCommand.isEnabled = true
+                    commandCenter.skipForwardCommand.isEnabled = true
+                    commandCenter.skipBackwardCommand.isEnabled = true
+
+                    commandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: 10)] // 10 second skip
+                    commandCenter.skipForwardCommand.addTarget { [weak self] _ in
+                        guard let self = self, let player = self._player else { return .commandFailed }
+                        let newTime = player.currentTime() + CMTime(seconds: 10, preferredTimescale: 1)
+                        let endTime = CMTime(seconds: Double(self._seekEndTime), preferredTimescale: 1)
+                        player.seek(to: min(newTime, endTime), toleranceBefore: .zero, toleranceAfter: .zero)
+                        return .success
+                    }
+
+                    commandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: 10)] // 10 second skip
+                    commandCenter.skipBackwardCommand.addTarget { [weak self] _ in
+                        guard let self = self, let player = self._player else { return .commandFailed }
+                        let newTime = player.currentTime() - CMTime(seconds: 10, preferredTimescale: 1)
+                        let startTime = CMTime(seconds: Double(self._seekStartTime), preferredTimescale: 1)
+                        player.seek(to: max(newTime, startTime), toleranceBefore: .zero, toleranceAfter: .zero)
+                        return .success
+                    }
                     
                     commandCenter.playCommand.addTarget { [weak self] _ in
                         self?._player?.play()
@@ -606,14 +646,29 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         self?.applyModifiers()
                         return .success
                     }
-                    
+
                     commandCenter.pauseCommand.addTarget { [weak self] _ in
                         self?._player?.pause()
                         self?._paused = true
                         self?.applyModifiers()
                         return .success
                     }
-                    
+
+                    commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+                        guard let self = self,
+                              let positionEvent = event as? MPChangePlaybackPositionCommandEvent else {
+                            return .commandFailed
+                        }
+                        
+                        let position = Float(positionEvent.positionTime)
+                        if position >= self._seekStartTime && position <= self._seekEndTime {
+                            self.setSeek(NSNumber(value: position), NSNumber(value: 0))
+                            return .success
+                        } else {
+                            return .commandFailed
+                        }
+                    }
+
                     UIApplication.shared.beginReceivingRemoteControlEvents()
 
                 } catch {
@@ -972,6 +1027,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             setMaxBitRate(_maxBitRate)
         }
 
+        if let duration = _player?.currentItem?.duration.seconds, duration.isFinite {
+            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        }
+        
         setAudioOutput(_audioOutput)
         setSelectedAudioTrack(_selectedAudioTrackCriteria)
         setSelectedTextTrack(_selectedTextTrackCriteria)
