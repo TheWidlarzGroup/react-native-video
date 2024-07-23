@@ -239,6 +239,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (msg.what == SHOW_JS_PROGRESS) {
                 ExoPlayer exoPlayer = (player == null ? null : player.getExoPlayer());
                 if (exoPlayer != null && exoPlayer.getPlaybackState() == Player.STATE_READY && exoPlayer.getPlayWhenReady()) {
+                    long contentTimestampMs = C.TIME_UNSET;
+                    if (player.getCurrentVideoType().isLive()) {
+                        long timelineWindowStartMs = player.getWindowStartTimeInTimeline();
+                        if (timelineWindowStartMs != C.TIME_UNSET) {
+                            long timelinePositionMs = player.getContentPositionInTimeline();
+                            contentTimestampMs = timelineWindowStartMs + timelinePositionMs;
+                        }
+                    }
                     long position = player.getContentPosition();
                     long bufferedDuration = player.getContentBufferedPosition();
                     long duration = player.getContentDuration();
@@ -255,7 +263,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                         eventEmitter.videoAboutToEnd(isAboutToEnd);
                     }
 
-                    eventEmitter.progressChanged(position, bufferedDuration, duration);
+                    eventEmitter.progressChanged(contentTimestampMs, position, bufferedDuration, duration);
 
                     jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
                     msg = obtainMessage(SHOW_JS_PROGRESS);

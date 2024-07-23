@@ -155,9 +155,12 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ID = "id";
     private static final String EVENT_PROP_TYPE = "type";
     private static final String EVENT_PROP_DURATION = "duration";
+
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
+    private static final String EVENT_PROP_CURRENT_DATE = "currentDate";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
+
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
     private static final String EVENT_PROP_WIDTH = "width";
@@ -222,8 +225,15 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration) {
+    void progressChanged(
+            double currentDate,
+            double currentPosition,
+            double bufferedDuration,
+            double seekableDuration) {
         WritableMap event = Arguments.createMap();
+        // We are using milliseconds instead of seconds here, due to iOS has used milliseconds.
+        //  we should keep consistent with iOS
+        event.putDouble(EVENT_PROP_CURRENT_DATE, currentDate);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
