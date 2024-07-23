@@ -296,19 +296,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // MARK: - App lifecycle handlers
 
-    @objc
-    func applicationWillResignActive(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
-        _player?.pause()
+    @objc func applicationWillResignActive(notification:NSNotification!) {
+        if _playInBackground || _playWhenInactive || _paused {return}
     }
+    
+    
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
         if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
-
-        _player?.play()
-        _player?.rate = _rate
     }
 
     @objc
@@ -319,14 +315,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationWillEnterForeground(notification _: NSNotification!) {
         self.applyModifiers()
-        _playerLayer?.player = _player
-        _playerViewController?.player = _player
-        
-        // Apply the stored rate
-        if _playInBackground {
-            _player?.play()
-            _player?.rate = _rate
-        }
     }
 
     // MARK: - Audio events
