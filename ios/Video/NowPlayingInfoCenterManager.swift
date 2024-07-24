@@ -107,13 +107,11 @@ class NowPlayingInfoCenterManager {
         registerCommandTargets()
 
         updateMetadata()
-
-        // one second observer
         playbackObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(value: 1, timescale: 4),
             queue: .global(),
             using: { [weak self] _ in
-                self?.updatePlaybackInfo()
+                self?.updateMetadata()
             }
         )
     }
@@ -217,26 +215,6 @@ class NowPlayingInfoCenterManager {
         ]
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
-    private func updatePlaybackInfo() {
-        guard let player = currentPlayer, let currentItem = player.currentItem else {
-            return
-        }
-
-        // We dont want to update playback if we did not set metadata yet
-        if var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo {
-            let newNowPlayingInfo: [String: Any] = [
-                MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds.rounded(),
-                MPNowPlayingInfoPropertyPlaybackRate: player.rate,
-                MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
-            ]
-
-            nowPlayingInfo.merge(newNowPlayingInfo) { _, v in v }
-
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-        }
     }
 
     private func findNewCurrentPlayer() {
