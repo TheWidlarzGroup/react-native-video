@@ -437,13 +437,26 @@ Determine whether the media should continue playing when notifications or the Co
 ### `poster`
 
 <PlatformsList types={['All']} />
+> [!WARNING]
+> Value: string with a URL for the poster is deprecated, use `poster` as object instead
 
 An image to display while the video is loading
 
-Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
+Value: Props for the `Image` component. The poster is visible when the source attribute is provided.
+
+```javascript
+<Video>
+  poster={{
+    source: { uri: "https://baconmockup.com/300/200/" },
+    resizeMode: "cover",
+    // ...
+  }}
+</Video>
+````
 
 ### `posterResizeMode`
-
+> [!WARNING]
+> deprecated, use `poster` with `resizeMode` key instead
 <PlatformsList types={['All']} />
 
 Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
@@ -488,6 +501,22 @@ Speed at which the media should play.
 - **0.0** - Pauses the video (iOS only)
 - **1.0** - Play at normal speed (default)
 - **Other values** - Slow down or speed up playback
+
+### `renderLoader`
+
+<PlatformsList types={['All']} />
+
+Allows you to create custom components to display while the video is loading. If `renderLoader` is provided, `poster` and `posterResizeMode` will be ignored.
+
+```javascript
+<Video>
+  renderLoader={
+    <View>
+      <Text>Custom Loader</Text>
+    </View>
+  }
+</Video>
+````
 
 ### `repeat`
 

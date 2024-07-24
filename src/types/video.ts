@@ -1,6 +1,14 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
+import type {
+  ImageProps,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+  ImageRequireSource,
+  ImageURISource,
+} from 'react-native';
+import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
@@ -34,6 +42,13 @@ export type ReactVideoSource = Readonly<
   }
 >;
 
+export type ReactVideoPosterSource = ImageURISource | ImageRequireSource;
+
+export type ReactVideoPoster = Omit<ImageProps, 'source'> & {
+  // prevents giving source in the array
+  source?: ReactVideoPosterSource;
+};
+
 export type VideoMetadata = Readonly<{
   title?: string;
   subtitle?: string;
@@ -61,7 +76,7 @@ export type Drm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
-  multiDrm: boolean; // android
+  multiDrm?: boolean; // android
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
@@ -243,12 +258,14 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
-  poster?: string;
+  poster?: string | ReactVideoPoster; // string is deprecated
+  /** @deprecated use **resizeMode** key in **poster** props instead */
   posterResizeMode?: EnumValues<PosterResizeModeType>;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
+  renderLoader?: ReactNode;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;

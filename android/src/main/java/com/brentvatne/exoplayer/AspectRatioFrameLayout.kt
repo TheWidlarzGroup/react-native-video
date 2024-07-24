@@ -75,9 +75,9 @@ class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
 
                 // Scale video if it doesn't fill the measuredWidth
                 if (width < measuredWidth) {
-                    val scaleFactor: Int = measuredWidth / width
-                    width *= scaleFactor
-                    height = measuredHeight * scaleFactor
+                    val scaleFactor: Float = measuredWidth.toFloat() / width
+                    width = (scaleFactor * width).toInt()
+                    height = (scaleFactor * height).toInt()
                 }
             }
 

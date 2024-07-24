@@ -5,6 +5,21 @@ apply plugin: 'kotlin-android'
 
 buildscript {
     def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
+    def requiredKotlinVersion = project.properties['RNVideo_kotlinVersion']
+
+    def isVersionAtLeast = { version, requiredVersion ->
+        def (v1, v2) = [version, requiredVersion].collect { it.tokenize('.')*.toInteger() }
+        for (int i = 0; i < Math.max(v1.size(), v2.size()); i++) {
+            int val1 = i < v1.size() ? v1[i] : 0
+            int val2 = i < v2.size() ? v2[i] : 0
+            if (val1 < val2) {
+                return false
+            } else if (val1 > val2) {
+                return true
+            }
+        }
+        return true
+    }
 
     repositories {
         mavenCentral()
@@ -13,9 +28,17 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
+
+    ext {
+        if (!isVersionAtLeast(kotlin_version, requiredKotlinVersion)) {
+            throw new GradleException("Kotlin version mismatch: Project is using Kotlin version $kotlin_version, but it must be at least $requiredKotlinVersion. Please update the Kotlin version.")
+        } else {
+            println("Kotlin version is correct: $kotlin_version")
+        }
+    }
 }
 
-// This looks funny but it's necessary to keep backwards compatibility (: 
+// This looks funny but it's necessary to keep backwards compatibility (:
 def safeExtGet(prop) {
     return rootProject.ext.has(prop) ?
             rootProject.ext.get(prop) : rootProject.ext.has("RNVideo_" + prop) ?
@@ -184,7 +207,6 @@ repositories {
 }
 
 def media3_version = safeExtGet('media3Version')
-def kotlin_version = safeExtGet('kotlinVersion')
 def androidxCore_version = safeExtGet('androidxCoreVersion')
 def androidxActivity_version = safeExtGet('androidxActivityVersion')
 
@@ -239,7 +261,7 @@ dependencies {
             implementation "androidx.media3:media3-exoplayer-rtsp:$media3_version"
         }
     }
-    
+
     // For ad insertion using the Interactive Media Ads SDK with ExoPlayer
     if (ExoplayerDependencies["useExoplayerIMA"]) {
         if (media3_buildFromSource) {
@@ -280,5 +302,4 @@ dependencies {
         // Common functionality used across multiple media libraries
         implementation "androidx.media3:media3-common:$media3_version"
     }
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
