@@ -1,3 +1,4 @@
+// file path: com/brentvatne/receiver/AudioBecomingNoisyReceiver.kt
 package com.brentvatne.receiver
 
 import android.content.BroadcastReceiver
