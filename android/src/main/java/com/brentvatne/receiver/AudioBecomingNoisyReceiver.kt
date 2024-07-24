@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 
 class AudioBecomingNoisyReceiver(private val context: Context) : BroadcastReceiver() {
@@ -21,7 +22,11 @@ class AudioBecomingNoisyReceiver(private val context: Context) : BroadcastReceiv
         this.listener = listener
         val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         try {
-            ContextCompat.registerReceiver(appContext, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            if (Build.VERSION.SDK_INT >= 34 && appContext.applicationInfo.targetSdkVersion >= 34) {
+                ContextCompat.registerReceiver(appContext, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            } else {
+                appContext.registerReceiver(this, intentFilter)
+            }
         } catch (e: Exception) {
             // Handle the exception and log it, but do not crash the app
             e.printStackTrace()
