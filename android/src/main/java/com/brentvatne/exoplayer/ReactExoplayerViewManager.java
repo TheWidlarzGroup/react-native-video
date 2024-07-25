@@ -7,11 +7,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.media3.exoplayer.upstream.CmcdConfiguration;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
-import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.Source;
@@ -78,6 +78,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private final ReactExoplayerConfig config;
 
+    private static final String PROP_CMCD = "cmcd";
+    private CMCDConfig prevCmcdConfig = null;
+
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
         this.config = config;
     }
@@ -116,9 +119,18 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         Source source = Source.parse(src, context);
+
         if (source.getUri() == null) {
             videoView.clearSrc();
         } else {
+            if (source.getCmcdProps() != null) {
+                CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());
+                CmcdConfiguration.Factory factory = cmcdConfig.toCmcdConfigurationFactory();
+                videoView.setCmcdConfigurationFactory(factory);
+            } else {
+                videoView.setCmcdConfigurationFactory(null);
+            }
+
             videoView.setSrc(source);
         }
     }
