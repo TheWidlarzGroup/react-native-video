@@ -78,9 +78,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private final ReactExoplayerConfig config;
 
-    private static final String PROP_CMCD = "cmcd";
-    private CMCDConfig prevCmcdConfig = null;
-
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
         this.config = config;
     }
