@@ -96,6 +96,7 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelection;
 import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
+import androidx.media3.exoplayer.upstream.CmcdConfiguration;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.exoplayer.util.EventLogger;
@@ -268,6 +269,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean viewHasDropped = false;
 
     private String instanceId = String.valueOf(UUID.randomUUID());
+
+    private CmcdConfiguration.Factory cmcdConfigurationFactory;
+
+    public void setCmcdConfigurationFactory(CmcdConfiguration.Factory factory) {
+        this.cmcdConfigurationFactory = factory;
+    }
 
     private void updateProgress() {
         if (player != null) {
@@ -1095,6 +1102,12 @@ public class ReactExoplayerView extends FrameLayout implements
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
+        }
+
+        if (cmcdConfigurationFactory != null) {
+            mediaSourceFactory = mediaSourceFactory.setCmcdConfigurationFactory(
+                    cmcdConfigurationFactory::createCmcdConfiguration
+            );
         }
 
         MediaItem mediaItem = mediaItemBuilder.setStreamKeys(streamKeys).build();
