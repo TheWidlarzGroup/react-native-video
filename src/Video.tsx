@@ -16,7 +16,9 @@ import type {
   ImageResizeMode,
 } from 'react-native';
 
-import NativeVideoComponent from './specs/VideoNativeComponent';
+import NativeVideoComponent, {
+  NativeCmcdConfiguration,
+} from './specs/VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,
@@ -44,7 +46,7 @@ import {
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
 import type {VideoSaveData} from './specs/NativeVideoManager';
-import {ViewType} from './types';
+import {CmcdMode, ViewType} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
@@ -142,6 +144,30 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
+    const _cmcd = useMemo<NativeCmcdConfiguration | undefined>(() => {
+      if (Platform.OS !== 'android' || !source?.cmcd) {
+        return undefined;
+      }
+
+      if (typeof source?.cmcd === 'boolean') {
+        return source?.cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+      }
+
+      const cmcd = source.cmcd;
+
+      return {
+        mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
+        request: cmcd.request
+          ? generateHeaderForNative(cmcd.request)
+          : undefined,
+        session: cmcd.session
+          ? generateHeaderForNative(cmcd.session)
+          : undefined,
+        object: cmcd.object ? generateHeaderForNative(cmcd.object) : undefined,
+        status: cmcd.status ? generateHeaderForNative(cmcd.status) : undefined,
+      };
+    }, [source?.cmcd]);
+
     const src = useMemo<VideoSrc | undefined>(() => {
       if (!source) {
         return undefined;
@@ -190,10 +216,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
         drm: _drm,
+        cmcd: _cmcd,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [drm, source]);
+    }, [_cmcd, drm, source]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
