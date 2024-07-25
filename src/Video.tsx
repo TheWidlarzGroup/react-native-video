@@ -146,14 +146,20 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const _cmcd = useMemo<NativeCmcdConfiguration | undefined>(() => {
       if (Platform.OS !== 'android' || !source?.cmcd) {
-        return undefined;
-      }
-
-      if (typeof source?.cmcd === 'boolean') {
-        return source?.cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+        return;
       }
 
       const cmcd = source.cmcd;
+
+      if (typeof cmcd === 'boolean') {
+        return cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+      }
+
+      if (typeof cmcd !== 'object' || Array.isArray(cmcd)) {
+        throw new Error(
+          'Invalid CMCD configuration: Expected a boolean or an object.',
+        );
+      }
 
       return {
         mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
