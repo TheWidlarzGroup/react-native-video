@@ -1016,18 +1016,33 @@ When providing an object, you can configure the following properties:
 
 | Property | Type                    | Description                                        |
 |----------|-------------------------|----------------------------------------------------|
-| mode     | CmcdMode                | The mode for sending CMCD data                     |
-| request  | { [key: `string-string`]: string \| number }  | Custom key-value pairs for the request object      |
-| session  | { [key: `string-string`]: string \| number }  | Custom key-value pairs for the session object      |
-| object   | { [key: `string-string`]: string \| number }  | Custom key-value pairs for the object metadata     |
-| status   | { [key: `string-string`]: string \| number }  | Custom key-value pairs for the status information  |
+| `mode`     | `CmcdMode` | The mode for sending CMCD data                     |
+| `request`  | `CmcdData` | Custom key-value pairs for the request object      |
+| `session`  | `CmcdData` | Custom key-value pairs for the session object      |
+| `object`   | `CmcdData` | Custom key-value pairs for the object metadata     |
+| `status`   | `CmcdData` | Custom key-value pairs for the status information  |
 
 Note: The `mode` property defaults to `CmcdMode.MODE_QUERY_PARAMETER` if not specified.
+
+#### `CmcdMode`
+CmcdMode is an enum that defines how CMCD data should be sent:
+- `CmcdMode.MODE_REQUEST_HEADER` (0) - Send CMCD data in the HTTP request headers.
+- `CmcdMode.MODE_QUERY_PARAMETER` (1) - Send CMCD data as query parameters in the URL.
+
+#### `CmcdData`
+CmcdData is a type representing custom key-value pairs for CMCD data. It's defined as:
+
+```typescript
+type CmcdData = Record<`${string}-${string}`, string | number>;
+```
+
+Custom key names MUST include a hyphenated prefix to prevent namespace collisions. It's recommended to use a reverse-DNS syntax for custom prefixes.
 
 Example:
 
 ```javascript
-source={{
+<Video
+  source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     cmcd: {
       mode: CmcdMode.MODE_QUERY_PARAMETER,
@@ -1046,4 +1061,6 @@ source={{
       }
     }
   }}
+  // or other video props
+/>
 ```
