@@ -23,7 +23,6 @@ import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
 import com.brentvatne.common.api.ViewType
 import com.brentvatne.common.toolbox.DebugLog
-import com.google.common.collect.ImmutableList
 
 @UnstableApi
 class ExoPlayerView(
@@ -71,7 +70,6 @@ class ExoPlayerView(
 
         addViewInLayout(layout, 0, aspectRatioParams)
         addViewInLayout(subtitleLayout, 1, layoutParams)
-
     }
 
     private fun clearVideoView() {
@@ -109,7 +107,6 @@ class ExoPlayerView(
         } else {
             subtitleLayout.visibility = View.GONE
         }
-
     }
 
     fun setShutterColor(color: Int) {
@@ -127,6 +124,7 @@ class ExoPlayerView(
                 }
                 (surfaceView as SurfaceView).setSecure(viewType == ViewType.VIEW_TYPE_SURFACE_SECURE)
             }
+
             ViewType.VIEW_TYPE_TEXTURE -> {
                 if (surfaceView !is TextureView) {
                     surfaceView = TextureView(context)
@@ -135,10 +133,12 @@ class ExoPlayerView(
                 // Support opacity properly:
                 (surfaceView as TextureView).isOpaque = false
             }
+
             else -> {
                 DebugLog.wtf(TAG, "wtf is this texture $viewType")
             }
         }
+
         if (viewNeedRefresh) {
             surfaceView?.layoutParams = layoutParams
 
@@ -226,7 +226,7 @@ class ExoPlayerView(
         if (tracks == null) {
             return
         }
-        val groups: ImmutableList<Tracks.Group> = tracks.groups
+        val groups = tracks.groups
 
         for (group in groups) {
             if (group.type == C.TRACK_TYPE_VIDEO && group.length > 0) {
@@ -256,7 +256,6 @@ class ExoPlayerView(
     }
 
     private inner class ComponentListener : Player.Listener {
-
         override fun onCues(cues: List<Cue>) {
             subtitleLayout.setCues(cues)
         }
