@@ -26,8 +26,8 @@ class CMCDConfig(private val props: CMCDProps) {
             addFormattedData(this, CmcdConfiguration.KEY_CMCD_STATUS, props.cmcdStatus)
         }.build()
 
-    private fun addFormattedData(builder: ImmutableListMultimap.Builder<String, String>, key: String, dataArray: Array<Pair<String, Any>>) {
-        dataArray.forEach { (dataKey, dataValue) ->
+    private fun addFormattedData(builder: ImmutableListMultimap.Builder<String, String>, key: String, dataList: List<Pair<String, Any>>) {
+        dataList.forEach { (dataKey, dataValue) ->
             builder.put(key, formatKeyValue(dataKey, dataValue))
         }
     }
