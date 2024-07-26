@@ -37,6 +37,8 @@ class ExoPlayerView(
     private var player: ExoPlayer? = null
     private var layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     private var adOverlayFrameLayout: FrameLayout
+    val isPlaying: Boolean
+        get() = player != null && player?.isPlaying == true
 
     @ViewType.ViewType
     private var viewType = ViewType.VIEW_TYPE_SURFACE
@@ -86,10 +88,6 @@ class ExoPlayerView(
         } else if (surfaceView is SurfaceView) {
             player?.setVideoSurfaceView(surfaceView as SurfaceView)
         }
-    }
-
-    fun isPlaying(): Boolean {
-        return player != null && player?.isPlaying == true
     }
 
     fun setSubtitleStyle(style: SubtitleStyle) {
