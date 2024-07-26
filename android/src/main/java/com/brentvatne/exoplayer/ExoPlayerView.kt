@@ -1,6 +1,7 @@
 package com.brentvatne.exoplayer
 
 import android.content.Context
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.SurfaceView
@@ -76,18 +77,26 @@ class ExoPlayerView(private val context: Context) :
     }
 
     private fun clearVideoView() {
-        if (surfaceView is TextureView) {
-            player?.clearVideoTextureView(surfaceView as TextureView)
-        } else if (surfaceView is SurfaceView) {
-            player?.clearVideoSurfaceView(surfaceView as SurfaceView)
+        when (surfaceView) {
+            is TextureView -> player?.clearVideoTextureView(surfaceView as TextureView)
+
+            is SurfaceView -> player?.clearVideoSurfaceView(surfaceView as SurfaceView)
+
+            else -> {
+                Log.w("clearVideoView", "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}")
+            }
         }
     }
 
     private fun setVideoView() {
-        if (surfaceView is TextureView) {
-            player?.setVideoTextureView(surfaceView as TextureView)
-        } else if (surfaceView is SurfaceView) {
-            player?.setVideoSurfaceView(surfaceView as SurfaceView)
+        when (surfaceView) {
+            is TextureView -> player?.setVideoTextureView(surfaceView as TextureView)
+
+            is SurfaceView -> player?.setVideoSurfaceView(surfaceView as SurfaceView)
+
+            else -> {
+                Log.w("setVideoView", "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}")
+            }
         }
     }
 
@@ -134,7 +143,7 @@ class ExoPlayerView(private val context: Context) :
             }
 
             else -> {
-                DebugLog.wtf(TAG, "wtf is this texture $viewType")
+                DebugLog.wtf(TAG, "Unexpected texture view type: $viewType")
             }
         }
 
