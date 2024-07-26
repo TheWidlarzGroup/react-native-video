@@ -25,9 +25,9 @@ import com.brentvatne.common.api.ViewType
 import com.brentvatne.common.toolbox.DebugLog
 
 @UnstableApi
-class ExoPlayerView(
-    private val context: Context
-) : FrameLayout(context, null, 0), AdViewProvider {
+class ExoPlayerView(private val context: Context) :
+    FrameLayout(context, null, 0),
+    AdViewProvider {
 
     private var surfaceView: View? = null
     private var shutterView: View
@@ -48,7 +48,8 @@ class ExoPlayerView(
         componentListener = ComponentListener()
 
         val aspectRatioParams = LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT
         )
         aspectRatioParams.gravity = Gravity.CENTER
         layout = AspectRatioFrameLayout(context)
@@ -165,9 +166,7 @@ class ExoPlayerView(
     }
 
     // AdsLoader.AdViewProvider implementation.
-    override fun getAdViewGroup(): ViewGroup {
-        return Assertions.checkNotNull(adOverlayFrameLayout, "exo_ad_overlay must be present for ad playback")
-    }
+    override fun getAdViewGroup(): ViewGroup = Assertions.checkNotNull(adOverlayFrameLayout, "exo_ad_overlay must be present for ad playback")
 
     /**
      * Set the {@link ExoPlayer} to use. The {@link ExoPlayer#addListener} method of the
@@ -215,7 +214,8 @@ class ExoPlayerView(
 
     private val measureAndLayout: Runnable = Runnable {
         measure(
-            MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
         )
         layout(left, top, right, bottom)
     }
@@ -235,6 +235,7 @@ class ExoPlayerView(
                 layout.videoAspectRatio = when (format.rotationDegrees) {
                     // update aspect ratio !
                     90, 270 -> (format.height * format.pixelWidthHeightRatio / format.width)
+
                     else -> (format.width * format.pixelWidthHeightRatio / format.height)
                 }
                 return
