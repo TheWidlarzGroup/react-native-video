@@ -34,10 +34,9 @@ class FullScreenPlayerView(
                     val window = it.window
                     if (window != null) {
                         val isPlaying = it.exoPlayerView.isPlaying
-                        if (isPlaying) {
-                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                        } else {
-                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        when {
+                            isPlaying -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            else -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         }
                     }
                     it.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
