@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.media3.common.AdViewProvider;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.Player;
@@ -60,6 +59,8 @@ public final class ExoPlayerView extends PlayerView {
         aspectRatioParams.gravity = Gravity.CENTER;
         layout = new AspectRatioFrameLayout(context);
         layout.setLayoutParams(aspectRatioParams);
+
+        addView(layout, 0, aspectRatioParams);
 
         updateSurfaceView(viewType);
         requestLayout();
@@ -222,7 +223,7 @@ public final class ExoPlayerView extends PlayerView {
 
     public void invalidateAspectRatio() {
         // Resetting aspect ratio will force layout refresh on next video size changed
-        //layout.invalidateAspectRatio();
+        layout.invalidateAspectRatio();
     }
 
     private final class ComponentListener implements Player.Listener {
@@ -255,7 +256,7 @@ public final class ExoPlayerView extends PlayerView {
 
         @Override
         public void onRenderedFirstFrame() {
-            setHideShutterView(hideShutterView);
+            shutterView.setVisibility(INVISIBLE);
         }
 
         @Override

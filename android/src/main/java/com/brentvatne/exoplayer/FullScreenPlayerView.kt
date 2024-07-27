@@ -43,7 +43,7 @@ class FullScreenPlayerView(
                     it.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
                 }
             } catch (ex: Exception) {
-                DebugLog.e("ExoPlayer Exception", "Failed to flag FLAG_KEEP_SCREEN_ON on fullscreeen.")
+                DebugLog.e("ExoPlayer Exception", "Failed to flag FLAG_KEEP_SCREEN_ON on fullscreen.")
                 DebugLog.e("ExoPlayer Exception", ex.toString())
             }
         }
