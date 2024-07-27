@@ -26,7 +26,6 @@ import Video, {
   type OnPlaybackRateChangeData,
   type OnVideoTracksData,
   type ReactVideoSource,
-  type TextTracks,
   type VideoTrack,
   type SelectedTrack,
   type SelectedVideoTrack,
@@ -35,14 +34,7 @@ import Video, {
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
 import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
-import {Overlay, toast} from './components';
-
-type AdditionnalSourceInfo = {
-  textTracks: TextTracks;
-  adTagUrl: string;
-  description: string;
-  noView: boolean;
-};
+import {Overlay, toast, VideoLoader} from './components';
 
 type Props = NonNullable<unknown>;
 
@@ -76,7 +68,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   const [repeat, setRepeat] = useState(false);
   const [controls, setControls] = useState(false);
   const [useCache, setUseCache] = useState(false);
-  const [poster, setPoster] = useState<string | undefined>(undefined);
+  const [showPoster, setShowPoster] = useState<boolean>(false);
   const [showNotificationControls, setShowNotificationControls] =
     useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -242,7 +234,6 @@ const VideoPlayer: FC<Props> = ({}) => {
             paused={paused}
             volume={volume}
             muted={muted}
-            fullscreen={fullscreen}
             controls={controls}
             resizeMode={resizeMode}
             onFullscreenPlayerWillDismiss={onFullScreenExit}
@@ -272,7 +263,7 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            poster={poster}
+            renderLoader={showPoster ? <VideoLoader /> : undefined}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
@@ -302,7 +293,7 @@ const VideoPlayer: FC<Props> = ({}) => {
         paused={paused}
         volume={volume}
         setControls={setControls}
-        poster={poster}
+        showPoster={showPoster}
         rate={rate}
         setFullscreen={setFullscreen}
         setPaused={setPaused}
@@ -311,7 +302,7 @@ const VideoPlayer: FC<Props> = ({}) => {
         setIsSeeking={setIsSeeking}
         repeat={repeat}
         setRepeat={setRepeat}
-        setPoster={setPoster}
+        setShowPoster={setShowPoster}
         setRate={setRate}
         setResizeMode={setResizeMode}
         setShowNotificationControls={setShowNotificationControls}

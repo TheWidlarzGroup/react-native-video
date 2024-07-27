@@ -102,9 +102,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'red',
   },
-  IndicatorStyle: {
-    flex: 1,
+  indicatorContainer: {
     justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+    height: '100%',
+  },
+  indicatorText: {
+    color: 'white',
   },
   seekbarContainer: {
     flex: 1,
