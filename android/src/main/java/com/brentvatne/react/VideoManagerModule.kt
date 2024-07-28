@@ -1,5 +1,6 @@
 package com.brentvatne.react
 
+import android.os.Build
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -59,6 +60,23 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     fun setFullScreenCmd(reactTag: Int, fullScreen: Boolean) {
         performOnPlayerView(reactTag) {
             it?.setFullscreen(fullScreen)
+        }
+    }
+
+    @ReactMethod
+    fun enterPictureInPictureCmd(reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.enterPictureInPictureMode()
+        }
+    }
+
+    @ReactMethod
+    fun exitPictureInPictureCmd(reactTag: Int) {
+        val activity = reactApplicationContext.currentActivity
+        activity?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && it.isInPictureInPictureMode) {
+                it.moveTaskToBack(false)
+            }
         }
     }
 

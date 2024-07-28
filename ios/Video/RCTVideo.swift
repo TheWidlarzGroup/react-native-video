@@ -63,10 +63,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _presentingViewController: UIViewController?
     private var _startPosition: Float64 = -1
     private var _showNotificationControls = false
-    private var _pictureInPictureEnabled = false {
+    private var _enterPictureInPictureOnLeave = false {
         didSet {
             #if os(iOS)
-                if _pictureInPictureEnabled {
+                if isPictureInPictureActive() { return }
+                if _enterPictureInPictureOnLeave {
                     initPictureinPicture()
                     _playerViewController?.allowsPictureInPicturePlayback = true
                 } else {
@@ -167,11 +168,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         onRestoreUserInterfaceForPictureInPictureStop?([:])
     }
 
-    func isPipEnabled() -> Bool {
-        return _pictureInPictureEnabled
-    }
-
-    func isPipActive() -> Bool {
+    func isPictureInPictureActive() -> Bool {
         #if os(iOS)
             return _pip?._pipController?.isPictureInPictureActive == true
         #else
@@ -181,15 +178,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func initPictureinPicture() {
         #if os(iOS)
-            _pip = RCTPictureInPicture({ [weak self] in
-                self?._onPictureInPictureEnter()
-            }, { [weak self] in
-                self?._onPictureInPictureExit()
-            }, { [weak self] in
-                self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
-            })
+            if _pip == nil {
+                _pip = RCTPictureInPicture({ [weak self] in
+                    self?._onPictureInPictureEnter()
+                }, { [weak self] in
+                    self?._onPictureInPictureExit()
+                }, { [weak self] in
+                    self?.onRestoreUserInterfaceForPictureInPictureStop?([:])
+                })
+            }
 
-            if _playerLayer != nil && !_controls {
+            if _playerLayer != nil && !_controls && _pip?._pipController == nil {
                 _pip?.setupPipController(_playerLayer)
             }
         #else
@@ -201,17 +200,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
         #endif
 
         _eventDispatcher = eventDispatcher
 
         #if os(iOS)
-            if _pictureInPictureEnabled {
+            if _enterPictureInPictureOnLeave {
                 initPictureinPicture()
-                _playerViewController?.allowsPictureInPicturePlayback = true
-            } else {
-                _playerViewController?.allowsPictureInPicturePlayback = false
             }
         #endif
 
@@ -245,6 +241,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         NotificationCenter.default.addObserver(
             self,
+            selector: #selector(screenWillLock),
+            name: UIApplication.protectedDataWillBecomeUnavailableNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(screenDidUnlock),
+            name: UIApplication.protectedDataDidBecomeAvailableNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
             selector: #selector(audioRouteChanged(notification:)),
             name: AVAudioSession.routeChangeNotification,
             object: nil
@@ -258,7 +268,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, pipEnabled: isPipEnabled)
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
         #endif
     }
 
@@ -305,8 +315,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
+        if !_paused && isPictureInPictureActive() {
+            _player?.play()
+            _player?.rate = _rate
+        }
         let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if !_playInBackground || isExternalPlaybackActive || isPipActive() { return }
+        if !_playInBackground || isExternalPlaybackActive || isPictureInPictureActive() { return }
         // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
         _playerLayer?.player = nil
         _playerViewController?.player = nil
@@ -317,6 +331,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.applyModifiers()
         _playerLayer?.player = _player
         _playerViewController?.player = _player
+    }
+
+    @objc
+    func screenWillLock() {
+        let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
+        if _playInBackground || !_isPlaying || !isActiveBackgroundPip { return }
+
+        _player?.pause()
+        _player?.rate = 0.0
+    }
+
+    @objc
+    func screenDidUnlock() {
+        let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
+        if _paused || !isActiveBackgroundPip { return }
+
+        _player?.play()
+        _player?.rate = _rate
     }
 
     // MARK: - Audio events
@@ -689,19 +721,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setPictureInPicture(_ pictureInPicture: Bool) {
+    func setEnterPictureInPictureOnLeave(_ enterPictureInPictureOnLeave: Bool) {
         #if os(iOS)
             let audioSession = AVAudioSession.sharedInstance()
             do {
                 try audioSession.setCategory(.playback)
                 try audioSession.setActive(true, options: [])
             } catch {}
-            if pictureInPicture {
-                _pictureInPictureEnabled = true
-            } else {
-                _pictureInPictureEnabled = false
+            if _enterPictureInPictureOnLeave != enterPictureInPictureOnLeave {
+                _enterPictureInPictureOnLeave = enterPictureInPictureOnLeave
             }
-            _pip?.setPictureInPicture(pictureInPicture)
         #endif
     }
 
@@ -1077,8 +1106,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         viewController.view.frame = self.bounds
         viewController.player = player
         if #available(tvOS 14.0, *) {
-            viewController.allowsPictureInPicturePlayback = _pictureInPictureEnabled
+            viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
         }
+        #if os(iOS)
+            viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
+        #endif
         return viewController
     }
 
@@ -1098,7 +1130,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.layer.needsDisplayOnBoundsChange = true
             #if os(iOS)
-                if _pictureInPictureEnabled {
+                if _enterPictureInPictureOnLeave {
                     _pip?.setupPipController(_playerLayer)
                 }
             #endif
@@ -1650,6 +1682,31 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         } else {
             reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.", nil)
         }
+    }
+
+    @objc
+    func enterPictureInPicture() {
+        if _pip?._pipController == nil {
+            initPictureinPicture()
+            _playerViewController?.allowsPictureInPicturePlayback = true
+        }
+        _pip?.enterPictureInPicture()
+    }
+
+    @objc
+    func exitPictureInPicture() {
+        guard isPictureInPictureActive() else { return }
+
+        _pip?.exitPictureInPicture()
+        #if os(iOS)
+            if _enterPictureInPictureOnLeave {
+                initPictureinPicture()
+                _playerViewController?.allowsPictureInPicturePlayback = true
+            } else {
+                _pip?.deinitPipController()
+                _playerViewController?.allowsPictureInPicturePlayback = false
+            }
+        #endif
     }
 
     // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
