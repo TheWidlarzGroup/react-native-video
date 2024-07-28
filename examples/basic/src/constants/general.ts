@@ -149,10 +149,6 @@ export const srcAndroidList = [
   },
 ];
 
-// poster which can be displayed
-export const samplePoster =
-  'https://upload.wikimedia.org/wikipedia/commons/1/18/React_Native_Logo.png';
-
 export const srcList: SampleVideoSource[] = srcAllPlatformList.concat(
   isAndroid ? srcAndroidList : srcIosList,
 );
