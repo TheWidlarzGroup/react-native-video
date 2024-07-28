@@ -36,7 +36,10 @@ class ExoPlayerView(private val context: Context) :
     private var layout: AspectRatioFrameLayout
     private var componentListener: ComponentListener
     private var player: ExoPlayer? = null
-    private var layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    private var layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
     private var adOverlayFrameLayout: FrameLayout
     val isPlaying: Boolean
         get() = player != null && player?.isPlaying == true
@@ -77,25 +80,31 @@ class ExoPlayerView(private val context: Context) :
     }
 
     private fun clearVideoView() {
-        when (surfaceView) {
-            is TextureView -> player?.clearVideoTextureView(surfaceView as TextureView)
+        when (val view = surfaceView) {
+            is TextureView -> player?.clearVideoTextureView(view)
 
-            is SurfaceView -> player?.clearVideoSurfaceView(surfaceView as SurfaceView)
+            is SurfaceView -> player?.clearVideoSurfaceView(view)
 
             else -> {
-                Log.w("clearVideoView", "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}")
+                Log.w(
+                    "clearVideoView",
+                    "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}"
+                )
             }
         }
     }
 
     private fun setVideoView() {
-        when (surfaceView) {
-            is TextureView -> player?.setVideoTextureView(surfaceView as TextureView)
+        when (val view = surfaceView) {
+            is TextureView -> player?.setVideoTextureView(view)
 
-            is SurfaceView -> player?.setVideoSurfaceView(surfaceView as SurfaceView)
+            is SurfaceView -> player?.setVideoSurfaceView(view)
 
             else -> {
-                Log.w("setVideoView", "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}")
+                Log.w(
+                    "setVideoView",
+                    "Unexpected surfaceView type: ${surfaceView?.javaClass?.name}"
+                )
             }
         }
     }
@@ -108,7 +117,12 @@ class ExoPlayerView(private val context: Context) :
         if (style.fontSize > 0) {
             subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.fontSize.toFloat())
         }
-        subtitleLayout.setPadding(style.paddingLeft, style.paddingTop, style.paddingTop, style.paddingBottom)
+        subtitleLayout.setPadding(
+            style.paddingLeft,
+            style.paddingTop,
+            style.paddingTop,
+            style.paddingBottom
+        )
         if (style.opacity.toInt() != 0) {
             subtitleLayout.alpha = style.opacity
             subtitleLayout.visibility = View.VISIBLE
@@ -175,7 +189,11 @@ class ExoPlayerView(private val context: Context) :
     }
 
     // AdsLoader.AdViewProvider implementation.
-    override fun getAdViewGroup(): ViewGroup = Assertions.checkNotNull(adOverlayFrameLayout, "exo_ad_overlay must be present for ad playback")
+    override fun getAdViewGroup(): ViewGroup =
+        Assertions.checkNotNull(
+            adOverlayFrameLayout,
+            "exo_ad_overlay must be present for ad playback"
+        )
 
     /**
      * Set the {@link ExoPlayer} to use. The {@link ExoPlayer#addListener} method of the
@@ -275,7 +293,8 @@ class ExoPlayerView(private val context: Context) :
                 // No need to resize the view in that case
                 return
             }
-            layout.videoAspectRatio = ((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height)
+            layout.videoAspectRatio =
+                ((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height)
 
             // React native workaround for measuring and layout on initial load.
             if (isInitialRatio) {
