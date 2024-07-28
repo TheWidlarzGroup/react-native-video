@@ -60,10 +60,16 @@ public final class ExoPlayerView extends PlayerView {
         layout = new AspectRatioFrameLayout(context);
         layout.setLayoutParams(aspectRatioParams);
 
-        addView(layout, 0, aspectRatioParams);
-
         updateSurfaceView(viewType);
-        requestLayout();
+        addViewInLayout(layout, 0, aspectRatioParams);
+    }
+
+    private void setVideoView() {
+        if (surfaceView instanceof TextureView) {
+            player.setVideoTextureView((TextureView) surfaceView);
+        } else if (surfaceView instanceof SurfaceView) {
+            player.setVideoSurfaceView((SurfaceView) surfaceView);
+        }
     }
 
     private void clearVideoView() {
@@ -123,7 +129,11 @@ public final class ExoPlayerView extends PlayerView {
                 if (layout.getChildAt(0) != null) {
                     layout.removeViewAt(0);
                 }
-                addView(surfaceView, 0, layoutParams);
+                layout.addView(surfaceView, 0, layoutParams);
+
+                if (this.player != null) {
+                    setVideoView();
+                }
             }
         }
 
@@ -166,9 +176,9 @@ public final class ExoPlayerView extends PlayerView {
         ((PlayerView)this).setPlayer(player);
         setHideShutterView(this.hideShutterView);
         if (player != null) {
+            setVideoView();
             player.addListener(componentListener);
         }
-        requestLayout();
     }
 
     /**
