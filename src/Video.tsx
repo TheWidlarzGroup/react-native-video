@@ -52,6 +52,7 @@ import type {
   OnTextTracksData,
   OnReceiveAdEventData,
   ReactVideoProps,
+  CmcdData,
 } from './types';
 
 export interface VideoRef {
@@ -161,16 +162,15 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         );
       }
 
+      const createCmcdHeader = (property?: CmcdData) =>
+        property ? generateHeaderForNative(property) : undefined;
+
       return {
         mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
-        request: cmcd.request
-          ? generateHeaderForNative(cmcd.request)
-          : undefined,
-        session: cmcd.session
-          ? generateHeaderForNative(cmcd.session)
-          : undefined,
-        object: cmcd.object ? generateHeaderForNative(cmcd.object) : undefined,
-        status: cmcd.status ? generateHeaderForNative(cmcd.status) : undefined,
+        request: createCmcdHeader(cmcd.request),
+        session: createCmcdHeader(cmcd.session),
+        object: createCmcdHeader(cmcd.object),
+        status: createCmcdHeader(cmcd.status),
       };
     }, [source?.cmcd]);
 
