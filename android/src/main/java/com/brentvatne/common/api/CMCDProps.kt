@@ -1,6 +1,5 @@
 package com.brentvatne.common.api
 
-import androidx.media3.exoplayer.upstream.CmcdConfiguration
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
@@ -11,7 +10,7 @@ data class CMCDProps(
     val cmcdRequest: List<Pair<String, Any>> = emptyList(),
     val cmcdSession: List<Pair<String, Any>> = emptyList(),
     val cmcdStatus: List<Pair<String, Any>> = emptyList(),
-    val mode: Int = CmcdConfiguration.MODE_QUERY_PARAMETER
+    val mode: Int = 1
 ) {
     companion object {
         private const val PROP_CMCD_OBJECT = "object"
@@ -29,7 +28,7 @@ data class CMCDProps(
                 cmcdRequest = parseKeyValuePairs(src.getArray(PROP_CMCD_REQUEST)),
                 cmcdSession = parseKeyValuePairs(src.getArray(PROP_CMCD_SESSION)),
                 cmcdStatus = parseKeyValuePairs(src.getArray(PROP_CMCD_STATUS)),
-                mode = safeGetInt(src, PROP_CMCD_MODE, CmcdConfiguration.MODE_QUERY_PARAMETER)
+                mode = safeGetInt(src, PROP_CMCD_MODE, 1)
             )
         }
 
