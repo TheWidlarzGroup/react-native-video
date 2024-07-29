@@ -1807,6 +1807,14 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
+            if (source.getCmcdProps() != null) {
+                CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());
+                CmcdConfiguration.Factory factory = cmcdConfig.toCmcdConfigurationFactory();
+                this.setCmcdConfigurationFactory(factory);
+            } else {
+                this.setCmcdConfigurationFactory(null);
+            }
+
             if (!isSourceEqual) {
                 reloadSource();
             }

@@ -120,14 +120,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         if (source.getUri() == null) {
             videoView.clearSrc();
         } else {
-            if (source.getCmcdProps() != null) {
-                CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());
-                CmcdConfiguration.Factory factory = cmcdConfig.toCmcdConfigurationFactory();
-                videoView.setCmcdConfigurationFactory(factory);
-            } else {
-                videoView.setCmcdConfigurationFactory(null);
-            }
-
             videoView.setSrc(source);
         }
     }
