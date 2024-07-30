@@ -172,6 +172,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerLayer?.player = nil
             _playerViewController?.player = nil
             _player?.play()
+            _player?.rate = _rate
         }
     }
 
@@ -302,21 +303,31 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     
     
     @objc
-    func applicationDidBecomeActive(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
-        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
-    }
+      func applicationDidBecomeActive(notification _: NSNotification!) {
+          let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+          if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
-    @objc
-    func applicationDidEnterBackground(notification _: NSNotification!) {
-        if _paused {return}
-    }
+          // Resume the player or any other tasks that should continue when the app becomes active.
+          _player?.play()
+          _player?.rate = _rate
+      }
 
-    @objc
-    func applicationWillEnterForeground(notification _: NSNotification!) {
-        self.applyModifiers()
-    }
+      @objc
+      func applicationDidEnterBackground(notification _: NSNotification!) {
+          let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+          if !_playInBackground || isExternalPlaybackActive || isPipActive() { return }
+          // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+          _playerLayer?.player = nil
+          _playerViewController?.player = nil
+      }
 
+      @objc
+      func applicationWillEnterForeground(notification _: NSNotification!) {
+          self.applyModifiers()
+          _playerLayer?.player = _player
+          _playerViewController?.player = _player
+      }
+    
     // MARK: - Audio events
 
     @objc
