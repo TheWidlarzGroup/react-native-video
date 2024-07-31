@@ -535,7 +535,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               if (nativeRef.current) {
                 NativeVideoManager.setLicenseResultCmd(
                   getReactTag(nativeRef),
-                  result,
+                  license,
                   data.loadedLicenseUrl,
                 );
               }
