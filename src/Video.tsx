@@ -542,7 +542,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               return;
             } else {
               result = 'Empty license result';
-            } 
+            }
           } catch {
             result = 'fetch error';
           }
