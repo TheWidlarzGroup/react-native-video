@@ -526,12 +526,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             throw new Error('No spc received');
           }
           // Handles both scenarios, getLicenseOverride being a promise and not.
-          const license = await Promise.resolve(selectedDrm.getLicense(
-            data.spcBase64,
-            data.contentId,
-            data.licenseUrl,
-            data.loadedLicenseUrl,
-            )
+          const license = await Promise.resolve(
+            selectedDrm.getLicense(
+              data.spcBase64,
+              data.contentId,
+              data.licenseUrl,
+              data.loadedLicenseUrl,
+            ),
           ).catch(() => {
             throw new Error('fetch error');
           });
@@ -545,7 +546,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               data.loadedLicenseUrl,
             );
           }
-        } catch (e) { 
+        } catch (e) {
           const msg = e instanceof Error ? e.message : 'fetch error';
           if (nativeRef.current) {
             NativeVideoManager.setLicenseResultErrorCmd(
