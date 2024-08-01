@@ -72,7 +72,7 @@ class NowPlayingInfoCenterManager {
 
         if currentPlayer == player {
             currentPlayer = nil
-            updateMetadata()
+            updateNowPlayingInfo()
         }
 
         if players.allObjects.isEmpty {
@@ -106,12 +106,12 @@ class NowPlayingInfoCenterManager {
         currentPlayer = player
         registerCommandTargets()
 
-        updateMetadata()
+        updateNowPlayingInfo()
         playbackObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(value: 1, timescale: 4),
             queue: .global(),
             using: { [weak self] _ in
-                self?.updateMetadata()
+                self?.updateNowPlayingInfo()
             }
         )
     }
@@ -184,7 +184,7 @@ class NowPlayingInfoCenterManager {
         remoteCommandCenter.changePlaybackPositionCommand.removeTarget(playbackPositionTarget)
     }
 
-    public func updateMetadata() {
+    public func updateNowPlayingInfo() {
         guard let player = currentPlayer, let currentItem = player.currentItem else {
             invalidateCommandTargets()
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
