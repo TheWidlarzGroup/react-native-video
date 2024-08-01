@@ -531,7 +531,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             data.contentId,
             data.licenseUrl,
             data.loadedLicenseUrl,
-            );
+            )
           ).catch(() => {
             throw new Error('fetch error');
           });
