@@ -123,7 +123,7 @@ class ExoPlayerView(private val context: Context) :
             style.paddingTop,
             style.paddingBottom
         )
-        if (style.opacity.toInt() != 0) {
+        if (style.opacity != 0.0f) {
             subtitleLayout.alpha = style.opacity
             subtitleLayout.visibility = View.VISIBLE
         } else {
