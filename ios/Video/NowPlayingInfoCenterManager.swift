@@ -215,7 +215,7 @@ class NowPlayingInfoCenterManager {
         ]
         let currentNowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = currentNowPlayingInfo.merging(newNowPlayingInfo) {(_, new) in new }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = currentNowPlayingInfo.merging(newNowPlayingInfo) { _, new in new }
     }
 
     private func findNewCurrentPlayer() {
