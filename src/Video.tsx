@@ -521,40 +521,32 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           return;
         }
         const data = event.nativeEvent;
-        let result;
-        if (data?.spcBase64) {
-          try {
-            // Handles both scenarios, getLicenseOverride being a promise and not.
-            const license = await selectedDrm.getLicense(
-              data.spcBase64,
-              data.contentId,
-              data.licenseUrl,
+        try {
+          if (!data?.spcBase64) throw new Error('No spc received');
+          // Handles both scenarios, getLicenseOverride being a promise and not.
+          const license = await Promise.resolve(selectedDrm.getLicense(
+            data.spcBase64,
+            data.contentId,
+            data.licenseUrl,
+            data.loadedLicenseUrl,
+          )).catch(() => { throw new Error('fetch error') });
+          if (typeof license !== 'string') throw Error('Empty license result')
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultCmd(
+              getReactTag(nativeRef),
+              license,
               data.loadedLicenseUrl,
             );
-            if (typeof license === 'string') {
-              if (nativeRef.current) {
-                NativeVideoManager.setLicenseResultCmd(
-                  getReactTag(nativeRef),
-                  license,
-                  data.loadedLicenseUrl,
-                );
-              }
-              return;
-            } else {
-              result = 'Empty license result';
-            }
-          } catch {
-            result = 'fetch error';
           }
-        } else {
-          result = 'No spc received';
-        }
-        if (nativeRef.current) {
-          NativeVideoManager.setLicenseResultErrorCmd(
-            getReactTag(nativeRef),
-            result,
-            data.loadedLicenseUrl,
-          );
+        } catch (e) { 
+          const msg = e instanceof Error ? e.message : 'fetch error'
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultErrorCmd(
+              getReactTag(nativeRef),
+              msg,
+              data.loadedLicenseUrl,
+            );
+          }
         }
       },
       [selectedDrm, usingExternalGetLicense],
