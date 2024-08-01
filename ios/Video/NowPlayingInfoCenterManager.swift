@@ -204,7 +204,7 @@ class NowPlayingInfoCenterManager {
         let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
         let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
 
-        let nowPlayingInfo: [String: Any] = [
+        let newNowPlayingInfo: [String: Any] = [
             MPMediaItemPropertyTitle: titleItem,
             MPMediaItemPropertyArtist: artistItem,
             MPMediaItemPropertyArtwork: artworkItem,
@@ -213,8 +213,9 @@ class NowPlayingInfoCenterManager {
             MPNowPlayingInfoPropertyPlaybackRate: player.rate,
             MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(currentItem.asset.duration),
         ]
+        let currentNowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = currentNowPlayingInfo.merging(newNowPlayingInfo) {(_, new) in new }
     }
 
     private func findNewCurrentPlayer() {
