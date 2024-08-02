@@ -490,8 +490,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         } else {
             _player?.replaceCurrentItem(with: playerItem)
 
-            // later we can just call "updateMetadata:
-            NowPlayingInfoCenterManager.shared.updateMetadata()
+            // later we can just call "updateNowPlayingInfo:
+            NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
 
         _playerObserver.player = _player
