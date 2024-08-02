@@ -512,7 +512,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const usingExternalGetLicense = drm?.getLicense instanceof Function;
+    const selectedDrm = source?.drm || drm;
+    const usingExternalGetLicense = selectedDrm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
       async (event: NativeSyntheticEvent<OnGetLicenseData>) => {
@@ -520,33 +521,43 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           return;
         }
         const data = event.nativeEvent;
-        let result;
-        if (data?.spcBase64) {
-          try {
-            // Handles both scenarios, getLicenseOverride being a promise and not.
-            const license = await drm.getLicense(
+        try {
+          if (!data?.spcBase64) {
+            throw new Error('No spc received');
+          }
+          // Handles both scenarios, getLicenseOverride being a promise and not.
+          const license = await Promise.resolve(
+            selectedDrm.getLicense(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
               data.loadedLicenseUrl,
-            );
-            result =
-              typeof license === 'string' ? license : 'Empty license result';
-          } catch {
-            result = 'fetch error';
+            ),
+          ).catch(() => {
+            throw new Error('fetch error');
+          });
+          if (typeof license !== 'string') {
+            throw Error('Empty license result');
           }
-        } else {
-          result = 'No spc received';
-        }
-        if (nativeRef.current) {
-          NativeVideoManager.setLicenseResultErrorCmd(
-            getReactTag(nativeRef),
-            result,
-            data.loadedLicenseUrl,
-          );
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultCmd(
+              getReactTag(nativeRef),
+              license,
+              data.loadedLicenseUrl,
+            );
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'fetch error';
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultErrorCmd(
+              getReactTag(nativeRef),
+              msg,
+              data.loadedLicenseUrl,
+            );
+          }
         }
       },
-      [drm, usingExternalGetLicense],
+      [selectedDrm, usingExternalGetLicense],
     );
 
     useImperativeHandle(
