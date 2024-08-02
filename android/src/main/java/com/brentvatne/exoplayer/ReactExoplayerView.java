@@ -575,7 +575,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     initializePlayerCore(self);
                 }
                 if (playerNeedsSource && source.getUri() != null) {
-                    exoPlayerView.invalidateAspectRatio();
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {

@@ -69,7 +69,7 @@ RCT_EXPORT_VIEW_PROPERTY(onAudioTracks, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTextTrackDataChanged, RCTDirectEventBlock);
 
 RCT_EXTERN_METHOD(seekCmd : (nonnull NSNumber*)reactTag time : (nonnull NSNumber*)time tolerance : (nonnull NSNumber*)tolerance)
-RCT_EXTERN_METHOD(setLicenseResultCmd : (nonnull NSNumber*)reactTag lisence : (NSString*)license licenseUrl : (NSString*)licenseUrl)
+RCT_EXTERN_METHOD(setLicenseResultCmd : (nonnull NSNumber*)reactTag license : (NSString*)license licenseUrl : (NSString*)licenseUrl)
 RCT_EXTERN_METHOD(setLicenseResultErrorCmd : (nonnull NSNumber*)reactTag error : (NSString*)error licenseUrl : (NSString*)licenseUrl)
 RCT_EXTERN_METHOD(setPlayerPauseStateCmd : (nonnull NSNumber*)reactTag paused : (nonnull BOOL)paused)
 RCT_EXTERN_METHOD(setVolumeCmd : (nonnull NSNumber*)reactTag volume : (nonnull float*)volume)

@@ -231,11 +231,6 @@ public final class ExoPlayerView extends PlayerView {
         setHideShutterView(hideShutterView);
     }
 
-    public void invalidateAspectRatio() {
-        // Resetting aspect ratio will force layout refresh on next video size changed
-        layout.invalidateAspectRatio();
-    }
-
     private final class ComponentListener implements Player.Listener {
 
         @Override
