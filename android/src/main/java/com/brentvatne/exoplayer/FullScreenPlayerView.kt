@@ -9,6 +9,8 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
@@ -58,7 +60,6 @@ class FullScreenPlayerView(
 
     override fun onBackPressed() {
         findViewById<ImageView>(androidx.media3.ui.R.id.exo_fullscreen)?.performClick()
-        onBackPressedCallback.handleOnBackPressed()
         super.onBackPressed()
     }
 
@@ -71,9 +72,11 @@ class FullScreenPlayerView(
 
     override fun onStop() {
         super.onStop()
+        onBackPressedCallback.handleOnBackPressed()
         mKeepScreenOnHandler.removeCallbacks(mKeepScreenOnUpdater)
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
+        adjustLayoutForNormal()
         parent?.requestLayout()
         parent = null
     }
@@ -92,4 +95,13 @@ class FullScreenPlayerView(
         ).apply {
             setMargins(0, 0, 0, 0)
         }
+
+    private fun adjustLayoutForNormal() {
+        ViewCompat.setOnApplyWindowInsetsListener(containerView) { view, insets ->
+            val systemWindowInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, systemWindowInsets.bottom)
+            insets
+        }
+        containerView.requestLayout()
+    }
 }
