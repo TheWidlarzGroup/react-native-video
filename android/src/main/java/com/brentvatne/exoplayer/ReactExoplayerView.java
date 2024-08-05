@@ -717,7 +717,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void getCurrentPosition(Promise promise) {
         if (player != null) {
-            double currentPosition = player.getCurrentPosition() / 1000;
+            float currentPosition = player.getCurrentPosition() / 1000.0f;
             promise.resolve(currentPosition);
         } else {
             promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
