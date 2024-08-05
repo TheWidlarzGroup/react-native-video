@@ -29,21 +29,19 @@ class ReactNativeVideoManager : RNVPlugin {
     /**
      * register a new ReactExoplayerViewManager in the managed list
      */
-    fun registerView(newInstance: ReactExoplayerViewManager): () -> Boolean =
-        {
-            if (instanceList.size > 2) {
-                DebugLog.d(TAG, "multiple Video displayed ?")
-            }
-            instanceList.add(newInstance)
+    fun registerView(newInstance: ReactExoplayerViewManager) {
+        if (instanceList.size > 2) {
+            DebugLog.d(TAG, "multiple Video displayed ?")
         }
+        instanceList.add(newInstance)
+    }
 
     /**
      * unregister existing ReactExoplayerViewManager in the managed list
      */
-    fun unregisterView(newInstance: ReactExoplayerViewManager): () -> Boolean =
-        {
-            instanceList.remove(newInstance)
-        }
+    fun unregisterView(newInstance: ReactExoplayerViewManager) {
+        instanceList.remove(newInstance)
+    }
 
     /**
      * register a new plugin in the managed list
