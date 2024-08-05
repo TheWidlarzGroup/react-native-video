@@ -286,6 +286,7 @@ type ControlsStyles = Readonly<{
   hideSeekBar?: boolean;
   seekIncrementMS?: Int32;
   showSubtitleButton?: boolean;
+  showSettingButton?: boolean;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
