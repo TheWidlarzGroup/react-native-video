@@ -225,6 +225,7 @@ export type ControlsStyles = {
   hideSeekBar?: boolean;
   seekIncrementMS?: number;
   showSubtitleButton?: boolean;
+  showSettingButton?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {

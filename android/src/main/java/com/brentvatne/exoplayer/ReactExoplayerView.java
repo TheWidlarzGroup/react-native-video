@@ -2271,8 +2271,19 @@ public class ReactExoplayerView extends FrameLayout implements
         eventEmitter.onReceiveAdEvent.invoke("ERROR", errMap);
     }
 
+    private void settingButtonVisibility() {
+        View settingButton = findViewById(androidx.media3.ui.R.id.exo_settings);
+        if(settingButton == null) return;
+        if(controlsConfig.getShowSettingButton()){
+            settingButton.setVisibility(VISIBLE);
+        }else {
+            settingButton.setVisibility(INVISIBLE);
+        }
+    }
+
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshProgressBarVisibility();
+        settingButtonVisibility();
     }
 }
