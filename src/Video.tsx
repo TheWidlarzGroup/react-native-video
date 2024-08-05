@@ -145,35 +145,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
-    const _cmcd = useMemo<NativeCmcdConfiguration | undefined>(() => {
-      if (Platform.OS !== 'android' || !source?.cmcd) {
-        return;
-      }
-
-      const cmcd = source.cmcd;
-
-      if (typeof cmcd === 'boolean') {
-        return cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
-      }
-
-      if (typeof cmcd !== 'object' || Array.isArray(cmcd)) {
-        throw new Error(
-          'Invalid CMCD configuration: Expected a boolean or an object.',
-        );
-      }
-
-      const createCmcdHeader = (property?: CmcdData) =>
-        property ? generateHeaderForNative(property) : undefined;
-
-      return {
-        mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
-        request: createCmcdHeader(cmcd.request),
-        session: createCmcdHeader(cmcd.session),
-        object: createCmcdHeader(cmcd.object),
-        status: createCmcdHeader(cmcd.status),
-      };
-    }, [source?.cmcd]);
-
     const src = useMemo<VideoSrc | undefined>(() => {
       if (!source) {
         return undefined;
@@ -208,6 +179,30 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             multiDrm: selectedDrm.multiDrm,
           };
 
+      let _cmcd: NativeCmcdConfiguration | undefined;
+      if (Platform.OS === 'android' && source?.cmcd) {
+        const cmcd = source.cmcd;
+
+        if (typeof cmcd === 'boolean') {
+          _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+        } else if (typeof cmcd === 'object' && !Array.isArray(cmcd)) {
+          const createCmcdHeader = (property?: CmcdData) =>
+            property ? generateHeaderForNative(property) : undefined;
+
+          _cmcd = {
+            mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
+            request: createCmcdHeader(cmcd.request),
+            session: createCmcdHeader(cmcd.session),
+            object: createCmcdHeader(cmcd.object),
+            status: createCmcdHeader(cmcd.status),
+          };
+        } else {
+          throw new Error(
+            'Invalid CMCD configuration: Expected a boolean or an object.',
+          );
+        }
+      }
+
       return {
         uri,
         isNetwork,
@@ -226,7 +221,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [_cmcd, drm, source]);
+    }, [drm, source]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
