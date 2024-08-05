@@ -253,7 +253,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
 
     @ReactProp(name = PROP_FULLSCREEN, defaultBoolean = false)
     fun setFullscreen(videoView: ReactExoplayerView, fullscreen: Boolean) {
-        videoView.setFullscreen(fullscreen)
+        videoView.updateFullScreenProp(fullscreen)
     }
 
     @ReactProp(name = PROP_VIEW_TYPE, defaultInt = ViewType.VIEW_TYPE_SURFACE)

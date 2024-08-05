@@ -443,9 +443,12 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    public void updateFullScreenProp() {
+    public void updateFullScreenProp(Boolean fullScreen) {
         ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
-        if(exoFullScreen == null) return;
+        if(exoFullScreen == null) {
+            setFullscreen(fullScreen);
+            return;
+        };
         exoFullScreen.performClick();
     }
 
