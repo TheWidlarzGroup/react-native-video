@@ -16,6 +16,7 @@ const PLATFORM_LABELS = {
   Android: 'Platform: Android',
   'Android TV': 'Platform: Android',
   Windows: 'Platform: Windows',
+  web: 'Platform: Web',
 };
 
 const BOT_LABELS = [
@@ -23,6 +24,7 @@ const BOT_LABELS = [
   'Repro Provided',
   'Missing Repro',
   'Waiting for Review',
+  ...Object.values(PLATFORM_LABELS),
 ];
 
 const getFieldValue = (body, field) => {
@@ -160,6 +162,7 @@ const updateLabelsForMissingInfo = (labels) => {
 const handleValidReport = async ({github, context, labels}) => {
   const comment = `Thank you for your issue report. We will review it and get back to you if we need more information.`;
   await createComment({github, context, body: comment});
+  labels.add('Repro Provided');
   labels.add('Waiting for Review');
 };
 
