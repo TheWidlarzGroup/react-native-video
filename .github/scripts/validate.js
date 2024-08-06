@@ -34,9 +34,18 @@ const getFieldValue = (body, field) => {
   }
 
   const sections = body.split('###');
-  const section = sections.find((section) =>
-    section.includes(FIELD_MAPPINGS[field]),
-  );
+  const section = sections.find((section) => {
+    // Find the section that contains the field
+    // For Reproduction, we need to make sure that we don't match Reproduction Link
+    if (field === 'Reproduction') {
+      return (
+        section.includes(FIELD_MAPPINGS[field]) &&
+        !section.includes('Reproduction Link')
+      );
+    }
+
+    return section.includes(FIELD_MAPPINGS[field]);
+  });
 
   return section ? section.replace(FIELD_MAPPINGS[field], '').trim() : '';
 };
@@ -147,7 +156,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
 };
 
 const updateLabelsForMissingInfo = (labels) => {
-  if (labels.has('missing-reproduction-steps')) {
+  if (labels.has('missing-reproduction')) {
     labels.add('Missing Repro');
     labels.delete('Repro Provided');
   } else {
