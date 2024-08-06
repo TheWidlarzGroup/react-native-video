@@ -309,9 +309,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setSubtitleStyle(SubtitleStyle.parse(src));
     }
 
-    @ReactProp(name = PROP_SHUTTER_COLOR, defaultInt = 0)
+    @ReactProp(name = PROP_SHUTTER_COLOR, defaultInt = Color.BLACK)
     public void setShutterColor(final ReactExoplayerView videoView, final int color) {
-        videoView.setShutterColor(color == 0 ? Color.BLACK : color);
+        videoView.setShutterColor(color);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
