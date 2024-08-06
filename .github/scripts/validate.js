@@ -27,6 +27,19 @@ const BOT_LABELS = [
   ...Object.values(PLATFORM_LABELS),
 ];
 
+const MESSAGE = {
+  FEATURE_REQUEST: `Thank you for your feature request. We will review it and get back to you if we need more information.`,
+  BUG_REPORT: `Thank you for your bug report. We will review it and get back to you if we need more information.`,
+  MISSING_INFO: (missingFields) => {
+    return `Thank you for your issue report. Please note that the following information is missing or incomplete:\n\n${missingFields
+      .map((field) => `- ${field.replace('missing-', '')}`)
+      .join(
+        '\n',
+      )}\n\nPlease update your issue with this information to help us address it more effectively. 
+      \n > Note: issues without complete information have a lower priority`;
+  },
+};
+
 const getFieldValue = (body, field) => {
   if (!FIELD_MAPPINGS[field]) {
     console.warn('Field not supported:', field);
@@ -123,7 +136,7 @@ const handleIssue = async ({github, context}) => {
 const handleFeatureRequest = async ({github, context, body, labels}) => {
   validateFeatureRequest(body, labels);
 
-  const comment = `Thank you for your feature request. We will review it and get back to you if we need more information.`;
+  const comment = MESSAGE.FEATURE_REQUEST;
   await createComment({github, context, body: comment});
 };
 
@@ -143,11 +156,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
   );
 
   if (missingFields.length > 0) {
-    const comment = `Thank you for your issue report. Please note that the following information is missing or incomplete:\n\n${missingFields
-      .map((field) => `- ${field.replace('missing-', '')}`)
-      .join(
-        '\n',
-      )}\n\nPlease update your issue with this information to help us address it more effectively.`;
+    const comment = MESSAGE.MISSING_INFO(missingFields);
 
     await createComment({github, context, body: comment});
   }
@@ -169,7 +178,7 @@ const updateLabelsForMissingInfo = (labels) => {
 };
 
 const handleValidReport = async ({github, context, labels}) => {
-  const comment = `Thank you for your issue report. We will review it and get back to you if we need more information.`;
+  const comment = MESSAGE.BUG_REPORT;
   await createComment({github, context, body: comment});
   labels.add('Repro Provided');
   labels.add('Waiting for Review');
