@@ -68,21 +68,22 @@ const getFieldValue = (body, field) => {
     return '';
   }
 
+  const fieldValue = FIELD_MAPPINGS[field];
+
   const sections = body.split('###');
   const section = sections.find((section) => {
     // Find the section that contains the field
     // For Reproduction, we need to make sure that we don't match Reproduction Link
     if (field === 'Reproduction') {
       return (
-        section.includes(FIELD_MAPPINGS[field]) &&
-        !section.includes('Reproduction Link')
+        section.includes(fieldValue) && !section.includes('Reproduction Link')
       );
     }
 
-    return section.includes(FIELD_MAPPINGS[field]);
+    return section.includes(fieldValue);
   });
 
-  return section ? section.replace(FIELD_MAPPINGS[field], '').trim() : '';
+  return section ? section.replace(fieldValue, '').trim() : '';
 };
 
 const validateBugReport = async (body, labels) => {
