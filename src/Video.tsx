@@ -512,7 +512,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const usingExternalGetLicense = drm?.getLicense instanceof Function;
+    const selectedDrm = source?.drm || drm;
+    const usingExternalGetLicense = selectedDrm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
       async (event: NativeSyntheticEvent<OnGetLicenseData>) => {
@@ -520,33 +521,43 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           return;
         }
         const data = event.nativeEvent;
-        let result;
-        if (data?.spcBase64) {
-          try {
-            // Handles both scenarios, getLicenseOverride being a promise and not.
-            const license = await drm.getLicense(
+        try {
+          if (!data?.spcBase64) {
+            throw new Error('No spc received');
+          }
+          // Handles both scenarios, getLicenseOverride being a promise and not.
+          const license = await Promise.resolve(
+            selectedDrm.getLicense(
               data.spcBase64,
               data.contentId,
               data.licenseUrl,
               data.loadedLicenseUrl,
-            );
-            result =
-              typeof license === 'string' ? license : 'Empty license result';
-          } catch {
-            result = 'fetch error';
+            ),
+          ).catch(() => {
+            throw new Error('fetch error');
+          });
+          if (typeof license !== 'string') {
+            throw Error('Empty license result');
           }
-        } else {
-          result = 'No spc received';
-        }
-        if (nativeRef.current) {
-          NativeVideoManager.setLicenseResultErrorCmd(
-            getReactTag(nativeRef),
-            result,
-            data.loadedLicenseUrl,
-          );
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultCmd(
+              getReactTag(nativeRef),
+              license,
+              data.loadedLicenseUrl,
+            );
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'fetch error';
+          if (nativeRef.current) {
+            NativeVideoManager.setLicenseResultErrorCmd(
+              getReactTag(nativeRef),
+              msg,
+              data.loadedLicenseUrl,
+            );
+          }
         }
       },
-      [drm, usingExternalGetLicense],
+      [selectedDrm, usingExternalGetLicense],
     );
 
     useImperativeHandle(
@@ -584,28 +595,32 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       const shallForceViewType =
         hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
 
-      if (shallForceViewType) {
-        console.warn(
-          'cannot use DRM on texture view. please set useTextureView={false}',
-        );
-      }
       if (useSecureView && useTextureView) {
         console.warn(
           'cannot use SecureView on texture view. please set useTextureView={false}',
         );
       }
 
-      return shallForceViewType
-        ? useSecureView
-          ? ViewType.SURFACE_SECURE
-          : ViewType.SURFACE // check if we should force the type to Surface due to DRM
-        : viewType
-        ? viewType // else use ViewType from source
-        : useSecureView // else infer view type from useSecureView and useTextureView
-        ? ViewType.SURFACE_SECURE
-        : useTextureView
-        ? ViewType.TEXTURE
-        : ViewType.SURFACE;
+      if (shallForceViewType) {
+        console.warn(
+          'cannot use DRM on texture view. please set useTextureView={false}',
+        );
+        return useSecureView ? ViewType.SURFACE_SECURE : ViewType.SURFACE;
+      }
+
+      if (viewType !== undefined && viewType !== null) {
+        return viewType;
+      }
+
+      if (useSecureView) {
+        return ViewType.SURFACE_SECURE;
+      }
+
+      if (useTextureView) {
+        return ViewType.TEXTURE;
+      }
+
+      return ViewType.SURFACE;
     }, [drm, useSecureView, useTextureView, viewType]);
 
     const _renderPoster = useCallback(() => {

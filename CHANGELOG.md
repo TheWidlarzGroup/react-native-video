@@ -1,5 +1,23 @@
 
 
+## [6.4.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.2...v6.4.3) (2024-07-24)
+
+
+### Bug Fixes
+
+* **android:** app crash at boot with old arch ([#4022](https://github.com/TheWidlarzGroup/react-native-video/issues/4022)) ([1ee5811](https://github.com/TheWidlarzGroup/react-native-video/commit/1ee5811c8e0ecfc2486f5120b575b57c6396e0f8)), closes [#3875](https://github.com/TheWidlarzGroup/react-native-video/issues/3875)
+* **android:** fix backward compatibility ([#4020](https://github.com/TheWidlarzGroup/react-native-video/issues/4020)) ([ab7e02e](https://github.com/TheWidlarzGroup/react-native-video/commit/ab7e02e4538c97340f13fb052b1cad94408b48fa))
+* **android:** resize mode cover calculation ([#4010](https://github.com/TheWidlarzGroup/react-native-video/issues/4010)) ([9f38216](https://github.com/TheWidlarzGroup/react-native-video/commit/9f382163d83c3331518e2784b335da28179ac91d))
+* index of the selected track ([#4012](https://github.com/TheWidlarzGroup/react-native-video/issues/4012)) ([fb1d6bd](https://github.com/TheWidlarzGroup/react-native-video/commit/fb1d6bdef7210d43f9e34f673691a9a17b95424e))
+* **sample:** boot failure on emulator ([#4016](https://github.com/TheWidlarzGroup/react-native-video/issues/4016)) ([ffbc977](https://github.com/TheWidlarzGroup/react-native-video/commit/ffbc977ff90248aeb270626620f5c3553f955617))
+
+
+### Features
+
+* add ability to define `poster` props as Image type and render poster as custom component ([#3972](https://github.com/TheWidlarzGroup/react-native-video/issues/3972)) ([adbd06e](https://github.com/TheWidlarzGroup/react-native-video/commit/adbd06e2df557b22b8a3a19073a2de1cbb964833))
+* **android:** add error handling for Kotlin version ([#4018](https://github.com/TheWidlarzGroup/react-native-video/issues/4018)) ([6189080](https://github.com/TheWidlarzGroup/react-native-video/commit/6189080c9aac89aa3d2a4e60049999d8880bc971))
+* **android:** set originalFitsSystemWindows on fullscreen open ([#4013](https://github.com/TheWidlarzGroup/react-native-video/issues/4013)) ([2f70c02](https://github.com/TheWidlarzGroup/react-native-video/commit/2f70c02cdcf6488338df197feb61eeb10ed3281f))
+
 ## [6.4.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.1...v6.4.2) (2024-07-15)
 
 

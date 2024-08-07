@@ -717,7 +717,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void getCurrentPosition(Promise promise) {
         if (player != null) {
-            double currentPosition = player.getCurrentPosition() / 1000;
+            float currentPosition = player.getCurrentPosition() / 1000.0f;
             promise.resolve(currentPosition);
         } else {
             promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
@@ -1591,7 +1591,7 @@ public class ReactExoplayerView extends FrameLayout implements
         if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
         if (format.language != null) track.setLanguage(format.language);
         if (format.label != null) track.setTitle(format.label);
-        track.setSelected(isTrackSelected(selection, group, 0));
+        track.setSelected(isTrackSelected(selection, group, trackIndex));
         return track;
     }
 

@@ -57,12 +57,14 @@ $RNVideoUseGoogleIMA=true
 
 ## Android
 
-From version >= 6.0.0, your application needs to have kotlin version >= 1.7.0
+From version >= 6.0.0, your application needs to have kotlin version >= 1.8.0
 
 ```:
 buildscript {
     ...
-    ext.kotlinVersion = '1.7.0'
+    ext.kotlinVersion = '1.8.0',
+    ext.compileSdkVersion = 34
+    ext.targetSdkVersion = 34
     ...
 }
 ```
