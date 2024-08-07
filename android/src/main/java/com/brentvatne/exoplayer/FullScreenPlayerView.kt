@@ -3,14 +3,19 @@ package com.brentvatne.exoplayer
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.ui.LegacyPlayerControlView
+import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
@@ -20,7 +25,8 @@ class FullScreenPlayerView(
     private val exoPlayerView: ExoPlayerView,
     private val reactExoplayerView: ReactExoplayerView,
     private val playerControlView: LegacyPlayerControlView?,
-    private val onBackPressedCallback: OnBackPressedCallback
+    private val onBackPressedCallback: OnBackPressedCallback,
+    private val controlsConfig: ControlsConfig
 ) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 
     private var parent: ViewGroup? = null
@@ -75,6 +81,7 @@ class FullScreenPlayerView(
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
+        navigationBarVisibility()
     }
 
     override fun onStop() {
@@ -126,5 +133,30 @@ class FullScreenPlayerView(
         )
         layoutParams.setMargins(0, 0, 0, 0)
         return layoutParams
+    }
+
+    private fun navigationBarVisibility() {
+        if (controlsConfig.hideNavigationBarOnFullScreenMode) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window?.setDecorFitsSystemWindows(false)
+                window?.insetsController?.let {
+                    it.hide(WindowInsets.Type.navigationBars())
+                    it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window?.setDecorFitsSystemWindows(true)
+                window?.insetsController?.let {
+                    it.show(WindowInsets.Type.navigationBars())
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            }
+        }
     }
 }
