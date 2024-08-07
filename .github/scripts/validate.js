@@ -24,6 +24,7 @@ const BOT_LABELS = [
   'Repro Provided',
   'Missing Repro',
   'Waiting for Review',
+  'Newer Version Available',
   ...Object.values(PLATFORM_LABELS),
 ];
 
@@ -38,6 +39,24 @@ const MESSAGE = {
       )}\n\nPlease update your issue with this information to help us address it more effectively. 
       \n > Note: issues without complete information have a lower priority`;
   },
+  OUTDATED_VERSION: (issueVersion, latestVersion) => {
+    return `There is a newer version of the library available.
+      You are using version ${issueVersion}, while the latest version is ${latestVersion}.
+      Please update to the latest version and check if the issue still exists.`;
+  },
+};
+
+const checkLatestVersion = async () => {
+  try {
+    const response = await fetch(
+      'https://registry.npmjs.org/react-native-video/latest',
+    );
+    const data = await response.json();
+    return data.version;
+  } catch (error) {
+    console.error('Error checking latest version:', error);
+    return null;
+  }
 };
 
 const getFieldValue = (body, field) => {
@@ -81,11 +100,25 @@ const validateBugReport = (body, labels) => {
     });
   }
 
+  const version = getFieldValue(body, 'Version');
+  if (version) {
+    const words = version.split(' ');
+
+    const versionPattern = /\d+\.\d+\.\d+/;
+    const isVersionValid = words.some((word) => versionPattern.test(word));
+
+    if (!isVersionValid) {
+      labels.add('missing-version');
+    }
+
+    checkLatestVersion().then((latestVersion) => {
+      if (latestVersion && latestVersion !== version) {
+        labels.add(`outdated-version-${version}-${latestVersion}`);
+      }
+    });
+  }
+
   const fields = [
-    {
-      name: 'Version',
-      invalidValue: 'Put the exact version from your package.json',
-    },
     {
       name: 'SystemVersion',
       invalidValue:
@@ -155,8 +188,20 @@ const handleMissingInformation = async ({github, context, labels}) => {
     label.startsWith('missing-'),
   );
 
+  const outdatedVersionLabel = missingFields.find((label) =>
+    label.startsWith('outdated-version'),
+  );
+
   if (missingFields.length > 0) {
-    const comment = MESSAGE.MISSING_INFO(missingFields);
+    let comment = MESSAGE.MISSING_INFO(missingFields);
+
+    if (outdatedVersionLabel) {
+      const [_, issueVersion, latestVersion] = outdatedVersionLabel.split('-');
+      comment += `\n\n ${MESSAGE.OUTDATED_VERSION(
+        issueVersion,
+        latestVersion,
+      )}`;
+    }
 
     await createComment({github, context, body: comment});
   }
@@ -173,12 +218,28 @@ const updateLabelsForMissingInfo = (labels) => {
     labels.add('Repro Provided');
   }
 
+  if (labels.find((label) => label.startsWith('outdated-version'))) {
+    labels.add('Newer Version Available');
+  } else {
+    labels.delete('Newer Version Available');
+  }
+
   labels.add('Missing Info');
   labels.delete('Waiting for Review');
 };
 
 const handleValidReport = async ({github, context, labels}) => {
-  const comment = MESSAGE.BUG_REPORT;
+  let comment = MESSAGE.BUG_REPORT;
+
+  const outdatedVersionLabel = Array.from(labels).find((label) =>
+    label.startsWith('outdated-version'),
+  );
+
+  if (outdatedVersionLabel) {
+    const [_, issueVersion, latestVersion] = outdatedVersionLabel.split('-');
+    comment += `\n\n ${MESSAGE.OUTDATED_VERSION(issueVersion, latestVersion)}`;
+  }
+
   await createComment({github, context, body: comment});
   labels.add('Repro Provided');
   labels.add('Waiting for Review');
@@ -195,7 +256,7 @@ const createComment = async ({github, context, body}) => {
 
 const updateIssueLabels = async ({github, context, labels}) => {
   const labelsToAdd = Array.from(labels).filter(
-    (label) => !label.startsWith('missing-'),
+    (label) => !label.startsWith('missing-') && !label.startsWith('outdated-'),
   );
 
   await github.rest.issues.update({
