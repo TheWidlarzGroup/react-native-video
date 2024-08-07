@@ -161,8 +161,22 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
+    private void hideShutterView() {
+        shutterView.setVisibility(INVISIBLE);
+        surfaceView.setAlpha(1);
+    }
+
+    private void showShutterView() {
+        shutterView.setVisibility(VISIBLE);
+        surfaceView.setAlpha(0);
+    }
+
     private void updateShutterViewVisibility() {
-        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
+        if (this.hideShutterView) {
+            hideShutterView();
+        } else {
+            showShutterView();
+        }
     }
 
     @Override
@@ -194,7 +208,9 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
             clearVideoView();
         }
         this.player = player;
-        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
+
+        updateShutterViewVisibility();
+
         if (player != null) {
             setVideoView();
             player.addListener(componentListener);
@@ -281,7 +297,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onRenderedFirstFrame() {
-            shutterView.setVisibility(INVISIBLE);
+            hideShutterView();
         }
 
         @Override
