@@ -1,6 +1,5 @@
 package com.brentvatne.exoplayer
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.os.Handler
@@ -8,25 +7,24 @@ import android.os.Looper
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
-import androidx.media3.ui.LegacyPlayerControlView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
-@SuppressLint("PrivateResource")
 class FullScreenPlayerView(
     context: Context,
     private val exoPlayerView: ExoPlayerView,
     private val reactExoplayerView: ReactExoplayerView,
-    private val playerControlView: LegacyPlayerControlView?,
     private val onBackPressedCallback: OnBackPressedCallback
 ) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 
     private var parent: ViewGroup? = null
     private val containerView = FrameLayout(context)
-    private val mKeepScreenOnHandler = Handler(Looper.getMainLooper())
-    private val mKeepScreenOnUpdater = KeepScreenOnUpdater(this)
+    private val mKeepScreenOnHandler: Handler = Handler(Looper.getMainLooper())
+    private val mKeepScreenOnUpdater: Runnable = KeepScreenOnUpdater(this)
 
     private class KeepScreenOnUpdater(fullScreenPlayerView: FullScreenPlayerView) : Runnable {
         private val mFullscreenPlayer = WeakReference(fullScreenPlayerView)
@@ -34,17 +32,16 @@ class FullScreenPlayerView(
         override fun run() {
             try {
                 val fullscreenVideoPlayer = mFullscreenPlayer.get()
-                if (fullscreenVideoPlayer != null) {
-                    val window = fullscreenVideoPlayer.window
+                fullscreenVideoPlayer?.let {
+                    val window = it.window
                     if (window != null) {
-                        val isPlaying = fullscreenVideoPlayer.exoPlayerView.isPlaying
-                        if (isPlaying) {
-                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                        } else {
-                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        val isPlaying = it.exoPlayerView.isPlaying
+                        when {
+                            isPlaying -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            else -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         }
                     }
-                    fullscreenVideoPlayer.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
+                    it.mKeepScreenOnHandler.postDelayed(this, UPDATE_KEEP_SCREEN_ON_FLAG_MS)
                 }
             } catch (ex: Exception) {
                 DebugLog.e("ExoPlayer Exception", "Failed to flag FLAG_KEEP_SCREEN_ON on fullscreen.")
@@ -60,9 +57,10 @@ class FullScreenPlayerView(
     init {
         setContentView(containerView, generateDefaultLayoutParams())
     }
+
     override fun onBackPressed() {
+        findViewById<ImageView>(androidx.media3.ui.R.id.exo_fullscreen)?.performClick()
         super.onBackPressed()
-        onBackPressedCallback.handleOnBackPressed()
     }
 
     override fun onStart() {
@@ -70,46 +68,17 @@ class FullScreenPlayerView(
         parent = exoPlayerView.parent as ViewGroup?
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
-        playerControlView?.let {
-            updateFullscreenButton(playerControlView, true)
-            parent?.removeView(it)
-            containerView.addView(it, generateDefaultLayoutParams())
-        }
     }
 
     override fun onStop() {
         super.onStop()
+        onBackPressedCallback.handleOnBackPressed()
         mKeepScreenOnHandler.removeCallbacks(mKeepScreenOnUpdater)
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
-        playerControlView?.let {
-            updateFullscreenButton(playerControlView, false)
-            containerView.removeView(it)
-            parent?.addView(it, generateDefaultLayoutParams())
-        }
+        adjustLayoutForNormal()
         parent?.requestLayout()
         parent = null
-    }
-
-    private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
-        if (isFullscreen) {
-            androidx.media3.ui.R.drawable.exo_icon_fullscreen_exit
-        } else {
-            androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
-        }
-
-    private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
-        val imageButton = playerControlView.findViewById<ImageButton?>(com.brentvatne.react.R.id.exo_fullscreen)
-        imageButton?.let {
-            val imgResource = getFullscreenIconResource(isFullscreen)
-            val desc = if (isFullscreen) {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description)
-            } else {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description)
-            }
-            imageButton.setImageResource(imgResource)
-            imageButton.contentDescription = desc
-        }
     }
 
     override fun onAttachedToWindow() {
@@ -119,12 +88,20 @@ class FullScreenPlayerView(
         }
     }
 
-    private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams {
-        val layoutParams = FrameLayout.LayoutParams(
+    private fun generateDefaultLayoutParams(): FrameLayout.LayoutParams =
+        FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
-        )
-        layoutParams.setMargins(0, 0, 0, 0)
-        return layoutParams
+        ).apply {
+            setMargins(0, 0, 0, 0)
+        }
+
+    private fun adjustLayoutForNormal() {
+        ViewCompat.setOnApplyWindowInsetsListener(containerView) { view, insets ->
+            val systemWindowInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, systemWindowInsets.bottom)
+            insets
+        }
+        containerView.requestLayout()
     }
 }
