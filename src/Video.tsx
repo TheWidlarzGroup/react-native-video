@@ -16,7 +16,9 @@ import type {
   ImageResizeMode,
 } from 'react-native';
 
-import NativeVideoComponent from './specs/VideoNativeComponent';
+import NativeVideoComponent, {
+  NativeCmcdConfiguration,
+} from './specs/VideoNativeComponent';
 import type {
   OnAudioFocusChangedData,
   OnAudioTracksData,
@@ -44,12 +46,13 @@ import {
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
 import type {VideoSaveData} from './specs/NativeVideoManager';
-import {ViewType} from './types';
+import {CmcdMode, ViewType} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
   OnReceiveAdEventData,
   ReactVideoProps,
+  CmcdData,
 } from './types';
 
 export interface VideoRef {
@@ -176,6 +179,30 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             multiDrm: selectedDrm.multiDrm,
           };
 
+      let _cmcd: NativeCmcdConfiguration | undefined;
+      if (Platform.OS === 'android' && source?.cmcd) {
+        const cmcd = source.cmcd;
+
+        if (typeof cmcd === 'boolean') {
+          _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+        } else if (typeof cmcd === 'object' && !Array.isArray(cmcd)) {
+          const createCmcdHeader = (property?: CmcdData) =>
+            property ? generateHeaderForNative(property) : undefined;
+
+          _cmcd = {
+            mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
+            request: createCmcdHeader(cmcd.request),
+            session: createCmcdHeader(cmcd.session),
+            object: createCmcdHeader(cmcd.object),
+            status: createCmcdHeader(cmcd.status),
+          };
+        } else {
+          throw new Error(
+            'Invalid CMCD configuration: Expected a boolean or an object.',
+          );
+        }
+      }
+
       return {
         uri,
         isNetwork,
@@ -190,6 +217,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         cropEnd: resolvedSource.cropEnd,
         metadata: resolvedSource.metadata,
         drm: _drm,
+        cmcd: _cmcd,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };

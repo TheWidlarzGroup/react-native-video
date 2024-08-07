@@ -57,6 +57,11 @@ class Source {
      */
     var textTracksAllowChunklessPreparation: Boolean = false
 
+    /**
+     * CMCD properties linked to the source
+     */
+    var cmcdProps: CMCDProps? = null
+
     override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
     /** return true if this and src are equals  */
@@ -68,7 +73,8 @@ class Source {
                 cropEndMs == other.cropEndMs &&
                 startPositionMs == other.startPositionMs &&
                 extension == other.extension &&
-                drmProps == other.drmProps
+                drmProps == other.drmProps &&
+                cmcdProps == other.cmcdProps
             )
     }
 
@@ -131,6 +137,7 @@ class Source {
         private const val PROP_SRC_METADATA = "metadata"
         private const val PROP_SRC_HEADERS = "requestHeaders"
         private const val PROP_SRC_DRM = "drm"
+        private const val PROP_SRC_CMCD = "cmcd"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
 
         @SuppressLint("DiscouragedApi")
@@ -189,6 +196,7 @@ class Source {
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
+                source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
