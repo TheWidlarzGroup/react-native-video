@@ -43,8 +43,7 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
-import type {VideoSaveData} from './specs/NativeVideoManager';
-import {ViewType} from './types';
+import {ViewType, type VideoSaveData} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
