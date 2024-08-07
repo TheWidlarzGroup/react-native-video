@@ -234,6 +234,7 @@ const handleValidReport = async ({github, context, labels}) => {
   if (outdatedVersionLabel) {
     const [, , issueVersion, latestVersion] = outdatedVersionLabel.split('-');
     comment += `\n\n ${MESSAGE.OUTDATED_VERSION(issueVersion, latestVersion)}`;
+    labels.add('Newer Version Available');
   }
 
   await createComment({github, context, body: comment});
