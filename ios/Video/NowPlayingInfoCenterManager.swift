@@ -167,9 +167,7 @@ class NowPlayingInfoCenterManager {
                 return .commandFailed
             }
             if let event = event as? MPChangePlaybackPositionCommandEvent {
-                player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: .max)) { _ in
-                    player.play()
-                }
+                player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: .max))
                 return .success
             }
             return .commandFailed
