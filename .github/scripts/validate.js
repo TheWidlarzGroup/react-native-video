@@ -40,9 +40,7 @@ const MESSAGE = {
       \n > Note: issues without complete information have a lower priority`;
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
-    return `There is a newer version of the library available.
-      You are using version ${issueVersion}, while the latest version is ${latestVersion}.
-      Please update to the latest version and check if the issue still exists.`;
+    return `There is a newer version of the library available. You are using version ${issueVersion}, while the latest stable version is ${latestVersion}. Please update to the latest version and check if the issue still exists.`;
   },
 };
 
@@ -82,7 +80,7 @@ const getFieldValue = (body, field) => {
   return section ? section.replace(FIELD_MAPPINGS[field], '').trim() : '';
 };
 
-const validateBugReport = (body, labels) => {
+const validateBugReport = async (body, labels) => {
   const selectedPlatforms = getFieldValue(body, 'Platform')
     .split(',')
     .map((p) => p.trim());
@@ -103,7 +101,6 @@ const validateBugReport = (body, labels) => {
   const version = getFieldValue(body, 'Version');
   if (version) {
     const words = version.split(' ');
-
     const versionPattern = /\d+\.\d+\.\d+/;
     const isVersionValid = words.some((word) => versionPattern.test(word));
 
@@ -111,11 +108,10 @@ const validateBugReport = (body, labels) => {
       labels.add('missing-version');
     }
 
-    checkLatestVersion().then((latestVersion) => {
-      if (latestVersion && latestVersion !== version) {
-        labels.add(`outdated-version-${version}-${latestVersion}`);
-      }
-    });
+    const latestVersion = await checkLatestVersion();
+    if (latestVersion && latestVersion !== version) {
+      labels.add(`outdated-version-${version}-${latestVersion}`);
+    }
   }
 
   const fields = [
@@ -174,7 +170,7 @@ const handleFeatureRequest = async ({github, context, body, labels}) => {
 };
 
 const handleBugReport = async ({github, context, body, labels}) => {
-  validateBugReport(body, labels);
+  await validateBugReport(body, labels);
 
   if (Array.from(labels).some((label) => label.startsWith('missing-'))) {
     await handleMissingInformation({github, context, labels});
@@ -188,7 +184,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
     label.startsWith('missing-'),
   );
 
-  const outdatedVersionLabel = missingFields.find((label) =>
+  const outdatedVersionLabel = labels.find((label) =>
     label.startsWith('outdated-version'),
   );
 
@@ -196,7 +192,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
     let comment = MESSAGE.MISSING_INFO(missingFields);
 
     if (outdatedVersionLabel) {
-      const [_, issueVersion, latestVersion] = outdatedVersionLabel.split('-');
+      const [, , issueVersion, latestVersion] = outdatedVersionLabel.split('-');
       comment += `\n\n ${MESSAGE.OUTDATED_VERSION(
         issueVersion,
         latestVersion,
@@ -236,7 +232,7 @@ const handleValidReport = async ({github, context, labels}) => {
   );
 
   if (outdatedVersionLabel) {
-    const [_, issueVersion, latestVersion] = outdatedVersionLabel.split('-');
+    const [, , issueVersion, latestVersion] = outdatedVersionLabel.split('-');
     comment += `\n\n ${MESSAGE.OUTDATED_VERSION(issueVersion, latestVersion)}`;
   }
 
