@@ -74,7 +74,7 @@ body:
   - type: input
     id: reproduction-repo
     attributes:
-      label: Reproduction
+      label: Reproduction Link
       description: Provide a link to a repository with a reproduction of the bug, this is optional but it will make us to fix the bug faster
       placeholder: Reproduction Repository
       value: "repository link"
