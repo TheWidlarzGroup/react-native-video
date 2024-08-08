@@ -136,26 +136,22 @@ class FullScreenPlayerView(
     }
 
     private fun navigationBarVisibility() {
-        if (controlsConfig.hideNavigationBarOnFullScreenMode) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window?.setDecorFitsSystemWindows(false)
-                window?.insetsController?.let {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window?.setDecorFitsSystemWindows(!controlsConfig.hideNavigationBarOnFullScreenMode)
+            window?.insetsController?.let {
+                if (controlsConfig.hideNavigationBarOnFullScreenMode) {
                     it.hide(WindowInsets.Type.navigationBars())
                     it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window?.setDecorFitsSystemWindows(true)
-                window?.insetsController?.let {
+                } else {
                     it.show(WindowInsets.Type.navigationBars())
                 }
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window?.decorView?.systemUiVisibility = if (controlsConfig.hideNavigationBarOnFullScreenMode) {
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             } else {
-                @Suppress("DEPRECATION")
-                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             }
         }
     }
