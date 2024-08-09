@@ -141,7 +141,10 @@ const someCoolFunctions = async () => {
   videoRef.current.presentFullscreenPlayer();
   videoRef.current.dismissFullscreenPlayer();
 
-  // pause or play the video
+  // play the video
+  videoRef.current.resume();
+
+  // pause the video
   videoRef.current.pause();
 
   // save video to your Photos with current filter prop
