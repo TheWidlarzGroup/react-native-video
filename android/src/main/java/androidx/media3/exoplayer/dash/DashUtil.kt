@@ -1,12 +1,12 @@
-package androidx.media3.exoplayer.dash;
+package androidx.media3.exoplayer.dash
 
-import android.net.Uri;
+import android.net.Uri
+import androidx.media3.datasource.DataSource
+import androidx.media3.exoplayer.dash.manifest.DashManifest
 
-import androidx.media3.datasource.DataSource;
-import androidx.media3.exoplayer.dash.manifest.DashManifest;
-
-public class DashUtil {
-    public static DashManifest loadManifest(DataSource ds, Uri uri) {
-        return null;
+object DashUtil {
+    @JvmStatic
+    fun loadManifest(dataSource: DataSource, uri: Uri): DashManifest {
+        TODO("Implement the logic to load and return the DashManifest")
     }
 }
