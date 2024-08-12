@@ -6,7 +6,5 @@ import androidx.media3.exoplayer.dash.manifest.DashManifest
 
 object DashUtil {
     @JvmStatic
-    fun loadManifest(dataSource: DataSource, uri: Uri): DashManifest? {
-        return null
-    }
+    fun loadManifest(dataSource: DataSource, uri: Uri): DashManifest? = null
 }
