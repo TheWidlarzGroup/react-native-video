@@ -9,14 +9,14 @@ import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 class DashMediaSource {
     class Factory(private val chunkSourceFactory: DefaultDashChunkSource.Factory, private val dataSourceFactory: DataSource.Factory) : MediaSource.Factory {
         override fun setDrmSessionManagerProvider(drmSessionManagerProvider: DrmSessionManagerProvider): MediaSource.Factory {
-            TODO("Not yet implemented")
+            return this
         }
         override fun setLoadErrorHandlingPolicy(loadErrorHandlingPolicy: LoadErrorHandlingPolicy): MediaSource.Factory {
-            TODO("Not yet implemented")
+            return this
         }
         override fun getSupportedTypes(): IntArray = intArrayOf()
         override fun createMediaSource(mediaItem: MediaItem): MediaSource {
-            TODO("Not yet implemented")
+            throw UnsupportedOperationException("This MediaSource is not implemented")
         }
     }
 }
