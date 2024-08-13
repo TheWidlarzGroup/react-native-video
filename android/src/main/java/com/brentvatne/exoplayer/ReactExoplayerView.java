@@ -2176,6 +2176,7 @@ public class ReactExoplayerView extends FrameLayout implements
             eventEmitter.onVideoFullscreenPlayerWillDismiss.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
+                reLayoutControls();
                 setControls(controls);
             }
             UiThreadUtil.runOnUiThread(() -> {
