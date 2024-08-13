@@ -224,6 +224,7 @@ export type AudioOutput = 'speaker' | 'earpiece';
 export type ControlsStyles = {
   hideSeekBar?: boolean;
   seekIncrementMS?: number;
+  hideNavigationBarOnFullScreenMode?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
