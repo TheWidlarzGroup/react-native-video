@@ -13,7 +13,7 @@ export const withBackgroundAudio: ConfigPlugin<boolean> = (
 
     if (enableBackgroundAudio) {
       if (!modes.includes('audio')) {
-        modes.push('audio');
+        config.modResults.UIBackgroundModes = [...modes, 'audio'];
       }
     } else {
       config.modResults.UIBackgroundModes = modes.filter(
