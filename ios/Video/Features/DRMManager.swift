@@ -16,6 +16,9 @@ class DRMManager: NSObject {
     var onVideoError: RCTDirectEventBlock?
     var onGetLicense: RCTDirectEventBlock?
     
+    // Licneses handled by onGetLicense
+    var _pendingLicenses: [String: AVContentKeyRequest] = [:]
+    
     override init() {
         contentKeySession = AVContentKeySession(keySystem: .fairPlayStreaming)
         super.init()
@@ -23,7 +26,7 @@ class DRMManager: NSObject {
         contentKeySession.setDelegate(self, queue: DRMManager.queue)
     }
     
-    public func addAsset(asset: AVContentKeyRecipient, drmParams: DRMParams?, reactTag: NSNumber?, onVideoError: RCTDirectEventBlock?, onGetLicense: RCTDirectEventBlock?) {
+    public func createContentKeyRequest(asset: AVContentKeyRecipient, drmParams: DRMParams?, reactTag: NSNumber?, onVideoError: RCTDirectEventBlock?, onGetLicense: RCTDirectEventBlock?) {
         self.reactTag = reactTag
         self.onVideoError = onVideoError
         self.onGetLicense = onGetLicense
@@ -42,17 +45,25 @@ class DRMManager: NSObject {
         }
     }
     
+    func finishProcessingContentKeyRequest(keyRequest: AVContentKeyRequest, licence: Data) throws {
+        let keyResponse = AVContentKeyResponse(fairPlayStreamingKeyResponseData: licence)
+        keyRequest.processContentKeyResponse(keyResponse)
+    }
+    
     private func processContentKeyRequest(keyRequest: AVContentKeyRequest) async throws {
         guard let assetId = drmParams?.contentId, let assetIdData = assetId.data(using: .utf8) else {
             throw RCTVideoErrorHandler.invalidContentId
         }
         
         let appCertificte = try await self.requestApplicationCertificate(keyRequest: keyRequest)
-        
         let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificte, contentIdentifier: assetIdData)
-        let licence = try await self.requestLicence(spcData: spcData, keyRequest: keyRequest)
-        let keyResponse = AVContentKeyResponse(fairPlayStreamingKeyResponseData: licence)
-        keyRequest.processContentKeyResponse(keyResponse)
+        
+        if onGetLicense == nil {
+            let licence = try await self.requestLicence(spcData: spcData, keyRequest: keyRequest)
+            try finishProcessingContentKeyRequest(keyRequest: keyRequest, licence: licence)
+        } else {
+            try requestLicneseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
+        }
     }
     
     private func requestApplicationCertificate(keyRequest: AVContentKeyRequest) async throws -> Data {

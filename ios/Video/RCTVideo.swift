@@ -463,7 +463,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _drmManager = DRMManager()
             }
             
-            _drmManager?.addAsset(asset: asset, drmParams: source.drm, reactTag: reactTag, onVideoError: onVideoError, onGetLicense: onGetLicense)
+            _drmManager?.createContentKeyRequest(asset: asset, drmParams: source.drm, reactTag: reactTag, onVideoError: onVideoError, onGetLicense: onGetLicense)
         }
 
         return await playerItemPrepareText(source: source, asset: asset, assetOptions: assetOptions, uri: source.uri ?? "")
@@ -1326,11 +1326,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
-        // _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
+        _drmManager?.setJSLicneseResult(license: license, licenseUrl: licenseUrl)
     }
 
     func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
-        // _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
+        _drmManager?.setJSLinceseError(error: error, licenseUrl: licenseUrl)
     }
 
     // MARK: - RCTPlayerObserverHandler
