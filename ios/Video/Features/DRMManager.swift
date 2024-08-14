@@ -51,7 +51,7 @@ class DRMManager: NSObject {
     }
     
     private func processContentKeyRequest(keyRequest: AVContentKeyRequest) async throws {
-        guard let assetId = drmParams?.contentId, let assetIdData = assetId.data(using: .utf8) else {
+        guard let assetId = getAssetId(keyRequest: keyRequest), let assetIdData = assetId.data(using: .utf8) else {
             throw RCTVideoErrorHandler.invalidContentId
         }
         
@@ -125,5 +125,20 @@ class DRMManager: NSObject {
         }
         
         return data
+    }
+    
+    private func getAssetId(keyRequest: AVContentKeyRequest) -> String? {
+        guard let assetIdString = drmParams?.contentId else {
+            let url = keyRequest.identifier as? String
+            
+            if let url {
+                let assetId = url.replacingOccurrences(of: "skd://", with: "")
+                return assetId
+            }
+            
+            return nil
+        }
+        
+        return assetIdString
     }
 }
