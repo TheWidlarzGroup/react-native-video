@@ -12,6 +12,7 @@ enum RCTVideoError: Int {
     case noFairplayDRM
     case noDRMData
     case invalidContentId
+    case invalidAppCert
 }
 
 // MARK: - RCTVideoErrorHandler
@@ -109,6 +110,16 @@ enum RCTVideoErrorHandler {
             NSLocalizedDescriptionKey: "Error obtaining DRM license.",
             NSLocalizedFailureReasonErrorKey: "No valide content Id received",
             NSLocalizedRecoverySuggestionErrorKey: "Is the contentId and url ok?",
+        ]
+    )
+    
+    static let invalidAppCert = NSError(
+        domain: "RCTVideo",
+        code: RCTVideoError.invalidAppCert.rawValue,
+        userInfo: [
+            NSLocalizedDescriptionKey: "Error obtaining Application Certificate license.",
+            NSLocalizedFailureReasonErrorKey: "No valide Application Certificate received",
+            NSLocalizedRecoverySuggestionErrorKey: "Is the Application Certificate valid?",
         ]
     )
 }

@@ -97,7 +97,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _didRequestAds = false
     private var _adPlaying = false
 
-    private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
+    private lazy var _drmManager: DRMManager? = DRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
 
     #if USE_VIDEO_CACHING
@@ -459,14 +459,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #endif
 
         if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
-            _resouceLoaderDelegate = RCTResourceLoaderDelegate(
-                asset: asset,
-                drm: source.drm,
-                localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
-                onVideoError: onVideoError,
-                onGetLicense: onGetLicense,
-                reactTag: reactTag
-            )
+            if _drmManager == nil {
+                _drmManager = DRMManager()
+            }
+            
+            _drmManager?.addAsset(asset: asset, drmParams: source.drm, reactTag: reactTag, onVideoError: onVideoError, onGetLicense: onGetLicense)
         }
 
         return await playerItemPrepareText(source: source, asset: asset, assetOptions: assetOptions, uri: source.uri ?? "")
@@ -562,7 +559,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.removePlayerLayer()
             self._playerObserver.player = nil
-            self._resouceLoaderDelegate = nil
+            self._drmManager = nil
             self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
@@ -1295,7 +1292,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player as Any)
         _player = nil
-        _resouceLoaderDelegate = nil
+        _drmManager = nil
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
@@ -1329,11 +1326,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
+        // _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
     }
 
     func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
+        // _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
     }
 
     // MARK: - RCTPlayerObserverHandler
