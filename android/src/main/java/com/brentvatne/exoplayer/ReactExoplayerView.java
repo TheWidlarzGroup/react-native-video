@@ -418,6 +418,15 @@ public class ReactExoplayerView extends FrameLayout implements
             });
         }
 
+        if(fullScreenPlayerView == null) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            });
+        }
+
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
 
@@ -442,16 +451,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
-
-    public void updateFullScreenProp(Boolean fullScreen) {
-        ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
-        if(exoFullScreen == null) {
-            setFullscreen(fullScreen);
-            return;
-        };
-        exoFullScreen.performClick();
-    }
-
 
     @SuppressLint("ResourceAsColor")
     private void refreshProgressBarVisibility (){
@@ -2134,7 +2133,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void handleFullScreenMode(boolean fullscreen){
         ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
-        exoFullScreen.performClick();
+        if(exoFullScreen != null){
+            exoFullScreen.performClick();
+        }
+        setFullscreen(fullscreen);
     }
 
     public void setFullscreen(boolean fullscreen) {
@@ -2150,14 +2152,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
         Window window = activity.getWindow();
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
-        if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    setFullscreen(false);
-                }
-            });
-        }
         if (fullscreen) {
             eventEmitter.onVideoFullscreenPlayerDidPresent.invoke();
             if (fullScreenPlayerView != null) {
