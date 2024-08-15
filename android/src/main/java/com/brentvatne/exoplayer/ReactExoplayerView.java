@@ -554,7 +554,13 @@ public class ReactExoplayerView extends FrameLayout implements
             exoPosition.setLayoutParams(param);
         }else{
             exoProgress.setVisibility(VISIBLE);
-            exoDuration.setVisibility(VISIBLE);
+
+            if(controlsConfig.getHideDuration()){
+                exoDuration.setVisibility(GONE);
+            }else{
+                exoDuration.setVisibility(VISIBLE);
+            }
+
             // Reset the layout parameters of exoPosition to their default state
             LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
                     LayoutParams.WRAP_CONTENT,

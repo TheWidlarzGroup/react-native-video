@@ -223,6 +223,7 @@ export type AudioOutput = 'speaker' | 'earpiece';
 
 export type ControlsStyles = {
   hideSeekBar?: boolean;
+  hideDuration?: boolean;
   seekIncrementMS?: number;
 };
 
