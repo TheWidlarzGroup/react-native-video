@@ -284,6 +284,7 @@ export type OnAudioFocusChangedData = Readonly<{
 
 type ControlsStyles = Readonly<{
   hideSeekBar?: boolean;
+  hideDuration?: boolean;
   seekIncrementMS?: Int32;
 }>;
 

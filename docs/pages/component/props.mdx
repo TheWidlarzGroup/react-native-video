@@ -147,6 +147,7 @@ Adjust the control styles. This prop is need only if `controls={true}` and is an
 | Property        | Type    | Description                                                                             |
 |-----------------|---------|-----------------------------------------------------------------------------------------|
 | hideSeekBar     | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.    |
+| hideDuration    | boolean | The default value is `false`, allowing you to hide the duration.                        |
 | seekIncrementMS | number  | The default value is `10000`. You can change the value to increment forward and rewind. |
 
 Example with default values:
@@ -154,6 +155,7 @@ Example with default values:
 ```javascript
 controlsStyles={{
   hideSeekBar: false,
+  hideDuration: false,
   seekIncrementMS: 10000,
 }}
 ```
