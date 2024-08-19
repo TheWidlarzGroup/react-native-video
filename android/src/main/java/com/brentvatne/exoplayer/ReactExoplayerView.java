@@ -923,7 +923,11 @@ public class ReactExoplayerView extends FrameLayout implements
         Intent intent = new Intent(themedReactContext, VideoPlaybackService.class);
         intent.setAction(MediaSessionService.SERVICE_INTERFACE);
 
-        themedReactContext.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            themedReactContext.startForegroundService(intent);
+        } else {
+            themedReactContext.startService(intent);
+        }
 
         int flags;
         if (Build.VERSION.SDK_INT >= 29) {

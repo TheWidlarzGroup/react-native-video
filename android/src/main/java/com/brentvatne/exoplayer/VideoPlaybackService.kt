@@ -63,6 +63,7 @@ class VideoPlaybackService : MediaSessionService() {
 
         mediaSessionsList[player] = mediaSession
         addSession(mediaSession)
+        startForeground(mediaSession.player.hashCode(), buildNotification(mediaSession))
     }
 
     fun unregisterPlayer(player: ExoPlayer) {
@@ -95,6 +96,10 @@ class VideoPlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         cleanup()
+        val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.deleteNotificationChannel(NOTIFICATION_CHANEL_ID)
+        }
         super.onDestroy()
     }
 
@@ -209,9 +214,6 @@ class VideoPlaybackService : MediaSessionService() {
     private fun hideAllNotifications() {
         val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.deleteNotificationChannel(NOTIFICATION_CHANEL_ID)
-        }
     }
 
     private fun cleanup() {
