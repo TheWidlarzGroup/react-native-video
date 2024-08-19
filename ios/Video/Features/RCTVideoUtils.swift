@@ -12,27 +12,24 @@ enum RCTVideoAssetsUtils {
             guard let asset = asset else {
                 return nil
             }
-            return try? await asset.loadMediaSelectionGroup(for: mediaCharacteristic)
+            if let mediaSelectionGroup = try? await asset.loadMediaSelectionGroup(for: mediaCharacteristic) {
+                return mediaSelectionGroup
+            } else {
+                return nil
+            }
         } else {
             #if !os(visionOS)
                 return asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic)
-            #else
-                return nil
             #endif
         }
     }
 
     static func getTracks(asset: AVAsset, withMediaType: AVMediaType) async -> [AVAssetTrack]? {
         if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
-            guard let asset = asset else {
-                return nil
-            }
             return try? await asset.loadTracks(withMediaType: withMediaType)
         } else {
             #if !os(visionOS)
                 return asset.tracks(withMediaType: withMediaType)
-            #else
-                return nil
             #endif
         }
     }
