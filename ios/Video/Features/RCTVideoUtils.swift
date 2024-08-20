@@ -9,6 +9,7 @@ enum RCTVideoAssetsUtils {
         for mediaCharacteristic: AVMediaCharacteristic
     ) async -> AVMediaSelectionGroup? {
         if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
+            // swiftlint:disable shorthand_optional_binding
             guard let asset = asset else {
                 return nil
             }
@@ -17,6 +18,7 @@ enum RCTVideoAssetsUtils {
             } else {
                 return nil
             }
+            // swiftlint:enable shorthand_optional_binding
         } else {
             #if !os(visionOS)
                 return asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic)
