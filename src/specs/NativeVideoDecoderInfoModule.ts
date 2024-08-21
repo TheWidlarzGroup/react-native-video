@@ -2,7 +2,7 @@ import {NativeModules} from 'react-native';
 import type {Int32} from 'react-native/Libraries/Types/CodegenTypes';
 
 // @TODO rename to "Spec" when applying new arch
-interface VideoDecoderInfoModuleType {
+export interface VideoDecoderInfoModuleType {
   getWidevineLevel: () => Promise<Int32>;
   isCodecSupported: (
     mimeType: string,

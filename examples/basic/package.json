@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "web": "expo start --web",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "windows": "react-native run-windows",
@@ -13,12 +14,15 @@
     "pod-install:newarch": "cd ios && RCT_NEW_ARCH_ENABLED=1 bundle exec pod install && cd .."
   },
   "dependencies": {
+    "@expo/metro-runtime": "~3.2.1",
     "@react-native-picker/picker": "2.7.5",
     "expo": "^51.0.17",
     "expo-asset": "^10.0.9",
     "expo-image": "^1.12.12",
     "react": "18.2.0",
     "react-native": "0.74.3",
+    "react-dom": "18.2.0",
+    "react-native-web": "~0.19.10",
     "react-native-windows": "0.74.1"
   },
   "devDependencies": {
