@@ -28,6 +28,10 @@ extension DRMManager: AVContentKeySessionDelegate {
         return reasons.contains(where: { r in r == retryReason })
     }
     
+    func contentKeySession(_ session: AVContentKeySession, didProvide keyRequest: AVPersistableContentKeyRequest) {
+        handlePersistableKeyRequest(keyRequest: keyRequest)
+    }
+    
     func contentKeySession(_ session: AVContentKeySession, contentKeyRequest keyRequest: AVContentKeyRequest, didFailWithError err: any Error) {
         guard let onVideoError, let reactTag else {
             return

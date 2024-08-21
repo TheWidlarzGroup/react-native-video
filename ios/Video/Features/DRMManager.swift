@@ -12,6 +12,7 @@ class DRMManager: NSObject {
     let contentKeySession: AVContentKeySession
     
     var drmParams: DRMParams?
+    var localSourceEncryptionKeyScheme: String?
     var reactTag: NSNumber?
     var onVideoError: RCTDirectEventBlock?
     var onGetLicense: RCTDirectEventBlock?
@@ -38,6 +39,12 @@ class DRMManager: NSObject {
     func handleContentKeyRequest(keyRequest: AVContentKeyRequest) {
         Task {
             do {
+                // If localSourceEncryptionKeyScheme we will handle it in PersistableContentKeyRequest
+                if localSourceEncryptionKeyScheme != nil {
+                    try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
+                    return
+                }
+                
                 try await processContentKeyRequest(keyRequest: keyRequest)
             } catch {
                 keyRequest.processContentKeyResponseError(error)
@@ -59,9 +66,12 @@ class DRMManager: NSObject {
         let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificte, contentIdentifier: assetIdData)
         
         if onGetLicense == nil {
+            // try get licence on native part
             let licence = try await self.requestLicence(spcData: spcData, keyRequest: keyRequest)
             try finishProcessingContentKeyRequest(keyRequest: keyRequest, licence: licence)
         } else {
+            // try get licence from JS (method provided by user)
+            // We will set loading request, and after callback we will set result to keyRequest
             try requestLicneseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
         }
     }
