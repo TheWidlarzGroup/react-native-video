@@ -9,7 +9,15 @@ enum RCTVideoAssetsUtils {
         for mediaCharacteristic: AVMediaCharacteristic
     ) async -> AVMediaSelectionGroup? {
         if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
-            return try? await asset?.loadMediaSelectionGroup(for: mediaCharacteristic)
+            do {
+                guard let asset else {
+                    return nil
+                }
+
+                return try await asset.loadMediaSelectionGroup(for: mediaCharacteristic)
+            } catch {
+                return nil
+            }
         } else {
             #if !os(visionOS)
                 return asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic)

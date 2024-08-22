@@ -135,8 +135,7 @@ Determines whether to show player controls.
 - **false (default)** - Don't show player controls
 - **true** - Show player controls
 
-Note on iOS, controls are always shown when in fullscreen mode.
-Note on Android, native controls are available by default.
+Controls are always shown in fullscreen mode, even when `controls={false}`.
 If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Project](/projects).
 
 ### `controlsStyles`
@@ -146,8 +145,9 @@ If needed, you can also add your controls or use a package like [react-native-vi
 Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
 
 | Property                          | Type    | Description                                                                                |
-| --------------------------------- | ------- | ------------------------------------------------------------------------------------------ |
+|-----------------------------------|---------|--------------------------------------------------------------------------------------------|
 | hideSeekBar                       | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.       |
+| hideDuration                      | boolean | The default value is `false`, allowing you to hide the duration.                           |
 | seekIncrementMS                   | number  | The default value is `10000`. You can change the value to increment forward and rewind.    |
 | hideNavigationBarOnFullScreenMode | boolean | The default value is `false`, allowing you to hide the navigation bar on full-screen mode. |
 
@@ -156,6 +156,7 @@ Example with default values:
 ```javascript
 controlsStyles={{
   hideSeekBar: false,
+  hideDuration: false,
   seekIncrementMS: 10000,
   hideNavigationBarOnFullScreenMode: false,
 }}
@@ -1001,3 +1002,68 @@ Adjust the volume.
 - **1.0 (default)** - Play at full volume
 - **0.0** - Mute the audio
 - **Other values** - Reduce volume
+
+### `cmcd`
+
+<PlatformsList types={['Android']} />
+
+Configure CMCD (Common Media Client Data) parameters. CMCD is a standard for conveying client-side metrics and capabilities to servers, which can help improve streaming quality and performance.
+
+For detailed information about CMCD, please refer to the [CTA-5004 Final Specification](https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf).
+
+- **false (default)** - Don't use CMCD
+- **true** - Use default CMCD configuration
+- **object** - Use custom CMCD configuration
+
+When providing an object, you can configure the following properties:
+
+| Property | Type                    | Description                                        |
+|----------|-------------------------|----------------------------------------------------|
+| `mode`     | `CmcdMode` | The mode for sending CMCD data                     |
+| `request`  | `CmcdData` | Custom key-value pairs for the request object      |
+| `session`  | `CmcdData` | Custom key-value pairs for the session object      |
+| `object`   | `CmcdData` | Custom key-value pairs for the object metadata     |
+| `status`   | `CmcdData` | Custom key-value pairs for the status information  |
+
+Note: The `mode` property defaults to `CmcdMode.MODE_QUERY_PARAMETER` if not specified.
+
+#### `CmcdMode`
+CmcdMode is an enum that defines how CMCD data should be sent:
+- `CmcdMode.MODE_REQUEST_HEADER` (0) - Send CMCD data in the HTTP request headers.
+- `CmcdMode.MODE_QUERY_PARAMETER` (1) - Send CMCD data as query parameters in the URL.
+
+#### `CmcdData`
+CmcdData is a type representing custom key-value pairs for CMCD data. It's defined as:
+
+```typescript
+type CmcdData = Record<`${string}-${string}`, string | number>;
+```
+
+Custom key names MUST include a hyphenated prefix to prevent namespace collisions. It's recommended to use a reverse-DNS syntax for custom prefixes.
+
+Example:
+
+```javascript
+<Video
+  source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    cmcd: {
+      mode: CmcdMode.MODE_QUERY_PARAMETER,
+      request: {
+        'com-custom-key': 'custom-value'
+      },
+      session: {
+        sid: 'session-id'
+      },
+      object: {
+        br: '3000',
+        d: '4000'
+      },
+      status: {
+        rtp: '1200'
+      }
+    }
+  }}
+  // or other video props
+/>
+```
