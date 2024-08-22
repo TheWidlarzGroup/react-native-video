@@ -23,3 +23,14 @@ Example:
 onReceiveAdEvent={event => console.log(event)}
 ...
 ```
+
+### Localization
+To change the language of the IMA SDK, you need to pass `adLanguage` prop to `Video` component. List of supported languages, you can find [here](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/localization#locale-codes)
+
+Example:
+
+```jsx
+...
+adLanguage="fr"
+...
+```
