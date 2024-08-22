@@ -41,8 +41,8 @@ const MESSAGE = {
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
     return (
-      `There is a newer version of the library available.` +
-      `You are using version ${issueVersion}, while the latest stable version is ${latestVersion}.` +
+      `There is a newer version of the library available. ` +
+      `You are using version ${issueVersion}, while the latest stable version is ${latestVersion}. ` +
       `Please update to the latest version and check if the issue still exists.` +
       `\n > Note: If the issue still exists, please update the issue report with the latest information.`
     );
