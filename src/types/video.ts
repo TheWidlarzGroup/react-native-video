@@ -33,6 +33,7 @@ export type ReactVideoSourceProperties = {
   cropEnd?: number;
   metadata?: VideoMetadata;
   drm?: Drm;
+  cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
 };
 
@@ -86,6 +87,27 @@ export type Drm = Readonly<{
   ) => string | Promise<string>; // ios
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
+
+export enum CmcdMode {
+  MODE_REQUEST_HEADER = 0,
+  MODE_QUERY_PARAMETER = 1,
+}
+/**
+ * Custom key names MUST carry a hyphenated prefix to ensure that there will not be a
+ * namespace collision with future revisions to this specification. Clients SHOULD
+ * use a reverse-DNS syntax when defining their own prefix.
+ *
+ * @see https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf CTA-5004 Specification (Page 6, Section 3.1)
+ */
+export type CmcdData = Record<`${string}-${string}`, string | number>;
+export type CmcdConfiguration = Readonly<{
+  mode?: CmcdMode; // default: MODE_QUERY_PARAMETER
+  request?: CmcdData;
+  session?: CmcdData;
+  object?: CmcdData;
+  status?: CmcdData;
+}>;
+export type Cmcd = boolean | CmcdConfiguration;
 
 export enum BufferingStrategyType {
   DEFAULT = 'Default',
