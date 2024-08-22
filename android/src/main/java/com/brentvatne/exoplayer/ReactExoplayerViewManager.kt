@@ -29,6 +29,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val REACT_CLASS = "RCTVideo"
         private const val PROP_SRC = "src"
         private const val PROP_AD_TAG_URL = "adTagUrl"
+        private const val PROP_AD_LANGUAGE = "adLanguage"
         private const val PROP_RESIZE_MODE = "resizeMode"
         private const val PROP_REPEAT = "repeat"
         private const val PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack"
@@ -108,6 +109,16 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         }
         val adTagUrl = Uri.parse(uriString)
         videoView.setAdTagUrl(adTagUrl)
+    }
+
+    @ReactProp(name = PROP_AD_LANGUAGE)
+    fun setAdLanguage(videoView: ReactExoplayerView, languageString: String?) {
+        if (TextUtils.isEmpty(languageString)) {
+            videoView.setAdLanguage(null) // Maybe "en" default?
+            return
+        }
+
+        videoView.setAdLanguage(languageString)
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
