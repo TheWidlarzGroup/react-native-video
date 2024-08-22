@@ -81,7 +81,7 @@ class FullScreenPlayerView(
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
-        navigationBarVisibility()
+        updateNavigationBarVisibility()
     }
 
     override fun onStop() {
@@ -135,7 +135,7 @@ class FullScreenPlayerView(
         return layoutParams
     }
 
-    private fun navigationBarVisibility() {
+    private fun updateNavigationBarVisibility() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window?.setDecorFitsSystemWindows(!controlsConfig.hideNavigationBarOnFullScreenMode)
             window?.insetsController?.let {
