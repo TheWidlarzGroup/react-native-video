@@ -276,9 +276,9 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         videoView.setSubtitleStyle(SubtitleStyle.parse(src))
     }
 
-    @ReactProp(name = PROP_SHUTTER_COLOR, defaultInt = 0)
+    @ReactProp(name = PROP_SHUTTER_COLOR, defaultInt = Color.BLACK)
     fun setShutterColor(videoView: ReactExoplayerView, color: Int) {
-        videoView.setShutterColor(if (color == 0) Color.BLACK else color)
+        videoView.setShutterColor(color)
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
