@@ -190,7 +190,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
     label.startsWith('missing-'),
   );
 
-  const outdatedVersionLabel = labels.find((label) =>
+  const outdatedVersionLabel = Array.from(labels).find((label) =>
     label.startsWith('outdated-version'),
   );
 
@@ -220,7 +220,9 @@ const updateLabelsForMissingInfo = (labels) => {
     labels.add('Repro Provided');
   }
 
-  if (labels.find((label) => label.startsWith('outdated-version'))) {
+  if (
+    Array.from(labels).find((label) => label.startsWith('outdated-version'))
+  ) {
     labels.add('Newer Version Available');
   } else {
     labels.delete('Newer Version Available');
