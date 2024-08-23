@@ -207,12 +207,14 @@ class PlayerViewProxy {
 
         var rndvJSSource: RNDReactNativeDiceVideo.JSSource?
         if let sourceValue = jsProps.source.value {
-            rndvJsProps.nowPlaying.value = RNDReactNativeDiceVideo.JSNowPlaying(
+            let jsNowPlaying = RNDReactNativeDiceVideo.JSNowPlaying(
                 title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title,
                 channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl,
                 episodeInfo: jsProps.metadata.value?.episodeInfo, //tvos new
                 startDate: sourceValue.nowPlaying?.startDate,
-                endDate: sourceValue.nowPlaying?.endDate)
+                endDate: sourceValue.nowPlaying?.endDate,
+                dateFormat: sourceValue.nowPlaying?.dateFormat)
+            rndvJsProps.nowPlaying.value = jsNowPlaying
             
             let rndvJSIma = PlayerViewProxy.convertRNVideoImaToRNDV(sourceIma: sourceValue.ima)
             let rndvJSDrm = PlayerViewProxy.convertRNVideoDrmToRNDV(sourceDrm: sourceValue.drm)
@@ -229,7 +231,6 @@ class PlayerViewProxy {
                 }
             }
             let jsLimitedSeekableRange = RNDReactNativeDiceVideo.JSLimitedSeekableRange(start: sourceValue.limitedSeekableRange?.start, end: sourceValue.limitedSeekableRange?.end, seekToStart: sourceValue.limitedSeekableRange?.seekToStart)
-            let jsNowPlaying = RNDReactNativeDiceVideo.JSNowPlaying(title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title, channelLogoUrl: sourceValue.nowPlaying?.channelLogoUrl, episodeInfo: jsProps.metadata.value?.episodeInfo, startDate: sourceValue.nowPlaying?.startDate, endDate: sourceValue.nowPlaying?.endDate)
             
             let metadata = JSMetadata(metadata: sourceValue.metadata)
 
