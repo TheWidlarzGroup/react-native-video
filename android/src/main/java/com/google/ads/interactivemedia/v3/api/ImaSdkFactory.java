@@ -1,8 +1,22 @@
 package com.google.ads.interactivemedia.v3.api;
 
-import androidx.annotation.InspectableProperty;
-
 public abstract class ImaSdkFactory {
+    private static ImaSdkFactory instance;
+
     public abstract ImaSdkSettings createImaSdkSettings();
-    public abstract void setLanguage(String language);
+
+    public static ImaSdkFactory getInstance() {
+        if (instance == null) {
+            instance = new ConcreteImaSdkFactory();
+        }
+        return instance;
+    }
+}
+
+class ConcreteImaSdkFactory extends ImaSdkFactory {
+
+    @Override
+    public ImaSdkSettings createImaSdkSettings() {
+        return new ConcreteImaSdkSettings();
+    }
 }
