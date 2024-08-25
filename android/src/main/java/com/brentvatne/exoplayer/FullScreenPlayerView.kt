@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -14,6 +13,8 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.ui.LegacyPlayerControlView
 import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.toolbox.DebugLog
@@ -147,11 +148,10 @@ class FullScreenPlayerView(
                 }
             }
         } else {
-            @Suppress("DEPRECATION")
-            window?.decorView?.systemUiVisibility = if (controlsConfig.hideNavigationBarOnFullScreenMode) {
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            if (controlsConfig.hideNavigationBarOnFullScreenMode) {
+                window?.let { WindowInsetsControllerCompat(it, window!!.decorView).hide(WindowInsetsCompat.Type.navigationBars()) }
             } else {
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                window?.let { WindowInsetsControllerCompat(it, window!!.decorView).show(WindowInsetsCompat.Type.navigationBars()) }
             }
         }
     }
