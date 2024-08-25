@@ -137,6 +137,16 @@ public final class ExoPlayerView extends PlayerView {
             }
         }
 
+    private void hideShutterView() {
+        shutterView.setVisibility(INVISIBLE);
+        surfaceView.setAlpha(1);
+    }
+
+    private void showShutterView() {
+        shutterView.setVisibility(VISIBLE);
+        surfaceView.setAlpha(0);
+    }
+
     private void updateShutterViewVisibility() {
         if(shutterView != null) {
             shutterView.setVisibility(this.hideShutterView ? INVISIBLE : VISIBLE);
@@ -261,7 +271,7 @@ public final class ExoPlayerView extends PlayerView {
 
         @Override
         public void onRenderedFirstFrame() {
-            shutterView.setVisibility(INVISIBLE);
+            hideShutterView();
         }
 
         @Override

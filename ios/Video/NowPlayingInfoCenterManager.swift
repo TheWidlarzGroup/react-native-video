@@ -167,9 +167,7 @@ class NowPlayingInfoCenterManager {
                 return .commandFailed
             }
             if let event = event as? MPChangePlaybackPositionCommandEvent {
-                player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: .max)) { _ in
-                    player.play()
-                }
+                player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: .max))
                 return .success
             }
             return .commandFailed
@@ -192,7 +190,12 @@ class NowPlayingInfoCenterManager {
         }
 
         // commonMetadata is metadata from asset, externalMetadata is custom metadata set by user
-        let metadata = currentItem.asset.commonMetadata + currentItem.externalMetadata
+        // externalMetadata should override commonMetadata to allow override metadata from source
+        let metadata = {
+            let common = Dictionary(uniqueKeysWithValues: currentItem.asset.commonMetadata.map { ($0.identifier, $0) })
+            let external = Dictionary(uniqueKeysWithValues: currentItem.externalMetadata.map { ($0.identifier, $0) })
+            return Array((common.merging(external) { _, new in new }).values)
+        }()
 
         let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.stringValue ?? ""
 

@@ -42,6 +42,7 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     }
 
     @ReactMethod
+    @Suppress("UNUSED_PARAMETER") // codegen compatibility
     fun seekCmd(reactTag: Int, time: Float, tolerance: Float) {
         performOnPlayerView(reactTag) {
             it?.seekTo((time * 1000f).roundToInt().toLong())

@@ -98,6 +98,7 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelection;
 import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
+import androidx.media3.exoplayer.upstream.CmcdConfiguration;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.exoplayer.util.EventLogger;
@@ -196,8 +197,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private EventLogger debugEventLogger = null;
     private boolean enableDebug = false;
     private static final String TAG_EVENT_LOGGER = "RNVExoplayer";
-    private ViewGroup.LayoutParams exoProgressLayoutParam;
-    private ColorStateList exoPositionText;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -268,6 +267,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean viewHasDropped = false;
 
     private final String instanceId = String.valueOf(UUID.randomUUID());
+
+    private CmcdConfiguration.Factory cmcdConfigurationFactory;
+
+    public void setCmcdConfigurationFactory(CmcdConfiguration.Factory factory) {
+        this.cmcdConfigurationFactory = factory;
+    }
 
     private void updateProgress() {
         if (player != null) {
@@ -454,20 +459,19 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @SuppressLint("ResourceAsColor")
     private void refreshProgressBarVisibility (){
-        if(playerControlView == null) return;
-        DefaultTimeBar exoProgress;
-        TextView exoDuration;
-        exoProgress = findViewById(androidx.media3.ui.R.id.exo_progress);
-        exoDuration = findViewById(androidx.media3.ui.R.id.exo_duration);
-        if(exoProgressLayoutParam == null || exoPositionText == null) return;
+        if(playerControlView == null || !controls) return;
+        DefaultTimeBar exoProgress = findViewById(androidx.media3.ui.R.id.exo_progress);
+        TextView exoDuration = findViewById(androidx.media3.ui.R.id.exo_duration);
         if(controlsConfig.getHideSeekBar()){
-            exoProgressLayoutParam = exoProgress.getLayoutParams();
-            exoPositionText = exoDuration.getTextColors();
-            exoProgress.setLayoutParams(new LayoutParams(0,0));
-            exoDuration.setTextColor(android.R.color.transparent);
+            exoProgress.setVisibility(INVISIBLE);
+            exoDuration.setVisibility(INVISIBLE);
         }else{
-            exoProgress.setLayoutParams(exoProgressLayoutParam);
-            exoDuration.setTextColor(exoPositionText);
+            exoProgress.setVisibility(VISIBLE);
+            if(controlsConfig.getHideDuration()){
+                exoDuration.setVisibility(INVISIBLE);
+            }else{
+                exoDuration.setVisibility(VISIBLE);
+            }
         }
     }
 
@@ -623,7 +627,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void getCurrentPosition(Promise promise) {
         if (player != null) {
-            double currentPosition = player.getCurrentPosition() / 1000;
+            float currentPosition = player.getCurrentPosition() / 1000.0f;
             promise.resolve(currentPosition);
         } else {
             promise.reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.");
@@ -1003,6 +1007,12 @@ public class ReactExoplayerView extends FrameLayout implements
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
+        }
+
+        if (cmcdConfigurationFactory != null) {
+            mediaSourceFactory = mediaSourceFactory.setCmcdConfigurationFactory(
+                    cmcdConfigurationFactory::createCmcdConfiguration
+            );
         }
 
         MediaItem mediaItem = mediaItemBuilder.setStreamKeys(streamKeys).build();
@@ -1717,6 +1727,14 @@ public class ReactExoplayerView extends FrameLayout implements
                     player.setMediaItem(newMediaItem, false);
                 }
             }
+            if (source.getCmcdProps() != null) {
+                CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());
+                CmcdConfiguration.Factory factory = cmcdConfig.toCmcdConfigurationFactory();
+                this.setCmcdConfigurationFactory(factory);
+            } else {
+                this.setCmcdConfigurationFactory(null);
+            }
+
             if (!isSourceEqual) {
                 reloadSource();
             }
@@ -2239,6 +2257,8 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setControls(boolean controls) {
         this.controls = controls;
         exoPlayerView.setUseController(controls);
+        if(!controls) return;
+        refreshProgressBarVisibility();
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {

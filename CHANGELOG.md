@@ -1,5 +1,24 @@
 
 
+## [6.4.5](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.4...v6.4.5) (2024-08-17)
+
+
+### Bug Fixes
+
+* **android:** resolve a release issue with DefaultDashChunkSource ([#4097](https://github.com/TheWidlarzGroup/react-native-video/issues/4097)) ([7e222e8](https://github.com/TheWidlarzGroup/react-native-video/commit/7e222e8fc4f3c47a1c9cd2fbf5ff012bcbe98a7f))
+
+* refactor(android): migrate DefaultDashChunkSource to Kotlin (#4078) (b7d1cabf)
+* fix(ios): remove resume logic in notification seek closure (#4068) (c6ae17e4)
+* chore(doc): update document (props & method) (#4072) (cd41a1b2)
+* fix(android): build warnings (#4058) (899bb822)
+* infra: update feature request form (#4065) (6c03d0a7)
+* fix(ios): override source metadata with custom metadata (#4050) (38aa2b05)
+* fix(android): return the value as a float for the getCurrentPosition function (#4054) (af0302b1)
+* refactor(android): migrate ReactExoplayerViewManager to Kotlin (#4011) (74c6dd62)
+* fix(android): viewType is ignored when its value is ViewType.TEXTURE (#4031) (22cfd6ce)
+* fix(ios): metadata update race (#4033) (08a57a3b)
+* fix(ios): updated getLicense call to work with new syntax, and fixed spelling error (#4014) (#4042) (2348c5e4)
+
 ## [6.4.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.2...v6.4.3) (2024-07-24)
 
 
