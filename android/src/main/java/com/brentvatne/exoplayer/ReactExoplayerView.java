@@ -2276,7 +2276,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 setControls(controls);
             }
             UiThreadUtil.runOnUiThread(() -> {
-                controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
             });
         }
