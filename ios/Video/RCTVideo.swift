@@ -284,9 +284,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     // MARK: - App lifecycle handlers
 
+    func getIsExternalPlaybackActive() -> Bool {
+        #if os(visionOS)
+            let isExternalPlaybackActive = false
+        #else
+            let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        #endif
+        return isExternalPlaybackActive
+    }
+
     @objc
     func applicationWillResignActive(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        let isExternalPlaybackActive = getIsExternalPlaybackActive()
         if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
         _player?.pause()
@@ -295,7 +304,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        let isExternalPlaybackActive = getIsExternalPlaybackActive()
         if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
 
         // Resume the player or any other tasks that should continue when the app becomes active.
@@ -305,7 +314,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func applicationDidEnterBackground(notification _: NSNotification!) {
-        let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
+        let isExternalPlaybackActive = getIsExternalPlaybackActive()
         if !_playInBackground || isExternalPlaybackActive || isPipActive() { return }
         // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
         _playerLayer?.player = nil
