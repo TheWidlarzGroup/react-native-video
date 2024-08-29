@@ -1,5 +1,12 @@
 
 
+## [6.4.5](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.4...v6.4.5) (2024-08-17)
+
+
+### Bug Fixes
+
+* **android:** resolve a release issue with DefaultDashChunkSource ([#4097](https://github.com/TheWidlarzGroup/react-native-video/issues/4097)) ([7e222e8](https://github.com/TheWidlarzGroup/react-native-video/commit/7e222e8fc4f3c47a1c9cd2fbf5ff012bcbe98a7f))
+
 * refactor(android): migrate DefaultDashChunkSource to Kotlin (#4078) (b7d1cabf)
 * fix(ios): remove resume logic in notification seek closure (#4068) (c6ae17e4)
 * chore(doc): update document (props & method) (#4072) (cd41a1b2)
