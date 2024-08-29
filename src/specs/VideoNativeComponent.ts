@@ -305,6 +305,7 @@ export type OnControlsVisibilityChange = Readonly<{
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   adTagUrl?: string;
+  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   disableFocus?: boolean; // android
   maxBitRate?: Float;

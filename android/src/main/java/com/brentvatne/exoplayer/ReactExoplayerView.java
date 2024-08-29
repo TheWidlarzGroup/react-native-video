@@ -133,6 +133,8 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
+import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
+import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.common.collect.ImmutableList;
 
 import java.net.CookieHandler;
@@ -251,6 +253,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean mReportBandwidth = false;
     private boolean controls;
     private Uri adTagUrl;
+    private String adLanguage;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -754,9 +757,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
+        ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+        imaSdkSettings.setLanguage(adLanguage);
+
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
                 .Builder(themedReactContext)
+                .setImaSdkSettings(imaSdkSettings)
                 .setAdEventListener(this)
                 .setAdErrorListener(this)
                 .build();
@@ -1849,6 +1856,10 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setAdTagUrl(final Uri uri) {
         adTagUrl = uri;
+    }
+
+    public void setAdLanguage(final String language) {
+        adLanguage = language;
     }
 
     public void setTextTracks(SideLoadedTextTrackList textTracks) {
