@@ -79,6 +79,11 @@ export const srcAllPlatformList = [
     startPosition: 50000,
   },
   {
+    description: 'mp3 with texttrack',
+    uri: 'https://traffic.libsyn.com/democracynow/wx2024-0702_SOT_DeadCalm-LucileSmith-FULL-V2.mxf-audio.mp3', // an mp3 file
+    textTracks: [], // empty text track list
+  },
+  {
     description: 'BigBugBunny sideLoaded subtitles',
     // sideloaded subtitles wont work for streaming like HLS on ios
     // mp4
