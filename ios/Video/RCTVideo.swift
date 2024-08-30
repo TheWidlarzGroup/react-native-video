@@ -979,7 +979,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func setTextTracks(_ textTracks: [TextTrack]?) {
-        if (textTracks == nil) {
+        if textTracks == nil {
             _textTracks = []
         } else {
             _textTracks = textTracks!
