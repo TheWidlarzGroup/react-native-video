@@ -130,17 +130,18 @@ const VideoPlayer: FC<Props> = ({}) => {
 
     if (selectedTrack?.language) {
       setTextTracks(data.textTracks);
-      if (textTracksSelectionBy === 'index') {
-        setSelectedTextTrack({
-          type: SelectedTrackType.INDEX,
-          value: selectedTrack?.index,
-        });
-      } else {
-        setSelectedTextTrack({
-          type: SelectedTrackType.LANGUAGE,
-          value: selectedTrack?.language,
-        });
+      let value;
+      if (textTracksSelectionBy === SelectedTrackType.INDEX) {
+        value = selectedTrack?.index;
+      } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+        value = selectedTrack?.language;
+      } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
+        value = selectedTrack?.title;
       }
+      setSelectedTextTrack({
+        type: textTracksSelectionBy,
+        value: value,
+      });
     } else {
       setTextTracks(data.textTracks);
     }

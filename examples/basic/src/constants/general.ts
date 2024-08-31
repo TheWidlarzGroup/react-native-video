@@ -2,13 +2,14 @@ import {
   BufferConfig,
   DRMType,
   ISO639_1,
+  SelectedTrackType,
   TextTrackType,
 } from 'react-native-video';
 import {SampleVideoSource} from '../types';
 import {localeVideo} from '../assets';
 import {Platform} from 'react-native';
 
-export const textTracksSelectionBy = 'index';
+export const textTracksSelectionBy = SelectedTrackType.INDEX;
 
 export const isIos = Platform.OS === 'ios';
 
