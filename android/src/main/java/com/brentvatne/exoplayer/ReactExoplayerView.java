@@ -1940,7 +1940,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } else if ("title".equals(type)) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value)) {
+                if (format.label != null && format.label.equals(value)) {
                     groupIndex = i;
                     break;
                 }
