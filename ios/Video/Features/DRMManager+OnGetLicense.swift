@@ -17,12 +17,14 @@ extension DRMManager {
             throw RCTVideoErrorHandler.noLicenseServerURL
         }
         
-        _pendingLicenses[licenseSeverUrl] = keyRequest
-        
+        guard let loadedLicenseUrl = keyRequest.identifier as? String else {
+            throw RCTVideoErrorHandler.invalidContentId
+        }
+        _pendingLicenses[loadedLicenseUrl] = keyRequest
         onGetLicense([
             "licenseUrl": licenseSeverUrl,
-            "loadedLicenseUrl": keyRequest.identifier as Any,
-            "contetId": assetId,
+            "loadedLicenseUrl": loadedLicenseUrl,
+            "contentId": assetId,
             "spcBase64": spcData.base64EncodedString(),
             "target": reactTag as Any
         ])
