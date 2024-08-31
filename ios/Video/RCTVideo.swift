@@ -462,8 +462,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if _drmManager == nil {
                 _drmManager = DRMManager()
             }
-            
-            _drmManager?.createContentKeyRequest(asset: asset, drmParams: source.drm, reactTag: reactTag, onVideoError: onVideoError, onGetLicense: onGetLicense)
+
+            _drmManager?.createContentKeyRequest(
+                asset: asset,
+                drmParams: source.drm,
+                reactTag: reactTag,
+                onVideoError: onVideoError,
+                onGetLicense: onGetLicense
+            )
         }
 
         return await playerItemPrepareText(source: source, asset: asset, assetOptions: assetOptions, uri: source.uri ?? "")

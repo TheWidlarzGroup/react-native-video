@@ -8,37 +8,36 @@
 import AVFoundation
 
 extension DRMManager: AVContentKeySessionDelegate {
-    
-    func contentKeySession(_ session: AVContentKeySession, didProvide keyRequest: AVContentKeyRequest) {
+    func contentKeySession(_: AVContentKeySession, didProvide keyRequest: AVContentKeyRequest) {
         handleContentKeyRequest(keyRequest: keyRequest)
     }
-    
-    func contentKeySession(_ session: AVContentKeySession, didProvideRenewingContentKeyRequest keyRequest: AVContentKeyRequest) {
+
+    func contentKeySession(_: AVContentKeySession, didProvideRenewingContentKeyRequest keyRequest: AVContentKeyRequest) {
         handleContentKeyRequest(keyRequest: keyRequest)
     }
-    
-    func contentKeySession(_ session: AVContentKeySession, shouldRetry keyRequest: AVContentKeyRequest, reason retryReason: AVContentKeyRequest.RetryReason) -> Bool {
+
+    func contentKeySession(_: AVContentKeySession, shouldRetry _: AVContentKeyRequest, reason retryReason: AVContentKeyRequest.RetryReason) -> Bool {
         let reasons = [
             AVContentKeyRequest.RetryReason.timedOut,
             AVContentKeyRequest.RetryReason.receivedResponseWithExpiredLease,
-            AVContentKeyRequest.RetryReason.receivedObsoleteContentKey
+            AVContentKeyRequest.RetryReason.receivedObsoleteContentKey,
         ]
-        
+
         // Check if we should retry
         return reasons.contains(where: { r in r == retryReason })
     }
-    
-    func contentKeySession(_ session: AVContentKeySession, didProvide keyRequest: AVPersistableContentKeyRequest) {
+
+    func contentKeySession(_: AVContentKeySession, didProvide keyRequest: AVPersistableContentKeyRequest) {
         handlePersistableKeyRequest(keyRequest: keyRequest)
     }
-    
-    func contentKeySession(_ session: AVContentKeySession, contentKeyRequest keyRequest: AVContentKeyRequest, didFailWithError err: any Error) {
+
+    func contentKeySession(_: AVContentKeySession, contentKeyRequest _: AVContentKeyRequest, didFailWithError err: any Error) {
         guard let onVideoError, let reactTag else {
             return
         }
-        
+
         let error = err as NSError
-        
+
         onVideoError([
             "error": [
                 "code": NSNumber(value: error.code),
@@ -47,7 +46,7 @@ extension DRMManager: AVContentKeySessionDelegate {
                 "localizedRecoverySuggestion": error.localizedRecoverySuggestion ?? "",
                 "domain": error.domain,
             ],
-            "target": reactTag
+            "target": reactTag,
         ])
     }
 }

@@ -13,7 +13,7 @@ extension DRMManager {
             if localSourceEncryptionKeyScheme != nil {
                 try handleEmbemedKey(keyRequest: keyRequest)
             }
-            
+
             // Offline DRM is not supported yet - if you need it please checkout below issue
             // https://github.com/TheWidlarzGroup/react-native-video/issues/3539
             throw NSError()
@@ -21,22 +21,22 @@ extension DRMManager {
             keyRequest.processContentKeyResponseError(error)
         }
     }
-    
+
     func handleEmbemedKey(keyRequest: AVPersistableContentKeyRequest) throws {
         guard let localSourceEncryptionKeyScheme else {
             throw RCTVideoErrorHandler.noDRMData
         }
-        
+
         guard let uri = keyRequest.identifier as? String, let url = URL(string: uri) else {
             throw RCTVideoErrorHandler.noDRMData
         }
-        
+
         guard let persistentKeyData = RCTVideoUtils.extractDataFromCustomSchemeUrl(from: url, scheme: localSourceEncryptionKeyScheme) else {
             throw RCTVideoErrorHandler.noDataFromLicenseRequest
         }
-        
+
         let persistentKey = try keyRequest.persistableContentKey(fromKeyVendorResponse: persistentKeyData)
-        
+
         try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: persistentKey)
     }
 }

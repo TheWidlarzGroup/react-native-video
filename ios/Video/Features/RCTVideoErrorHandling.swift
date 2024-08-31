@@ -112,7 +112,7 @@ enum RCTVideoErrorHandler {
             NSLocalizedRecoverySuggestionErrorKey: "Is the contentId and url ok?",
         ]
     )
-    
+
     static let invalidAppCert = NSError(
         domain: "RCTVideo",
         code: RCTVideoError.invalidAppCert.rawValue,
