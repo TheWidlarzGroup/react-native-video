@@ -94,9 +94,9 @@ export const srcAllPlatformList = [
   },
 ];
 
-export const srcIosList = [];
+export const srcIosList: SampleVideoSource[] = [];
 
-export const srcAndroidList = [
+export const srcAndroidList: SampleVideoSource[] = [
   {
     description: 'Another live sample',
     uri: 'https://live.forstreet.cl/live/livestream.m3u8',
@@ -149,9 +149,12 @@ export const srcAndroidList = [
   },
 ];
 
-export const srcList: SampleVideoSource[] = srcAllPlatformList.concat(
-  isAndroid ? srcAndroidList : srcIosList,
-);
+const platformSrc: SampleVideoSource[] = isAndroid
+  ? srcAndroidList
+  : srcIosList;
+
+export const srcList: SampleVideoSource[] =
+  platformSrc.concat(srcAllPlatformList);
 
 export const bufferConfig: BufferConfig = {
   minBufferMs: 15000,
