@@ -13,14 +13,14 @@ extension DRMManager {
             throw RCTVideoErrorHandler.noDataFromLicenseRequest
         }
         
-        guard let licenceSeverUrl = drmParams?.licenseServer, licenceSeverUrl.isEmpty else {
+        guard let licenseSeverUrl = drmParams?.licenseServer, !licenseSeverUrl.isEmpty else {
             throw RCTVideoErrorHandler.noLicenseServerURL
         }
         
-        _pendingLicenses[licenceSeverUrl] = keyRequest
+        _pendingLicenses[licenseSeverUrl] = keyRequest
         
         onGetLicense([
-            "licenseUrl": licenceSeverUrl,
+            "licenseUrl": licenseSeverUrl,
             "loadedLicenseUrl": keyRequest.identifier as Any,
             "contetId": assetId,
             "spcBase64": spcData.base64EncodedString(),
@@ -28,20 +28,20 @@ extension DRMManager {
         ])
     }
     
-    public func setJSLicneseResult(license: String, licenseUrl: String) {
+    public func setJSLicenseResult(license: String, licenseUrl: String) {
         // Check if the loading request exists in _loadingRequests based on licenseUrl
         guard let keyContentRequest = _pendingLicenses[licenseUrl] else {
-            setJSLinceseError(error: "Loading request for licenseUrl \(licenseUrl) not found", licenseUrl: licenseUrl)
+            setJSLicenseError(error: "Loading request for licenseUrl \(licenseUrl) not found", licenseUrl: licenseUrl)
             return
         }
         
         guard let responseData = Data(base64Encoded: license) else {
-            setJSLinceseError(error: "No data from JS license response", licenseUrl: licenseUrl)
+            setJSLicenseError(error: "No data from JS license response", licenseUrl: licenseUrl)
             return
         }
         
         do {
-            try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, licence: responseData)
+            try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, license: responseData)
         } catch {
             keyContentRequest.processContentKeyResponseError(error)
         }
@@ -49,7 +49,7 @@ extension DRMManager {
         _pendingLicenses.removeValue(forKey: licenseUrl)
     }
     
-    public func setJSLinceseError(error: String, licenseUrl: String) {
+    public func setJSLicenseError(error: String, licenseUrl: String) {
         if let onVideoError, let reactTag {
             let err = RCTVideoErrorHandler.fromJSPart(error)
             onVideoError([

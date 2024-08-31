@@ -1326,11 +1326,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
-        _drmManager?.setJSLicneseResult(license: license, licenseUrl: licenseUrl)
+        _drmManager?.setJSLicenseResult(license: license, licenseUrl: licenseUrl)
     }
 
     func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
-        _drmManager?.setJSLinceseError(error: error, licenseUrl: licenseUrl)
+        _drmManager?.setJSLicenseError(error: error, licenseUrl: licenseUrl)
     }
 
     // MARK: - RCTPlayerObserverHandler

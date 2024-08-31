@@ -52,8 +52,8 @@ class DRMManager: NSObject {
         }
     }
     
-    func finishProcessingContentKeyRequest(keyRequest: AVContentKeyRequest, licence: Data) throws {
-        let keyResponse = AVContentKeyResponse(fairPlayStreamingKeyResponseData: licence)
+    func finishProcessingContentKeyRequest(keyRequest: AVContentKeyRequest, license: Data) throws {
+        let keyResponse = AVContentKeyResponse(fairPlayStreamingKeyResponseData: license)
         keyRequest.processContentKeyResponse(keyResponse)
     }
     
@@ -66,11 +66,11 @@ class DRMManager: NSObject {
         let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificte, contentIdentifier: assetIdData)
         
         if onGetLicense == nil {
-            // try get licence on native part
-            let licence = try await self.requestLicence(spcData: spcData, keyRequest: keyRequest)
-            try finishProcessingContentKeyRequest(keyRequest: keyRequest, licence: licence)
+            // try get license on native part
+            let license = try await self.requestlicense(spcData: spcData, keyRequest: keyRequest)
+            try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: license)
         } else {
-            // try get licence from JS (method provided by user)
+            // try get license from JS (method provided by user)
             // We will set loading request, and after callback we will set result to keyRequest
             try requestLicneseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
         }
@@ -97,18 +97,18 @@ class DRMManager: NSObject {
         return data
     }
     
-    private func requestLicence(spcData: Data, keyRequest: AVContentKeyRequest) async throws -> Data {
-        let licence: Data? = nil
+    private func requestlicense(spcData: Data, keyRequest: AVContentKeyRequest) async throws -> Data {
+        let license: Data? = nil
         
-        guard let licenceSeverUrlString = drmParams?.licenseServer else {
+        guard let licenseSeverUrlString = drmParams?.licenseServer else {
             throw RCTVideoErrorHandler.noLicenseServerURL
         }
         
-        guard let licenceSeverUrl = URL(string: licenceSeverUrlString) else {
+        guard let licenseSeverUrl = URL(string: licenseSeverUrlString) else {
             throw RCTVideoErrorHandler.noLicenseServerURL
         }
         
-        var urlRequest = URLRequest(url: licenceSeverUrl)
+        var urlRequest = URLRequest(url: licenseSeverUrl)
         urlRequest.httpMethod = "POST"
 
         if let headers = drmParams?.headers {

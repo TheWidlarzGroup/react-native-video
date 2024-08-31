@@ -37,6 +37,6 @@ extension DRMManager {
         
         let persistentKey = try keyRequest.persistableContentKey(fromKeyVendorResponse: persistentKeyData)
         
-        try finishProcessingContentKeyRequest(keyRequest: keyRequest, licence: persistentKey)
+        try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: persistentKey)
     }
 }
