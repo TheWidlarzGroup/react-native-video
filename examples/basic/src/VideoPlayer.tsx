@@ -268,6 +268,7 @@ const VideoPlayer: FC<Props> = ({}) => {
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
+            subtitleStyle={{subtitlesFollowVideo: true}}
           />
         </TouchableOpacity>
       )}
