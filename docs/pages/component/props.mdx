@@ -846,15 +846,17 @@ source={{
 
 ### `subtitleStyle`
 
-| Property      | Description                                                                                                                                                                                        | Platforms    |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| fontSize      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
-| paddingTop    | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
-| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
-| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
-| paddingRight  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
-| opacity       | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
-| subtitlesFollowVideo | Boolean to adjust position of subtitles. Default: true |
+<PlatformsList types={['Android', 'iOS']} />
+
+| Property      | Platform | Description                                                                                                                                                                                        | Platforms    |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize      | Android  | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop    | Android  | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom | Android  | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft   | Android  | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight  | Android  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity       | Android, iOS | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+| subtitlesFollowVideo | Android | Boolean to adjust position of subtitles. Default: true |
 
 
 Example:
