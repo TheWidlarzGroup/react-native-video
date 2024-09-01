@@ -498,19 +498,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
             }
         } else {
-#if !os(tvOS)
-            if #available(iOS 16.0, *) {
-                // This feature caused crashes, if the app was put in bg, before the source change
-                // https://github.com/TheWidlarzGroup/react-native-video/issues/3900
-                self._playerViewController?.allowsVideoFrameAnalysis = false
-            }
-#endif
+            #if !os(tvOS)
+                if #available(iOS 16.0, *) {
+                    // This feature caused crashes, if the app was put in bg, before the source change
+                    // https://github.com/TheWidlarzGroup/react-native-video/issues/3900
+                    self._playerViewController?.allowsVideoFrameAnalysis = false
+                }
+            #endif
             _player?.replaceCurrentItem(with: playerItem)
-#if !os(tvOS)
-            if #available(iOS 16.0, *) {
-                self._playerViewController?.allowsVideoFrameAnalysis = true
-            }
-#endif
+            #if !os(tvOS)
+                if #available(iOS 16.0, *) {
+                    self._playerViewController?.allowsVideoFrameAnalysis = true
+                }
+            #endif
             // later we can just call "updateNowPlayingInfo:
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
