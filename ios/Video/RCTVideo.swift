@@ -1394,6 +1394,20 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    func extractJsonWithIndex(from tracks: [TextTrack]) -> [NSDictionary]? {
+        if tracks.isEmpty {
+            // No tracks, need to return nil to handle
+            return nil
+        }
+        // Map each enumerated pair to include the index in the json dictionary
+        let mappedTracks = tracks.enumerated().compactMap { index, track -> NSDictionary? in
+            guard let json = track.json?.mutableCopy() as? NSMutableDictionary else { return nil }
+            json["index"] = index // Insert the index into the json dictionary
+            return json
+        }
+        return mappedTracks
+    }
+
     func handleReadyToPlay() {
         guard let _playerItem else { return }
 
@@ -1452,7 +1466,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                                        "orientation": orientation,
                                    ],
                                    "audioTracks": audioTracks,
-                                   "textTracks": self._textTracks.compactMap { $0.json } ?? textTracks.map(\.json),
+                                   "textTracks": extractJsonWithIndex(from: _textTracks) ?? textTracks.map(\.json),
                                    "target": self.reactTag as Any])
             }
 
@@ -1650,7 +1664,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if onTextTracks != nil {
             Task {
                 let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
-                self.onTextTracks?(["textTracks": self._textTracks.compactMap { $0.json } ?? textTracks.compactMap(\.json)])
+                self.onTextTracks?(["textTracks": extractJsonWithIndex(from: _textTracks) ?? textTracks.compactMap(\.json)])
             }
         }
 
