@@ -108,7 +108,7 @@ class DRMManager: NSObject {
         let appCertificate = try await requestApplicationCertificate()
         let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificate, contentIdentifier: assetIdData)
 
-        if let onGetLicense {
+        if onGetLicense != nil {
             try await requestLicenseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
         } else {
             let license = try await requestLicense(spcData: spcData)
