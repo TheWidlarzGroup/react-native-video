@@ -17,8 +17,8 @@ class DRMManager: NSObject {
     var onVideoError: RCTDirectEventBlock?
     var onGetLicense: RCTDirectEventBlock?
 
-    // Licneses handled by onGetLicense
-    var _pendingLicenses: [String: AVContentKeyRequest] = [:]
+    // Licenses handled by onGetLicense (from JS side)
+    var pendingLicenses: [String: AVContentKeyRequest] = [:]
 
     override init() {
         contentKeySession = AVContentKeySession(keySystem: .fairPlayStreaming)
@@ -27,7 +27,7 @@ class DRMManager: NSObject {
         contentKeySession.setDelegate(self, queue: DRMManager.queue)
     }
 
-    public func createContentKeyRequest(
+    func createContentKeyRequest(
         asset: AVContentKeyRecipient,
         drmParams: DRMParams?,
         reactTag: NSNumber?,
@@ -42,10 +42,11 @@ class DRMManager: NSObject {
         contentKeySession.addContentKeyRecipient(asset)
     }
 
+    // MARK: - Internal
+
     func handleContentKeyRequest(keyRequest: AVContentKeyRequest) {
         Task {
             do {
-                // If localSourceEncryptionKeyScheme we will handle it in PersistableContentKeyRequest
                 if localSourceEncryptionKeyScheme != nil {
                     try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
                     return
@@ -53,7 +54,7 @@ class DRMManager: NSObject {
 
                 try await processContentKeyRequest(keyRequest: keyRequest)
             } catch {
-                keyRequest.processContentKeyResponseError(error)
+                handleError(error, for: keyRequest)
             }
         }
     }
@@ -63,96 +64,125 @@ class DRMManager: NSObject {
         keyRequest.processContentKeyResponse(keyResponse)
     }
 
-    private func processContentKeyRequest(keyRequest: AVContentKeyRequest) async throws {
-        guard let assetId = getAssetId(keyRequest: keyRequest), let assetIdData = assetId.data(using: .utf8) else {
-            throw RCTVideoErrorHandler.invalidContentId
-        }
+    func handleError(_ error: Error, for keyRequest: AVContentKeyRequest) {
+        let rctError: RCTVideoError
+        if let videoError = error as? RCTVideoError {
+            // handle RCTVideoError errors
+            rctError = videoError
 
-        let appCertificte = try await self.requestApplicationCertificate(keyRequest: keyRequest)
-        let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificte, contentIdentifier: assetIdData)
-
-        if onGetLicense == nil {
-            // try get license on native part
-            let license = try await self.requestlicense(spcData: spcData, keyRequest: keyRequest)
-            try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: license)
+            DispatchQueue.main.async { [weak self] in
+                self?.onVideoError?([
+                    "error": RCTVideoErrorHandler.createError(from: rctError),
+                    "target": self?.reactTag as Any,
+                ])
+            }
         } else {
-            // try get license from JS (method provided by user)
-            // We will set loading request, and after callback we will set result to keyRequest
-            try requestLicneseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
-        }
-    }
+            let err = error as NSError
 
-    private func requestApplicationCertificate(keyRequest _: AVContentKeyRequest) async throws -> Data {
-        guard let urlString = drmParams?.certificateUrl, let url = URL(string: urlString) else {
-            throw RCTVideoErrorHandler.noCertificateURL
-        }
-
-        let urlRequest = URLRequest(url: url)
-        let (data, response) = try await URLSession.shared.data(from: urlRequest)
-
-        if let httpsResponse = response as? HTTPURLResponse {
-            if httpsResponse.statusCode != 200 {
-                throw RCTVideoErrorHandler.noCertificateData
+            // handle Other errors
+            DispatchQueue.main.async { [weak self] in
+                self?.onVideoError?([
+                    "error": [
+                        "code": err.code,
+                        "localizedDescription": err.localizedDescription,
+                        "localizedFailureReason": err.localizedFailureReason ?? "",
+                        "localizedRecoverySuggestion": err.localizedRecoverySuggestion ?? "",
+                        "domain": err.domain,
+                    ],
+                    "target": self?.reactTag as Any,
+                ])
             }
         }
 
-        guard let certData = (drmParams?.base64Certificate != nil ? Data(base64Encoded: data) : data) else {
-            throw RCTVideoErrorHandler.noCertificateData
-        }
-
-        return certData
+        keyRequest.processContentKeyResponseError(error)
     }
 
-    private func requestlicense(spcData: Data, keyRequest _: AVContentKeyRequest) async throws -> Data {
-        guard let licenseSeverUrlString = drmParams?.licenseServer else {
-            throw RCTVideoErrorHandler.noLicenseServerURL
+    // MARK: - Private
+
+    private func processContentKeyRequest(keyRequest: AVContentKeyRequest) async throws {
+        guard let assetId = getAssetId(keyRequest: keyRequest),
+              let assetIdData = assetId.data(using: .utf8) else {
+            throw RCTVideoError.invalidContentId
         }
 
-        guard let licenseSeverUrl = URL(string: licenseSeverUrlString) else {
-            throw RCTVideoErrorHandler.noLicenseServerURL
+        let appCertificate = try await requestApplicationCertificate()
+        let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificate, contentIdentifier: assetIdData)
+
+        if let onGetLicense {
+            try await requestLicenseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
+        } else {
+            let license = try await requestLicense(spcData: spcData)
+            try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: license)
+        }
+    }
+
+    private func requestApplicationCertificate() async throws -> Data {
+        guard let urlString = drmParams?.certificateUrl,
+              let url = URL(string: urlString) else {
+            throw RCTVideoError.noCertificateURL
         }
 
-        var urlRequest = URLRequest(url: licenseSeverUrl)
-        urlRequest.httpMethod = "POST"
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw RCTVideoError.noCertificateData
+        }
+
+        if drmParams?.base64Certificate == true {
+            guard let certData = Data(base64Encoded: data) else {
+                throw RCTVideoError.noCertificateData
+            }
+            return certData
+        }
+
+        return data
+    }
+
+    private func requestLicense(spcData: Data) async throws -> Data {
+        guard let licenseServerUrlString = drmParams?.licenseServer,
+              let licenseServerUrl = URL(string: licenseServerUrlString) else {
+            throw RCTVideoError.noLicenseServerURL
+        }
+
+        var request = URLRequest(url: licenseServerUrl)
+        request.httpMethod = "POST"
+        request.httpBody = spcData
 
         if let headers = drmParams?.headers {
-            for item in headers {
-                guard let value = item.value as? String else {
-                    continue
+            for (key, value) in headers {
+                if let stringValue = value as? String {
+                    request.setValue(stringValue, forHTTPHeaderField: key)
                 }
-                urlRequest.setValue(value, forHTTPHeaderField: item.key)
             }
         }
 
-        urlRequest.httpBody = spcData
+        let (data, response) = try await URLSession.shared.data(for: request)
 
-        let (data, response) = try await URLSession.shared.data(from: urlRequest)
-
-        if let httpsResponse = response as? HTTPURLResponse {
-            if httpsResponse.statusCode != 200 {
-                throw RCTVideoErrorHandler.licenseRequestNotOk(httpsResponse.statusCode)
-            }
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw RCTVideoError.licenseRequestFailed(0)
         }
 
-        if data.isEmpty {
-            throw RCTVideoErrorHandler.noDataFromLicenseRequest
+        guard httpResponse.statusCode == 200 else {
+            throw RCTVideoError.licenseRequestFailed(httpResponse.statusCode)
+        }
+
+        guard !data.isEmpty else {
+            throw RCTVideoError.noDataFromLicenseRequest
         }
 
         return data
     }
 
     private func getAssetId(keyRequest: AVContentKeyRequest) -> String? {
-        guard let assetIdString = drmParams?.contentId else {
-            let url = keyRequest.identifier as? String
-
-            if let url {
-                let assetId = url.replacingOccurrences(of: "skd://", with: "")
-                return assetId
-            }
-
-            return nil
+        if let assetId = drmParams?.contentId {
+            return assetId
         }
 
-        return assetIdString
+        if let url = keyRequest.identifier as? String {
+            return url.replacingOccurrences(of: "skd://", with: "")
+        }
+
+        return nil
     }
 }

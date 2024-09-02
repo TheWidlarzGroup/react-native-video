@@ -17,36 +17,25 @@ extension DRMManager: AVContentKeySessionDelegate {
     }
 
     func contentKeySession(_: AVContentKeySession, shouldRetry _: AVContentKeyRequest, reason retryReason: AVContentKeyRequest.RetryReason) -> Bool {
-        let reasons = [
-            AVContentKeyRequest.RetryReason.timedOut,
-            AVContentKeyRequest.RetryReason.receivedResponseWithExpiredLease,
-            AVContentKeyRequest.RetryReason.receivedObsoleteContentKey,
+        let retryReasons: [AVContentKeyRequest.RetryReason] = [
+            .timedOut,
+            .receivedResponseWithExpiredLease,
+            .receivedObsoleteContentKey,
         ]
-
-        // Check if we should retry
-        return reasons.contains(where: { r in r == retryReason })
+        return retryReasons.contains(retryReason)
     }
 
     func contentKeySession(_: AVContentKeySession, didProvide keyRequest: AVPersistableContentKeyRequest) {
-        handlePersistableKeyRequest(keyRequest: keyRequest)
+        Task {
+            do {
+                try await handlePersistableKeyRequest(keyRequest: keyRequest)
+            } catch {
+                handleError(error, for: keyRequest)
+            }
+        }
     }
 
-    func contentKeySession(_: AVContentKeySession, contentKeyRequest _: AVContentKeyRequest, didFailWithError err: any Error) {
-        guard let onVideoError, let reactTag else {
-            return
-        }
-
-        let error = err as NSError
-
-        onVideoError([
-            "error": [
-                "code": NSNumber(value: error.code),
-                "localizedDescription": error.localizedDescription,
-                "localizedFailureReason": error.localizedFailureReason ?? "",
-                "localizedRecoverySuggestion": error.localizedRecoverySuggestion ?? "",
-                "domain": error.domain,
-            ],
-            "target": reactTag,
-        ])
+    func contentKeySession(_: AVContentKeySession, contentKeyRequest keyRequest: AVContentKeyRequest, didFailWithError error: Error) {
+        handleError(error, for: keyRequest)
     }
 }

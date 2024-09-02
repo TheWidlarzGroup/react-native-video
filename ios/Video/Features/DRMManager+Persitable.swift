@@ -8,35 +8,27 @@
 import AVFoundation
 
 extension DRMManager {
-    func handlePersistableKeyRequest(keyRequest: AVPersistableContentKeyRequest) {
-        do {
-            if localSourceEncryptionKeyScheme != nil {
-                try handleEmbemedKey(keyRequest: keyRequest)
-            }
-
-            // Offline DRM is not supported yet - if you need it please checkout below issue
+    func handlePersistableKeyRequest(keyRequest: AVPersistableContentKeyRequest) async throws {
+        if let localSourceEncryptionKeyScheme {
+            try handleEmbeddedKey(keyRequest: keyRequest, scheme: localSourceEncryptionKeyScheme)
+        } else {
+            // Offline DRM is not supported yet - if you need it please check out the following issue:
             // https://github.com/TheWidlarzGroup/react-native-video/issues/3539
-            throw NSError()
-        } catch {
-            keyRequest.processContentKeyResponseError(error)
+            throw RCTVideoError.offlineDRMNotSuported
         }
     }
 
-    func handleEmbemedKey(keyRequest: AVPersistableContentKeyRequest) throws {
-        guard let localSourceEncryptionKeyScheme else {
-            throw RCTVideoErrorHandler.noDRMData
+    private func handleEmbeddedKey(keyRequest: AVPersistableContentKeyRequest, scheme: String) throws {
+        guard let uri = keyRequest.identifier as? String,
+              let url = URL(string: uri) else {
+            throw RCTVideoError.invalidContentId
         }
 
-        guard let uri = keyRequest.identifier as? String, let url = URL(string: uri) else {
-            throw RCTVideoErrorHandler.noDRMData
-        }
-
-        guard let persistentKeyData = RCTVideoUtils.extractDataFromCustomSchemeUrl(from: url, scheme: localSourceEncryptionKeyScheme) else {
-            throw RCTVideoErrorHandler.noDataFromLicenseRequest
+        guard let persistentKeyData = RCTVideoUtils.extractDataFromCustomSchemeUrl(from: url, scheme: scheme) else {
+            throw RCTVideoError.embeddedKeyExtractionFailed
         }
 
         let persistentKey = try keyRequest.persistableContentKey(fromKeyVendorResponse: persistentKeyData)
-
         try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: persistentKey)
     }
 }

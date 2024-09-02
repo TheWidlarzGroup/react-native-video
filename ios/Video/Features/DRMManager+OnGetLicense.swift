@@ -7,73 +7,62 @@
 
 import AVFoundation
 
-public extension DRMManager {
-    internal func requestLicneseFromJS(spcData: Data, assetId: String, keyRequest: AVContentKeyRequest) throws {
+extension DRMManager {
+    func requestLicenseFromJS(spcData: Data, assetId: String, keyRequest: AVContentKeyRequest) async throws {
         guard let onGetLicense else {
-            throw RCTVideoErrorHandler.noDataFromLicenseRequest
+            throw RCTVideoError.noDataFromLicenseRequest
         }
 
-        guard let licenseSeverUrl = drmParams?.licenseServer, !licenseSeverUrl.isEmpty else {
-            throw RCTVideoErrorHandler.noLicenseServerURL
+        guard let licenseServerUrl = drmParams?.licenseServer, !licenseServerUrl.isEmpty else {
+            throw RCTVideoError.noLicenseServerURL
         }
 
         guard let loadedLicenseUrl = keyRequest.identifier as? String else {
-            throw RCTVideoErrorHandler.invalidContentId
+            throw RCTVideoError.invalidContentId
         }
 
-        _pendingLicenses[loadedLicenseUrl] = keyRequest
+        pendingLicenses[loadedLicenseUrl] = keyRequest
 
-        onGetLicense([
-            "licenseUrl": licenseSeverUrl,
-            "loadedLicenseUrl": loadedLicenseUrl,
-            "contentId": assetId,
-            "spcBase64": spcData.base64EncodedString(),
-            "target": reactTag as Any,
-        ])
+        DispatchQueue.main.async { [weak self] in
+            onGetLicense([
+                "licenseUrl": licenseServerUrl,
+                "loadedLicenseUrl": loadedLicenseUrl,
+                "contentId": assetId,
+                "spcBase64": spcData.base64EncodedString(),
+                "target": self?.reactTag as Any,
+            ])
+        }
     }
 
     func setJSLicenseResult(license: String, licenseUrl: String) {
-        // Check if the loading request exists in _loadingRequests based on licenseUrl
-        guard let keyContentRequest = _pendingLicenses[licenseUrl] else {
+        guard let keyContentRequest = pendingLicenses[licenseUrl] else {
             setJSLicenseError(error: "Loading request for licenseUrl \(licenseUrl) not found", licenseUrl: licenseUrl)
             return
         }
 
         guard let responseData = Data(base64Encoded: license) else {
-            setJSLicenseError(error: "No data from JS license response", licenseUrl: licenseUrl)
+            setJSLicenseError(error: "Invalid license data", licenseUrl: licenseUrl)
             return
         }
 
         do {
             try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, license: responseData)
+            pendingLicenses.removeValue(forKey: licenseUrl)
         } catch {
-            keyContentRequest.processContentKeyResponseError(error)
+            handleError(error, for: keyContentRequest)
         }
-
-        _pendingLicenses.removeValue(forKey: licenseUrl)
     }
 
     func setJSLicenseError(error: String, licenseUrl: String) {
-        if let onVideoError, let reactTag {
-            let err = RCTVideoErrorHandler.fromJSPart(error)
-            onVideoError([
-                "error": [
-                    "code": NSNumber(value: err.code),
-                    "localizedDescription": err.localizedDescription,
-                    "localizedFailureReason": err.localizedFailureReason ?? "",
-                    "localizedRecoverySuggestion": err.localizedRecoverySuggestion ?? "",
-                    "domain": err.domain,
-                ],
-                "target": reactTag,
+        let rctError = RCTVideoError.fromJSPart(error)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.onVideoError?([
+                "error": RCTVideoErrorHandler.createError(from: rctError),
+                "target": self?.reactTag as Any,
             ])
         }
 
-        // Check if the loading request exists in _loadingRequests based on licenseUrl
-        guard _pendingLicenses.contains(where: { url, _ in url == licenseUrl }) else {
-            print("Loading request for licenseUrl \(licenseUrl) not found")
-            return
-        }
-
-        _pendingLicenses.removeValue(forKey: licenseUrl)
+        pendingLicenses.removeValue(forKey: licenseUrl)
     }
 }
