@@ -131,6 +131,7 @@ type SubtitleStyle = Readonly<{
   paddingLeft?: WithDefault<Float, 0>;
   paddingRight?: WithDefault<Float, 0>;
   opacity?: WithDefault<Float, 1>;
+  subtitlesFollowVideo?: WithDefault<boolean, true>;
 }>;
 
 type OnLoadData = Readonly<{
@@ -307,6 +308,7 @@ export type OnControlsVisibilityChange = Readonly<{
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   adTagUrl?: string;
+  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   disableFocus?: boolean; // android
   maxBitRate?: Float;

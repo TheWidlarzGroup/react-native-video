@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReadableMap
 /**
  * Helper file to parse SubtitleStyle prop and build a dedicated class
  */
-class SubtitleStyle private constructor() {
+class SubtitleStyle public constructor() {
     var fontSize = -1
         private set
     var paddingLeft = 0
@@ -19,6 +19,8 @@ class SubtitleStyle private constructor() {
         private set
     var opacity = 1f
         private set
+    var subtitlesFollowVideo = true
+        private set
 
     companion object {
         private const val PROP_FONT_SIZE_TRACK = "fontSize"
@@ -27,6 +29,7 @@ class SubtitleStyle private constructor() {
         private const val PROP_PADDING_LEFT = "paddingLeft"
         private const val PROP_PADDING_RIGHT = "paddingRight"
         private const val PROP_OPACITY = "opacity"
+        private const val PROP_SUBTITLES_FOLLOW_VIDEO = "subtitlesFollowVideo"
 
         @JvmStatic
         fun parse(src: ReadableMap?): SubtitleStyle {
@@ -37,6 +40,7 @@ class SubtitleStyle private constructor() {
             subtitleStyle.paddingLeft = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_LEFT, 0)
             subtitleStyle.paddingRight = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_RIGHT, 0)
             subtitleStyle.opacity = ReactBridgeUtils.safeGetFloat(src, PROP_OPACITY, 1f)
+            subtitleStyle.subtitlesFollowVideo = ReactBridgeUtils.safeGetBool(src, PROP_SUBTITLES_FOLLOW_VIDEO, true)
             return subtitleStyle
         }
     }

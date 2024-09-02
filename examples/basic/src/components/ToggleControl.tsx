@@ -25,7 +25,7 @@ interface ToggleControlType {
   onPress: () => void;
 }
 
-const ToggleControl = ({
+export const ToggleControl = ({
   isSelected,
   selectedText,
   unselectedText,

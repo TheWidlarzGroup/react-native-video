@@ -19,7 +19,12 @@
         }
 
         func setUpAdsLoader() {
-            adsLoader = IMAAdsLoader(settings: nil)
+            guard let _video else { return }
+            let settings = IMASettings()
+            if let adLanguage = _video.getAdLanguage() {
+                settings.language = adLanguage
+            }
+            adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
         }
 

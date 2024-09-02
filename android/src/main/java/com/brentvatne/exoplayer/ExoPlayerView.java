@@ -41,6 +41,8 @@ public final class ExoPlayerView extends PlayerView {
     private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
+    private SubtitleStyle localStyle = new SubtitleStyle();
+
     public ExoPlayerView(Context context) {
         super(context, null, 0);
 
@@ -101,7 +103,6 @@ public final class ExoPlayerView extends PlayerView {
         } else {
             subtitleLayout.setVisibility(View.GONE);
         }
-
     }
 
     public void updateSurfaceView(@ViewType.ViewType int viewType) {

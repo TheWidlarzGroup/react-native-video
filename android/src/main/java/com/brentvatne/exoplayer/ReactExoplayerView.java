@@ -14,7 +14,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -26,7 +25,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
@@ -136,6 +134,8 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
+import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
+import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.common.collect.ImmutableList;
 
 import java.net.CookieHandler;
@@ -250,6 +250,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean mReportBandwidth = false;
     private boolean controls;
     private Uri adTagUrl;
+    private String adLanguage;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -651,9 +652,13 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
+        ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+        imaSdkSettings.setLanguage(adLanguage);
+
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader
                 .Builder(themedReactContext)
+                .setImaSdkSettings(imaSdkSettings)
                 .setAdEventListener(this)
                 .setAdErrorListener(this)
                 .build();
@@ -1765,6 +1770,10 @@ public class ReactExoplayerView extends FrameLayout implements
         adTagUrl = uri;
     }
 
+    public void setAdLanguage(final String language) {
+        adLanguage = language;
+    }
+
     public void setTextTracks(SideLoadedTextTrackList textTracks) {
         this.textTracks = textTracks;
         reloadSource(); // FIXME Shall be moved inside source
@@ -1843,7 +1852,7 @@ public class ReactExoplayerView extends FrameLayout implements
         } else if ("title".equals(type)) {
             for (int i = 0; i < groups.length; ++i) {
                 Format format = groups.get(i).getFormat(0);
-                if (format.id != null && format.id.equals(value)) {
+                if (format.label != null && format.label.equals(value)) {
                     groupIndex = i;
                     break;
                 }

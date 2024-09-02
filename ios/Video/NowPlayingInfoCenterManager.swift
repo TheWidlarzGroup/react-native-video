@@ -18,6 +18,7 @@ class NowPlayingInfoCenterManager {
     private var skipBackwardTarget: Any?
     private var playbackPositionTarget: Any?
     private var seekTarget: Any?
+    private var togglePlayPauseTarget: Any?
 
     private let remoteCommandCenter = MPRemoteCommandCenter.shared()
 
@@ -172,6 +173,21 @@ class NowPlayingInfoCenterManager {
             }
             return .commandFailed
         }
+
+        // Handler for togglePlayPauseCommand, sent by Apple's Earpods wired headphones
+        togglePlayPauseTarget = remoteCommandCenter.togglePlayPauseCommand.addTarget { [weak self] _ in
+            guard let self, let player = self.currentPlayer else {
+                return .commandFailed
+            }
+
+            if player.rate == 0 {
+                player.play()
+            } else {
+                player.pause()
+            }
+
+            return .success
+        }
     }
 
     private func invalidateCommandTargets() {
@@ -180,6 +196,7 @@ class NowPlayingInfoCenterManager {
         remoteCommandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
         remoteCommandCenter.skipBackwardCommand.removeTarget(skipBackwardTarget)
         remoteCommandCenter.changePlaybackPositionCommand.removeTarget(playbackPositionTarget)
+        remoteCommandCenter.togglePlayPauseCommand.removeTarget(togglePlayPauseTarget)
     }
 
     public func updateNowPlayingInfo() {

@@ -168,6 +168,7 @@ export type SubtitleStyle = {
   paddingLeft?: number;
   paddingRight?: number;
   opacity?: number;
+  subtitlesFollowVideo?: boolean;
 };
 
 export enum TextTrackType {
@@ -257,6 +258,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
+  adLanguage?: ISO639_1;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   bufferConfig?: BufferConfig; // Android
