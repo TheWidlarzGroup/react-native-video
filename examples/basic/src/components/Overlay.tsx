@@ -164,11 +164,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const onSelectedTextTrackChange = (itemValue: string) => {
     console.log('on value change ' + itemValue);
-    const type =
-      textTracksSelectionBy === 'index'
-        ? SelectedTrackType.INDEX
-        : SelectedTrackType.LANGUAGE;
-    setSelectedTextTrack({type, value: itemValue});
+    setSelectedTextTrack({type: textTracksSelectionBy, value: itemValue});
   };
 
   const onSelectedVideoTrackChange = (itemValue: string) => {
