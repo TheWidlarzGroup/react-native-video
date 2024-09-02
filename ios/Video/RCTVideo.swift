@@ -613,6 +613,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             textTracks: self._textTracks
         )
 
+        if validTextTracks.isEmpty {
+            DebugLog("Strange state, not valid textTrack")
+        }
+
         if validTextTracks.count != self._textTracks.count {
             self.setTextTracks(validTextTracks)
         }
