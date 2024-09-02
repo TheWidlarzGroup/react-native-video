@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReadableMap
 /**
  * Helper file to parse SubtitleStyle prop and build a dedicated class
  */
-class SubtitleStyle private constructor() {
+class SubtitleStyle public constructor() {
     var fontSize = -1
         private set
     var paddingLeft = 0

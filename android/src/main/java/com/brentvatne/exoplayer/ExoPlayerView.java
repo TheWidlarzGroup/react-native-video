@@ -48,7 +48,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
-    private SubtitleStyle localStyle = SubtitleStyle.parse(null);
+    private SubtitleStyle localStyle = new SubtitleStyle();
 
     public ExoPlayerView(Context context) {
         super(context, null, 0);
