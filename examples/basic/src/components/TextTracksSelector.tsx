@@ -1,6 +1,10 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
-import type {TextTrack, SelectedTrack} from 'react-native-video';
+import {
+  type TextTrack,
+  type SelectedTrack,
+  SelectedTrackType,
+} from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
 
@@ -38,23 +42,15 @@ export const TextTrackSelector = ({
           if (!track) {
             return;
           }
-          if (textTracksSelectionBy === 'index') {
-            return (
-              <Picker.Item
-                label={`${track.index}`}
-                value={track.index}
-                key={track.index}
-              />
-            );
-          } else {
-            return (
-              <Picker.Item
-                label={track.language}
-                value={track.language}
-                key={track.language}
-              />
-            );
+          let value;
+          if (textTracksSelectionBy === SelectedTrackType.INDEX) {
+            value = track.index;
+          } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+            value = track.language;
+          } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
+            value = track.title;
           }
+          return <Picker.Item label={`${value}`} value={value} key={value} />;
         })}
       </Picker>
     </>

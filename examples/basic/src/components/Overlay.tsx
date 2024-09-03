@@ -7,9 +7,7 @@ import React, {
 } from 'react';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
-import ToggleControl from '../ToggleControl.tsx';
 import {isAndroid, isIos, textTracksSelectionBy} from '../constants';
-import MultiValueControl from '../MultiValueControl.tsx';
 import {
   ResizeMode,
   VideoRef,
@@ -23,14 +21,15 @@ import {
   type VideoTrack,
   type AudioTrack,
 } from 'react-native-video';
-import {
-  toast,
-  Seeker,
-  AudioTrackSelector,
-  TextTrackSelector,
-  VideoTrackSelector,
-  TopControl,
-} from '../components';
+
+import {toast} from './Toast';
+import {Seeker} from './Seeker';
+import {AudioTrackSelector} from './AudioTracksSelector';
+import {VideoTrackSelector} from './VideoTracksSelector';
+import {TextTrackSelector} from './TextTracksSelector';
+import {TopControl} from './TopControl';
+import {ToggleControl} from './ToggleControl';
+import {MultiValueControl} from './MultiValueControl';
 
 type Props = {
   channelDown: () => void;
@@ -165,11 +164,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
 
   const onSelectedTextTrackChange = (itemValue: string) => {
     console.log('on value change ' + itemValue);
-    const type =
-      textTracksSelectionBy === 'index'
-        ? SelectedTrackType.INDEX
-        : SelectedTrackType.LANGUAGE;
-    setSelectedTextTrack({type, value: itemValue});
+    setSelectedTextTrack({type: textTracksSelectionBy, value: itemValue});
   };
 
   const onSelectedVideoTrackChange = (itemValue: string) => {

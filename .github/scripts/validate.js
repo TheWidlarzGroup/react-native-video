@@ -28,6 +28,8 @@ const BOT_LABELS = [
   ...Object.values(PLATFORM_LABELS),
 ];
 
+const SKIP_LABEL = "No Validation"
+
 const MESSAGE = {
   FEATURE_REQUEST: `Thank you for your feature request. We will review it and get back to you if we need more information.`,
   BUG_REPORT: `Thank you for your bug report. We will review it and get back to you if we need more information.`,
@@ -41,8 +43,8 @@ const MESSAGE = {
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
     return (
-      `There is a newer version of the library available.` +
-      `You are using version ${issueVersion}, while the latest stable version is ${latestVersion}.` +
+      `There is a newer version of the library available. ` +
+      `You are using version ${issueVersion}, while the latest stable version is ${latestVersion}. ` +
       `Please update to the latest version and check if the issue still exists.` +
       `\n > Note: If the issue still exists, please update the issue report with the latest information.`
     );
@@ -150,6 +152,11 @@ const handleIssue = async ({github, context}) => {
   const {issue} = context.payload;
   const {body} = issue;
   const labels = new Set(issue.labels.map((label) => label.name));
+
+  if(labels.has(SKIP_LABEL)) {
+    console.log("Skiping Issue Validation")
+    return;
+  }
 
   // Clear out labels that are added by the bot
   BOT_LABELS.forEach((label) => labels.delete(label));
