@@ -284,11 +284,11 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
                                                name: NSNotification.Name.AVPlayerItemFailedToPlayToEndTime,
                                                object: nil)
 
-        NotificationCenter.default.removeObserver(_handlers, name: NSNotification.Name.AVPlayerItemNewAccessLogEntry, object: player?.currentItem)
+        NotificationCenter.default.removeObserver(_handlers, name: AVPlayerItem.newAccessLogEntryNotification, object: player?.currentItem)
 
         NotificationCenter.default.addObserver(_handlers,
                                                selector: #selector(RCTPlayerObserverHandlerObjc.handleAVPlayerAccess(notification:)),
-                                               name: NSNotification.Name.AVPlayerItemNewAccessLogEntry,
+                                               name: AVPlayerItem.newAccessLogEntryNotification,
                                                object: player?.currentItem)
     }
 
