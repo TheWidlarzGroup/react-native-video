@@ -1742,7 +1742,8 @@ public class ReactExoplayerView extends FrameLayout implements
         playerNeedsSource = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
-            initializePlayer();
+            player?.seekToDefaultPosition();
+            player?.prepare();
         } else {
             updateResumePosition();
         }
