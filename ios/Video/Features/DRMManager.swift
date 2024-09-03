@@ -48,8 +48,12 @@ class DRMManager: NSObject {
         Task {
             do {
                 if localSourceEncryptionKeyScheme != nil {
-                    try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
-                    return
+                    #if os(iOS)
+                        try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
+                        return
+                    #else
+                        throw RCTVideoError.offlineDRMNotSuported
+                    #endif
                 }
 
                 try await processContentKeyRequest(keyRequest: keyRequest)
