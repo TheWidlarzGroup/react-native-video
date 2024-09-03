@@ -7,7 +7,7 @@ class ControlsConfig {
     var hideSeekBar: Boolean = false
     var seekIncrementMS: Int = 10000
     var hideDuration: Boolean = false
-    var hideNavigationBarOnFullScreenMode: Boolean = false
+    var hideNavigationBarOnFullScreenMode: Boolean = true
 
     companion object {
         @JvmStatic
@@ -18,7 +18,7 @@ class ControlsConfig {
                 config.hideSeekBar = ReactBridgeUtils.safeGetBool(src, "hideSeekBar", false)
                 config.seekIncrementMS = ReactBridgeUtils.safeGetInt(src, "seekIncrementMS", 10000)
                 config.hideDuration = ReactBridgeUtils.safeGetBool(src, "hideDuration", false)
-                config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", false)
+                config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
             }
             return config
         }
