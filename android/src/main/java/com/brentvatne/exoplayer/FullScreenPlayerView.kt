@@ -117,11 +117,13 @@ class FullScreenPlayerView(
 
     // restore system UI state
     private fun restoreSystemUI() {
-        window?.let  {
-            updateNavigationBarVisibility(it,
+        window?.let {
+            updateNavigationBarVisibility(
+                it,
                 initialNavigationBarIsVisible,
                 initialNotificationBarIsVisible,
-                initialSystemBarsBehavior)
+                initialSystemBarsBehavior
+            )
         }
     }
 
@@ -164,10 +166,12 @@ class FullScreenPlayerView(
 
     // Move the UI to fullscreen.
     // if you change this code, remember to check that the UI is well restored in restoreUIState
-    private fun updateNavigationBarVisibility(window: Window,
-                                              hideNavigationBarOnFullScreenMode: Boolean?,
-                                              hideNotificationBarOnFullScreenMode: Boolean?,
-                                              systemBarsBehavior: Int? ) {
+    private fun updateNavigationBarVisibility(
+        window: Window,
+        hideNavigationBarOnFullScreenMode: Boolean?,
+        hideNotificationBarOnFullScreenMode: Boolean?,
+        systemBarsBehavior: Int?
+    ) {
         // Configure the behavior of the hidden system bars.
         val inset = WindowInsetsControllerCompat(window, window.decorView)
         hideNavigationBarOnFullScreenMode?.let { it ->
@@ -195,10 +199,12 @@ class FullScreenPlayerView(
 
     private fun updateNavigationBarVisibility() {
         window?.let {
-            updateNavigationBarVisibility(it,
+            updateNavigationBarVisibility(
+                it,
                 controlsConfig.hideNavigationBarOnFullScreenMode,
                 controlsConfig.hideNotificationBarOnFullScreenMode,
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            )
         }
     }
 }
