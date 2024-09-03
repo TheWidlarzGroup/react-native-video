@@ -3,16 +3,15 @@ package com.brentvatne.exoplayer
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowInsetsController
+import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.ui.LegacyPlayerControlView
@@ -28,12 +27,19 @@ class FullScreenPlayerView(
     private val playerControlView: LegacyPlayerControlView?,
     private val onBackPressedCallback: OnBackPressedCallback,
     private val controlsConfig: ControlsConfig
-) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+) : Dialog(context, android.R.style.Theme_Black_NoTitleBar) {
 
     private var parent: ViewGroup? = null
     private val containerView = FrameLayout(context)
     private val mKeepScreenOnHandler = Handler(Looper.getMainLooper())
     private val mKeepScreenOnUpdater = KeepScreenOnUpdater(this)
+
+    // As this view is fullscreen we need to save initial state and restore it afterward
+    // Following variables save UI state when open the view
+    // restoreUIState, will reapply these values
+    private var initialSystemBarsBehavior: Int? = null
+    private var initialNavigationBarIsVisible: Boolean? = null
+    private var initialNotificationBarIsVisible: Boolean? = null
 
     private class KeepScreenOnUpdater(fullScreenPlayerView: FullScreenPlayerView) : Runnable {
         private val mFullscreenPlayer = WeakReference(fullScreenPlayerView)
@@ -66,6 +72,15 @@ class FullScreenPlayerView(
 
     init {
         setContentView(containerView, generateDefaultLayoutParams())
+
+        window?.let {
+            val inset = WindowInsetsControllerCompat(it, it.decorView)
+            initialSystemBarsBehavior = inset.systemBarsBehavior
+            initialNavigationBarIsVisible = ViewCompat.getRootWindowInsets(it.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.navigationBars()) == true
+            initialNotificationBarIsVisible = ViewCompat.getRootWindowInsets(it.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.statusBars()) == true
+        }
     }
     override fun onBackPressed() {
         super.onBackPressed()
@@ -97,6 +112,17 @@ class FullScreenPlayerView(
         }
         parent?.requestLayout()
         parent = null
+        restoreSystemUI()
+    }
+
+    // restore system UI state
+    private fun restoreSystemUI() {
+        window?.let  {
+            updateNavigationBarVisibility(it,
+                initialNavigationBarIsVisible,
+                initialNotificationBarIsVisible,
+                initialSystemBarsBehavior)
+        }
     }
 
     private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
@@ -136,23 +162,43 @@ class FullScreenPlayerView(
         return layoutParams
     }
 
-    private fun updateNavigationBarVisibility() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window?.setDecorFitsSystemWindows(!controlsConfig.hideNavigationBarOnFullScreenMode)
-            window?.insetsController?.let {
-                if (controlsConfig.hideNavigationBarOnFullScreenMode) {
-                    it.hide(WindowInsets.Type.navigationBars())
-                    it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    // Move the UI to fullscreen.
+    // if you change this code, remember to check that the UI is well restored in restoreUIState
+    private fun updateNavigationBarVisibility(window: Window,
+                                              hideNavigationBarOnFullScreenMode: Boolean?,
+                                              hideNotificationBarOnFullScreenMode: Boolean?,
+                                              systemBarsBehavior: Int? ) {
+        // Configure the behavior of the hidden system bars.
+        val inset = WindowInsetsControllerCompat(window, window.decorView)
+        hideNavigationBarOnFullScreenMode?.let { it ->
+            if (it != initialNavigationBarIsVisible) {
+                if (it) {
+                    inset.hide(WindowInsetsCompat.Type.navigationBars())
+                    if (systemBarsBehavior != null) {
+                        inset.systemBarsBehavior = systemBarsBehavior
+                    }
                 } else {
-                    it.show(WindowInsets.Type.navigationBars())
+                    inset.show(WindowInsetsCompat.Type.navigationBars())
                 }
             }
-        } else {
-            if (controlsConfig.hideNavigationBarOnFullScreenMode) {
-                window?.let { WindowInsetsControllerCompat(it, window!!.decorView).hide(WindowInsetsCompat.Type.navigationBars()) }
-            } else {
-                window?.let { WindowInsetsControllerCompat(it, window!!.decorView).show(WindowInsetsCompat.Type.navigationBars()) }
+        }
+        hideNotificationBarOnFullScreenMode?.let {
+            if (it != initialNotificationBarIsVisible) {
+                if (it) {
+                    inset.hide(WindowInsetsCompat.Type.statusBars())
+                } else {
+                    inset.show(WindowInsetsCompat.Type.statusBars())
+                }
             }
+        }
+    }
+
+    private fun updateNavigationBarVisibility() {
+        window?.let {
+            updateNavigationBarVisibility(it,
+                controlsConfig.hideNavigationBarOnFullScreenMode,
+                controlsConfig.hideNotificationBarOnFullScreenMode,
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
         }
     }
 }

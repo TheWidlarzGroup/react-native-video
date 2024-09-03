@@ -298,6 +298,7 @@ type ControlsStyles = Readonly<{
   hideDuration?: WithDefault<boolean, false>;
   seekIncrementMS?: Int32;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
