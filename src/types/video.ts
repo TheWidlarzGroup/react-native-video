@@ -250,6 +250,8 @@ export type ControlsStyles = {
   seekIncrementMS?: number;
   showSubtitleButton?: boolean;
   showSettingButton?: boolean;
+  hideNavigationBarOnFullScreenMode?: boolean;
+  hideNotificationBarOnFullScreenMode?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {

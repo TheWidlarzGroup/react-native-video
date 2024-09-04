@@ -9,6 +9,8 @@ class ControlsConfig {
     var hideDuration: Boolean = false
     var showSubtitleButton: Boolean = true
     var showSettingButton: Boolean = true
+    var hideNavigationBarOnFullScreenMode: Boolean = true
+    var hideNotificationBarOnFullScreenMode: Boolean = true
 
     companion object {
         @JvmStatic
@@ -21,8 +23,9 @@ class ControlsConfig {
                 config.hideDuration = ReactBridgeUtils.safeGetBool(src, "hideDuration", false)
                 config.showSubtitleButton = ReactBridgeUtils.safeGetBool(src, "showSubtitleButton", true)
                 config.showSettingButton = ReactBridgeUtils.safeGetBool(src, "showSettingButton", true)
+                config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
+                config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNotificationBarOnFullScreenMode", true)
             }
-
             return config
         }
     }

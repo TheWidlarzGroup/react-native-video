@@ -1,5 +1,32 @@
 
 
+# [6.5.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.5...v6.5.0) (2024-09-04)
+
+
+### Bug Fixes
+
+* **android:**  show the status bar and navigation bar after exiting full-screen mode ([#4112](https://github.com/TheWidlarzGroup/react-native-video/issues/4112)) ([8b8ebe9](https://github.com/TheWidlarzGroup/react-native-video/commit/8b8ebe9410e95085e5602393c2ce3de814df4a96))
+* **android:** add subtitleStyle.subtitlesFollowVideo prop to control subtitles positionning ([#4133](https://github.com/TheWidlarzGroup/react-native-video/issues/4133)) ([2fa6c43](https://github.com/TheWidlarzGroup/react-native-video/commit/2fa6c43615c1bc0a3bbcb5f472ffaeb8ae16a1af))
+* **android:** hide surfaceView for loading time when shutter is hidden ([#4060](https://github.com/TheWidlarzGroup/react-native-video/issues/4060)) ([65faba3](https://github.com/TheWidlarzGroup/react-native-video/commit/65faba312d23de981972d2b6ffecefbc87ecac61))
+* **expo-plugin:** adding bg mode if none exist yet ([#4126](https://github.com/TheWidlarzGroup/react-native-video/issues/4126)) ([451806c](https://github.com/TheWidlarzGroup/react-native-video/commit/451806c547591fbe5714b133e704ffac9efb05d8))
+* **ios:** Add handler for Earpods play/pause command ([#4116](https://github.com/TheWidlarzGroup/react-native-video/issues/4116)) ([9c38d9f](https://github.com/TheWidlarzGroup/react-native-video/commit/9c38d9f4ef42c3e275ee39a08aa227e6b976fdb2))
+* **ios:** build fail due to an unwrapped value ([#4101](https://github.com/TheWidlarzGroup/react-native-video/issues/4101)) ([0a1085c](https://github.com/TheWidlarzGroup/react-native-video/commit/0a1085ce03152d58d98da408dbe79e76fa5ebc1a))
+* **ios:** ensure behavior is correct with empty text track list ([#4123](https://github.com/TheWidlarzGroup/react-native-video/issues/4123)) ([3a32d67](https://github.com/TheWidlarzGroup/react-native-video/commit/3a32d67087c39bcf7904043d15a2fdba65307f4e))
+* **ios:** ensure we don't disable tracks when not necessary (causes black screen) ([#4130](https://github.com/TheWidlarzGroup/react-native-video/issues/4130)) ([89df9d6](https://github.com/TheWidlarzGroup/react-native-video/commit/89df9d69ff96f7d6ff3d493bf1a3eb9c3da51c3c))
+* **ios:** fix onBandwidth update event (old ios api is deprecated and doens't work) ([#4140](https://github.com/TheWidlarzGroup/react-native-video/issues/4140)) ([d6bae3c](https://github.com/TheWidlarzGroup/react-native-video/commit/d6bae3cd076018f07556ab27af2779479bc7ff7d))
+* **sample:** update dependencies to fix local asset playback ([#4121](https://github.com/TheWidlarzGroup/react-native-video/issues/4121)) ([7a2b401](https://github.com/TheWidlarzGroup/react-native-video/commit/7a2b4014f40758a025fcd6b388448d3559ec6a4a))
+* set does not have `find` method ([#4110](https://github.com/TheWidlarzGroup/react-native-video/issues/4110)) ([7db7024](https://github.com/TheWidlarzGroup/react-native-video/commit/7db7024cb36ea34289fddf5c7f66e7b4d7827146))
+* **tvos:** fix build (and update sample) ([#4134](https://github.com/TheWidlarzGroup/react-native-video/issues/4134)) ([688d98d](https://github.com/TheWidlarzGroup/react-native-video/commit/688d98d68f888a59bde1ee33aa844ac63c9026a5))
+* **VisionOS:** do not access to isExternalPlaybackActive on VisionOS ([#4109](https://github.com/TheWidlarzGroup/react-native-video/issues/4109)) ([0576eac](https://github.com/TheWidlarzGroup/react-native-video/commit/0576eacfddb32c4dcc072b6fd3cbf74cf25946a4))
+
+
+### Features
+
+* add ads localize ([#4113](https://github.com/TheWidlarzGroup/react-native-video/issues/4113)) ([703ed43](https://github.com/TheWidlarzGroup/react-native-video/commit/703ed4399667e0142704d19686563dd62fb4883d))
+* **android:** Support Common Media Client Data (CMCD) ([#4034](https://github.com/TheWidlarzGroup/react-native-video/issues/4034)) ([ca795f2](https://github.com/TheWidlarzGroup/react-native-video/commit/ca795f298a99a183b81561ef7e09d8d1e8addaf5))
+* **android:** support hiding Exoplayer video duration on android ([#4090](https://github.com/TheWidlarzGroup/react-native-video/issues/4090)) ([41e2bed](https://github.com/TheWidlarzGroup/react-native-video/commit/41e2bed6b36f74a28d7dd640414c6d5ccbec0399))
+* Correct isBehindLiveWindow Error Handling ([#4143](https://github.com/TheWidlarzGroup/react-native-video/issues/4143)) ([22c21ad](https://github.com/TheWidlarzGroup/react-native-video/commit/22c21ad249879fe4ff8fb119384ebc82766106c3))
+
 ## [6.4.5](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.4...v6.4.5) (2024-08-17)
 
 
