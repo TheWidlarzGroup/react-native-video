@@ -294,9 +294,11 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
-  hideSeekBar?: boolean;
-  hideDuration?: boolean;
+  hideSeekBar?: WithDefault<boolean, false>;
+  hideDuration?: WithDefault<boolean, false>;
   seekIncrementMS?: Int32;
+  hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{

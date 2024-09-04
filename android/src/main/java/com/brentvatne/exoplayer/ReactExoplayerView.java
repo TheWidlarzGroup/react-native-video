@@ -427,15 +427,6 @@ public class ReactExoplayerView extends FrameLayout implements
             });
         }
 
-        if (fullScreenPlayerView == null) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    setFullscreen(false);
-                }
-            });
-        }
-
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
         playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
@@ -2261,6 +2252,12 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (isFullscreen) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    setFullscreen(false);
+                }
+            }, controlsConfig);
             eventEmitter.onVideoFullscreenPlayerWillPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();

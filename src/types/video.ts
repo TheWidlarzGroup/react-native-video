@@ -248,6 +248,8 @@ export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
   seekIncrementMS?: number;
+  hideNavigationBarOnFullScreenMode?: boolean;
+  hideNotificationBarOnFullScreenMode?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
