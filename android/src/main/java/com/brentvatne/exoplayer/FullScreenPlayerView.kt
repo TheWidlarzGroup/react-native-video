@@ -164,6 +164,23 @@ class FullScreenPlayerView(
         return layoutParams
     }
 
+    private fun updateBarVisibility(
+        inset: WindowInsetsControllerCompat,
+        type: Int,
+        shouldHide: Boolean?,
+        initialVisibility: Boolean?,
+        systemBarsBehavior: Int? = null
+    ) {
+        shouldHide?.takeIf { it != initialVisibility }?.let {
+            if (it) {
+                inset.hide(type)
+                systemBarsBehavior?.let { behavior -> inset.systemBarsBehavior = behavior }
+            } else {
+                inset.show(type)
+            }
+        }
+    }
+
     // Move the UI to fullscreen.
     // if you change this code, remember to check that the UI is well restored in restoreUIState
     private fun updateNavigationBarVisibility(
@@ -174,27 +191,23 @@ class FullScreenPlayerView(
     ) {
         // Configure the behavior of the hidden system bars.
         val inset = WindowInsetsControllerCompat(window, window.decorView)
-        hideNavigationBarOnFullScreenMode?.let { it ->
-            if (it != initialNavigationBarIsVisible) {
-                if (it) {
-                    inset.hide(WindowInsetsCompat.Type.navigationBars())
-                    if (systemBarsBehavior != null) {
-                        inset.systemBarsBehavior = systemBarsBehavior
-                    }
-                } else {
-                    inset.show(WindowInsetsCompat.Type.navigationBars())
-                }
-            }
-        }
-        hideNotificationBarOnFullScreenMode?.let {
-            if (it != initialNotificationBarIsVisible) {
-                if (it) {
-                    inset.hide(WindowInsetsCompat.Type.statusBars())
-                } else {
-                    inset.show(WindowInsetsCompat.Type.statusBars())
-                }
-            }
-        }
+
+        // Update navigation bar visibility and apply systemBarsBehavior if hiding
+        updateBarVisibility(
+            inset,
+            WindowInsetsCompat.Type.navigationBars(),
+            hideNavigationBarOnFullScreenMode,
+            initialNavigationBarIsVisible,
+            systemBarsBehavior
+        )
+
+        // Update notification bar visibility (no need for systemBarsBehavior here)
+        updateBarVisibility(
+            inset,
+            WindowInsetsCompat.Type.statusBars(),
+            hideNotificationBarOnFullScreenMode,
+            initialNotificationBarIsVisible
+        )
     }
 
     private fun updateNavigationBarVisibility() {
