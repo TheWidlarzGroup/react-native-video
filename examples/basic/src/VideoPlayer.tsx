@@ -30,6 +30,7 @@ import Video, {
   type SelectedTrack,
   type SelectedVideoTrack,
   type EnumValues,
+  OnBandwidthUpdateData,
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
@@ -219,6 +220,10 @@ const VideoPlayer: FC<Props> = ({}) => {
     console.log('onPlaybackStateChanged', data);
   };
 
+  const onVideoBandwidthUpdate = (data: OnBandwidthUpdateData) => {
+    console.log('onVideoBandwidthUpdate', data);
+  }
+
   const onFullScreenExit = () => {
     // iOS pauses video on exit from full screen
     Platform.OS === 'ios' && setPaused(true);
@@ -260,6 +265,7 @@ const VideoPlayer: FC<Props> = ({}) => {
             onAspectRatio={onAspectRatio}
             onReadyForDisplay={onReadyForDisplay}
             onBuffer={onVideoBuffer}
+            onBandwidthUpdate={onVideoBandwidthUpdate}
             onSeek={onSeek}
             repeat={repeat}
             selectedTextTrack={selectedTextTrack}
