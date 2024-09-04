@@ -35,7 +35,7 @@ extension DRMManager: AVContentKeySessionDelegate {
         }
     }
 
-    func contentKeySession(_: AVContentKeySession, contentKeyRequest keyRequest: AVContentKeyRequest, didFailWithError error: Error) {
-        handleError(error, for: keyRequest)
+    func contentKeySession(_: AVContentKeySession, contentKeyRequest _: AVContentKeyRequest, didFailWithError error: Error) {
+        print(error)
     }
 }

@@ -99,6 +99,7 @@ class DRMManager: NSObject {
         }
 
         keyRequest.processContentKeyResponseError(error)
+        contentKeySession.expire()
     }
 
     // MARK: - Private
