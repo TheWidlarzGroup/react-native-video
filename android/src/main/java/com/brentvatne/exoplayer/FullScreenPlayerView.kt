@@ -13,7 +13,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.media3.ui.LegacyPlayerControlView
 import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
