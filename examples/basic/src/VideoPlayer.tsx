@@ -34,7 +34,7 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
-import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
+import {bufferConfig, isAndroid, srcList, textTracksSelectionBy} from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 import * as NavigationBar from 'expo-navigation-bar';
 
@@ -106,7 +106,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   }, [goToChannel, srcListId]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
+    if (isAndroid) {
       NavigationBar.setVisibilityAsync('visible');
     }
   }, []);
