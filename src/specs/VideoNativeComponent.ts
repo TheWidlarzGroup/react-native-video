@@ -40,6 +40,7 @@ export type VideoSrc = Readonly<{
   cropEnd?: Float;
   metadata?: VideoMetadata;
   drm?: Drm;
+  cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
 }>;
 
@@ -59,6 +60,15 @@ type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   useExternalGetLicense?: boolean; // ios
   multiDrm?: WithDefault<boolean, false>; // android
+}>;
+
+type CmcdMode = WithDefault<Int32, 1>;
+export type NativeCmcdConfiguration = Readonly<{
+  mode?: CmcdMode; // default: MODE_QUERY_PARAMETER
+  request?: Headers;
+  session?: Headers;
+  object?: Headers;
+  status?: Headers;
 }>;
 
 type TextTracks = ReadonlyArray<
@@ -121,6 +131,7 @@ type SubtitleStyle = Readonly<{
   paddingLeft?: WithDefault<Float, 0>;
   paddingRight?: WithDefault<Float, 0>;
   opacity?: WithDefault<Float, 1>;
+  subtitlesFollowVideo?: WithDefault<boolean, true>;
 }>;
 
 type OnLoadData = Readonly<{
@@ -283,8 +294,11 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
-  hideSeekBar?: boolean;
+  hideSeekBar?: WithDefault<boolean, false>;
+  hideDuration?: WithDefault<boolean, false>;
   seekIncrementMS?: Int32;
+  hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
@@ -294,6 +308,7 @@ export type OnControlsVisibilityChange = Readonly<{
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
   adTagUrl?: string;
+  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   disableFocus?: boolean; // android
   maxBitRate?: Float;

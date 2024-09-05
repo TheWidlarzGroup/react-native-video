@@ -15,10 +15,14 @@ enum RCTPlayerOperations {
         let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
 
         // The first few tracks will be audio & video track
-        var firstTextIndex = 0
+        var firstTextIndex = -1
         for i in 0 ..< trackCount where player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
             firstTextIndex = i
             break
+        }
+        if firstTextIndex == -1 {
+            // no sideLoaded text track available (can happen with invalid vtt url)
+            return
         }
 
         var selectedTrackIndex: Int = RCTVideoUnset

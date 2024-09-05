@@ -48,6 +48,8 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
+    private SubtitleStyle localStyle = new SubtitleStyle();
+
     public ExoPlayerView(Context context) {
         super(context, null, 0);
 
@@ -80,10 +82,15 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         adOverlayFrameLayout = new FrameLayout(context);
 
         layout.addView(shutterView, 1, layoutParams);
-        layout.addView(adOverlayFrameLayout, 2, layoutParams);
+        if (localStyle.getSubtitlesFollowVideo()) {
+            layout.addView(subtitleLayout, layoutParams);
+            layout.addView(adOverlayFrameLayout, layoutParams);
+        }
 
         addViewInLayout(layout, 0, aspectRatioParams);
-        addViewInLayout(subtitleLayout, 1, layoutParams);
+        if (!localStyle.getSubtitlesFollowVideo()) {
+            addViewInLayout(subtitleLayout, 1, layoutParams);
+        }
     }
 
     private void clearVideoView() {
@@ -107,7 +114,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
-        // ensure we reset subtile style before reapplying it
+        // ensure we reset subtitle style before reapplying it
         subtitleLayout.setUserDefaultStyle();
         subtitleLayout.setUserDefaultTextSize();
 
@@ -121,7 +128,18 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         } else {
             subtitleLayout.setVisibility(View.GONE);
         }
-
+        if (localStyle.getSubtitlesFollowVideo() != style.getSubtitlesFollowVideo()) {
+            // No need to manipulate layout if value didn't change
+            if (style.getSubtitlesFollowVideo()) {
+                removeViewInLayout(subtitleLayout);
+                layout.addView(subtitleLayout, layoutParams);
+            } else {
+                layout.removeViewInLayout(subtitleLayout);
+                addViewInLayout(subtitleLayout, 1, layoutParams, false);
+            }
+            requestLayout();
+        }
+        localStyle = style;
     }
 
     public void setShutterColor(Integer color) {
@@ -161,8 +179,22 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
+    private void hideShutterView() {
+        shutterView.setVisibility(INVISIBLE);
+        surfaceView.setAlpha(1);
+    }
+
+    private void showShutterView() {
+        shutterView.setVisibility(VISIBLE);
+        surfaceView.setAlpha(0);
+    }
+
     private void updateShutterViewVisibility() {
-        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
+        if (this.hideShutterView) {
+            hideShutterView();
+        } else {
+            showShutterView();
+        }
     }
 
     @Override
@@ -194,7 +226,9 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
             clearVideoView();
         }
         this.player = player;
-        shutterView.setVisibility(this.hideShutterView ? View.INVISIBLE : View.VISIBLE);
+
+        updateShutterViewVisibility();
+
         if (player != null) {
             setVideoView();
             player.addListener(componentListener);
@@ -281,7 +315,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onRenderedFirstFrame() {
-            shutterView.setVisibility(INVISIBLE);
+            hideShutterView();
         }
 
         @Override

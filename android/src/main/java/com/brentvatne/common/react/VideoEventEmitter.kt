@@ -209,7 +209,7 @@ class VideoEventEmitter {
                     putArray(
                         "metadata",
                         Arguments.createArray().apply {
-                            metadataArrayList.forEachIndexed { i, metadata ->
+                            metadataArrayList.forEachIndexed { _, metadata ->
                                 pushMap(
                                     Arguments.createMap().apply {
                                         putString("identifier", metadata.identifier)
@@ -303,7 +303,7 @@ class VideoEventEmitter {
 
     private fun videoTracksToArray(videoTracks: java.util.ArrayList<VideoTrack>?): WritableArray =
         Arguments.createArray().apply {
-            videoTracks?.forEachIndexed { i, vTrack ->
+            videoTracks?.forEachIndexed { _, vTrack ->
                 pushMap(
                     Arguments.createMap().apply {
                         putInt("width", vTrack.width)
