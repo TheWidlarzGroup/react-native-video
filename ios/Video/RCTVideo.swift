@@ -63,6 +63,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _presentingViewController: UIViewController?
     private var _startPosition: Float64 = -1
     private var _showNotificationControls = false
+    private var _lastBitrate = -2.0
     private var _pictureInPictureEnabled = false {
         didSet {
             #if os(iOS)
@@ -1659,9 +1660,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
             return
         }
-
         guard let lastEvent = accessLog.events.last else { return }
-        onVideoBandwidthUpdate?(["bitrate": lastEvent.indicatedBitrate, "target": reactTag])
+        if (lastEvent.indicatedBitrate != _lastBitrate) {
+            _lastBitrate = lastEvent.indicatedBitrate
+            onVideoBandwidthUpdate?(["bitrate": _lastBitrate, "target": reactTag])
+        }
     }
 
     func handleTracksChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<[AVPlayerItemTrack]>) {
