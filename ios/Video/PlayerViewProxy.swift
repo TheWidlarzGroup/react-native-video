@@ -102,6 +102,8 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.subtitles = translationsValue.captions
             dorisTranslationsViewModel.skipIntro = translationsValue.skipIntro
             dorisTranslationsViewModel.skipCredits = translationsValue.skipCredits
+            dorisTranslationsViewModel.rewind = translationsValue.rewind
+            dorisTranslationsViewModel.fastForward = translationsValue.fastForward
             jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
         }
         return jsTranslations
