@@ -1661,7 +1661,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
         guard let lastEvent = accessLog.events.last else { return }
-        if (lastEvent.indicatedBitrate != _lastBitrate) {
+        if lastEvent.indicatedBitrate != _lastBitrate {
             _lastBitrate = lastEvent.indicatedBitrate
             onVideoBandwidthUpdate?(["bitrate": _lastBitrate, "target": reactTag])
         }
