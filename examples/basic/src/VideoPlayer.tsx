@@ -106,7 +106,9 @@ const VideoPlayer: FC<Props> = ({}) => {
   }, [goToChannel, srcListId]);
 
   useEffect(() => {
-    NavigationBar.setVisibilityAsync('visible');
+    if (Platform.OS === 'android') {
+      NavigationBar.setVisibilityAsync('visible');
+    }
   }, []);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
