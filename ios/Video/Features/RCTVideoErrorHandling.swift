@@ -17,6 +17,7 @@ enum RCTVideoError: Error, Hashable {
     case persistableKeyRequestFailed
     case embeddedKeyExtractionFailed
     case offlineDRMNotSuported
+    case unsupportedDRMType
 
     var errorCode: Int {
         switch self {
@@ -48,6 +49,8 @@ enum RCTVideoError: Error, Hashable {
             return 1012
         case .offlineDRMNotSuported:
             return 1013
+        case .unsupportedDRMType:
+            return 1014
         }
     }
 }
@@ -85,6 +88,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Failed to extract embedded key", comment: "")
         case .offlineDRMNotSuported:
             return NSLocalizedString("Offline DRM is not supported, see https://github.com/TheWidlarzGroup/react-native-video/issues/3539", comment: "")
+        case .unsupportedDRMType:
+            return NSLocalizedString("Unsupporeted DRM type", comment: "")
         }
     }
 
@@ -118,6 +123,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Unable to extract the embedded key from the custom scheme URL.", comment: "")
         case .offlineDRMNotSuported:
             return NSLocalizedString("You tried to use Offline DRM but it is not supported yet", comment: "")
+        case .unsupportedDRMType:
+            return NSLocalizedString("You tried to use unsupporeted DRM type", comment: "")
         }
     }
 
@@ -151,6 +158,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Check if the embedded key is present in the URL and the custom scheme is correctly implemented.", comment: "")
         case .offlineDRMNotSuported:
             return NSLocalizedString("Check if localSourceEncryptionKeyScheme is setted", comment: "")
+        case .unsupportedDRMType:
+            return NSLocalizedString("Verifiy that you are using fairplay (on Apple devices)", comment: "")
         }
     }
 }

@@ -37,7 +37,15 @@ class DRMManager: NSObject {
         self.onVideoError = onVideoError
         self.onGetLicense = onGetLicense
         self.drmParams = drmParams
-
+        
+        if drmParams?.type != "fairplay" {
+            self.onVideoError?([
+                "error": RCTVideoErrorHandler.createError(from: RCTVideoError.unsupportedDRMType),
+                "target": self.reactTag as Any,
+            ])
+            return
+        }
+        
         contentKeySession.addContentKeyRecipient(asset)
     }
 
