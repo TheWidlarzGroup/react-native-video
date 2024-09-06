@@ -343,6 +343,8 @@ Controls the iOS silent switch behavior
 
 <PlatformsList types={['iOS']} />
 
+**This is deprecated, prop moved to `drm`**
+
 Set the url scheme for stream encryption key for local assets
 
 Type: String
@@ -789,7 +791,7 @@ The following other types are supported on some platforms, but aren't fully docu
 
 #### Using DRM content
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'tvOS']} />
 
 To setup DRM please follow [this guide](/component/drm)
 
@@ -806,8 +808,6 @@ Example:
       },
     },
 ```
-
-> ⚠️ DRM is not supported on visionOS yet
 
 
 #### Start playback at a specific point in time
