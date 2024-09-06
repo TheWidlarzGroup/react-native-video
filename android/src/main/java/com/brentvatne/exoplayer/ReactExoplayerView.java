@@ -287,7 +287,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 lastDuration = duration;
                 eventEmitter.onVideoProgress.invoke(pos, bufferedDuration, player.getDuration(), getPositionInFirstPeriodMsForCurrentWindow(pos));
             }
-            exoPlayerView.closeShutterView();
         }
     }
 
@@ -1308,7 +1307,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void videoLoaded() {
         if (!player.isPlayingAd() && loadVideoStarted) {
-            exoPlayerView.closeShutterView();
             loadVideoStarted = false;
             if (audioTrackType != null) {
                 setSelectedAudioTrack(audioTrackType, audioTrackValue);

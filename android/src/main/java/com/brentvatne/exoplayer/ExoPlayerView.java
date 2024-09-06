@@ -41,8 +41,6 @@ public final class ExoPlayerView extends PlayerView {
     private @ViewType.ViewType int viewType = ViewType.VIEW_TYPE_SURFACE;
     private boolean hideShutterView = false;
 
-    private SubtitleStyle localStyle = new SubtitleStyle();
-
     public ExoPlayerView(Context context) {
         super(context, null, 0);
 
@@ -86,6 +84,8 @@ public final class ExoPlayerView extends PlayerView {
     public boolean isPlaying() {
         return player != null && player.isPlaying();
     }
+
+
 
     public void setSubtitleStyle(SubtitleStyle style) {
         // ensure we reset subtitle style before reapplying it
@@ -139,24 +139,30 @@ public final class ExoPlayerView extends PlayerView {
         }
 
     private void hideShutterView() {
-        shutterView.setVisibility(INVISIBLE);
-        surfaceView.setAlpha(1);
-    }
-
-    private void showShutterView() {
-        shutterView.setVisibility(VISIBLE);
-        surfaceView.setAlpha(0);
-    }
-
-    private void updateShutterViewVisibility() {
-        if(shutterView != null) {
-            shutterView.setVisibility(this.hideShutterView ? INVISIBLE : VISIBLE);
+        if (shutterView != null) {
+            shutterView.setVisibility(INVISIBLE);
+            if (surfaceView != null) {
+                surfaceView.setAlpha(1);
+            }
         }
     }
 
-    public void closeShutterView() {
-        if(shutterView != null) {
-            shutterView.setVisibility(INVISIBLE);
+    private void showShutterView() {
+        if (shutterView != null) {
+            shutterView.setVisibility(VISIBLE);
+            if (surfaceView != null) {
+                surfaceView.setAlpha(0);
+            }
+        }
+    }
+
+    private void updateShutterViewVisibility() {
+        if (shutterView != null) {
+            if (this.hideShutterView) {
+                hideShutterView();
+            } else {
+                showShutterView();
+            }
         }
     }
 
@@ -165,8 +171,6 @@ public final class ExoPlayerView extends PlayerView {
         super.requestLayout();
         post(measureAndLayout);
     }
-
-    // AdsLoader.AdViewProvider implementation.
 
     /**
      * Set the {@link ExoPlayer} to use. The {@link ExoPlayer#addListener} method of the
