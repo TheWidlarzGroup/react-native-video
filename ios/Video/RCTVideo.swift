@@ -17,7 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-    private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
     private var _eventDispatcher: RCTEventDispatcher?
@@ -458,7 +457,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
+        if source.drm != nil {
             if _drmManager == nil {
                 _drmManager = DRMManager()
             }
@@ -602,8 +601,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _localSourceEncryptionKeyScheme = keyScheme
     }
 
-    func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
-        if source.textTracks.isEmpty != true || uri.hasSuffix(".m3u8") {
+    func playerItemPrepareText(asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
+        if self._textTracks.isEmpty == true || (uri.hasSuffix(".m3u8")) {
             return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 

@@ -9,7 +9,7 @@ import AVFoundation
 
 extension DRMManager {
     func handlePersistableKeyRequest(keyRequest: AVPersistableContentKeyRequest) async throws {
-        if let localSourceEncryptionKeyScheme {
+        if let localSourceEncryptionKeyScheme = drmParams?.localSourceEncryptionKeyScheme {
             try handleEmbeddedKey(keyRequest: keyRequest, scheme: localSourceEncryptionKeyScheme)
         } else {
             // Offline DRM is not supported yet - if you need it please check out the following issue:

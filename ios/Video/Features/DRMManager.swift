@@ -12,7 +12,6 @@ class DRMManager: NSObject {
     let contentKeySession: AVContentKeySession
 
     var drmParams: DRMParams?
-    var localSourceEncryptionKeyScheme: String?
     var reactTag: NSNumber?
     var onVideoError: RCTDirectEventBlock?
     var onGetLicense: RCTDirectEventBlock?
@@ -47,7 +46,7 @@ class DRMManager: NSObject {
     func handleContentKeyRequest(keyRequest: AVContentKeyRequest) {
         Task {
             do {
-                if localSourceEncryptionKeyScheme != nil {
+                if drmParams?.localSourceEncryptionKeyScheme != nil {
                     #if os(iOS)
                         try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
                         return
