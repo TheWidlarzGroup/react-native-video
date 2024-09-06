@@ -93,12 +93,12 @@ class FullScreenPlayerView(
 
     override fun onStop() {
         super.onStop()
-        onBackPressedCallback.handleOnBackPressed()
         mKeepScreenOnHandler.removeCallbacks(mKeepScreenOnUpdater)
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
         parent?.requestLayout()
         parent = null
+        onBackPressedCallback.handleOnBackPressed()
         restoreSystemUI()
     }
 
