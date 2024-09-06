@@ -82,10 +82,6 @@ class FullScreenPlayerView(
                 ?.isVisible(WindowInsetsCompat.Type.statusBars()) == true
         }
     }
-    override fun onBackPressed() {
-        super.onBackPressed()
-        onBackPressedCallback.handleOnBackPressed()
-    }
 
     override fun onStart() {
         super.onStart()
@@ -112,6 +108,7 @@ class FullScreenPlayerView(
         }
         parent?.requestLayout()
         parent = null
+        onBackPressedCallback.handleOnBackPressed()
         restoreSystemUI()
     }
 
