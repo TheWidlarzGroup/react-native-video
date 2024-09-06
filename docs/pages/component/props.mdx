@@ -47,25 +47,6 @@ A Boolean value that indicates whether the player should automatically delay pla
 - **false** - Immediately starts playback
 - **true (default)** - Delays playback in order to minimize stalling
 
-### `controlsStyles`
-
-<PlatformsList types={['Android']} />
-
-Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
-
-| Property    | Type    | Description                                                                          |
-|-------------|---------|--------------------------------------------------------------------------------------|
-| hideSeekBar | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts. |
-
-Example with default values:
-
-```javascript
-controlsStyles={{
-  hideSeekBar: false,
-}}
-```
-
-
 ### `bufferConfig`
 
 <PlatformsList types={['Android']} />
@@ -154,9 +135,34 @@ Determines whether to show player controls.
 - **false (default)** - Don't show player controls
 - **true** - Show player controls
 
-Note on iOS, controls are always shown when in fullscreen mode.
-Note on Android, native controls are available by default.
+Controls are always shown in fullscreen mode, even when `controls={false}`.
 If needed, you can also add your controls or use a package like [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls) or [react-native-media-console](https://github.com/criszz77/react-native-media-console), see [Useful Side Project](/projects).
+
+### `controlsStyles`
+
+<PlatformsList types={['Android']} />
+
+Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
+
+| Property                          | Type    | Description                                                                                |
+|-----------------------------------|---------|--------------------------------------------------------------------------------------------|
+| hideSeekBar                       | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.       |
+| hideDuration                      | boolean | The default value is `false`, allowing you to hide the duration.                           |
+| seekIncrementMS                   | number  | The default value is `10000`. You can change the value to increment forward and rewind.    |
+| hideNavigationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.  |
+| hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode. |
+
+Example with default values:
+
+```javascript
+controlsStyles={{
+  hideSeekBar: false,
+  hideDuration: false,
+  seekIncrementMS: 10000,
+  hideNavigationBarOnFullScreenMode: true,
+  hideNotificationBarOnFullScreenMode: true,
+}}
+```
 
 ### `contentStartTime`
 
@@ -208,6 +214,9 @@ Determines if the player needs to throw an error when connection is lost or not
 - **true** - Player will keep trying to buffer when network connect is lost
 
 ### `drm`
+
+> [!WARNING]
+> deprecated, use source.drm instead
 
 <PlatformsList types={['Android', 'iOS']} />
 
@@ -433,13 +442,26 @@ Determine whether the media should continue playing when notifications or the Co
 ### `poster`
 
 <PlatformsList types={['All']} />
+> [!WARNING]
+> Value: string with a URL for the poster is deprecated, use `poster` as object instead
 
 An image to display while the video is loading
 
-Value: string with a URL for the poster, e.g. "https://baconmockup.com/300/200/"
+Value: Props for the `Image` component. The poster is visible when the source attribute is provided.
+
+```javascript
+<Video>
+  poster={{
+    source: { uri: "https://baconmockup.com/300/200/" },
+    resizeMode: "cover",
+    // ...
+  }}
+</Video>
+````
 
 ### `posterResizeMode`
-
+> [!WARNING]
+> deprecated, use `poster` with `resizeMode` key instead
 <PlatformsList types={['All']} />
 
 Determines how to resize the poster image when the frame doesn't match the raw video dimensions.
@@ -484,6 +506,22 @@ Speed at which the media should play.
 - **0.0** - Pauses the video (iOS only)
 - **1.0** - Play at normal speed (default)
 - **Other values** - Slow down or speed up playback
+
+### `renderLoader`
+
+<PlatformsList types={['All']} />
+
+Allows you to create custom components to display while the video is loading. If `renderLoader` is provided, `poster` and `posterResizeMode` will be ignored.
+
+```javascript
+<Video>
+  renderLoader={
+    <View>
+      <Text>Custom Loader</Text>
+    </View>
+  }
+</Video>
+````
 
 ### `repeat`
 
@@ -727,6 +765,29 @@ type: 'mpd' }}
 The following other types are supported on some platforms, but aren't fully documented yet:
 `content://, ms-appx://, ms-appdata://, assets-library://`
 
+#### Using DRM content
+
+<PlatformsList types={['Android', 'iOS']} />
+
+To setup DRM please follow [this guide](/component/drm)
+
+Example:
+
+```javascript
+    {
+      description: 'WV: Secure SD & HD (cbcs,MP4,H264)',
+      uri: 'https://storage.googleapis.com/wvmedia/cbcs/h264/tears/tears_aes_cbcs.mpd',
+      drm: {
+        type: DRMType.WIDEVINE,
+        licenseServer:
+          'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+      },
+    },
+```
+
+> ⚠️ DRM is not supported on visionOS yet
+
+
 #### Start playback at a specific point in time
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -752,7 +813,7 @@ source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
 
 #### Overriding the metadata of a source
 
-<PlatformsList types={['Android, iOS, tvOS']} />
+<PlatformsList types={['Android', 'iOS', 'tvOS']} />
 
 Provide an optional `title`, `subtitle`, `artist`, `imageUri` and/or `description` properties for the video.
 Useful when using notification controls on Android or iOS or to adapt the tvOS playback experience.
@@ -772,22 +833,62 @@ source={{
   }}
 ```
 
+#### `textTracksAllowChunklessPreparation`
+<PlatformsList types={['Android']} />
+
+AllowChunklessPreparation for hls media source.
+see: [disabling-chunkless](https://developer.android.com/media/media3/exoplayer/hls?#disabling-chunkless) in android documentation.
+
+Default value: true.
+
+```javascript
+source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    textTracksAllowChunklessPreparation: false,
+  }}
+```
+
 ### `subtitleStyle`
 
-| Property      | Description                                                                                                                                                                                        | Platforms    |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| fontSize      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
-| paddingTop    | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
-| paddingBottom | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
-| paddingLeft   | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
-| paddingRight  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
-| opacity       | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+<PlatformsList types={['Android', 'iOS']} />
+
+| Property      | Platform | Description                                                                                                                                                                                        | Platforms    |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize      | Android  | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop    | Android  | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom | Android  | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft   | Android  | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight  | Android  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity       | Android, iOS | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+| subtitlesFollowVideo | Android | Boolean to adjust position of subtitles. Default: true |
+
 
 Example:
 
 ```javascript
 subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0 }}
 ```
+
+Note for `subtitlesFollowVideo`
+
+`subtitlesFollowVideo` helps to determine how the subtitles are positionned.
+To understand this prop you need to understand how views management works.
+The main View style passed to react native video is the position reserved to display the video component.
+It may not match exactly the real video size.
+For exemple, you can pass a 4:3 video view and render a 16:9 video inside.
+So there is a second view, the video view.
+
+Subtitles are managed in a third view.
+
+First react-native-video resize the video to keep aspect ratio (depending on `resizeMode` property) and put it in main view.
+
+* When putting subtitlesFollowVideo to true, the subtitle view will be adapt to the video view.
+It means that if the video is displayed out of screen, the subtitles may also be displayed out of screen.
+
+* When putting subtitlesFollowVideo to false, the subtitle view will keep adapting to the main view.
+It means that if the video is displayed out of screen, the subtitles may also be displayed out of screen.
+
+This prop can be changed on runtime.
 
 ### `textTracks`
 
@@ -829,12 +930,14 @@ textTracks={[
 ]}
 ```
 
-### `showNotificationContorols`
+### `showNotificationControls`
 
 <PlatformsList types={['Android', 'iOS']} />
 
 Controls whether to show media controls in the notification area.
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.
+
+On android this will also allow for external controls, Google Assistant session and other benefits of MediaSession.
 
 You propably want also set `playInBackground` to `true` to keep the video playing when the app is in the background or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
 
@@ -870,6 +973,9 @@ To customize the notification controls you can use `metadata` property in the `s
 
 ### `useSecureView`
 
+> [!WARNING]
+> deprecated, use viewType instead
+
 <PlatformsList types={['Android']} />
 
 Force the output to a SurfaceView and enables the secure surface.
@@ -881,7 +987,12 @@ SurfaceView is is the only one that can be labeled as secure.
 - **true** - Use security
 - **false (default)** - Do not use security
 
+
+
 ### `useTextureView`
+
+> [!WARNING]
+> deprecated, use viewType instead
 
 <PlatformsList types={['Android']} />
 
@@ -897,6 +1008,18 @@ useTextureView can only be set at same time you're setting the source.
 - **true (default)** - Use a TextureView
 - **false** - Use a SurfaceView
 
+### `viewType`
+
+<PlatformsList types={['Android']} />
+
+Allow to explicitly specify view type.
+This flag replace `useSecureView` and `useTextureView` fields.
+There are 3 available values:
+- 'textureView': The video is rendered in a texture view. it allows mapping the view on a texture (useful for 3D).
+DRM playback is not supported on textureView, if drm prop is provided, the suface will be transformed to a SurfaceView.
+- 'surfaceView' (default): The video is rendered in a surface. take less resources to be rendered.
+- 'secureView': The video is rendered in a surface which disallow taking screenshot of the video
+
 ### `volume`
 
 <PlatformsList types={['All']} />
@@ -906,3 +1029,68 @@ Adjust the volume.
 - **1.0 (default)** - Play at full volume
 - **0.0** - Mute the audio
 - **Other values** - Reduce volume
+
+### `cmcd`
+
+<PlatformsList types={['Android']} />
+
+Configure CMCD (Common Media Client Data) parameters. CMCD is a standard for conveying client-side metrics and capabilities to servers, which can help improve streaming quality and performance.
+
+For detailed information about CMCD, please refer to the [CTA-5004 Final Specification](https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf).
+
+- **false (default)** - Don't use CMCD
+- **true** - Use default CMCD configuration
+- **object** - Use custom CMCD configuration
+
+When providing an object, you can configure the following properties:
+
+| Property | Type                    | Description                                        |
+|----------|-------------------------|----------------------------------------------------|
+| `mode`     | `CmcdMode` | The mode for sending CMCD data                     |
+| `request`  | `CmcdData` | Custom key-value pairs for the request object      |
+| `session`  | `CmcdData` | Custom key-value pairs for the session object      |
+| `object`   | `CmcdData` | Custom key-value pairs for the object metadata     |
+| `status`   | `CmcdData` | Custom key-value pairs for the status information  |
+
+Note: The `mode` property defaults to `CmcdMode.MODE_QUERY_PARAMETER` if not specified.
+
+#### `CmcdMode`
+CmcdMode is an enum that defines how CMCD data should be sent:
+- `CmcdMode.MODE_REQUEST_HEADER` (0) - Send CMCD data in the HTTP request headers.
+- `CmcdMode.MODE_QUERY_PARAMETER` (1) - Send CMCD data as query parameters in the URL.
+
+#### `CmcdData`
+CmcdData is a type representing custom key-value pairs for CMCD data. It's defined as:
+
+```typescript
+type CmcdData = Record<`${string}-${string}`, string | number>;
+```
+
+Custom key names MUST include a hyphenated prefix to prevent namespace collisions. It's recommended to use a reverse-DNS syntax for custom prefixes.
+
+Example:
+
+```javascript
+<Video
+  source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    cmcd: {
+      mode: CmcdMode.MODE_QUERY_PARAMETER,
+      request: {
+        'com-custom-key': 'custom-value'
+      },
+      session: {
+        sid: 'session-id'
+      },
+      object: {
+        br: '3000',
+        d: '4000'
+      },
+      status: {
+        rtp: '1200'
+      }
+    }
+  }}
+  // or other video props
+/>
+```

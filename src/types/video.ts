@@ -1,8 +1,17 @@
 import type {ISO639_1} from './language';
 import type {ReactVideoEvents} from './events';
-import type {StyleProp, ViewProps, ViewStyle} from 'react-native';
+import type {
+  ImageProps,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+  ImageRequireSource,
+  ImageURISource,
+} from 'react-native';
+import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
+import type ViewType from './ViewType';
 
 export type Headers = Record<string, string>;
 
@@ -23,6 +32,9 @@ export type ReactVideoSourceProperties = {
   cropStart?: number;
   cropEnd?: number;
   metadata?: VideoMetadata;
+  drm?: Drm;
+  cmcd?: Cmcd; // android
+  textTracksAllowChunklessPreparation?: boolean;
 };
 
 export type ReactVideoSource = Readonly<
@@ -30,6 +42,13 @@ export type ReactVideoSource = Readonly<
     uri?: string | NodeRequire;
   }
 >;
+
+export type ReactVideoPosterSource = ImageURISource | ImageRequireSource;
+
+export type ReactVideoPoster = Omit<ImageProps, 'source'> & {
+  // prevents giving source in the array
+  source?: ReactVideoPosterSource;
+};
 
 export type VideoMetadata = Readonly<{
   title?: string;
@@ -58,15 +77,37 @@ export type Drm = Readonly<{
   contentId?: string; // ios
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
+  multiDrm?: boolean; // android
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
     contentId: string,
     licenseUrl: string,
     loadedLicenseUrl: string,
-  ) => void; // ios
+  ) => string | Promise<string>; // ios
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }>;
+
+export enum CmcdMode {
+  MODE_REQUEST_HEADER = 0,
+  MODE_QUERY_PARAMETER = 1,
+}
+/**
+ * Custom key names MUST carry a hyphenated prefix to ensure that there will not be a
+ * namespace collision with future revisions to this specification. Clients SHOULD
+ * use a reverse-DNS syntax when defining their own prefix.
+ *
+ * @see https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf CTA-5004 Specification (Page 6, Section 3.1)
+ */
+export type CmcdData = Record<`${string}-${string}`, string | number>;
+export type CmcdConfiguration = Readonly<{
+  mode?: CmcdMode; // default: MODE_QUERY_PARAMETER
+  request?: CmcdData;
+  session?: CmcdData;
+  object?: CmcdData;
+  status?: CmcdData;
+}>;
+export type Cmcd = boolean | CmcdConfiguration;
 
 export enum BufferingStrategyType {
   DEFAULT = 'Default',
@@ -127,6 +168,7 @@ export type SubtitleStyle = {
   paddingLeft?: number;
   paddingRight?: number;
   opacity?: number;
+  subtitlesFollowVideo?: boolean;
 };
 
 export enum TextTrackType {
@@ -204,13 +246,19 @@ export type AudioOutput = 'speaker' | 'earpiece';
 
 export type ControlsStyles = {
   hideSeekBar?: boolean;
+  hideDuration?: boolean;
+  seekIncrementMS?: number;
+  hideNavigationBarOnFullScreenMode?: boolean;
+  hideNotificationBarOnFullScreenMode?: boolean;
 };
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
+  /** @deprecated */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
+  adLanguage?: ISO639_1;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   bufferConfig?: BufferConfig; // Android
@@ -237,12 +285,14 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   pictureInPicture?: boolean; // iOS
   playInBackground?: boolean;
   playWhenInactive?: boolean; // iOS
-  poster?: string;
+  poster?: string | ReactVideoPoster; // string is deprecated
+  /** @deprecated use **resizeMode** key in **poster** props instead */
   posterResizeMode?: EnumValues<PosterResizeModeType>;
   preferredForwardBufferDuration?: number; // iOS
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
+  renderLoader?: ReactNode;
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
@@ -254,7 +304,10 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   shutterColor?: string; // Android
   textTracks?: TextTracks;
   testID?: string;
+  viewType?: ViewType;
+  /** @deprecated */
   useTextureView?: boolean; // Android
+  /** @deprecated */
   useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;

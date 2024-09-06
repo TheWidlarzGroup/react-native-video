@@ -1,8 +1,7 @@
 package com.brentvatne.common.api
 
 import androidx.annotation.IntDef
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
+import kotlin.annotation.Retention
 
 internal object ResizeMode {
     /**
@@ -42,7 +41,7 @@ internal object ResizeMode {
             else -> RESIZE_MODE_FIT
         }
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(AnnotationRetention.SOURCE)
     @IntDef(
         RESIZE_MODE_FIT,
         RESIZE_MODE_FIXED_WIDTH,

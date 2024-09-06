@@ -67,7 +67,7 @@ Example:
 
 ### `onBandwidthUpdate`
 
-<PlatformsList types={['Android']} />
+<PlatformsList types={['Android', 'iOS']} />
 
 Callback function that is called when the available bandwidth changes.
 
@@ -118,6 +118,26 @@ Example:
 ```javascript
 {
   isBuffering: true;
+}
+```
+
+### `onControlsVisibilityChange`
+
+<PlatformsList types={['Android']} />
+
+Callback function that is called when the controls are hidden or shown. Not possible on iOS.
+
+Payload:
+
+| Property    | Type    | Description                                    |
+| ----------- | ------- | ---------------------------------------------- |
+| isVisible | boolean | Boolean indicating whether controls are visible |
+
+Example:
+
+```javascript
+{
+  isVisible: true;
 }
 ```
 
@@ -276,15 +296,17 @@ Callback function that is called when the playback state changes.
 
 Payload:
 
-| Property  | Type        | Description                                       |
-| --------- | ----------- | ------------------------------------------------- |
-| isPlaying | boolean     | Boolean indicating if the media is playing or not |
+| Property  | Type        | Description                                        |
+| --------- | ----------- | -------------------------------------------------- |
+| isPlaying | boolean     | Boolean indicating if the media is playing or not  |
+| isSeeking | boolean     | Boolean indicating if the player is seeking or not |
 
 Example:
 
 ```javascript
 {
   isPlaying: true,
+  isSeeking: false
 }
 ```
 
@@ -548,15 +570,16 @@ Callback function that is called when video tracks change
 
 Payload:
 
-| Property | Type    | Description                           |
-| -------- | ------- | ------------------------------------- |
-| index    | number  | index of the track                    |
-| trackId  | string  | Internal track ID                     |
-| codecs   | string  | MimeType of codec used for this track |
-| width    | number  | Track width                           |
-| height   | number  | Track height                          |
-| bitrate  | number  | Bitrate in bps                        |
-| selected | boolean | true if track is selected for playing |
+| Property | Type    | Description                                                     |
+| -------- | ------- | --------------------------------------------------------------- |
+| index    | number  | index of the track                                              |
+| trackId  | string  | Internal track ID                                               |
+| codecs   | string  | MimeType of codec used for this track                           |
+| width    | number  | Track width                                                     |
+| height   | number  | Track height                                                    |
+| bitrate  | number  | Bitrate in bps                                                  |
+| selected | boolean | true if track is selected for playing                           |
+| rotation | number  | 0, 90, 180 or 270 rotation to apply to the track (android only) |
 
 Example:
 
@@ -571,6 +594,7 @@ Example:
       height: 1080,
       bitrate: 10000,
       selected: true,
+      rotation: 0,
     },
   ];
 }

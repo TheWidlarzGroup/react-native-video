@@ -1,5 +1,166 @@
 
 
+# [6.5.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.5...v6.5.0) (2024-09-04)
+
+
+### Bug Fixes
+
+* **android:**  show the status bar and navigation bar after exiting full-screen mode ([#4112](https://github.com/TheWidlarzGroup/react-native-video/issues/4112)) ([8b8ebe9](https://github.com/TheWidlarzGroup/react-native-video/commit/8b8ebe9410e95085e5602393c2ce3de814df4a96))
+* **android:** add subtitleStyle.subtitlesFollowVideo prop to control subtitles positionning ([#4133](https://github.com/TheWidlarzGroup/react-native-video/issues/4133)) ([2fa6c43](https://github.com/TheWidlarzGroup/react-native-video/commit/2fa6c43615c1bc0a3bbcb5f472ffaeb8ae16a1af))
+* **android:** hide surfaceView for loading time when shutter is hidden ([#4060](https://github.com/TheWidlarzGroup/react-native-video/issues/4060)) ([65faba3](https://github.com/TheWidlarzGroup/react-native-video/commit/65faba312d23de981972d2b6ffecefbc87ecac61))
+* **expo-plugin:** adding bg mode if none exist yet ([#4126](https://github.com/TheWidlarzGroup/react-native-video/issues/4126)) ([451806c](https://github.com/TheWidlarzGroup/react-native-video/commit/451806c547591fbe5714b133e704ffac9efb05d8))
+* **ios:** Add handler for Earpods play/pause command ([#4116](https://github.com/TheWidlarzGroup/react-native-video/issues/4116)) ([9c38d9f](https://github.com/TheWidlarzGroup/react-native-video/commit/9c38d9f4ef42c3e275ee39a08aa227e6b976fdb2))
+* **ios:** build fail due to an unwrapped value ([#4101](https://github.com/TheWidlarzGroup/react-native-video/issues/4101)) ([0a1085c](https://github.com/TheWidlarzGroup/react-native-video/commit/0a1085ce03152d58d98da408dbe79e76fa5ebc1a))
+* **ios:** ensure behavior is correct with empty text track list ([#4123](https://github.com/TheWidlarzGroup/react-native-video/issues/4123)) ([3a32d67](https://github.com/TheWidlarzGroup/react-native-video/commit/3a32d67087c39bcf7904043d15a2fdba65307f4e))
+* **ios:** ensure we don't disable tracks when not necessary (causes black screen) ([#4130](https://github.com/TheWidlarzGroup/react-native-video/issues/4130)) ([89df9d6](https://github.com/TheWidlarzGroup/react-native-video/commit/89df9d69ff96f7d6ff3d493bf1a3eb9c3da51c3c))
+* **ios:** fix onBandwidth update event (old ios api is deprecated and doens't work) ([#4140](https://github.com/TheWidlarzGroup/react-native-video/issues/4140)) ([d6bae3c](https://github.com/TheWidlarzGroup/react-native-video/commit/d6bae3cd076018f07556ab27af2779479bc7ff7d))
+* **sample:** update dependencies to fix local asset playback ([#4121](https://github.com/TheWidlarzGroup/react-native-video/issues/4121)) ([7a2b401](https://github.com/TheWidlarzGroup/react-native-video/commit/7a2b4014f40758a025fcd6b388448d3559ec6a4a))
+* set does not have `find` method ([#4110](https://github.com/TheWidlarzGroup/react-native-video/issues/4110)) ([7db7024](https://github.com/TheWidlarzGroup/react-native-video/commit/7db7024cb36ea34289fddf5c7f66e7b4d7827146))
+* **tvos:** fix build (and update sample) ([#4134](https://github.com/TheWidlarzGroup/react-native-video/issues/4134)) ([688d98d](https://github.com/TheWidlarzGroup/react-native-video/commit/688d98d68f888a59bde1ee33aa844ac63c9026a5))
+* **VisionOS:** do not access to isExternalPlaybackActive on VisionOS ([#4109](https://github.com/TheWidlarzGroup/react-native-video/issues/4109)) ([0576eac](https://github.com/TheWidlarzGroup/react-native-video/commit/0576eacfddb32c4dcc072b6fd3cbf74cf25946a4))
+
+
+### Features
+
+* add ads localize ([#4113](https://github.com/TheWidlarzGroup/react-native-video/issues/4113)) ([703ed43](https://github.com/TheWidlarzGroup/react-native-video/commit/703ed4399667e0142704d19686563dd62fb4883d))
+* **android:** Support Common Media Client Data (CMCD) ([#4034](https://github.com/TheWidlarzGroup/react-native-video/issues/4034)) ([ca795f2](https://github.com/TheWidlarzGroup/react-native-video/commit/ca795f298a99a183b81561ef7e09d8d1e8addaf5))
+* **android:** support hiding Exoplayer video duration on android ([#4090](https://github.com/TheWidlarzGroup/react-native-video/issues/4090)) ([41e2bed](https://github.com/TheWidlarzGroup/react-native-video/commit/41e2bed6b36f74a28d7dd640414c6d5ccbec0399))
+* Correct isBehindLiveWindow Error Handling ([#4143](https://github.com/TheWidlarzGroup/react-native-video/issues/4143)) ([22c21ad](https://github.com/TheWidlarzGroup/react-native-video/commit/22c21ad249879fe4ff8fb119384ebc82766106c3))
+
+## [6.4.5](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.4...v6.4.5) (2024-08-17)
+
+
+### Bug Fixes
+
+* **android:** resolve a release issue with DefaultDashChunkSource ([#4097](https://github.com/TheWidlarzGroup/react-native-video/issues/4097)) ([7e222e8](https://github.com/TheWidlarzGroup/react-native-video/commit/7e222e8fc4f3c47a1c9cd2fbf5ff012bcbe98a7f))
+
+* refactor(android): migrate DefaultDashChunkSource to Kotlin (#4078) (b7d1cabf)
+* fix(ios): remove resume logic in notification seek closure (#4068) (c6ae17e4)
+* chore(doc): update document (props & method) (#4072) (cd41a1b2)
+* fix(android): build warnings (#4058) (899bb822)
+* infra: update feature request form (#4065) (6c03d0a7)
+* fix(ios): override source metadata with custom metadata (#4050) (38aa2b05)
+* fix(android): return the value as a float for the getCurrentPosition function (#4054) (af0302b1)
+* refactor(android): migrate ReactExoplayerViewManager to Kotlin (#4011) (74c6dd62)
+* fix(android): viewType is ignored when its value is ViewType.TEXTURE (#4031) (22cfd6ce)
+* fix(ios): metadata update race (#4033) (08a57a3b)
+* fix(ios): updated getLicense call to work with new syntax, and fixed spelling error (#4014) (#4042) (2348c5e4)
+
+## [6.4.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.2...v6.4.3) (2024-07-24)
+
+
+### Bug Fixes
+
+* **android:** app crash at boot with old arch ([#4022](https://github.com/TheWidlarzGroup/react-native-video/issues/4022)) ([1ee5811](https://github.com/TheWidlarzGroup/react-native-video/commit/1ee5811c8e0ecfc2486f5120b575b57c6396e0f8)), closes [#3875](https://github.com/TheWidlarzGroup/react-native-video/issues/3875)
+* **android:** fix backward compatibility ([#4020](https://github.com/TheWidlarzGroup/react-native-video/issues/4020)) ([ab7e02e](https://github.com/TheWidlarzGroup/react-native-video/commit/ab7e02e4538c97340f13fb052b1cad94408b48fa))
+* **android:** resize mode cover calculation ([#4010](https://github.com/TheWidlarzGroup/react-native-video/issues/4010)) ([9f38216](https://github.com/TheWidlarzGroup/react-native-video/commit/9f382163d83c3331518e2784b335da28179ac91d))
+* index of the selected track ([#4012](https://github.com/TheWidlarzGroup/react-native-video/issues/4012)) ([fb1d6bd](https://github.com/TheWidlarzGroup/react-native-video/commit/fb1d6bdef7210d43f9e34f673691a9a17b95424e))
+* **sample:** boot failure on emulator ([#4016](https://github.com/TheWidlarzGroup/react-native-video/issues/4016)) ([ffbc977](https://github.com/TheWidlarzGroup/react-native-video/commit/ffbc977ff90248aeb270626620f5c3553f955617))
+
+
+### Features
+
+* add ability to define `poster` props as Image type and render poster as custom component ([#3972](https://github.com/TheWidlarzGroup/react-native-video/issues/3972)) ([adbd06e](https://github.com/TheWidlarzGroup/react-native-video/commit/adbd06e2df557b22b8a3a19073a2de1cbb964833))
+* **android:** add error handling for Kotlin version ([#4018](https://github.com/TheWidlarzGroup/react-native-video/issues/4018)) ([6189080](https://github.com/TheWidlarzGroup/react-native-video/commit/6189080c9aac89aa3d2a4e60049999d8880bc971))
+* **android:** set originalFitsSystemWindows on fullscreen open ([#4013](https://github.com/TheWidlarzGroup/react-native-video/issues/4013)) ([2f70c02](https://github.com/TheWidlarzGroup/react-native-video/commit/2f70c02cdcf6488338df197feb61eeb10ed3281f))
+
+## [6.4.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.1...v6.4.2) (2024-07-15)
+
+
+### Bug Fixes
+
+* **android:** exit fullscreen mode after finishing video playback ([#3978](https://github.com/TheWidlarzGroup/react-native-video/issues/3978)) ([4b8d09e](https://github.com/TheWidlarzGroup/react-native-video/commit/4b8d09e61f79a319ba5816dd342b5c0fd02d6e07))
+* **android:** fix android notification controller order ([#4002](https://github.com/TheWidlarzGroup/react-native-video/issues/4002)) ([05623c9](https://github.com/TheWidlarzGroup/react-native-video/commit/05623c9f5447f67acb535487de8918210b5ffec7))
+* **android:** fix onVideoLoad event field key ([#4001](https://github.com/TheWidlarzGroup/react-native-video/issues/4001)) ([f82268b](https://github.com/TheWidlarzGroup/react-native-video/commit/f82268be1bc33e5c61dbb031d7937197da0b67e5))
+* **android:** handle aspect ratio for rotated videos ([#4000](https://github.com/TheWidlarzGroup/react-native-video/issues/4000)) ([0a55ace](https://github.com/TheWidlarzGroup/react-native-video/commit/0a55ace0ca92f56394235f7c651d3a160e6a3c90))
+* **android:** resolve compatibility issue ([5cd5e5e](https://github.com/TheWidlarzGroup/react-native-video/commit/5cd5e5efe70b49d76fb27e3220a1df12b32901a6))
+* **example/basic:** select resizeMode ([#3989](https://github.com/TheWidlarzGroup/react-native-video/issues/3989)) ([39cf477](https://github.com/TheWidlarzGroup/react-native-video/commit/39cf477ceb37c6ecc38cbdd9077a556c81fd9c3d))
+* **ts:** make multiDrm prop optional type ([#3999](https://github.com/TheWidlarzGroup/react-native-video/issues/3999)) ([79c3076](https://github.com/TheWidlarzGroup/react-native-video/commit/79c30767fcf67e75e70ceb64a17736b5e3de63c6))
+
+## [6.4.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.0...v6.4.1) (2024-07-12)
+
+
+### Bug Fixes
+
+* expo plugin export ([#3992](https://github.com/TheWidlarzGroup/react-native-video/issues/3992)) ([de8ade0](https://github.com/TheWidlarzGroup/react-native-video/commit/de8ade06202cfdb3dd7fec635b6e8c6cdfd04e47))
+
+* fix(ios): remove pip check for other platforms (#3991) (40a72825)
+* feat: add `isSeeking` to `onPlaybackStateChanged` (#3899) (111a5d21)
+* chore(android): migrate DataSourceUtil to Kotlin (#3984) (b25e43ee)
+* chore(android): migrate AspectRatioFrameLayout to Kotlin (#3985) (452e42f1)
+* refactor: move view type and drm in source (#3867) (66dcf32b)
+* feat: add expo plugins (#3933) (08f6caa6)
+* docs: update deprecated tool (#3982) (25c74e05)
+* chore(android): migrate DefaultReactExoplayerConfig to Kotlin (#3983) (1728373d)
+* fix(ios): don't pause playback when entering background (#3973) (ccffcfd7)
+* chore(example/basic): refactor state variable (#3949) (a3ecc010)
+* feat(android): Bump default media3 version from v1.1.1 to v1.3.1 (#3977) :warning: need targetSdkVersion 34 (7562669f)
+* feat: modified Fabric example android build.gradle for resolving build issue (#3976) (1d6fb297)
+* chore: upgrade react-native & expo version in the basic example app (#3964) (01a00b12)
+* refactor(android): migrate VideoEventEmitter to Kotlin (#3962) (3c9b1b57)
+* fix(ios): fix fullscreen view controller ANR (#3952) (7def3ac3)
+* chore(example/fabric): bump up fabric example android deps (#3957) (de6e7196)
+* refactor(ios): refactor NowPlayingInfoCenerManager.swift (#3968) (76c63291)
+* fix(android): build issue on the latest react-native version (#3963) (530686ca)
+* feat(fabric): updated ios podspec for implementing new architecture (#3961) (df29c231)
+* fix(android): fix wrong module name (#3959) (3f11894c)
+* refactor(android): migrate ReactVideoPackage to Kotlin (#3955) (702a0d9d)
+* refactor(android): migrate VideoDecoderPropertiesModule to Kotlin (#3954) (99585987)
+* feat: bump up fabric example react-native iOS (#3951) (e5a2ee3b)
+* fix(android): added setAllowChunklessPreparation to HlsMediaSource.Factory to allow build success on projects without HLS support (#3948) (#3950) (322d7e99)
+* refactor: basic example from class component to functional component (#3934) (d4f16486)
+* chore(android): rework view type (#3940) (b431d09e)
+* chore: update homepage field in package.json (#3945) (6e133768)
+* feat(android): allow building exoplayer from source (#3932) (a7d834a8)
+* feat: add plugins management (#3909) (91d27a60)
+* Chore(docs): fix typo (#3938) (3cfb96ad)
+
+# [6.3.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.2.0...v6.3.0) (2024-06-22)
+
+
+### Bug Fixes
+
+* **android:** allow chunk less preparation ([#3913](https://github.com/TheWidlarzGroup/react-native-video/issues/3913)) ([264b57a](https://github.com/TheWidlarzGroup/react-native-video/commit/264b57aa2ed01b52c09b2992d5ca61e33871315b))
+* **android:** avoid crash multiplayer with notification ([#3931](https://github.com/TheWidlarzGroup/react-native-video/issues/3931)) ([104ee70](https://github.com/TheWidlarzGroup/react-native-video/commit/104ee703bac0f7d5fb162d17c30f65f8071d07a6))
+* **android:** show controls in notification on older androids ([#3886](https://github.com/TheWidlarzGroup/react-native-video/issues/3886)) ([098a754](https://github.com/TheWidlarzGroup/react-native-video/commit/098a754110a2c58fc18062769f4dd83775d20de4))
+* **android:** use UI thread to pause when lost audio focus ([#3916](https://github.com/TheWidlarzGroup/react-native-video/issues/3916)) ([856b1dd](https://github.com/TheWidlarzGroup/react-native-video/commit/856b1dd58ba9bb1832397ee0fc86f778f737798f))
+* **ios:** crash on ads after leaving the app ([#3911](https://github.com/TheWidlarzGroup/react-native-video/issues/3911)) ([3d6bc94](https://github.com/TheWidlarzGroup/react-native-video/commit/3d6bc9409c2111760620a821466b0ea0f1970681))
+* **ios:** missing notification controls when enabled from start ([#3898](https://github.com/TheWidlarzGroup/react-native-video/issues/3898)) ([2d793db](https://github.com/TheWidlarzGroup/react-native-video/commit/2d793dbde16cc140d1e7b873c40ff4dec285e253))
+* **JS:** safety check on resolve uri ([#3915](https://github.com/TheWidlarzGroup/react-native-video/issues/3915)) ([84bb910](https://github.com/TheWidlarzGroup/react-native-video/commit/84bb910d10e3e3d70f9e92b57c17de829d73218a))
+* **typescript:** type checks on selectedTextTrack, selectedAudioTrack, selectedVideoTrack ([#3910](https://github.com/TheWidlarzGroup/react-native-video/issues/3910)) ([dc2a2ab](https://github.com/TheWidlarzGroup/react-native-video/commit/dc2a2ab863dc53fb2da1c2cea99e59e6d8387803))
+
+
+### Features
+
+* **android:** add `onControlsVisiblityChange` ([#3925](https://github.com/TheWidlarzGroup/react-native-video/issues/3925)) ([c2ce372](https://github.com/TheWidlarzGroup/react-native-video/commit/c2ce372bcf21e21b97878e7efe77780168d09a79))
+* **ios:** add live key to now playing dict to decorate when livestream playing ([#3922](https://github.com/TheWidlarzGroup/react-native-video/issues/3922)) ([91751ab](https://github.com/TheWidlarzGroup/react-native-video/commit/91751abc870109e0a2667dfffbd2baa2e4cf997b))
+
+# [6.2.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.1.2...v6.2.0) (2024-06-07)
+
+
+### Bug Fixes
+
+* **android:** allow notification tap to foreground app ([#3831](https://github.com/TheWidlarzGroup/react-native-video/issues/3831)) ([5c29b48](https://github.com/TheWidlarzGroup/react-native-video/commit/5c29b48747b4a30eb9911daa579baaa93402ba67))
+* **android:** android cache header ([#3832](https://github.com/TheWidlarzGroup/react-native-video/issues/3832)) ([c2a1424](https://github.com/TheWidlarzGroup/react-native-video/commit/c2a14240ada24cd7c816bcb1ac942986eb855792))
+* **android:** fix null pointer exception at playback start with item metadata ([#3879](https://github.com/TheWidlarzGroup/react-native-video/issues/3879)) ([c2cd752](https://github.com/TheWidlarzGroup/react-native-video/commit/c2cd7529fd9c9a3c8b1ae7b87d0b80e822ca400d))
+* **android:** optimize lag on old android ([#3860](https://github.com/TheWidlarzGroup/react-native-video/issues/3860)) ([c2ce66e](https://github.com/TheWidlarzGroup/react-native-video/commit/c2ce66ed26efb975335ee7b229744a9957b0621e))
+* **android:** refactor source, fix random DRM issue and crop start on local asset ([#3835](https://github.com/TheWidlarzGroup/react-native-video/issues/3835)) ([bdf3e55](https://github.com/TheWidlarzGroup/react-native-video/commit/bdf3e556d802caa426d098d3f5fffe00dfb96660))
+* **android:** video resolution orientation android ([#3862](https://github.com/TheWidlarzGroup/react-native-video/issues/3862)) ([b698b18](https://github.com/TheWidlarzGroup/react-native-video/commit/b698b1837b71f2c93d488c521eb363e236e41aa5))
+* ensure progress is sent before `onEnd` callback ([#3872](https://github.com/TheWidlarzGroup/react-native-video/issues/3872)) ([7133c96](https://github.com/TheWidlarzGroup/react-native-video/commit/7133c96cac905f06f7a9bccd21eeb2f7a8a27c06))
+* ensure view drop stop playback startup ([#3875](https://github.com/TheWidlarzGroup/react-native-video/issues/3875)) ([ff1e24a](https://github.com/TheWidlarzGroup/react-native-video/commit/ff1e24aaad179656af71443b3db3b9817a98eb92))
+* **ios:** don't crash app if view wasn't found ([#3841](https://github.com/TheWidlarzGroup/react-native-video/issues/3841)) ([cd28d37](https://github.com/TheWidlarzGroup/react-native-video/commit/cd28d370d27571b6f42b68e506b0bd1eaa9c770c))
+* **ios:** fix notification controls enabled by default ([#3861](https://github.com/TheWidlarzGroup/react-native-video/issues/3861)) ([5c6dfb2](https://github.com/TheWidlarzGroup/react-native-video/commit/5c6dfb26c56c2b9165b25a01b9224c489e2fd2a5))
+* **ios:** fix playback status with lifecycle ([#3819](https://github.com/TheWidlarzGroup/react-native-video/issues/3819)) ([1b51c15](https://github.com/TheWidlarzGroup/react-native-video/commit/1b51c1534881216f9975834657e8add1e7fe9621))
+* **ios:** Implicit use of 'self' in closure - use 'self.' to make capture semantics explicit ([#3764](https://github.com/TheWidlarzGroup/react-native-video/issues/3764)) ([#3881](https://github.com/TheWidlarzGroup/react-native-video/issues/3881)) ([ac0a9c3](https://github.com/TheWidlarzGroup/react-native-video/commit/ac0a9c3e3a4fec474a963207a343765d1776406d)), closes [#3875](https://github.com/TheWidlarzGroup/react-native-video/issues/3875)
+
+
+### Features
+
+* add getCurrentPosition to component's ref ([#3824](https://github.com/TheWidlarzGroup/react-native-video/issues/3824)) ([c7f4d7b](https://github.com/TheWidlarzGroup/react-native-video/commit/c7f4d7b83bd09178f945d21e1f252a57ee1c8ab1))
+* **android:** allow chunckless preparation ([#3882](https://github.com/TheWidlarzGroup/react-native-video/issues/3882)) ([d4a8c24](https://github.com/TheWidlarzGroup/react-native-video/commit/d4a8c24f65eda5f3ce17263b234e47b667947e08))
+* **android:** Change subtitleLayout from child to sibling of layout ([#3830](https://github.com/TheWidlarzGroup/react-native-video/issues/3830)) ([c2cc917](https://github.com/TheWidlarzGroup/react-native-video/commit/c2cc91736852ea8b128e63bee71979d64b805c91))
+* **android:** handle increment forward and rewind buttons ([#3818](https://github.com/TheWidlarzGroup/react-native-video/issues/3818)) ([5059e7a](https://github.com/TheWidlarzGroup/react-native-video/commit/5059e7a7f122447a1762249429d5fe289cbb0a4d))
+
 ## [6.1.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.1.1...v6.1.2) (2024-05-23)
 
 

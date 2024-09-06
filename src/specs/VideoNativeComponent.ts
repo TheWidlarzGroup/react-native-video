@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type {HostComponent, ViewProps} from 'react-native';
-import {NativeModules, requireNativeComponent} from 'react-native';
+import {requireNativeComponent} from 'react-native';
 import type {
   DirectEventHandler,
   Double,
@@ -39,6 +39,9 @@ export type VideoSrc = Readonly<{
   cropStart?: Float;
   cropEnd?: Float;
   metadata?: VideoMetadata;
+  drm?: Drm;
+  cmcd?: NativeCmcdConfiguration; // android
+  textTracksAllowChunklessPreparation?: boolean; // android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -56,6 +59,16 @@ type Drm = Readonly<{
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
   useExternalGetLicense?: boolean; // ios
+  multiDrm?: WithDefault<boolean, false>; // android
+}>;
+
+type CmcdMode = WithDefault<Int32, 1>;
+export type NativeCmcdConfiguration = Readonly<{
+  mode?: CmcdMode; // default: MODE_QUERY_PARAMETER
+  request?: Headers;
+  session?: Headers;
+  object?: Headers;
+  status?: Headers;
 }>;
 
 type TextTracks = ReadonlyArray<
@@ -88,11 +101,6 @@ type SelectedVideoTrack = Readonly<{
   value?: string;
 }>;
 
-export type Seek = Readonly<{
-  time: Float;
-  tolerance?: Float;
-}>;
-
 type BufferConfigLive = Readonly<{
   maxPlaybackSpeed?: Float;
   minPlaybackSpeed?: Float;
@@ -123,6 +131,7 @@ type SubtitleStyle = Readonly<{
   paddingLeft?: WithDefault<Float, 0>;
   paddingRight?: WithDefault<Float, 0>;
   opacity?: WithDefault<Float, 1>;
+  subtitlesFollowVideo?: WithDefault<boolean, true>;
 }>;
 
 type OnLoadData = Readonly<{
@@ -186,6 +195,7 @@ export type OnSeekData = Readonly<{
 
 export type OnPlaybackStateChangedData = Readonly<{
   isPlaying: boolean;
+  isSeeking: boolean;
 }>;
 
 export type OnTimedMetadataData = Readonly<{
@@ -284,18 +294,29 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
-  hideSeekBar?: boolean;
+  hideSeekBar?: WithDefault<boolean, false>;
+  hideDuration?: WithDefault<boolean, false>;
+  seekIncrementMS?: Int32;
+  hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
+}>;
+
+export type OnControlsVisibilityChange = Readonly<{
+  isVisible: boolean;
 }>;
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  drm?: Drm;
   adTagUrl?: string;
+  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
+  disableFocus?: boolean; // android
   maxBitRate?: Float;
   resizeMode?: WithDefault<string, 'none'>;
   repeat?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
+  shutterColor?: Int32;
+  audioOutput?: WithDefault<string, 'speaker'>;
   textTracks?: TextTracks;
   selectedTextTrack?: SelectedTextTrack;
   selectedAudioTrack?: SelectedAudioTrack;
@@ -331,10 +352,10 @@ export interface VideoNativeProps extends ViewProps {
   minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
-  useTextureView?: boolean; // Android
-  useSecureView?: boolean; // Android
+  viewType?: Int32; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
+  onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;
@@ -367,43 +388,8 @@ export interface VideoNativeProps extends ViewProps {
   onVideoTracks?: DirectEventHandler<OnVideoTracksData>; // android
 }
 
-export type VideoComponentType = HostComponent<VideoNativeProps>;
-
-export type VideoSaveData = {
-  uri: string;
-};
-
-export interface VideoManagerType {
-  save: (option: object, reactTag: number) => Promise<VideoSaveData>;
-  seek: (option: Seek, reactTag: number) => Promise<void>;
-  setPlayerPauseState: (paused: boolean, reactTag: number) => Promise<void>;
-  setLicenseResult: (
-    result: string,
-    licenseUrl: string,
-    reactTag: number,
-  ) => Promise<void>;
-  setLicenseResultError: (
-    error: string,
-    licenseUrl: string,
-    reactTag: number,
-  ) => Promise<void>;
-  setVolume: (volume: number, reactTag: number) => Promise<void>;
-}
-
-export interface VideoDecoderPropertiesType {
-  getWidevineLevel: () => Promise<number>;
-  isCodecSupported: (
-    mimeType: string,
-    width: number,
-    height: number,
-  ) => Promise<'unsupported' | 'hardware' | 'software'>;
-  isHEVCSupported: () => Promise<'unsupported' | 'hardware' | 'software'>;
-}
-
-export const VideoManager = NativeModules.VideoManager as VideoManagerType;
-export const VideoDecoderProperties =
-  NativeModules.VideoDecoderProperties as VideoDecoderPropertiesType;
+type NativeVideoComponentType = HostComponent<VideoNativeProps>;
 
 export default requireNativeComponent<VideoNativeProps>(
   'RCTVideo',
-) as VideoComponentType;
+) as NativeVideoComponentType;

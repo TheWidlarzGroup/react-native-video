@@ -1,9 +1,9 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
 import {
-  SelectedVideoTrack,
   SelectedVideoTrackType,
-  VideoTrack,
+  type SelectedVideoTrack,
+  type VideoTrack,
 } from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
@@ -14,7 +14,7 @@ export interface VideoTrackSelectorType {
   onValueChange: (arg0: string) => void;
 }
 
-const VideoTrackSelector = ({
+export const VideoTrackSelector = ({
   videoTracks,
   selectedVideoTrack,
   onValueChange,
@@ -60,5 +60,3 @@ const VideoTrackSelector = ({
     </>
   );
 };
-
-export default VideoTrackSelector;
