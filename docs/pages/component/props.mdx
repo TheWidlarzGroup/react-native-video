@@ -357,6 +357,9 @@ Sets the desired limit, in bits per second, of network bandwidth consumption whe
 
 Default: 0. Don't limit the maxBitRate.
 
+Note: This property can interact with selectedVideoTrack.
+To use `maxBitrate`, selectedVideoTrack shall be undefined or `{type: SelectedVideoTrackType.AUTO}`.
+
 Example:
 
 ```javascript

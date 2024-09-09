@@ -567,6 +567,11 @@ public class ReactExoplayerView extends FrameLayout implements
         reLayout(playerControlView);
     }
 
+    /// returns true is adaptive bitrate shall be used
+    public boolean isUsingVideoABR() {
+        return videoTrackType == null || "auto".equals(videoTrackType);
+    }
+
     public void setDebug(boolean enableDebug) {
         this.enableDebug = enableDebug;
         refreshDebugState();
@@ -2037,16 +2042,21 @@ public class ReactExoplayerView extends FrameLayout implements
 
         TrackSelectionOverride selectionOverride = new TrackSelectionOverride(groups.get(groupIndex), tracks);
 
-        DefaultTrackSelector.Parameters selectionParameters = trackSelector.getParameters()
+        DefaultTrackSelector.Parameters.Builder selectionParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setExceedAudioConstraintsIfNecessary(true)
                 .setExceedRendererCapabilitiesIfNecessary(true)
                 .setExceedVideoConstraintsIfNecessary(true)
                 .setRendererDisabled(rendererIndex, false)
-                .clearOverridesOfType(selectionOverride.getType())
-                .addOverride(selectionOverride)
-                .build();
-        trackSelector.setParameters(selectionParameters);
+                .clearOverridesOfType(selectionOverride.getType());
+
+        if (trackType == C.TRACK_TYPE_VIDEO && isUsingVideoABR()) {
+            selectionParameters.setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate);
+        } else {
+            selectionParameters.addOverride(selectionOverride);
+        }
+
+        trackSelector.setParameters(selectionParameters.build());
     }
 
     private boolean isFormatSupported(Format format) {
@@ -2177,7 +2187,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setMaxBitRateModifier(int newMaxBitRate) {
         maxBitRate = newMaxBitRate;
-        if (player != null) {
+        if (player != null && isUsingVideoABR()) {
+            // do not apply yet if not auto
             trackSelector.setParameters(trackSelector.buildUponParameters()
                     .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
         }
