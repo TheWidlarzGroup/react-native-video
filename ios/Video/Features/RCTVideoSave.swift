@@ -19,26 +19,32 @@ enum RCTVideoSave {
             reject("ERROR_COULD_NOT_CREATE_EXPORT_SESSION", "Could not create export session", nil)
             return
         }
-        var path: String!
-        path = RCTVideoSave.generatePathInDirectory(
-            directory: URL(fileURLWithPath: RCTVideoSave.cacheDirectoryPath() ?? "").appendingPathComponent("Videos").path,
-            withExtension: ".mp4"
-        )
-        let url: NSURL! = NSURL.fileURL(withPath: path) as NSURL
-        exportSession.outputFileType = AVFileType.mp4
-        exportSession.outputURL = url as URL?
-        exportSession.videoComposition = playerItem?.videoComposition
-        exportSession.shouldOptimizeForNetworkUse = true
-        exportSession.exportAsynchronously(completionHandler: {
-            switch exportSession.status {
-            case .failed:
-                reject("ERROR_COULD_NOT_EXPORT_VIDEO", "Could not export video", exportSession.error)
-            case .cancelled:
-                reject("ERROR_EXPORT_SESSION_CANCELLED", "Export session was cancelled", exportSession.error)
-            default:
-                resolve(["uri": url.absoluteString])
-            }
-        })
+
+        #if !os(visionOS)
+            var path: String!
+            path = RCTVideoSave.generatePathInDirectory(
+                directory: URL(fileURLWithPath: RCTVideoSave.cacheDirectoryPath() ?? "").appendingPathComponent("Videos").path,
+                withExtension: ".mp4"
+            )
+            let url: NSURL! = NSURL.fileURL(withPath: path) as NSURL
+            exportSession.outputFileType = .mp4
+            exportSession.outputFileType = AVFileType.mp4
+            exportSession.outputURL = url as URL?
+            exportSession.videoComposition = playerItem?.videoComposition
+            exportSession.shouldOptimizeForNetworkUse = true
+            exportSession.exportAsynchronously(completionHandler: {
+                switch exportSession.status {
+                case .failed:
+                    reject("ERROR_COULD_NOT_EXPORT_VIDEO", "Could not export video", exportSession.error)
+                case .cancelled:
+                    reject("ERROR_EXPORT_SESSION_CANCELLED", "Export session was cancelled", exportSession.error)
+                default:
+                    resolve(["uri": url.absoluteString])
+                }
+            })
+        #else
+            reject("ERROR_EXPORT_SESSION_CANCELLED", "this function is not supported on visionOS", nil)
+        #endif
     }
 
     static func generatePathInDirectory(directory: String?, withExtension extension: String?) -> String? {
