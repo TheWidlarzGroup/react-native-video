@@ -59,10 +59,11 @@ object ReactBridgeUtils {
         }
         return try {
             value.toInt()
-        } catch (e:java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             default
         }
     }
+
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.
      *

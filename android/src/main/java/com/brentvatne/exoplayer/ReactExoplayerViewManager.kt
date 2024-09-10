@@ -8,7 +8,6 @@ import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferingStrategy
 import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.api.ResizeMode
-import com.brentvatne.common.api.SideLoadedTextTrackList
 import com.brentvatne.common.api.Source
 import com.brentvatne.common.api.SubtitleStyle
 import com.brentvatne.common.api.ViewType
@@ -16,7 +15,6 @@ import com.brentvatne.common.react.EventTypes
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.brentvatne.react.ReactNativeVideoManager
-import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewGroupManager
