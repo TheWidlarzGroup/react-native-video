@@ -453,8 +453,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         #if USE_VIDEO_CACHING
-            if _videoCache.shouldCache(source: source, textTracks: _textTracks) {
-                return try await _videoCache.playerItemForSourceUsingCache(uri: source.uri, assetOptions: assetOptions)
+            if _videoCache.shouldCache(source: source) {
+                return try await _videoCache.playerItemForSourceUsingCache(source: source, assetOptions: assetOptions)
             }
         #endif
 

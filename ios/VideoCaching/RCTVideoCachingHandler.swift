@@ -4,20 +4,20 @@ import Foundation
 
 class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     private var _videoCache: RCTVideoCache! = RCTVideoCache.sharedInstance()
-    var playerItemPrepareText: ((AVAsset?, NSDictionary?, String) async -> AVPlayerItem)?
+    var playerItemPrepareText: ((VideoSource, AVAsset?, NSDictionary?, String) async -> AVPlayerItem)?
 
     override init() {
         super.init()
     }
 
-    func shouldCache(source: VideoSource, textTracks: [TextTrack]?) -> Bool {
-        if source.isNetwork && source.shouldCache && ((textTracks == nil) || (textTracks!.isEmpty)) {
+    func shouldCache(source: VideoSource) -> Bool {
+        if source.isNetwork && source.shouldCache && source.textTracks.isEmpty {
             /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
              * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
              * Until this is fixed, we need to bypass caching when text tracks are specified.
              */
             DebugLog("""
-              Caching is not supported for uri '\(source.uri)' because text tracks are not compatible with the cache.
+              Caching is not supported for uri '\(source.uri ?? "NO URI")' because text tracks are not compatible with the cache.
               Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
             return true
@@ -25,7 +25,8 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
         return false
     }
 
-    func playerItemForSourceUsingCache(uri: String!, assetOptions options: NSDictionary!) async throws -> AVPlayerItem {
+    func playerItemForSourceUsingCache(source: VideoSource, assetOptions options: NSDictionary) async throws -> AVPlayerItem {
+        let uri = source.uri!
         let url = URL(string: uri)
         let (videoCacheStatus, cachedAsset) = await getItemForUri(uri)
 
@@ -36,33 +37,33 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
         switch videoCacheStatus {
         case .missingFileExtension:
             DebugLog("""
-              Could not generate cache key for uri '\(uri ?? "NO_URI")'.
+              Could not generate cache key for uri '\(uri)'.
               It is currently not supported to cache urls that do not include a file extension.
               The video file will not be cached.
               Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
-            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as! [String: Any])
-            return await playerItemPrepareText(asset, options, "")
+            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as? [String: Any])
+            return await playerItemPrepareText(source, asset, options, "")
 
         case .unsupportedFileExtension:
             DebugLog("""
-              Could not generate cache key for uri '\(uri ?? "NO_URI")'.
+              Could not generate cache key for uri '\(uri)'.
               The file extension of that uri is currently not supported.
               The video file will not be cached.
               Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
-            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as! [String: Any])
-            return await playerItemPrepareText(asset, options, "")
+            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as? [String: Any])
+            return await playerItemPrepareText(source, asset, options, "")
 
         default:
             if let cachedAsset {
-                DebugLog("Playing back uri '\(uri ?? "NO_URI")' from cache")
+                DebugLog("Playing back uri '\(uri)' from cache")
                 // See note in playerItemForSource about not being able to support text tracks & caching
                 return AVPlayerItem(asset: cachedAsset)
             }
         }
 
-        let asset: DVURLAsset! = DVURLAsset(url: url, options: options as! [String: Any], networkTimeout: 10000)
+        let asset: DVURLAsset! = DVURLAsset(url: url, options: options as? [String: Any], networkTimeout: 10000)
         asset.loaderDelegate = self
 
         /* More granular code to have control over the DVURLAsset
