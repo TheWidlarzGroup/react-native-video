@@ -108,7 +108,6 @@ import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
-import com.brentvatne.common.api.SideLoadedTextTrackList;
 import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
@@ -116,6 +115,7 @@ import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
 import com.brentvatne.common.toolbox.DebugLog;
+import com.brentvatne.common.toolbox.ReactBridgeUtils;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.react.ReactNativeVideoManager;
@@ -230,9 +230,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private String audioTrackValue;
     private String videoTrackType;
     private String videoTrackValue;
-    private String textTrackType;
+    private String textTrackType = "disabled";
     private String textTrackValue;
-    private SideLoadedTextTrackList textTracks;
     private boolean disableFocus;
     private boolean focusable = true;
     private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
@@ -1126,11 +1125,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private ArrayList<MediaSource> buildTextSources() {
         ArrayList<MediaSource> textSources = new ArrayList<>();
-        if (textTracks == null) {
+        if (source.getSideLoadedTextTracks() == null) {
             return textSources;
         }
 
-        for (SideLoadedTextTrack track : textTracks.getTracks()) {
+        for (SideLoadedTextTrack track : source.getSideLoadedTextTracks().getTracks()) {
             MediaSource textSource = buildTextSource(track.getTitle(),
                     track.getUri(),
                     track.getType(),
@@ -1844,11 +1843,6 @@ public class ReactExoplayerView extends FrameLayout implements
         adLanguage = language;
     }
 
-    public void setTextTracks(SideLoadedTextTrackList textTracks) {
-        this.textTracks = textTracks;
-        reloadSource(); // FIXME Shall be moved inside source
-    }
-
     private void reloadSource() {
         playerNeedsSource = true;
         initializePlayer();
@@ -1928,64 +1922,67 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         } else if ("index".equals(type)) {
-            int iValue = Integer.parseInt(value);
-
-            if (trackType == C.TRACK_TYPE_VIDEO && groups.length == 1) {
-                groupIndex = 0;
-                if (iValue < groups.get(groupIndex).length) {
-                    tracks.set(0, iValue);
+            int iValue = ReactBridgeUtils.safeParseInt(value, -1);
+            if (iValue != -1) {
+                if (trackType == C.TRACK_TYPE_VIDEO && groups.length == 1) {
+                    groupIndex = 0;
+                    if (iValue < groups.get(groupIndex).length) {
+                        tracks.set(0, iValue);
+                    }
+                } else if (iValue < groups.length) {
+                    groupIndex = iValue;
                 }
-            } else if (iValue < groups.length) {
-                groupIndex = iValue;
             }
         } else if ("resolution".equals(type)) {
-            int height = Integer.parseInt(value);
-            for (int i = 0; i < groups.length; ++i) { // Search for the exact height
-                TrackGroup group = groups.get(i);
-                Format closestFormat = null;
-                int closestTrackIndex = -1;
-                boolean usingExactMatch = false;
-                for (int j = 0; j < group.length; j++) {
-                    Format format = group.getFormat(j);
-                    if (format.height == height) {
-                        groupIndex = i;
-                        tracks.set(0, j);
-                        closestFormat = null;
-                        closestTrackIndex = -1;
-                        usingExactMatch = true;
-                        break;
-                    } else if (isUsingContentResolution) {
-                        // When using content resolution rather than ads, we need to try and find the closest match if there is no exact match
-                        if (closestFormat != null) {
-                            if ((format.bitrate > closestFormat.bitrate || format.height > closestFormat.height) && format.height < height) {
-                                // Higher quality match
+            int height = ReactBridgeUtils.safeParseInt(value, -1);
+            if (height != -1) {
+                for (int i = 0; i < groups.length; ++i) { // Search for the exact height
+                    TrackGroup group = groups.get(i);
+                    Format closestFormat = null;
+                    int closestTrackIndex = -1;
+                    boolean usingExactMatch = false;
+                    for (int j = 0; j < group.length; j++) {
+                        Format format = group.getFormat(j);
+                        if (format.height == height) {
+                            groupIndex = i;
+                            tracks.set(0, j);
+                            closestFormat = null;
+                            closestTrackIndex = -1;
+                            usingExactMatch = true;
+                            break;
+                        } else if (isUsingContentResolution) {
+                            // When using content resolution rather than ads, we need to try and find the closest match if there is no exact match
+                            if (closestFormat != null) {
+                                if ((format.bitrate > closestFormat.bitrate || format.height > closestFormat.height) && format.height < height) {
+                                    // Higher quality match
+                                    closestFormat = format;
+                                    closestTrackIndex = j;
+                                }
+                            } else if (format.height < height) {
                                 closestFormat = format;
                                 closestTrackIndex = j;
                             }
-                        } else if(format.height < height) {
-                            closestFormat = format;
-                            closestTrackIndex = j;
                         }
                     }
-                }
-                // This is a fallback if the new period contains only higher resolutions than the user has selected
-                if (closestFormat == null && isUsingContentResolution && !usingExactMatch) {
-                    // No close match found - so we pick the lowest quality
-                    int minHeight = Integer.MAX_VALUE;
-                    for (int j = 0; j < group.length; j++) {
-                        Format format = group.getFormat(j);
-                        if (format.height < minHeight) {
-                            minHeight = format.height;
-                            groupIndex = i;
-                            tracks.set(0, j);
+                    // This is a fallback if the new period contains only higher resolutions than the user has selected
+                    if (closestFormat == null && isUsingContentResolution && !usingExactMatch) {
+                        // No close match found - so we pick the lowest quality
+                        int minHeight = Integer.MAX_VALUE;
+                        for (int j = 0; j < group.length; j++) {
+                            Format format = group.getFormat(j);
+                            if (format.height < minHeight) {
+                                minHeight = format.height;
+                                groupIndex = i;
+                                tracks.set(0, j);
+                            }
                         }
                     }
-                }
-                // Selecting the closest match found
-                if (closestFormat != null && closestTrackIndex != -1) {
-                    // We found the closest match instead of an exact one
-                    groupIndex = i;
-                    tracks.set(0, closestTrackIndex);
+                    // Selecting the closest match found
+                    if (closestFormat != null && closestTrackIndex != -1) {
+                        // We found the closest match instead of an exact one
+                        groupIndex = i;
+                        tracks.set(0, closestTrackIndex);
+                    }
                 }
             }
         } else if (trackType == C.TRACK_TYPE_TEXT && Util.SDK_INT > 18) { // Text default

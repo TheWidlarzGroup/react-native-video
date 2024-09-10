@@ -166,6 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       );
 
       const selectedDrm = source.drm || drm;
+      const _textTracks = source.textTracks || textTracks;
       const _drm = !selectedDrm
         ? undefined
         : {
@@ -218,10 +219,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         metadata: resolvedSource.metadata,
         drm: _drm,
         cmcd: _cmcd,
+        textTracks: _textTracks,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [drm, source]);
+    }, [drm, source, textTracks]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -727,7 +729,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           restoreUserInterfaceForPIPStopCompletionHandler={
             _restoreUserInterfaceForPIPStopCompletionHandler
           }
-          textTracks={textTracks}
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}

@@ -38,7 +38,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_SELECTED_TEXT_TRACK = "selectedTextTrack"
         private const val PROP_SELECTED_TEXT_TRACK_TYPE = "type"
         private const val PROP_SELECTED_TEXT_TRACK_VALUE = "value"
-        private const val PROP_TEXT_TRACKS = "textTracks"
         private const val PROP_PAUSED = "paused"
         private const val PROP_MUTED = "muted"
         private const val PROP_AUDIO_OUTPUT = "audioOutput"
@@ -178,12 +177,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
             value = ReactBridgeUtils.safeGetString(selectedTextTrack, PROP_SELECTED_TEXT_TRACK_VALUE)
         }
         videoView.setSelectedTextTrack(typeString, value)
-    }
-
-    @ReactProp(name = PROP_TEXT_TRACKS)
-    fun setTextTracks(videoView: ReactExoplayerView, textTracks: ReadableArray?) {
-        val sideLoadedTextTracks = SideLoadedTextTrackList.parse(textTracks)
-        videoView.setTextTracks(sideLoadedTextTracks)
     }
 
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
