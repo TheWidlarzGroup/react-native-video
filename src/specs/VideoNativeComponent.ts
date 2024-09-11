@@ -38,6 +38,7 @@ export type VideoSrc = Readonly<{
   startPosition?: Float;
   cropStart?: Float;
   cropEnd?: Float;
+  contentStartTime?: Int32; // Android
   metadata?: VideoMetadata;
   drm?: Drm;
   cmcd?: NativeCmcdConfiguration; // android
@@ -344,7 +345,6 @@ export interface VideoNativeProps extends ViewProps {
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
   bufferConfig?: BufferConfig; // Android
-  contentStartTime?: Int32; // Android
   currentPlaybackTime?: Double; // Android
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android

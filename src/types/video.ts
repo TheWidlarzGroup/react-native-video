@@ -31,6 +31,7 @@ export type ReactVideoSourceProperties = {
   startPosition?: number;
   cropStart?: number;
   cropEnd?: number;
+  contentStartTime?: number; // Android
   metadata?: VideoMetadata;
   drm?: Drm;
   cmcd?: Cmcd; // android
@@ -264,6 +265,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   bufferConfig?: BufferConfig; // Android
   bufferingStrategy?: BufferingStrategyType;
   chapters?: Chapters[]; // iOS
+  /** @deprecated Use source.contentStartTime */
   contentStartTime?: number; // Android
   controls?: boolean;
   currentPlaybackTime?: number; // Android
