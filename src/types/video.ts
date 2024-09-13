@@ -35,6 +35,7 @@ export type ReactVideoSourceProperties = {
   drm?: Drm;
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
+  textTracks?: TextTracks;
 };
 
 export type ReactVideoSource = Readonly<
@@ -254,7 +255,7 @@ export type ControlsStyles = {
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
-  /** @deprecated */
+  /** @deprecated Use source.drm */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
@@ -302,12 +303,13 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
   shutterColor?: string; // Android
+  /** @deprecated Use source.textTracks */
   textTracks?: TextTracks;
   testID?: string;
   viewType?: ViewType;
-  /** @deprecated */
+  /** @deprecated Use viewType */
   useTextureView?: boolean; // Android
-  /** @deprecated */
+  /** @deprecated Use viewType*/
   useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;
