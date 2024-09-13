@@ -179,12 +179,11 @@ enum RCTVideoUtils {
                 title = value as! String
             }
             let language: String! = currentOption?.extendedLanguageTag ?? ""
-            let selectedOpt = player.currentItem?.currentMediaSelection
             let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
             let textTrack = TextTrack([
                 "index": NSNumber(value: i),
                 "title": title,
-                "language": language,
+                "language": language as Any,
                 "selected": currentOption?.displayName == selectedOption?.displayName,
             ])
             textTracks.append(textTrack)
@@ -375,8 +374,8 @@ enum RCTVideoUtils {
                 assetOptions.setObject(headers, forKey: "AVURLAssetHTTPHeaderFieldsKey" as NSCopying)
             }
             let cookies: [AnyObject]! = HTTPCookieStorage.shared.cookies
-            assetOptions.setObject(cookies, forKey: AVURLAssetHTTPCookiesKey as NSCopying)
-            asset = AVURLAsset(url: url!, options: assetOptions as! [String: Any])
+            assetOptions.setObject(cookies as Any, forKey: AVURLAssetHTTPCookiesKey as NSCopying)
+            asset = AVURLAsset(url: url!, options: assetOptions as? [String: Any])
         } else {
             asset = AVURLAsset(url: url!)
         }
@@ -431,14 +430,10 @@ enum RCTVideoUtils {
             return try? await AVVideoComposition.videoComposition(
                 with: asset,
                 applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
-                    if filter == nil {
-                        request.finish(with: request.sourceImage, context: nil)
-                    } else {
-                        let image: CIImage! = request.sourceImage.clampedToExtent()
-                        filter.setValue(image, forKey: kCIInputImageKey)
-                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
-                        request.finish(with: output, context: nil)
-                    }
+                    let image: CIImage! = request.sourceImage.clampedToExtent()
+                    filter.setValue(image, forKey: kCIInputImageKey)
+                    let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                    request.finish(with: output, context: nil)
                 }
             )
         } else {
@@ -446,14 +441,10 @@ enum RCTVideoUtils {
                 return AVVideoComposition(
                     asset: asset,
                     applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
-                        if filter == nil {
-                            request.finish(with: request.sourceImage, context: nil)
-                        } else {
-                            let image: CIImage! = request.sourceImage.clampedToExtent()
-                            filter.setValue(image, forKey: kCIInputImageKey)
-                            let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
-                            request.finish(with: output, context: nil)
-                        }
+                        let image: CIImage! = request.sourceImage.clampedToExtent()
+                        filter.setValue(image, forKey: kCIInputImageKey)
+                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                        request.finish(with: output, context: nil)
                     }
                 )
             #endif

@@ -49,7 +49,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
     func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
         // Check if the loading request exists in _loadingRequests based on licenseUrl
         guard let loadingRequest = _loadingRequests[licenseUrl] else {
-            setLicenseResultError("Loading request for licenseUrl \(licenseUrl) not found", licenseUrl)
+            setLicenseResultError("Loading request for licenseUrl \(String(describing: licenseUrl)) not found", licenseUrl)
             return
         }
 
@@ -87,12 +87,12 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         _onVideoError?([
             "error": [
                 "code": NSNumber(value: error.code),
-                "localizedDescription": error.localizedDescription ?? "",
+                "localizedDescription": error.localizedDescription,
                 "localizedFailureReason": error.localizedFailureReason ?? "",
                 "localizedRecoverySuggestion": error.localizedRecoverySuggestion ?? "",
                 "domain": error.domain,
             ],
-            "target": _reactTag,
+            "target": _reactTag as Any,
         ])
 
         return false
@@ -158,7 +158,7 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
                                          "loadedLicenseUrl": loadingRequest.request.url?.absoluteString ?? "",
                                          "contentId": contentId ?? "",
                                          "spcBase64": spcData.base64EncodedString(options: []),
-                                         "target": self._reactTag])
+                                         "target": self._reactTag as Any])
                 } else {
                     let data = try await RCTVideoDRM.handleInternalGetLicense(
                         loadingRequest: loadingRequest,
