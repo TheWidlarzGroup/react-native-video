@@ -217,7 +217,7 @@ const VideoPlayer: FC<Props> = ({}) => {
 
   const onVideoBandwidthUpdate = (data: OnBandwidthUpdateData) => {
     console.log('onVideoBandwidthUpdate', data);
-  }
+  };
 
   const onFullScreenExit = () => {
     // iOS pauses video on exit from full screen

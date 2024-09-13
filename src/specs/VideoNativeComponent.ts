@@ -296,6 +296,13 @@ export type OnAudioFocusChangedData = Readonly<{
 type ControlsStyles = Readonly<{
   hideSeekBar?: boolean;
   hideDuration?: boolean;
+  hidePosition?: boolean;
+  hidePlayPause?: boolean;
+  hideForward?: boolean;
+  hideRewind?: boolean;
+  hideNext?: boolean;
+  hidePrevious?: boolean;
+  hideFullscreen?: boolean;
   seekIncrementMS?: Int32;
 }>;
 

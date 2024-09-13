@@ -247,6 +247,13 @@ export type AudioOutput = 'speaker' | 'earpiece';
 export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
+  hidePosition?: boolean;
+  hidePlayPause?: boolean;
+  hideForward?: boolean;
+  hideRewind?: boolean;
+  hideNext?: boolean;
+  hidePrevious?: boolean;
+  hideFullscreen?: boolean;
   seekIncrementMS?: number;
 };
 
