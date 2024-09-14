@@ -79,6 +79,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       poster,
       posterResizeMode,
       renderLoader,
+      contentStartTime,
       drm,
       textTracks,
       selectedVideoTrack,
@@ -204,6 +205,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
       }
 
+      const selectedContentStartTime =
+        source.contentStartTime || contentStartTime;
+
       return {
         uri,
         isNetwork,
@@ -216,6 +220,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
+        contentStartTime: selectedContentStartTime,
         metadata: resolvedSource.metadata,
         drm: _drm,
         cmcd: _cmcd,
@@ -223,7 +228,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [drm, source, textTracks]);
+    }, [drm, source, textTracks, contentStartTime]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {

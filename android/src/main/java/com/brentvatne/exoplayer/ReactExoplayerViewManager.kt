@@ -49,7 +49,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
         private const val PROP_MAXIMUM_BIT_RATE = "maxBitRate"
         private const val PROP_PLAY_IN_BACKGROUND = "playInBackground"
-        private const val PROP_CONTENT_START_TIME = "contentStartTime"
         private const val PROP_DISABLE_FOCUS = "disableFocus"
         private const val PROP_BUFFERING_STRATEGY = "bufferingStrategy"
         private const val PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError"
@@ -235,11 +234,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)
     fun setFocusable(videoView: ReactExoplayerView, focusable: Boolean) {
         videoView.setFocusable(focusable)
-    }
-
-    @ReactProp(name = PROP_CONTENT_START_TIME, defaultInt = -1)
-    fun setContentStartTime(videoView: ReactExoplayerView, contentStartTime: Int) {
-        videoView.setContentStartTime(contentStartTime)
     }
 
     @ReactProp(name = PROP_BUFFERING_STRATEGY)

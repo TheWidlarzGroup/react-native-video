@@ -235,7 +235,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean disableFocus;
     private boolean focusable = true;
     private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
-    private long contentStartTime = -1L;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
@@ -1436,7 +1435,7 @@ public class ReactExoplayerView extends FrameLayout implements
             ArrayList<Track> audioTracks = getAudioTrackInfo();
             ArrayList<Track> textTracks  = getTextTrackInfo();
 
-            if (this.contentStartTime != -1L) {
+            if (source.getContentStartTime() != -1) {
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 es.execute(() -> {
                     // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
@@ -1539,7 +1538,7 @@ public class ReactExoplayerView extends FrameLayout implements
         ExecutorService es = Executors.newSingleThreadExecutor();
         final DataSource dataSource = this.mediaDataSourceFactory.createDataSource();
         final Uri sourceUri = source.getUri();
-        final long startTime = this.contentStartTime * 1000 - 100; // s -> ms with 100ms offset
+        final long startTime = source.getContentStartTime() * 1000 - 100; // s -> ms with 100ms offset
 
         Future<ArrayList<VideoTrack>> result = es.submit(new Callable() {
             final DataSource ds = dataSource;
@@ -2205,10 +2204,6 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setFocusable(boolean focusable) {
         this.focusable = focusable;
         exoPlayerView.setFocusable(this.focusable);
-    }
-
-    public void setContentStartTime(int contentStartTime) {
-        this.contentStartTime = contentStartTime;
     }
 
     public void setShowNotificationControls(boolean showNotificationControls) {

@@ -34,7 +34,12 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
-import {bufferConfig, isAndroid, srcList, textTracksSelectionBy} from './constants';
+import {
+  bufferConfig,
+  isAndroid,
+  srcList,
+  textTracksSelectionBy,
+} from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 import * as NavigationBar from 'expo-navigation-bar';
 
@@ -224,7 +229,7 @@ const VideoPlayer: FC<Props> = ({}) => {
 
   const onVideoBandwidthUpdate = (data: OnBandwidthUpdateData) => {
     console.log('onVideoBandwidthUpdate', data);
-  }
+  };
 
   const onFullScreenExit = () => {
     // iOS pauses video on exit from full screen
@@ -284,7 +289,10 @@ const VideoPlayer: FC<Props> = ({}) => {
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
             subtitleStyle={{subtitlesFollowVideo: true}}
-            controlsStyles={{hideNavigationBarOnFullScreenMode: true, hideNotificationBarOnFullScreenMode: true}}
+            controlsStyles={{
+              hideNavigationBarOnFullScreenMode: true,
+              hideNotificationBarOnFullScreenMode: true,
+            }}
           />
         </TouchableOpacity>
       )}
