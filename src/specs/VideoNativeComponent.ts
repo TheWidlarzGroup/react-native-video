@@ -43,6 +43,7 @@ export type VideoSrc = Readonly<{
   drm?: Drm;
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
+  textTracks?: TextTracks;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -318,7 +319,6 @@ export interface VideoNativeProps extends ViewProps {
   automaticallyWaitsToMinimizeStalling?: boolean;
   shutterColor?: Int32;
   audioOutput?: WithDefault<string, 'speaker'>;
-  textTracks?: TextTracks;
   selectedTextTrack?: SelectedTextTrack;
   selectedAudioTrack?: SelectedAudioTrack;
   selectedVideoTrack?: SelectedVideoTrack; // android

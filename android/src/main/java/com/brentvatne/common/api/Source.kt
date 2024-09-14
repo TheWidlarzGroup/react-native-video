@@ -65,6 +65,11 @@ class Source {
      */
     var cmcdProps: CMCDProps? = null
 
+    /**
+     * The list of sideLoaded text tracks
+     */
+    var sideLoadedTextTracks: SideLoadedTextTrackList? = null
+
     override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
     /** return true if this and src are equals  */
@@ -78,7 +83,8 @@ class Source {
                 extension == other.extension &&
                 drmProps == other.drmProps &&
                 contentStartTime == other.contentStartTime &&
-                cmcdProps == other.cmcdProps
+                cmcdProps == other.cmcdProps &&
+                sideLoadedTextTracks == other.sideLoadedTextTracks
             )
     }
 
@@ -144,6 +150,7 @@ class Source {
         private const val PROP_SRC_DRM = "drm"
         private const val PROP_SRC_CMCD = "cmcd"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
+        private const val PROP_SRC_TEXT_TRACKS = "textTracks"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -204,6 +211,7 @@ class Source {
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
+                source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
 
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {

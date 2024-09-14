@@ -121,7 +121,7 @@ class VideoPlaybackService : MediaSessionService() {
     }
 
     private fun buildNotification(session: MediaSession): Notification {
-        val returnToPlayer = Intent(this, sourceActivity).apply {
+        val returnToPlayer = Intent(this, sourceActivity ?: this.javaClass).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 

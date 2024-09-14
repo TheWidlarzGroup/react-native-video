@@ -48,7 +48,7 @@ class VideoPluginSample: NSObject, RNVPlugin {
      * custom functions to be able to track AVPlayer state change
      */
     func handlePlaybackRateChange(player: AVPlayer, change: NSKeyValueObservedChange<Float>) {
-        NSLog("plugin: handlePlaybackRateChange \(change.oldValue)")
+        NSLog("plugin: handlePlaybackRateChange \(String(describing: change.oldValue))")
     }
 
     func handlePlayerItemStatusChange(playerItem: AVPlayerItem, change _: NSKeyValueObservedChange<AVPlayerItem.Status>) {
@@ -56,7 +56,7 @@ class VideoPluginSample: NSObject, RNVPlugin {
     }
 
     func handleCurrentItemChange(player: AVPlayer, change: NSKeyValueObservedChange<AVPlayerItem?>) {
-        NSLog("plugin: handleCurrentItemChange \(player.currentItem)")
+        NSLog("plugin: handleCurrentItemChange \(String(describing: player.currentItem))")
         guard let playerItem = player.currentItem else {
             _playerItemStatusObserver?.invalidate()
             return

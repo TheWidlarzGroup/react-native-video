@@ -60,13 +60,11 @@ enum RCTVideoSave {
 
     static func ensureDirExists(withPath path: String?) -> Bool {
         var isDir: ObjCBool = false
-        var error: Error?
         let exists = FileManager.default.fileExists(atPath: path ?? "", isDirectory: &isDir)
         if !(exists && isDir.boolValue) {
             do {
                 try FileManager.default.createDirectory(atPath: path ?? "", withIntermediateDirectories: true, attributes: nil)
-            } catch {}
-            if error != nil {
+            } catch {
                 return false
             }
         }
