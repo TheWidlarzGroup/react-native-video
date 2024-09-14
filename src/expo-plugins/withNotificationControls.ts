@@ -23,7 +23,10 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
       if (!application.service) {
         application.service = [];
       }
-
+// We check if the VideoPlaybackService is already defined in the AndroidManifest.xml
+// to prevent adding duplicate service entries. If the service exists, we will remove 
+// it before adding the updated configuration to ensure there are no conflicts or redundant
+// service declarations in the manifest.
       const existingServiceIndex = application.service.findIndex(
         (service) =>
           service?.$?.['android:name'] ===
