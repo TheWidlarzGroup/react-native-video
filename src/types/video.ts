@@ -7,6 +7,7 @@ import type {
   ViewStyle,
   ImageRequireSource,
   ImageURISource,
+  ImageStyle,
 } from 'react-native';
 import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
@@ -254,6 +255,12 @@ export type ControlsStyles = {
   hideNotificationBarOnFullScreenMode?: boolean;
 };
 
+export interface ReactVideoRenderLoaderProps {
+  source?: ReactVideoSource;
+  videoStyle?: StyleProp<ImageStyle>;
+  resizeMode?: EnumValues<VideoResizeMode>;
+}
+
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
   /** @deprecated Use source.drm */
@@ -295,7 +302,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
-  renderLoader?: ReactNode;
+  renderLoader?: ReactNode | ((arg0: ReactVideoRenderLoaderProps) => ReactNode);
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;

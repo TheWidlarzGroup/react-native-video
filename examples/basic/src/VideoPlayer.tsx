@@ -231,6 +231,8 @@ const VideoPlayer: FC<Props> = ({}) => {
     Platform.OS === 'ios' && setPaused(true);
   };
 
+  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined
+
   return (
     <View style={styles.container}>
       <StatusBar animated={true} backgroundColor="black" hidden={false} />
@@ -278,7 +280,7 @@ const VideoPlayer: FC<Props> = ({}) => {
               cacheSizeMB: useCache ? 200 : 0,
             }}
             preventsDisplaySleepDuringVideoPlayback={true}
-            renderLoader={showPoster ? <VideoLoader /> : undefined}
+            renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
