@@ -24,6 +24,15 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
         application.service = [];
       }
 
+      const existingServiceIndex = application.service.findIndex(
+        (service) =>
+          service?.$?.['android:name'] ===
+          'com.brentvatne.exoplayer.VideoPlaybackService',
+      );
+      if (existingServiceIndex !== -1) {
+        application.service.splice(existingServiceIndex, 1);
+      }
+
       application.service.push({
         $: {
           'android:name': 'com.brentvatne.exoplayer.VideoPlaybackService',
