@@ -34,7 +34,12 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
-import {bufferConfig, isAndroid, srcList, textTracksSelectionBy} from './constants';
+import {
+  bufferConfig,
+  isAndroid,
+  srcList,
+  textTracksSelectionBy,
+} from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 import * as NavigationBar from 'expo-navigation-bar';
 
@@ -224,14 +229,20 @@ const VideoPlayer: FC<Props> = ({}) => {
 
   const onVideoBandwidthUpdate = (data: OnBandwidthUpdateData) => {
     console.log('onVideoBandwidthUpdate', data);
-  }
+  };
 
   const onFullScreenExit = () => {
     // iOS pauses video on exit from full screen
     Platform.OS === 'ios' && setPaused(true);
   };
 
-  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined
+  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
+
+  const _subtitleStyle = {subtitlesFollowVideo: true};
+  const _controlsStyles = {
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true,
+  };
 
   return (
     <View style={styles.container}>
@@ -285,8 +296,8 @@ const VideoPlayer: FC<Props> = ({}) => {
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
-            subtitleStyle={{subtitlesFollowVideo: true}}
-            controlsStyles={{hideNavigationBarOnFullScreenMode: true, hideNotificationBarOnFullScreenMode: true}}
+            subtitleStyle={_subtitleStyle}
+            controlsStyles={_controlsStyles}
           />
         </TouchableOpacity>
       )}
