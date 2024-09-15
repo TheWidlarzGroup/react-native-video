@@ -18,6 +18,7 @@ class AudioManagerDelegate(player: RNVPlayerInterface, themedReactContext: Theme
 
     // indicates if audio focus shall be handled
     var disableFocus: Boolean = false
+
     // indicates app currently have audio focus
     var hasAudioFocus = false
 
@@ -26,14 +27,13 @@ class AudioManagerDelegate(player: RNVPlayerInterface, themedReactContext: Theme
     private val audioFocusChangeListener = OnAudioFocusChangedListener(player, themedReactContext, this)
 
     /** implementation of OnAudioFocusChangedListener
-    * It reports audio events to the app and request volume change to the player
+     * It reports audio events to the app and request volume change to the player
      **/
     private class OnAudioFocusChangedListener(
         private val player: RNVPlayerInterface,
         private val themedReactContext: ThemedReactContext,
         private val audioFocusDelegate: AudioManagerDelegate
-    ) :
-        OnAudioFocusChangeListener {
+    ) : OnAudioFocusChangeListener {
         override fun onAudioFocusChange(focusChange: Int) {
             when (focusChange) {
                 AudioManager.AUDIOFOCUS_LOSS -> {
@@ -45,6 +45,7 @@ class AudioManagerDelegate(player: RNVPlayerInterface, themedReactContext: Theme
                 }
 
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> player.eventEmitter.onAudioFocusChanged.invoke(false)
+
                 AudioManager.AUDIOFOCUS_GAIN -> {
                     audioFocusDelegate.hasAudioFocus = true
                     player.eventEmitter.onAudioFocusChanged.invoke(true)
