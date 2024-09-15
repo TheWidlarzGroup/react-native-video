@@ -710,7 +710,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           <View style={StyleSheet.absoluteFill}>
             {_renderLoader({
               source: source,
-              videoStyle: posterStyle,
+              style: posterStyle,
               resizeMode: resizeMode,
             })}
           </View>

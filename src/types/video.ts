@@ -257,7 +257,7 @@ export type ControlsStyles = {
 
 export interface ReactVideoRenderLoaderProps {
   source?: ReactVideoSource;
-  videoStyle?: StyleProp<ImageStyle>;
+  style?: StyleProp<ImageStyle>;
   resizeMode?: EnumValues<VideoResizeMode>;
 }
 
