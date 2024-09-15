@@ -238,7 +238,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [drm, source, textTracks]);
+    }, [drm, source, textTracks, contentStartTime]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {

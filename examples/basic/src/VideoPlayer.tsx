@@ -243,6 +243,10 @@ const VideoPlayer: FC<Props> = ({}) => {
     hideNavigationBarOnFullScreenMode: true,
     hideNotificationBarOnFullScreenMode: true,
   };
+  const _bufferConfig = {
+    ...bufferConfig,
+    cacheSizeMB: useCache ? 200 : 0,
+  }
 
   return (
     <View style={styles.container}>
@@ -286,10 +290,7 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={selectedAudioTrack}
             selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{
-              ...bufferConfig,
-              cacheSizeMB: useCache ? 200 : 0,
-            }}
+            bufferConfig={_bufferConfig}
             preventsDisplaySleepDuringVideoPlayback={true}
             renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
