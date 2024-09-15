@@ -14,7 +14,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -106,6 +105,7 @@ import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.DRMProps;
+import com.brentvatne.common.api.RNVPlayerInterface;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
 import com.brentvatne.common.api.Source;
@@ -114,6 +114,7 @@ import com.brentvatne.common.api.TimedMetadata;
 import com.brentvatne.common.api.Track;
 import com.brentvatne.common.api.VideoTrack;
 import com.brentvatne.common.react.VideoEventEmitter;
+import com.brentvatne.common.toolbox.AudioManagerDelegate;
 import com.brentvatne.common.toolbox.DebugLog;
 import com.brentvatne.common.toolbox.ReactBridgeUtils;
 import com.brentvatne.react.BuildConfig;
@@ -139,7 +140,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -155,7 +155,8 @@ public class ReactExoplayerView extends FrameLayout implements
         BecomingNoisyListener,
         DrmSessionEventListener,
         AdEvent.AdEventListener,
-        AdErrorEvent.AdErrorListener {
+        AdErrorEvent.AdErrorListener,
+        RNVPlayerInterface {
 
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
@@ -170,7 +171,8 @@ public class ReactExoplayerView extends FrameLayout implements
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
-    protected final VideoEventEmitter eventEmitter;
+    public final VideoEventEmitter eventEmitter = new VideoEventEmitter();
+
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
     private LegacyPlayerControlView playerControlView;
@@ -201,7 +203,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
-    private boolean hasAudioFocus = false;
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
@@ -249,9 +250,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
     // React
     private final ThemedReactContext themedReactContext;
-    private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
-    private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
+    private AudioManagerDelegate audioFocusDelegate;
 
     // store last progress event values to avoid sending unnecessary messages
     private long lastPos = -1;
@@ -266,6 +266,13 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setCmcdConfigurationFactory(CmcdConfiguration.Factory factory) {
         this.cmcdConfigurationFactory = factory;
+    }
+
+    public boolean isPlaying() {
+        if (player == null || !player.getPlayWhenReady()) {
+            return false;
+        }
+        return true;
     }
 
     private void updateProgress() {
@@ -313,16 +320,21 @@ public class ReactExoplayerView extends FrameLayout implements
     public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
-        this.eventEmitter = new VideoEventEmitter();
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
         mainHandler = new Handler();
         createViews();
 
-        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
-        audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
+    }
+
+    private AudioManagerDelegate getAudioFocusDelegate() {
+        if (audioFocusDelegate == null) {
+            audioFocusDelegate = new AudioManagerDelegate(this, themedReactContext);
+            audioFocusDelegate.setDisableFocus(disableFocus);
+        }
+        return audioFocusDelegate;
     }
 
     private boolean isPlayingAd() {
@@ -585,6 +597,17 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setViewType(int viewType) {
         exoPlayerView.updateSurfaceView(viewType);
+    }
+
+    @NonNull
+    @Override
+    public VideoEventEmitter getEventEmitter() {
+        return eventEmitter;
+    }
+
+    @Override
+    public boolean isMuted() {
+        return muted;
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
@@ -1192,78 +1215,14 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private static class OnAudioFocusChangedListener implements AudioManager.OnAudioFocusChangeListener {
-        private final ReactExoplayerView view;
-        private final ThemedReactContext themedReactContext;
-
-        private OnAudioFocusChangedListener(ReactExoplayerView view, ThemedReactContext themedReactContext) {
-            this.view = view;
-            this.themedReactContext = themedReactContext;
-        }
-
-        @Override
-        public void onAudioFocusChange(int focusChange) {
-            Activity activity = themedReactContext.getCurrentActivity();
-
-            switch (focusChange) {
-                case AudioManager.AUDIOFOCUS_LOSS:
-                    view.hasAudioFocus = false;
-                    view.eventEmitter.onAudioFocusChanged.invoke(false);
-                    // FIXME this pause can cause issue if content doesn't have pause capability (can happen on live channel)
-                    if (activity != null) {
-                        activity.runOnUiThread(view::pausePlayback);
-                    }
-                    view.audioManager.abandonAudioFocus(this);
-                    break;
-                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                    view.eventEmitter.onAudioFocusChanged.invoke(false);
-                    break;
-                case AudioManager.AUDIOFOCUS_GAIN:
-                    view.hasAudioFocus = true;
-                    view.eventEmitter.onAudioFocusChanged.invoke(true);
-                    break;
-                default:
-                    break;
-            }
-
-            if (view.player != null && activity != null) {
-                if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                    // Lower the volume
-                    if (!view.muted) {
-                        activity.runOnUiThread(() ->
-                                view.player.setVolume(view.audioVolume * 0.8f)
-                        );
-                    }
-                } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-                    // Raise it back to normal
-                    if (!view.muted) {
-                        activity.runOnUiThread(() ->
-                                view.player.setVolume(view.audioVolume * 1)
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean requestAudioFocus() {
-        if (disableFocus || source.getUri() == null || this.hasAudioFocus) {
-            return true;
-        }
-        int result = audioManager.requestAudioFocus(audioFocusChangeListener,
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN);
-        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
-    }
-
     private void setPlayWhenReady(boolean playWhenReady) {
         if (player == null) {
             return;
         }
 
         if (playWhenReady) {
-            this.hasAudioFocus = requestAudioFocus();
-            if (this.hasAudioFocus) {
+            boolean hasAudioGranted = getAudioFocusDelegate().requestAudioFocus();
+            if (hasAudioGranted) {
                 player.setPlayWhenReady(true);
             }
         } else {
@@ -1280,7 +1239,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private void pausePlayback() {
+    public void pausePlayback() {
         if (player != null) {
             if (player.getPlayWhenReady()) {
                 setPlayWhenReady(false);
@@ -1295,7 +1254,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void onStopPlayback() {
-        audioManager.abandonAudioFocus(audioFocusChangeListener);
+        getAudioFocusDelegate().abandonAudioFocus();
     }
 
     private void updateResumePosition() {
@@ -2136,12 +2095,8 @@ public class ReactExoplayerView extends FrameLayout implements
                     .setContentType(contentType)
                     .build();
             player.setAudioAttributes(audioAttributes, false);
-            AudioManager audioManager = (AudioManager) themedReactContext.getSystemService(Context.AUDIO_SERVICE);
             boolean isSpeakerOutput = output == AudioOutput.SPEAKER;
-            audioManager.setMode(
-                    isSpeakerOutput ? AudioManager.MODE_NORMAL
-                            : AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(isSpeakerOutput);
+            getAudioFocusDelegate().changeOutput(isSpeakerOutput);
         }
     }
 
@@ -2154,7 +2109,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setVolumeModifier(float volume) {
         audioVolume = volume;
-        if (player != null) {
+        if (player != null && !muted) {
             player.setVolume(audioVolume);
         }
     }
@@ -2199,6 +2154,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setDisableFocus(boolean disableFocus) {
         this.disableFocus = disableFocus;
+        // do not use getAudioFocusDelegate()
+        // should not be created here as we are not sure the playback is really required
+        if (audioFocusDelegate != null) {
+            audioFocusDelegate.setDisableFocus(disableFocus);
+        }
     }
 
     public void setFocusable(boolean focusable) {
@@ -2380,4 +2340,23 @@ public class ReactExoplayerView extends FrameLayout implements
         controlsConfig = controlsStyles;
         refreshProgressBarVisibility();
     }
+
+    public void audioDuck() {
+        if (themedReactContext.getCurrentActivity() != null && !muted) {
+            themedReactContext.getCurrentActivity().runOnUiThread(() -> {
+                        player.setVolume(audioVolume * 0.8f);
+                    });
+        }
+    }
+
+    public void audioRestoreFromDuck() {
+        if (themedReactContext.getCurrentActivity() != null) {
+            themedReactContext.getCurrentActivity().runOnUiThread(() -> {
+                        if (!muted) {
+                            player.setVolume(audioVolume);
+                        }
+                    });
+        }
+    }
+
 }
