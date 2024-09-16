@@ -355,5 +355,4 @@ class VideoEventEmitter {
 
             putString("orientation", orientation)
         }
-
 }
