@@ -216,7 +216,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
 
-    implementation "androidx.core:core:$androidxCore_version"
+    implementation "androidx.core:core-ktx:$androidxCore_version"
     implementation "androidx.activity:activity-ktx:$androidxActivity_version"
 
     // For media playback using ExoPlayer
