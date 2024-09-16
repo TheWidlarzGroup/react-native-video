@@ -384,13 +384,13 @@ public class ReactExoplayerView extends FrameLayout implements
     public void onBandwidthSample(int elapsedMs, long bytes, long bitrate) {
         if (mReportBandwidth) {
             if (player == null) {
-                eventEmitter.onVideoBandwidthUpdate.invoke(bitrate, 0, 0, "-1");
+                eventEmitter.onVideoBandwidthUpdate.invoke(bitrate, 0, 0, null);
             } else {
                 Format videoFormat = player.getVideoFormat();
                 boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
                 int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
                 int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
-                String trackId = videoFormat != null ? videoFormat.id : "-1";
+                String trackId = videoFormat != null ? videoFormat.id : null;
                 eventEmitter.onVideoBandwidthUpdate.invoke(bitrate, height, width, trackId);
             }
         }
@@ -1427,7 +1427,7 @@ public class ReactExoplayerView extends FrameLayout implements
             boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
             int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
             int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
-            String trackId = videoFormat != null ? videoFormat.id : "-1";
+            String trackId = videoFormat != null ? videoFormat.id : null;
 
             // Properties that must be accessed on the main thread
             long duration = player.getDuration();
