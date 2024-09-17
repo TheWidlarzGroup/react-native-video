@@ -236,6 +236,18 @@ const VideoPlayer: FC<Props> = ({}) => {
     Platform.OS === 'ios' && setPaused(true);
   };
 
+  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
+
+  const _subtitleStyle = {subtitlesFollowVideo: true};
+  const _controlsStyles = {
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true,
+  };
+  const _bufferConfig = {
+    ...bufferConfig,
+    cacheSizeMB: useCache ? 200 : 0,
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar animated={true} backgroundColor="black" hidden={false} />
@@ -278,21 +290,15 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={selectedAudioTrack}
             selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{
-              ...bufferConfig,
-              cacheSizeMB: useCache ? 200 : 0,
-            }}
+            bufferConfig={_bufferConfig}
             preventsDisplaySleepDuringVideoPlayback={true}
-            renderLoader={showPoster ? <VideoLoader /> : undefined}
+            renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
-            subtitleStyle={{subtitlesFollowVideo: true}}
-            controlsStyles={{
-              hideNavigationBarOnFullScreenMode: true,
-              hideNotificationBarOnFullScreenMode: true,
-            }}
+            subtitleStyle={_subtitleStyle}
+            controlsStyles={_controlsStyles}
           />
         </TouchableOpacity>
       )}

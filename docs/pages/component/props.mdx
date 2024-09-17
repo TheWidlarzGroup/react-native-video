@@ -518,14 +518,29 @@ Speed at which the media should play.
 
 <PlatformsList types={['All']} />
 
-Allows you to create custom components to display while the video is loading. If `renderLoader` is provided, `poster` and `posterResizeMode` will be ignored.
+Allows you to create custom components to display while the video is loading.
+If `renderLoader` is provided, `poster` and `posterResizeMode` will be ignored.
+renderLoader is either a component or a function returning a component.
+It is recommended to use the function for optimization matter.
+
+`renderLoader` function be called with parameters of type `ReactVideoRenderLoaderProps` to be able to adapt loader 
+
+```typescript
+interface ReactVideoRenderLoaderProps {
+  source?: ReactVideoSource;                /// source of the video
+  style?: StyleProp<ImageStyle>;            /// style to apply
+  resizeMode?: EnumValues<VideoResizeMode>; /// resizeMode provided to the video component
+}
+````
+
+Sample:
 
 ```javascript
 <Video>
-  renderLoader={
+  renderLoader={() => (
     <View>
       <Text>Custom Loader</Text>
-    </View>
+    </View>)
   }
 </Video>
 ````
