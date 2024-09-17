@@ -199,12 +199,15 @@ debug={{
 
 ### `disableFocus`
 
+> [!WARNING]
+> Deprecated, use mixWithOthers instead
+
 <PlatformsList types={['Android']} />
 
 Determines whether video audio should override background music/audio in Android devices.
 
-- **false (default)** - Override background audio/music
-- **true** - Let background audio/music from other apps play
+- **false (default)** - Override background audio/music. Equivalent to mixWithOthers={'inherit'}
+- **true** - Let background audio/music from other apps play. equivalent to mixWithOthers={'duck'}
 
 Note: Allows multiple videos to play if set to `true`. If `false`, when one video is playing and another is started, the first video will be paused.
 
@@ -383,11 +386,11 @@ minLoadRetryCount={5} // retry 5 times
 
 ### `mixWithOthers`
 
-<PlatformsList types={['iOS', 'visionOS']} />
+<PlatformsList types={['iOS', 'visionOS', 'Android']} />
 
 Controls how Audio mix with other apps.
 
-- **"inherit" (default)** - Use the default AVPlayer behavior
+- **"inherit" (default)** - Use the default player behavior
 - **"mix"** - Audio from this video mixes with audio from other apps.
 - **"duck"** - Reduces the volume of other apps while audio from this video plays.
 

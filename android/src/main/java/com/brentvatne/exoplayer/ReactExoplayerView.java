@@ -105,6 +105,7 @@ import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.DRMProps;
+import com.brentvatne.common.api.MixWithOthers;
 import com.brentvatne.common.api.RNVPlayerInterface;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
@@ -233,7 +234,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private String videoTrackValue;
     private String textTrackType = "disabled";
     private String textTrackValue;
-    private boolean disableFocus;
+    private int mixWithOthers = MixWithOthers.MIX_INHERIT;
     private boolean focusable = true;
     private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
     private boolean disableDisconnectError;
@@ -332,7 +333,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private AudioManagerDelegate getAudioFocusDelegate() {
         if (audioFocusDelegate == null) {
             audioFocusDelegate = new AudioManagerDelegate(this, themedReactContext);
-            audioFocusDelegate.setDisableFocus(disableFocus);
+            audioFocusDelegate.setMixWithOthers(mixWithOthers);
         }
         return audioFocusDelegate;
     }
@@ -2152,12 +2153,12 @@ public class ReactExoplayerView extends FrameLayout implements
         this.playInBackground = playInBackground;
     }
 
-    public void setDisableFocus(boolean disableFocus) {
-        this.disableFocus = disableFocus;
+    public void setMixWithOthers(int _mixWithOthers) {
+        mixWithOthers = _mixWithOthers;
         // do not use getAudioFocusDelegate()
         // should not be created here as we are not sure the playback is really required
         if (audioFocusDelegate != null) {
-            audioFocusDelegate.setDisableFocus(disableFocus);
+            audioFocusDelegate.setMixWithOthers(mixWithOthers);
         }
     }
 

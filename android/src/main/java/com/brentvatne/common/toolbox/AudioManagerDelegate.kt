@@ -3,6 +3,9 @@ package com.brentvatne.common.toolbox
 import android.content.Context
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
+import androidx.annotation.IntDef
+import androidx.media3.common.FileTypes.Type
+import com.brentvatne.common.api.MixWithOthers
 import com.brentvatne.common.api.RNVPlayerInterface
 import com.facebook.react.uimanager.ThemedReactContext
 
@@ -17,7 +20,7 @@ class AudioManagerDelegate(player: RNVPlayerInterface, themedReactContext: Theme
     }
 
     // indicates if audio focus shall be handled
-    var disableFocus: Boolean = false
+    var mixWithOthers: Int = MixWithOthers.MIX_INHERIT
 
     // indicates app currently have audio focus
     var hasAudioFocus = false
@@ -75,7 +78,7 @@ class AudioManagerDelegate(player: RNVPlayerInterface, themedReactContext: Theme
      * request audio Focus
      */
     fun requestAudioFocus(): Boolean {
-        if (disableFocus || hasAudioFocus) {
+        if (mixWithOthers == MixWithOthers.MIX_MIX || hasAudioFocus) {
             return true
         }
         val result: Int = audioManager.requestAudioFocus(

@@ -270,6 +270,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   contentStartTime?: number; // Android
   controls?: boolean;
   currentPlaybackTime?: number; // Android
+  /** @deprecated Use mixWithOthers */
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
   filter?: EnumValues<FilterType>; // iOS
@@ -282,7 +283,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
-  mixWithOthers?: EnumValues<MixWithOthersType>; // iOS
+  mixWithOthers?: EnumValues<MixWithOthersType>; // iOS, android
   muted?: boolean;
   paused?: boolean;
   pictureInPicture?: boolean; // iOS
