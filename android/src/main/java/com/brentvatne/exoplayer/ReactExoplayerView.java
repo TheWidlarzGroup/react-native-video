@@ -2344,9 +2344,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void audioDuck() {
         if (themedReactContext.getCurrentActivity() != null && !muted) {
-            themedReactContext.getCurrentActivity().runOnUiThread(() -> {
-                        player.setVolume(audioVolume * 0.8f);
-                    });
+            themedReactContext.getCurrentActivity().runOnUiThread(() -> player.setVolume(audioVolume * 0.8f));
         }
     }
 
