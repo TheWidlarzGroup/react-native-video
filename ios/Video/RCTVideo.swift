@@ -457,7 +457,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if source.drm != nil {
+        if source.drm?.type != nil {
             if _drmManager == nil {
                 _drmManager = DRMManager()
             }
