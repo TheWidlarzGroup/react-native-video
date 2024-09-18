@@ -596,13 +596,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
     }
 
-    @objc
-    func setLocalSourceEncryptionKeyScheme(_ keyScheme: String) {
-        _localSourceEncryptionKeyScheme = keyScheme
-    }
-
-    func playerItemPrepareText(asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
-        if self._textTracks.isEmpty == true || (uri.hasSuffix(".m3u8")) {
+    func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
+        if source.textTracks.isEmpty == true || uri.hasSuffix(".m3u8") {
             return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
