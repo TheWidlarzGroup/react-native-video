@@ -420,7 +420,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": source.drm?.json ?? NSNull(),
+            "drm": source.drm.json ?? NSNull(),
             "target": reactTag as Any,
         ])
 
@@ -457,7 +457,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if source.drm?.type != nil {
+        if source.drm.json != nil {
             if _drmManager == nil {
                 _drmManager = DRMManager()
             }

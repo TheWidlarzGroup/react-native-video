@@ -9,7 +9,7 @@ import AVFoundation
 
 class DRMManager: NSObject {
     static let queue = DispatchQueue(label: "RNVideoContentKeyDelegateQueue")
-    let contentKeySession: AVContentKeySession
+    let contentKeySession: AVContentKeySession?
 
     var drmParams: DRMParams?
     var reactTag: NSNumber?
@@ -20,10 +20,15 @@ class DRMManager: NSObject {
     var pendingLicenses: [String: AVContentKeyRequest] = [:]
 
     override init() {
-        contentKeySession = AVContentKeySession(keySystem: .fairPlayStreaming)
-        super.init()
+        #if targetEnvironment(simulator)
+            contentKeySession = nil
+            super.init()
+        #else
+            contentKeySession = AVContentKeySession(keySystem: .fairPlayStreaming)
+            super.init()
 
-        contentKeySession.setDelegate(self, queue: DRMManager.queue)
+            contentKeySession?.setDelegate(self, queue: DRMManager.queue)
+        #endif
     }
 
     func createContentKeyRequest(
@@ -46,7 +51,15 @@ class DRMManager: NSObject {
             return
         }
 
-        contentKeySession.addContentKeyRecipient(asset)
+        #if targetEnvironment(simulator)
+            DebugLog("Simulator is not supported for FairPlay DRM.")
+            self.onVideoError?([
+                "error": RCTVideoErrorHandler.createError(from: RCTVideoError.simulatorDRMNotSuported),
+                "target": self.reactTag as Any,
+            ])
+        #endif
+
+        contentKeySession?.addContentKeyRecipient(asset)
     }
 
     // MARK: - Internal
@@ -106,7 +119,7 @@ class DRMManager: NSObject {
         }
 
         keyRequest.processContentKeyResponseError(error)
-        contentKeySession.expire()
+        contentKeySession?.expire()
     }
 
     // MARK: - Private

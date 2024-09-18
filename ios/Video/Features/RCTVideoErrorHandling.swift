@@ -18,6 +18,7 @@ enum RCTVideoError: Error, Hashable {
     case embeddedKeyExtractionFailed
     case offlineDRMNotSuported
     case unsupportedDRMType
+    case simulatorDRMNotSuported
 
     var errorCode: Int {
         switch self {
@@ -51,6 +52,8 @@ enum RCTVideoError: Error, Hashable {
             return 1013
         case .unsupportedDRMType:
             return 1014
+        case .simulatorDRMNotSuported:
+            return 1015
         }
     }
 }
@@ -90,6 +93,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Offline DRM is not supported, see https://github.com/TheWidlarzGroup/react-native-video/issues/3539", comment: "")
         case .unsupportedDRMType:
             return NSLocalizedString("Unsupporeted DRM type", comment: "")
+        case .simulatorDRMNotSuported:
+            return NSLocalizedString("DRM on simulators is not supported", comment: "")
         }
     }
 
@@ -125,6 +130,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("You tried to use Offline DRM but it is not supported yet", comment: "")
         case .unsupportedDRMType:
             return NSLocalizedString("You tried to use unsupporeted DRM type", comment: "")
+        case .simulatorDRMNotSuported:
+            return NSLocalizedString("You tried to DRM on a simulator", comment: "")
         }
     }
 
@@ -160,6 +167,8 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Check if localSourceEncryptionKeyScheme is setted", comment: "")
         case .unsupportedDRMType:
             return NSLocalizedString("Verifiy that you are using fairplay (on Apple devices)", comment: "")
+        case .simulatorDRMNotSuported:
+            return NSLocalizedString("You need to test DRM conent on real device", comment: "")
         }
     }
 }
