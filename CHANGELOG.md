@@ -1,5 +1,12 @@
 
 
+## [6.6.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.0...v6.6.1) (2024-09-18)
+
+
+### Bug Fixes
+
+* **ios:** fix side loaded text track management ([#4180](https://github.com/TheWidlarzGroup/react-native-video/issues/4180)) ([7d43d5d](https://github.com/TheWidlarzGroup/react-native-video/commit/7d43d5d3da72495e94468756be21442f96cc7a89))
+
 # [6.6.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.5.0...v6.6.0) (2024-09-18)
 
 
