@@ -1,5 +1,25 @@
 
 
+# [6.6.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.5.0...v6.6.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **android:** ensure maxbitrate & selectedVideoTrack interact correctly ([#4155](https://github.com/TheWidlarzGroup/react-native-video/issues/4155)) ([7f6b500](https://github.com/TheWidlarzGroup/react-native-video/commit/7f6b500c82122325c326b6dcacaf7af8039b2b33))
+* **android:** ensure pause is well tken in account after onEnd ([#4147](https://github.com/TheWidlarzGroup/react-native-video/issues/4147)) ([b2fd8d6](https://github.com/TheWidlarzGroup/react-native-video/commit/b2fd8d62a10ee64e6208b43120ca9231008309c2))
+* **expo-plugin:** add check for existing service in AndroidManifest for notification controls  ([#4172](https://github.com/TheWidlarzGroup/react-native-video/issues/4172)) ([0538b3b](https://github.com/TheWidlarzGroup/react-native-video/commit/0538b3b46801a535c76cf52db28cee76f2aeb0c5))
+* **ios:** ensure onBandwidthUpdate is reported only when value change ([#4149](https://github.com/TheWidlarzGroup/react-native-video/issues/4149)) ([809a730](https://github.com/TheWidlarzGroup/react-native-video/commit/809a73019836f95385891c2bba5c72b0610ffcb1))
+* **ios:** losing subtitle selection on foreground ([#3707](https://github.com/TheWidlarzGroup/react-native-video/issues/3707)) ([bee4123](https://github.com/TheWidlarzGroup/react-native-video/commit/bee4123402f4bc08dd2eb19ab0011ffdc795d0e3))
+* **JS:** improve loader api to allow function call instead of component ([#4171](https://github.com/TheWidlarzGroup/react-native-video/issues/4171)) ([835186a](https://github.com/TheWidlarzGroup/react-native-video/commit/835186a321e1940932a045a59e26e43a040fa334))
+* refactor side loaded text tracks management ([#4158](https://github.com/TheWidlarzGroup/react-native-video/issues/4158)) ([84a27f3](https://github.com/TheWidlarzGroup/react-native-video/commit/84a27f3d9f90624af3c5c3cbff50d754bab9baa4))
+* **sample:** remove warning on ios with NavigationBar ([#4148](https://github.com/TheWidlarzGroup/react-native-video/issues/4148)) ([e18769a](https://github.com/TheWidlarzGroup/react-native-video/commit/e18769ab3a6a7f4ebc459ab550f105f4d18f8201))
+* **visionOS:** remove unsupported apis ([#4154](https://github.com/TheWidlarzGroup/react-native-video/issues/4154)) ([2c1fc96](https://github.com/TheWidlarzGroup/react-native-video/commit/2c1fc964bf2cb97624c8cc37ff8138465619fc61))
+
+
+### Features
+
+* **android:** upgrade dependencies / media3 1.4.1 / androidxCore to 1.13.1 / androidxActivity 1.8.2 ([#4173](https://github.com/TheWidlarzGroup/react-native-video/issues/4173)) ([e57c7bd](https://github.com/TheWidlarzGroup/react-native-video/commit/e57c7bda5df7d624d90b20620859b8a4eb3f76b7))
+
 # [6.5.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.5...v6.5.0) (2024-09-04)
 
 
