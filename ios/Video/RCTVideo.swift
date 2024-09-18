@@ -600,7 +600,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
-        if source.textTracks.isEmpty != true || uri.hasSuffix(".m3u8") {
+        if source.textTracks.isEmpty == true || uri.hasSuffix(".m3u8") {
             return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
