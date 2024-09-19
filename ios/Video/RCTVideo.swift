@@ -49,12 +49,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _preventsDisplaySleepDuringVideoPlayback = true
     private var _preferredForwardBufferDuration: Float = 0.0
     private var _playWhenInactive = false
-    private var _ignoreSilentSwitch: String! = "inherit" // inherit, ignore, obey
-    private var _mixWithOthers: String! = "inherit" // inherit, mix, duck
-    private var _resizeMode: String! = "cover"
+    private var _ignoreSilentSwitch: String = "inherit" // inherit, ignore, obey
+    private var _mixWithOthers: String = "inherit" // inherit, mix, duck
+    private var _resizeMode: String = "cover"
     private var _fullscreen = false
     private var _fullscreenAutorotate = true
-    private var _fullscreenOrientation: String! = "all"
+    private var _fullscreenOrientation: String = "all"
     private var _fullscreenPlayerPresented = false
     private var _fullscreenUncontrolPlayerPresented = false // to call events switching full screen mode from player controls
     private var _filterName: String!
@@ -744,14 +744,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setIgnoreSilentSwitch(_ ignoreSilentSwitch: String?) {
-        _ignoreSilentSwitch = ignoreSilentSwitch
+        _ignoreSilentSwitch = ignoreSilentSwitch ?? "inherit"
         RCTPlayerOperations.configureAudio(ignoreSilentSwitch: _ignoreSilentSwitch, mixWithOthers: _mixWithOthers, audioOutput: _audioOutput)
         applyModifiers()
     }
 
     @objc
     func setMixWithOthers(_ mixWithOthers: String?) {
-        _mixWithOthers = mixWithOthers
+        _mixWithOthers = mixWithOthers ?? "inherit"
         applyModifiers()
     }
 
@@ -1053,9 +1053,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setFullscreenOrientation(_ orientation: String?) {
-        _fullscreenOrientation = orientation
+        _fullscreenOrientation = orientation ?? "all"
         if _fullscreenPlayerPresented {
-            _playerViewController?.preferredOrientation = orientation
+            _playerViewController?.preferredOrientation = _fullscreenOrientation
         }
     }
 
@@ -1227,7 +1227,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setAdTagUrl(_ adTagUrl: String!) {
+    func setAdTagUrl(_ adTagUrl: String?) {
         _adTagUrl = adTagUrl
     }
 
