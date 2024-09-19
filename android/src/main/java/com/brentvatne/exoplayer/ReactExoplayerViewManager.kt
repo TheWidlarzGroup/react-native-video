@@ -89,12 +89,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_SRC)
     fun setSrc(videoView: ReactExoplayerView, src: ReadableMap?) {
         val context = videoView.context.applicationContext
-        val source = Source.parse(src, context)
-        if (source.uri == null) {
-            videoView.clearSrc()
-        } else {
-            videoView.setSrc(source)
-        }
+        videoView.setSrc(Source.parse(src, context))
     }
 
     @ReactProp(name = PROP_AD_TAG_URL)

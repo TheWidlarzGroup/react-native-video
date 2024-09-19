@@ -93,6 +93,13 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         }
     }
 
+    public void showAds() {
+        adOverlayFrameLayout.setVisibility(View.GONE);
+    }
+    public void hideAds() {
+        adOverlayFrameLayout.setVisibility(View.VISIBLE);
+    }
+
     private void clearVideoView() {
         if (surfaceView instanceof TextureView) {
             player.clearVideoTextureView((TextureView) surfaceView);
