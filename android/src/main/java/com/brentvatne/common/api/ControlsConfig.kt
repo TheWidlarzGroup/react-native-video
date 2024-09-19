@@ -16,7 +16,7 @@ class ControlsConfig {
     var hideFullscreen: Boolean = false
     var hideNavigationBarOnFullScreenMode: Boolean = true
     var hideNotificationBarOnFullScreenMode: Boolean = true
-  
+
     var seekIncrementMS: Int = 10000
 
     companion object {
