@@ -14,6 +14,7 @@ import {Platform} from 'react-native';
 // by default, index will be displayed and index will be applied to selected tracks.
 // You can also use LANGUAGE or TITLE
 export const textTracksSelectionBy = SelectedTrackType.INDEX;
+export const audioTracksSelectionBy = SelectedTrackType.INDEX;
 
 export const isIos = Platform.OS === 'ios';
 
