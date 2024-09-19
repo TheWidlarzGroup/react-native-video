@@ -246,7 +246,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   const _bufferConfig = {
     ...bufferConfig,
     cacheSizeMB: useCache ? 200 : 0,
-  }
+  };
 
   return (
     <View style={styles.container}>

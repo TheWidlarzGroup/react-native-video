@@ -257,9 +257,9 @@ export type ControlsStyles = {
   hideNext?: boolean;
   hidePrevious?: boolean;
   hideFullscreen?: boolean;
-  seekIncrementMS?: number;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  seekIncrementMS?: number;
 };
 
 export interface ReactVideoRenderLoaderProps {
