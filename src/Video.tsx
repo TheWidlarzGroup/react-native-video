@@ -79,6 +79,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       poster,
       posterResizeMode,
       renderLoader,
+      contentStartTime,
       drm,
       textTracks,
       selectedVideoTrack,
@@ -126,8 +127,18 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const isPosterDeprecated = typeof poster === 'string';
 
+    const _renderLoader = useMemo(
+      () =>
+        !renderLoader
+          ? undefined
+          : renderLoader instanceof Function
+          ? renderLoader
+          : () => renderLoader,
+      [renderLoader],
+    );
+
     const hasPoster = useMemo(() => {
-      if (renderLoader) {
+      if (_renderLoader) {
         return true;
       }
 
@@ -136,7 +147,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       return !!poster?.source;
-    }, [isPosterDeprecated, poster, renderLoader]);
+    }, [isPosterDeprecated, poster, _renderLoader]);
 
     const [showPoster, setShowPoster] = useState(hasPoster);
 
@@ -166,6 +177,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       );
 
       const selectedDrm = source.drm || drm;
+      const _textTracks = source.textTracks || textTracks;
       const _drm = !selectedDrm
         ? undefined
         : {
@@ -203,6 +215,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
       }
 
+      const selectedContentStartTime =
+        source.contentStartTime || contentStartTime;
+
       return {
         uri,
         isNetwork,
@@ -215,13 +230,15 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         startPosition: resolvedSource.startPosition ?? -1,
         cropStart: resolvedSource.cropStart || 0,
         cropEnd: resolvedSource.cropEnd,
+        contentStartTime: selectedContentStartTime,
         metadata: resolvedSource.metadata,
         drm: _drm,
         cmcd: _cmcd,
+        textTracks: _textTracks,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
-    }, [drm, source]);
+    }, [drm, source, textTracks, contentStartTime]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -681,15 +698,23 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       // render poster
-      if (renderLoader && (poster || posterResizeMode)) {
+      if (_renderLoader && (poster || posterResizeMode)) {
         console.warn(
           'You provided both `renderLoader` and `poster` or `posterResizeMode` props. `renderLoader` will be used.',
         );
       }
 
       // render loader
-      if (renderLoader) {
-        return <View style={StyleSheet.absoluteFill}>{renderLoader}</View>;
+      if (_renderLoader) {
+        return (
+          <View style={StyleSheet.absoluteFill}>
+            {_renderLoader({
+              source: source,
+              style: posterStyle,
+              resizeMode: resizeMode,
+            })}
+          </View>
+        );
       }
 
       return (
@@ -704,8 +729,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       isPosterDeprecated,
       poster,
       posterResizeMode,
-      renderLoader,
+      _renderLoader,
       showPoster,
+      source,
+      resizeMode,
     ]);
 
     const _style: StyleProp<ViewStyle> = useMemo(
@@ -727,7 +754,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           restoreUserInterfaceForPIPStopCompletionHandler={
             _restoreUserInterfaceForPIPStopCompletionHandler
           }
-          textTracks={textTracks}
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}

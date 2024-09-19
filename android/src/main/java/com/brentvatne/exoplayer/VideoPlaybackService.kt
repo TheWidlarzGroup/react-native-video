@@ -121,7 +121,7 @@ class VideoPlaybackService : MediaSessionService() {
     }
 
     private fun buildNotification(session: MediaSession): Notification {
-        val returnToPlayer = Intent(this, sourceActivity).apply {
+        val returnToPlayer = Intent(this, sourceActivity ?: this.javaClass).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
@@ -179,17 +179,17 @@ class VideoPlaybackService : MediaSessionService() {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
                 // Add media control buttons that invoke intents in your media service
-                .addAction(androidx.media3.session.R.drawable.media3_notification_seek_back, "Seek Backward", seekBackwardPendingIntent) // #0
+                .addAction(androidx.media3.session.R.drawable.media3_icon_rewind, "Seek Backward", seekBackwardPendingIntent) // #0
                 .addAction(
                     if (session.player.isPlaying) {
-                        androidx.media3.session.R.drawable.media3_notification_pause
+                        androidx.media3.session.R.drawable.media3_icon_pause
                     } else {
-                        androidx.media3.session.R.drawable.media3_notification_play
+                        androidx.media3.session.R.drawable.media3_icon_play
                     },
                     "Toggle Play",
                     togglePlayPendingIntent
                 ) // #1
-                .addAction(androidx.media3.session.R.drawable.media3_notification_seek_forward, "Seek Forward", seekForwardPendingIntent) // #2
+                .addAction(androidx.media3.session.R.drawable.media3_icon_fast_forward, "Seek Forward", seekForwardPendingIntent) // #2
                 // Apply the media style template
                 .setStyle(MediaStyleNotificationHelper.MediaStyle(session).setShowActionsInCompactView(0, 1, 2))
                 .setContentTitle(session.player.mediaMetadata.title)

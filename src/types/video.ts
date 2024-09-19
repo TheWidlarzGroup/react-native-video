@@ -7,6 +7,7 @@ import type {
   ViewStyle,
   ImageRequireSource,
   ImageURISource,
+  ImageStyle,
 } from 'react-native';
 import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
@@ -31,10 +32,12 @@ export type ReactVideoSourceProperties = {
   startPosition?: number;
   cropStart?: number;
   cropEnd?: number;
+  contentStartTime?: number; // Android
   metadata?: VideoMetadata;
   drm?: Drm;
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
+  textTracks?: TextTracks;
 };
 
 export type ReactVideoSource = Readonly<
@@ -255,11 +258,19 @@ export type ControlsStyles = {
   hidePrevious?: boolean;
   hideFullscreen?: boolean;
   seekIncrementMS?: number;
+  hideNavigationBarOnFullScreenMode?: boolean;
+  hideNotificationBarOnFullScreenMode?: boolean;
 };
+
+export interface ReactVideoRenderLoaderProps {
+  source?: ReactVideoSource;
+  style?: StyleProp<ImageStyle>;
+  resizeMode?: EnumValues<VideoResizeMode>;
+}
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
-  /** @deprecated */
+  /** @deprecated Use source.drm */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
   adTagUrl?: string;
@@ -269,6 +280,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   bufferConfig?: BufferConfig; // Android
   bufferingStrategy?: BufferingStrategyType;
   chapters?: Chapters[]; // iOS
+  /** @deprecated Use source.contentStartTime */
   contentStartTime?: number; // Android
   controls?: boolean;
   currentPlaybackTime?: number; // Android
@@ -297,7 +309,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
-  renderLoader?: ReactNode;
+  renderLoader?: ReactNode | ((arg0: ReactVideoRenderLoaderProps) => ReactNode);
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
@@ -307,12 +319,13 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   selectedVideoTrack?: SelectedVideoTrack; // android
   subtitleStyle?: SubtitleStyle; // android
   shutterColor?: string; // Android
+  /** @deprecated Use source.textTracks */
   textTracks?: TextTracks;
   testID?: string;
   viewType?: ViewType;
-  /** @deprecated */
+  /** @deprecated Use viewType */
   useTextureView?: boolean; // Android
-  /** @deprecated */
+  /** @deprecated Use viewType*/
   useSecureView?: boolean; // Android
   volume?: number;
   localSourceEncryptionKeyScheme?: string;

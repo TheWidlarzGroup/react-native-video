@@ -234,10 +234,9 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
 
     /* Cancels the previously registered time observer. */
     func removePlayerTimeObserver() {
-        if _timeObserver != nil {
-            player?.removeTimeObserver(_timeObserver)
-            _timeObserver = nil
-        }
+        guard let timeObserver = _timeObserver else { return }
+        player?.removeTimeObserver(timeObserver)
+        _timeObserver = nil
     }
 
     func addTimeObserverIfNotSet() {

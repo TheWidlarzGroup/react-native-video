@@ -1,8 +1,8 @@
 'use strict';
 
-import React, {type FC, useCallback, useRef, useState} from 'react';
+import React, {type FC, useCallback, useRef, useState, useEffect} from 'react';
 
-import {Platform, TouchableOpacity, View} from 'react-native';
+import {Platform, TouchableOpacity, View, StatusBar} from 'react-native';
 
 import Video, {
   VideoRef,
@@ -34,8 +34,14 @@ import Video, {
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
-import {bufferConfig, srcList, textTracksSelectionBy} from './constants';
+import {
+  bufferConfig,
+  isAndroid,
+  srcList,
+  textTracksSelectionBy,
+} from './constants';
 import {Overlay, toast, VideoLoader} from './components';
+import * as NavigationBar from 'expo-navigation-bar';
 
 type Props = NonNullable<unknown>;
 
@@ -103,6 +109,12 @@ const VideoPlayer: FC<Props> = ({}) => {
     console.log('channel down');
     goToChannel((srcListId + srcList.length - 1) % srcList.length);
   }, [goToChannel, srcListId]);
+
+  useEffect(() => {
+    if (isAndroid) {
+      NavigationBar.setVisibilityAsync('visible');
+    }
+  }, []);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
@@ -224,15 +236,28 @@ const VideoPlayer: FC<Props> = ({}) => {
     Platform.OS === 'ios' && setPaused(true);
   };
 
+  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
+
+  const _subtitleStyle = {subtitlesFollowVideo: true};
+  const _controlsStyles = {
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true,
+  };
+  const _bufferConfig = {
+    ...bufferConfig,
+    cacheSizeMB: useCache ? 200 : 0,
+  }
+
   return (
     <View style={styles.container}>
+      <StatusBar animated={true} backgroundColor="black" hidden={false} />
+
       {(srcList[srcListId] as AdditionalSourceInfo)?.noView ? null : (
         <TouchableOpacity style={viewStyle}>
           <Video
             showNotificationControls={showNotificationControls}
             ref={videoRef}
             source={currentSrc as ReactVideoSource}
-            textTracks={additional?.textTracks}
             adTagUrl={additional?.adTagUrl}
             drm={additional?.drm}
             style={viewStyle}
@@ -265,17 +290,15 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={selectedAudioTrack}
             selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{
-              ...bufferConfig,
-              cacheSizeMB: useCache ? 200 : 0,
-            }}
+            bufferConfig={_bufferConfig}
             preventsDisplaySleepDuringVideoPlayback={true}
-            renderLoader={showPoster ? <VideoLoader /> : undefined}
+            renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
-            subtitleStyle={{subtitlesFollowVideo: true}}
+            subtitleStyle={_subtitleStyle}
+            controlsStyles={_controlsStyles}
           />
         </TouchableOpacity>
       )}
