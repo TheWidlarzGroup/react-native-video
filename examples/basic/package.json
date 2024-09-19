@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@react-native-picker/picker": "2.7.5",
-    "expo": "^51.0.31",
+    "expo": "^51.0.32",
     "expo-asset": "~10.0.10",
     "expo-image": "^1.12.15",
     "expo-navigation-bar": "~3.0.7",
