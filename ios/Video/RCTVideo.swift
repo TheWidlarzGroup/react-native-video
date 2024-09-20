@@ -17,7 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-    private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
     private var _eventDispatcher: RCTEventDispatcher?
@@ -97,7 +96,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _didRequestAds = false
     private var _adPlaying = false
 
-    private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
+    private lazy var _drmManager: DRMManager? = DRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
 
     #if USE_VIDEO_CACHING
@@ -421,7 +420,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": source.drm?.json ?? NSNull(),
+            "drm": source.drm.json ?? NSNull(),
             "target": reactTag as Any,
         ])
 
@@ -458,14 +457,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
-            _resouceLoaderDelegate = RCTResourceLoaderDelegate(
+        if source.drm.json != nil {
+            if _drmManager == nil {
+                _drmManager = DRMManager()
+            }
+
+            _drmManager?.createContentKeyRequest(
                 asset: asset,
-                drm: source.drm,
-                localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
+                drmParams: source.drm,
+                reactTag: reactTag,
                 onVideoError: onVideoError,
-                onGetLicense: onGetLicense,
-                reactTag: reactTag
+                onGetLicense: onGetLicense
             )
         }
 
@@ -562,7 +564,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.removePlayerLayer()
             self._playerObserver.player = nil
-            self._resouceLoaderDelegate = nil
+            self._drmManager = nil
             self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
@@ -592,11 +594,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
-    }
-
-    @objc
-    func setLocalSourceEncryptionKeyScheme(_ keyScheme: String) {
-        _localSourceEncryptionKeyScheme = keyScheme
     }
 
     func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
@@ -1295,7 +1292,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player as Any)
         _player = nil
-        _resouceLoaderDelegate = nil
+        _drmManager = nil
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
@@ -1328,12 +1325,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
+    func setLicenseResult(_ license: String, _ licenseUrl: String) {
+        _drmManager?.setJSLicenseResult(license: license, licenseUrl: licenseUrl)
     }
 
-    func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
+    func setLicenseResultError(_ error: String, _ licenseUrl: String) {
+        _drmManager?.setJSLicenseError(error: error, licenseUrl: licenseUrl)
     }
 
     // MARK: - RCTPlayerObserverHandler

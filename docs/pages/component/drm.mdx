@@ -137,6 +137,20 @@ You can specify the DRM type, either by string or using the exported DRMType enu
 Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
 for iOS: DRMType.FAIRPLAY
 
+### `localSourceEncryptionKeyScheme`
+
+<PlatformsList types={['iOS']} />
+
+Set the url scheme for stream encryption key for local assets
+
+Type: String
+
+Example:
+
+```
+localSourceEncryptionKeyScheme="my-offline-key"
+```
+
 ## Common Usage Scenarios
 
 ### Send cookies to license server

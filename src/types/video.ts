@@ -81,6 +81,7 @@ export type Drm = Readonly<{
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
   multiDrm?: boolean; // android
+  localSourceEncryptionKeyScheme?: string; // ios
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
@@ -321,6 +322,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use viewType*/
   useSecureView?: boolean; // Android
   volume?: number;
+  /** @deprecated use **localSourceEncryptionKeyScheme** key in **drm** props instead */
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   allowsExternalPlayback?: boolean; // iOS
