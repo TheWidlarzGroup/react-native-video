@@ -16,9 +16,9 @@ enum RCTVideoError: Error, Hashable {
     case keyRequestCreationFailed
     case persistableKeyRequestFailed
     case embeddedKeyExtractionFailed
-    case offlineDRMNotSuported
+    case offlineDRMNotSupported
     case unsupportedDRMType
-    case simulatorDRMNotSuported
+    case simulatorDRMNotSupported
 
     var errorCode: Int {
         switch self {
@@ -48,11 +48,11 @@ enum RCTVideoError: Error, Hashable {
             return 1011
         case .embeddedKeyExtractionFailed:
             return 1012
-        case .offlineDRMNotSuported:
+        case .offlineDRMNotSupported:
             return 1013
         case .unsupportedDRMType:
             return 1014
-        case .simulatorDRMNotSuported:
+        case .simulatorDRMNotSupported:
             return 1015
         }
     }
@@ -89,11 +89,11 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Failed to create persistable content key request", comment: "")
         case .embeddedKeyExtractionFailed:
             return NSLocalizedString("Failed to extract embedded key", comment: "")
-        case .offlineDRMNotSuported:
+        case .offlineDRMNotSupported:
             return NSLocalizedString("Offline DRM is not supported, see https://github.com/TheWidlarzGroup/react-native-video/issues/3539", comment: "")
         case .unsupportedDRMType:
-            return NSLocalizedString("Unsupporeted DRM type", comment: "")
-        case .simulatorDRMNotSuported:
+            return NSLocalizedString("Unsupported DRM type", comment: "")
+        case .simulatorDRMNotSupported:
             return NSLocalizedString("DRM on simulators is not supported", comment: "")
         }
     }
@@ -126,11 +126,11 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Failed to create a persistable content key request for offline playback.", comment: "")
         case .embeddedKeyExtractionFailed:
             return NSLocalizedString("Unable to extract the embedded key from the custom scheme URL.", comment: "")
-        case .offlineDRMNotSuported:
+        case .offlineDRMNotSupported:
             return NSLocalizedString("You tried to use Offline DRM but it is not supported yet", comment: "")
         case .unsupportedDRMType:
-            return NSLocalizedString("You tried to use unsupporeted DRM type", comment: "")
-        case .simulatorDRMNotSuported:
+            return NSLocalizedString("You tried to use unsupported DRM type", comment: "")
+        case .simulatorDRMNotSupported:
             return NSLocalizedString("You tried to DRM on a simulator", comment: "")
         }
     }
@@ -163,12 +163,12 @@ extension RCTVideoError: LocalizedError {
             return NSLocalizedString("Verify that offline playback is supported and properly configured for your content.", comment: "")
         case .embeddedKeyExtractionFailed:
             return NSLocalizedString("Check if the embedded key is present in the URL and the custom scheme is correctly implemented.", comment: "")
-        case .offlineDRMNotSuported:
-            return NSLocalizedString("Check if localSourceEncryptionKeyScheme is setted", comment: "")
+        case .offlineDRMNotSupported:
+            return NSLocalizedString("Check if localSourceEncryptionKeyScheme is set", comment: "")
         case .unsupportedDRMType:
-            return NSLocalizedString("Verifiy that you are using fairplay (on Apple devices)", comment: "")
-        case .simulatorDRMNotSuported:
-            return NSLocalizedString("You need to test DRM conent on real device", comment: "")
+            return NSLocalizedString("Verify that you are using fairplay (on Apple devices)", comment: "")
+        case .simulatorDRMNotSupported:
+            return NSLocalizedString("You need to test DRM content on real device", comment: "")
         }
     }
 }

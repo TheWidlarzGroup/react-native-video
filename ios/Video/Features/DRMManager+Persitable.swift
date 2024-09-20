@@ -14,7 +14,7 @@ extension DRMManager {
         } else {
             // Offline DRM is not supported yet - if you need it please check out the following issue:
             // https://github.com/TheWidlarzGroup/react-native-video/issues/3539
-            throw RCTVideoError.offlineDRMNotSuported
+            throw RCTVideoError.offlineDRMNotSupported
         }
     }
 

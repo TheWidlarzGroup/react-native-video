@@ -54,7 +54,7 @@ class DRMManager: NSObject {
         #if targetEnvironment(simulator)
             DebugLog("Simulator is not supported for FairPlay DRM.")
             self.onVideoError?([
-                "error": RCTVideoErrorHandler.createError(from: RCTVideoError.simulatorDRMNotSuported),
+                "error": RCTVideoErrorHandler.createError(from: RCTVideoError.simulatorDRMNotSupported),
                 "target": self.reactTag as Any,
             ])
         #endif
