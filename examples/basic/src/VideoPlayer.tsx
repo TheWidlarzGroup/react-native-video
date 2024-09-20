@@ -39,6 +39,7 @@ import {
   isAndroid,
   srcList,
   textTracksSelectionBy,
+  audioTracksSelectionBy,
 } from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -117,18 +118,23 @@ const VideoPlayer: FC<Props> = ({}) => {
   }, []);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
+    console.log('onAudioTracks', data);
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    if (selectedTrack?.index) {
-      setAudioTracks(data.audioTracks);
-      setSelectedAudioTrack({
-        type: SelectedTrackType.INDEX,
-        value: selectedTrack.index,
-      });
-    } else {
-      setAudioTracks(data.audioTracks);
+    let value;
+    if (audioTracksSelectionBy === SelectedTrackType.INDEX) {
+      value = selectedTrack?.index;
+    } else if (audioTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+      value = selectedTrack?.language;
+    } else if (audioTracksSelectionBy === SelectedTrackType.TITLE) {
+      value = selectedTrack?.title;
     }
+    setAudioTracks(data.audioTracks);
+    setSelectedAudioTrack({
+      type: audioTracksSelectionBy,
+      value: value,
+    });
   };
 
   const onVideoTracks = (data: OnVideoTracksData) => {
@@ -141,23 +147,19 @@ const VideoPlayer: FC<Props> = ({}) => {
       return x?.selected;
     });
 
-    if (selectedTrack?.language) {
-      setTextTracks(data.textTracks);
-      let value;
-      if (textTracksSelectionBy === SelectedTrackType.INDEX) {
-        value = selectedTrack?.index;
-      } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
-        value = selectedTrack?.language;
-      } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
-        value = selectedTrack?.title;
-      }
-      setSelectedTextTrack({
-        type: textTracksSelectionBy,
-        value: value,
-      });
-    } else {
-      setTextTracks(data.textTracks);
+    setTextTracks(data.textTracks);
+    let value;
+    if (textTracksSelectionBy === SelectedTrackType.INDEX) {
+      value = selectedTrack?.index;
+    } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+      value = selectedTrack?.language;
+    } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
+      value = selectedTrack?.title;
     }
+    setSelectedTextTrack({
+      type: textTracksSelectionBy,
+      value: value,
+    });
   };
 
   const onLoad = (data: OnLoadData) => {
@@ -246,7 +248,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   const _bufferConfig = {
     ...bufferConfig,
     cacheSizeMB: useCache ? 200 : 0,
-  }
+  };
 
   return (
     <View style={styles.container}>
