@@ -466,7 +466,6 @@ public class ReactExoplayerView extends FrameLayout implements
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisibility();
-        refreshProgressBarVisibility();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -525,40 +524,39 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void refreshProgressBarVisibility (){
-        if(playerControlView == null) return;
-        DefaultTimeBar exoProgress;
-        TextView exoDuration;
-        TextView exoPosition;
-        exoProgress = playerControlView.findViewById(R.id.exo_progress);
-        exoDuration = playerControlView.findViewById(R.id.exo_duration);
-        exoPosition = playerControlView.findViewById(R.id.exo_position);
-        if(controlsConfig.getHideSeekBar()){
-            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT,
-                    1.0f
-            );
-            exoProgress.setVisibility(GONE);
-            exoDuration.setVisibility(GONE);
-            exoPosition.setLayoutParams(param);
-        }else{
-            exoProgress.setVisibility(VISIBLE);
+    private void refreshProgressBarVisibility() {
+        if (playerControlView == null || player == null) return;
 
-            if(controlsConfig.getHideDuration()){
-                exoDuration.setVisibility(GONE);
-            }else{
-                exoDuration.setVisibility(VISIBLE);
-            }
+        DefaultTimeBar exoProgress = playerControlView.findViewById(R.id.exo_progress);
+        TextView exoDuration = playerControlView.findViewById(R.id.exo_duration);
+        LinearLayout exoLiveContainer = playerControlView.findViewById(R.id.exo_live_container);
 
-            // Reset the layout parameters of exoPosition to their default state
-            LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-            );
-            exoPosition.setLayoutParams(defaultParam);
+        boolean isLive = false;
+        Timeline timeline = player.getCurrentTimeline();
+
+        // Determine if the content is live
+        if (!timeline.isEmpty()) {
+            Timeline.Window window = new Timeline.Window();
+            timeline.getWindow(player.getCurrentMediaItemIndex(), window);
+            isLive = window.isLive();
         }
+
+        // Handle visibility for live content or hideSeekBar
+        if (controlsConfig.getHideSeekBar() || isLive) {
+            exoProgress.setVisibility(View.INVISIBLE);
+            exoDuration.setVisibility(View.INVISIBLE);
+            exoLiveContainer.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Handle visibility for non-live content
+        exoProgress.setVisibility(View.VISIBLE);
+        exoLiveContainer.setVisibility(View.GONE);
+
+        // Handle duration visibility based on configuration
+        exoDuration.setVisibility(controlsConfig.getHideDuration() ? View.INVISIBLE : View.VISIBLE);
     }
+
 
     private void reLayoutControls() {
         reLayout(exoPlayerView);
@@ -1459,6 +1457,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
             eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
                     audioTracks, textTracks, videoTracks, trackId);
+            refreshProgressBarVisibility();
         }
     }
 
@@ -2357,6 +2356,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
+        refreshProgressBarVisibility();
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
