@@ -272,13 +272,14 @@ const hidePreviousComments = async ({github, context}) => {
   );
 
   for (const comment of botComments) {
+    // Don't format string - it will broke the markdown
     const hiddenBody = `
-      <details>
-      <summary>Previous bot comment (click to expand)</summary>
+<details>
+<summary>Previous bot comment (click to expand)</summary>
 
-      ${comment.body}
-      </details>
-    `;
+${comment.body}
+
+</details>`;
 
     await github.rest.issues.updateComment({
       owner: context.repo.owner,
