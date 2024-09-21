@@ -217,7 +217,7 @@ class FullScreenPlayerView(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             )
         }
-        if(controlsConfig.hideNotificationBarOnFullScreenMode){
+        if (controlsConfig.hideNotificationBarOnFullScreenMode) {
             val liveContainer = playerControlView?.findViewById<LinearLayout?>(com.brentvatne.react.R.id.exo_live_container)
             liveContainer?.let {
                 val layoutParams = it.layoutParams as LinearLayout.LayoutParams
