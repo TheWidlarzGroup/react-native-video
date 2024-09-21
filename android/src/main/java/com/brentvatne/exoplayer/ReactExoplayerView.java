@@ -524,7 +524,7 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void refreshProgressBarVisibility() {
+    private void refreshControlsStyles() {
         if (playerControlView == null || player == null) return;
 
         DefaultTimeBar exoProgress = playerControlView.findViewById(R.id.exo_progress);
@@ -1457,7 +1457,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
             eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
                     audioTracks, textTracks, videoTracks, trackId);
-            refreshProgressBarVisibility();
+            refreshControlsStyles();
         }
     }
 
@@ -2356,7 +2356,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
-        refreshProgressBarVisibility();
+        refreshControlsStyles();
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
@@ -2389,6 +2389,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
-        refreshProgressBarVisibility();
+        refreshControlsStyles();
     }
 }
