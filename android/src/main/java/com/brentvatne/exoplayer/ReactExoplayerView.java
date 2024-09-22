@@ -541,20 +541,20 @@ public class ReactExoplayerView extends FrameLayout implements
             isLive = window.isLive();
         }
 
-        // Handle visibility for live content or hideSeekBar
-        if (controlsConfig.getHideSeekBar() || isLive) {
-            exoProgress.setVisibility(View.INVISIBLE);
-            exoDuration.setVisibility(View.INVISIBLE);
+        if(isLive){
             exoLiveContainer.setVisibility(View.VISIBLE);
-            return;
+        }else{
+            exoLiveContainer.setVisibility(View.GONE);
         }
 
-        // Handle visibility for non-live content
-        exoProgress.setVisibility(View.VISIBLE);
-        exoLiveContainer.setVisibility(View.GONE);
+        if (controlsConfig.getHideSeekBar()) {
+            exoProgress.setVisibility(View.INVISIBLE);
+        }else{
+            exoProgress.setVisibility(View.VISIBLE);
+        }
 
-        // Handle duration visibility based on configuration
-        exoDuration.setVisibility(controlsConfig.getHideDuration() ? View.INVISIBLE : View.VISIBLE);
+        // Handle duration visibility based on configuration or live video
+        exoDuration.setVisibility(controlsConfig.getHideDuration() || isLive ? View.INVISIBLE : View.VISIBLE);
     }
 
 
