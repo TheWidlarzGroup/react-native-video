@@ -22,7 +22,7 @@ In your project Podfile add support for static dependency linking. This is requi
 
 Add `use_frameworks! :linkage => :static` just under `platform :ios` in your ios project Podfile.
 
-[See the example ios project for reference](examples/basic/ios/Podfile#L5)
+[See the example ios project for reference](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/basic/ios/Podfile#L5)
 
 ##### podspec
 
@@ -34,7 +34,7 @@ You can remove following lines from your podfile as they are not necessary anymo
 -  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
 ```
 
-If you were previously using VideoCaching, you should $RNVideoUseVideoCaching flag in your podspec, see: [installation section](https://react-native-video.github.io/react-native-video/installation#video-caching)
+If you were previously using VideoCaching, you should $RNVideoUseVideoCaching flag in your podspec, see: [installation section](https://thewidlarzgroup.github.io/react-native-video/installation#video-caching)
 
 #### Android
 
