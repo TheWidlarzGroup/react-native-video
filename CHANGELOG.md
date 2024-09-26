@@ -1,5 +1,12 @@
 
 
+## [6.6.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.1...v6.6.2) (2024-09-20)
+
+
+### Features
+
+* **iOS:** rewrite DRM Module ([#4136](https://github.com/TheWidlarzGroup/react-native-video/issues/4136)) ([0e4c95d](https://github.com/TheWidlarzGroup/react-native-video/commit/0e4c95def968a4091fdd18d07215ba592eec99cb))
+
 ## [6.6.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.0...v6.6.1) (2024-09-18)
 
 

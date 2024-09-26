@@ -121,6 +121,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onTextTrackDataChanged,
       onVideoTracks,
       onAspectRatio,
+      localSourceEncryptionKeyScheme,
       ...rest
     },
     ref,
@@ -192,6 +193,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               base64Certificate: selectedDrm.base64Certificate,
               useExternalGetLicense: !!selectedDrm.getLicense,
               multiDrm: selectedDrm.multiDrm,
+              localSourceEncryptionKeyScheme:
+                selectedDrm.localSourceEncryptionKeyScheme ||
+                localSourceEncryptionKeyScheme,
             };
 
         let _cmcd: NativeCmcdConfiguration | undefined;
@@ -242,7 +246,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             resolvedSource.textTracksAllowChunklessPreparation,
         };
       },
-      [contentStartTime, drm, source, textTracks],
+      [
+        contentStartTime,
+        drm,
+        localSourceEncryptionKeyScheme,
+        source,
+        textTracks,
+      ],
     );
 
     const src = useMemo<VideoSrc | undefined>(() => {

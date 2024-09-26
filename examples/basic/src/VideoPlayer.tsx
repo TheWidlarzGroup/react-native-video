@@ -248,7 +248,7 @@ const VideoPlayer: FC<Props> = ({}) => {
   const _bufferConfig = {
     ...bufferConfig,
     cacheSizeMB: useCache ? 200 : 0,
-  }
+  };
 
   useEffect(() => {
     videoRef.current?.setSource(currentSrc)

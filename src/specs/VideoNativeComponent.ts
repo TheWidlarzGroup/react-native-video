@@ -62,6 +62,7 @@ type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   useExternalGetLicense?: boolean; // ios
   multiDrm?: WithDefault<boolean, false>; // android
+  localSourceEncryptionKeyScheme?: string; // ios
 }>;
 
 type CmcdMode = WithDefault<Int32, 1>;
@@ -341,7 +342,6 @@ export interface VideoNativeProps extends ViewProps {
   fullscreenOrientation?: WithDefault<string, 'all'>;
   progressUpdateInterval?: Float;
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
-  localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
   bufferConfig?: BufferConfig; // Android

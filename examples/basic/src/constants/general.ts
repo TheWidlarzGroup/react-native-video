@@ -9,11 +9,12 @@ import {SampleVideoSource} from '../types';
 import {localeVideo} from '../assets';
 import {Platform} from 'react-native';
 
-// This constant allows to change how the sample behaves regarding to texts selection.
+// This constant allows to change how the sample behaves regarding to audio and texts selection.
 // You can change it to change how selector will use tracks information.
 // by default, index will be displayed and index will be applied to selected tracks.
 // You can also use LANGUAGE or TITLE
 export const textTracksSelectionBy = SelectedTrackType.INDEX;
+export const audioTracksSelectionBy = SelectedTrackType.INDEX;
 
 export const isIos = Platform.OS === 'ios';
 
