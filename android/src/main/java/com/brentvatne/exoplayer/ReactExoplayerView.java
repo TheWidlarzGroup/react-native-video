@@ -675,6 +675,8 @@ public class ReactExoplayerView extends FrameLayout implements
                     initializePlayerCore(self);
                 }
                 if (playerNeedsSource) {
+                    // Will force display of shutter view if needed
+                    exoPlayerView.updateShutterViewVisibility();
                     exoPlayerView.invalidateAspectRatio();
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();

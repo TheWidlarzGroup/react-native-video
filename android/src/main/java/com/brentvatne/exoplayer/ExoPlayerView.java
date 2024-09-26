@@ -196,7 +196,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         surfaceView.setAlpha(0);
     }
 
-    private void updateShutterViewVisibility() {
+    public void updateShutterViewVisibility() {
         if (this.hideShutterView) {
             hideShutterView();
         } else {
