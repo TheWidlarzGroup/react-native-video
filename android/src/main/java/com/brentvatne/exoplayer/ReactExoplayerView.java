@@ -139,6 +139,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -530,6 +531,7 @@ public class ReactExoplayerView extends FrameLayout implements
         DefaultTimeBar exoProgress = playerControlView.findViewById(R.id.exo_progress);
         TextView exoDuration = playerControlView.findViewById(R.id.exo_duration);
         LinearLayout exoLiveContainer = playerControlView.findViewById(R.id.exo_live_container);
+        TextView exoLiveLabel = playerControlView.findViewById(R.id.exo_live_label);
 
         boolean isLive = false;
         Timeline timeline = player.getCurrentTimeline();
@@ -541,7 +543,8 @@ public class ReactExoplayerView extends FrameLayout implements
             isLive = window.isLive();
         }
 
-        if(isLive){
+        if(isLive && !Objects.equals(controlsConfig.getLiveLabel(), "")){
+            exoLiveLabel.setText(controlsConfig.getLiveLabel());
             exoLiveContainer.setVisibility(View.VISIBLE);
         }else{
             exoLiveContainer.setVisibility(View.GONE);
