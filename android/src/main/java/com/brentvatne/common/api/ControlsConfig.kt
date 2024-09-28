@@ -9,7 +9,7 @@ class ControlsConfig {
     var hideDuration: Boolean = false
     var hideNavigationBarOnFullScreenMode: Boolean = true
     var hideNotificationBarOnFullScreenMode: Boolean = true
-    var liveLabel: String? = ""
+    var liveLabel: String? = null
 
     companion object {
         @JvmStatic
@@ -22,7 +22,7 @@ class ControlsConfig {
                 config.hideDuration = ReactBridgeUtils.safeGetBool(src, "hideDuration", false)
                 config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
                 config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNotificationBarOnFullScreenMode", true)
-                config.liveLabel = ReactBridgeUtils.safeGetString(src, "liveLabel", "")
+                config.liveLabel = ReactBridgeUtils.safeGetString(src, "liveLabel", null)
             }
             return config
         }

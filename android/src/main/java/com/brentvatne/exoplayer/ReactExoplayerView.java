@@ -139,7 +139,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -526,7 +525,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void refreshControlsStyles() {
-        if (playerControlView == null || player == null) return;
+        if (playerControlView == null || player == null || !controls) return;
 
         DefaultTimeBar exoProgress = playerControlView.findViewById(R.id.exo_progress);
         TextView exoDuration = playerControlView.findViewById(R.id.exo_duration);
@@ -543,7 +542,7 @@ public class ReactExoplayerView extends FrameLayout implements
             isLive = window.isLive();
         }
 
-        if(isLive && !Objects.equals(controlsConfig.getLiveLabel(), "")){
+        if(isLive && controlsConfig.getLiveLabel() != null){
             exoLiveLabel.setText(controlsConfig.getLiveLabel());
             exoLiveContainer.setVisibility(View.VISIBLE);
         }else{
