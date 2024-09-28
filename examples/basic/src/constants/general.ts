@@ -32,6 +32,10 @@ export const srcAllPlatformList = [
     cropEnd: 10000,
   },
   {
+    description: 'video with 90° rotation',
+    uri: 'https://bn-dev.fra1.digitaloceanspaces.com/km-tournament/uploads/rn_image_picker_lib_temp_2ee86a27_9312_4548_84af_7fd75d9ad4dd_ad8b20587a.mp4',
+  },
+  {
     description: 'local file portrait',
     uri: localeVideo.portrait,
     metadata: {
