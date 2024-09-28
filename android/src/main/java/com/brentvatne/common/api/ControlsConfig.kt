@@ -13,16 +13,16 @@ class ControlsConfig {
 
     companion object {
         @JvmStatic
-        fun parse(src: ReadableMap?): ControlsConfig {
+        fun parse(controlsConfig: ReadableMap?): ControlsConfig {
             val config = ControlsConfig()
 
-            if (src != null) {
-                config.hideSeekBar = ReactBridgeUtils.safeGetBool(src, "hideSeekBar", false)
-                config.seekIncrementMS = ReactBridgeUtils.safeGetInt(src, "seekIncrementMS", 10000)
-                config.hideDuration = ReactBridgeUtils.safeGetBool(src, "hideDuration", false)
-                config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
-                config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNotificationBarOnFullScreenMode", true)
-                config.liveLabel = ReactBridgeUtils.safeGetString(src, "liveLabel", null)
+            if (controlsConfig != null) {
+                config.hideSeekBar = ReactBridgeUtils.safeGetBool(controlsConfig, "hideSeekBar", false)
+                config.seekIncrementMS = ReactBridgeUtils.safeGetInt(controlsConfig, "seekIncrementMS", 10000)
+                config.hideDuration = ReactBridgeUtils.safeGetBool(controlsConfig, "hideDuration", false)
+                config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(controlsConfig, "hideNavigationBarOnFullScreenMode", true)
+                config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(controlsConfig, "hideNotificationBarOnFullScreenMode", true)
+                config.liveLabel = ReactBridgeUtils.safeGetString(controlsConfig, "liveLabel", null)
             }
             return config
         }
