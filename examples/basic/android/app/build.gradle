@@ -83,10 +83,6 @@ android {
     namespace "com.videoplayer"
 
     compileOptions {
-        // These options are necessary to be able to build from source
-        // coreLibraryDesugaringEnabled is mandatory to be able to build exoplayer from source
-        // uncomment this line if you want to build from source
-        // coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
@@ -157,8 +153,6 @@ dependencies {
             because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
         }
     }
-    // coreLibraryDesugaring is mandatory to be able to build exoplayer from source
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
