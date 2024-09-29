@@ -1,7 +1,7 @@
 import AVKit
 import Foundation
 
-protocol RCTVideoPlayerViewControllerDelegate: class {
+protocol RCTVideoPlayerViewControllerDelegate: AnyObject {
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController)
     func videoPlayerViewControllerDidDismiss(playerViewController: AVPlayerViewController)
 }

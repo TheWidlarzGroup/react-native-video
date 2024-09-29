@@ -14,12 +14,13 @@
   },
   "dependencies": {
     "@react-native-picker/picker": "2.7.5",
-    "expo": "^51.0.17",
-    "expo-asset": "^10.0.9",
-    "expo-image": "^1.12.12",
+    "expo": "^51.0.32",
+    "expo-asset": "~10.0.10",
+    "expo-image": "^1.12.15",
+    "expo-navigation-bar": "~3.0.7",
     "react": "18.2.0",
-    "react-native": "0.74.3",
-    "react-native-windows": "0.74.1"
+    "react-native": "0.74.5",
+    "react-native-windows": "0.74.19"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

@@ -24,6 +24,19 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
         application.service = [];
       }
 
+      // We check if the VideoPlaybackService is already defined in the AndroidManifest.xml
+      // to prevent adding duplicate service entries. If the service exists, we will remove
+      // it before adding the updated configuration to ensure there are no conflicts or redundant
+      // service declarations in the manifest.
+      const existingServiceIndex = application.service.findIndex(
+        (service) =>
+          service?.$?.['android:name'] ===
+          'com.brentvatne.exoplayer.VideoPlaybackService',
+      );
+      if (existingServiceIndex !== -1) {
+        application.service.splice(existingServiceIndex, 1);
+      }
+
       application.service.push({
         $: {
           'android:name': 'com.brentvatne.exoplayer.VideoPlaybackService',
