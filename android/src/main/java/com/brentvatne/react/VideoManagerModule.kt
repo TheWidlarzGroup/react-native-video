@@ -1,6 +1,5 @@
 package com.brentvatne.react
 
-import android.os.Build
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext

@@ -37,7 +37,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_SELECTED_TEXT_TRACK_TYPE = "type"
         private const val PROP_SELECTED_TEXT_TRACK_VALUE = "value"
         private const val PROP_PAUSED = "paused"
-        private const val PROP_ENTER_PICTURE_IN_PICTURE_ON_LEAVE = "enterPictureInPictureOnLeave";
+        private const val PROP_ENTER_PICTURE_IN_PICTURE_ON_LEAVE = "enterPictureInPictureOnLeave"
         private const val PROP_MUTED = "muted"
         private const val PROP_AUDIO_OUTPUT = "audioOutput"
         private const val PROP_VOLUME = "volume"
@@ -190,7 +190,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
 
     @ReactProp(name = PROP_ENTER_PICTURE_IN_PICTURE_ON_LEAVE, defaultBoolean = false)
     fun setEnterPictureInPictureOnLeave(videoView: ReactExoplayerView, enterPictureInPictureOnLeave: Boolean) {
-        videoView.setEnterPictureInPictureOnLeave(enterPictureInPictureOnLeave);
+        videoView.setEnterPictureInPictureOnLeave(enterPictureInPictureOnLeave)
     }
 
     @ReactProp(name = PROP_AUDIO_OUTPUT)
