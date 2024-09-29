@@ -7,6 +7,8 @@ class ControlsConfig {
     var hideSeekBar: Boolean = false
     var seekIncrementMS: Int = 10000
     var hideDuration: Boolean = false
+    var showSubtitleButton: Boolean = true
+    var showSettingButton: Boolean = true
     var hideNavigationBarOnFullScreenMode: Boolean = true
     var hideNotificationBarOnFullScreenMode: Boolean = true
 
@@ -19,6 +21,8 @@ class ControlsConfig {
                 config.hideSeekBar = ReactBridgeUtils.safeGetBool(src, "hideSeekBar", false)
                 config.seekIncrementMS = ReactBridgeUtils.safeGetInt(src, "seekIncrementMS", 10000)
                 config.hideDuration = ReactBridgeUtils.safeGetBool(src, "hideDuration", false)
+                config.showSubtitleButton = ReactBridgeUtils.safeGetBool(src, "showSubtitleButton", true)
+                config.showSettingButton = ReactBridgeUtils.safeGetBool(src, "showSettingButton", true)
                 config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
                 config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNotificationBarOnFullScreenMode", true)
             }

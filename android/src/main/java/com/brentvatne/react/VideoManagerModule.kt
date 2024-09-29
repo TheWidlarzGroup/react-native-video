@@ -59,7 +59,7 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     @ReactMethod
     fun setFullScreenCmd(reactTag: Int, fullScreen: Boolean) {
         performOnPlayerView(reactTag) {
-            it?.setFullscreen(fullScreen)
+            it?.handleFullScreenMode(fullScreen)
         }
     }
 

@@ -144,13 +144,16 @@ If needed, you can also add your controls or use a package like [react-native-vi
 
 Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
 
-| Property                          | Type    | Description                                                                                |
-|-----------------------------------|---------|--------------------------------------------------------------------------------------------|
-| hideSeekBar                       | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.       |
-| hideDuration                      | boolean | The default value is `false`, allowing you to hide the duration.                           |
-| seekIncrementMS                   | number  | The default value is `10000`. You can change the value to increment forward and rewind.    |
-| hideNavigationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.  |
-| hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode. |
+| Property                            | Type    | Description                                                                                                                                     |
+|-------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| hideSeekBar                         | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.                                                            |
+| hideDuration                        | boolean | The default value is `false`, allowing you to hide the duration.                                                                                |
+| seekIncrementMS                     | number  | The default value is `10000`. You can change the value to increment forward and rewind.                                                         |
+| showSubtitleButton                  | boolean | The default value is `true`, allowing you to show or hide the subtitle button. If the video does not have subtitles, we don't show this button. |
+| showSettingButton                   | boolean | The default value is `true`, allowing you to show or hide the setting button.                                                                   |
+| hideNavigationBarOnFullScreenMode   | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.                                                       |
+| hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode.                                                     |
+
 
 Example with default values:
 
@@ -159,8 +162,11 @@ controlsStyles={{
   hideSeekBar: false,
   hideDuration: false,
   seekIncrementMS: 10000,
+  showSubtitleButton: true,
+  showSettingButton: true,
   hideNavigationBarOnFullScreenMode: true,
   hideNotificationBarOnFullScreenMode: true,
+  }}
 }}
 ```
 
@@ -283,6 +289,9 @@ Whether this video view should be focusable with a non-touch input device, eg. r
 
 Controls whether the player enters fullscreen on play.
 See [presentFullscreenPlayer](#presentfullscreenplayer) for details.
+
+> [!WARNING]
+> deprecated, use setFullScreen method instead
 
 - **false (default)** - Don't display the video in fullscreen
 - **true** - Display the video in fullscreen
@@ -937,9 +946,6 @@ Subtitles are managed in a third view.
 First react-native-video resize the video to keep aspect ratio (depending on `resizeMode` property) and put it in main view.
 
 * When putting subtitlesFollowVideo to true, the subtitle view will be adapt to the video view.
-It means that if the video is displayed out of screen, the subtitles may also be displayed out of screen.
-
-* When putting subtitlesFollowVideo to false, the subtitle view will keep adapting to the main view.
 It means that if the video is displayed out of screen, the subtitles may also be displayed out of screen.
 
 This prop can be changed on runtime.

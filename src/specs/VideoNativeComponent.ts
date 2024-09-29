@@ -300,6 +300,8 @@ type ControlsStyles = Readonly<{
   hideSeekBar?: WithDefault<boolean, false>;
   hideDuration?: WithDefault<boolean, false>;
   seekIncrementMS?: Int32;
+  showSubtitleButton?: WithDefault<boolean, true>;
+  showSettingButton?: WithDefault<boolean, true>;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
   hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
 }>;

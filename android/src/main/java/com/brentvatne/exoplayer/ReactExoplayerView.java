@@ -14,6 +14,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -22,11 +23,11 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -100,7 +101,8 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.DefaultTimeBar;
-import androidx.media3.ui.LegacyPlayerControlView;
+import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.PlayerView;
 
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
@@ -172,10 +174,7 @@ public class ReactExoplayerView extends FrameLayout implements
     protected final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
-    private LegacyPlayerControlView playerControlView;
-    private View playPauseControlContainer;
-    private Player.Listener eventListener;
-
+    private PlayerControlView playerControlView;
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
     private ImaAdsLoader adsLoader;
@@ -191,7 +190,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private EventLogger debugEventLogger = null;
     private boolean enableDebug = false;
     private static final String TAG_EVENT_LOGGER = "RNVExoplayer";
-
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -256,7 +254,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
-
     private boolean viewHasDropped = false;
 
     private final String instanceId = String.valueOf(UUID.randomUUID());
@@ -270,7 +267,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private void updateProgress() {
         if (player != null) {
             if (playerControlView != null && isPlayingAd() && controls) {
-                playerControlView.hide();
+                exoPlayerView.setUseController(false);
             }
             long bufferedDuration = player.getBufferedPercentage() * player.getDuration() / 100;
             long duration = player.getDuration();
@@ -338,6 +335,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT);
         exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
+        exoPlayerView.setBackgroundColor(Color.BLACK);
+
         addView(exoPlayerView, 0, layoutParams);
 
         exoPlayerView.setFocusable(this.focusable);
@@ -399,117 +398,31 @@ public class ReactExoplayerView extends FrameLayout implements
     // Internal methods
 
     /**
-     * Toggling the visibility of the player control view
-     */
-    private void togglePlayerControlVisibility() {
-        if (player == null) return;
-        reLayoutControls();
-        if (playerControlView.isVisible()) {
-            playerControlView.hide();
-        } else {
-            playerControlView.show();
-        }
-    }
-
-    /**
      * Initializing Player control
      */
+    @SuppressLint("ClickableViewAccessibility")
     private void initializePlayerControl() {
         if (playerControlView == null) {
-            playerControlView = new LegacyPlayerControlView(getContext());
-            playerControlView.addVisibilityListener(new LegacyPlayerControlView.VisibilityListener() {
+            playerControlView = new PlayerControlView(getContext());
+            exoPlayerView.setFullscreenButtonClickListener(new PlayerView.FullscreenButtonClickListener() {
                 @Override
-                public void onVisibilityChange(int visibility) {
-                    eventEmitter.onControlsVisibilityChange.invoke(visibility == View.VISIBLE);
+                public void onFullscreenButtonClick(boolean isFullScreen) {
+                    DebugLog.w(TAG, "onFullscreenButtonClick");
+                    setFullscreen(isFullScreen);
                 }
             });
         }
 
         // Setting the player for the playerControlView
         playerControlView.setPlayer(player);
-        playPauseControlContainer = playerControlView.findViewById(R.id.exo_play_pause_container);
 
-        // Invoking onClick event for exoplayerView
-        exoPlayerView.setOnClickListener((View v) -> {
-            if (!isPlayingAd()) {
-                togglePlayerControlVisibility();
+        exoPlayerView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return !controls && !isFullscreen && !isPlayingAd();
             }
         });
-
-        //Handling the playButton click event
-        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
-        playButton.setOnClickListener((View v) -> {
-            if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
-                player.seekTo(0);
-            }
-            setPausedModifier(false);
-        });
-
-        //Handling the rewind and forward button click events
-        ImageButton exoRewind = playerControlView.findViewById(R.id.exo_rew);
-        ImageButton exoForward = playerControlView.findViewById(R.id.exo_ffwd);
-        exoRewind.setOnClickListener((View v) -> {
-            seekTo(player.getCurrentPosition() - controlsConfig.getSeekIncrementMS());
-        });
-
-        exoForward.setOnClickListener((View v) -> {
-            seekTo(player.getCurrentPosition() + controlsConfig.getSeekIncrementMS());
-        });
-
-        //Handling the pauseButton click event
-        ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
-        pauseButton.setOnClickListener((View v) ->
-                setPausedModifier(true)
-        );
-
-        //Handling the fullScreenButton click event
-        final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-        fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
-        updateFullScreenButtonVisibility();
         refreshProgressBarVisibility();
-
-        // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
-        eventListener = new Player.Listener() {
-            @Override
-            public void onPlaybackStateChanged(int playbackState) {
-                View playButton = playerControlView.findViewById(R.id.exo_play);
-                View pauseButton = playerControlView.findViewById(R.id.exo_pause);
-                if (playButton != null && playButton.getVisibility() == GONE) {
-                    playButton.setVisibility(INVISIBLE);
-                }
-                if (pauseButton != null && pauseButton.getVisibility() == GONE) {
-                    pauseButton.setVisibility(INVISIBLE);
-                }
-                reLayout(playPauseControlContainer);
-                //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
-                player.removeListener(eventListener);
-            }
-
-            @Override
-            public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-                reLayout(playPauseControlContainer);
-                //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
-                player.removeListener(eventListener);
-            }
-        };
-        player.addListener(eventListener);
-    }
-
-    /**
-     * Adding Player control to the frame layout
-     */
-    private void addPlayerControl() {
-        if (playerControlView == null) return;
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-        playerControlView.setLayoutParams(layoutParams);
-        int indexOfPC = indexOfChild(playerControlView);
-        if (indexOfPC != -1) {
-            removeViewAt(indexOfPC);
-        }
-        addView(playerControlView, 1, layoutParams);
-        reLayout(playerControlView);
     }
 
     /**
@@ -525,38 +438,21 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+    @SuppressLint("ResourceAsColor")
     private void refreshProgressBarVisibility (){
-        if(playerControlView == null) return;
-        DefaultTimeBar exoProgress;
-        TextView exoDuration;
-        TextView exoPosition;
-        exoProgress = playerControlView.findViewById(R.id.exo_progress);
-        exoDuration = playerControlView.findViewById(R.id.exo_duration);
-        exoPosition = playerControlView.findViewById(R.id.exo_position);
+        if(playerControlView == null || !controls) return;
+        DefaultTimeBar exoProgress = findViewById(androidx.media3.ui.R.id.exo_progress);
+        TextView exoDuration = findViewById(androidx.media3.ui.R.id.exo_duration);
         if(controlsConfig.getHideSeekBar()){
-            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT,
-                    1.0f
-            );
-            exoProgress.setVisibility(GONE);
-            exoDuration.setVisibility(GONE);
-            exoPosition.setLayoutParams(param);
+            exoProgress.setVisibility(INVISIBLE);
+            exoDuration.setVisibility(INVISIBLE);
         }else{
             exoProgress.setVisibility(VISIBLE);
-
             if(controlsConfig.getHideDuration()){
-                exoDuration.setVisibility(GONE);
+                exoDuration.setVisibility(INVISIBLE);
             }else{
                 exoDuration.setVisibility(VISIBLE);
             }
-
-            // Reset the layout parameters of exoPosition to their default state
-            LinearLayout.LayoutParams defaultParam = new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-            );
-            exoPosition.setLayoutParams(defaultParam);
         }
     }
 
@@ -671,7 +567,6 @@ public class ReactExoplayerView extends FrameLayout implements
                     initializePlayerCore(self);
                 }
                 if (playerNeedsSource && source.getUri() != null) {
-                    exoPlayerView.invalidateAspectRatio();
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {
@@ -766,6 +661,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 .setBandwidthMeter(bandwidthMeter)
                 .setLoadControl(loadControl)
                 .setMediaSourceFactory(mediaSourceFactory)
+                .setSeekForwardIncrementMs(controlsConfig.getSeekIncrementMS())
+                .setSeekBackIncrementMs(controlsConfig.getSeekIncrementMS())
                 .build();
         ReactNativeVideoManager.Companion.getInstance().onInstanceCreated(instanceId, player);
         refreshDebugState();
@@ -1383,8 +1280,8 @@ public class ReactExoplayerView extends FrameLayout implements
                         setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
                     }
                     // Setting the visibility for the playerControlView
-                    if (playerControlView != null) {
-                        playerControlView.show();
+                    if (playerControlView != null && controls) {
+                        exoPlayerView.setUseController(true);
                     }
                     setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                     break;
@@ -1427,6 +1324,9 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             if (textTrackType != null) {
                 setSelectedTextTrack(textTrackType, textTrackValue);
+                exoPlayerView.setShowSubtitleButton(controlsConfig.getShowSubtitleButton());
+            }else{
+                exoPlayerView.setShowSubtitleButton(false);
             }
             Format videoFormat = player.getVideoFormat();
             boolean isRotatedContent = videoFormat != null && (videoFormat.rotationDegrees == 90 || videoFormat.rotationDegrees == 270);
@@ -1708,7 +1608,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
-        
+
         if (isPlaying) {
             isSeeking = false;
         }
@@ -1813,6 +1713,17 @@ public class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
 
+            MediaMetadata customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
+
+            // Apply custom metadata is possible
+            if (player != null) {
+                MediaItem currentMediaItem = player.getCurrentMediaItem();
+                if (currentMediaItem != null) {
+                    MediaItem newMediaItem = currentMediaItem.buildUpon().setMediaMetadata(customMetadata).build();
+                    // This will cause video blink/reload but won't louse progress
+                    player.setMediaItem(newMediaItem, false);
+                }
+            }
             if (source.getCmcdProps() != null) {
                 CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());
                 CmcdConfiguration.Factory factory = cmcdConfig.toCmcdConfigurationFactory();
@@ -2235,20 +2146,16 @@ public class ReactExoplayerView extends FrameLayout implements
         return preventsDisplaySleepDuringVideoPlayback;
     }
 
-    private void updateFullScreenButtonVisibility() {
-        if (playerControlView != null) {
-            final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-            //Handling the fullScreenButton click event
-            if (isFullscreen && fullScreenPlayerView != null && !fullScreenPlayerView.isShowing()) {
-                fullScreenButton.setVisibility(GONE);
-            } else {
-                fullScreenButton.setVisibility(VISIBLE);
-            }
-        }
-    }
-
     public void setDisableDisconnectError(boolean disableDisconnectError) {
         this.disableDisconnectError = disableDisconnectError;
+    }
+
+    public void handleFullScreenMode(boolean fullscreen){
+        ImageView exoFullScreen = findViewById(androidx.media3.ui.R.id.exo_fullscreen);
+        if(exoFullScreen != null){
+            exoFullScreen.performClick();
+        }
+        setFullscreen(fullscreen);
     }
 
     public void setFullscreen(boolean fullscreen) {
@@ -2263,7 +2170,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (isFullscreen) {
-            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, playerControlView, new OnBackPressedCallback(true) {
+            fullScreenPlayerView = new FullScreenPlayerView(getContext(), exoPlayerView, this, new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
                     setFullscreen(false);
@@ -2272,6 +2179,8 @@ public class ReactExoplayerView extends FrameLayout implements
             eventEmitter.onVideoFullscreenPlayerWillPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
+                reLayoutControls();
+                exoPlayerView.setUseController(true);
             }
             UiThreadUtil.runOnUiThread(() -> {
                 eventEmitter.onVideoFullscreenPlayerDidPresent.invoke();
@@ -2287,8 +2196,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
             });
         }
-        // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
-        updateFullScreenButtonVisibility();
     }
 
     public void setHideShutterView(boolean hideShutterView) {
@@ -2348,15 +2255,9 @@ public class ReactExoplayerView extends FrameLayout implements
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (controls) {
-            addPlayerControl();
-            updateFullScreenButtonVisibility();
-        } else {
-            int indexOfPC = indexOfChild(playerControlView);
-            if (indexOfPC != -1) {
-                removeViewAt(indexOfPC);
-            }
-        }
+        exoPlayerView.setUseController(controls);
+        if(!controls) return;
+        refreshProgressBarVisibility();
     }
 
     public void setSubtitleStyle(SubtitleStyle style) {
@@ -2364,7 +2265,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setShutterColor(Integer color) {
-        exoPlayerView.setShutterColor(color);
+        exoPlayerView.setShutterBackgroundColor(color);
     }
 
     @Override
@@ -2387,8 +2288,19 @@ public class ReactExoplayerView extends FrameLayout implements
         eventEmitter.onReceiveAdEvent.invoke("ERROR", errMap);
     }
 
+    private void settingButtonVisibility() {
+        View settingButton = findViewById(androidx.media3.ui.R.id.exo_settings);
+        if(settingButton == null) return;
+        if(controlsConfig.getShowSettingButton()){
+            settingButton.setVisibility(VISIBLE);
+        }else {
+            settingButton.setVisibility(INVISIBLE);
+        }
+    }
+
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshProgressBarVisibility();
+        settingButtonVisibility();
     }
 }

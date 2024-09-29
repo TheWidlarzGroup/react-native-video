@@ -252,6 +252,8 @@ export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
   seekIncrementMS?: number;
+  showSubtitleButton?: boolean;
+  showSettingButton?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
 };
