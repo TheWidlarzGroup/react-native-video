@@ -77,6 +77,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
 
     override fun onDropViewInstance(view: ReactExoplayerView) {
         view.cleanUpResources()
+        view.exitPictureInPictureMode()
         ReactNativeVideoManager.getInstance().unregisterView(this)
     }
 

@@ -73,11 +73,8 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
 
     @ReactMethod
     fun exitPictureInPictureCmd(reactTag: Int) {
-        val activity = reactApplicationContext.currentActivity
-        activity?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && it.isInPictureInPictureMode) {
-                it.moveTaskToBack(false)
-            }
+        performOnPlayerView(reactTag) {
+            it?.exitPictureInPictureMode()
         }
     }
 

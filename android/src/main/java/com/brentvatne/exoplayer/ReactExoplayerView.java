@@ -2222,11 +2222,13 @@ public class ReactExoplayerView extends FrameLayout implements
             rootView.addView(exoPlayerView, layoutParams);
         } else {
             rootView.removeView(exoPlayerView);
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+            if (!rootViewChildrenOriginalVisibility.isEmpty()) {
+                for (int i = 0; i < rootView.getChildCount(); i++) {
+                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+                }
+                addView(exoPlayerView, 0, layoutParams);
             }
-            rootViewChildrenOriginalVisibility.clear();
-            addView(exoPlayerView, 0, layoutParams);
+
             Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
                 @Override
                 public void doFrame(long frameTimeNanos) {
@@ -2263,6 +2265,26 @@ public class ReactExoplayerView extends FrameLayout implements
                     .build();
         }
         PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+    }
+
+    public void exitPictureInPictureMode() {
+        Activity currentActivity = themedReactContext.getCurrentActivity();
+        if (currentActivity == null) return;
+
+        View decorView = currentActivity.getWindow().getDecorView();
+        ViewGroup rootView = decorView.findViewById(android.R.id.content);
+
+        if (!rootViewChildrenOriginalVisibility.isEmpty()) {
+            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
+            for (int i = 0; i < rootView.getChildCount(); i++) {
+                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+            }
+            rootViewChildrenOriginalVisibility.clear();
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && currentActivity.isInPictureInPictureMode()) {
+            currentActivity.moveTaskToBack(false);
+        }
     }
 
     public void setMutedModifier(boolean muted) {
