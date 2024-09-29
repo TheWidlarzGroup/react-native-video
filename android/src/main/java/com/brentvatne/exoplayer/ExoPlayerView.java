@@ -275,6 +275,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
                     case 90:
                     case 270:
                         layout.setVideoAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
+                        break;
                     default:
                         layout.setVideoAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
                 }
