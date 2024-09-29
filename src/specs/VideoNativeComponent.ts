@@ -297,11 +297,18 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
+  hidePosition?: WithDefault<boolean, false>;
+  hidePlayPause?: WithDefault<boolean, false>;
+  hideForward?: WithDefault<boolean, false>;
+  hideRewind?: WithDefault<boolean, false>;
+  hideNext?: WithDefault<boolean, false>;
+  hidePrevious?: WithDefault<boolean, false>;
+  hideFullscreen?: WithDefault<boolean, false>;
   hideSeekBar?: WithDefault<boolean, false>;
   hideDuration?: WithDefault<boolean, false>;
-  seekIncrementMS?: Int32;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
   hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  seekIncrementMS?: Int32;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{

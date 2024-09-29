@@ -251,9 +251,16 @@ export type AudioOutput = 'speaker' | 'earpiece';
 export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
-  seekIncrementMS?: number;
+  hidePosition?: boolean;
+  hidePlayPause?: boolean;
+  hideForward?: boolean;
+  hideRewind?: boolean;
+  hideNext?: boolean;
+  hidePrevious?: boolean;
+  hideFullscreen?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  seekIncrementMS?: number;
 };
 
 export interface ReactVideoRenderLoaderProps {
