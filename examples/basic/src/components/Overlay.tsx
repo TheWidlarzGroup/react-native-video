@@ -7,7 +7,12 @@ import React, {
 } from 'react';
 import {View} from 'react-native';
 import styles from '../styles.tsx';
-import {isAndroid, isIos, textTracksSelectionBy} from '../constants';
+import {
+  isAndroid,
+  isIos,
+  textTracksSelectionBy,
+  audioTracksSelectionBy,
+} from '../constants';
 import {
   ResizeMode,
   VideoRef,
@@ -148,17 +153,14 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     setShowNotificationControls(prev => !prev);
   };
 
-  const onSelectedAudioTrackChange = (itemValue: string) => {
+  const onSelectedAudioTrackChange = (itemValue: string | number) => {
     console.log('on audio value change ' + itemValue);
     if (itemValue === 'none') {
       setSelectedAudioTrack({
         type: SelectedTrackType.DISABLED,
       });
     } else {
-      setSelectedAudioTrack({
-        type: SelectedTrackType.INDEX,
-        value: itemValue,
-      });
+      setSelectedAudioTrack({type: audioTracksSelectionBy, value: itemValue});
     }
   };
 
@@ -324,6 +326,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
                 audioTracks={audioTracks}
                 selectedAudioTrack={selectedAudioTrack}
                 onValueChange={onSelectedAudioTrackChange}
+                audioTracksSelectionBy={audioTracksSelectionBy}
               />
               <TextTrackSelector
                 textTracks={textTracks}

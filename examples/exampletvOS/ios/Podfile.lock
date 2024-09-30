@@ -316,11 +316,11 @@ PODS:
   - React-jsinspector (0.71.12-0)
   - React-logger (0.71.12-0):
     - glog
-  - react-native-video (6.4.5):
+  - react-native-video (6.6.2):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - react-native-video/Video (= 6.4.5)
-  - react-native-video/Video (6.4.5):
+    - react-native-video/Video (= 6.6.2)
+  - react-native-video/Video (6.6.2):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - React-perflogger (0.71.12-0)
@@ -592,7 +592,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 0c8c5e8b2171be52295f59097923babf84d1cf66
   React-jsinspector: f8e6919523047a9bd1270ade75b4eca0108963b4
   React-logger: 16c56636d4209cc204d06c5ba347cee21b960012
-  react-native-video: fdcfbf66416475f8e122be9f7d72dd1d156ef3ed
+  react-native-video: 5d1e10262d6986e1ce911634a3b8d8f32f2dd97e
   React-perflogger: 355109dc9d6f34e35bc35dabb32310f8ed2d29a2
   React-RCTActionSheet: 9d1be4d43972f2aae4b31d9e53ffb030115fa445
   React-RCTAnimation: aab7e1ecd325db67e1f2a947d85a52adf86594b7

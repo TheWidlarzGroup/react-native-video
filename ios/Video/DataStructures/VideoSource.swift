@@ -10,7 +10,7 @@ struct VideoSource {
     let cropEnd: Int64?
     let customMetadata: CustomMetadata?
     /* DRM */
-    let drm: DRMParams?
+    let drm: DRMParams
     var textTracks: [TextTrack] = []
 
     let json: NSDictionary?
@@ -28,7 +28,7 @@ struct VideoSource {
             self.cropStart = nil
             self.cropEnd = nil
             self.customMetadata = nil
-            self.drm = nil
+            self.drm = DRMParams(nil)
             return
         }
         self.json = json

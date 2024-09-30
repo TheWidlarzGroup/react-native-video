@@ -438,6 +438,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         //Handling the playButton click event
         ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+
         playButton.setOnClickListener((View v) -> {
             if (player != null && player.getPlaybackState() == Player.STATE_ENDED) {
                 player.seekTo(0);
@@ -466,6 +467,7 @@ public class ReactExoplayerView extends FrameLayout implements
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisibility();
+        refreshControlsStyles();
 
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
@@ -479,6 +481,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (pauseButton != null && pauseButton.getVisibility() == GONE) {
                     pauseButton.setVisibility(INVISIBLE);
                 }
+
                 reLayout(playPauseControlContainer);
                 //Remove this eventListener once its executed. since UI will work fine once after the reLayout is done
                 player.removeListener(eventListener);
@@ -524,11 +527,9 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void refreshControlsStyles() {
+    private void refreshControlsStyles (){
         if (playerControlView == null || player == null || !controls) return;
 
-        DefaultTimeBar exoProgress = playerControlView.findViewById(R.id.exo_progress);
-        TextView exoDuration = playerControlView.findViewById(R.id.exo_duration);
         LinearLayout exoLiveContainer = playerControlView.findViewById(R.id.exo_live_container);
         TextView exoLiveLabel = playerControlView.findViewById(R.id.exo_live_label);
 
@@ -549,14 +550,83 @@ public class ReactExoplayerView extends FrameLayout implements
             exoLiveContainer.setVisibility(View.GONE);
         }
 
-        if (controlsConfig.getHideSeekBar()) {
-            exoProgress.setVisibility(View.INVISIBLE);
-        }else{
-            exoProgress.setVisibility(View.VISIBLE);
+        final ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        final ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
+        if (controlsConfig.getHidePlayPause()) {
+            playPauseControlContainer.setAlpha(0);
+
+            playButton.setClickable(false);
+            pauseButton.setClickable(false);
+        } else {
+            playPauseControlContainer.setAlpha(1.0f);
+
+            playButton.setClickable(true);
+            pauseButton.setClickable(true);
         }
 
-        // Handle duration visibility based on configuration or live video
-        exoDuration.setVisibility(controlsConfig.getHideDuration() || isLive ? View.INVISIBLE : View.VISIBLE);
+        final ImageButton forwardButton = playerControlView.findViewById(R.id.exo_ffwd);
+        if (controlsConfig.getHideForward()) {
+            forwardButton.setImageAlpha(0);
+            forwardButton.setClickable(false);
+        } else {
+            forwardButton.setImageAlpha(255);
+            forwardButton.setClickable(true);
+        }
+
+        final ImageButton rewindButton = playerControlView.findViewById(R.id.exo_rew);
+        if (controlsConfig.getHideRewind()) {
+            rewindButton.setImageAlpha(0);
+            rewindButton.setClickable(false);
+        } else {
+            rewindButton.setImageAlpha(255);
+            rewindButton.setClickable(true);
+        }
+
+        final ImageButton nextButton = playerControlView.findViewById(R.id.exo_next);
+        if (controlsConfig.getHideNext()) {
+            nextButton.setClickable(false);
+            nextButton.setImageAlpha(0);
+        } else {
+            nextButton.setImageAlpha(255);
+            nextButton.setClickable(true);
+        }
+
+        final ImageButton previousButton = playerControlView.findViewById(R.id.exo_prev);
+        if (controlsConfig.getHidePrevious()) {
+            previousButton.setImageAlpha(0);
+            previousButton.setClickable(false);
+        } else {
+            previousButton.setImageAlpha(255);
+            previousButton.setClickable(true);
+        }
+
+        final ImageButton fullscreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
+        if (controlsConfig.getHideFullscreen()) {
+            fullscreenButton.setVisibility(GONE);
+        } else if (fullscreenButton.getVisibility() == GONE) {
+            fullscreenButton.setVisibility(VISIBLE);
+        }
+
+        final TextView positionText = playerControlView.findViewById(R.id.exo_position);
+        if(controlsConfig.getHidePosition()){
+            positionText.setVisibility(GONE);
+        } else if (positionText.getVisibility() == GONE){
+            positionText.setVisibility(VISIBLE);
+        }
+
+        final DefaultTimeBar progressBar = playerControlView.findViewById(R.id.exo_progress);
+        if (controlsConfig.getHideSeekBar()) {
+            progressBar.setVisibility(INVISIBLE);
+        } else if (progressBar.getVisibility() == INVISIBLE) {
+            progressBar.setVisibility(VISIBLE);
+        }
+
+        final TextView durationText = playerControlView.findViewById(R.id.exo_duration);
+        if (controlsConfig.getHideDuration()) {
+            durationText.setVisibility(GONE);
+        } else if (durationText.getVisibility() == GONE) {
+            durationText.setVisibility(VISIBLE);
+        }
     }
 
 
@@ -1709,7 +1779,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
-        
+
         if (isPlaying) {
             isSeeking = false;
         }

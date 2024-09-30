@@ -146,22 +146,36 @@ Adjust the control styles. This prop is need only if `controls={true}` and is an
 
 | Property                            | Type    | Description                                                                                 |
 |-------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| hidePosition                        | boolean | Hides the position indicator. Default is `false`.                                           |
+| hidePlayPause                       | boolean | Hides the play/pause button. Default is `false`.                                            |
+| hideForward                         | boolean | Hides the forward button. Default is `false`.                                               |
+| hideRewind                          | boolean | Hides the rewind button. Default is `false`.                                                |
+| hideNext                            | boolean | Hides the next button. Default is `false`.                                                  |
+| hidePrevious                        | boolean | Hides the previous button. Default is `false`.                                              |
+| hideFullscreen                      | boolean | Hides the fullscreen button. Default is `false`.                                            |
 | hideSeekBar                         | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.        |
 | hideDuration                        | boolean | The default value is `false`, allowing you to hide the duration.                            |
-| seekIncrementMS                     | number  | The default value is `10000`. You can change the value to increment forward and rewind.     |
 | hideNavigationBarOnFullScreenMode   | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.   |
 | hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode. |
+| seekIncrementMS                     | number  | The default value is `10000`. You can change the value to increment forward and rewind.     |
 | liveLabel                           | string  | Allowing you to set a label for live video.                                                 |
 
 Example with default values:
 
 ```javascript
 controlsStyles={{
+  hidePosition: false,
+  hidePlayPause: false,
+  hideForward: false,
+  hideRewind: false,
+  hideNext: false,
+  hidePrevious: false,
+  hideFullscreen: false,
   hideSeekBar: false,
   hideDuration: false,
-  seekIncrementMS: 10000,
   hideNavigationBarOnFullScreenMode: true,
   hideNotificationBarOnFullScreenMode: true,
+  seekIncrementMS: 10000,
   liveLabel: "LIVE"
 }}
 ```
@@ -341,19 +355,6 @@ Controls the iOS silent switch behavior
 - **"ignore"** - Play audio even if the silent switch is set
 - **"obey"** - Don't play audio if the silent switch is set
 
-### `localSourceEncryptionKeyScheme`
-
-<PlatformsList types={['iOS']} />
-
-Set the url scheme for stream encryption key for local assets
-
-Type: String
-
-Example:
-
-```
-localSourceEncryptionKeyScheme="my-offline-key"
-```
 
 ### `maxBitRate`
 
@@ -791,7 +792,7 @@ The following other types are supported on some platforms, but aren't fully docu
 
 #### Using DRM content
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'tvOS']} />
 
 To setup DRM please follow [this guide](/component/drm)
 
@@ -808,8 +809,6 @@ Example:
       },
     },
 ```
-
-> ⚠️ DRM is not supported on visionOS yet
 
 
 #### Start playback at a specific point in time

@@ -81,6 +81,7 @@ export type Drm = Readonly<{
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
   multiDrm?: boolean; // android
+  localSourceEncryptionKeyScheme?: string; // ios
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
@@ -250,9 +251,16 @@ export type AudioOutput = 'speaker' | 'earpiece';
 export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
-  seekIncrementMS?: number;
+  hidePosition?: boolean;
+  hidePlayPause?: boolean;
+  hideForward?: boolean;
+  hideRewind?: boolean;
+  hideNext?: boolean;
+  hidePrevious?: boolean;
+  hideFullscreen?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  seekIncrementMS?: number;
   liveLabel?: string;
 };
 
@@ -322,6 +330,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use viewType*/
   useSecureView?: boolean; // Android
   volume?: number;
+  /** @deprecated use **localSourceEncryptionKeyScheme** key in **drm** props instead */
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   allowsExternalPlayback?: boolean; // iOS
