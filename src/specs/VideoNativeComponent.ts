@@ -320,7 +320,6 @@ export interface VideoNativeProps extends ViewProps {
   adTagUrl?: string;
   adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
-  disableFocus?: boolean; // android
   maxBitRate?: Float;
   resizeMode?: WithDefault<string, 'none'>;
   repeat?: boolean;
