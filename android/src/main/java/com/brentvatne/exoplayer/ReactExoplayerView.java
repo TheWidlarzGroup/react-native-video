@@ -527,9 +527,21 @@ public class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
-    private void refreshControlsStyles (){
+    private void refreshControlsStyles() {
         if (playerControlView == null || player == null || !controls) return;
+        updateLiveContent();
+        updatePlayPauseButtons();
+        updateButtonVisibility(controlsConfig.getHideForward(), R.id.exo_ffwd);
+        updateButtonVisibility(controlsConfig.getHideRewind(), R.id.exo_rew);
+        updateButtonVisibility(controlsConfig.getHideNext(), R.id.exo_next);
+        updateButtonVisibility(controlsConfig.getHidePrevious(), R.id.exo_prev);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_fullscreen), controlsConfig.getHideFullscreen(), GONE);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_position), controlsConfig.getHidePosition(), GONE);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_progress), controlsConfig.getHideSeekBar(), INVISIBLE);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_duration), controlsConfig.getHideDuration(), GONE);
+    }
 
+    private void updateLiveContent() {
         LinearLayout exoLiveContainer = playerControlView.findViewById(R.id.exo_live_container);
         TextView exoLiveLabel = playerControlView.findViewById(R.id.exo_live_label);
 
@@ -543,91 +555,48 @@ public class ReactExoplayerView extends FrameLayout implements
             isLive = window.isLive();
         }
 
-        if(isLive && controlsConfig.getLiveLabel() != null){
+        if (isLive && controlsConfig.getLiveLabel() != null) {
             exoLiveLabel.setText(controlsConfig.getLiveLabel());
-            exoLiveContainer.setVisibility(View.VISIBLE);
-        }else{
-            exoLiveContainer.setVisibility(View.GONE);
+            exoLiveContainer.setVisibility(VISIBLE);
+        } else {
+            exoLiveContainer.setVisibility(GONE);
         }
+    }
 
+    private void updatePlayPauseButtons() {
         final ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
         final ImageButton pauseButton = playerControlView.findViewById(R.id.exo_pause);
+
         if (controlsConfig.getHidePlayPause()) {
             playPauseControlContainer.setAlpha(0);
-
             playButton.setClickable(false);
             pauseButton.setClickable(false);
         } else {
             playPauseControlContainer.setAlpha(1.0f);
-
             playButton.setClickable(true);
             pauseButton.setClickable(true);
         }
+    }
 
-        final ImageButton forwardButton = playerControlView.findViewById(R.id.exo_ffwd);
-        if (controlsConfig.getHideForward()) {
-            forwardButton.setImageAlpha(0);
-            forwardButton.setClickable(false);
+    private void updateButtonVisibility(boolean hide, int buttonID) {
+        ImageButton button = playerControlView.findViewById(buttonID);
+        if (hide) {
+            button.setImageAlpha(0);
+            button.setClickable(false);
         } else {
-            forwardButton.setImageAlpha(255);
-            forwardButton.setClickable(true);
-        }
-
-        final ImageButton rewindButton = playerControlView.findViewById(R.id.exo_rew);
-        if (controlsConfig.getHideRewind()) {
-            rewindButton.setImageAlpha(0);
-            rewindButton.setClickable(false);
-        } else {
-            rewindButton.setImageAlpha(255);
-            rewindButton.setClickable(true);
-        }
-
-        final ImageButton nextButton = playerControlView.findViewById(R.id.exo_next);
-        if (controlsConfig.getHideNext()) {
-            nextButton.setClickable(false);
-            nextButton.setImageAlpha(0);
-        } else {
-            nextButton.setImageAlpha(255);
-            nextButton.setClickable(true);
-        }
-
-        final ImageButton previousButton = playerControlView.findViewById(R.id.exo_prev);
-        if (controlsConfig.getHidePrevious()) {
-            previousButton.setImageAlpha(0);
-            previousButton.setClickable(false);
-        } else {
-            previousButton.setImageAlpha(255);
-            previousButton.setClickable(true);
-        }
-
-        final ImageButton fullscreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
-        if (controlsConfig.getHideFullscreen()) {
-            fullscreenButton.setVisibility(GONE);
-        } else if (fullscreenButton.getVisibility() == GONE) {
-            fullscreenButton.setVisibility(VISIBLE);
-        }
-
-        final TextView positionText = playerControlView.findViewById(R.id.exo_position);
-        if(controlsConfig.getHidePosition()){
-            positionText.setVisibility(GONE);
-        } else if (positionText.getVisibility() == GONE){
-            positionText.setVisibility(VISIBLE);
-        }
-
-        final DefaultTimeBar progressBar = playerControlView.findViewById(R.id.exo_progress);
-        if (controlsConfig.getHideSeekBar()) {
-            progressBar.setVisibility(INVISIBLE);
-        } else if (progressBar.getVisibility() == INVISIBLE) {
-            progressBar.setVisibility(VISIBLE);
-        }
-
-        final TextView durationText = playerControlView.findViewById(R.id.exo_duration);
-        if (controlsConfig.getHideDuration()) {
-            durationText.setVisibility(GONE);
-        } else if (durationText.getVisibility() == GONE) {
-            durationText.setVisibility(VISIBLE);
+            button.setImageAlpha(255);
+            button.setClickable(true);
         }
     }
+
+    private void updateViewVisibility(View view, boolean hide, int hideVisibility) {
+        if (hide) {
+            view.setVisibility(hideVisibility);
+        } else if (view.getVisibility() == hideVisibility) {
+            view.setVisibility(VISIBLE);
+        }
+    }
+
 
 
     private void reLayoutControls() {
