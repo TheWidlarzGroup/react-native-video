@@ -72,7 +72,7 @@ class DRMManager: NSObject {
                         try keyRequest.respondByRequestingPersistableContentKeyRequestAndReturnError()
                         return
                     #else
-                        throw RCTVideoError.offlineDRMNotSuported
+                        throw RCTVideoError.offlineDRMNotSupported
                     #endif
                 }
 

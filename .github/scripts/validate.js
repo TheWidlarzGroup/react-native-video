@@ -28,7 +28,7 @@ const BOT_LABELS = [
   ...Object.values(PLATFORM_LABELS),
 ];
 
-const SKIP_LABEL = "No Validation"
+const SKIP_LABEL = 'No Validation';
 
 const MESSAGE = {
   FEATURE_REQUEST: `Thank you for your feature request. We will review it and get back to you if we need more information.`,
@@ -153,8 +153,8 @@ const handleIssue = async ({github, context}) => {
   const {body} = issue;
   const labels = new Set(issue.labels.map((label) => label.name));
 
-  if(labels.has(SKIP_LABEL)) {
-    console.log("Skiping Issue Validation")
+  if (labels.has(SKIP_LABEL)) {
+    console.log('Skiping Issue Validation');
     return;
   }
 
@@ -212,31 +212,11 @@ const handleMissingInformation = async ({github, context, labels}) => {
       )}`;
     }
 
+    await hidePreviousComments({github, context});
     await createComment({github, context, body: comment});
   }
 
   updateLabelsForMissingInfo(labels);
-};
-
-const updateLabelsForMissingInfo = (labels) => {
-  if (labels.has('missing-reproduction')) {
-    labels.add('Missing Repro');
-    labels.delete('Repro Provided');
-  } else {
-    labels.delete('Missing Repro');
-    labels.add('Repro Provided');
-  }
-
-  if (
-    Array.from(labels).find((label) => label.startsWith('outdated-version'))
-  ) {
-    labels.add('Newer Version Available');
-  } else {
-    labels.delete('Newer Version Available');
-  }
-
-  labels.add('Missing Info');
-  labels.delete('Waiting for Review');
 };
 
 const handleValidReport = async ({github, context, labels}) => {
@@ -252,6 +232,7 @@ const handleValidReport = async ({github, context, labels}) => {
     labels.add('Newer Version Available');
   }
 
+  await hidePreviousComments({github, context});
   await createComment({github, context, body: comment});
   labels.add('Repro Provided');
   labels.add('Waiting for Review');
@@ -277,6 +258,36 @@ const updateIssueLabels = async ({github, context, labels}) => {
     issue_number: context.payload.issue.number,
     labels: labelsToAdd,
   });
+};
+
+const hidePreviousComments = async ({github, context}) => {
+  const comments = await github.rest.issues.listComments({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: context.payload.issue.number,
+  });
+
+  const botComments = comments.data.filter(
+    (comment) => comment.user.type === 'Bot',
+  );
+
+  for (const comment of botComments) {
+    // Don't format string - it will broke the markdown
+    const hiddenBody = `
+<details>
+<summary>Previous bot comment (click to expand)</summary>
+
+${comment.body}
+
+</details>`;
+
+    await github.rest.issues.updateComment({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      comment_id: comment.id,
+      body: hiddenBody,
+    });
+  }
 };
 
 module.exports = handleIssue;
