@@ -21,7 +21,7 @@ interface MultiValueControlType<T> {
   onPress: (arg: T) => void;
 }
 
-const MultiValueControl = <T extends number | string | ResizeMode>({
+export const MultiValueControl = <T extends number | string | ResizeMode>({
   values,
   selected,
   onPress,

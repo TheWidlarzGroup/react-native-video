@@ -49,4 +49,11 @@ body:
     validations:
       required: false
 
+  - type: markdown
+    attributes:
+      value: |
+        ## Support
+
+        If this functionality is important to you and you need it, contact [TheWidlarzGroup](https://thewidlarzgroup.com) - [`hi@thewidlarzgroup.com`](mailto:hi@thewidlarzgroup.com)
+
   

@@ -2,13 +2,19 @@ import {
   BufferConfig,
   DRMType,
   ISO639_1,
+  SelectedTrackType,
   TextTrackType,
 } from 'react-native-video';
 import {SampleVideoSource} from '../types';
 import {localeVideo} from '../assets';
 import {Platform} from 'react-native';
 
-export const textTracksSelectionBy = 'index';
+// This constant allows to change how the sample behaves regarding to audio and texts selection.
+// You can change it to change how selector will use tracks information.
+// by default, index will be displayed and index will be applied to selected tracks.
+// You can also use LANGUAGE or TITLE
+export const textTracksSelectionBy = SelectedTrackType.INDEX;
+export const audioTracksSelectionBy = SelectedTrackType.INDEX;
 
 export const isIos = Platform.OS === 'ios';
 
@@ -24,6 +30,10 @@ export const srcAllPlatformList = [
     uri: localeVideo.broadchurch,
     cropStart: 3000,
     cropEnd: 10000,
+  },
+  {
+    description: 'video with 90° rotation',
+    uri: 'https://bn-dev.fra1.digitaloceanspaces.com/km-tournament/uploads/rn_image_picker_lib_temp_2ee86a27_9312_4548_84af_7fd75d9ad4dd_ad8b20587a.mp4',
   },
   {
     description: 'local file portrait',
@@ -79,6 +89,11 @@ export const srcAllPlatformList = [
     startPosition: 50000,
   },
   {
+    description: 'mp3 with texttrack',
+    uri: 'https://traffic.libsyn.com/democracynow/wx2024-0702_SOT_DeadCalm-LucileSmith-FULL-V2.mxf-audio.mp3', // an mp3 file
+    textTracks: [], // empty text track list
+  },
+  {
     description: 'BigBugBunny sideLoaded subtitles',
     // sideloaded subtitles wont work for streaming like HLS on ios
     // mp4
@@ -94,9 +109,9 @@ export const srcAllPlatformList = [
   },
 ];
 
-export const srcIosList = [];
+export const srcIosList: SampleVideoSource[] = [];
 
-export const srcAndroidList = [
+export const srcAndroidList: SampleVideoSource[] = [
   {
     description: 'Another live sample',
     uri: 'https://live.forstreet.cl/live/livestream.m3u8',
@@ -149,9 +164,12 @@ export const srcAndroidList = [
   },
 ];
 
-export const srcList: SampleVideoSource[] = srcAllPlatformList.concat(
-  isAndroid ? srcAndroidList : srcIosList,
-);
+const platformSrc: SampleVideoSource[] = isAndroid
+  ? srcAndroidList
+  : srcIosList;
+
+export const srcList: SampleVideoSource[] =
+  platformSrc.concat(srcAllPlatformList);
 
 export const bufferConfig: BufferConfig = {
   minBufferMs: 15000,
