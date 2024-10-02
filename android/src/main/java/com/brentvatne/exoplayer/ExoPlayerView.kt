@@ -75,13 +75,13 @@ class ExoPlayerView(private val context: Context) :
         adOverlayFrameLayout = FrameLayout(context)
 
         layout.addView(shutterView, 1, layoutParams)
-        if (localStyle.getSubtitlesFollowVideo()) {
+        if (localStyle.subtitlesFollowVideo) {
             layout.addView(subtitleLayout, layoutParams)
             layout.addView(adOverlayFrameLayout, layoutParams)
         }
 
         addViewInLayout(layout, 0, aspectRatioParams)
-        if (!localStyle.getSubtitlesFollowVideo()) {
+        if (!localStyle.subtitlesFollowVideo) {
             addViewInLayout(subtitleLayout, 1, layoutParams)
         }
     }
@@ -136,9 +136,9 @@ class ExoPlayerView(private val context: Context) :
         } else {
             subtitleLayout.visibility = View.GONE
         }
-        if (localStyle.getSubtitlesFollowVideo() != style.getSubtitlesFollowVideo()) {
+        if (localStyle.subtitlesFollowVideo != style.subtitlesFollowVideo) {
             // No need to manipulate layout if value didn't change
-            if (style.getSubtitlesFollowVideo()) {
+            if (style.subtitlesFollowVideo) {
                 removeViewInLayout(subtitleLayout)
                 layout.addView(subtitleLayout, layoutParams)
             } else {
@@ -196,12 +196,12 @@ class ExoPlayerView(private val context: Context) :
 
     private fun hideShutterView() {
         shutterView.setVisibility(INVISIBLE)
-        surfaceView.setAlpha(1)
+        surfaceView?.setAlpha(1f)
     }
 
     private fun showShutterView() {
         shutterView.setVisibility(VISIBLE)
-        surfaceView.setAlpha(0)
+        surfaceView?.setAlpha(0f)
     }
 
     private fun updateShutterViewVisibility() {
@@ -288,13 +288,13 @@ class ExoPlayerView(private val context: Context) :
                 layout.videoAspectRatio = when (format.rotationDegrees) {
                     // update aspect ratio !
                     90, 270 -> if (format.width == 0) {
-                        1
+                        1f
                     } else {
                         (format.height * format.pixelWidthHeightRatio) / format.width
                     }
 
                     else -> if (format.height == 0) {
-                        1
+                        1f
                     } else {
                         (format.width * format.pixelWidthHeightRatio) / format.height
                     }
