@@ -31,6 +31,7 @@ import Video, {
   type SelectedVideoTrack,
   type EnumValues,
   OnBandwidthUpdateData,
+  ControlsStyles,
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
@@ -241,9 +242,10 @@ const VideoPlayer: FC<Props> = ({}) => {
   const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
 
   const _subtitleStyle = {subtitlesFollowVideo: true};
-  const _controlsStyles = {
+  const _controlsStyles : ControlsStyles = {
     hideNavigationBarOnFullScreenMode: true,
     hideNotificationBarOnFullScreenMode: true,
+    liveLabel: "LIVE"
   };
   const _bufferConfig = {
     ...bufferConfig,
