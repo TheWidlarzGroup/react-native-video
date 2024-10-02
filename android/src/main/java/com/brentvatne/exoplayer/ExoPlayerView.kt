@@ -74,15 +74,15 @@ class ExoPlayerView(private val context: Context) :
 
         adOverlayFrameLayout = FrameLayout(context)
 
-        layout.addView(shutterView, 1, layoutParams);
+        layout.addView(shutterView, 1, layoutParams)
         if (localStyle.getSubtitlesFollowVideo()) {
-            layout.addView(subtitleLayout, layoutParams);
-            layout.addView(adOverlayFrameLayout, layoutParams);
+            layout.addView(subtitleLayout, layoutParams)
+            layout.addView(adOverlayFrameLayout, layoutParams)
         }
 
-        addViewInLayout(layout, 0, aspectRatioParams);
+        addViewInLayout(layout, 0, aspectRatioParams)
         if (!localStyle.getSubtitlesFollowVideo()) {
-            addViewInLayout(subtitleLayout, 1, layoutParams);
+            addViewInLayout(subtitleLayout, 1, layoutParams)
         }
     }
 
@@ -139,15 +139,15 @@ class ExoPlayerView(private val context: Context) :
         if (localStyle.getSubtitlesFollowVideo() != style.getSubtitlesFollowVideo()) {
             // No need to manipulate layout if value didn't change
             if (style.getSubtitlesFollowVideo()) {
-                removeViewInLayout(subtitleLayout);
-                layout.addView(subtitleLayout, layoutParams);
+                removeViewInLayout(subtitleLayout)
+                layout.addView(subtitleLayout, layoutParams)
             } else {
-                layout.removeViewInLayout(subtitleLayout);
-                addViewInLayout(subtitleLayout, 1, layoutParams, false);
+                layout.removeViewInLayout(subtitleLayout)
+                addViewInLayout(subtitleLayout, 1, layoutParams, false)
             }
-            requestLayout();
+            requestLayout()
         }
-        localStyle = style;
+        localStyle = style
     }
 
     fun setShutterColor(color: Int) {
@@ -195,13 +195,13 @@ class ExoPlayerView(private val context: Context) :
     }
 
     private fun hideShutterView() {
-        shutterView.setVisibility(INVISIBLE);
-        surfaceView.setAlpha(1);
+        shutterView.setVisibility(INVISIBLE)
+        surfaceView.setAlpha(1)
     }
 
     private fun showShutterView() {
-        shutterView.setVisibility(VISIBLE);
-        surfaceView.setAlpha(0);
+        shutterView.setVisibility(VISIBLE)
+        surfaceView.setAlpha(0)
     }
 
     private fun updateShutterViewVisibility() {
@@ -298,7 +298,6 @@ class ExoPlayerView(private val context: Context) :
                     } else {
                         (format.width * format.pixelWidthHeightRatio) / format.height
                     }
-
                 }
                 return
             }
