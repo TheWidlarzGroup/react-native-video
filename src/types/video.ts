@@ -262,6 +262,7 @@ export type ControlsStyles = {
   hideNotificationBarOnFullScreenMode?: boolean;
   hideSettingButton?: boolean;
   seekIncrementMS?: number;
+  liveLabel?: string;
 };
 
 export interface ReactVideoRenderLoaderProps {

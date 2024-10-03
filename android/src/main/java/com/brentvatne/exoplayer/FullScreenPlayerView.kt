@@ -10,6 +10,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -215,6 +216,14 @@ class FullScreenPlayerView(
                 controlsConfig.hideNotificationBarOnFullScreenMode,
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             )
+        }
+        if (controlsConfig.hideNotificationBarOnFullScreenMode) {
+            val liveContainer = playerControlView?.findViewById<LinearLayout?>(com.brentvatne.react.R.id.exo_live_container)
+            liveContainer?.let {
+                val layoutParams = it.layoutParams as LinearLayout.LayoutParams
+                layoutParams.topMargin = 40
+                it.layoutParams = layoutParams
+            }
         }
     }
 }

@@ -1,5 +1,12 @@
 
 
+## [6.6.4](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.3...v6.6.4) (2024-10-03)
+
+
+### Features
+
+* **android:** add live video label configuration ([#4190](https://github.com/TheWidlarzGroup/react-native-video/issues/4190)) ([149924f](https://github.com/TheWidlarzGroup/react-native-video/commit/149924ffcb0cbdeaa8c671ebb4b3b6115920131a))
+
 ## [6.6.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.2...v6.6.3) (2024-09-29)
 
 

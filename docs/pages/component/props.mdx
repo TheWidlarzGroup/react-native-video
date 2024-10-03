@@ -144,20 +144,21 @@ If needed, you can also add your controls or use a package like [react-native-vi
 
 Adjust the control styles. This prop is need only if `controls={true}` and is an object. See the list of prop supported below.
 
-| Property                          | Type    | Description                                                                                |
-|-----------------------------------|---------|--------------------------------------------------------------------------------------------|
-| hidePosition                      | boolean | Hides the position indicator. Default is `false`.                                        |
-| hidePlayPause                     | boolean | Hides the play/pause button. Default is `false`.                                         |
-| hideForward                       | boolean | Hides the forward button. Default is `false`.                                            |
-| hideRewind                        | boolean | Hides the rewind button. Default is `false`.                                             |
-| hideNext                          | boolean | Hides the next button. Default is `false`.                                              |
-| hidePrevious                      | boolean | Hides the previous button. Default is `false`.                                          |
-| hideFullscreen                    | boolean | Hides the fullscreen button. Default is `false`.                                         |
-| hideSeekBar                       | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.     |
-| hideDuration                      | boolean | The default value is `false`, allowing you to hide the duration.                          |
-| hideNavigationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode. |
+| Property                            | Type    | Description                                                                                 |
+|-------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| hidePosition                        | boolean | Hides the position indicator. Default is `false`.                                           |
+| hidePlayPause                       | boolean | Hides the play/pause button. Default is `false`.                                            |
+| hideForward                         | boolean | Hides the forward button. Default is `false`.                                               |
+| hideRewind                          | boolean | Hides the rewind button. Default is `false`.                                                |
+| hideNext                            | boolean | Hides the next button. Default is `false`.                                                  |
+| hidePrevious                        | boolean | Hides the previous button. Default is `false`.                                              |
+| hideFullscreen                      | boolean | Hides the fullscreen button. Default is `false`.                                            |
+| hideSeekBar                         | boolean | The default value is `false`, allowing you to hide the seek bar for live broadcasts.        |
+| hideDuration                        | boolean | The default value is `false`, allowing you to hide the duration.                            |
+| hideNavigationBarOnFullScreenMode   | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.   |
 | hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode. |
-| seekIncrementMS                   | number  | The default value is `10000`. You can change the value to increment forward and rewind.   |
+| seekIncrementMS                     | number  | The default value is `10000`. You can change the value to increment forward and rewind.     |
+| liveLabel                           | string  | Allowing you to set a label for live video.                                                 |
 
 Example with default values:
 
@@ -175,6 +176,7 @@ controlsStyles={{
   hideNavigationBarOnFullScreenMode: true,
   hideNotificationBarOnFullScreenMode: true,
   seekIncrementMS: 10000,
+  liveLabel: "LIVE"
 }}
 ```
 
