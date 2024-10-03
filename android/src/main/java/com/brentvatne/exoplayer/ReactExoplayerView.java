@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -567,6 +568,7 @@ public class ReactExoplayerView extends FrameLayout implements
         updateButtonVisibility(controlsConfig.getHideRewind(), R.id.exo_rew);
         updateButtonVisibility(controlsConfig.getHideNext(), R.id.exo_next);
         updateButtonVisibility(controlsConfig.getHidePrevious(), R.id.exo_prev);
+        updateButtonVisibility(controlsConfig.getHideSettingButton(), R.id.exo_settings);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_fullscreen), controlsConfig.getHideFullscreen(), GONE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_position), controlsConfig.getHidePosition(), GONE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_progress), controlsConfig.getHideSeekBar(), INVISIBLE);

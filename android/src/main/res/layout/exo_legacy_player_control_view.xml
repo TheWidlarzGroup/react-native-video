@@ -102,9 +102,9 @@
             android:textColor="@color/silver_gray"/>
 
         <ImageButton
+            android:id="@+id/exo_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/exo_settings"
             style="@style/ExoStyledControls.Button.Bottom.Settings"
             />
 
