@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
@@ -140,6 +141,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -907,7 +909,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         // init source to manage ads and external text tracks
-        ArrayList<MediaSource> mediaSourceList = buildTextSources();
+        MediaSource subtitlesSource = buildTextSource();
         MediaSource videoSource = buildMediaSource(runningSource.getUri(), runningSource.getExtension(), drmSessionManager, runningSource.getCropStartMs(), runningSource.getCropEndMs());
         MediaSource mediaSourceWithAds = null;
         Uri adTagUrl = null;
@@ -923,22 +925,17 @@ public class ReactExoplayerView extends FrameLayout implements
             exoPlayerView.showAds();
         }
         MediaSource mediaSource;
-        if (mediaSourceList.isEmpty()) {
-            if (mediaSourceWithAds != null) {
-                mediaSource = mediaSourceWithAds;
-            } else {
-                mediaSource = videoSource;
-            }
+        if (subtitlesSource == null) {
+            mediaSource = Objects.requireNonNullElse(mediaSourceWithAds, videoSource);
         } else {
-            if (mediaSourceWithAds != null) {
-                mediaSourceList.add(0, mediaSourceWithAds);
-            } else {
-                mediaSourceList.add(0, videoSource);
-            }
-            MediaSource[] textSourceArray = mediaSourceList.toArray(
+            ArrayList<MediaSource> mediaSourceList = new ArrayList<>();
+            mediaSourceList.add(subtitlesSource);
+            mediaSourceList.add(0, Objects.requireNonNullElse(mediaSourceWithAds, videoSource));
+            MediaSource[] mediaSourceArray = mediaSourceList.toArray(
                     new MediaSource[mediaSourceList.size()]
             );
-            mediaSource = new MergingMediaSource(textSourceArray);
+
+            mediaSource = new MergingMediaSource(mediaSourceArray);
         }
 
         // wait for player to be set
@@ -1227,32 +1224,30 @@ public class ReactExoplayerView extends FrameLayout implements
         return mediaSource;
     }
 
-    private ArrayList<MediaSource> buildTextSources() {
-        ArrayList<MediaSource> textSources = new ArrayList<>();
+    @Nullable
+    private MediaSource buildTextSource() {
         if (source.getSideLoadedTextTracks() == null) {
-            return textSources;
+            return null;
         }
+
+        List<MediaItem.SubtitleConfiguration> subtitleConfigurations = new ArrayList<>();
 
         for (SideLoadedTextTrack track : source.getSideLoadedTextTracks().getTracks()) {
-            MediaSource textSource = buildTextSource(track.getTitle(),
-                    track.getUri(),
-                    track.getType(),
-                    track.getLanguage());
-            textSources.add(textSource);
-        }
-        return textSources;
-    }
-
-    private MediaSource buildTextSource(String title, Uri uri, String mimeType, String language) {
-        MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(uri)
-                .setMimeType(mimeType)
-                .setLanguage(language)
+            MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(track.getUri())
+                .setMimeType(track.getType())
+                .setLanguage(track.getLanguage())
                 .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
                 .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
-                .setLabel(title)
+                .setLabel(track.getTitle())
                 .build();
-        return new SingleSampleMediaSource.Factory(mediaDataSourceFactory)
-                .createMediaSource(subtitleConfiguration, C.TIME_UNSET);
+            subtitleConfigurations.add(subtitleConfiguration);
+        }
+
+        MediaItem subtitlesMediaItem = new MediaItem.Builder()
+                .setUri(source.getUri())
+                .setSubtitleConfigurations(subtitleConfigurations).build();
+
+        return new DefaultMediaSourceFactory(mediaDataSourceFactory).createMediaSource(subtitlesMediaItem);
     }
 
     private void releasePlayer() {
