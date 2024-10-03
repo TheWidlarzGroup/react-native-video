@@ -10,6 +10,7 @@ import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +27,6 @@ import android.view.View;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -463,6 +463,10 @@ public class ReactExoplayerView extends FrameLayout implements
                 setPausedModifier(true)
         );
 
+        //Handling the settingButton click event
+        final ImageButton settingButton = playerControlView.findViewById(R.id.exo_settings);
+        settingButton.setOnClickListener(v -> openSettings());
+
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
@@ -495,6 +499,34 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         };
         player.addListener(eventListener);
+    }
+    private void openSettings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
+        builder.setTitle("Settings");
+        String[] settingsOptions = {"Playback Speed"};
+        builder.setItems(settingsOptions, (dialog, which) -> {
+            if (which == 0) {
+                showPlaybackSpeedOptions();
+            }
+        });
+        builder.show();
+    }
+
+    private void showPlaybackSpeedOptions() {
+        String[] speedOptions = {"0.5x", "1.0x", "1.5x", "2.0x"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
+        builder.setTitle("Select Playback Speed");
+
+        builder.setItems(speedOptions, (dialog, which) -> {
+            float speed = switch (which) {
+                case 0 -> 0.5f;
+                case 2 -> 1.5f;
+                case 3 -> 2.0f;
+                default -> 1.0f;
+            };
+            player.setPlaybackParameters(new PlaybackParameters(speed));
+        });
+        builder.show();
     }
 
     /**

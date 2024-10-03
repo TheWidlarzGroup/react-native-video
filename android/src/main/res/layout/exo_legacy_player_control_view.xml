@@ -71,6 +71,13 @@
             android:textColor="@color/silver_gray"/>
 
         <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/exo_settings"
+            style="@style/ExoStyledControls.Button.Bottom.Settings"
+            />
+
+        <ImageButton
             android:id="@+id/exo_fullscreen"
             style="@style/ExoMediaButton.FullScreen"
             android:layout_width="@dimen/full_screen_size"

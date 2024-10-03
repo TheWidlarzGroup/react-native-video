@@ -6,7 +6,6 @@ import com.facebook.react.bridge.ReadableMap
 class ControlsConfig {
     var hideSeekBar: Boolean = false
     var hideDuration: Boolean = false
-
     var hidePosition: Boolean = false
     var hidePlayPause: Boolean = false
     var hideForward: Boolean = false
@@ -16,6 +15,7 @@ class ControlsConfig {
     var hideFullscreen: Boolean = false
     var hideNavigationBarOnFullScreenMode: Boolean = true
     var hideNotificationBarOnFullScreenMode: Boolean = true
+    var hideSettingButton: Boolean = false
 
     var seekIncrementMS: Int = 10000
 
@@ -37,6 +37,7 @@ class ControlsConfig {
                 config.seekIncrementMS = ReactBridgeUtils.safeGetInt(src, "seekIncrementMS", 10000)
                 config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNavigationBarOnFullScreenMode", true)
                 config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(src, "hideNotificationBarOnFullScreenMode", true)
+                config.hideSettingButton = ReactBridgeUtils.safeGetBool(src, "hideSettingButton", false)
             }
             return config
         }
