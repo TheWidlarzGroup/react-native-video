@@ -100,7 +100,6 @@ import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
-import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
@@ -259,6 +258,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     private boolean viewHasDropped = false;
+    private int selectedSpeedIndex = 1; // Default is 1.0x
 
     private final String instanceId = String.valueOf(UUID.randomUUID());
 
@@ -518,7 +518,8 @@ public class ReactExoplayerView extends FrameLayout implements
         AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
         builder.setTitle("Select Playback Speed");
 
-        builder.setItems(speedOptions, (dialog, which) -> {
+        builder.setSingleChoiceItems(speedOptions, selectedSpeedIndex, (dialog, which) -> {
+            selectedSpeedIndex = which;
             float speed = switch (which) {
                 case 0 -> 0.5f;
                 case 2 -> 1.5f;
