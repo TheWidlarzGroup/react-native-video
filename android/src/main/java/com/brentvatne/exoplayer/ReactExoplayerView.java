@@ -569,11 +569,11 @@ public class ReactExoplayerView extends FrameLayout implements
         updateButtonVisibility(controlsConfig.getHideRewind(), R.id.exo_rew);
         updateButtonVisibility(controlsConfig.getHideNext(), R.id.exo_next);
         updateButtonVisibility(controlsConfig.getHidePrevious(), R.id.exo_prev);
-        updateButtonVisibility(controlsConfig.getHideSettingButton(), R.id.exo_settings);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_fullscreen), controlsConfig.getHideFullscreen(), GONE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_position), controlsConfig.getHidePosition(), GONE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_progress), controlsConfig.getHideSeekBar(), INVISIBLE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_duration), controlsConfig.getHideDuration(), GONE);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_settings), controlsConfig.getHideSettingButton(), GONE );
     }
 
     private void updateLiveContent() {
