@@ -9,11 +9,12 @@ import {SampleVideoSource} from '../types';
 import {localeVideo} from '../assets';
 import {Platform} from 'react-native';
 
-// This constant allows to change how the sample behaves regarding to texts selection.
+// This constant allows to change how the sample behaves regarding to audio and texts selection.
 // You can change it to change how selector will use tracks information.
 // by default, index will be displayed and index will be applied to selected tracks.
-// You can also use LANGUAGE or TITLE 
+// You can also use LANGUAGE or TITLE
 export const textTracksSelectionBy = SelectedTrackType.INDEX;
+export const audioTracksSelectionBy = SelectedTrackType.INDEX;
 
 export const isIos = Platform.OS === 'ios';
 
@@ -29,6 +30,10 @@ export const srcAllPlatformList = [
     uri: localeVideo.broadchurch,
     cropStart: 3000,
     cropEnd: 10000,
+  },
+  {
+    description: 'video with 90° rotation',
+    uri: 'https://bn-dev.fra1.digitaloceanspaces.com/km-tournament/uploads/rn_image_picker_lib_temp_2ee86a27_9312_4548_84af_7fd75d9ad4dd_ad8b20587a.mp4',
   },
   {
     description: 'local file portrait',

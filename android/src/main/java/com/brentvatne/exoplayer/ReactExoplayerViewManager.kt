@@ -8,7 +8,6 @@ import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferingStrategy
 import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.api.ResizeMode
-import com.brentvatne.common.api.SideLoadedTextTrackList
 import com.brentvatne.common.api.Source
 import com.brentvatne.common.api.SubtitleStyle
 import com.brentvatne.common.api.ViewType
@@ -16,7 +15,6 @@ import com.brentvatne.common.react.EventTypes
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.brentvatne.react.ReactNativeVideoManager
-import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewGroupManager
@@ -38,7 +36,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_SELECTED_TEXT_TRACK = "selectedTextTrack"
         private const val PROP_SELECTED_TEXT_TRACK_TYPE = "type"
         private const val PROP_SELECTED_TEXT_TRACK_VALUE = "value"
-        private const val PROP_TEXT_TRACKS = "textTracks"
         private const val PROP_PAUSED = "paused"
         private const val PROP_MUTED = "muted"
         private const val PROP_AUDIO_OUTPUT = "audioOutput"
@@ -52,7 +49,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
         private const val PROP_MAXIMUM_BIT_RATE = "maxBitRate"
         private const val PROP_PLAY_IN_BACKGROUND = "playInBackground"
-        private const val PROP_CONTENT_START_TIME = "contentStartTime"
         private const val PROP_DISABLE_FOCUS = "disableFocus"
         private const val PROP_BUFFERING_STRATEGY = "bufferingStrategy"
         private const val PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError"
@@ -180,12 +176,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         videoView.setSelectedTextTrack(typeString, value)
     }
 
-    @ReactProp(name = PROP_TEXT_TRACKS)
-    fun setTextTracks(videoView: ReactExoplayerView, textTracks: ReadableArray?) {
-        val sideLoadedTextTracks = SideLoadedTextTrackList.parse(textTracks)
-        videoView.setTextTracks(sideLoadedTextTracks)
-    }
-
     @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
     fun setPaused(videoView: ReactExoplayerView, paused: Boolean) {
         videoView.setPausedModifier(paused)
@@ -244,11 +234,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)
     fun setFocusable(videoView: ReactExoplayerView, focusable: Boolean) {
         videoView.setFocusable(focusable)
-    }
-
-    @ReactProp(name = PROP_CONTENT_START_TIME, defaultInt = -1)
-    fun setContentStartTime(videoView: ReactExoplayerView, contentStartTime: Int) {
-        videoView.setContentStartTime(contentStartTime)
     }
 
     @ReactProp(name = PROP_BUFFERING_STRATEGY)

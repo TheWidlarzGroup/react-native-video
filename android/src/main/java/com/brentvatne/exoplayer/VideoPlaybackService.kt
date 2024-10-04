@@ -63,6 +63,7 @@ class VideoPlaybackService : MediaSessionService() {
 
         mediaSessionsList[player] = mediaSession
         addSession(mediaSession)
+        startForeground(mediaSession.player.hashCode(), buildNotification(mediaSession))
     }
 
     fun unregisterPlayer(player: ExoPlayer) {
@@ -95,6 +96,10 @@ class VideoPlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         cleanup()
+        val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.deleteNotificationChannel(NOTIFICATION_CHANEL_ID)
+        }
         super.onDestroy()
     }
 
@@ -121,7 +126,7 @@ class VideoPlaybackService : MediaSessionService() {
     }
 
     private fun buildNotification(session: MediaSession): Notification {
-        val returnToPlayer = Intent(this, sourceActivity).apply {
+        val returnToPlayer = Intent(this, sourceActivity ?: this.javaClass).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
@@ -179,17 +184,17 @@ class VideoPlaybackService : MediaSessionService() {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
                 // Add media control buttons that invoke intents in your media service
-                .addAction(androidx.media3.session.R.drawable.media3_notification_seek_back, "Seek Backward", seekBackwardPendingIntent) // #0
+                .addAction(androidx.media3.session.R.drawable.media3_icon_rewind, "Seek Backward", seekBackwardPendingIntent) // #0
                 .addAction(
                     if (session.player.isPlaying) {
-                        androidx.media3.session.R.drawable.media3_notification_pause
+                        androidx.media3.session.R.drawable.media3_icon_pause
                     } else {
-                        androidx.media3.session.R.drawable.media3_notification_play
+                        androidx.media3.session.R.drawable.media3_icon_play
                     },
                     "Toggle Play",
                     togglePlayPendingIntent
                 ) // #1
-                .addAction(androidx.media3.session.R.drawable.media3_notification_seek_forward, "Seek Forward", seekForwardPendingIntent) // #2
+                .addAction(androidx.media3.session.R.drawable.media3_icon_fast_forward, "Seek Forward", seekForwardPendingIntent) // #2
                 // Apply the media style template
                 .setStyle(MediaStyleNotificationHelper.MediaStyle(session).setShowActionsInCompactView(0, 1, 2))
                 .setContentTitle(session.player.mediaMetadata.title)
@@ -209,9 +214,6 @@ class VideoPlaybackService : MediaSessionService() {
     private fun hideAllNotifications() {
         val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.deleteNotificationChannel(NOTIFICATION_CHANEL_ID)
-        }
     }
 
     private fun cleanup() {

@@ -10,7 +10,8 @@ struct VideoSource {
     let cropEnd: Int64?
     let customMetadata: CustomMetadata?
     /* DRM */
-    let drm: DRMParams?
+    let drm: DRMParams
+    var textTracks: [TextTrack] = []
 
     let json: NSDictionary?
 
@@ -27,7 +28,7 @@ struct VideoSource {
             self.cropStart = nil
             self.cropEnd = nil
             self.customMetadata = nil
-            self.drm = nil
+            self.drm = DRMParams(nil)
             return
         }
         self.json = json
@@ -52,5 +53,8 @@ struct VideoSource {
         self.cropEnd = (json["cropEnd"] as? Float64).flatMap { Int64(round($0)) }
         self.customMetadata = CustomMetadata(json["metadata"] as? NSDictionary)
         self.drm = DRMParams(json["drm"] as? NSDictionary)
+        self.textTracks = (json["textTracks"] as? NSArray)?.map { trackDict in
+            return TextTrack(trackDict as? NSDictionary)
+        } ?? []
     }
 }

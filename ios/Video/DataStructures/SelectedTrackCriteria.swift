@@ -15,4 +15,8 @@ struct SelectedTrackCriteria {
         self.type = json["type"] as? String ?? ""
         self.value = json["value"] as? String
     }
+
+    static func none() -> SelectedTrackCriteria {
+        return SelectedTrackCriteria(["type": "none", "value": ""])
+    }
 }

@@ -6,11 +6,17 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.ui.LegacyPlayerControlView
+import com.brentvatne.common.api.ControlsConfig
 import com.brentvatne.common.toolbox.DebugLog
 import java.lang.ref.WeakReference
 
@@ -20,13 +26,21 @@ class FullScreenPlayerView(
     private val exoPlayerView: ExoPlayerView,
     private val reactExoplayerView: ReactExoplayerView,
     private val playerControlView: LegacyPlayerControlView?,
-    private val onBackPressedCallback: OnBackPressedCallback
-) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+    private val onBackPressedCallback: OnBackPressedCallback,
+    private val controlsConfig: ControlsConfig
+) : Dialog(context, android.R.style.Theme_Black_NoTitleBar) {
 
     private var parent: ViewGroup? = null
     private val containerView = FrameLayout(context)
     private val mKeepScreenOnHandler = Handler(Looper.getMainLooper())
     private val mKeepScreenOnUpdater = KeepScreenOnUpdater(this)
+
+    // As this view is fullscreen we need to save initial state and restore it afterward
+    // Following variables save UI state when open the view
+    // restoreUIState, will reapply these values
+    private var initialSystemBarsBehavior: Int? = null
+    private var initialNavigationBarIsVisible: Boolean? = null
+    private var initialNotificationBarIsVisible: Boolean? = null
 
     private class KeepScreenOnUpdater(fullScreenPlayerView: FullScreenPlayerView) : Runnable {
         private val mFullscreenPlayer = WeakReference(fullScreenPlayerView)
@@ -59,10 +73,15 @@ class FullScreenPlayerView(
 
     init {
         setContentView(containerView, generateDefaultLayoutParams())
-    }
-    override fun onBackPressed() {
-        super.onBackPressed()
-        onBackPressedCallback.handleOnBackPressed()
+
+        window?.let {
+            val inset = WindowInsetsControllerCompat(it, it.decorView)
+            initialSystemBarsBehavior = inset.systemBarsBehavior
+            initialNavigationBarIsVisible = ViewCompat.getRootWindowInsets(it.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.navigationBars()) == true
+            initialNotificationBarIsVisible = ViewCompat.getRootWindowInsets(it.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.statusBars()) == true
+        }
     }
 
     override fun onStart() {
@@ -75,6 +94,7 @@ class FullScreenPlayerView(
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
+        updateNavigationBarVisibility()
     }
 
     override fun onStop() {
@@ -89,6 +109,20 @@ class FullScreenPlayerView(
         }
         parent?.requestLayout()
         parent = null
+        onBackPressedCallback.handleOnBackPressed()
+        restoreSystemUI()
+    }
+
+    // restore system UI state
+    private fun restoreSystemUI() {
+        window?.let {
+            updateNavigationBarVisibility(
+                it,
+                initialNavigationBarIsVisible,
+                initialNotificationBarIsVisible,
+                initialSystemBarsBehavior
+            )
+        }
     }
 
     private fun getFullscreenIconResource(isFullscreen: Boolean): Int =
@@ -126,5 +160,70 @@ class FullScreenPlayerView(
         )
         layoutParams.setMargins(0, 0, 0, 0)
         return layoutParams
+    }
+
+    private fun updateBarVisibility(
+        inset: WindowInsetsControllerCompat,
+        type: Int,
+        shouldHide: Boolean?,
+        initialVisibility: Boolean?,
+        systemBarsBehavior: Int? = null
+    ) {
+        shouldHide?.takeIf { it != initialVisibility }?.let {
+            if (it) {
+                inset.hide(type)
+                systemBarsBehavior?.let { behavior -> inset.systemBarsBehavior = behavior }
+            } else {
+                inset.show(type)
+            }
+        }
+    }
+
+    // Move the UI to fullscreen.
+    // if you change this code, remember to check that the UI is well restored in restoreUIState
+    private fun updateNavigationBarVisibility(
+        window: Window,
+        hideNavigationBarOnFullScreenMode: Boolean?,
+        hideNotificationBarOnFullScreenMode: Boolean?,
+        systemBarsBehavior: Int?
+    ) {
+        // Configure the behavior of the hidden system bars.
+        val inset = WindowInsetsControllerCompat(window, window.decorView)
+
+        // Update navigation bar visibility and apply systemBarsBehavior if hiding
+        updateBarVisibility(
+            inset,
+            WindowInsetsCompat.Type.navigationBars(),
+            hideNavigationBarOnFullScreenMode,
+            initialNavigationBarIsVisible,
+            systemBarsBehavior
+        )
+
+        // Update notification bar visibility (no need for systemBarsBehavior here)
+        updateBarVisibility(
+            inset,
+            WindowInsetsCompat.Type.statusBars(),
+            hideNotificationBarOnFullScreenMode,
+            initialNotificationBarIsVisible
+        )
+    }
+
+    private fun updateNavigationBarVisibility() {
+        window?.let {
+            updateNavigationBarVisibility(
+                it,
+                controlsConfig.hideNavigationBarOnFullScreenMode,
+                controlsConfig.hideNotificationBarOnFullScreenMode,
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            )
+        }
+        if (controlsConfig.hideNotificationBarOnFullScreenMode) {
+            val liveContainer = playerControlView?.findViewById<LinearLayout?>(com.brentvatne.react.R.id.exo_live_container)
+            liveContainer?.let {
+                val layoutParams = it.layoutParams as LinearLayout.LayoutParams
+                layoutParams.topMargin = 40
+                it.layoutParams = layoutParams
+            }
+        }
     }
 }
