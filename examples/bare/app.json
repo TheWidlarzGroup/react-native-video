@@ -3,12 +3,9 @@
   "displayName": "BareExample",
   "components": [
     {
-      "appKey": "BareExample",
-      "displayName": "BareExample"
+      "appKey": "BasicVideoExample",
+      "displayName": "Basic Example"
     }
-  ],
-  "plugins": [
-    "../.."
   ],
   "resources": {
     "android": [
@@ -31,5 +28,22 @@
       "dist/assets",
       "dist/main.windows.bundle"
     ]
-  }
+  },
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        "enableNotificationControls": true,
+        "enableBackgroundAudio": true,
+        "enableADSExtension": false,
+        "enableCacheExtension": false,
+        "androidExtensions": {
+          "useExoplayerRtsp": true,
+          "useExoplayerSmoothStreaming": true,
+          "useExoplayerHls": true,
+          "useExoplayerDash": true
+        }
+      }
+    ]
+  ]
 }
