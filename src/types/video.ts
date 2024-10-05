@@ -38,7 +38,7 @@ export type ReactVideoSourceProperties = {
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
-  ad: AdConfig;
+  ad?: AdConfig;
 };
 
 export type ReactVideoSource = Readonly<

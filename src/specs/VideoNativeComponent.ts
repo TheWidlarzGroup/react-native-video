@@ -49,7 +49,7 @@ export type VideoSrc = Readonly<{
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
-  ad: AdsConfig;
+  ad?: AdsConfig;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
