@@ -270,15 +270,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
                 Format format = group.getTrackFormat(0);
 
                 // There are weird cases when video height and width did not change with rotation so we need change aspect ration to fix it
-                switch (format.rotationDegrees) {
-                    // update aspect ratio !
-                    case 90:
-                    case 270:
-                        layout.setVideoAspectRatio(format.width == 0 ? 1 : (format.height * format.pixelWidthHeightRatio) / format.width);
-                        break;
-                    default:
-                        layout.setVideoAspectRatio(format.height == 0 ? 1 : (format.width * format.pixelWidthHeightRatio) / format.height);
-                }
+                layout.updateAspectRatio(format);
                 return;
             }
         }
@@ -300,18 +292,15 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onVideoSizeChanged(VideoSize videoSize) {
-            boolean isInitialRatio = layout.getVideoAspectRatio() == 0;
             if (videoSize.height == 0 || videoSize.width == 0) {
                 // When changing video track we receive an ghost state with height / width = 0
                 // No need to resize the view in that case
                 return;
             }
-            layout.setVideoAspectRatio((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height);
-
-            // React native workaround for measuring and layout on initial load.
-            if (isInitialRatio) {
-                post(measureAndLayout);
-            }
+            // Here we use updateForCurrentTrackSelections to have a consistent behavior.
+            // according to: https://github.com/androidx/media/issues/1207
+            // sometimes media3 send bad Video size information
+            updateForCurrentTrackSelections(player.getCurrentTracks());
         }
 
         @Override

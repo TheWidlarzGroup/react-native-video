@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer
 
 import android.content.Context
 import android.widget.FrameLayout
+import androidx.media3.common.Format
 import com.brentvatne.common.api.ResizeMode
 import kotlin.math.abs
 
@@ -93,5 +94,13 @@ class AspectRatioFrameLayout(context: Context) : FrameLayout(context) {
             MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
         )
+    }
+
+    fun updateAspectRatio(format: Format) {
+        // There are weird cases when video height and width did not change with rotation so we need change aspect ration to fix it
+        when (format.rotationDegrees) {
+            90, 270 -> videoAspectRatio = if (format.width == 0) 1f else (format.height * format.pixelWidthHeightRatio) / format.width
+            else -> videoAspectRatio = if (format.height == 0) 1f else (format.width * format.pixelWidthHeightRatio) / format.height
+        }
     }
 }
