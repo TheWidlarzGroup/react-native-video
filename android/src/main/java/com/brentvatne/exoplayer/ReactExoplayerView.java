@@ -102,6 +102,7 @@ import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.LegacyPlayerControlView;
 
+import com.brentvatne.common.api.AdsProps;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
@@ -240,8 +241,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean playInBackground = false;
     private boolean mReportBandwidth = false;
     private boolean controls;
-    private Uri adTagUrl;
-    private String adLanguage;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -781,16 +780,21 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
-        ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
-        imaSdkSettings.setLanguage(adLanguage);
+        AdsProps adProps = source.getAdsProps();
 
         // Create an AdsLoader.
-        adsLoader = new ImaAdsLoader
+        ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
                 .Builder(themedReactContext)
-                .setImaSdkSettings(imaSdkSettings)
                 .setAdEventListener(this)
-                .setAdErrorListener(this)
-                .build();
+                .setAdErrorListener(this);
+
+        if (adProps != null && adProps.getAdLanguage() != null) {
+            ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+            imaSdkSettings.setLanguage(adProps.getAdLanguage());
+            imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
+        }
+        adsLoader = imaLoaderBuilder.build();
+
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
         if (useCache) {
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
@@ -864,6 +868,10 @@ public class ReactExoplayerView extends FrameLayout implements
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(source.getUri(), source.getExtension(), drmSessionManager, source.getCropStartMs(), source.getCropEndMs());
         MediaSource mediaSourceWithAds = null;
+        Uri adTagUrl = null;
+        if (source.getAdsProps() != null) {
+            adTagUrl = source.getAdsProps().getAdTagUrl();
+        }
         if (adTagUrl != null && adsLoader != null) {
             DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
                     .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
@@ -1068,11 +1076,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
-
-        if (adTagUrl != null) {
-            mediaItemBuilder.setAdsConfiguration(
-                    new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
-            );
+        if (source.getAdsProps() != null) {
+            Uri adTagUrl = source.getAdsProps().getAdTagUrl();
+            if (adTagUrl != null) {
+                mediaItemBuilder.setAdsConfiguration(
+                        new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+                );
+            }
         }
 
         MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(bufferConfig);
@@ -1889,14 +1899,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
-    }
-
-    public void setAdTagUrl(final Uri uri) {
-        adTagUrl = uri;
-    }
-
-    public void setAdLanguage(final String language) {
-        adLanguage = language;
     }
 
     private void reloadSource() {

@@ -66,6 +66,10 @@ class Source {
     var cmcdProps: CMCDProps? = null
 
     /**
+     * Ads playback properties
+     */
+    var adsProps: AdsProps? = null
+    /**
      * The list of sideLoaded text tracks
      */
     var sideLoadedTextTracks: SideLoadedTextTrackList? = null
@@ -84,7 +88,8 @@ class Source {
                 drmProps == other.drmProps &&
                 contentStartTime == other.contentStartTime &&
                 cmcdProps == other.cmcdProps &&
-                sideLoadedTextTracks == other.sideLoadedTextTracks
+                sideLoadedTextTracks == other.sideLoadedTextTracks &&
+                adsProps == other.adsProps
             )
     }
 
@@ -149,6 +154,7 @@ class Source {
         private const val PROP_SRC_HEADERS = "requestHeaders"
         private const val PROP_SRC_DRM = "drm"
         private const val PROP_SRC_CMCD = "cmcd"
+        private const val PROP_SRC_ADS = "ad"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
 
@@ -210,6 +216,7 @@ class Source {
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
+                source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
 

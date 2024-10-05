@@ -89,6 +89,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       useSecureView,
       viewType,
       shutterColor,
+      adTagUrl,
+      adLanguage,
       onLoadStart,
       onLoad,
       onError,
@@ -222,6 +224,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       const selectedContentStartTime =
         source.contentStartTime || contentStartTime;
 
+      const _ad =
+        source.ad ||
+        (adTagUrl || adLanguage
+          ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
+          : undefined);
+
       return {
         uri,
         isNetwork,
@@ -238,16 +246,19 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         metadata: resolvedSource.metadata,
         drm: _drm,
         cmcd: _cmcd,
+        ad: _ad,
         textTracks: _textTracks,
         textTracksAllowChunklessPreparation:
           resolvedSource.textTracksAllowChunklessPreparation,
       };
     }, [
-      drm,
       source,
+      drm,
+      adTagUrl,
+      adLanguage,
       textTracks,
-      contentStartTime,
       localSourceEncryptionKeyScheme,
+      contentStartTime,
     ]);
 
     const _selectedTextTrack = useMemo(() => {
