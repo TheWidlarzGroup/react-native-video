@@ -10,5 +10,11 @@ module.exports = makeMetroConfig({
       },
     }),
   },
-  watchFolders: [path.join(__dirname, 'node_modules', 'react-native-video')],
+  resolver: {
+    enableSymlinks: true,
+  },
+  watchFolders: [
+    path.join(__dirname, 'node_modules', 'react-native-video'),
+    path.resolve(__dirname, '../..'),
+  ],
 });
