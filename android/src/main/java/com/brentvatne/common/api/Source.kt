@@ -69,6 +69,7 @@ class Source {
      * Ads playback properties
      */
     var adsProps: AdsProps? = null
+
     /**
      * The list of sideLoaded text tracks
      */

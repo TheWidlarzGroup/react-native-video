@@ -13,8 +13,10 @@ class AdsProps {
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is AdsProps) return false
-        return (adTagUrl == other.adTagUrl &&
-            adLanguage == other.adLanguage)
+        return (
+            adTagUrl == other.adTagUrl &&
+                adLanguage == other.adLanguage
+            )
     }
 
     companion object {
@@ -33,7 +35,7 @@ class AdsProps {
                 } else {
                     adsProps.adTagUrl = Uri.parse(uriString)
                 }
-                val languageString = ReactBridgeUtils.safeGetString(src, PROP_AD_LANGUAGE);
+                val languageString = ReactBridgeUtils.safeGetString(src, PROP_AD_LANGUAGE)
                 if (!TextUtils.isEmpty(languageString)) {
                     adsProps.adLanguage = languageString
                 }

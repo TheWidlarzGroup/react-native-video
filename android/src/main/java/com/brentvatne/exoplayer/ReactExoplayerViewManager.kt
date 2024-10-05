@@ -1,8 +1,6 @@
 package com.brentvatne.exoplayer
 
 import android.graphics.Color
-import android.net.Uri
-import android.text.TextUtils
 import android.util.Log
 import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferingStrategy
