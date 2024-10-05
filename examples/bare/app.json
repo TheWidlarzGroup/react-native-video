@@ -3,7 +3,7 @@
   "displayName": "BareExample",
   "components": [
     {
-      "appKey": "BasicVideoExample",
+      "appKey": "BareExample",
       "displayName": "Basic Example"
     }
   ],
@@ -36,8 +36,8 @@
         "reactNativeTestApp": true,
         "enableNotificationControls": true,
         "enableBackgroundAudio": true,
-        "enableADSExtension": true,
-        "enableCacheExtension": true,
+        "enableADSExtension": false,
+        "enableCacheExtension": false,
         "androidExtensions": {
           "useExoplayerRtsp": true,
           "useExoplayerSmoothStreaming": true,
