@@ -260,6 +260,7 @@ export type ControlsStyles = {
   hideFullscreen?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  hideSettingButton?: boolean;
   seekIncrementMS?: number;
   liveLabel?: string;
 };

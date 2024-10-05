@@ -10,6 +10,7 @@ import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -99,7 +100,6 @@ import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
-import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.LegacyPlayerControlView;
 
 import com.brentvatne.common.api.BufferConfig;
@@ -258,6 +258,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private long lastDuration = -1;
 
     private boolean viewHasDropped = false;
+    private int selectedSpeedIndex = 1; // Default is 1.0x
 
     private final String instanceId = String.valueOf(UUID.randomUUID());
 
@@ -463,6 +464,10 @@ public class ReactExoplayerView extends FrameLayout implements
                 setPausedModifier(true)
         );
 
+        //Handling the settingButton click event
+        final ImageButton settingButton = playerControlView.findViewById(R.id.exo_settings);
+        settingButton.setOnClickListener(v -> openSettings());
+
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
@@ -495,6 +500,35 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         };
         player.addListener(eventListener);
+    }
+    private void openSettings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
+        builder.setTitle(R.string.settings);
+        String[] settingsOptions = {themedReactContext.getString(R.string.playback_speed)};
+        builder.setItems(settingsOptions, (dialog, which) -> {
+            if (which == 0) {
+                showPlaybackSpeedOptions();
+            }
+        });
+        builder.show();
+    }
+
+    private void showPlaybackSpeedOptions() {
+        String[] speedOptions = {"0.5x", "1.0x", "1.5x", "2.0x"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
+        builder.setTitle(R.string.select_playback_speed);
+
+        builder.setSingleChoiceItems(speedOptions, selectedSpeedIndex, (dialog, which) -> {
+            selectedSpeedIndex = which;
+            float speed = switch (which) {
+                case 0 -> 0.5f;
+                case 2 -> 1.5f;
+                case 3 -> 2.0f;
+                default -> 1.0f;
+            };
+            setRateModifier(speed);
+        });
+        builder.show();
     }
 
     /**
@@ -539,6 +573,7 @@ public class ReactExoplayerView extends FrameLayout implements
         updateViewVisibility(playerControlView.findViewById(R.id.exo_position), controlsConfig.getHidePosition(), GONE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_progress), controlsConfig.getHideSeekBar(), INVISIBLE);
         updateViewVisibility(playerControlView.findViewById(R.id.exo_duration), controlsConfig.getHideDuration(), GONE);
+        updateViewVisibility(playerControlView.findViewById(R.id.exo_settings), controlsConfig.getHideSettingButton(), GONE );
     }
 
     private void updateLiveContent() {
