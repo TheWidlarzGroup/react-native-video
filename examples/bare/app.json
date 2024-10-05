@@ -33,10 +33,11 @@
     [
       "react-native-video",
       {
+        "reactNativeTestApp": true,
         "enableNotificationControls": true,
         "enableBackgroundAudio": true,
-        "enableADSExtension": false,
-        "enableCacheExtension": false,
+        "enableADSExtension": true,
+        "enableCacheExtension": true,
         "androidExtensions": {
           "useExoplayerRtsp": true,
           "useExoplayerSmoothStreaming": true,

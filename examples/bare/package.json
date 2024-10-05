@@ -20,13 +20,14 @@
     "@callstack/react-native-visionos": "^0.73.0",
     "react": "18.2.0",
     "react-native": "0.73.2",
-    "react-native-windows": "^0.73.0",
-    "react-native-video": "link:../.."
+    "react-native-video": "link:../..",
+    "react-native-windows": "^0.73.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
+    "@expo/config-plugins": "^8.0.10",
     "@react-native/babel-preset": "0.73.19",
     "@react-native/eslint-config": "0.73.2",
     "@react-native/metro-config": "0.73.3",

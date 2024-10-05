@@ -7,3 +7,7 @@ require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
 workspace 'BareExample.xcworkspace'
 
 use_test_app!
+
+if defined?($RNVideoUseVideoCaching)
+  use_modular_headers!
+end
