@@ -16,7 +16,7 @@ class ControlsConfig {
     var hideNavigationBarOnFullScreenMode: Boolean = true
     var hideNotificationBarOnFullScreenMode: Boolean = true
     var liveLabel: String? = null
-    var hideSettingButton: Boolean = false
+    var hideSettingButton: Boolean = true
 
     var seekIncrementMS: Int = 10000
 
@@ -39,7 +39,7 @@ class ControlsConfig {
                 config.hideNavigationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(controlsConfig, "hideNavigationBarOnFullScreenMode", true)
                 config.hideNotificationBarOnFullScreenMode = ReactBridgeUtils.safeGetBool(controlsConfig, "hideNotificationBarOnFullScreenMode", true)
                 config.liveLabel = ReactBridgeUtils.safeGetString(controlsConfig, "liveLabel", null)
-                config.hideSettingButton = ReactBridgeUtils.safeGetBool(controlsConfig, "hideSettingButton", false)
+                config.hideSettingButton = ReactBridgeUtils.safeGetBool(controlsConfig, "hideSettingButton", true)
             }
             return config
         }

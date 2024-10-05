@@ -503,8 +503,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
     private void openSettings() {
         AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
-        builder.setTitle("Settings");
-        String[] settingsOptions = {"Playback Speed"};
+        builder.setTitle(R.string.settings);
+        String[] settingsOptions = {themedReactContext.getString(R.string.playback_speed)};
         builder.setItems(settingsOptions, (dialog, which) -> {
             if (which == 0) {
                 showPlaybackSpeedOptions();
@@ -516,7 +516,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private void showPlaybackSpeedOptions() {
         String[] speedOptions = {"0.5x", "1.0x", "1.5x", "2.0x"};
         AlertDialog.Builder builder = new AlertDialog.Builder(themedReactContext);
-        builder.setTitle("Select Playback Speed");
+        builder.setTitle(R.string.select_playback_speed);
 
         builder.setSingleChoiceItems(speedOptions, selectedSpeedIndex, (dialog, which) -> {
             selectedSpeedIndex = which;
@@ -526,7 +526,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 case 3 -> 2.0f;
                 default -> 1.0f;
             };
-            player.setPlaybackParameters(new PlaybackParameters(speed));
+            setRateModifier(speed);
         });
         builder.show();
     }
