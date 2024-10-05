@@ -14,6 +14,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetBool
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
+import com.brentvatne.react.BuildConfig
 import com.facebook.react.bridge.ReadableMap
 import java.util.Locale
 import java.util.Objects
@@ -217,7 +218,9 @@ class Source {
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
-                source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
+                if (BuildConfig.USE_EXOPLAYER_IMA) {
+                    source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
+                }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
 

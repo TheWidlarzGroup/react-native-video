@@ -780,21 +780,22 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
-        AdsProps adProps = source.getAdsProps();
+        if (BuildConfig.USE_EXOPLAYER_IMA) {
+            AdsProps adProps = source.getAdsProps();
 
-        // Create an AdsLoader.
-        ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
-                .Builder(themedReactContext)
-                .setAdEventListener(this)
-                .setAdErrorListener(this);
+            // Create an AdsLoader.
+            ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
+                    .Builder(themedReactContext)
+                    .setAdEventListener(this)
+                    .setAdErrorListener(this);
 
-        if (adProps != null && adProps.getAdLanguage() != null) {
-            ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
-            imaSdkSettings.setLanguage(adProps.getAdLanguage());
-            imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
+            if (adProps != null && adProps.getAdLanguage() != null) {
+                ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+                imaSdkSettings.setLanguage(adProps.getAdLanguage());
+                imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
+            }
+            adsLoader = imaLoaderBuilder.build();
         }
-        adsLoader = imaLoaderBuilder.build();
-
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
         if (useCache) {
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
@@ -1238,8 +1239,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
         if (adsLoader != null) {
             adsLoader.release();
+            adsLoader = null;
         }
-        adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
