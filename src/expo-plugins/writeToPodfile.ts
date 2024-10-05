@@ -11,6 +11,13 @@ export const writeToPodfile = (
   const podfilePath = path.join(projectRoot, 'ios', 'Podfile');
   const podfileContent = fs.readFileSync(podfilePath, 'utf8');
 
+  if (podfileContent.includes(`$${key} =`)) {
+    console.warn(
+      `RNV - Podfile already contains a definition for "$${key}". Skipping...`,
+    );
+    return;
+  }
+
   if (testApp) {
     mergeTestAppPodfile(podfileContent, podfilePath, key, value);
   } else {
