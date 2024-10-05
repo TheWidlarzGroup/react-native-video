@@ -1,4 +1,6 @@
-const { makeMetroConfig } = require("@rnx-kit/metro-config");
+const path = require('path');
+const {makeMetroConfig} = require('@rnx-kit/metro-config');
+
 module.exports = makeMetroConfig({
   transformer: {
     getTransformOptions: async () => ({
@@ -8,4 +10,5 @@ module.exports = makeMetroConfig({
       },
     }),
   },
+  watchFolders: [path.join(__dirname, 'node_modules', 'react-native-video')],
 });
