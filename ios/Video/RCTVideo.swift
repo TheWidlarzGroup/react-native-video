@@ -1631,7 +1631,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             )
         } else {
-            _playerObserver.removePlayerTimeObserver()
+            _player?.pause()
+            _player?.rate = 0.0
         }
     }
 
