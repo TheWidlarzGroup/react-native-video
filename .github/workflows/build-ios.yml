@@ -9,28 +9,28 @@ on:
       - '.github/workflows/build-ios.yml'
       - 'ios/**'
       - '*.podspec'
-      - 'examples/basic/ios/**'
+      - 'examples/bare/ios/**'
   pull_request:
     paths:
       - '.github/workflows/build-ios.yml'
       - 'ios/**'
       - '*.podspec'
-      - 'examples/basic/ios/**'
+      - 'examples/bare/ios/**'
 
 jobs:
   build:
     name: Build iOS Example App
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
       - name: Install node_modules
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -69,17 +69,17 @@ jobs:
 
   build-with-ads:
     name: Build iOS Example App With Ads
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
       - name: Install node_modules
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -95,7 +95,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -121,14 +121,14 @@ jobs:
     runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
       - name: Install node_modules
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -144,7 +144,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}

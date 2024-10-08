@@ -7,16 +7,16 @@ on:
     paths:
       - '.github/workflows/build-android.yml'
       - 'android/**'
-      - 'examples/basic/android/**'
+      - 'examples/bare/android/**'
       - 'yarn.lock'
-      - 'examples/basic/yarn.lock'
+      - 'examples/bare/yarn.lock'
   pull_request:
     paths:
       - '.github/workflows/build-android.yml'
       - 'android/**'
-      - 'examples/basic/android/**'
+      - 'examples/bare/android/**'
       - 'yarn.lock'
-      - 'examples/basic/yarn.lock'
+      - 'examples/bare/yarn.lock'
 
 jobs:
   build:
@@ -35,7 +35,7 @@ jobs:
       - name: Install node_modules
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: examples/bare
 
       - name: Restore Gradle cache
         uses: actions/cache@v3
@@ -46,8 +46,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Gradle Build for basic example
-        run: cd examples/basic/android && ./gradlew assembleDebug --build-cache && cd ../../..
+      - name: Run Gradle Build for bare example
+        run: cd examples/bare/android && ./gradlew assembleDebug --build-cache && cd ../../..
 
   build-without-ads:
     name: Build Android Example App Without Ads
@@ -65,7 +65,7 @@ jobs:
       - name: Install node_modules
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: examples/bare
 
       - name: Restore Gradle cache
         uses: actions/cache@v3
@@ -76,5 +76,5 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Gradle Build for basic example
-        run: cd examples/basic/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..
+      - name: Run Gradle Build for bare example
+        run: cd examples/bare/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..
