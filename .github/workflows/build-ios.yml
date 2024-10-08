@@ -61,15 +61,21 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: pod install
+
       - name: Install Pods
         run: pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \
@@ -119,15 +125,21 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
       - name: Install Pods
         run:  export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && export RNV_SAMPLE_ENABLE_ADS=true && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \
@@ -177,15 +189,21 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
       - name: Install Pods
         run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && export RNV_SAMPLE_VIDEO_CACHING=true && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \
