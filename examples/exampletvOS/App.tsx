@@ -13,11 +13,13 @@ export default function App() {
           uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           // uri: 'https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8',
           // type: 'm3u8',
-          title: 'Custom Title',
-          subtitle: 'Custom Subtitle',
-          description: 'Custom Description',
-          customImageUri:
-            'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
+          metadata: {
+            title: 'Custom Title',
+            subtitle: 'Custom Subtitle',
+            description: 'Custom Description',
+            imageUri:
+              'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
+          },
         }}
         style={[styles.fullScreen, StyleSheet.absoluteFillObject]}
         controls

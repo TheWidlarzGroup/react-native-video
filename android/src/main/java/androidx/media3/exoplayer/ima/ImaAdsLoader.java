@@ -11,9 +11,17 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.ads.AdsLoader;
 import androidx.media3.exoplayer.source.ads.AdsMediaSource;
 
+import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
+
 import java.io.IOException;
 
 public class ImaAdsLoader implements AdsLoader {
+    private final ImaSdkSettings imaSdkSettings;
+
+    public ImaAdsLoader(ImaSdkSettings imaSdkSettings) {
+        this.imaSdkSettings = imaSdkSettings;
+    }
+
     public void setPlayer(ExoPlayer ignoredPlayer) {
     }
 
@@ -45,6 +53,7 @@ public class ImaAdsLoader implements AdsLoader {
     }
 
     public static class Builder {
+        private ImaSdkSettings imaSdkSettings;
         public Builder(Context ignoredThemedReactContext) {
         }
 
@@ -53,6 +62,11 @@ public class ImaAdsLoader implements AdsLoader {
         }
 
         public Builder setAdErrorListener(Object ignoredReactExoplayerView) {
+            return this;
+        }
+
+        public Builder setImaSdkSettings(ImaSdkSettings imaSdkSettings) {
+            this.imaSdkSettings = imaSdkSettings;
             return this;
         }
 

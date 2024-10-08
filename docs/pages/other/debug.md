@@ -1,13 +1,13 @@
 # Debugging
 
-This page describe usefull tips for debugging and investigating issue in the package or in your application.
+This page describe useful tips for debugging and investigating issue in the package or in your application.
 
 ## Using the sample app
 This repository contains multiple a sample implementation in example folder.
 It is always preferable to test behavior on a sample app than in a full app implementation.
 The basic sample allow to test a lot of feature.
 To use the sample you will need to do steps:
-- Clone this repository:  ``` git clone git@github.com:react-native-video/react-native-video.git```
+- Clone this repository:  ``` git clone git@github.com:TheWidlarzGroup/react-native-video.git```
 - Go to root folder and build it. It will generate a transpiled version of the package in lib folder: ```cd react-native-video && yarn && yarn build```
 - Go to the sample and install it: ```cd example/basic && yarn install```
 - Build it ! for android ```yarn android``` for ios ```cd ios && pod install && cd .. && yarn ios``` 
@@ -55,6 +55,36 @@ To achieve that, you need to record network trace to ensure communications with 
 With these tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / video chunks, ...
 
 Then try to compare exchanges with previous tests you made.
+
+## Debug media3: build from media3 source
+
+If you need to use a specific exoplayer version or patch default behavior, you may want to build from media3 source code.
+
+Building from media3 source is possible. You need to add 2 or 3 things in your app:
+
+### Configure player path
+
+You need to add following lines in settings.gradle to configure your media3 source path:
+
+```gradle
+gradle.ext.androidxMediaModulePrefix = 'media-'
+apply from: file("../../../../media3/core_settings.gradle")
+````
+
+Of course, you should replace with media3 source path. Be carefull, you need to use the same version (or version with compatible api) that the package support.
+
+### Enable building from source
+In your build.gradle file, add following setting:
+
+```gradle
+buildscript {
+    ext {
+        ...
+        buildFromMedia3Source = true
+        ...
+    }
+}
+```
 
 ## It's still not working
 

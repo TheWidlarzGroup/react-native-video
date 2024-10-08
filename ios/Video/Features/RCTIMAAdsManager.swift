@@ -19,7 +19,12 @@
         }
 
         func setUpAdsLoader() {
-            adsLoader = IMAAdsLoader(settings: nil)
+            guard let _video else { return }
+            let settings = IMASettings()
+            if let adLanguage = _video.getAdLanguage() {
+                settings.language = adLanguage
+            }
+            adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
         }
 
@@ -49,6 +54,16 @@
                 return true
             }
             return false
+        }
+
+        func releaseAds() {
+            guard let adsManager else { return }
+            // Destroy AdsManager may be delayed for a few milliseconds
+            // But what we want is it stopped producing sound immediately
+            // Issue found on tvOS 17, or iOS if view detach & STARTED event happen at the same moment
+            adsManager.volume = 0
+            adsManager.pause()
+            adsManager.destroy()
         }
 
         // MARK: - Getters

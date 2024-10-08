@@ -108,7 +108,7 @@ class VideoPlayer extends Component {
             this.setState({paused: !this.state.paused});
           }}>
           <Video
-            source={require('./broadchurch.mp4')}
+            source={require('./assets/videos/broadchurch.mp4')}
             style={styles.fullScreen}
             rate={this.state.rate}
             paused={this.state.paused}

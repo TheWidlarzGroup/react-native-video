@@ -8,11 +8,15 @@ const path = require('path');
 const escape = require('escape-string-regexp');
 
 const blacklist = require('metro-config/src/defaults/exclusionList');
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
+const { mergeConfig } = require('@react-native/metro-config');
 
 const pak = require('../../package.json');
 const root = path.resolve(__dirname, '../..');
 const modules = Object.keys({...pak.peerDependencies});
+
+const defaultConfig = getDefaultConfig(__dirname)
+const { resolver, transformer } = defaultConfig
 
 /**
  * Metro configuration
@@ -23,6 +27,7 @@ const modules = Object.keys({...pak.peerDependencies});
 const config = {
   watchFolders: [root],
   resolver: {
+    ...resolver,
     blacklistRE: blacklist([
       // This stops "react-native run-windows" from causing the metro server to crash if its already running
       new RegExp(
@@ -48,6 +53,7 @@ const config = {
       path.resolve(path.join(__dirname, '../../node_modules')),
     ],
     transformer: {
+      ...transformer,
       getTransformOptions: async () => ({
         transform: {
           experimentalImportSupport: false,
@@ -56,6 +62,9 @@ const config = {
       }),
     },
   },
+  transformer: {
+    ...transformer, // <--- THIS WAS MISSING
+  },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(defaultConfig, config);

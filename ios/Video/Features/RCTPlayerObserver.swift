@@ -234,10 +234,9 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
 
     /* Cancels the previously registered time observer. */
     func removePlayerTimeObserver() {
-        if _timeObserver != nil {
-            player?.removeTimeObserver(_timeObserver)
-            _timeObserver = nil
-        }
+        guard let timeObserver = _timeObserver else { return }
+        player?.removeTimeObserver(timeObserver)
+        _timeObserver = nil
     }
 
     func addTimeObserverIfNotSet() {
@@ -284,11 +283,11 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
                                                name: NSNotification.Name.AVPlayerItemFailedToPlayToEndTime,
                                                object: nil)
 
-        NotificationCenter.default.removeObserver(_handlers, name: NSNotification.Name.AVPlayerItemNewAccessLogEntry, object: player?.currentItem)
+        NotificationCenter.default.removeObserver(_handlers, name: AVPlayerItem.newAccessLogEntryNotification, object: player?.currentItem)
 
         NotificationCenter.default.addObserver(_handlers,
                                                selector: #selector(RCTPlayerObserverHandlerObjc.handleAVPlayerAccess(notification:)),
-                                               name: NSNotification.Name.AVPlayerItemNewAccessLogEntry,
+                                               name: AVPlayerItem.newAccessLogEntryNotification,
                                                object: player?.currentItem)
     }
 

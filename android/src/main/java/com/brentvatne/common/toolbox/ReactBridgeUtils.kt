@@ -3,7 +3,6 @@ package com.brentvatne.common.toolbox
 import com.facebook.react.bridge.Dynamic
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
-import java.util.HashMap
 
 /*
 * Toolbox to safe parsing of <Video props
@@ -53,6 +52,17 @@ object ReactBridgeUtils {
         if (map != null && map.hasKey(key!!) && !map.isNull(key)) map.getDouble(key).toFloat() else fallback
 
     @JvmStatic fun safeGetFloat(map: ReadableMap?, key: String?): Float = safeGetFloat(map, key, 0.0f)
+
+    @JvmStatic fun safeParseInt(value: String?, default: Int): Int {
+        if (value == null) {
+            return default
+        }
+        return try {
+            value.toInt()
+        } catch (e: java.lang.Exception) {
+            default
+        }
+    }
 
     /**
      * toStringMap converts a [ReadableMap] into a HashMap.

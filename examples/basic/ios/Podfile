@@ -1,3 +1,4 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -16,6 +17,14 @@ if linkage != nil
 end
 
 target 'videoplayer' do
+  use_expo_modules!
+  post_integrate do |installer|
+    begin
+      expo_patch_react_imports!(installer)
+    rescue => e
+      Pod::UI.warn e
+    end
+  end
   config = use_native_modules!
 
   use_frameworks! :linkage => :static
@@ -37,6 +46,7 @@ target 'videoplayer' do
   )
 
   pod 'react-native-video', path: '../../..'
+  pod 'react-native-video-plugin-sample', path: '../../react-native-video-plugin-sample'
 
   target 'videoplayerTests' do
     inherit! :complete
