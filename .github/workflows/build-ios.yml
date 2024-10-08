@@ -32,6 +32,10 @@ jobs:
         with:
           working-directory: ./
 
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
       - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
@@ -81,7 +85,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: ./
+
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
+      - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
           working-directory: examples/bare
@@ -123,14 +136,23 @@ jobs:
 
   build-with-caching:
     name: Build iOS Example App With Caching
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
         working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: ./
+
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
+      - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
           working-directory: examples/bare
