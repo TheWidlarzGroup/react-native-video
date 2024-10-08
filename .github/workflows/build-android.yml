@@ -37,6 +37,9 @@ jobs:
         with:
           working-directory: ./
 
+      - name: Build Library
+        run: yarn build
+
       - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
@@ -54,8 +57,8 @@ jobs:
       - name: Run Gradle Build for bare example
         run: cd examples/bare/android && ./gradlew assembleDebug --build-cache && cd ../../..
 
-  build-without-ads:
-    name: Build Android Example App Without Ads
+  build-with-ads:
+    name: Build Android Example App With Ads
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +70,15 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: ./
+  
+      - name: Build Library
+        run: yarn build
+  
+      - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
           working-directory: examples/bare
@@ -82,4 +93,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Run Gradle Build for bare example
-        run: cd examples/bare/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..
+        run: cd examples/bare/android && export RNV_SAMPLE_ENABLE_ADS=true && ./gradlew assembleDebug --build-cache && cd ../../..
