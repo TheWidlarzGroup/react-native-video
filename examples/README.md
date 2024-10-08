@@ -47,8 +47,8 @@ cd examples/bare && yarn install
       # for visionOS
       pod install --project-directory=visionOS
       ```
-      > [!IMPORTANT]  
-      > You will need to hit it twice, because expo-plugin changes are not applied in the first run.
+> [!IMPORTANT]  
+> You will need to hit it twice, because expo-plugin changes are not applied in the first run.
 
       Now you are ready to run the App. (Flag `--interactive` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
       ```bash
@@ -129,8 +129,8 @@ cd examples/expo && yarn install
       yarn android:tv
       ```
 
-      > [!WARNING]  
-      > Setup for android is not complete yet. Please use bare app for android testing.
+> [!WARNING]  
+> Setup for android is not complete yet. Please use bare app for android testing.
 
     - For Web:
       Support for web is coming soon.
