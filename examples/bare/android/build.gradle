@@ -22,6 +22,11 @@ buildscript {
     }
 }
 
+ext {
+   // For CI builds
+  useExoplayerIMA = System.getenv("RNV_SAMPLE_ENABLE_ADS") ?: false
+}
+
 allprojects {
     repositories {
         maven {
