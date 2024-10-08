@@ -32,7 +32,12 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: ./
+
+      - name: Install node_modules at Example
         uses: ./.github/actions/setup-node
         with:
           working-directory: examples/bare
