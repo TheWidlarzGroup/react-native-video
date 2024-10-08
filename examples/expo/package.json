@@ -10,8 +10,8 @@
     "ios:tvos": "EXPO_TV=1 expo run:ios",
     "ios": "EXPO_TV=0 expo run:ios",
     "web": "expo start --web",
-    "prebuild:tvos": "EXPO_TV=1 expo prebuild --clean",
-    "prebuild": "EXPO_TV=0 expo prebuild --clean",
+    "prebuild:tvos": "EXPO_TV=1 expo prebuild",
+    "prebuild": "EXPO_TV=0 expo prebuild",
     "update-src": "echo 'Updating src from ../bare/src' && rm -r ./src && cp -r ../bare/src ./src && echo 'Updated src from ../bare/src'"
   },
   "dependencies": {
