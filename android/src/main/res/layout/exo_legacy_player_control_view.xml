@@ -1,17 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
+    android:layout_height="match_parent"
     android:layoutDirection="ltr"
     android:background="@color/midnight_black"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/live_wrapper_margin_top"
+        android:id="@+id/exo_live_container">
+
+        <ImageView
+            android:id="@+id/exo_live_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/position_duration_horizontal_padding"
+            android:src="@drawable/circle" />
+
+        <TextView android:id="@+id/exo_live_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/position_duration_text_size"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+    
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="@dimen/controller_wrapper_padding_top"
+        android:layout_gravity="bottom"
         android:orientation="horizontal">
 
         <ImageButton android:id="@+id/exo_prev"
@@ -69,6 +100,13 @@
             android:paddingHorizontal="@dimen/position_duration_horizontal_padding"
             android:includeFontPadding="false"
             android:textColor="@color/silver_gray"/>
+
+        <ImageButton
+            android:id="@+id/exo_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ExoStyledControls.Button.Bottom.Settings"
+            />
 
         <ImageButton
             android:id="@+id/exo_fullscreen"

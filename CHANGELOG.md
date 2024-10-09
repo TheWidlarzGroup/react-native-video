@@ -1,5 +1,27 @@
 
 
+## [6.6.4](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.3...v6.6.4) (2024-10-03)
+
+
+### Features
+
+* **android:** add live video label configuration ([#4190](https://github.com/TheWidlarzGroup/react-native-video/issues/4190)) ([149924f](https://github.com/TheWidlarzGroup/react-native-video/commit/149924ffcb0cbdeaa8c671ebb4b3b6115920131a))
+
+## [6.6.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.2...v6.6.3) (2024-09-29)
+
+
+### Bug Fixes
+
+* **android:** bad rotation handling ([#4205](https://github.com/TheWidlarzGroup/react-native-video/issues/4205)) ([3ecf324](https://github.com/TheWidlarzGroup/react-native-video/commit/3ecf324bb30208ab8efbf00958ebd4590ddf8d39))
+* **docs:** invalid URLs in updating section ([#4201](https://github.com/TheWidlarzGroup/react-native-video/issues/4201)) ([c81eea5](https://github.com/TheWidlarzGroup/react-native-video/commit/c81eea54d8291c5131fd59a93f198e0fd5f3673c))
+* **ios:** Add safety checks and remove some of the ! in types declaration ([#4182](https://github.com/TheWidlarzGroup/react-native-video/issues/4182)) ([ae82c83](https://github.com/TheWidlarzGroup/react-native-video/commit/ae82c83eef2fc7c383fd844c7471613e4ac1c7ee))
+* **tvos:** typo ([#4204](https://github.com/TheWidlarzGroup/react-native-video/issues/4204)) ([b11f05f](https://github.com/TheWidlarzGroup/react-native-video/commit/b11f05f1753a4cb963b94d1e1d8d1f6c37af2a9d))
+
+
+### Features
+
+* **android:** allow to hide specific controls ([#4183](https://github.com/TheWidlarzGroup/react-native-video/issues/4183)) ([279cc0e](https://github.com/TheWidlarzGroup/react-native-video/commit/279cc0e5ed712488fc3c153c62b14f13048103f2))
+
 ## [6.6.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.1...v6.6.2) (2024-09-20)
 
 
