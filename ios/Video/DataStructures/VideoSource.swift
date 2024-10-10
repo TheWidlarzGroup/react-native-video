@@ -12,6 +12,7 @@ struct VideoSource {
     /* DRM */
     let drm: DRMParams
     var textTracks: [TextTrack] = []
+    let adParams: AdParams
 
     let json: NSDictionary?
 
@@ -29,6 +30,7 @@ struct VideoSource {
             self.cropEnd = nil
             self.customMetadata = nil
             self.drm = DRMParams(nil)
+            adParams = AdParams(nil)
             return
         }
         self.json = json
@@ -56,5 +58,6 @@ struct VideoSource {
         self.textTracks = (json["textTracks"] as? NSArray)?.map { trackDict in
             return TextTrack(trackDict as? NSDictionary)
         } ?? []
+        adParams = AdParams(json["ad"] as? NSDictionary)
     }
 }

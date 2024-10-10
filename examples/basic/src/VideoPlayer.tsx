@@ -265,8 +265,7 @@ const VideoPlayer: FC<Props> = ({}) => {
           <Video
             showNotificationControls={showNotificationControls}
             ref={videoRef}
-            // source={currentSrc as ReactVideoSource}
-            adTagUrl={additional?.adTagUrl}
+//            source={currentSrc as ReactVideoSource}
             drm={additional?.drm}
             style={viewStyle}
             rate={rate}
