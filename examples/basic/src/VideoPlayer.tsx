@@ -252,6 +252,10 @@ const VideoPlayer: FC<Props> = ({}) => {
     cacheSizeMB: useCache ? 200 : 0,
   };
 
+  useEffect(() => {
+    videoRef.current?.setSource(currentSrc)
+  }, [currentSrc])
+
   return (
     <View style={styles.container}>
       <StatusBar animated={true} backgroundColor="black" hidden={false} />
@@ -261,7 +265,7 @@ const VideoPlayer: FC<Props> = ({}) => {
           <Video
             showNotificationControls={showNotificationControls}
             ref={videoRef}
-            source={currentSrc as ReactVideoSource}
+            // source={currentSrc as ReactVideoSource}
             adTagUrl={additional?.adTagUrl}
             drm={additional?.drm}
             style={viewStyle}
