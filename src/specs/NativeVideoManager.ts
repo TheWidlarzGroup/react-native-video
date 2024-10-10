@@ -4,6 +4,7 @@ import type {
   Float,
   UnsafeObject,
 } from 'react-native/Libraries/Types/CodegenTypes';
+import {TPlaybackStatus} from '../types';
 
 export type VideoSaveData = {
   uri: string;
@@ -27,6 +28,7 @@ export interface VideoManagerType {
   setVolumeCmd: (reactTag: Int32, volume: number) => Promise<void>;
   save: (reactTag: Int32, option: UnsafeObject) => Promise<VideoSaveData>;
   getCurrentPosition: (reactTag: Int32) => Promise<Int32>;
+  getCurrentPlaybackStatus: (reactTag: Int32) => Promise<TPlaybackStatus>;
 }
 
 export default NativeModules.VideoManager as VideoManagerType;

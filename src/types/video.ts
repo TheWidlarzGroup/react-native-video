@@ -40,6 +40,15 @@ export type ReactVideoSourceProperties = {
   textTracks?: TextTracks;
 };
 
+export type TPlaybackStatus = {
+  paused: 'paused';
+  playing: 'playing';
+  buffering: 'buffering';
+  ended: 'ended';
+  idle: 'idle';
+  unknown: 'unknown';
+}
+
 export type ReactVideoSource = Readonly<
   Omit<ReactVideoSourceProperties, 'uri'> & {
     uri?: string | NodeRequire;

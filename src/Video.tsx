@@ -53,6 +53,7 @@ import type {
   OnReceiveAdEventData,
   ReactVideoProps,
   CmcdData,
+  TPlaybackStatus,
 } from './types';
 
 export interface VideoRef {
@@ -68,6 +69,7 @@ export interface VideoRef {
   setFullScreen: (fullScreen: boolean) => void;
   save: (options: object) => Promise<VideoSaveData> | void;
   getCurrentPosition: () => Promise<number>;
+  getCurrentPlaybackStatus: () => Promise<TPlaybackStatus>;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -394,6 +396,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       return NativeVideoManager.getCurrentPosition(getReactTag(nativeRef));
     }, []);
 
+    const getCurrentPlaybackStatus = useCallback(() => {
+      // @todo Must implement it in a different way.
+      return NativeVideoManager.getCurrentPlaybackStatus(getReactTag(nativeRef));
+    }, []);
+
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(
       (restored: boolean) => {
         setRestoreUserInterfaceForPIPStopCompletionHandler(restored);
@@ -628,6 +635,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        getCurrentPlaybackStatus,
       }),
       [
         seek,
@@ -640,6 +648,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        getCurrentPlaybackStatus,
       ],
     );
 

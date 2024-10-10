@@ -1685,6 +1685,44 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    @objc
+    func getCurrentPlaybackStatus(_ resolve: @escaping RCTPromiseResolveBlock, _ reject: @escaping RCTPromiseRejectBlock) {
+        if let player = _player {
+            switch player.status {
+            case .unknown:
+                resolve("unknown")
+            case .failed:
+                reject("PLAYBACK_ERROR", "Playback failed", player.error)
+            case .readyToPlay:
+                if let currentItem = player.currentItem {
+                    let currentTime = CMTimeGetSeconds(player.currentTime())
+                    let duration = CMTimeGetSeconds(currentItem.duration)
+
+                    if currentTime >= duration {
+                        resolve("ended")
+                    } else {
+                        switch player.timeControlStatus {
+                        case .paused:
+                            resolve("paused")
+                        case .waitingToPlayAtSpecifiedRate:
+                            resolve("buffering")
+                        case .playing:
+                            resolve("playing")
+                        @unknown default:
+                            resolve("unknown")
+                        }
+                    }
+                } else {
+                    resolve("unknown")
+                }
+            @unknown default:
+                resolve("unknown")
+            }
+        } else {
+            reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.", nil)
+        }
+    }
+
     // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
     @objc
     func setOnClick(_: Any) {}
