@@ -53,6 +53,7 @@ import type {
   OnReceiveAdEventData,
   ReactVideoProps,
   CmcdData,
+  ReactVideoSource,
   TPlaybackStatus,
 } from './types';
 
@@ -67,6 +68,7 @@ export interface VideoRef {
   ) => void;
   setVolume: (volume: number) => void;
   setFullScreen: (fullScreen: boolean) => void;
+  setSource: (source?: ReactVideoSource) => void;
   save: (options: object) => Promise<VideoSaveData> | void;
   getCurrentPosition: () => Promise<number>;
   getCurrentPlaybackStatus: () => Promise<TPlaybackStatus>;
@@ -159,98 +161,105 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       setRestoreUserInterfaceForPIPStopCompletionHandler,
     ] = useState<boolean | undefined>();
 
-    const src = useMemo<VideoSrc | undefined>(() => {
-      if (!source) {
-        return undefined;
-      }
-      const resolvedSource = resolveAssetSourceForVideo(source);
-      let uri = resolvedSource.uri || '';
-      if (uri && uri.match(/^\//)) {
-        uri = `file://${uri}`;
-      }
-      if (!uri) {
-        console.log('Trying to load empty source');
-      }
-      const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
-      const isAsset = !!(
-        uri &&
-        uri.match(
-          /^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/,
-        )
-      );
-
-      const selectedDrm = source.drm || drm;
-      const _textTracks = source.textTracks || textTracks;
-      const _drm = !selectedDrm
-        ? undefined
-        : {
-            type: selectedDrm.type,
-            licenseServer: selectedDrm.licenseServer,
-            headers: generateHeaderForNative(selectedDrm.headers),
-            contentId: selectedDrm.contentId,
-            certificateUrl: selectedDrm.certificateUrl,
-            base64Certificate: selectedDrm.base64Certificate,
-            useExternalGetLicense: !!selectedDrm.getLicense,
-            multiDrm: selectedDrm.multiDrm,
-            localSourceEncryptionKeyScheme:
-              selectedDrm.localSourceEncryptionKeyScheme ||
-              localSourceEncryptionKeyScheme,
-          };
-
-      let _cmcd: NativeCmcdConfiguration | undefined;
-      if (Platform.OS === 'android' && source?.cmcd) {
-        const cmcd = source.cmcd;
-
-        if (typeof cmcd === 'boolean') {
-          _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
-        } else if (typeof cmcd === 'object' && !Array.isArray(cmcd)) {
-          const createCmcdHeader = (property?: CmcdData) =>
-            property ? generateHeaderForNative(property) : undefined;
-
-          _cmcd = {
-            mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
-            request: createCmcdHeader(cmcd.request),
-            session: createCmcdHeader(cmcd.session),
-            object: createCmcdHeader(cmcd.object),
-            status: createCmcdHeader(cmcd.status),
-          };
-        } else {
-          throw new Error(
-            'Invalid CMCD configuration: Expected a boolean or an object.',
-          );
+    const sourceToUnternalSource = useCallback(
+      (_source?: ReactVideoSource) => {
+        if (!_source) {
+          return undefined;
         }
-      }
+        const resolvedSource = resolveAssetSourceForVideo(_source);
+        let uri = resolvedSource.uri || '';
+        if (uri && uri.match(/^\//)) {
+          uri = `file://${uri}`;
+        }
+        if (!uri) {
+          console.log('Trying to load empty source');
+        }
+        const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
+        const isAsset = !!(
+          uri &&
+          uri.match(
+            /^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/,
+          )
+        );
 
-      const selectedContentStartTime =
-        source.contentStartTime || contentStartTime;
+        const selectedDrm = _source.drm || drm;
+        const _textTracks = _source.textTracks || textTracks;
+        const _drm = !selectedDrm
+          ? undefined
+          : {
+              type: selectedDrm.type,
+              licenseServer: selectedDrm.licenseServer,
+              headers: generateHeaderForNative(selectedDrm.headers),
+              contentId: selectedDrm.contentId,
+              certificateUrl: selectedDrm.certificateUrl,
+              base64Certificate: selectedDrm.base64Certificate,
+              useExternalGetLicense: !!selectedDrm.getLicense,
+              multiDrm: selectedDrm.multiDrm,
+              localSourceEncryptionKeyScheme:
+                selectedDrm.localSourceEncryptionKeyScheme ||
+                localSourceEncryptionKeyScheme,
+            };
 
-      return {
-        uri,
-        isNetwork,
-        isAsset,
-        shouldCache: resolvedSource.shouldCache || false,
-        type: resolvedSource.type || '',
-        mainVer: resolvedSource.mainVer || 0,
-        patchVer: resolvedSource.patchVer || 0,
-        requestHeaders: generateHeaderForNative(resolvedSource.headers),
-        startPosition: resolvedSource.startPosition ?? -1,
-        cropStart: resolvedSource.cropStart || 0,
-        cropEnd: resolvedSource.cropEnd,
-        contentStartTime: selectedContentStartTime,
-        metadata: resolvedSource.metadata,
-        drm: _drm,
-        cmcd: _cmcd,
-        textTracks: _textTracks,
-        textTracksAllowChunklessPreparation:
-          resolvedSource.textTracksAllowChunklessPreparation,
-      };
-    }, [
-      drm,
-      source,
-      textTracks,
-      contentStartTime,
-      localSourceEncryptionKeyScheme,
-    ]);
+        let _cmcd: NativeCmcdConfiguration | undefined;
+        if (Platform.OS === 'android' && source?.cmcd) {
+          const cmcd = source.cmcd;
+
+          if (typeof cmcd === 'boolean') {
+            _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
+          } else if (typeof cmcd === 'object' && !Array.isArray(cmcd)) {
+            const createCmcdHeader = (property?: CmcdData) =>
+              property ? generateHeaderForNative(property) : undefined;
+
+            _cmcd = {
+              mode: cmcd.mode ?? CmcdMode.MODE_QUERY_PARAMETER,
+              request: createCmcdHeader(cmcd.request),
+              session: createCmcdHeader(cmcd.session),
+              object: createCmcdHeader(cmcd.object),
+              status: createCmcdHeader(cmcd.status),
+            };
+          } else {
+            throw new Error(
+              'Invalid CMCD configuration: Expected a boolean or an object.',
+            );
+          }
+        }
+
+        const selectedContentStartTime =
+          _source.contentStartTime || contentStartTime;
+
+        return {
+          uri,
+          isNetwork,
+          isAsset,
+          shouldCache: resolvedSource.shouldCache || false,
+          type: resolvedSource.type || '',
+          mainVer: resolvedSource.mainVer || 0,
+          patchVer: resolvedSource.patchVer || 0,
+          requestHeaders: generateHeaderForNative(resolvedSource.headers),
+          startPosition: resolvedSource.startPosition ?? -1,
+          cropStart: resolvedSource.cropStart || 0,
+          cropEnd: resolvedSource.cropEnd,
+          contentStartTime: selectedContentStartTime,
+          metadata: resolvedSource.metadata,
+          drm: _drm,
+          cmcd: _cmcd,
+          textTracks: _textTracks,
+          textTracksAllowChunklessPreparation:
+            resolvedSource.textTracksAllowChunklessPreparation,
+        };
+      },
+      [
+        contentStartTime,
+        drm,
+        localSourceEncryptionKeyScheme,
+        source,
+        textTracks,
+      ],
+    );
+
+    const src = useMemo<VideoSrc | undefined>(() => {
+      return sourceToUnternalSource(source);
+    }, [sourceToUnternalSource, source]);
 
     const _selectedTextTrack = useMemo(() => {
       if (!selectedTextTrack) {
@@ -371,6 +380,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         fullScreen,
       );
     }, []);
+
+    const setSource = useCallback(
+      (_source?: ReactVideoSource) => {
+        return NativeVideoManager.setSourceCmd(
+          getReactTag(nativeRef),
+          sourceToUnternalSource(_source),
+        );
+      },
+      [sourceToUnternalSource],
+    );
 
     const presentFullscreenPlayer = useCallback(
       () => setFullScreen(true),
@@ -637,6 +656,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        setSource,
         getCurrentPlaybackStatus,
       }),
       [
@@ -650,6 +670,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        setSource,
         getCurrentPlaybackStatus,
       ],
     );

@@ -72,6 +72,13 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @objc(setSourceCmd:source:)
+    func setSourceCmd(_ reactTag: NSNumber, source: NSDictionary) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setSrc(source)
+        })
+    }
+
     @objc(save:options:resolve:reject:)
     func save(_ reactTag: NSNumber, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
