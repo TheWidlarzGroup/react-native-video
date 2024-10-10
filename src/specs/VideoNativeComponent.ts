@@ -314,6 +314,7 @@ type ControlsStyles = Readonly<{
   hideDuration?: WithDefault<boolean, false>;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
   hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideSettingButton?: WithDefault<boolean, true>;
   seekIncrementMS?: Int32;
   liveLabel?: string;
 }>;
