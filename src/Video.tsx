@@ -398,7 +398,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const getCurrentPlaybackStatus = useCallback(() => {
       // @todo Must implement it in a different way.
-      return NativeVideoManager.getCurrentPlaybackStatus(getReactTag(nativeRef));
+      return NativeVideoManager.getCurrentPlaybackStatus(
+        getReactTag(nativeRef),
+      );
     }, []);
 
     const restoreUserInterfaceForPictureInPictureStopCompleted = useCallback(

@@ -47,7 +47,7 @@ export type TPlaybackStatus = {
   ended: 'ended';
   idle: 'idle';
   unknown: 'unknown';
-}
+};
 
 export type ReactVideoSource = Readonly<
   Omit<ReactVideoSourceProperties, 'uri'> & {
