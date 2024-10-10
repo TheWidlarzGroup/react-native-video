@@ -1719,7 +1719,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 resolve("unknown")
             }
         } else {
-            reject("PLAYER_NOT_AVAILABLE", "Player is not initialized.", nil)
+            resolve("released")
         }
     }
 
