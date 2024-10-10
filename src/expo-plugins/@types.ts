@@ -1,4 +1,5 @@
 export type ConfigProps = {
+  reactNativeTestApp?: boolean;
   /**
    * Whether to require permissions to be able to use notification controls.
    * @default false

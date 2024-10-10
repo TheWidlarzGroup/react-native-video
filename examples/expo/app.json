@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "plugins": [
+      [
+        "@react-native-tvos/config-tv",
+        {
+          "androidTVBanner": "./assets/images/icon-400x240.png",
+          "appleTVImages": {
+            "icon": "./assets/images/icon-1280x768.png",
+            "iconSmall": "./assets/images/icon-400x240.png",
+            "iconSmall2x": "./assets/images/icon-800x480.png",
+            "topShelf": "./assets/images/icon-1920x720.png",
+            "topShelf2x": "./assets/images/icon-3840x1440.png",
+            "topShelfWide": "./assets/images/icon-2320x720.png",
+            "topShelfWide2x": "./assets/images/icon-4640x1440.png"
+          }
+        }
+      ],
+      [
+        "../../lib/expo-plugins/withRNVideo.js", 
+        {
+          "reactNativeTestApp": true,
+          "enableNotificationControls": true,
+          "enableBackgroundAudio": true,
+          "enableADSExtension": false,
+          "enableCacheExtension": false,
+          "androidExtensions": {
+            "useExoplayerRtsp": true,
+            "useExoplayerSmoothStreaming": true,
+            "useExoplayerHls": true,
+            "useExoplayerDash": true
+          }
+        }
+      ]
+    ],
+    "name": "ExpoExample",
+    "slug": "ExpoExample",
+    "android": {
+      "package": "com.anonymous.ExpoExample"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.ExpoExample"
+    }
+  }
+}
