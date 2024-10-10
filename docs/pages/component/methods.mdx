@@ -137,6 +137,18 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
+### `getCurrentPlaybackStatus`
+
+This function retrieves the current playback status of the media and can return one of the following states:
+
+- **idle** (Android only): The media is not yet prepared, and the player must be prepared before it can play the media.
+- **paused**: The media is loaded but not actively playing.
+- **playing**: The media is currently playing.
+- **buffering**: The media is loading or waiting for data to continue playback.
+- **ended**: The media has finished playing.
+- **unknown**: The media has unknown status.
+- **released**: The player is not initialized.
+
 ### Example Usage
 
 ```tsx

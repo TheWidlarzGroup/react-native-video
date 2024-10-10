@@ -79,6 +79,13 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
         }
     }
 
+    @ReactMethod
+    fun getCurrentPlaybackStatus(reactTag: Int, promise: Promise) {
+        performOnPlayerView(reactTag) {
+            it?.getCurrentPlaybackStatus(promise)
+        }
+    }
+
     companion object {
         private const val REACT_CLASS = "VideoManager"
     }
