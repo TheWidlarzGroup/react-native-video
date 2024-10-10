@@ -152,6 +152,16 @@ This function will change the volume exactly like [volume](./props#volume) prope
 This function retrieves and returns the precise current position of the video playback, measured in seconds.
 This function will throw an error if player is not initialized.
 
+
+### `setSource`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setSource(source: ReactVideoSource): Promise<void>`
+
+This function will change the source exactly like [source](./props#source) property.
+Changing source with this function will overide source provided as props. 
+
 ### `setFullScreen`
 
 <PlatformsList types={['Android', 'iOS']} />

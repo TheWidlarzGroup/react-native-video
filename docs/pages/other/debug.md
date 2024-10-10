@@ -88,4 +88,4 @@ buildscript {
 
 ## It's still not working
 
-You can try to open a ticket now !
+You can try to open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact)!

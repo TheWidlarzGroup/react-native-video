@@ -24,6 +24,7 @@ export interface VideoManagerType {
     licenseUrl: string,
   ) => Promise<void>;
   setFullScreenCmd: (reactTag: Int32, fullScreen: boolean) => Promise<void>;
+  setSourceCmd: (reactTag: Int32, source?: UnsafeObject) => Promise<void>;
   setVolumeCmd: (reactTag: Int32, volume: number) => Promise<void>;
   enterPictureInPictureCmd: (reactTag: number) => Promise<void>;
   exitPictureInPictureCmd: (reactTag: number) => Promise<void>;

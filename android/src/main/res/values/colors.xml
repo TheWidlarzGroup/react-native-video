@@ -2,4 +2,6 @@
 <resources>
     <color name="silver_gray">#FFBEBEBE</color>
     <color name="midnight_black">#CC000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="red">#FF0000</color>
 </resources>

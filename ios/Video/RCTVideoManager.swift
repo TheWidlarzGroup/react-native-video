@@ -83,6 +83,11 @@ class RCTVideoManager: RCTViewManager {
     func exitPictureInPictureCmd(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in
             videoView?.exitPictureInPicture()
+
+    @objc(setSourceCmd:source:)
+    func setSourceCmd(_ reactTag: NSNumber, source: NSDictionary) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setSrc(source)
         })
     }
 
