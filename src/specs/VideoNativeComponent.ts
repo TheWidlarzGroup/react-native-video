@@ -26,6 +26,11 @@ type VideoMetadata = Readonly<{
   imageUri?: string;
 }>;
 
+export type AdsConfig = Readonly<{
+  adTagUrl?: string;
+  adLanguage?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -44,6 +49,7 @@ export type VideoSrc = Readonly<{
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
+  ad?: AdsConfig;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -319,8 +325,6 @@ export type OnControlsVisibilityChange = Readonly<{
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  adTagUrl?: string;
-  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   disableFocus?: boolean; // android
   maxBitRate?: Float;

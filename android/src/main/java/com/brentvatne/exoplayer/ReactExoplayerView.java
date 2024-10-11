@@ -109,6 +109,7 @@ import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.LegacyPlayerControlView;
 
+import com.brentvatne.common.api.AdsProps;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
 import com.brentvatne.common.api.ControlsConfig;
@@ -253,8 +254,6 @@ public class ReactExoplayerView extends FrameLayout implements
     protected boolean playInBackground = false;
     private boolean mReportBandwidth = false;
     private boolean controls;
-    private Uri adTagUrl;
-    private String adLanguage;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -880,16 +879,23 @@ public class ReactExoplayerView extends FrameLayout implements
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
-        ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
-        imaSdkSettings.setLanguage(adLanguage);
+        if (BuildConfig.USE_EXOPLAYER_IMA) {
+            AdsProps adProps = source.getAdsProps();
 
-        // Create an AdsLoader.
-        adsLoader = new ImaAdsLoader
-                .Builder(themedReactContext)
-                .setImaSdkSettings(imaSdkSettings)
-                .setAdEventListener(this)
-                .setAdErrorListener(this)
-                .build();
+            // Create an AdsLoader.
+            ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
+                    .Builder(themedReactContext)
+                    .setAdEventListener(this)
+                    .setAdErrorListener(this);
+
+            if (adProps != null && adProps.getAdLanguage() != null) {
+                ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+                imaSdkSettings.setLanguage(adProps.getAdLanguage());
+                imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
+            }
+            adsLoader = imaLoaderBuilder.build();
+        }
+
         mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
 
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
@@ -958,7 +964,11 @@ public class ReactExoplayerView extends FrameLayout implements
         ArrayList<MediaSource> mediaSourceList = buildTextSources();
         MediaSource videoSource = buildMediaSource(runningSource.getUri(), runningSource.getExtension(), drmSessionManager, runningSource.getCropStartMs(), runningSource.getCropEndMs());
         MediaSource mediaSourceWithAds = null;
-        if (adTagUrl != null && BuildConfig.USE_EXOPLAYER_IMA) {
+        Uri adTagUrl = null;
+        if (source.getAdsProps() != null) {
+            adTagUrl = source.getAdsProps().getAdTagUrl();
+        }
+        if (adTagUrl != null && adsLoader != null) {
             DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
                     .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
             DataSpec adTagDataSpec = new DataSpec(adTagUrl);
@@ -1159,11 +1169,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
-
-        if (adTagUrl != null) {
-            mediaItemBuilder.setAdsConfiguration(
-                    new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
-            );
+        if (source.getAdsProps() != null) {
+            Uri adTagUrl = source.getAdsProps().getAdTagUrl();
+            if (adTagUrl != null) {
+                mediaItemBuilder.setAdsConfiguration(
+                        new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+                );
+            }
         }
 
         MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(bufferConfig);
@@ -1315,8 +1327,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
         if (adsLoader != null) {
             adsLoader.release();
+            adsLoader = null;
         }
-        adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         pictureInPictureReceiver.removeListener();
@@ -1979,15 +1991,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
-    }
-
-    public void setAdTagUrl(final Uri uri) {
-        DebugLog.w(TAG, "setAdTagUrl" + uri);
-        adTagUrl = uri;
-    }
-
-    public void setAdLanguage(final String language) {
-        adLanguage = language;
     }
 
     private void reloadSource() {

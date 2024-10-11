@@ -93,6 +93,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       useSecureView,
       viewType,
       shutterColor,
+      adTagUrl,
+      adLanguage,
       onLoadStart,
       onLoad,
       onError,
@@ -227,6 +229,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         const selectedContentStartTime =
           _source.contentStartTime || contentStartTime;
 
+        const _ad =
+          _source.ad ||
+          (adTagUrl || adLanguage
+            ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
+            : undefined);
+
         return {
           uri,
           isNetwork,
@@ -242,6 +250,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           contentStartTime: selectedContentStartTime,
           metadata: resolvedSource.metadata,
           drm: _drm,
+          ad: _ad,
           cmcd: _cmcd,
           textTracks: _textTracks,
           textTracksAllowChunklessPreparation:
@@ -249,10 +258,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         };
       },
       [
+        adLanguage,
+        adTagUrl,
         contentStartTime,
         drm,
         localSourceEncryptionKeyScheme,
-        source,
+        source?.cmcd,
         textTracks,
       ],
     );
