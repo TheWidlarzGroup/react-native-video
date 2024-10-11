@@ -78,7 +78,7 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
             it?.exitPictureInPictureMode()
         }
     }
-    
+
     @ReactMethod
     fun setSourceCmd(reactTag: Int, source: ReadableMap?) {
         performOnPlayerView(reactTag) {
