@@ -1,4 +1,4 @@
-import React, {type FC, useCallback, useRef, useState, useEffect} from 'react';
+import React, {type FC, useCallback, useRef, useState} from 'react';
 
 import {Platform, TouchableOpacity, View, StatusBar} from 'react-native';
 
@@ -35,7 +35,6 @@ import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
 import {
   bufferConfig,
-  isAndroid,
   srcList,
   textTracksSelectionBy,
   audioTracksSelectionBy,
@@ -44,7 +43,7 @@ import {Overlay, toast, VideoLoader} from './components';
 
 type Props = NonNullable<unknown>;
 
-const VideoPlayer: FC<Props> = ({}) => {
+const BasicExample: FC<Props> = () => {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
@@ -341,4 +340,4 @@ const VideoPlayer: FC<Props> = ({}) => {
     </View>
   );
 };
-export default VideoPlayer;
+export default BasicExample;

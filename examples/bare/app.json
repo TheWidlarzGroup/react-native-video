@@ -5,6 +5,10 @@
     {
       "appKey": "BareExample",
       "displayName": "Basic Video Example"
+    },
+    {
+      "appKey": "DRMExample",
+      "displayName": "DRM Example"
     }
   ],
   "resources": {
