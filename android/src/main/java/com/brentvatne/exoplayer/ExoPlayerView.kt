@@ -204,7 +204,15 @@ class ExoPlayerView(private val context: Context) :
         surfaceView?.setAlpha(0f)
     }
 
-    private fun updateShutterViewVisibility() {
+    fun showAds() {
+        adOverlayFrameLayout.setVisibility(View.VISIBLE)
+    }
+
+    fun hideAds() {
+        adOverlayFrameLayout.setVisibility(View.GONE)
+    }
+
+    fun updateShutterViewVisibility() {
         shutterView.visibility = if (this.hideShutterView) {
             View.INVISIBLE
         } else {
