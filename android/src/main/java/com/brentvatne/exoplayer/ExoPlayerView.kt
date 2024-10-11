@@ -318,7 +318,7 @@ class ExoPlayerView(private val context: Context) :
             // Here we use updateForCurrentTrackSelections to have a consistent behavior.
             // according to: https://github.com/androidx/media/issues/1207
             // sometimes media3 send bad Video size information
-            updateForCurrentTrackSelections(player.getCurrentTracks());
+            updateForCurrentTrackSelections(player.getCurrentTracks())
         }
 
         override fun onRenderedFirstFrame() {
