@@ -8,6 +8,9 @@ This page shows the list of available properties to configure player
 
 ### `adTagUrl`
 
+> [!WARNING]
+> Deprecated, use source.ad.adTagUrl instead
+
 <PlatformsList types={['Android', 'iOS']} />
 
 Sets the VAST uri to play AVOD ads.
@@ -157,6 +160,7 @@ Adjust the control styles. This prop is need only if `controls={true}` and is an
 | hideDuration                        | boolean | The default value is `false`, allowing you to hide the duration.                            |
 | hideNavigationBarOnFullScreenMode   | boolean | The default value is `true`, allowing you to hide the navigation bar on full-screen mode.   |
 | hideNotificationBarOnFullScreenMode | boolean | The default value is `true`, allowing you to hide the notification bar on full-screen mode. |
+| hideSettingButton                   | boolean | The default value is `true`, allowing you to hide the setting button.                      |
 | seekIncrementMS                     | number  | The default value is `10000`. You can change the value to increment forward and rewind.     |
 | liveLabel                           | string  | Allowing you to set a label for live video.                                                 |
 
@@ -175,6 +179,7 @@ controlsStyles={{
   hideDuration: false,
   hideNavigationBarOnFullScreenMode: true,
   hideNotificationBarOnFullScreenMode: true,
+  hideSettingButton: true,
   seekIncrementMS: 10000,
   liveLabel: "LIVE"
 }}
@@ -856,6 +861,26 @@ source={{
   }}
 ```
 
+### `ad`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+Sets the ad configuration.
+
+Example:
+
+```
+ad: {
+  adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
+  adLanguage="fr"
+}
+```
+
+See: [./ads.md] for more informations
+
+Note: You need enable IMA SDK in gradle or pod file - [enable client side ads insertion](/installation)
+
+
 #### `contentStartTime`
 
 <PlatformsList types={['Android']} />
@@ -879,19 +904,18 @@ source={{
 ```
 
 #### `textTracks`
-
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
 Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
 
 > ⚠️ This feature does not work with HLS playlists (e.g m3u8) on iOS
 
-| Property | Description                                                                                                                                                                      |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| title    | Descriptive name for the track                                                                                                                                                   |
-| language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                       |
-| type     | Mime type of the track _ TextTrackType.SRT - SubRip (.srt) _ TextTrackType.TTML - TTML (.ttml) \* TextTrackType.VTT - WebVTT (.vtt)iOS only supports VTT, Android supports all 3 |
-| uri      | URL for the text track. Currently, only tracks hosted on a webserver are supported                                                                                               |
+| Property | Description                                                                                                                                                                         |
+|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title    | Descriptive name for the track                                                                                                                                                      |
+| language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                          |
+| type     | Mime type of the track _ TextTrackType.SUBRIP - SubRip (.srt) _ TextTrackType.TTML - TTML (.ttml) \* TextTrackType.VTT - WebVTT (.vtt)iOS only supports VTT, Android supports all 3 |
+| uri      | URL for the text track. Currently, only tracks hosted on a webserver are supported                                                                                                  |
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
@@ -912,7 +936,7 @@ textTracks={[
   {
     title: "Spanish Subtitles",
     language: "es",
-    type: TextTrackType.SRT, // "application/x-subrip"
+    type: TextTrackType.SUBRIP, // "application/x-subrip"
     uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
   }
 ]}
@@ -971,12 +995,12 @@ Load one or more "sidecar" text tracks. This takes an array of objects represent
 
 > ⚠️ This feature does not work with HLS playlists (e.g m3u8) on iOS
 
-| Property | Description                                                                                                                                                                      |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| title    | Descriptive name for the track                                                                                                                                                   |
-| language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                       |
-| type     | Mime type of the track _ TextTrackType.SRT - SubRip (.srt) _ TextTrackType.TTML - TTML (.ttml) \* TextTrackType.VTT - WebVTT (.vtt)iOS only supports VTT, Android supports all 3 |
-| uri      | URL for the text track. Currently, only tracks hosted on a webserver are supported                                                                                               |
+| Property | Description                                                                                                                                                                         |
+|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title    | Descriptive name for the track                                                                                                                                                      |
+| language | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                          |
+| type     | Mime type of the track _ TextTrackType.SUBRIP - SubRip (.srt) _ TextTrackType.TTML - TTML (.ttml) \* TextTrackType.VTT - WebVTT (.vtt)iOS only supports VTT, Android supports all 3 |
+| uri      | URL for the text track. Currently, only tracks hosted on a webserver are supported                                                                                                  |
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
@@ -997,7 +1021,7 @@ textTracks={[
   {
     title: "Spanish Subtitles",
     language: "es",
-    type: TextTrackType.SRT, // "application/x-subrip"
+    type: TextTrackType.SUBRIP, // "application/x-subrip"
     uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
   }
 ]}
