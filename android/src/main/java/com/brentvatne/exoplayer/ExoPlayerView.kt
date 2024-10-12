@@ -291,22 +291,7 @@ class ExoPlayerView(private val context: Context) :
             if (group.type == C.TRACK_TYPE_VIDEO && group.length > 0) {
                 // get the first track of the group to identify aspect ratio
                 val format = group.getTrackFormat(0)
-
-                // There are weird cases when video height and width did not change with rotation so we need change aspect ration to fix
-                layout.videoAspectRatio = when (format.rotationDegrees) {
-                    // update aspect ratio !
-                    90, 270 -> if (format.width == 0) {
-                        1f
-                    } else {
-                        (format.height * format.pixelWidthHeightRatio) / format.width
-                    }
-
-                    else -> if (format.height == 0) {
-                        1f
-                    } else {
-                        (format.width * format.pixelWidthHeightRatio) / format.height
-                    }
-                }
+                layout.updateAspectRatio(format)
                 return
             }
         }
@@ -325,18 +310,16 @@ class ExoPlayerView(private val context: Context) :
         }
 
         override fun onVideoSizeChanged(videoSize: VideoSize) {
-            val isInitialRatio = layout.videoAspectRatio == 0f
             if (videoSize.height == 0 || videoSize.width == 0) {
                 // When changing video track we receive an ghost state with height / width = 0
                 // No need to resize the view in that case
                 return
             }
-            layout.videoAspectRatio =
-                ((videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height)
-
-            // React native workaround for measuring and layout on initial load.
-            if (isInitialRatio) {
-                post(measureAndLayout)
+            // Here we use updateForCurrentTrackSelections to have a consistent behavior.
+            // according to: https://github.com/androidx/media/issues/1207
+            // sometimes media3 send bad Video size information
+            player?.let {
+                updateForCurrentTrackSelections(it.currentTracks)
             }
         }
 
