@@ -207,7 +207,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
-    private int minLoadRetryCount = 3;
     private BufferConfig bufferConfig = new BufferConfig();
     private int maxBitRate = 0;
     private boolean hasDrmFailed = false;
@@ -1209,7 +1208,7 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaSource mediaSource = mediaSourceFactory
                 .setDrmSessionManagerProvider(drmProvider)
                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
                 )
                 .createMediaSource(mediaItem);
 
@@ -2274,12 +2273,6 @@ public class ReactExoplayerView extends FrameLayout implements
             trackSelector.setParameters(trackSelector.buildUponParameters()
                     .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
         }
-    }
-
-    public void setMinLoadRetryCountModifier(int newMinLoadRetryCount) {
-        minLoadRetryCount = newMinLoadRetryCount;
-        releasePlayer();
-        initializePlayer();
     }
 
     public void setPlayInBackground(boolean playInBackground) {

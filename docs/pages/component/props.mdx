@@ -379,6 +379,8 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 ### `minLoadRetryCount`
+> [!WARNING]
+> deprecated, use `source.minLoadRetryCount` key instead
 
 <PlatformsList types={['Android']} />
 
@@ -901,6 +903,23 @@ source={{
     uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     textTracksAllowChunklessPreparation: false,
   }}
+```
+
+#### `minLoadRetryCount`
+
+<PlatformsList types={['Android']} />
+
+Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful to recover from transient internet failures.
+
+Default: 3. Retry 3 times.
+
+Example:
+
+```javascript
+source={{
+  uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  minLoadRetryCount={5} // retry 5 times
+}}
 ```
 
 #### `textTracks`
