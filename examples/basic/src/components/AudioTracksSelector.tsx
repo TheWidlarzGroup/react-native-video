@@ -1,19 +1,25 @@
 import {Picker} from '@react-native-picker/picker';
 import {Text} from 'react-native';
-import type {AudioTrack, SelectedTrack} from 'react-native-video';
+import {
+  SelectedTrackType,
+  type AudioTrack,
+  type SelectedTrack,
+} from 'react-native-video';
 import styles from '../styles';
 import React from 'react';
 
 export interface AudioTrackSelectorType {
   audioTracks: Array<AudioTrack>;
   selectedAudioTrack: SelectedTrack | undefined;
-  onValueChange: (arg0: string) => void;
+  onValueChange: (arg0: string | number) => void;
+  audioTracksSelectionBy: SelectedTrackType;
 }
 
 export const AudioTrackSelector = ({
   audioTracks,
   selectedAudioTrack,
   onValueChange,
+  audioTracksSelectionBy,
 }: AudioTrackSelectorType) => {
   return (
     <>
@@ -25,7 +31,7 @@ export const AudioTrackSelector = ({
         onValueChange={itemValue => {
           if (itemValue !== 'empty') {
             console.log('on audio value change ' + itemValue);
-            onValueChange(`${itemValue}`);
+            onValueChange(itemValue);
           }
         }}>
         {audioTracks?.length <= 0 ? (
@@ -37,11 +43,19 @@ export const AudioTrackSelector = ({
           if (!track) {
             return;
           }
+          let value;
+          if (audioTracksSelectionBy === SelectedTrackType.INDEX) {
+            value = track.index;
+          } else if (audioTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+            value = track.language;
+          } else if (audioTracksSelectionBy === SelectedTrackType.TITLE) {
+            value = track.title;
+          }
           return (
             <Picker.Item
-              label={`${track.language} - ${track.title} - ${track.selected}`}
-              value={`${track.index}`}
-              key={`${track.index}`}
+              label={`${value} - ${track.selected}`}
+              value={`${value}`}
+              key={`${value}`}
             />
           );
         })}

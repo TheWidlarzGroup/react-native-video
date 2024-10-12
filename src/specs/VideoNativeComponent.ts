@@ -26,6 +26,11 @@ type VideoMetadata = Readonly<{
   imageUri?: string;
 }>;
 
+export type AdsConfig = Readonly<{
+  adTagUrl?: string;
+  adLanguage?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -44,6 +49,7 @@ export type VideoSrc = Readonly<{
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
+  ad?: AdsConfig;
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -62,6 +68,7 @@ type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   useExternalGetLicense?: boolean; // ios
   multiDrm?: WithDefault<boolean, false>; // android
+  localSourceEncryptionKeyScheme?: string; // ios
 }>;
 
 type CmcdMode = WithDefault<Int32, 1>;
@@ -296,11 +303,20 @@ export type OnAudioFocusChangedData = Readonly<{
 }>;
 
 type ControlsStyles = Readonly<{
+  hidePosition?: WithDefault<boolean, false>;
+  hidePlayPause?: WithDefault<boolean, false>;
+  hideForward?: WithDefault<boolean, false>;
+  hideRewind?: WithDefault<boolean, false>;
+  hideNext?: WithDefault<boolean, false>;
+  hidePrevious?: WithDefault<boolean, false>;
+  hideFullscreen?: WithDefault<boolean, false>;
   hideSeekBar?: WithDefault<boolean, false>;
   hideDuration?: WithDefault<boolean, false>;
-  seekIncrementMS?: Int32;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
   hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideSettingButton?: WithDefault<boolean, true>;
+  seekIncrementMS?: Int32;
+  liveLabel?: string;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
@@ -309,8 +325,6 @@ export type OnControlsVisibilityChange = Readonly<{
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  adTagUrl?: string;
-  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   maxBitRate?: Float;
   resizeMode?: WithDefault<string, 'none'>;
@@ -340,7 +354,6 @@ export interface VideoNativeProps extends ViewProps {
   fullscreenOrientation?: WithDefault<string, 'all'>;
   progressUpdateInterval?: Float;
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
-  localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
   bufferConfig?: BufferConfig; // Android

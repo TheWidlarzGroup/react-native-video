@@ -31,6 +31,7 @@ import Video, {
   type SelectedVideoTrack,
   type EnumValues,
   OnBandwidthUpdateData,
+  ControlsStyles,
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
@@ -39,6 +40,7 @@ import {
   isAndroid,
   srcList,
   textTracksSelectionBy,
+  audioTracksSelectionBy,
 } from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -117,18 +119,23 @@ const VideoPlayer: FC<Props> = ({}) => {
   }, []);
 
   const onAudioTracks = (data: OnAudioTracksData) => {
+    console.log('onAudioTracks', data);
     const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
       return x.selected;
     });
-    if (selectedTrack?.index) {
-      setAudioTracks(data.audioTracks);
-      setSelectedAudioTrack({
-        type: SelectedTrackType.INDEX,
-        value: selectedTrack.index,
-      });
-    } else {
-      setAudioTracks(data.audioTracks);
+    let value;
+    if (audioTracksSelectionBy === SelectedTrackType.INDEX) {
+      value = selectedTrack?.index;
+    } else if (audioTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+      value = selectedTrack?.language;
+    } else if (audioTracksSelectionBy === SelectedTrackType.TITLE) {
+      value = selectedTrack?.title;
     }
+    setAudioTracks(data.audioTracks);
+    setSelectedAudioTrack({
+      type: audioTracksSelectionBy,
+      value: value,
+    });
   };
 
   const onVideoTracks = (data: OnVideoTracksData) => {
@@ -141,23 +148,19 @@ const VideoPlayer: FC<Props> = ({}) => {
       return x?.selected;
     });
 
-    if (selectedTrack?.language) {
-      setTextTracks(data.textTracks);
-      let value;
-      if (textTracksSelectionBy === SelectedTrackType.INDEX) {
-        value = selectedTrack?.index;
-      } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
-        value = selectedTrack?.language;
-      } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
-        value = selectedTrack?.title;
-      }
-      setSelectedTextTrack({
-        type: textTracksSelectionBy,
-        value: value,
-      });
-    } else {
-      setTextTracks(data.textTracks);
+    setTextTracks(data.textTracks);
+    let value;
+    if (textTracksSelectionBy === SelectedTrackType.INDEX) {
+      value = selectedTrack?.index;
+    } else if (textTracksSelectionBy === SelectedTrackType.LANGUAGE) {
+      value = selectedTrack?.language;
+    } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
+      value = selectedTrack?.title;
     }
+    setSelectedTextTrack({
+      type: textTracksSelectionBy,
+      value: value,
+    });
   };
 
   const onLoad = (data: OnLoadData) => {
@@ -236,6 +239,23 @@ const VideoPlayer: FC<Props> = ({}) => {
     Platform.OS === 'ios' && setPaused(true);
   };
 
+  const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
+
+  const _subtitleStyle = {subtitlesFollowVideo: true};
+  const _controlsStyles : ControlsStyles = {
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true,
+    liveLabel: "LIVE"
+  };
+  const _bufferConfig = {
+    ...bufferConfig,
+    cacheSizeMB: useCache ? 200 : 0,
+  };
+
+  useEffect(() => {
+    videoRef.current?.setSource(currentSrc)
+  }, [currentSrc])
+
   return (
     <View style={styles.container}>
       <StatusBar animated={true} backgroundColor="black" hidden={false} />
@@ -245,8 +265,7 @@ const VideoPlayer: FC<Props> = ({}) => {
           <Video
             showNotificationControls={showNotificationControls}
             ref={videoRef}
-            source={currentSrc as ReactVideoSource}
-            adTagUrl={additional?.adTagUrl}
+//            source={currentSrc as ReactVideoSource}
             drm={additional?.drm}
             style={viewStyle}
             rate={rate}
@@ -278,21 +297,15 @@ const VideoPlayer: FC<Props> = ({}) => {
             selectedAudioTrack={selectedAudioTrack}
             selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={{
-              ...bufferConfig,
-              cacheSizeMB: useCache ? 200 : 0,
-            }}
+            bufferConfig={_bufferConfig}
             preventsDisplaySleepDuringVideoPlayback={true}
-            renderLoader={showPoster ? <VideoLoader /> : undefined}
+            renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
             onPlaybackStateChanged={onPlaybackStateChanged}
             bufferingStrategy={BufferingStrategyType.DEFAULT}
             debug={{enable: true, thread: true}}
-            subtitleStyle={{subtitlesFollowVideo: true}}
-            controlsStyles={{
-              hideNavigationBarOnFullScreenMode: true,
-              hideNotificationBarOnFullScreenMode: true,
-            }}
+            subtitleStyle={_subtitleStyle}
+            controlsStyles={_controlsStyles}
           />
         </TouchableOpacity>
       )}

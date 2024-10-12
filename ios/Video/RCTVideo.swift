@@ -17,7 +17,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     private var _playerViewController: RCTVideoPlayerViewController?
     private var _videoURL: NSURL?
-    private var _localSourceEncryptionKeyScheme: String?
 
     /* Required to publish events */
     private var _eventDispatcher: RCTEventDispatcher?
@@ -49,12 +48,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _preventsDisplaySleepDuringVideoPlayback = true
     private var _preferredForwardBufferDuration: Float = 0.0
     private var _playWhenInactive = false
-    private var _ignoreSilentSwitch: String! = "inherit" // inherit, ignore, obey
-    private var _mixWithOthers: String! = "inherit" // inherit, mix, duck
-    private var _resizeMode: String! = "cover"
+    private var _ignoreSilentSwitch: String = "inherit" // inherit, ignore, obey
+    private var _mixWithOthers: String = "inherit" // inherit, mix, duck
+    private var _resizeMode: String = "cover"
     private var _fullscreen = false
     private var _fullscreenAutorotate = true
-    private var _fullscreenOrientation: String! = "all"
+    private var _fullscreenOrientation: String = "all"
     private var _fullscreenPlayerPresented = false
     private var _fullscreenUncontrolPlayerPresented = false // to call events switching full screen mode from player controls
     private var _filterName: String!
@@ -87,8 +86,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     /* IMA Ads */
-    private var _adTagUrl: String?
-    private var _adLanguage: String?
     #if USE_GOOGLE_IMA
         private var _imaAdsManager: RCTIMAAdsManager!
         /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
@@ -97,7 +94,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _didRequestAds = false
     private var _adPlaying = false
 
-    private var _resouceLoaderDelegate: RCTResourceLoaderDelegate?
+    private lazy var _drmManager: DRMManager? = DRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
 
     #if USE_VIDEO_CACHING
@@ -375,7 +372,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
-                if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
+                if !_didRequestAds && currentTimeSecs >= 0.0001 && _source?.adParams.adTagUrl != nil {
                     _imaAdsManager.requestAds()
                     _didRequestAds = true
                 }
@@ -421,7 +418,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "type": _source?.type ?? NSNull(),
                 "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
             ],
-            "drm": source.drm?.json ?? NSNull(),
+            "drm": source.drm.json ?? NSNull(),
             "target": reactTag as Any,
         ])
 
@@ -458,14 +455,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         #endif
 
-        if source.drm != nil || _localSourceEncryptionKeyScheme != nil {
-            _resouceLoaderDelegate = RCTResourceLoaderDelegate(
+        if source.drm.json != nil {
+            if _drmManager == nil {
+                _drmManager = DRMManager()
+            }
+
+            _drmManager?.createContentKeyRequest(
                 asset: asset,
-                drm: source.drm,
-                localSourceEncryptionKeyScheme: _localSourceEncryptionKeyScheme,
+                drmParams: source.drm,
+                reactTag: reactTag,
                 onVideoError: onVideoError,
-                onGetLicense: onGetLicense,
-                reactTag: reactTag
+                onGetLicense: onGetLicense
             )
         }
 
@@ -525,7 +525,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         #if USE_GOOGLE_IMA
-            if _adTagUrl != nil {
+            if _source?.adParams.adTagUrl != nil {
                 // Set up your content playhead and contentComplete callback.
                 _contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: _player!)
 
@@ -562,7 +562,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
             self.removePlayerLayer()
             self._playerObserver.player = nil
-            self._resouceLoaderDelegate = nil
+            self._drmManager = nil
             self._playerObserver.playerItem = nil
 
             // perform on next run loop, otherwise other passed react-props may not be set
@@ -594,13 +594,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         DispatchQueue.global(qos: .default).async(execute: initializeSource)
     }
 
-    @objc
-    func setLocalSourceEncryptionKeyScheme(_ keyScheme: String) {
-        _localSourceEncryptionKeyScheme = keyScheme
-    }
-
     func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
-        if source.textTracks.isEmpty != true || uri.hasSuffix(".m3u8") {
+        if source.textTracks.isEmpty == true || uri.hasSuffix(".m3u8") {
             return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
         }
 
@@ -744,14 +739,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setIgnoreSilentSwitch(_ ignoreSilentSwitch: String?) {
-        _ignoreSilentSwitch = ignoreSilentSwitch
+        _ignoreSilentSwitch = ignoreSilentSwitch ?? "inherit"
         RCTPlayerOperations.configureAudio(ignoreSilentSwitch: _ignoreSilentSwitch, mixWithOthers: _mixWithOthers, audioOutput: _audioOutput)
         applyModifiers()
     }
 
     @objc
     func setMixWithOthers(_ mixWithOthers: String?) {
-        _mixWithOthers = mixWithOthers
+        _mixWithOthers = mixWithOthers ?? "inherit"
         applyModifiers()
     }
 
@@ -1053,9 +1048,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setFullscreenOrientation(_ orientation: String?) {
-        _fullscreenOrientation = orientation
+        _fullscreenOrientation = orientation ?? "all"
         if _fullscreenPlayerPresented {
-            _playerViewController?.preferredOrientation = orientation
+            _playerViewController?.preferredOrientation = _fullscreenOrientation
         }
     }
 
@@ -1219,16 +1214,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - RCTIMAAdsManager
 
     func getAdLanguage() -> String? {
-        return _adLanguage
+        return _source?.adParams.adLanguage
     }
 
     func getAdTagUrl() -> String? {
-        return _adTagUrl
-    }
-
-    @objc
-    func setAdTagUrl(_ adTagUrl: String!) {
-        _adTagUrl = adTagUrl
+        return _source?.adParams.adTagUrl
     }
 
     #if USE_GOOGLE_IMA
@@ -1295,7 +1285,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player as Any)
         _player = nil
-        _resouceLoaderDelegate = nil
+        _drmManager = nil
         _playerObserver.clearPlayer()
 
         self.removePlayerLayer()
@@ -1328,12 +1318,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func setLicenseResult(_ license: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResult(license, licenseUrl)
+    func setLicenseResult(_ license: String, _ licenseUrl: String) {
+        _drmManager?.setJSLicenseResult(license: license, licenseUrl: licenseUrl)
     }
 
-    func setLicenseResultError(_ error: String!, _ licenseUrl: String!) {
-        _resouceLoaderDelegate?.setLicenseResultError(error, licenseUrl)
+    func setLicenseResultError(_ error: String, _ licenseUrl: String) {
+        _drmManager?.setJSLicenseError(error: error, licenseUrl: licenseUrl)
     }
 
     // MARK: - RCTPlayerObserverHandler
@@ -1634,7 +1624,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             )
         } else {
-            _playerObserver.removePlayerTimeObserver()
+            _player?.pause()
+            _player?.rate = 0.0
         }
     }
 

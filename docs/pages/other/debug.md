@@ -86,11 +86,6 @@ buildscript {
 }
 ```
 
-### Desugaring
-to be able to link you may also need to enable coreLibraryDesugaringEnabled in your app.
-
-See: https://developer.android.com/studio/write/java8-support?hl=fr#library-desugaring for more informations.
-
 ## It's still not working
 
-You can try to open a ticket now !
+You can try to open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact)!

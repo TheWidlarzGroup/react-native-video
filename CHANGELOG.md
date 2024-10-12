@@ -1,5 +1,61 @@
 
 
+## [6.6.4](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.3...v6.6.4) (2024-10-03)
+
+
+### Features
+
+* **android:** add live video label configuration ([#4190](https://github.com/TheWidlarzGroup/react-native-video/issues/4190)) ([149924f](https://github.com/TheWidlarzGroup/react-native-video/commit/149924ffcb0cbdeaa8c671ebb4b3b6115920131a))
+
+## [6.6.3](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.2...v6.6.3) (2024-09-29)
+
+
+### Bug Fixes
+
+* **android:** bad rotation handling ([#4205](https://github.com/TheWidlarzGroup/react-native-video/issues/4205)) ([3ecf324](https://github.com/TheWidlarzGroup/react-native-video/commit/3ecf324bb30208ab8efbf00958ebd4590ddf8d39))
+* **docs:** invalid URLs in updating section ([#4201](https://github.com/TheWidlarzGroup/react-native-video/issues/4201)) ([c81eea5](https://github.com/TheWidlarzGroup/react-native-video/commit/c81eea54d8291c5131fd59a93f198e0fd5f3673c))
+* **ios:** Add safety checks and remove some of the ! in types declaration ([#4182](https://github.com/TheWidlarzGroup/react-native-video/issues/4182)) ([ae82c83](https://github.com/TheWidlarzGroup/react-native-video/commit/ae82c83eef2fc7c383fd844c7471613e4ac1c7ee))
+* **tvos:** typo ([#4204](https://github.com/TheWidlarzGroup/react-native-video/issues/4204)) ([b11f05f](https://github.com/TheWidlarzGroup/react-native-video/commit/b11f05f1753a4cb963b94d1e1d8d1f6c37af2a9d))
+
+
+### Features
+
+* **android:** allow to hide specific controls ([#4183](https://github.com/TheWidlarzGroup/react-native-video/issues/4183)) ([279cc0e](https://github.com/TheWidlarzGroup/react-native-video/commit/279cc0e5ed712488fc3c153c62b14f13048103f2))
+
+## [6.6.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.1...v6.6.2) (2024-09-20)
+
+
+### Features
+
+* **iOS:** rewrite DRM Module ([#4136](https://github.com/TheWidlarzGroup/react-native-video/issues/4136)) ([0e4c95d](https://github.com/TheWidlarzGroup/react-native-video/commit/0e4c95def968a4091fdd18d07215ba592eec99cb))
+
+## [6.6.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.0...v6.6.1) (2024-09-18)
+
+
+### Bug Fixes
+
+* **ios:** fix side loaded text track management ([#4180](https://github.com/TheWidlarzGroup/react-native-video/issues/4180)) ([7d43d5d](https://github.com/TheWidlarzGroup/react-native-video/commit/7d43d5d3da72495e94468756be21442f96cc7a89))
+
+# [6.6.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.5.0...v6.6.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **android:** ensure maxbitrate & selectedVideoTrack interact correctly ([#4155](https://github.com/TheWidlarzGroup/react-native-video/issues/4155)) ([7f6b500](https://github.com/TheWidlarzGroup/react-native-video/commit/7f6b500c82122325c326b6dcacaf7af8039b2b33))
+* **android:** ensure pause is well tken in account after onEnd ([#4147](https://github.com/TheWidlarzGroup/react-native-video/issues/4147)) ([b2fd8d6](https://github.com/TheWidlarzGroup/react-native-video/commit/b2fd8d62a10ee64e6208b43120ca9231008309c2))
+* **expo-plugin:** add check for existing service in AndroidManifest for notification controls  ([#4172](https://github.com/TheWidlarzGroup/react-native-video/issues/4172)) ([0538b3b](https://github.com/TheWidlarzGroup/react-native-video/commit/0538b3b46801a535c76cf52db28cee76f2aeb0c5))
+* **ios:** ensure onBandwidthUpdate is reported only when value change ([#4149](https://github.com/TheWidlarzGroup/react-native-video/issues/4149)) ([809a730](https://github.com/TheWidlarzGroup/react-native-video/commit/809a73019836f95385891c2bba5c72b0610ffcb1))
+* **ios:** losing subtitle selection on foreground ([#3707](https://github.com/TheWidlarzGroup/react-native-video/issues/3707)) ([bee4123](https://github.com/TheWidlarzGroup/react-native-video/commit/bee4123402f4bc08dd2eb19ab0011ffdc795d0e3))
+* **JS:** improve loader api to allow function call instead of component ([#4171](https://github.com/TheWidlarzGroup/react-native-video/issues/4171)) ([835186a](https://github.com/TheWidlarzGroup/react-native-video/commit/835186a321e1940932a045a59e26e43a040fa334))
+* refactor side loaded text tracks management ([#4158](https://github.com/TheWidlarzGroup/react-native-video/issues/4158)) ([84a27f3](https://github.com/TheWidlarzGroup/react-native-video/commit/84a27f3d9f90624af3c5c3cbff50d754bab9baa4))
+* **sample:** remove warning on ios with NavigationBar ([#4148](https://github.com/TheWidlarzGroup/react-native-video/issues/4148)) ([e18769a](https://github.com/TheWidlarzGroup/react-native-video/commit/e18769ab3a6a7f4ebc459ab550f105f4d18f8201))
+* **visionOS:** remove unsupported apis ([#4154](https://github.com/TheWidlarzGroup/react-native-video/issues/4154)) ([2c1fc96](https://github.com/TheWidlarzGroup/react-native-video/commit/2c1fc964bf2cb97624c8cc37ff8138465619fc61))
+
+
+### Features
+
+* **android:** upgrade dependencies / media3 1.4.1 / androidxCore to 1.13.1 / androidxActivity 1.8.2 ([#4173](https://github.com/TheWidlarzGroup/react-native-video/issues/4173)) ([e57c7bd](https://github.com/TheWidlarzGroup/react-native-video/commit/e57c7bda5df7d624d90b20620859b8a4eb3f76b7))
+
 # [6.5.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.4.5...v6.5.0) (2024-09-04)
 
 

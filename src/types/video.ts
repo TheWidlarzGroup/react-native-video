@@ -7,6 +7,7 @@ import type {
   ViewStyle,
   ImageRequireSource,
   ImageURISource,
+  ImageStyle,
 } from 'react-native';
 import type {ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
@@ -37,6 +38,7 @@ export type ReactVideoSourceProperties = {
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
+  ad?: AdConfig;
 };
 
 export type ReactVideoSource = Readonly<
@@ -72,6 +74,11 @@ export enum DRMType {
   FAIRPLAY = 'fairplay',
 }
 
+export type AdConfig = Readonly<{
+  adTagUrl?: string;
+  adLanguage?: ISO639_1;
+}>;
+
 export type Drm = Readonly<{
   type?: DRMType;
   licenseServer?: string;
@@ -80,6 +87,7 @@ export type Drm = Readonly<{
   certificateUrl?: string; // ios
   base64Certificate?: boolean; // ios default: false
   multiDrm?: boolean; // android
+  localSourceEncryptionKeyScheme?: string; // ios
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getLicense?: (
     spcBase64: string,
@@ -249,17 +257,34 @@ export type AudioOutput = 'speaker' | 'earpiece';
 export type ControlsStyles = {
   hideSeekBar?: boolean;
   hideDuration?: boolean;
-  seekIncrementMS?: number;
+  hidePosition?: boolean;
+  hidePlayPause?: boolean;
+  hideForward?: boolean;
+  hideRewind?: boolean;
+  hideNext?: boolean;
+  hidePrevious?: boolean;
+  hideFullscreen?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  hideSettingButton?: boolean;
+  seekIncrementMS?: number;
+  liveLabel?: string;
 };
+
+export interface ReactVideoRenderLoaderProps {
+  source?: ReactVideoSource;
+  style?: StyleProp<ImageStyle>;
+  resizeMode?: EnumValues<VideoResizeMode>;
+}
 
 export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   source?: ReactVideoSource;
   /** @deprecated Use source.drm */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
+  /** @deprecated Use source.ad.adTagUrl */
   adTagUrl?: string;
+  /** @deprecated Use source.ad.adLanguage */
   adLanguage?: ISO639_1;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
@@ -296,7 +321,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   preventsDisplaySleepDuringVideoPlayback?: boolean;
   progressUpdateInterval?: number;
   rate?: number;
-  renderLoader?: ReactNode;
+  renderLoader?: ReactNode | ((arg0: ReactVideoRenderLoaderProps) => ReactNode);
   repeat?: boolean;
   reportBandwidth?: boolean; //Android
   resizeMode?: EnumValues<VideoResizeMode>;
@@ -315,6 +340,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use viewType*/
   useSecureView?: boolean; // Android
   volume?: number;
+  /** @deprecated use **localSourceEncryptionKeyScheme** key in **drm** props instead */
   localSourceEncryptionKeyScheme?: string;
   debug?: DebugConfig;
   allowsExternalPlayback?: boolean; // iOS
