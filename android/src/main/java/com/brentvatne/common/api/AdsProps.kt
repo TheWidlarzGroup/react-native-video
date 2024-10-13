@@ -2,7 +2,6 @@ package com.brentvatne.common.api
 
 import android.net.Uri
 import android.text.TextUtils
-import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.facebook.react.bridge.ReadableMap
 
