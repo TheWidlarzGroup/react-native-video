@@ -84,7 +84,20 @@ Future:
 
 `enterPictureInPicture()`
 
-To use this feature on Android, you must:
+To use this feature on Android with Expo, you must set 'enableAndroidPictureInPicture' true within expo plugin config (app.json)
+
+```json
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        "enableAndroidPictureInPicture": true,
+      }
+    ]
+  ]
+```
+
+To use this feature on Android with Bare React Native, you must:
 
 - [Declare PiP support](https://developer.android.com/develop/ui/views/picture-in-picture#declaring) in your AndroidManifest.xml
 - setting `android:supportsPictureInPicture` to `true`

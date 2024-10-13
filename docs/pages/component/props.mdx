@@ -258,7 +258,20 @@ Determine whether to play media as a picture in picture when the user goes to th
 - **false (default)** - Don't not play as picture in picture
 - **true** - Play the media as picture in picture
 
-To use this feature on Android, you must:
+To use this feature on Android with Expo, you must set 'enableAndroidPictureInPicture' true within expo plugin config (app.json)
+
+```json
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        "enableAndroidPictureInPicture": true,
+      }
+    ]
+  ]
+```
+
+To use this feature on Android with Bare React Native, you must:
 
 - [Declare PiP support](https://developer.android.com/develop/ui/views/picture-in-picture#declaring) in your AndroidManifest.xml
 - setting `android:supportsPictureInPicture` to `true`

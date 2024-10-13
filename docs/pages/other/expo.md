@@ -38,3 +38,4 @@ It's useful when you are using `expo` managed workflow (expo prebuild) as it wil
 | enableADSExtension | boolean | false | Add required changes to use ads extension for video player |
 | enableCacheExtension | boolean | false | Add required changes to use cache extension for video player on iOS |
 | androidExtensions | object | {} | You can enable/disable extensions as per your requirement - this allow to reduce library size on android |
+| enableAndroidPictureInPicture | boolean | false | Apply configs to be able to use Picture-in-picture on android |
