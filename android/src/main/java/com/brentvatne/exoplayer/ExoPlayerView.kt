@@ -40,7 +40,7 @@ class ExoPlayerView(private val context: Context) :
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
     )
-    private var adOverlayFrameLayout: FrameLayout
+    private var adOverlayFrameLayout: FrameLayout? = null
     val isPlaying: Boolean
         get() = player != null && player?.isPlaying == true
 
@@ -72,12 +72,9 @@ class ExoPlayerView(private val context: Context) :
 
         updateSurfaceView(viewType)
 
-        adOverlayFrameLayout = FrameLayout(context)
-
         layout.addView(shutterView, 1, layoutParams)
         if (localStyle.subtitlesFollowVideo) {
             layout.addView(subtitleLayout, layoutParams)
-            layout.addView(adOverlayFrameLayout, layoutParams)
         }
 
         addViewInLayout(layout, 0, aspectRatioParams)
@@ -194,22 +191,21 @@ class ExoPlayerView(private val context: Context) :
         }
     }
 
-    private fun hideShutterView() {
-        shutterView.setVisibility(INVISIBLE)
-        surfaceView?.setAlpha(1f)
-    }
-
-    private fun showShutterView() {
-        shutterView.setVisibility(VISIBLE)
-        surfaceView?.setAlpha(0f)
-    }
-
+    var adsShown = false
     fun showAds() {
-        adOverlayFrameLayout.setVisibility(View.VISIBLE)
+        if (!adsShown) {
+            adOverlayFrameLayout = FrameLayout(context)
+            layout.addView(adOverlayFrameLayout, layoutParams)
+            adsShown = true
+        }
     }
 
     fun hideAds() {
-        adOverlayFrameLayout.setVisibility(View.GONE)
+        if (adsShown) {
+            layout.removeView(adOverlayFrameLayout)
+            adOverlayFrameLayout = null
+            adsShown = false
+        }
     }
 
     fun updateShutterViewVisibility() {
