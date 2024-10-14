@@ -123,21 +123,75 @@ class DRMManager: NSObject {
     }
 
     // MARK: - Private
+    
+    private func downloadNagra(spcData: Data) async throws -> Data {
+        // Safely unwrap the certificateUrl
+        guard let licenseUrl = drmParams?.licenseServer, let licenseServerUrl = URL(string: licenseUrl) else {
+            throw RCTVideoError.noLicenseServerURL
+        }
+        var request = URLRequest(url: licenseServerUrl)
+        request.httpMethod = "POST"
+        // Append headers from drmParams?.headers
+            if let headers = drmParams?.headers as? [String: Any] {
+                for (key, value) in headers {
+                    if let keyString = key as? String, let valueString = value as? String {
+                        request.addValue(valueString, forHTTPHeaderField: keyString)
+                    }
+                }
+        }
+        request.httpBody = spcData
+        
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw RCTVideoError.licenseRequestFailed(1)
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw RCTVideoError.licenseRequestFailed(1)
+        }
+
+        guard let jsonBody = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            throw RCTVideoError.licenseRequestFailed(1)
+        }
+
+        guard let ckcMessage = jsonBody["CkcMessage"] as? String, let ckcData = Data(base64Encoded: ckcMessage) else {
+            throw RCTVideoError.licenseRequestFailed(1)
+        }
+
+        return ckcData
+    }
 
     private func processContentKeyRequest(keyRequest: AVContentKeyRequest) async throws {
         guard let assetId = getAssetId(keyRequest: keyRequest),
-              let assetIdData = assetId.data(using: .utf8) else {
+              let assetIdData = generateAssetIdData(contentKeyIdentifier: assetId) else {
             throw RCTVideoError.invalidContentId
         }
 
         let appCertificate = try await requestApplicationCertificate()
-        let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificate, contentIdentifier: assetIdData)
-
-        if onGetLicense != nil {
-            try await requestLicenseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
-        } else {
-            let license = try await requestLicense(spcData: spcData)
-            try finishProcessingContentKeyRequest(keyRequest: keyRequest, license: license)
+//        print("Certificate data retrieved, assetData: \(assetIdData), assetId: \(assetId)")
+        do {
+            let spcData = try await keyRequest.makeStreamingContentKeyRequestData(forApp: appCertificate, contentIdentifier: assetIdData)
+            
+            if onGetLicense != nil {
+                try await requestLicenseFromJS(spcData: spcData, assetId: assetId, keyRequest: keyRequest)
+            } else {
+                let ckcData = try await downloadNagra(spcData: spcData)
+//                print("License data retrieved: \(ckcData)")
+                let keyResponse = AVContentKeyResponse(fairPlayStreamingKeyResponseData: ckcData)
+//                print("Key response: \(keyResponse)")
+                keyRequest.processContentKeyResponse(keyResponse)
+            }
+            
+            // Proceed with using the spcData, like sending it to a server, etc.
+        } catch let nsError as NSError {
+            print("Failed to make streaming request: \(nsError.localizedDescription)")
+            print("Error code: \(nsError.code)")
+            print("Error domain: \(nsError.domain)")
+            if let underlyingError = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+                print("Underlying error: \(underlyingError.localizedDescription)")
+            }
         }
     }
 
@@ -205,9 +259,50 @@ class DRMManager: NSObject {
         }
 
         if let url = keyRequest.identifier as? String {
-            return url.replacingOccurrences(of: "skd://", with: "")
+            return url.replacingOccurrences(of: "skd", with: "https")
         }
 
         return nil
     }
+    
+    private func generateAssetIdData(contentKeyIdentifier: String) -> Data? {
+        guard let contentKeyIdentifierURL = URL(string: contentKeyIdentifier) else {
+            return nil
+        }
+        let (contentId, keyId, iVString) =  self.parseSSPLoadingRequest(url: contentKeyIdentifierURL)
+        let assetIdDict = ["ContentId": contentId, "KeyId": keyId, "IV": iVString]
+        
+        return try? JSONSerialization.data(withJSONObject: assetIdDict, options: [])
+    }
+    
+    
+    private func parseSSPLoadingRequest(url: URL) -> (String, String, String) {
+      if let jsonResults = jsonFromURL(url: url),
+        let contentId = jsonResults["ContentId"] as? String,
+        let keyId = jsonResults["KeyId"] as? String,
+        let ivString = jsonResults["IV"] as? String {
+        
+        return (contentId, keyId, ivString)
+      }
+      
+      return ("", "", "")
+    }
+    
+    private func jsonFromURL(url: URL) -> [String: Any]? {
+      guard let host = url.host,
+        let decodedUrlData = Data(base64Encoded: host, options: NSData.Base64DecodingOptions(rawValue: 0)) else {
+          return nil
+      }
+      
+      do {
+        let jsonResults = try JSONSerialization.jsonObject(with: decodedUrlData, options: []) as? [String: Any]
+        return jsonResults
+      } catch {
+        return nil
+      }
+    }
+
 }
+
+
+
