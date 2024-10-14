@@ -299,21 +299,21 @@ public class ReactExoplayerView extends FrameLayout implements
         });
     }
 
-    public void refreshTitle_fork(){
-        if( playerControlView == null ){ return; }
-        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
-
-        // Hide title if it's not available
-        if( this.srcTitle == null || this.srcTitle.length() < 1 ){
-            exoTitleLayout.setVisibility(INVISIBLE);
-            return;
-        }
-
-        // Add title to the TextView and make it visible
-        TextView titleView = playerControlView.findViewById(R.id.exo_title);
-        titleView.setText(this.srcTitle);
-        exoTitleLayout.setVisibility(VISIBLE);
-    }
+//    public void refreshTitle_fork(){
+//        if( playerControlView == null ){ return; }
+//        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
+//
+//        // Hide title if it's not available
+//        if( this.srcTitle == null || this.srcTitle.length() < 1 ){
+//            exoTitleLayout.setVisibility(INVISIBLE);
+//            return;
+//        }
+//
+//        // Add title to the TextView and make it visible
+//        TextView titleView = playerControlView.findViewById(R.id.exo_title);
+//        titleView.setText(this.srcTitle);
+//        exoTitleLayout.setVisibility(VISIBLE);
+//    }
 
     public void setControllerFocusByID(@IdRes int buttonID){
         final View button = playerControlView.findViewById(buttonID);
@@ -453,47 +453,47 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    public void initializePlayerControlsTV_fork(LegacyPlayerControlView playerControlView){
-        if(!isTelevision()){ return; }
-        
-        // Add padding to player title to account for overscan
-        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
-        exoTitleLayout.setPadding(
-            DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING
-        );
-
-        // Add padding to player controller to account for overscan
-        LinearLayout exoBottomBarLayout = playerControlView.findViewById(R.id.exo_bottom_bar);
-        exoBottomBarLayout.setPadding(
-            DEFAULT_TV_CONTROLLER_PADDING,
-            0,
-            DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING
-        );
-
-        //DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE
-        TextView durationView = playerControlView.findViewById(R.id.exo_duration);
-        TextView positionView = playerControlView.findViewById(R.id.exo_position);
-        durationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
-        positionView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
-
-        // Calculate label view widths from dp to pixels
-        final float dipScale = getContext().getResources().getDisplayMetrics().density;
-        int durPosWidth = (int) (DEFAULT_TV_CONTROLLER_DURATION_WIDHT * dipScale + 0.5f);
-
-        // Set duration view width
-        ViewGroup.LayoutParams durLayout = durationView.getLayoutParams();
-        durLayout.width = durPosWidth;
-        durationView.setLayoutParams(durLayout);
-
-        // Set position view width
-        ViewGroup.LayoutParams posLayout = positionView.getLayoutParams();
-        posLayout.width = durPosWidth;
-        positionView.setLayoutParams(posLayout);
-    }
+//    public void initializePlayerControlsTV_fork(LegacyPlayerControlView playerControlView){
+//        if(!isTelevision()){ return; }
+//
+//        // Add padding to player title to account for overscan
+//        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
+//        exoTitleLayout.setPadding(
+//            DEFAULT_TV_CONTROLLER_PADDING,
+//            DEFAULT_TV_CONTROLLER_PADDING,
+//            DEFAULT_TV_CONTROLLER_PADDING,
+//            DEFAULT_TV_CONTROLLER_PADDING
+//        );
+//
+//        // Add padding to player controller to account for overscan
+//        LinearLayout exoBottomBarLayout = playerControlView.findViewById(R.id.exo_bottom_bar);
+//        exoBottomBarLayout.setPadding(
+//            DEFAULT_TV_CONTROLLER_PADDING,
+//            0,
+//            DEFAULT_TV_CONTROLLER_PADDING,
+//            DEFAULT_TV_CONTROLLER_PADDING
+//        );
+//
+//        //DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE
+//        TextView durationView = playerControlView.findViewById(R.id.exo_duration);
+//        TextView positionView = playerControlView.findViewById(R.id.exo_position);
+//        durationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+//        positionView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+//
+//        // Calculate label view widths from dp to pixels
+//        final float dipScale = getContext().getResources().getDisplayMetrics().density;
+//        int durPosWidth = (int) (DEFAULT_TV_CONTROLLER_DURATION_WIDHT * dipScale + 0.5f);
+//
+//        // Set duration view width
+//        ViewGroup.LayoutParams durLayout = durationView.getLayoutParams();
+//        durLayout.width = durPosWidth;
+//        durationView.setLayoutParams(durLayout);
+//
+//        // Set position view width
+//        ViewGroup.LayoutParams posLayout = positionView.getLayoutParams();
+//        posLayout.width = durPosWidth;
+//        positionView.setLayoutParams(posLayout);
+//    }
     // END: FORK
 
     private boolean viewHasDropped = false;
@@ -662,7 +662,7 @@ public class ReactExoplayerView extends FrameLayout implements
             playerControlView = new LegacyPlayerControlView(getContext());
             
             // FORK: Apply TV specific Styling
-            initializePlayerControlsTV_fork(playerControlView);
+//            initializePlayerControlsTV_fork(playerControlView);
 
             playerControlView.addVisibilityListener(new LegacyPlayerControlView.VisibilityListener() {
                 @Override
@@ -712,7 +712,6 @@ public class ReactExoplayerView extends FrameLayout implements
         //Handling the fullScreenButton click event
         final ImageButton fullScreenButton = playerControlView.findViewById(R.id.exo_fullscreen);
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
-        updateFullScreenButtonVisbility();
         refreshControlsStyles();
         //BEGIN: FORK
         // Ensure that view is in focus (necessary for listening to remote dispatches)
@@ -1647,7 +1646,7 @@ public class ReactExoplayerView extends FrameLayout implements
     // Player.Listener implementation
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
-        refreshTitle_fork();
+//        refreshTitle_fork();
     }
 
     @Override
