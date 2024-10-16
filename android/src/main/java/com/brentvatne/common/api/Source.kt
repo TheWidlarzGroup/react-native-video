@@ -48,6 +48,9 @@ class Source {
     /** Metadata to display in notification */
     var metadata: Metadata? = null
 
+    /** Allowed reload before failure notification */
+    var minLoadRetryCount = 3
+
     /** http header list */
     val headers: MutableMap<String, String> = HashMap()
 
@@ -91,7 +94,8 @@ class Source {
                 contentStartTime == other.contentStartTime &&
                 cmcdProps == other.cmcdProps &&
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
-                adsProps == other.adsProps
+                adsProps == other.adsProps &&
+                minLoadRetryCount == other.minLoadRetryCount
             )
     }
 
@@ -159,6 +163,7 @@ class Source {
         private const val PROP_SRC_ADS = "ad"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
+        private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -223,7 +228,7 @@ class Source {
                 }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
-
+                source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {
                     if (propSrcHeadersArray.size() > 0) {

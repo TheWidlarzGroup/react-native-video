@@ -39,6 +39,7 @@ export type ReactVideoSourceProperties = {
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
   ad?: AdConfig;
+  minLoadRetryCount?: number; // Android
 };
 
 export type ReactVideoSource = Readonly<
@@ -305,6 +306,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   fullscreenOrientation?: EnumValues<FullscreenOrientationType>; // iOS
   hideShutterView?: boolean; //	Android
   ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
+  /** @deprecated Use source.minLoadRetryCount */
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
   mixWithOthers?: EnumValues<MixWithOthersType>; // iOS

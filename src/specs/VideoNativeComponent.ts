@@ -50,6 +50,7 @@ export type VideoSrc = Readonly<{
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
   ad?: AdsConfig;
+  minLoadRetryCount?: Int32; // Android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -362,7 +363,6 @@ export interface VideoNativeProps extends ViewProps {
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android
   hideShutterView?: boolean; //	Android
-  minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
   viewType?: Int32; // Android

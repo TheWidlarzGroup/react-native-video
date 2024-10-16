@@ -124,6 +124,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onVideoTracks,
       onAspectRatio,
       localSourceEncryptionKeyScheme,
+      minLoadRetryCount,
       ...rest
     },
     ref,
@@ -233,6 +234,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
             : undefined);
 
+        const _minLoadRetryCount =
+          _source.minLoadRetryCount || minLoadRetryCount;
         return {
           uri,
           isNetwork,
@@ -253,6 +256,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           textTracks: _textTracks,
           textTracksAllowChunklessPreparation:
             resolvedSource.textTracksAllowChunklessPreparation,
+          minLoadRetryCount: _minLoadRetryCount,
         };
       },
       [
@@ -261,6 +265,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         contentStartTime,
         drm,
         localSourceEncryptionKeyScheme,
+        minLoadRetryCount,
         source?.cmcd,
         textTracks,
       ],
