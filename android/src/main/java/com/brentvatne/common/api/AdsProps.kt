@@ -2,7 +2,6 @@ package com.brentvatne.common.api
 
 import android.net.Uri
 import android.text.TextUtils
-import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.facebook.react.bridge.ReadableMap
 
@@ -26,8 +25,6 @@ class AdsProps {
         @JvmStatic
         fun parse(src: ReadableMap?): AdsProps {
             val adsProps = AdsProps()
-            DebugLog.w("olivier", "uri: parse AdsProps")
-
             if (src != null) {
                 val uriString = ReactBridgeUtils.safeGetString(src, PROP_AD_TAG_URL)
                 if (TextUtils.isEmpty(uriString)) {
