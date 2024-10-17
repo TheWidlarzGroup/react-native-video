@@ -856,9 +856,9 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private AdsMediaSource initializeAds(MediaSource videoSource, Source runningSource) {
-        AdsMediaSource mediaSourceWithAds = null;
-        AdsProps adProps = source.getAdsProps();
-        if (adProps != null) {
+        AdsProps adProps = runningSource.getAdsProps();
+        Uri uri = runningSource.getUri();
+        if (adProps != null && uri != null) {
             Uri adTagUrl = adProps.getAdTagUrl();
             if (adTagUrl != null) {
                 exoPlayerView.showAds();
@@ -879,11 +879,10 @@ public class ReactExoplayerView extends FrameLayout implements
                     DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
                             .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
                     DataSpec adTagDataSpec = new DataSpec(adTagUrl);
-                    mediaSourceWithAds = new AdsMediaSource(videoSource,
+                    return new AdsMediaSource(videoSource,
                             adTagDataSpec,
-                            ImmutableList.of(runningSource.getUri(), adTagUrl),
+                            ImmutableList.of(uri, adTagUrl),
                             mediaSourceFactory, adsLoader, exoPlayerView);
-                    return mediaSourceWithAds;
                 }
             }
         }
