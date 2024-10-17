@@ -2,6 +2,7 @@ import {type ConfigPlugin, createRunOncePlugin} from '@expo/config-plugins';
 import type {ConfigProps} from './@types';
 import {withNotificationControls} from './withNotificationControls';
 import {withAndroidExtensions} from './withAndroidExtensions';
+import {withAndroidPictureInPicture} from './withAndroidPictureInPicture';
 import {withAds} from './withAds';
 import {withBackgroundAudio} from './withBackgroundAudio';
 import {withPermissions} from '@expo/config-plugins/build/android/Permissions';
@@ -18,6 +19,13 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
     androidPermissions.push('android.permission.FOREGROUND_SERVICE');
     androidPermissions.push(
       'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+    );
+  }
+
+  if (props.enableAndroidPictureInPicture) {
+    config = withAndroidPictureInPicture(
+      config,
+      props.enableAndroidPictureInPicture,
     );
   }
 

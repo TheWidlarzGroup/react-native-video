@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
@@ -122,6 +123,14 @@ class FullScreenPlayerView(
                 initialNotificationBarIsVisible,
                 initialSystemBarsBehavior
             )
+        }
+    }
+
+    fun hideWithoutPlayer() {
+        for (i in 0 until containerView.childCount) {
+            if (containerView.getChildAt(i) !== exoPlayerView) {
+                containerView.getChildAt(i).visibility = View.GONE
+            }
         }
     }
 

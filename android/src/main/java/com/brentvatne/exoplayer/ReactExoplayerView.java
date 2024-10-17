@@ -10,6 +10,8 @@ import static androidx.media3.common.C.TIME_END_OF_SOURCE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,7 +25,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.Choreographer;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -34,6 +38,9 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
@@ -122,6 +129,7 @@ import com.brentvatne.react.R;
 import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.brentvatne.receiver.PictureInPictureReceiver;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
@@ -202,6 +210,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean isPaused;
     private boolean isBuffering;
     private boolean muted = false;
+    private boolean enterPictureInPictureOnLeave = false;
+    private boolean isInPictureInPicture = false;
+    private PictureInPictureParams.Builder pictureInPictureParamsBuilder;
     private boolean hasAudioFocus = false;
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
@@ -215,6 +226,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private boolean useCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
+    private String pictureInPictureFragmentTag = "";
+    private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
     /*
     * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
@@ -238,7 +251,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
-    private boolean playInBackground = false;
+    protected boolean playInBackground = false;
     private boolean mReportBandwidth = false;
     private boolean controls;
 
@@ -249,6 +262,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private final ThemedReactContext themedReactContext;
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
+    private final PictureInPictureReceiver pictureInPictureReceiver;
     private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
 
     // store last progress event values to avoid sending unnecessary messages
@@ -322,6 +336,11 @@ public class ReactExoplayerView extends FrameLayout implements
         themedReactContext.addLifecycleEventListener(this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
+        pictureInPictureReceiver = new PictureInPictureReceiver(this, themedReactContext);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && pictureInPictureParamsBuilder == null) {
+            pictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
+        }
     }
 
     private boolean isPlayingAd() {
@@ -333,6 +352,8 @@ public class ReactExoplayerView extends FrameLayout implements
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
 
+        addFragment();
+
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
@@ -341,6 +362,12 @@ public class ReactExoplayerView extends FrameLayout implements
         addView(exoPlayerView, 0, layoutParams);
 
         exoPlayerView.setFocusable(this.focusable);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        cleanupPlaybackService();
+        super.onDetachedFromWindow();
     }
 
     // LifecycleEventListener implementation
@@ -355,7 +382,13 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (playInBackground) {
+        if (enterPictureInPictureOnLeave && !isInPictureInPicture) {
+            enterPictureInPictureMode();
+            return;
+        }
+        Activity activity = themedReactContext.getCurrentActivity();
+        boolean isInMultiWindowMode = Util.SDK_INT >= Build.VERSION_CODES.N && activity != null && activity.isInMultiWindowMode();
+        if (playInBackground || isInPictureInPicture || isInMultiWindowMode) {
             return;
         }
         setPlayWhenReady(false);
@@ -366,17 +399,37 @@ public class ReactExoplayerView extends FrameLayout implements
         cleanUpResources();
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        cleanupPlaybackService();
-        super.onDetachedFromWindow();
-    }
-
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
         releasePlayer();
+        removeFragment();
         viewHasDropped = true;
+    }
+
+    private void addFragment() {
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity && !viewHasDropped) {
+            ReactExoplayerFragment fragment = new ReactExoplayerFragment(this);
+            pictureInPictureFragmentTag = fragment.getId();
+            ((FragmentActivity) activity)
+                    .getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(fragment, fragment.getId())
+                    .commitNowAllowingStateLoss();
+        }
+    }
+
+    private void removeFragment() {
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity instanceof FragmentActivity) {
+            FragmentManager fragmentManager = ((FragmentActivity) activity).getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(pictureInPictureFragmentTag);
+            if (fragment == null) return;
+            fragmentManager.beginTransaction()
+                    .remove(fragment)
+                    .commitNowAllowingStateLoss();
+        }
     }
 
     //BandwidthMeter.EventListener implementation
@@ -841,6 +894,7 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setPlayer(player);
 
         audioBecomingNoisyReceiver.setListener(self);
+        pictureInPictureReceiver.setListener();
         bandwidthMeter.addEventListener(new Handler(), self);
         setPlayWhenReady(!isPaused);
         playerNeedsSource = true;
@@ -1271,6 +1325,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
+        pictureInPictureReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
 
         if (mainHandler != null && mainRunnable != null) {
@@ -1789,7 +1844,7 @@ public class ReactExoplayerView extends FrameLayout implements
         if (isPlaying && isSeeking) {
             eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
         }
-
+        updatePictureInPictureActions(!isPlaying);
         eventEmitter.onVideoPlaybackStateChanged.invoke(isPlaying, isSeeking);
 
         if (isPlaying) {
@@ -2200,6 +2255,108 @@ public class ReactExoplayerView extends FrameLayout implements
             } else {
                 pausePlayback();
             }
+        }
+    }
+
+    public void setEnterPictureInPictureOnLeave(boolean enterPictureInPictureOnLeave) {
+        this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && enterPictureInPictureOnLeave;
+    }
+
+    protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
+        this.isInPictureInPicture = isInPictureInPicture;
+        eventEmitter.onPictureInPictureStatusChanged.invoke(isInPictureInPicture);
+
+        if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
+            if (isInPictureInPicture) fullScreenPlayerView.hideWithoutPlayer();
+            return;
+        }
+
+        Activity currentActivity = themedReactContext.getCurrentActivity();
+        if (currentActivity == null) return;
+
+        View decorView = currentActivity.getWindow().getDecorView();
+        ViewGroup rootView = decorView.findViewById(android.R.id.content);
+
+        LayoutParams layoutParams = new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+
+        if (isInPictureInPicture) {
+            ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
+            if (parent != null) {
+                parent.removeView(exoPlayerView);
+            }
+            for (int i = 0; i < rootView.getChildCount(); i++) {
+                if (rootView.getChildAt(i) != exoPlayerView) {
+                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
+                    rootView.getChildAt(i).setVisibility(View.GONE);
+                }
+            }
+            rootView.addView(exoPlayerView, layoutParams);
+        } else {
+            rootView.removeView(exoPlayerView);
+            if (!rootViewChildrenOriginalVisibility.isEmpty()) {
+                for (int i = 0; i < rootView.getChildCount(); i++) {
+                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+                }
+                addView(exoPlayerView, 0, layoutParams);
+            }
+
+            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    for (int i = 0; i < getChildCount(); i++) {
+                        View child = getChildAt(i);
+                        child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                                MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+                        child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+                    }
+                    getViewTreeObserver().dispatchOnGlobalLayout();
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            });
+        }
+    }
+
+    private void updatePictureInPictureActions(boolean isPaused) {
+        if (pictureInPictureParamsBuilder == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            pictureInPictureParamsBuilder.setActions(actions);
+            PictureInPictureParams pipParams = pictureInPictureParamsBuilder.build();
+            PictureInPictureUtil.updatePictureInPictureActions(themedReactContext, pipParams);
+        }
+    }
+
+    public void enterPictureInPictureMode() {
+        PictureInPictureParams _pipParams = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
+            pictureInPictureParamsBuilder.setActions(actions);
+            _pipParams = pictureInPictureParamsBuilder
+                    .setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player))
+                    .build();
+        }
+        PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+    }
+
+    public void exitPictureInPictureMode() {
+        Activity currentActivity = themedReactContext.getCurrentActivity();
+        if (currentActivity == null) return;
+
+        View decorView = currentActivity.getWindow().getDecorView();
+        ViewGroup rootView = decorView.findViewById(android.R.id.content);
+
+        if (!rootViewChildrenOriginalVisibility.isEmpty()) {
+            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
+            for (int i = 0; i < rootView.getChildCount(); i++) {
+                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+            }
+            rootViewChildrenOriginalVisibility.clear();
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && currentActivity.isInPictureInPictureMode()) {
+            currentActivity.moveTaskToBack(false);
         }
     }
 
