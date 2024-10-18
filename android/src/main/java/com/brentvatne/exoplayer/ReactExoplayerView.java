@@ -804,6 +804,36 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    public void getCurrentPlaybackStatus(Promise promise) {
+        if (player != null) {
+            int playbackState = player.getPlaybackState();
+            switch (playbackState) {
+                case Player.STATE_IDLE:
+                    promise.resolve("idle");
+                    break;
+                case Player.STATE_BUFFERING:
+                    promise.resolve("buffering");
+                    break;
+                case Player.STATE_READY:
+                    if (isPaused) {
+                        promise.resolve("paused");
+                    } else {
+                        promise.resolve("playing");
+                    }
+                    break;
+                case Player.STATE_ENDED:
+                    promise.resolve("ended");
+                    break;
+                default:
+                    promise.resolve("unknown");
+                    break;
+            }
+        } else {
+            promise.resolve("released");
+        }
+    }
+
+
     private void initializePlayerCore(ReactExoplayerView self) {
         ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
         self.trackSelector = new DefaultTrackSelector(getContext(), videoTrackSelectionFactory);

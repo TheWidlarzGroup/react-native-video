@@ -42,6 +42,15 @@ export type ReactVideoSourceProperties = {
   minLoadRetryCount?: number; // Android
 };
 
+export type TPlaybackStatus = {
+  paused: 'paused';
+  playing: 'playing';
+  buffering: 'buffering';
+  ended: 'ended';
+  idle: 'idle';
+  unknown: 'unknown';
+};
+
 export type ReactVideoSource = Readonly<
   Omit<ReactVideoSourceProperties, 'uri'> & {
     uri?: string | NodeRequire;

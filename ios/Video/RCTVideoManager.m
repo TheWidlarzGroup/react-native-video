@@ -84,5 +84,9 @@ RCT_EXTERN_METHOD(getCurrentPosition
                   : (nonnull NSNumber*)reactTag resolve
                   : (RCTPromiseResolveBlock)resolve reject
                   : (RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(getCurrentPlaybackStatus
+                  : (nonnull NSNumber*)reactTag resolve
+                  : (RCTPromiseResolveBlock)resolve reject
+                  : (RCTPromiseRejectBlock)reject)
 
 @end
