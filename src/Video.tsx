@@ -70,6 +70,7 @@ export interface VideoRef {
   setSource: (source?: ReactVideoSource) => void;
   save: (options: object) => Promise<VideoSaveData> | void;
   getCurrentPosition: () => Promise<number>;
+  paused: boolean;
 }
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
@@ -130,6 +131,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<ElementRef<typeof NativeVideoComponent>>(null);
+    const [paused, setPaused] = useState<boolean>(() => !!rest.paused);
 
     const isPosterDeprecated = typeof poster === 'string';
 
@@ -477,6 +479,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoPlaybackStateChanged = useCallback(
       (e: NativeSyntheticEvent<OnPlaybackStateChangedData>) => {
+        setPaused(!e.nativeEvent.isPlaying);
         onPlaybackStateChanged?.(e.nativeEvent);
       },
       [onPlaybackStateChanged],
@@ -664,6 +667,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPosition,
         setFullScreen,
         setSource,
+        paused: !!paused,
       }),
       [
         seek,
@@ -677,6 +681,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         getCurrentPosition,
         setFullScreen,
         setSource,
+        paused,
       ],
     );
 
