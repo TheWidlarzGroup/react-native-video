@@ -38,34 +38,36 @@ yarn install
 cd examples/bare && yarn install
 ```
 
-3. Now you will need to generate native project for platform you want to run the example on. 
+3. Now you will need to generate native project for platform you want to run the example on.
     - For iOS / visionOS:
       Install pods in `ios` / `visionOS` directory
       ```bash
       # for ios
       pod install --project-directory=ios
       # for visionOS
-      pod install --project-directory=visionOS
+      pod install --project-directory=visionos
       ```
 > [!IMPORTANT]  
 > You will need to hit it twice, because expo-plugin changes are not applied in the first run.
+> [!TIP]
+> Make sure you've already downloaded the visionOS simulator on which you want to launch the app.
 
-      Now you are ready to run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
+      Now you are ready to run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on. Select `BareExample` scheme)
       ```bash
       # for ios
       yarn ios --interactive
       # for visionOS
-      yarn visionOS
+      yarn visionos --interactive
       ```
      
     - For Android:
-      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
+      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
       ```bash
       yarn android --interactive
       ```
 
     - For Windows:
-      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
+      There is no need to run any additional command. you can just run the App.
       ```bash
       yarn windows
       ```
@@ -89,7 +91,7 @@ You can configure the example by changing the settings of expo-plugin `app.json`
 > You will need to regenerate the native project after changing the `app.json` file - you can do it by running `yarn prebuild` command in `expo` example directory.
 
 #### Switching between Mobile and TV
-If you want to switch between mobile and TV version of the app you will need to regenerate the native project. You can do it by running `yarn prebuild:tvos` command in `expo` example directory.
+If you want to switch between mobile and TV version of the app you will need to regenerate the native project. You can do it by running `yarn prebuild:tv` command in `expo` example directory.
 
 
 ### Building
@@ -112,21 +114,21 @@ cd examples/expo && yarn install
       pod install --project-directory=ios
       ```
 
-      Now you are ready to run the App. (Flag `--device` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
+      Now you are ready to run the App. (Flag `--device` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
       ```bash
       # for ios
       yarn ios --device
       # for tvOS
-      yarn ios:tvos --device
+      yarn ios:tv --device
       ```
      
     - For Android / Android TV:
-      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
+      There is no need to run any additional command. you can just run the App. (Flag `--device` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
       ```bash
       # for android
       yarn android --device
       # for android tv
-      yarn android:tv
+      yarn android:tv --device
       ```
 
 > [!WARNING]  

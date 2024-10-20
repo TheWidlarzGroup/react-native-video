@@ -4,13 +4,13 @@
   "scripts": {
     "postinstall": "yarn update-src",
     "start": "expo start",
-    "start:tvos": "EXPO_TV=1 expo start",
-    "android:tvos": "EXPO_TV=1 expo run:android",
+    "start:tv": "EXPO_TV=1 expo start",
+    "android:tv": "EXPO_TV=1 expo run:android",
     "android": "EXPO_TV=0 expo run:android",
-    "ios:tvos": "EXPO_TV=1 expo run:ios",
+    "ios:tv": "EXPO_TV=1 expo run:ios",
     "ios": "EXPO_TV=0 expo run:ios",
     "web": "expo start --web",
-    "prebuild:tvos": "EXPO_TV=1 expo prebuild",
+    "prebuild:tv": "EXPO_TV=1 expo prebuild",
     "prebuild": "EXPO_TV=0 expo prebuild",
     "update-src": "echo 'Updating src from ../bare/src' && rm -r ./src && cp -r ../bare/src ./src && echo 'Updated src from ../bare/src'"
   },
