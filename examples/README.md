@@ -22,7 +22,7 @@ If you want to sync `expo` example, you can use `yarn update-src` command in `ex
 You can configure the example by changing the settings of expo-plugin `app.json` file in the `bare` directory.
 
 > [!TIP]
-> You can find more information about the expo-plugin configuration [here](https://thewidlarzgroup.github.io/react-native-video/other/expo/).
+> You can find more information about the expo-plugin configuration [here](https://thewidlarzgroup.github.io/react-native-video/other/expo).
 
 > [!CAUTION]
 > You will need to regenerate the native project after changing the `app.json` file. eg. on Apple platforms you will need to install pods twice. (one for applying expo-plugin changes and second for applying react-native-video changes)
@@ -83,7 +83,7 @@ yarn start
 You can configure the example by changing the settings of expo-plugin `app.json` file in the `expo` directory.
 
 > [!TIP]
-> You can find more information about the expo-plugin configuration [here](https://thewidlarzgroup.github.io/react-native-video/other/expo/).
+> You can find more information about the expo-plugin configuration [here](https://thewidlarzgroup.github.io/react-native-video/other/expo).
 
 > [!CAUTION]
 > You will need to regenerate the native project after changing the `app.json` file - you can do it by running `yarn prebuild` command in `expo` example directory.
@@ -156,5 +156,5 @@ npx @rnx-kit/align-deps@latest --requirements react-native@RN_VERSION --write
 That's it! Now you can commit changes and create a PR.
 
 #### Expo
-To update `expo` example you should follow this [guide](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/).
+To update `expo` example you should follow this [guide](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough).
 After updating `expo` example you will need to use prebuild (yarn expo prebuild) - if it fails you will need to add `--clean` flag to the command - this will remove manual link of `react-native-video` package so you will need to link it again.
