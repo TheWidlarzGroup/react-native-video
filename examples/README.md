@@ -144,6 +144,16 @@ yarn start
 
 ## For Maintainers
 
+### Opening React Native Video in Android Studio / Xcode
+To open `react-native-video` in Android Studio / Xcode you need to open `examples/bare/android` or `examples/bare/ios` directory.
+First, you need to follow the [How To Run Examples](#how-to-run-examples) guide to generate the native project. Then you can open the project in Android Studio / Xcode by running below command in `examples/bare` directory.
+```bash
+# for android
+studio ./android
+# for ios
+xed ./ios
+```
+
 ### Updating Examples
 
 #### Bare
