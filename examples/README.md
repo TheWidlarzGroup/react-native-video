@@ -50,7 +50,7 @@ cd examples/bare && yarn install
 > [!IMPORTANT]  
 > You will need to hit it twice, because expo-plugin changes are not applied in the first run.
 
-      Now you are ready to run the App. (Flag `--interactive` is optional, but I recommend it as it will allow you to choose the device you want to run the app on)
+      Now you are ready to run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
       ```bash
       # for ios
       yarn ios --interactive
