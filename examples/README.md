@@ -47,10 +47,7 @@ cd examples/bare && yarn install
       # for visionOS
       pod install --project-directory=visionos
       ```
-> [!IMPORTANT]  
-> You will need to hit it twice, because expo-plugin changes are not applied in the first run.
-> [!TIP]
-> Make sure you've already downloaded the visionOS simulator on which you want to launch the app.
+      ⚠️ You will need to hit it twice, because expo-plugin changes are not applied in the first run.
 
       Now you are ready to run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on. Select `BareExample` scheme)
       ```bash
@@ -76,6 +73,9 @@ If Metro Bundler is not running (or it did not start), you can start it by runni
 ```bash
 yarn start
 ```
+
+> [!TIP]
+> Make sure you've already downloaded the simulator on which you want to launch the app.
 
 ## [Expo](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/bare)
 
