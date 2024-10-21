@@ -792,11 +792,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
         playerControlView.setLayoutParams(layoutParams);
-        int indexOfPC = indexOfChild(playerControlView);
+        int indexOfPC = exoPlayerView.indexOfChild(playerControlView);
         if (indexOfPC != -1) {
-            removeViewAt(indexOfPC);
+            exoPlayerView.removeViewAt(indexOfPC);
         }
-        addView(playerControlView, 1, layoutParams);
+        exoPlayerView.addView(playerControlView, layoutParams);
         // FORK: Ensure controls are on top of IMA player
         playerControlView.bringToFront();
         reLayout(playerControlView);
