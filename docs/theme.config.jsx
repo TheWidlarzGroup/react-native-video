@@ -13,7 +13,7 @@ export default {
       />
       <meta
         name="og:image"
-        content="https://react-native-video.github.io/react-native-video/thumbnail.jpg"
+        content="https://thewidlarzgroup.github.io/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="React Native Video" />
@@ -23,7 +23,7 @@ export default {
       />
       <meta
         name="twitter:image"
-        content="https://react-native-video.github.io/react-native-video/thumbnail.jpg"
+        content="https://thewidlarzgroup.github.io/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:image:alt" content="React Native Video" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,14 +41,14 @@ export default {
   ),
   faviconGlyph: '🎬',
   project: {
-    link: 'https://github.com/react-native-video/react-native-video',
+    link: 'https://github.com/TheWidlarzGroup/react-native-video',
   },
   docsRepositoryBase:
-    'https://github.com/react-native-video/react-native-video/tree/master/docs/',
+    'https://github.com/TheWidlarzGroup/react-native-video/tree/master/docs/',
   footer: {
     text: (
       <span>
-        Built with love ❤️ by <strong>React Native Community</strong>
+        Built with ❤️ by <strong>React Native Community</strong>
       </span>
     ),
   },

@@ -15,10 +15,14 @@ enum RCTPlayerOperations {
         let trackCount: Int! = player?.currentItem?.tracks.count ?? 0
 
         // The first few tracks will be audio & video track
-        var firstTextIndex = 0
+        var firstTextIndex = -1
         for i in 0 ..< trackCount where player?.currentItem?.tracks[i].assetTrack?.hasMediaCharacteristic(.legible) ?? false {
             firstTextIndex = i
             break
+        }
+        if firstTextIndex == -1 {
+            // no sideLoaded text track available (can happen with invalid vtt url)
+            return
         }
 
         var selectedTrackIndex: Int = RCTVideoUnset
@@ -45,9 +49,11 @@ enum RCTPlayerOperations {
                 }
             }
         } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if textTracks.count > index {
-                    selectedTrackIndex = index
+            if let value = criteria?.value { // check value is provided
+                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
+                    if textTracks.count > indexValue { // ensure value is in group range
+                        selectedTrackIndex = indexValue
+                    }
                 }
             }
         }
@@ -106,9 +112,11 @@ enum RCTPlayerOperations {
             // } else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
         } else if type == "index" {
-            if let value = criteria?.value, let index = value as? Int {
-                if group.options.count > index {
-                    mediaOption = group.options[index]
+            if let value = criteria?.value { // check value is provided
+                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
+                    if group.options.count > indexValue { // ensure value is in group range
+                        mediaOption = group.options[indexValue]
+                    }
                 }
             }
         } else { // default. invalid type or "system"

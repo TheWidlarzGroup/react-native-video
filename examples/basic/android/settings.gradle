@@ -2,7 +2,17 @@ rootProject.name = 'videoplayer'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
 
+include ':react-native-video-plugin-sample'
+project (':react-native-video-plugin-sample').projectDir = new File(rootProject.projectDir, '../../react-native-video-plugin-sample/android')
+
 include ':react-native-video'
 project (':react-native-video').projectDir = new File(rootProject.projectDir, '../../../android')
 
+// uncomment these lines to be able to build from media3 source code
+// gradle.ext.androidxMediaModulePrefix = 'media-'
+// apply from: file("../../../../media3/core_settings.gradle")
+
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
+useExpoModules()

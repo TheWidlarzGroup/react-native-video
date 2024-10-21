@@ -45,27 +45,29 @@ Callback function that is called when audio tracks change
 Payload:
 
 An **array** of
-Property | Type | Description
---- | --- | ---
-index | number | Index number of the track
-title | string | Description of the track
-language | string | 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code
-type | string | Mime type of track
+| Property | Type    | Description                                                                                                |
+| -------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| index    | number  | Internal track ID                                                                                          |
+| title    | string  | Descriptive name for the track                                                                             |
+| language | string  | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language |
+| bitrate  | number  | bitrate of track                                                                                           |
+| type     | string  | Mime type of track                                                                                         |
+| selected | boolean | true if track is playing                                                                                   |
 
 Example:
 
 ```javascript
 {
   audioTracks: [
-    {language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0},
-    {language: 'en', title: 'English', type: 'audio/mpeg', index: 1},
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0, selected: true },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
   ];
 }
 ```
 
 ### `onBandwidthUpdate`
 
-<PlatformsList types={['Android']} />
+<PlatformsList types={['Android', 'iOS']} />
 
 Callback function that is called when the available bandwidth changes.
 
@@ -116,6 +118,26 @@ Example:
 ```javascript
 {
   isBuffering: true;
+}
+```
+
+### `onControlsVisibilityChange`
+
+<PlatformsList types={['Android']} />
+
+Callback function that is called when the controls are hidden or shown. Not possible on iOS.
+
+Payload:
+
+| Property    | Type    | Description                                    |
+| ----------- | ------- | ---------------------------------------------- |
+| isVisible | boolean | Boolean indicating whether controls are visible |
+
+Example:
+
+```javascript
+{
+  isVisible: true;
 }
 ```
 
@@ -200,13 +222,14 @@ Callback function that is called when the media is loaded and ready to play.
 Payload:
 
 | Property    | Type   | Description                                                                                                                                                                                                                                                                                                                                                        |
-| ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|-------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | currentTime | number | Time in seconds where the media will start                                                                                                                                                                                                                                                                                                                         |
 | duration    | number | Length of the media in seconds                                                                                                                                                                                                                                                                                                                                     |
-| naturalSize | object | Properties:<br/> _ width - Width in pixels that the video was encoded at<br/> _ height - Height in pixels that the video was encoded at<br/> \* orientation - "portrait" or "landscape"                                                                                                                                                                            |
+| naturalSize | object | Properties:<br/> _ width - Width in pixels that the video was encoded at<br/> _ height - Height in pixels that the video was encoded at<br/> \* orientation - "portrait", "landscape" or "square"                                                                                                                                                                  |
 | audioTracks | array  | An array of audio track info objects with the following properties:<br/> _ index - Index number<br/> _ title - Description of the track<br/> _ language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> _ type - Mime type of track |
 | textTracks  | array  | An array of text track info objects with the following properties:<br/> _ index - Index number<br/> _ title - Description of the track<br/> _ language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> _ type - Mime type of track |
 | videoTracks | array  | An array of video track info objects with the following properties:<br/> _ trackId - ID for the track<br/> _ bitrate - Bit rate in bits per second<br/> _ codecs - Comma separated list of codecs<br/> _ height - Height of the video<br/> \* width - Width of the video                                                                                           |
+| trackId     | string | Provide key information about the video track, typically including: `Resolution`, `Bitrate`.                                                                                                                                                                                                                                                                                                                                                |
 
 Example:
 
@@ -235,10 +258,11 @@ Example:
     { title: '#3 English Director Commentary', language: 'en', index: 2, type: 'text/vtt' }
   ],
   videoTracks: [
-    { bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
-    { bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
-    { bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
-  ]
+    { index: 0, bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
+    { index: 1, bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
+    { index: 2, bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
+  ],
+  trackId: "720p 2400kbps"
 }
 ```
 
@@ -274,15 +298,17 @@ Callback function that is called when the playback state changes.
 
 Payload:
 
-| Property  | Type        | Description                                       |
-| --------- | ----------- | ------------------------------------------------- |
-| isPlaying | boolean     | Boolean indicating if the media is playing or not |
+| Property  | Type        | Description                                        |
+| --------- | ----------- | -------------------------------------------------- |
+| isPlaying | boolean     | Boolean indicating if the media is playing or not  |
+| isSeeking | boolean     | Boolean indicating if the player is seeking or not |
 
 Example:
 
 ```javascript
 {
   isPlaying: true,
+  isSeeking: false
 }
 ```
 
@@ -459,6 +485,8 @@ Example:
 
 Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
 
+Note: on iOS, when controls are enable, this callback is not reported. This is a known limitation.
+
 ### `onTimedMetadata`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
@@ -482,6 +510,28 @@ Example:
   ];
 }
 ```
+
+### `onTextTrackDataChanged`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
+
+Payload:
+
+| Property         | Type     | Description                                        |
+| ---------------- | -------- | -------------------------------------------------- |
+| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
+
+Example:
+
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.",
+}
+```
+
+For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
 
 ### `onTextTracks`
 
@@ -514,28 +564,6 @@ Example:
 }
 ```
 
-### `onTextTrackDataChanged`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
-
-Payload:
-
-| Property         | Type     | Description                                        |
-| ---------------- | -------- | -------------------------------------------------- |
-| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
-
-Example:
-
-```javascript
-{
-  subtitleTracks: "This blade has a dark past.",
-}
-```
-
-For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
-
 ### `onVideoTracks`
 
 <PlatformsList types={['Android']} />
@@ -544,14 +572,16 @@ Callback function that is called when video tracks change
 
 Payload:
 
-| Property | Type    | Description                           |
-| -------- | ------- | ------------------------------------- |
-| trackId  | number  | Internal track ID                     |
-| codecs   | string  | MimeType of codec used for this track |
-| width    | number  | Track width                           |
-| height   | number  | Track height                          |
-| bitrate  | number  | Bitrate in bps                        |
-| selected | boolean | true if track is selected for playing |
+| Property | Type    | Description                                                     |
+| -------- | ------- | --------------------------------------------------------------- |
+| index    | number  | index of the track                                              |
+| trackId  | string  | Internal track ID                                               |
+| codecs   | string  | MimeType of codec used for this track                           |
+| width    | number  | Track width                                                     |
+| height   | number  | Track height                                                    |
+| bitrate  | number  | Bitrate in bps                                                  |
+| selected | boolean | true if track is selected for playing                           |
+| rotation | number  | 0, 90, 180 or 270 rotation to apply to the track (android only) |
 
 Example:
 
@@ -559,12 +589,14 @@ Example:
 {
   videoTracks: [
     {
-      trackId: 0,
+      index: O,
+      trackId: "0",
       codecs: 'video/mp4',
       width: 1920,
       height: 1080,
       bitrate: 10000,
       selected: true,
+      rotation: 0,
     },
   ];
 }

@@ -12,6 +12,17 @@ This page shows the list of available methods
 
 Take the player out of fullscreen mode.
 
+> [!WARNING]
+> deprecated, use setFullScreen method instead
+
+### `pause`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`pause(): Promise<void>`
+
+Pause the video.
+
 ### `presentFullscreenPlayer`
 
 <PlatformsList types={['Android', 'iOS']} />
@@ -24,13 +35,8 @@ On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
-### `pause`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-`pause(): Promise<void>`
-
-Pause the video.
+> [!WARNING]
+> deprecated, use setFullScreen method instead
 
 ### `resume`
 
@@ -39,6 +45,14 @@ Pause the video.
 `resume(): Promise<void>`
 
 Resume the video.
+
+### `restoreUserInterfaceForPictureInPictureStopCompleted`
+
+<PlatformsList types={['iOS']} />
+
+`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
+
+This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
 
 ### `save`
 
@@ -64,14 +78,6 @@ Future:
 - Will support more formats in the future through options
 - Will support custom directory and file name through options
 
-### `restoreUserInterfaceForPictureInPictureStopCompleted`
-
-<PlatformsList types={['iOS']} />
-
-`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
-
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
-
 ### `seek`
 
 <PlatformsList types={['All']} />
@@ -80,7 +86,7 @@ This function corresponds to the completion handler in Apple's [restoreUserInter
 
 Seek to the specified position represented by seconds. seconds is a float value.
 
-`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](#onseek) event will be called.
+`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](./events#onseek) event will be called.
 
 #### Exact seek
 
@@ -91,6 +97,35 @@ By default iOS seeks within 100 milliseconds of the target position. If you need
 `seek(seconds, tolerance)`
 
 tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
+
+### `setVolume`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setVolume(value): Promise<void>`
+
+This function will change the volume exactly like [volume](./props#volume) property. default value and range are the same then.
+
+### `getCurrentPosition`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`getCurrentPosition(): Promise<number>`
+
+This function retrieves and returns the precise current position of the video playback, measured in seconds.
+This function will throw an error if player is not initialized.
+
+### `setFullScreen`
+
+<PlatformsList types={['Android', 'iOS']} />
+
+`setFullScreen(fullscreen): Promise<void>`
+
+If you set it to `true`, the player enters fullscreen mode. If you set it to `false`, the player exits fullscreen mode.
+
+On iOS, this displays the video in a fullscreen view controller with controls.
+
+On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
 
 ### Example Usage
 
@@ -106,9 +141,9 @@ const someCoolFunctions = async () => {
   videoRef.current.presentFullscreenPlayer();
   videoRef.current.dismissFullscreenPlayer();
 
-  // pause or play the video
-  videoRef.current.play();
+  // pause or resume the video
   videoRef.current.pause();
+  videoRef.current.resume();
 
   // save video to your Photos with current filter prop
   const response = await videoRef.current.save();
@@ -143,6 +178,8 @@ Possible values are:
 
 ### `isCodecSupported`
 
+<PlatformsList types={['Android']} />
+
 Indicates whether the provided codec is supported level supported by device.
 
 parameters:
@@ -156,13 +193,11 @@ Possible results:
 - `software` - codec is supported by software only
 - `unsupported` - codec is not supported
 
-<PlatformsList types={['Android']} />
-
 ### `isHEVCSupported`
 
-Helper which Indicates whether the provided HEVC/1920\*1080 is supported level supported by device. It uses isCodecSupported internally.
-
 <PlatformsList types={['Android']} />
+
+Helper which Indicates whether the provided HEVC/1920\*1080 is supported level supported by device. It uses isCodecSupported internally.
 
 ### Example Usage
 

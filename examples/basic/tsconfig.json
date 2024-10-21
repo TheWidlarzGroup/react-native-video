@@ -1,11 +1,12 @@
 {
+  "rootDir": "./src",
   "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
     "paths": {
       "react-native-video": ["../../src/index"],
-      "react": ["./node_modules/@types/react"]
+      "react-native-video-plugin-sample": ["../react-native-video-plugin-sample/src/index"],
     }
   },
-  "include": ["src", "**/*.js"],
+  "jsx": "react",
   "exclude": ["node_modules"]
 }
