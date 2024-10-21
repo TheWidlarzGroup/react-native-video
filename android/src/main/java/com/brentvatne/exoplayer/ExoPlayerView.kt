@@ -119,21 +119,6 @@ class ExoPlayerView(private val context: Context) :
         return spinner
     }
 
-    // Fork: Listen for buffering and toggle loading spinner
-    @Override
-    fun onPlaybackStateChanged(@Player.State playbackState: Int) {
-        if (loadingSpinner == null) {
-            return
-        }
-
-        // Set loading spinner visibility when buffering
-        if (playbackState == Player.STATE_BUFFERING) {
-            loadingSpinner?.setVisibility(VISIBLE)
-        } else {
-            loadingSpinner?.setVisibility(GONE)
-        }
-    }
-
     private fun setVideoView() {
         when (val view = surfaceView) {
             is TextureView -> player?.setVideoTextureView(view)
@@ -361,6 +346,20 @@ class ExoPlayerView(private val context: Context) :
 
         override fun onTracksChanged(tracks: Tracks) {
             updateForCurrentTrackSelections(tracks)
+        }
+
+        // Fork: Listen for buffering and toggle loading spinner
+        override fun onPlaybackStateChanged(@Player.State playbackState: Int) {
+            if (loadingSpinner == null) {
+                return
+            }
+
+            // Set loading spinner visibility when buffering
+            if (playbackState == Player.STATE_BUFFERING) {
+                loadingSpinner?.setVisibility(VISIBLE)
+            } else {
+                loadingSpinner?.setVisibility(GONE)
+            }
         }
     }
 
