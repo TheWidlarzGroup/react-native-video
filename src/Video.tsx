@@ -67,6 +67,8 @@ export interface VideoRef {
   ) => void;
   setVolume: (volume: number) => void;
   setFullScreen: (fullScreen: boolean) => void;
+  enterPictureInPicture: () => void;
+  exitPictureInPicture: () => void;
   setSource: (source?: ReactVideoSource) => void;
   save: (options: object) => Promise<VideoSaveData> | void;
   getCurrentPosition: () => Promise<number>;
@@ -415,6 +417,40 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [setFullScreen],
     );
 
+    const enterPictureInPicture = useCallback(async () => {
+      if (!nativeRef.current) {
+        console.warn('Video Component is not mounted');
+        return;
+      }
+
+      const _enterPictureInPicture = () => {
+        NativeVideoManager.enterPictureInPictureCmd(getReactTag(nativeRef));
+      };
+
+      Platform.select({
+        ios: _enterPictureInPicture,
+        android: _enterPictureInPicture,
+        default: () => {},
+      })();
+    }, []);
+
+    const exitPictureInPicture = useCallback(async () => {
+      if (!nativeRef.current) {
+        console.warn('Video Component is not mounted');
+        return;
+      }
+
+      const _exitPictureInPicture = () => {
+        NativeVideoManager.exitPictureInPictureCmd(getReactTag(nativeRef));
+      };
+
+      Platform.select({
+        ios: _exitPictureInPicture,
+        android: _exitPictureInPicture,
+        default: () => {},
+      })();
+    }, []);
+
     const save = useCallback((options: object) => {
       // VideoManager.save can be null on android & windows
       if (Platform.OS !== 'ios') {
@@ -663,6 +699,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        enterPictureInPicture,
+        exitPictureInPicture,
         setSource,
       }),
       [
@@ -676,6 +714,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         setVolume,
         getCurrentPosition,
         setFullScreen,
+        enterPictureInPicture,
+        exitPictureInPicture,
         setSource,
       ],
     );
