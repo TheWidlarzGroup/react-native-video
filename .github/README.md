@@ -33,6 +33,9 @@ To sync this fork with the upstream repository, follow these steps:
    -  Add Fork comments above these functions instead
 
 ## Changes Introduced By Fork
+- 10/21/2024: [Android] Fix toggling of player controls on TV and Ads
+
+Old changes:
 ```
 All platforms
 - [Android/iOS] Show loading indicator while preparing Ads (and don't start the original video until pre-roll has finished)
