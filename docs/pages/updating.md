@@ -34,7 +34,7 @@ You can remove following lines from your podfile as they are not necessary anymo
 -  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
 ```
 
-If you were previously using VideoCaching, you should $RNVideoUseVideoCaching flag in your podspec, see: [installation section](https://thewidlarzgroup.github.io/react-native-video/installation#video-caching)
+If you were previously using VideoCaching, you should $RNVideoUseVideoCaching flag in your podspec, see: [installation section](https://docs.thewidlarzgroup.com/react-native-video/installation#video-caching)
 
 #### Android
 
