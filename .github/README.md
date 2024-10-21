@@ -1,7 +1,7 @@
 # Forked Repository: react-native-video
 
 ## Description
-This repository is a fork of the original [react-native-video](https://github.com/react-native-video/react-native-video) repository. 
+This repository is a fork of [react-native-video](https://github.com/react-native-video/react-native-video) repository. 
 
 ## Update Instructions
 To sync this fork with the upstream repository, follow these steps:
@@ -35,8 +35,8 @@ To sync this fork with the upstream repository, follow these steps:
 ## Changes Introduced By Fork
 ```
 All platforms
-- [Android/iOS] Show loading indicator while preparing Ads
-- [Android/iOS ] Add text that indicates if video is live ("Live")
+- [Android/iOS] Show loading indicator while preparing Ads (and don't start the original video until pre-roll has finished)
+- [Android/iOS] Add text that indicates if video is live ("Live")
     - Change width to accommodate difference in sizes between duration and live text
 - [Android/iOS] Allow toggling of player controls while Ad is playing
     - [Android/iOS] Manually bring the controls on top of the IMA player to ensure visibility
