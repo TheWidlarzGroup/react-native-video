@@ -4,6 +4,10 @@
 ## Documentation
 documentation is available at [thewidlarzgroup.github.io/react-native-video/](https://thewidlarzgroup.github.io/react-native-video/)
 
+## Examples
+We have examples that will show you basic usage of react-native-video [here](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples). <br />
+Examples shows [basic](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/BasicExample.tsx) usage and [DRM example](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx).
+
 ## Usage
 
 ```javascript
