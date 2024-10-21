@@ -5,6 +5,7 @@ import android.util.Log
 import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferingStrategy
 import com.brentvatne.common.api.ControlsConfig
+import com.brentvatne.common.api.MixWithOthers
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.Source
 import com.brentvatne.common.api.SubtitleStyle
@@ -44,7 +45,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_RATE = "rate"
         private const val PROP_MAXIMUM_BIT_RATE = "maxBitRate"
         private const val PROP_PLAY_IN_BACKGROUND = "playInBackground"
-        private const val PROP_DISABLE_FOCUS = "disableFocus"
+        private const val PROP_DISABLE_MIX_WITH_OTHERS = "mixWithOthers"
         private const val PROP_BUFFERING_STRATEGY = "bufferingStrategy"
         private const val PROP_DISABLE_DISCONNECT_ERROR = "disableDisconnectError"
         private const val PROP_FOCUSABLE = "focusable"
@@ -191,9 +192,9 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         videoView.setPlayInBackground(playInBackground)
     }
 
-    @ReactProp(name = PROP_DISABLE_FOCUS, defaultBoolean = false)
-    fun setDisableFocus(videoView: ReactExoplayerView, disableFocus: Boolean) {
-        videoView.setDisableFocus(disableFocus)
+    @ReactProp(name = PROP_DISABLE_MIX_WITH_OTHERS)
+    fun setMixWithOthers(videoView: ReactExoplayerView, disableFocus: String) {
+        videoView.setMixWithOthers(MixWithOthers.toMixWithOthers(disableFocus))
     }
 
     @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)

@@ -46,7 +46,7 @@ import {
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
 import type {VideoSaveData} from './specs/NativeVideoManager';
-import {CmcdMode, ViewType} from './types';
+import {CmcdMode, MixWithOthersType, ViewType} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
@@ -89,6 +89,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedTextTrack,
       useTextureView,
       useSecureView,
+      disableFocus,
+      mixWithOthers,
       viewType,
       shutterColor,
       adTagUrl,
@@ -789,6 +791,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }),
       [showPoster],
     );
+    if (disableFocus != undefined && mixWithOthers) {
+      console.warn('disableFocus is deprecated, please use only mixWithOthers');
+    }
+    const _mixWithOthers = mixWithOthers
+      ? mixWithOthers
+      : disableFocus
+      ? MixWithOthersType.DUCK
+      : MixWithOthersType.INHERIT;
 
     return (
       <View style={style}>
@@ -805,6 +815,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
           shutterColor={_shutterColor}
+          mixWithOthers={_mixWithOthers}
           onGetLicense={usingExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={
             onLoad || hasPoster
