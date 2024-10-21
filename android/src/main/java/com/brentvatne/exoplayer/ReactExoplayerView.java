@@ -445,10 +445,10 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void onAdEvent_fork(AdEvent adEvent) {
-        // Display player controller when AD is tapped
         String adEventName = adEvent.getType().name();
-        if(adEventName.equals("TAPPED")){
-            togglePlayerControlVisibility();
+
+        switch (adEventName) {
+            case "TAPPED", "CLICKED", "CLICK" -> togglePlayerControlVisibility();
         }
     }
 
