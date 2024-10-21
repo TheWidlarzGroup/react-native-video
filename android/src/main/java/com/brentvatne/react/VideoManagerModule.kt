@@ -1,10 +1,12 @@
 package com.brentvatne.react
 
+import com.brentvatne.common.api.Source
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.common.UIManagerType
@@ -60,6 +62,13 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     fun setFullScreenCmd(reactTag: Int, fullScreen: Boolean) {
         performOnPlayerView(reactTag) {
             it?.setFullscreen(fullScreen)
+        }
+    }
+
+    @ReactMethod
+    fun setSourceCmd(reactTag: Int, source: ReadableMap?) {
+        performOnPlayerView(reactTag) {
+            it?.setSrc(Source.parse(source, reactApplicationContext))
         }
     }
 

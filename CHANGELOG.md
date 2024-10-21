@@ -1,5 +1,22 @@
 
 
+# [6.7.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.4...v6.7.0) (2024-10-17)
+
+
+### Bug Fixes
+
+* **android:** sideloaded subtitles ([#4232](https://github.com/TheWidlarzGroup/react-native-video/issues/4232)) ([352dfbb](https://github.com/TheWidlarzGroup/react-native-video/commit/352dfbbc9bef158400c59516a50d889d25757c0d))
+* ensure aspect ratio from video is handled in a coherent way ([#4219](https://github.com/TheWidlarzGroup/react-native-video/issues/4219)) ([a8d5841](https://github.com/TheWidlarzGroup/react-native-video/commit/a8d5841c7c0f9767ec095ffd8401b1579f32623f))
+* **iOS:** pause video on end reached & don't remove listeners ([#4218](https://github.com/TheWidlarzGroup/react-native-video/issues/4218)) ([2c19a47](https://github.com/TheWidlarzGroup/react-native-video/commit/2c19a4770df73179436a9e23a5e55ad0699fcfcc))
+* remove warning and refactor & fix ad workflow ([#4235](https://github.com/TheWidlarzGroup/react-native-video/issues/4235)) ([7501880](https://github.com/TheWidlarzGroup/react-native-video/commit/7501880062a4c381838949084f0017a2aecc58d7))
+
+
+### Features
+
+* add setSource API function fix ads playback ([#4185](https://github.com/TheWidlarzGroup/react-native-video/issues/4185)) ([9a3fcda](https://github.com/TheWidlarzGroup/react-native-video/commit/9a3fcda3b8ca4689c9131a12a8375fc43d442f80))
+* **android:** add settings button to control video playback speed ([#4211](https://github.com/TheWidlarzGroup/react-native-video/issues/4211)) ([d1883a7](https://github.com/TheWidlarzGroup/react-native-video/commit/d1883a7e008706cac2a2beac934194539c9b5b77))
+* **exoplayerview:** Migrate ExoPlayerView to kotlin ([#4038](https://github.com/TheWidlarzGroup/react-native-video/issues/4038)) ([78f4f04](https://github.com/TheWidlarzGroup/react-native-video/commit/78f4f0480d70d209fea9e0579963e347c965fd6e))
+
 ## [6.6.4](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.3...v6.6.4) (2024-10-03)
 
 

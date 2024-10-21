@@ -5,8 +5,6 @@
 
 RCT_EXPORT_VIEW_PROPERTY(src, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(drm, NSDictionary);
-RCT_EXPORT_VIEW_PROPERTY(adTagUrl, NSString);
-RCT_EXPORT_VIEW_PROPERTY(adLanguage, NSString);
 RCT_EXPORT_VIEW_PROPERTY(maxBitRate, float);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);
 RCT_EXPORT_VIEW_PROPERTY(repeat, BOOL);
@@ -75,6 +73,7 @@ RCT_EXTERN_METHOD(setLicenseResultErrorCmd : (nonnull NSNumber*)reactTag error :
 RCT_EXTERN_METHOD(setPlayerPauseStateCmd : (nonnull NSNumber*)reactTag paused : (nonnull BOOL)paused)
 RCT_EXTERN_METHOD(setVolumeCmd : (nonnull NSNumber*)reactTag volume : (nonnull float*)volume)
 RCT_EXTERN_METHOD(setFullScreenCmd : (nonnull NSNumber*)reactTag fullscreen : (nonnull BOOL)fullScreen)
+RCT_EXTERN_METHOD(setSourceCmd : (nonnull NSNumber*)reactTag source : (NSDictionary*)source)
 
 RCT_EXTERN_METHOD(save
                   : (nonnull NSNumber*)reactTag options
