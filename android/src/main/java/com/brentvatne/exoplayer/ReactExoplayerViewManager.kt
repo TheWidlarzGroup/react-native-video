@@ -1,8 +1,6 @@
 package com.brentvatne.exoplayer
 
 import android.graphics.Color
-import android.net.Uri
-import android.text.TextUtils
 import android.util.Log
 import com.brentvatne.common.api.BufferConfig
 import com.brentvatne.common.api.BufferingStrategy
@@ -26,8 +24,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val TAG = "ExoViewManager"
         private const val REACT_CLASS = "RCTVideo"
         private const val PROP_SRC = "src"
-        private const val PROP_AD_TAG_URL = "adTagUrl"
-        private const val PROP_AD_LANGUAGE = "adLanguage"
         private const val PROP_RESIZE_MODE = "resizeMode"
         private const val PROP_REPEAT = "repeat"
         private const val PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack"
@@ -46,7 +42,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval"
         private const val PROP_REPORT_BANDWIDTH = "reportBandwidth"
         private const val PROP_RATE = "rate"
-        private const val PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
         private const val PROP_MAXIMUM_BIT_RATE = "maxBitRate"
         private const val PROP_PLAY_IN_BACKGROUND = "playInBackground"
         private const val PROP_DISABLE_FOCUS = "disableFocus"
@@ -89,32 +84,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_SRC)
     fun setSrc(videoView: ReactExoplayerView, src: ReadableMap?) {
         val context = videoView.context.applicationContext
-        val source = Source.parse(src, context)
-        if (source.uri == null) {
-            videoView.clearSrc()
-        } else {
-            videoView.setSrc(source)
-        }
-    }
-
-    @ReactProp(name = PROP_AD_TAG_URL)
-    fun setAdTagUrl(videoView: ReactExoplayerView, uriString: String?) {
-        if (TextUtils.isEmpty(uriString)) {
-            videoView.setAdTagUrl(null)
-            return
-        }
-        val adTagUrl = Uri.parse(uriString)
-        videoView.setAdTagUrl(adTagUrl)
-    }
-
-    @ReactProp(name = PROP_AD_LANGUAGE)
-    fun setAdLanguage(videoView: ReactExoplayerView, languageString: String?) {
-        if (TextUtils.isEmpty(languageString)) {
-            videoView.setAdLanguage(null) // Maybe "en" default?
-            return
-        }
-
-        videoView.setAdLanguage(languageString)
+        videoView.setSrc(Source.parse(src, context))
     }
 
     @ReactProp(name = PROP_RESIZE_MODE)
@@ -214,11 +184,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
     fun setMaxBitRate(videoView: ReactExoplayerView, maxBitRate: Float) {
         videoView.setMaxBitRateModifier(maxBitRate.toInt())
-    }
-
-    @ReactProp(name = PROP_MIN_LOAD_RETRY_COUNT)
-    fun setMinLoadRetryCount(videoView: ReactExoplayerView, minLoadRetryCount: Int) {
-        videoView.setMinLoadRetryCountModifier(minLoadRetryCount)
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)

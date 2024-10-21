@@ -14,6 +14,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetBool
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
+import com.brentvatne.react.BuildConfig
 import com.facebook.react.bridge.ReadableMap
 import java.util.Locale
 import java.util.Objects
@@ -47,6 +48,9 @@ class Source {
     /** Metadata to display in notification */
     var metadata: Metadata? = null
 
+    /** Allowed reload before failure notification */
+    var minLoadRetryCount = 3
+
     /** http header list */
     val headers: MutableMap<String, String> = HashMap()
 
@@ -64,6 +68,11 @@ class Source {
      * CMCD properties linked to the source
      */
     var cmcdProps: CMCDProps? = null
+
+    /**
+     * Ads playback properties
+     */
+    var adsProps: AdsProps? = null
 
     /**
      * The list of sideLoaded text tracks
@@ -84,7 +93,9 @@ class Source {
                 drmProps == other.drmProps &&
                 contentStartTime == other.contentStartTime &&
                 cmcdProps == other.cmcdProps &&
-                sideLoadedTextTracks == other.sideLoadedTextTracks
+                sideLoadedTextTracks == other.sideLoadedTextTracks &&
+                adsProps == other.adsProps &&
+                minLoadRetryCount == other.minLoadRetryCount
             )
     }
 
@@ -149,8 +160,10 @@ class Source {
         private const val PROP_SRC_HEADERS = "requestHeaders"
         private const val PROP_SRC_DRM = "drm"
         private const val PROP_SRC_CMCD = "cmcd"
+        private const val PROP_SRC_ADS = "ad"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
+        private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -210,9 +223,12 @@ class Source {
                 source.extension = safeGetString(src, PROP_SRC_TYPE, null)
                 source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
+                if (BuildConfig.USE_EXOPLAYER_IMA) {
+                    source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
+                }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
-
+                source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {
                     if (propSrcHeadersArray.size() > 0) {

@@ -26,6 +26,11 @@ type VideoMetadata = Readonly<{
   imageUri?: string;
 }>;
 
+export type AdsConfig = Readonly<{
+  adTagUrl?: string;
+  adLanguage?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -44,6 +49,8 @@ export type VideoSrc = Readonly<{
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
+  ad?: AdsConfig;
+  minLoadRetryCount?: Int32; // Android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -308,6 +315,7 @@ type ControlsStyles = Readonly<{
   hideDuration?: WithDefault<boolean, false>;
   hideNavigationBarOnFullScreenMode?: WithDefault<boolean, true>;
   hideNotificationBarOnFullScreenMode?: WithDefault<boolean, true>;
+  hideSettingButton?: WithDefault<boolean, true>;
   seekIncrementMS?: Int32;
   liveLabel?: string;
 }>;
@@ -318,8 +326,6 @@ export type OnControlsVisibilityChange = Readonly<{
 
 export interface VideoNativeProps extends ViewProps {
   src?: VideoSrc;
-  adTagUrl?: string;
-  adLanguage?: string;
   allowsExternalPlayback?: boolean; // ios, true
   disableFocus?: boolean; // android
   maxBitRate?: Float;
@@ -357,7 +363,6 @@ export interface VideoNativeProps extends ViewProps {
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android
   hideShutterView?: boolean; //	Android
-  minLoadRetryCount?: Int32; // Android
   reportBandwidth?: boolean; //Android
   subtitleStyle?: SubtitleStyle; // android
   viewType?: Int32; // Android

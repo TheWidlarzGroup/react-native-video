@@ -38,6 +38,8 @@ export type ReactVideoSourceProperties = {
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
+  ad?: AdConfig;
+  minLoadRetryCount?: number; // Android
 };
 
 export type ReactVideoSource = Readonly<
@@ -72,6 +74,11 @@ export enum DRMType {
   CLEARKEY = 'clearkey',
   FAIRPLAY = 'fairplay',
 }
+
+export type AdConfig = Readonly<{
+  adTagUrl?: string;
+  adLanguage?: ISO639_1;
+}>;
 
 export type Drm = Readonly<{
   type?: DRMType;
@@ -260,6 +267,7 @@ export type ControlsStyles = {
   hideFullscreen?: boolean;
   hideNavigationBarOnFullScreenMode?: boolean;
   hideNotificationBarOnFullScreenMode?: boolean;
+  hideSettingButton?: boolean;
   seekIncrementMS?: number;
   liveLabel?: string;
 };
@@ -275,7 +283,9 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use source.drm */
   drm?: Drm;
   style?: StyleProp<ViewStyle>;
+  /** @deprecated Use source.ad.adTagUrl */
   adTagUrl?: string;
+  /** @deprecated Use source.ad.adLanguage */
   adLanguage?: ISO639_1;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
@@ -296,6 +306,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   fullscreenOrientation?: EnumValues<FullscreenOrientationType>; // iOS
   hideShutterView?: boolean; //	Android
   ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
+  /** @deprecated Use source.minLoadRetryCount */
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
   mixWithOthers?: EnumValues<MixWithOthersType>; // iOS

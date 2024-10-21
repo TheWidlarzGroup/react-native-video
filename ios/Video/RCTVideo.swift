@@ -86,8 +86,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     /* IMA Ads */
-    private var _adTagUrl: String?
-    private var _adLanguage: String?
     #if USE_GOOGLE_IMA
         private var _imaAdsManager: RCTIMAAdsManager!
         /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
@@ -181,7 +179,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
     
     func requestAds(){
-        if !self._didRequestAds && self._adTagUrl != nil{
+        if !self._didRequestAds && _source?.adParams.adTagUrl != nil {
             self._didRequestAds = true
             
             if self._imaAdsManager.requestAds() {
@@ -688,7 +686,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         #if USE_GOOGLE_IMA
-            if _adTagUrl != nil {
+            if _source?.adParams.adTagUrl != nil {
                 // Set up your content playhead and contentComplete callback.
                 _contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: _player!)
 
@@ -1385,16 +1383,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - RCTIMAAdsManager
 
     func getAdLanguage() -> String? {
-        return _adLanguage
+        return _source?.adParams.adLanguage
     }
 
     func getAdTagUrl() -> String? {
-        return _adTagUrl
-    }
-
-    @objc
-    func setAdTagUrl(_ adTagUrl: String?) {
-        _adTagUrl = adTagUrl
+        return _source?.adParams.adTagUrl
     }
 
     #if USE_GOOGLE_IMA
@@ -1826,7 +1819,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             )
         } else {
-            _playerObserver.removePlayerTimeObserver()
+            _player?.pause()
+            _player?.rate = 0.0
         }
     }
 

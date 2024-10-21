@@ -37,8 +37,8 @@ data class CMCDProps(
 
             return (0 until array.size()).mapNotNull { i ->
                 val item = array.getMap(i)
-                val key = item?.getString("key")
-                val value = when (item?.getType("value")) {
+                val key = item.getString("key")
+                val value = when (item.getType("value")) {
                     ReadableType.Number -> item.getDouble("value")
                     ReadableType.String -> item.getString("value")
                     else -> null
