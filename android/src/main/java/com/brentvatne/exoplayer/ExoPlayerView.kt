@@ -88,7 +88,7 @@ class ExoPlayerView(private val context: Context) :
 
         // Fork: Add loading spinner
         loadingSpinner = createLoadingSpinner();
-        layout.addView(loadingSpinner, 4);
+        layout.addView(loadingSpinner, layout.childCount);
     }
 
     private fun clearVideoView() {
