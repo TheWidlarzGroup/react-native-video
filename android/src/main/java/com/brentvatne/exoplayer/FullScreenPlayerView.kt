@@ -91,7 +91,9 @@ class FullScreenPlayerView(
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
             updateFullscreenButton(playerControlView, true)
-            parent?.removeView(it)
+            // FORK: Replaces and fixes view removal that caused crash when toggling fullscreen
+            val pcViewParent = playerControlView.parent as? ViewGroup
+            pcViewParent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
         updateNavigationBarVisibility()
