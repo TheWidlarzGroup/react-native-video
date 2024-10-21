@@ -18,7 +18,7 @@ To sync this fork with the upstream repository, follow these steps:
     - d. Resolve conflicts
 3. Create new PR targeting release branch
     - a. Name the PR `[v6.0.0 beta.8] Sync fork up to commit <commitHash>`
-4. Review and merge PR
+4. Review and merge PR into the `rekease` branch
 5. Draft a new release on GitHub
 6. Update GolfPass apps package.json use the new version tag
 
